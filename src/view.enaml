@@ -3,7 +3,7 @@ from enamlnative.widgets.api import LinearLayout, TextView
 enamldef ContentView(LinearLayout):
   orientation = "vertical"
   TextView:
-      text = "HOLY FRICK IT WORKS"
+      text = "IT WORKS"
             
             
         
