@@ -8,19 +8,19 @@
 import jnius
 from atom.api import Typed
 
-from enamlnative.widgets.text_view import ProxyTextView
+from enamlnative.widgets.compound_button import ProxyCompoundButton
 
-from .android_widget import AndroidWidget
+from .android_button import AndroidButton
 
-_TextView = jnius.autoclass('android.widget.TextView')
+_CompoundButton = jnius.autoclass('android.widget.CompoundButton')
 
 
-class AndroidTextView(AndroidWidget, ProxyTextView):
+class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
     """ An Android implementation of an Enaml ProxyLinearLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_TextView)
+    widget = Typed(_CompoundButton)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -29,21 +29,18 @@ class AndroidTextView(AndroidWidget, ProxyTextView):
         """ Create the underlying label widget.
 
         """
-        self.widget = _TextView(self.get_context())
+        self.widget = _CompoundButton(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.
 
         """
-        super(AndroidTextView, self).init_widget()
+        super(AndroidCompoundButton, self).init_widget()
         d = self.declaration
-        self.set_text(d.text)
+        self.set_checked(d.checked)
 
     #--------------------------------------------------------------------------
     # ProxyLabel API
     #--------------------------------------------------------------------------
-    def set_text(self, text):
-        """ Set the text in thae widget.
-
-        """
-        self.widget.setText(text,0,len(text))
+    def set_checked(self, checked):
+        self.widget.setChecked(checked)

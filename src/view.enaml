@@ -1,9 +1,19 @@
-from enamlnative.widgets.api import LinearLayout, TextView
+import time
+from enamlnative.widgets.api import *
 
 enamldef ContentView(LinearLayout):
   orientation = "vertical"
   TextView:
-      text = "IT WORKS"
-            
-            
-        
+    text = "IT WORKS"
+  TextView:
+    text = "SWEET"
+  Button:
+    text = "Vertical layout"
+  TextView:
+    text = "MAN"
+  CheckBox:
+    text = "CheckBox"
+    checked = True
+  Chronometer:
+    text = "Timer"
+

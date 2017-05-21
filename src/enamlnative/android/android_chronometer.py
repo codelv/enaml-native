@@ -8,19 +8,20 @@
 import jnius
 from atom.api import Typed
 
-from enamlnative.widgets.text_view import ProxyTextView
+from enamlnative.widgets.chronometer import ProxyChronometer
 
-from .android_widget import AndroidWidget
+from .android_text_view import AndroidTextView
 
-_TextView = jnius.autoclass('android.widget.TextView')
+SystemClock = jnius.autoclass('android.os.SystemClock')
+_Chronometer = jnius.autoclass('android.widget.Chronometer')
 
 
-class AndroidTextView(AndroidWidget, ProxyTextView):
+class AndroidChronometer(AndroidTextView, ProxyChronometer):
     """ An Android implementation of an Enaml ProxyLinearLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_TextView)
+    widget = Typed(_Chronometer)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -29,21 +30,28 @@ class AndroidTextView(AndroidWidget, ProxyTextView):
         """ Create the underlying label widget.
 
         """
-        self.widget = _TextView(self.get_context())
+        self.widget = _Chronometer(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.
 
         """
-        super(AndroidTextView, self).init_widget()
+        super(AndroidChronometer, self).init_widget()
         d = self.declaration
-        self.set_text(d.text)
+        self.set_base(d.base)
+        if d.format:
+            self.set_format(d.format)
+        if d.direction=='down':
+            self.set_direction(d.direction)
 
     #--------------------------------------------------------------------------
     # ProxyLabel API
     #--------------------------------------------------------------------------
-    def set_text(self, text):
-        """ Set the text in thae widget.
+    def set_base(self, base):
+        self.widget.setBase(base or SystemClock.elapsedRealtime())
 
-        """
-        self.widget.setText(text,0,len(text))
+    def set_format(self, format):
+        self.widget.setFormat(format)
+
+    def set_direction(self, direction):
+        self.widget.setCountDown(direction=='down')

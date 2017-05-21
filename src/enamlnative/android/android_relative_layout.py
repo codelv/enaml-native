@@ -8,19 +8,18 @@
 import jnius
 from atom.api import Typed
 
-from enamlnative.widgets.text_view import ProxyTextView
+from enamlnative.widgets.relative_layout import ProxyRelativeLayout
 
 from .android_widget import AndroidWidget
 
-_TextView = jnius.autoclass('android.widget.TextView')
+_RelativeLayout = jnius.autoclass('android.widget.RelativeLayout')
 
-
-class AndroidTextView(AndroidWidget, ProxyTextView):
-    """ An Android implementation of an Enaml ProxyLinearLayout.
+class AndroidRelativeLayout(AndroidWidget, ProxyRelativeLayout):
+    """ An Android implementation of an Enaml ProxyRelativeLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_TextView)
+    widget = Typed(_RelativeLayout)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -29,21 +28,29 @@ class AndroidTextView(AndroidWidget, ProxyTextView):
         """ Create the underlying label widget.
 
         """
-        self.widget = _TextView(self.get_context())
+        self.widget = _RelativeLayout(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.
 
         """
-        super(AndroidTextView, self).init_widget()
+        super(AndroidRelativeLayout, self).init_widget()
         d = self.declaration
-        self.set_text(d.text)
+        if d.gravity:
+            self.set_gravity(d.gravity)
+        if d.horizontal_gravity:
+            self.set_horizontal_gravity(d.horizontal_gravity)
+        if d.vertical_gravity:
+            self.set_vertical_gravity(d.vertical_gravity)
 
     #--------------------------------------------------------------------------
-    # ProxyLabel API
+    # ProxyRelativeLayout API
     #--------------------------------------------------------------------------
-    def set_text(self, text):
-        """ Set the text in thae widget.
+    def set_gravity(self, gravity):
+        self.widget.setGravity(gravity)
 
-        """
-        self.widget.setText(text,0,len(text))
+    def set_horizontal_gravity(self, gravity):
+        self.widget.setHorizontalGravity(gravity)
+
+    def set_vertical_gravity(self, gravity):
+        self.widget.setVerticalGravity(gravity)

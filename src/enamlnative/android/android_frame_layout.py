@@ -8,19 +8,18 @@
 import jnius
 from atom.api import Typed
 
-from enamlnative.widgets.text_view import ProxyTextView
+from enamlnative.widgets.frame_layout import ProxyFrameLayout
 
 from .android_widget import AndroidWidget
 
-_TextView = jnius.autoclass('android.widget.TextView')
+_FrameLayout = jnius.autoclass('android.widget.FrameLayout')
 
-
-class AndroidTextView(AndroidWidget, ProxyTextView):
-    """ An Android implementation of an Enaml ProxyLinearLayout.
+class AndroidFrameLayout(AndroidWidget, ProxyFrameLayout):
+    """ An Android implementation of an Enaml ProxyFrameLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_TextView)
+    widget = Typed(_FrameLayout)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -29,21 +28,23 @@ class AndroidTextView(AndroidWidget, ProxyTextView):
         """ Create the underlying label widget.
 
         """
-        self.widget = _TextView(self.get_context())
+        self.widget = _FrameLayout(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.
 
         """
-        super(AndroidTextView, self).init_widget()
+        super(AndroidFrameLayout, self).init_widget()
         d = self.declaration
-        self.set_text(d.text)
+        if d.foreground_gravity:
+            self.set_foreground_gravity(d.foreground_gravity)
+        self.set_measure_all_children(d.measure_all_children)
 
     #--------------------------------------------------------------------------
-    # ProxyLabel API
+    # ProxyFrameLayout API
     #--------------------------------------------------------------------------
-    def set_text(self, text):
-        """ Set the text in thae widget.
+    def set_foreground_gravity(self, gravity):
+        self.widget.setForegroundGravity(gravity)
 
-        """
-        self.widget.setText(text,0,len(text))
+    def set_measure_all_children(self, enabled):
+        self.widget.setMeasureAllChildren(enabled)
