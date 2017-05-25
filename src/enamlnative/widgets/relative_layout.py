@@ -1,19 +1,23 @@
-#------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
-#
-# Distributed under the terms of the Modified BSD License.
-#
-# The full license is in the file COPYING.txt, distributed with this software.
-#------------------------------------------------------------------------------
+'''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+Created on May 20, 2017
+
+@author: jrm
+'''
 from atom.api import (
     Typed, ForwardTyped, Int, Enum, Event, observe, set_default
 )
 
 from enaml.core.declarative import d_
 
-from enaml.widgets.widget import Widget, ProxyWidget
+from .view_group import ViewGroup, ProxyViewGroup
 
-class ProxyRelativeLayout(ProxyWidget):
+class ProxyRelativeLayout(ProxyViewGroup):
     """ The abstract definition of a proxy relative layout object.
 
     """
@@ -29,7 +33,7 @@ class ProxyRelativeLayout(ProxyWidget):
     def set_vertical_gravity(self, gravity):
         raise NotImplementedError
 
-class RelativeLayout(Widget):
+class RelativeLayout(ViewGroup):
     """ RelativeLayout is a view group that displays
         child views in relative positions.
 

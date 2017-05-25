@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2017, Jairus Martin.
 #
-# Distributed under the terms of the Modified BSD License.
+# Distributed under the terms of the MIT License.
 #
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
@@ -12,15 +12,21 @@ from enamlnative.widgets.drawer_layout import ProxyDrawerLayout
 
 from .android_view_group import AndroidViewGroup
 
-_Gravity = jnius.autoclass('android.view.Gravity')
-_DrawerLayout = jnius.autoclass('android.support.v4.widget.DrawerLayout')
+LayoutParams = jnius.autoclass('android.view.ViewGroup$LayoutParams')
+Gravity = jnius.autoclass('android.view.Gravity')
+GravityCompat = jnius.autoclass('android.support.v4.view.GravityCompat')
+ViewCompat = jnius.autoclass('android.support.v4.view.ViewCompat')
+DrawerLayout = jnius.autoclass('android.support.v4.widget.DrawerLayout')
+DrawerLayoutLayoutParams = jnius.autoclass('android.support.v4.widget.DrawerLayout$LayoutParams')
 
 class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     """ An Android implementation of an Enaml ProxyDrawerLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_DrawerLayout)
+    widget = Typed(DrawerLayout)
+
+    layout_params = DrawerLayoutLayoutParams
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -29,7 +35,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
         """ Create the underlying label widget.
 
         """
-        self.widget = _DrawerLayout(self.get_context())
+        self.widget = DrawerLayout(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.
@@ -37,6 +43,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
         """
         super(AndroidDrawerLayout, self).init_widget()
         d = self.declaration
+        #self.set_drawer_gravity(d.drawer_gravity)
         if d.title:
             self.set_title(d.title)
         if d.drawer_elevation:
@@ -51,6 +58,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     def init_layout(self):
         super(AndroidDrawerLayout, self).init_layout()
         d = self.declaration
+
         if d.opened:
             self.set_opened(d.opened)
 
@@ -59,11 +67,42 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     #--------------------------------------------------------------------------
     def set_opened(self, opened):
         d = self.declaration
-        gravity = getattr(_Gravity,d.open_gravity.upper())
+        view = None
+        for c in self.children():
+            if hasattr(c.declaration,'layout_gravity') and \
+                        c.declaration.layout_gravity==d.side:
+                view = c.widget
+                break
+        if not view:
+            raise ValueError("DrawerLayout must have a child with layout_gravity==side")
+
+        #: Force the view to have the correct layout params
+        _params = view.getLayoutParams()
+        gravity = getattr(Gravity,d.side.upper())
+        params = DrawerLayoutLayoutParams(
+            _params.width,
+            _params.height,
+            gravity
+        )
+        view.setLayoutParams(params)
+
         if opened:
-            self.widget.openDrawer(gravity,d.open_animated)
+            self.widget.openDrawer(view,d.open_animated)
         else:
-            self.widget.closeDrawer(gravity,d.open_animated)
+            self.widget.closeDrawer(view,d.open_animated)
+
+    def set_drawer_width(self, width):
+        d = self.declaration
+        self.set_side(d.side)
+
+    # def set_drawer_gravity(self,gravity):
+    #     d = self.declaration
+    #     params = DrawerLayoutLayoutParams(
+    #         d.drawer_width,
+    #         LayoutParams.MATCH_PARENT
+    #     )
+    #     params.gravity = getattr(Gravity,gravity.upper())
+    #     self.widget.setLayoutParams(params)
 
     def set_title(self, title):
         d = self.declaration

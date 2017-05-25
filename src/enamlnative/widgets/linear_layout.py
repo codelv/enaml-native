@@ -1,10 +1,14 @@
-#------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
-#
-# Distributed under the terms of the Modified BSD License.
-#
-# The full license is in the file COPYING.txt, distributed with this software.
-#------------------------------------------------------------------------------
+'''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+Created on May 20, 2017
+
+@author: jrm
+'''
 from atom.api import (
     Typed, ForwardTyped, Unicode, Enum, Event, observe, set_default
 )
@@ -26,7 +30,7 @@ class ProxyLinearLayout(ProxyViewGroup):
 
     def set_gravity(self, gravity):
         raise NotImplementedError
-
+    
 class LinearLayout(ViewGroup):
     """ A simple control for displaying read-only text.
 
@@ -34,11 +38,12 @@ class LinearLayout(ViewGroup):
     #: Should the layout be a column or a row.
     orientation = d_(Enum('horizontal', 'vertical'))
 
-    #: Layout gravity
+    #: View gravity
     gravity = d_(Enum('top', 'left', 'right',
                       'bottom','center',
                       'end','start', 'no_gravity',
                       'fill_horizontal'))
+    
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyLinearLayout)

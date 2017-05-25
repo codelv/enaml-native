@@ -15,15 +15,15 @@ from atom.api import (
 
 from enaml.core.declarative import d_
 
-from .frame_layout import FrameLayout, ProxyFrameLayout
+from .linear_layout import LinearLayout, ProxyLinearLayout
 
 
-class ProxyTimePicker(ProxyFrameLayout):
+class ProxyTabWidget(ProxyLinearLayout):
     """ The abstract definition of a proxy Label object.
 
     """
     #: A reference to the Label declaration.
-    declaration = ForwardTyped(lambda: TimePicker)
+    declaration = ForwardTyped(lambda: TabWidget)
 
     def set_enabled(self, enabled):
         raise NotImplementedError
@@ -37,7 +37,7 @@ class ProxyTimePicker(ProxyFrameLayout):
     def set_hour_mode(self,mode):
         raise NotImplementedError
 
-class TimePicker(FrameLayout):
+class TabWidget(LinearLayout):
     """ A simple control for displaying read-only text.
 
     """
@@ -54,7 +54,7 @@ class TimePicker(FrameLayout):
     hour_mode = d_(Enum('24','12'))
 
     #: A reference to the ProxyLabel object.
-    proxy = Typed(ProxyTimePicker)
+    proxy = Typed(ProxyTabWidget)
 
     #--------------------------------------------------------------------------
     # Observers
@@ -65,4 +65,4 @@ class TimePicker(FrameLayout):
 
         """
         # The superclass implementation is sufficient.
-        super(TimePicker, self)._update_proxy(change)
+        super(TabWidget, self)._update_proxy(change)

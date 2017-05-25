@@ -1,3 +1,11 @@
+#------------------------------------------------------------------------------
+# Copyright (c) 2017, Jairus Martin.
+#
+# Distributed under the terms of the MIT License.
+#
+# The full license is in the file COPYING.txt, distributed with this software.
+#------------------------------------------------------------------------------
+
 #: The internal mapping of widget to proxy object.
 __registry = {}
 

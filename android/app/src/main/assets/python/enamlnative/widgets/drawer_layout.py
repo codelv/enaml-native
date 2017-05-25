@@ -1,12 +1,16 @@
-#------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
-#
-# Distributed under the terms of the Modified BSD License.
-#
-# The full license is in the file COPYING.txt, distributed with this software.
-#------------------------------------------------------------------------------
+'''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+Created on May 20, 2017
+
+@author: jrm
+'''
 from atom.api import (
-    Typed, ForwardTyped, Unicode, Float, Int, Bool, Enum, observe
+    Typed, ForwardTyped, Unicode, Float, Int, Bool, Enum, observe, set_default
 )
 
 from enaml.core.declarative import d_
@@ -26,13 +30,16 @@ class ProxyDrawerLayout(ProxyViewGroup):
     def set_open_animated(self, animated):
         pass
 
-    def set_open_gravity(self, gravity):
+    def set_side(self, side):
         pass
 
     def set_title(self, title):
         raise NotImplementedError
 
     def set_title_gravity(self, gravity):
+        raise NotImplementedError
+
+    def set_drawer_width(self, width):
         raise NotImplementedError
 
     def set_drawer_elevation(self, elevation):
@@ -58,9 +65,10 @@ class DrawerLayout(ViewGroup):
     open_animated = d_(Bool(True))
 
     #: Open drawer gravity
-    open_gravity = d_(Enum('top', 'left', 'right',
-                           'bottom','center',
-                           'end','start', 'no_gravity'))
+    side = d_(Enum('left', 'right', 'start', 'end'))
+
+    #: Drawer width
+    drawer_width = d_(Int(200))
 
     #: Title of drawer
     title = d_(Unicode())
@@ -86,7 +94,7 @@ class DrawerLayout(ViewGroup):
     #--------------------------------------------------------------------------
     # Observers
     #--------------------------------------------------------------------------
-    @observe('opened','open_gravity', 'open_animated', 'title', 'title_gravity',
+    @observe('opened', 'drawer_width', 'side', 'open_animated', 'title', 'title_gravity',
              'drawer_elevation', 'drawer_lock_mode', 'scrim_color',
              'status_bar_background_color')
     def _update_proxy(self, change):

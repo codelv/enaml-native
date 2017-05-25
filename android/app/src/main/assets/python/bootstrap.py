@@ -1,8 +1,16 @@
-"""
- This file is executed when the Python interpreter is started.
- Use this file to configure all your necessary python code.
+'''
+Copyright (c) 2017, Jairus Martin.
 
-"""
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+Created on May 20, 2017
+
+Forked from https://github.com/joaoventura/pybridge
+@author joaoventura
+@author: jrm
+'''
 
 import sys
 import json

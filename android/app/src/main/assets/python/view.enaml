@@ -1,3 +1,14 @@
+'''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+Created on May 20, 2017
+
+@author: jrm
+'''
 import time
 from enamlnative.widgets.api import *
 from datetime import datetime
@@ -9,9 +20,11 @@ enamldef VBox(LinearLayout):
   orientation = "vertical"
 
 enamldef ContentView(DrawerLayout):
-  opened = True
-  open_gravity = 'start'
+  #opened = True # Or swipe to open
+  side = 'left'
   ScrollView:
+    layout_width = 'match_parent'
+    layout_height = 'match_parent'
     LinearLayout:
       orientation = "vertical"
       TextView:
@@ -56,8 +69,9 @@ enamldef ContentView(DrawerLayout):
           month = today.month
           day = today.day
   LinearLayout:
-    layout_direction = 'ltr'
+    layout_gravity = 'left'
     TextView:
       text = "Button"
+
     #CalendarView:
     #  date = long(time.time()*1000)
