@@ -6,50 +6,59 @@
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import (
-    Typed, ForwardTyped, Unicode, Enum, Event, observe, set_default
+    Typed, ForwardTyped, Int, Bool, Enum, observe
 )
 
 from enaml.core.declarative import d_
 
-from .view_group import ViewGroup, ProxyViewGroup
+from .frame_layout import FrameLayout, ProxyFrameLayout
 
 
-class ProxyLinearLayout(ProxyViewGroup):
+class ProxyTimePicker(ProxyFrameLayout):
     """ The abstract definition of a proxy Label object.
 
     """
     #: A reference to the Label declaration.
-    declaration = ForwardTyped(lambda: LinearLayout)
+    declaration = ForwardTyped(lambda: TimePicker)
 
-    def set_orientation(self, orientation):
+    def set_enabled(self, enabled):
         raise NotImplementedError
 
-    def set_gravity(self, gravity):
+    def set_hour(self, hour):
         raise NotImplementedError
 
-class LinearLayout(ViewGroup):
+    def set_minute(self, minute):
+        raise NotImplementedError
+
+    def set_hour_mode(self,mode):
+        raise NotImplementedError
+
+class TimePicker(FrameLayout):
     """ A simple control for displaying read-only text.
 
     """
-    #: Should the layout be a column or a row.
-    orientation = d_(Enum('horizontal', 'vertical'))
+    #: Set the enabled state of this view.
+    enabled = d_(Bool(True))
 
-    #: Layout gravity
-    gravity = d_(Enum('top', 'left', 'right',
-                      'bottom','center',
-                      'end','start', 'no_gravity',
-                      'fill_horizontal'))
+    #: Sets the currently selected hour using 24-hour time.
+    hour = d_(Int(0))
+
+    #: Sets the currently selected minute.
+    minute = d_(Int(0))
+
+    #: Sets whether this widget displays time in 24-hour mode or 12-hour mode with an AM/PM picker.
+    hour_mode = d_(Enum('24','12'))
 
     #: A reference to the ProxyLabel object.
-    proxy = Typed(ProxyLinearLayout)
+    proxy = Typed(ProxyTimePicker)
 
     #--------------------------------------------------------------------------
     # Observers
     #--------------------------------------------------------------------------
-    @observe('orientation','gravity')
+    @observe('enabled','hour','minute','hour_mode')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 
         """
         # The superclass implementation is sufficient.
-        super(LinearLayout, self)._update_proxy(change)
+        super(TimePicker, self)._update_proxy(change)

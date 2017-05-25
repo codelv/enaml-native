@@ -8,19 +8,18 @@
 import jnius
 from atom.api import Typed
 
-from enamlnative.widgets.linear_layout import ProxyLinearLayout
+from enamlnative.widgets.scroll_view import ProxyScrollView
 
-from .android_view_group import AndroidViewGroup
+from .android_frame_layout import AndroidFrameLayout
 
-_Gravity = jnius.autoclass('android.view.Gravity')
-_LinearLayout = jnius.autoclass('android.widget.LinearLayout')
+_ScrollView = jnius.autoclass('android.widget.ScrollView')
 
-class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
-    """ An Android implementation of an Enaml ProxyLinearLayout.
+class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
+    """ An Android implementation of an Enaml ProxyFrameLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_LinearLayout)
+    widget = Typed(_ScrollView)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -29,27 +28,15 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
         """ Create the underlying label widget.
 
         """
-        self.widget = _LinearLayout(self.get_context())
+        self.widget = _ScrollView(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.
 
         """
-        super(AndroidLinearLayout, self).init_widget()
+        super(AndroidScrollView, self).init_widget()
         d = self.declaration
-        self.set_orientation(d.orientation)
-        if d.gravity:
-            self.set_gravity(d.gravity)
 
     #--------------------------------------------------------------------------
-    # ProxyLinearLayout API
+    # ProxyFrameLayout API
     #--------------------------------------------------------------------------
-    def set_orientation(self, orientation):
-        """ Set the text in the widget.
-
-        """
-        self.widget.setOrientation(0 if orientation=='horizontal' else 1)
-
-    def set_gravity(self, gravity):
-        g = getattr(_Gravity,gravity.upper())
-        self.widget.setGravity(g)

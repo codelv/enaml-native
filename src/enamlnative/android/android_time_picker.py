@@ -8,19 +8,19 @@
 import jnius
 from atom.api import Typed
 
-from enamlnative.widgets.linear_layout import ProxyLinearLayout
+from enamlnative.widgets.time_picker import ProxyTimePicker
 
-from .android_view_group import AndroidViewGroup
+from .android_frame_layout import AndroidFrameLayout
 
-_Gravity = jnius.autoclass('android.view.Gravity')
-_LinearLayout = jnius.autoclass('android.widget.LinearLayout')
+_Boolean = jnius.autoclass('java.lang.Boolean')
+_TimePicker = jnius.autoclass('android.widget.TimePicker')
 
-class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
-    """ An Android implementation of an Enaml ProxyLinearLayout.
+class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
+    """ An Android implementation of an Enaml ProxyFrameLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_LinearLayout)
+    widget = Typed(_TimePicker)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -29,27 +29,30 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
         """ Create the underlying label widget.
 
         """
-        self.widget = _LinearLayout(self.get_context())
+        self.widget = _TimePicker(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.
 
         """
-        super(AndroidLinearLayout, self).init_widget()
+        super(AndroidTimePicker, self).init_widget()
         d = self.declaration
-        self.set_orientation(d.orientation)
-        if d.gravity:
-            self.set_gravity(d.gravity)
+        self.set_hour(d.hour)
+        self.set_minute(d.minute)
+        self.set_hour_mode(d.hour_mode)
+        self.set_enabled(d.enabled)
 
     #--------------------------------------------------------------------------
-    # ProxyLinearLayout API
+    # ProxyFrameLayout API
     #--------------------------------------------------------------------------
-    def set_orientation(self, orientation):
-        """ Set the text in the widget.
+    def set_hour(self, hour):
+        self.widget.setHour(hour)
 
-        """
-        self.widget.setOrientation(0 if orientation=='horizontal' else 1)
+    def set_minute(self, minute):
+        self.widget.setMinute(minute)
 
-    def set_gravity(self, gravity):
-        g = getattr(_Gravity,gravity.upper())
-        self.widget.setGravity(g)
+    def set_hour_mode(self, mode):
+        self.widget.setIs24HourView(_Boolean(mode=='24'))
+
+    def set_enabled(self, enabled):
+        self.widget.setEnabled(enabled)

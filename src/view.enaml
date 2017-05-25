@@ -16,4 +16,5 @@ enamldef ContentView(LinearLayout):
     checked = True
   Chronometer:
     text = "Timer"
-
+  #CalendarView:
+  #  date = long(time.time()*1000)

@@ -1,13 +1,11 @@
 import jnius
-from atom.api import Value
+from atom.api import Value, Dict, Long
 from enaml.application import Application, ProxyResolver
 
 from . import factories
 
 Activity = jnius.autoclass('android.app.Activity')
 View = jnius.autoclass('android.view.View')
-
-from enaml.widgets.main_window import MainWindow
 
 class AndroidApplication(Application):
     """ An Android implementation of an Enaml application.
@@ -16,16 +14,24 @@ class AndroidApplication(Application):
     runs in the local process.
 
     """
+    #: Android Activity
     activity = Value(Activity) # TODO...
-    content_view = Value(View)
 
-    def __init__(self):
+    #: View to display within the activity
+    view = Value(View)
+
+    #: Callback cache
+    _callback_cache = Dict()
+    _callback_id = Long()
+
+
+
+    def __init__(self, activity):
         """ Initialize a AndroidApplication
 
         """
         super(AndroidApplication, self).__init__()
-        PythonActivity = jnius.autoclass('org.kivy.android.PythonActivity')
-        self.activity = PythonActivity.mActivity
+        self.activity = activity
         self.resolver = ProxyResolver(factories=factories.ANDROID_FACTORIES)
 
     #--------------------------------------------------------------------------
@@ -36,15 +42,15 @@ class AndroidApplication(Application):
 
         """
         activity = self.activity
-        if not getattr(activity, '_in_event_loop', False):
-            activity._in_event_loop = True
-            activity.setContentView(self.get_view())
+        view = self.get_view()
+        assert view, "View does not exist!"
+        activity.setView(view)
 
     def get_view(self):
         """ Prepare the view
 
         """
-        view = self.content_view
+        view = self.view
         if not view.is_initialized:
             view.initialize()
         if not view.proxy_is_active:
@@ -57,7 +63,21 @@ class AndroidApplication(Application):
         """
         activity = self.activity
         activity.exit()
-        activity._in_event_loop = False
+
+    def invoke_callback(self,callback_id):
+        """ Invoke the call with the given id.
+
+        Parameters
+        ----------
+        callback_id : long
+            The id of a previously scheduled call.
+
+
+        """
+        if callback_id in self._callback_cache:
+            callback,args,kwargs = self._callback_cache[callback_id]
+            callback(*args,**kwargs)
+            del self._callback_cache[callback_id]
 
     def deferred_call(self, callback, *args, **kwargs):
         """ Invoke a callable on the next cycle of the main event loop
@@ -73,7 +93,7 @@ class AndroidApplication(Application):
             the callback.
 
         """
-        deferredCall(callback, *args, **kwargs)
+        self.timed_call(0,callback,*args,**kwargs)
 
     def timed_call(self, ms, callback, *args, **kwargs):
         """ Invoke a callable on the main event loop thread at a
@@ -93,7 +113,10 @@ class AndroidApplication(Application):
             the callback.
 
         """
-        timedCall(ms, callback, *args, **kwargs)
+        self._callback_id += 1
+        self._callback_cache[self._callback_id] = (callback,args,kwargs)
+        activity = self.activity
+        activity.scheduleCallback(self._callback_id,ms)
 
     def is_main_thread(self):
         """ Indicates whether the caller is on the main gui thread.

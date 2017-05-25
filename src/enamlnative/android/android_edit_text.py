@@ -8,19 +8,19 @@
 import jnius
 from atom.api import Typed
 
-from enamlnative.widgets.linear_layout import ProxyLinearLayout
+from enamlnative.widgets.edit_text import ProxyEditText
 
-from .android_view_group import AndroidViewGroup
+from .android_text_view import AndroidTextView
 
-_Gravity = jnius.autoclass('android.view.Gravity')
-_LinearLayout = jnius.autoclass('android.widget.LinearLayout')
+_EditText = jnius.autoclass('android.widget.EditText')
 
-class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
+
+class AndroidEditText(AndroidTextView, ProxyEditText):
     """ An Android implementation of an Enaml ProxyLinearLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_LinearLayout)
+    widget = Typed(_EditText)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -29,27 +29,20 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
         """ Create the underlying label widget.
 
         """
-        self.widget = _LinearLayout(self.get_context())
+        self.widget = _EditText(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.
 
         """
-        super(AndroidLinearLayout, self).init_widget()
+        super(AndroidEditText, self).init_widget()
         d = self.declaration
-        self.set_orientation(d.orientation)
-        if d.gravity:
-            self.set_gravity(d.gravity)
+        if d.selection:
+            self.set_selection(d.selection)
 
     #--------------------------------------------------------------------------
-    # ProxyLinearLayout API
+    # ProxyEditText API
     #--------------------------------------------------------------------------
-    def set_orientation(self, orientation):
-        """ Set the text in the widget.
+    def set_selection(self, selection):
+        self.widget.setSelection(*selection)
 
-        """
-        self.widget.setOrientation(0 if orientation=='horizontal' else 1)
-
-    def set_gravity(self, gravity):
-        g = getattr(_Gravity,gravity.upper())
-        self.widget.setGravity(g)
