@@ -1,5 +1,6 @@
 venv/
 .idea/
 .git/
+.externalNativeBuild/
 android/build/
 android/app/build/
