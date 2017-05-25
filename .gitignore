@@ -1,2 +1,5 @@
 venv/
 .idea/
+.git/
+android/build/
+android/app/build/
