@@ -1,0 +1,46 @@
+{
+  "buildFiles": [
+    "/home/jrm/Workspace/enaml-native/android/app/src/main/jni/Android.mk",
+    "/home/jrm/Workspace/enaml-native/android/app/src/main/jni/Application.mk"
+  ],
+  "cleanCommands": [
+    "/home/jrm/Android/Crystax/crystax-ndk-10.3.2/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/home/jrm/Workspace/enaml-native/android/app/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/home/jrm/Workspace/enaml-native/android/app/src/main/jni/Application.mk APP_ABI\u003dmips NDK_ALL_ABIS\u003dmips NDK_DEBUG\u003d1 APP_PLATFORM\u003dandroid-16 NDK_OUT\u003d/home/jrm/Workspace/enaml-native/android/app/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT\u003d/home/jrm/Workspace/enaml-native/android/app/build/intermediates/ndkBuild/debug/lib clean"
+  ],
+  "libraries": {
+    "jnius-debug-mips": {
+      "buildCommand": "/home/jrm/Android/Crystax/crystax-ndk-10.3.2/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/home/jrm/Workspace/enaml-native/android/app/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/home/jrm/Workspace/enaml-native/android/app/src/main/jni/Application.mk APP_ABI\u003dmips NDK_ALL_ABIS\u003dmips NDK_DEBUG\u003d1 APP_PLATFORM\u003dandroid-16 NDK_OUT\u003d/home/jrm/Workspace/enaml-native/android/app/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT\u003d/home/jrm/Workspace/enaml-native/android/app/build/intermediates/ndkBuild/debug/lib /home/jrm/Workspace/enaml-native/android/app/build/intermediates/ndkBuild/debug/obj/local/mips/libjnius.so",
+      "toolchain": "toolchain-mips",
+      "abi": "mips",
+      "artifactName": "jnius",
+      "files": [
+        {
+          "src": "/home/jrm/Workspace/enaml-native/android/app/src/main/jni/pyjnius.c",
+          "flags": "\"-fpic\" \"-fno-strict-aliasing\" \"-finline-functions\" \"-ffunction-sections\" \"-funwind-tables\" \"-fmessage-length\u003d0\" \"-fno-inline-functions-called-once\" \"-fgcse-after-reload\" \"-frerun-cse-after-loop\" \"-frename-registers\" \"-no-canonical-prefixes\" \"-O0\" \"-g\" \"-fno-omit-frame-pointer\" \"-I/home/jrm/Workspace/enaml-native/android/app/src/main/jni\" \"-DANDROID\" \"-I\" \"/home/jrm/Android/Crystax/crystax-ndk-10.3.2/sources/python/2.7/include/python/\" \"-Wa,--noexecstack\" \"-Wformat\" \"-Werror\u003dformat-security\" \"-I/home/jrm/Android/Crystax/crystax-ndk-10.3.2/platforms/android-16/arch-mips/usr/include\" \"/home/jrm/Workspace/enaml-native/android/app/src/main/jni/pyjnius.c\""
+        }
+      ],
+      "output": "/home/jrm/Workspace/enaml-native/android/app/build/intermediates/ndkBuild/debug/obj/local/mips/libjnius.so"
+    },
+    "pybridge-debug-mips": {
+      "buildCommand": "/home/jrm/Android/Crystax/crystax-ndk-10.3.2/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/home/jrm/Workspace/enaml-native/android/app/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/home/jrm/Workspace/enaml-native/android/app/src/main/jni/Application.mk APP_ABI\u003dmips NDK_ALL_ABIS\u003dmips NDK_DEBUG\u003d1 APP_PLATFORM\u003dandroid-16 NDK_OUT\u003d/home/jrm/Workspace/enaml-native/android/app/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT\u003d/home/jrm/Workspace/enaml-native/android/app/build/intermediates/ndkBuild/debug/lib /home/jrm/Workspace/enaml-native/android/app/build/intermediates/ndkBuild/debug/obj/local/mips/libpybridge.so",
+      "toolchain": "toolchain-mips",
+      "abi": "mips",
+      "artifactName": "pybridge",
+      "files": [
+        {
+          "src": "/home/jrm/Workspace/enaml-native/android/app/src/main/jni/pybridge.c",
+          "flags": "\"-fpic\" \"-fno-strict-aliasing\" \"-finline-functions\" \"-ffunction-sections\" \"-funwind-tables\" \"-fmessage-length\u003d0\" \"-fno-inline-functions-called-once\" \"-fgcse-after-reload\" \"-frerun-cse-after-loop\" \"-frename-registers\" \"-no-canonical-prefixes\" \"-O0\" \"-g\" \"-fno-omit-frame-pointer\" \"-I/home/jrm/Workspace/enaml-native/android/app/src/main/jni\" \"-DANDROID\" \"-I\" \"/home/jrm/Android/Crystax/crystax-ndk-10.3.2/sources/python/2.7/include/python/\" \"-Wa,--noexecstack\" \"-Wformat\" \"-Werror\u003dformat-security\" \"-I/home/jrm/Android/Crystax/crystax-ndk-10.3.2/platforms/android-16/arch-mips/usr/include\" \"/home/jrm/Workspace/enaml-native/android/app/src/main/jni/pybridge.c\""
+        }
+      ],
+      "output": "/home/jrm/Workspace/enaml-native/android/app/build/intermediates/ndkBuild/debug/obj/local/mips/libpybridge.so"
+    }
+  },
+  "toolchains": {
+    "toolchain-mips": {
+      "cCompilerExecutable": "/home/jrm/Android/Crystax/crystax-ndk-10.3.2/toolchains/mipsel-linux-android-5/prebuilt/linux-x86_64/bin/mipsel-linux-android-gcc"
+    }
+  },
+  "cFileExtensions": [
+    "c"
+  ],
+  "cppFileExtensions": []
+}

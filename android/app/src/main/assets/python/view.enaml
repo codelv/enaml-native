@@ -1,0 +1,63 @@
+import time
+from enamlnative.widgets.api import *
+from datetime import datetime
+
+enamldef HBox(LinearLayout):
+  orientation = "horizontal"
+
+enamldef VBox(LinearLayout):
+  orientation = "vertical"
+
+enamldef ContentView(DrawerLayout):
+  opened = True
+  open_gravity = 'start'
+  ScrollView:
+    LinearLayout:
+      orientation = "vertical"
+      TextView:
+        text = "TextView"
+      Button:
+        text = "PushButton"
+      CheckBox:
+        text = "CheckBox"
+        checked = True
+      RadioGroup:
+        RadioButton:
+          text = "A"
+          #checked = True
+        RadioButton:
+          text = "B"
+        RadioButton:
+          text = "C"
+
+      HBox:
+        TextView:
+          text = "Timer"
+        Chronometer:
+          pass
+      VBox:
+        TextView:
+          text = "EditText"
+        EditText:
+          text = ""
+
+      VBox:
+        TextView:
+          text = "Time Picker"
+        TimePicker:
+          hour = 6
+          minute = 30
+      VBox:
+        TextView:
+          text = "Date Picker"
+        DatePicker:
+          attr today = datetime.now()
+          year = today.year
+          month = today.month
+          day = today.day
+  LinearLayout:
+    layout_direction = 'ltr'
+    TextView:
+      text = "Button"
+    #CalendarView:
+    #  date = long(time.time()*1000)
