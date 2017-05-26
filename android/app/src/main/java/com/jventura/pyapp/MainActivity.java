@@ -26,6 +26,12 @@ public class MainActivity extends AppCompatActivity {
     // Reference to the activity so it can be accessed from the python interpreter
     public static MainActivity mActivity = null;
 
+    // Class name to pass to python for loading
+    private final String mActivityId = "com.jventura.pyapp.MainActivity";
+
+    // Assets version
+    public final int mAssetsVersion = 1;
+
     // Save layout elements to display a fade in animation
     // When the view is loaded from python
     private FrameLayout mContentView;
@@ -64,10 +70,15 @@ public class MainActivity extends AppCompatActivity {
         protected JSONObject doInBackground(String... dirs) {
             // Extract python files from assets
             String path = dirs[0];
-            publishProgress("Unpacking... Please wait.");
             AssetExtractor assetExtractor = new AssetExtractor(mActivity);
-            assetExtractor.removeAssets(path);
-            assetExtractor.copyAssets(path);
+
+            // If assets version changed, remove the old, and copy the new ones
+            if (assetExtractor.getAssetsVersion() != mAssetsVersion) {
+                publishProgress("Unpacking... Please wait.");
+                assetExtractor.removeAssets(path);
+                assetExtractor.copyAssets(path);
+                assetExtractor.setAssetsVersion(mAssetsVersion);
+            }
 
             // Get the extracted assets directory
             String pythonPath = assetExtractor.getAssetsDataDir() + path;
@@ -84,8 +95,8 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject json = new JSONObject();
                 JSONObject params = new JSONObject();
                 json.put("method", "load");
-                params.put("activity","com.jventura.pyapp.MainActivity");
-                json.putOpt("params",params);
+                params.put("activity", mActivityId);
+                json.putOpt("params", params);
                 JSONObject result = PyBridge.call(json);
                 publishProgress("Starting... Please wait.");
                 return result;
