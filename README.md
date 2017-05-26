@@ -15,7 +15,7 @@ I made this because wanted to have a more "React Native" like environment that:
 4. Uses enaml's models, and declarative and dynamic widget framework instead of kvlang
 
    
-_Note: This is currently only works for Android and is very limited at the moment as it's very new. I've been working on this for less than a week _
+_Note: This is currently only works for Android and is very limited at the moment as it's very new. I've been working on this for less than a week_
 
 ## Thanks to ##
  
