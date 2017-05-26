@@ -47,6 +47,7 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
         super(AndroidProgressBar, self).init_widget()
         d = self.declaration
         self.set_progress(d.progress)
+        self.set_indeterminate(d.indeterminate)
         if d.secondary_progress:
             self.set_secondary_progress(d.secondary_progress)
         if d.max:
@@ -60,6 +61,9 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
 
     def set_animated(self, animated):
         pass
+
+    def set_indeterminate(self, indeterminate):
+        self.widget.setIndeterminate(indeterminate)
 
     def set_secondary_progress(self, progress):
         self.widget.setSecondaryProgress(progress)

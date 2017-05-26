@@ -31,6 +31,9 @@ class ProxyProgressBar(ProxyView):
     def set_animated(self, animated):
         pass
 
+    def set_indeterminate(self, indeterminate):
+        raise NotImplementedError
+
     def set_secondary_progress(self, progress):
         raise NotImplementedError
 
@@ -50,6 +53,11 @@ class ProgressBar(View):
     #: Animate the visual position between the current and target values.
     animated = d_(Bool(True))
 
+    #: Change the indeterminate mode for this progress bar.
+    #: In indeterminate mode, the progress is ignored and the progress
+    #: bar shows an infinite animation instead.
+    indeterminate = d_(Bool())
+
     #: Set the upper range of the progress bar max.
     max = d_(Int())
 
@@ -59,7 +67,7 @@ class ProgressBar(View):
     #--------------------------------------------------------------------------
     # Observers
     #--------------------------------------------------------------------------
-    @observe('progress', 'secondary_progress', 'animated', 'max')
+    @observe('progress', 'secondary_progress', 'animated', 'indeterminate', 'max')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 
