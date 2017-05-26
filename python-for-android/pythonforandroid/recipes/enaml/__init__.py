@@ -5,6 +5,6 @@ class EnamlRecipe(CppCompiledComponentsPythonRecipe):
     version = '0.9.8'
     url = 'https://github.com/nucleic/enaml/archive/master.zip'
     patches = ['0001-Update-setup.py.patch'] # Remove PyQt dependency
-    depends = [('python2','python2crystax'),'atom','kiwisolver']
+    depends = [('python2','python2crystax'),'atom']
 
 recipe = EnamlRecipe()

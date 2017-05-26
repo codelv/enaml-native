@@ -935,21 +935,20 @@ class CppCompiledComponentsPythonRecipe(CompiledComponentsPythonRecipe):
         if 'python2crystax' in self.ctx.recipe_build_order:
             env['CFLAGS'] +=" -I{ctx.ndk_dir}/sources/python/2.7/include/python/" \
                             " -I{ctx.ndk_dir}/platforms/android-{ctx.ndk_platform_version}/arch-{arch_noeabi}/usr/include" \
-                            " -I{ctx.ndk_dir}/sources/cxx-stl/gnu-libstdc++/{ctx.toolchain_version}/include" \
-                            " -I{ctx.ndk_dir}/sources/cxx-stl/gnu-libstdc++/{ctx.toolchain_version}/libs/{arch.arch}/include".format(**keys)
-            env['LDFLAGS'] += " -L{ctx.ndk_dir}/sources/cxx-stl/gnu-libstdc++/{ctx.toolchain_version}/libs/{arch.arch}" \
-                " -L{ctx.ndk_dir}/sources/python/2.7/libs/{arch.arch}" \
-                " -lpython2.7" \
-                " -lgnustl_shared".format(**keys)
+                            " -I{ctx.ndk_dir}/sources/cxx-stl/stlport/stlport".format(**keys)
+            env['LDFLAGS'] += " -L{ctx.ndk_dir}/sources/cxx-stl/stlport/libs/{arch.arch}" \
+                                            " -L{ctx.ndk_dir}/sources/python/2.7/libs/{arch.arch}" \
+                                            " -lpython2.7" \
+                                            " -lstlport_shared".format(**keys)
         else:
             env['CFLAGS'] +=" -I{pyroot}/include/python2.7/" \
                             " -I{ctx.ndk_dir}/platforms/android-{ctx.ndk_platform_version}/arch-{arch_noeabi}/usr/include" \
-                            " -I{ctx.ndk_dir}/sources/cxx-stl/gnu-libstdc++/{ctx.toolchain_version}/include" \
-                            " -I{ctx.ndk_dir}/sources/cxx-stl/gnu-libstdc++/{ctx.toolchain_version}/libs/{arch.arch}/include".format(**keys)
-            env['LDFLAGS'] += " -L{ctx.ndk_dir}/sources/cxx-stl/gnu-libstdc++/{ctx.toolchain_version}/libs/{arch.arch}" \
-                " -lpython2.7" \
-                " -lgnustl_shared".format(**keys)
-            
+                            " -I{ctx.ndk_dir}/sources/cxx-stl/stlport/stlport".format(**keys)
+            env['LDFLAGS'] +=  " -L{ctx.ndk_dir}/sources/cxx-stl/stlport/libs/{arch.arch}" \
+                                                " -L{ctx.ndk_dir}/sources/python/2.7/libs/{arch.arch}" \
+                                                " -lpython2.7" \
+                                                " -lstlport_shared".format(**keys)
+                                            
         env['CXXFLAGS'] = env['CFLAGS'] + ' -frtti -fexceptions'
         
         
@@ -963,7 +962,7 @@ class CppCompiledComponentsPythonRecipe(CompiledComponentsPythonRecipe):
         # Copy libgnustl_shared.so
         with current_directory(self.get_build_dir(arch.arch)):
             sh.cp(
-                "{ctx.ndk_dir}/sources/cxx-stl/gnu-libstdc++/{ctx.toolchain_version}/libs/{arch.arch}/libgnustl_shared.so".format(ctx=self.ctx,arch=arch),
+                "{ctx.ndk_dir}/sources/cxx-stl/stlport//libs/{arch.arch}/libstlport_shared.so".format(ctx=self.ctx,arch=arch),
                 self.ctx.get_libs_dir(arch.arch)
             )
 

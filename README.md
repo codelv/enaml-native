@@ -58,7 +58,7 @@ Any python modules with compiled components must be cross compiled for the speci
 A lot of the same issues as `Kivy` are here. Since it's packaging and must load python.
 
 1. Apk size are probably going to be at least 8 MB (when packaged for one arch).  Installed size will be around 30 MB.
-2. Startup times are SLOW. The loading splash comes immediately but on a nexus 5, it takes ~20 seconds for python to start and render the UI (no profiling has yet been done)
+2. Startup times are SLOW. The loading splash comes immediately but on a nexus 5, it takes ~20 seconds for python to start and render the UI (no profiling has yet been done), but this is a killer at the moment...
 
 
 

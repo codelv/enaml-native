@@ -8,6 +8,8 @@ clean-python:
 
 build-python:
 	cd python-for-android/ && python p4a.py apk --arch=$(ARCH) --private=../src --package=org.example.enamlnative --name="Enaml Native Application" --dist-name="enaml-native" --version=0.1 --requirements=python2crystax,pyjnius,atom,ply,enaml --android-api=25 --bootstrap=enaml --sdk-dir=$(SDK_DIR) --ndk-dir=$(NDK_DIR) --ndk-platform=21 --copy-libs
+
+copy-python:
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/libs/$(ARCH) android/app/src/main/libs
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/python/modules android/app/src/main/python/$(ARCH)
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/python/site-packages android/app/src/main/python/$(ARCH)

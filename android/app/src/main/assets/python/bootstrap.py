@@ -12,6 +12,7 @@ Forked from https://github.com/joaoventura/pybridge
 @author: jrm
 '''
 
+import time
 import sys
 import json
 import traceback
@@ -63,17 +64,27 @@ def version():
 
 def load(activity):
     """ Get and load the view """
+    start_time = time.time()
+    print "Start {}".format(start_time)
     import jnius
+    print "Load jnius {}s".format(time.time()-start_time)
     import enaml
+    print "Load enaml {}s".format(time.time()-start_time)
     from enamlnative.android.app import AndroidApplication
+    print "Import AndroidApp {}s".format(time.time()-start_time)
 
     MainActivity = jnius.autoclass(activity)
+    print "Create MainActiivty {}s".format(time.time()-start_time)
+
     app = AndroidApplication(MainActivity.mActivity)
+    print "Create AndroidApp {}s".format(time.time()-start_time)
 
     #: Set the view
     with enaml.imports():
         from view import ContentView
+        print "Import View {}s".format(time.time()-start_time)
         app.view = ContentView()
+    print "Created View {}s".format(time.time()-start_time)
 
 def start():
     """ Display the view """
