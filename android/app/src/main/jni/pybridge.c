@@ -59,6 +59,7 @@ PyMODINIT_FUNC PyInit_androidlog(void)
 
 void setAndroidLog()
 {
+    PyInit_androidlog();
     // Inject  bootstrap code to redirect python stdin/stdout
     // to the androidlog module
     PyRun_SimpleString(
