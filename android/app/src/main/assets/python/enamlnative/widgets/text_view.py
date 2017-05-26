@@ -15,10 +15,10 @@ from atom.api import (
 
 from enaml.core.declarative import d_
 
-from enaml.widgets.widget import Widget, ProxyWidget
+from .view import View, ProxyView
 
 
-class ProxyTextView(ProxyWidget):
+class ProxyTextView(View):
     """ The abstract definition of a proxy Label object.
 
     """
@@ -35,7 +35,7 @@ class ProxyTextView(ProxyWidget):
     #     raise NotImplementedError
 
 
-class TextView(Widget):
+class TextView(View):
     """ A simple control for displaying read-only text.
 
     """

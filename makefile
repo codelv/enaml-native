@@ -13,7 +13,11 @@ copy-python:
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/libs/$(ARCH) android/app/src/main/libs
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/python/modules android/app/src/main/python/$(ARCH)
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/python/site-packages android/app/src/main/python/$(ARCH)
-	
+
+clean-assets:
+	cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.pyc' -delete
+	cd android/app/src/main/assets/python/site-packages && 	rm -R enaml/qt
+
 run-android:
 	adb install -r EnamlNativeApplication-0.1-debug.apk
 	adb shell am start -n org.example.enamlnative/org.kivy.android.PythonActivity

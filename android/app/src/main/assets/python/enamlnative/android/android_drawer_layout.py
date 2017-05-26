@@ -47,7 +47,6 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
         """
         super(AndroidDrawerLayout, self).init_widget()
         d = self.declaration
-        #self.set_drawer_gravity(d.drawer_gravity)
         if d.title:
             self.set_title(d.title)
         if d.drawer_elevation:
@@ -62,9 +61,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     def init_layout(self):
         super(AndroidDrawerLayout, self).init_layout()
         d = self.declaration
-
-        if d.opened:
-            self.set_opened(d.opened)
+        self.set_opened(d.opened)
 
     #--------------------------------------------------------------------------
     # ProxyDrawerLayout API

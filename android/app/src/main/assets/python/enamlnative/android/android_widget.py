@@ -17,9 +17,7 @@ from enaml.drag_drop import DropAction
 from enaml.styling import StyleCache
 from enaml.widgets.widget import Feature, ProxyWidget
 from . import focus_registry
-from .android_toolkit_object import AndroidToolkitObject
-
-View = jnius.autoclass('android.view.View')
+from .android_toolkit_object import AndroidToolkitObject, View
 
 class AndroidWidget(AndroidToolkitObject, ProxyWidget):
     """ A Android implementation of an Enaml ProxyWidget.
@@ -523,7 +521,7 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
 
         """
         # 0 - visible, 1 - invisible, 2 - gone
-        self.widget.setVisible(2)
+        self.widget.setVisibility(2)
         #action = self._widget_action
         #if action is not None:
         #    action.setVisible(False)

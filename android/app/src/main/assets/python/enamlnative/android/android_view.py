@@ -14,17 +14,17 @@ from atom.api import Typed
 
 from enamlnative.widgets.view import ProxyView
 
-from .android_widget import AndroidWidget
+from .android_widget import AndroidWidget, View
 
-_LayoutDirection = jnius.autoclass('android.util.LayoutDirection')
-_View = jnius.autoclass('android.view.View')
+
+LayoutDirection = jnius.autoclass('android.util.LayoutDirection')
 
 class AndroidView(AndroidWidget, ProxyView):
     """ An Android implementation of an Enaml ProxyView.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_View)
+    widget = Typed(View)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -33,7 +33,7 @@ class AndroidView(AndroidWidget, ProxyView):
         """ Create the underlying label widget.
 
         """
-        self.widget = _View(self.get_context())
+        self.widget = View(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.
@@ -74,7 +74,7 @@ class AndroidView(AndroidWidget, ProxyView):
 
     def set_layout_direction(self, direction):
         if direction != 'none':
-            d = getattr(_LayoutDirection,direction.upper())
+            d = getattr(LayoutDirection,direction.upper())
             self.widget.setLayoutDirection(d)
 
 

@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         protected void showErrorMessage(String message) {
             if (message!=null) {
                 TextView textView = (TextView) findViewById(R.id.textView);
-                //textView.setMarg(0);
+                textView.setTop(0);
                 textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
                 textView.setTextColor(Color.RED);
                 textView.setText(message);

@@ -42,7 +42,8 @@ enamldef ContentView(DrawerLayout):
           text = "B"
         RadioButton:
           text = "C"
-
+      ProgressBar:
+        progress = 40
       HBox:
         TextView:
           text = "Timer"

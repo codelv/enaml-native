@@ -12,19 +12,18 @@ Created on May 20, 2017
 import jnius
 from atom.api import Typed
 
-from enamlnative.widgets.text_view import ProxyTextView
+from enamlnative.widgets.tab_host import ProxyTabHost
 
-from .android_view import AndroidView
+from .android_frame_layout import AndroidFrameLayout
 
-TextView = jnius.autoclass('android.widget.TextView')
+TabHost = jnius.autoclass('android.widget.TabHost')
 
-
-class AndroidTextView(AndroidView, ProxyTextView):
-    """ An Android implementation of an Enaml ProxyTextView.
+class AndroidTabHost(AndroidFrameLayout, ProxyTabHost):
+    """ An Android implementation of an Enaml ProxyFrameLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(TextView)
+    widget = Typed(TabHost)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -33,21 +32,17 @@ class AndroidTextView(AndroidView, ProxyTextView):
         """ Create the underlying label widget.
 
         """
-        self.widget = TextView(self.get_context())
+        self.widget = TabHost(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.
 
         """
-        super(AndroidTextView, self).init_widget()
+        super(AndroidTabHost, self).init_widget()
         d = self.declaration
-        self.set_text(d.text)
-
+        self.set_current_tab(d.current_tab)
     #--------------------------------------------------------------------------
-    # ProxyTextView API
+    # ProxyTabHost API
     #--------------------------------------------------------------------------
-    def set_text(self, text):
-        """ Set the text in thae widget.
-
-        """
-        self.widget.setText(text,0,len(text))
+    def set_current_tab(self, index):
+        self.widget.setCurrentTab(index)

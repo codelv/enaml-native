@@ -17,6 +17,8 @@ import sys
 import json
 import traceback
 
+shared = {}
+
 def router(args):
     """
     Defines the router function that routes by function name.
@@ -64,12 +66,20 @@ def version():
 
 def load(activity):
     """ Get and load the view """
+    import cProfile
+    pr = cProfile.Profile()
+    pr.enable()
+    shared['pr'] = pr
+
     start_time = time.time()
     print "Start {}".format(start_time)
     import jnius
     print "Load jnius {}s".format(time.time()-start_time)
     import enaml
     print "Load enaml {}s".format(time.time()-start_time)
+    from atom.api import Atom
+    print "Load atom {}s".format(time.time()-start_time)
+
     from enamlnative.android.app import AndroidApplication
     print "Import AndroidApp {}s".format(time.time()-start_time)
 
@@ -81,9 +91,10 @@ def load(activity):
 
     #: Set the view
     with enaml.imports():
+        print "Within imports {}s".format(time.time()-start_time)
         from view import ContentView
-        print "Import View {}s".format(time.time()-start_time)
-        app.view = ContentView()
+    print "Import View {}s".format(time.time()-start_time)
+    app.view = ContentView()
     print "Created View {}s".format(time.time()-start_time)
 
 def start():
@@ -91,6 +102,13 @@ def start():
     from enamlnative.android.app import AndroidApplication
     app = AndroidApplication.instance()
     app.start()
+    pr = shared['pr']
+    pr.disable()
+    import pstats, StringIO
+    s = StringIO.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+    ps.print_stats()
+    print s.getvalue()
 
 def invoke(callback_id):
     """ Display the view """

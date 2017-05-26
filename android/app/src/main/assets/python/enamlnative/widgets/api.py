@@ -15,6 +15,7 @@ from .linear_layout import LinearLayout
 from .relative_layout import RelativeLayout
 from .frame_layout import FrameLayout
 from .drawer_layout import DrawerLayout
+from .grid_layout import GridLayout
 
 #: Views
 from .view import View
@@ -35,3 +36,8 @@ from .edit_text import EditText
 #: Pickers
 from .time_picker import TimePicker
 from .date_picker import DatePicker
+
+#: Widgets
+from .tab_widget import TabWidget
+from .tab_host import TabHost
+from .progress_bar import ProgressBar

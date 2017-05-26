@@ -1,6 +1,8 @@
 # enaml-native
 Build mobile apps in python using with enaml and widgets native to the platform.
 
+![enaml-native-android-app](https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app.png)
+
 The goal of this project is to be an alternative to using [kivy](https://kivy.org/) for building mobile apps with python. 
 
 I made this because wanted to have a more "React Native" like environment that: 
@@ -58,7 +60,7 @@ Any python modules with compiled components must be cross compiled for the speci
 A lot of the same issues as `Kivy` are here. Since it's packaging and must load python.
 
 1. Apk size are probably going to be at least 8 MB (when packaged for one arch).  Installed size will be around 30 MB.
-2. Startup times are SLOW. The loading splash comes immediately but on a nexus 5, it takes ~20 seconds for python to start and render the UI (no profiling has yet been done), but this is a killer at the moment...
+2. Startup times are SLOW. The loading splash comes immediately but on a nexus 5, it takes ~20 seconds for python to start and render the UI (no profiling has yet been done), but this is a killer at the moment...  Update - jnius.reflect is taking 50% of this
 
 
 
