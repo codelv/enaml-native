@@ -2,6 +2,8 @@
 Build mobile apps in python using with enaml and widgets native to the platform.
 
 <img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app.png" width="240">
+<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-2.png" width="240">
+<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-3.png" width="240">
 
 The goal of this project is to be an alternative to using [kivy](https://kivy.org/) for building mobile apps with python. 
 
