@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Assets version
     public final int mAssetsVersion = 1;
+    public final boolean mAssetsAlwaysOverwrite = false; // TODO: Set only on debug builds
 
     // Save layout elements to display a fade in animation
     // When the view is loaded from python
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             AssetExtractor assetExtractor = new AssetExtractor(mActivity);
 
             // If assets version changed, remove the old, and copy the new ones
-            if (assetExtractor.getAssetsVersion() != mAssetsVersion) {
+            if (mAssetsAlwaysOverwrite || assetExtractor.getAssetsVersion() != mAssetsVersion) {
                 publishProgress("Unpacking... Please wait.");
                 assetExtractor.removeAssets(path);
                 assetExtractor.copyAssets(path);
@@ -91,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
             publishProgress("Loading... Please wait.");
 
             try {
-
                 JSONObject json = new JSONObject();
                 JSONObject params = new JSONObject();
                 json.put("method", "load");

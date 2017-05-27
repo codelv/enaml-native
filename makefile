@@ -1,4 +1,4 @@
-ARCH=x86
+ARCH=armeabi-v7a
 SDK_DIR=/home/jrm/Android/Sdk
 NDK_DIR=/home/jrm/Android/Crystax/crystax-ndk-10.3.2/
 
@@ -13,10 +13,24 @@ copy-python:
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/libs/$(ARCH) android/app/src/main/libs
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/python/modules android/app/src/main/python/$(ARCH)
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/python/site-packages android/app/src/main/python/$(ARCH)
+	
+install-assets:
+	#: Install assets for a specific arch
+	#: Remove old
+	cd android/app/src/main/assets/python/ && rm -R modules && rm -R site-packages
+	#: Install new 
+	cp -R android/app/src/main/python/$(ARCH)/modules android/app/src/main/assets/python/
+	cp -R android/app/src/main/python/$(ARCH)/site-packages android/app/src/main/assets/python/ 
 
 clean-assets:
-	cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.pyc' -delete
+	#: Remove any unused modules
+	#cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.py' -delete
+	#cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.pyc' -delete
+	#cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.pyo' -delete
 	cd android/app/src/main/assets/python/site-packages && 	rm -R enaml/qt
+	cd android/app/src/main/assets/python/site-packages && 	rm -R *.egg-info
+	cd android/app/src/main/assets/python/site-packages && 	rm -R tests
+	cd android/app/src/main/assets/python/site-packages && 	rm -R usr
 
 run-android:
 	adb install -r EnamlNativeApplication-0.1-debug.apk
