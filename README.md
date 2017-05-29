@@ -1,6 +1,8 @@
 # enaml-native
 Build mobile apps in python using enaml and widgets native to the platform.
 
+[demo](https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-startup-speed-test.gif)
+
 <div>
 <img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app.png" width="240" style="float: left;">
 <img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-2.png" width="240" style="float: left;">
@@ -71,7 +73,9 @@ After removing unused libraries the installed size is about ~24 MB.
 
 ~~Startup times are (now less) SLOW. The loading splash comes immediately but on a nexus 5, it takes ~~about 20~~ 13 seconds for python to start and render the UI. This is a killer at the moment...~~
 
-Now loading now take about 3 seconds! I think even more improvements can be made.   But this seems to be a reasonable loading time. 
+Now loading now takes ~~about 3 seconds. I think even more improvements can be made.~~ about 2 seconds!    
+
+But this seems to be a reasonable loading time. 
 
 Profiling results:
  
