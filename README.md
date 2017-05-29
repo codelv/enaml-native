@@ -68,32 +68,38 @@ Apk size are probably going to be at least 8 MB (when packaged for one arch).  I
 After removing unused libraries the installed size is about ~24 MB.
 
 ###### Slow startup times ######
-Startup times are (now less) SLOW. The loading splash comes immediately but on a nexus 5, it takes ~~about 20~~ 13 seconds for python to start and render the UI. This is a killer at the moment...  
+
+~~Startup times are (now less) SLOW. The loading splash comes immediately but on a nexus 5, it takes ~~about 20~~ 13 seconds for python to start and render the UI. This is a killer at the moment...~~
+
+Now loading now take about 3 seconds! I think even more improvements can be made.   But this seems to be a reasonable loading time. 
 
 Profiling results:
  
  ```
  
- 05-26 13:44:09.366 5426-5426/com.jventura.pyapp I/pybridge:          246540 function calls (244835 primitive calls) in 13.056 seconds
-05-26 13:44:09.366 5426-5426/com.jventura.pyapp I/pybridge:    Ordered by: cumulative time
-05-26 13:44:09.366 5426-5426/com.jventura.pyapp I/pybridge:    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-05-26 13:44:09.366 5426-5426/com.jventura.pyapp I/pybridge:        33    9.790    0.297   11.999    0.364 /data/user/0/com.jventura.pyapp/assets/python/site-packages/jnius/reflect.py:149(autoclass)
-05-26 13:44:09.367 5426-5426/com.jventura.pyapp I/pybridge:         1    0.000    0.000   10.916   10.916 /data/user/0/com.jventura.pyapp/assets/python/bootstrap.py:22(router)
-05-26 13:44:09.367 5426-5426/com.jventura.pyapp I/pybridge:         1    0.000    0.000   10.916   10.916 /data/user/0/com.jventura.pyapp/assets/python/bootstrap.py:33(handle)
-05-26 13:44:09.367 5426-5426/com.jventura.pyapp I/pybridge:         1    0.000    0.000   10.916   10.916 /data/user/0/com.jventura.pyapp/assets/python/bootstrap.py:100(start)
-05-26 13:44:09.367 5426-5426/com.jventura.pyapp I/pybridge:         1    0.008    0.008   10.916   10.916 /data/user/0/com.jventura.pyapp/assets/python/enamlnative/android/app.py:51(start)
-05-26 13:44:09.367 5426-5426/com.jventura.pyapp I/pybridge:         1    0.000    0.000   10.908   10.908 /data/user/0/com.jventura.pyapp/assets/python/enamlnative/android/app.py:60(get_view)
-05-26 13:44:09.367 5426-5426/com.jventura.pyapp I/pybridge:      25/1    0.001    0.000   10.587   10.587 /data/user/0/com.jventura.pyapp/assets/python/site-packages/enaml/widgets/toolkit_object.py:147(initialize)
-05-26 13:44:09.367 5426-5426/com.jventura.pyapp I/pybridge:        25    0.001    0.000   10.585    0.423 /data/user/0/com.jventura.pyapp/assets/python/site-packages/enaml/application.py:351(create_proxy)
-05-26 13:44:09.367 5426-5426/com.jventura.pyapp I/pybridge:        25    0.000    0.000   10.584    0.423 /data/user/0/com.jventura.pyapp/assets/python/site-packages/enaml/application.py:325(resolve_proxy_class)
-05-26 13:44:09.367 5426-5426/com.jventura.pyapp I/pybridge:        30    0.000    0.000   10.583    0.353 /data/user/0/com.jventura.pyapp/assets/python/site-packages/enaml/application.py:127(resolve)
-05-26 13:44:09.367 5426-5426/com.jventura.pyapp I/pybridge:      25/1    0.001    0.000    9.197    9.197 /data/user/0/com.jventura.pyapp/assets/python/site-packages/enaml/core/declarative.py:103(initialize)
-05-26 13:44:09.367 5426-5426/com.jventura.pyapp I/pybridge:         1    0.000    0.000    1.390    1.390 /data/user/0/com.jventura.pyapp/assets/python/enamlnative/android/factories.py:103(drawer_layout_factory)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:          141961 function calls (140210 primitive calls) in 3.379 seconds
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:    Ordered by: cumulative time
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:        33    0.001    0.000    1.820    0.055 /data/user/0/com.jventura.pyapp/assets/python/site-packages/jnius/reflect.py:153(autoclass)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:        28    0.002    0.000    1.819    0.065 /data/user/0/com.jventura.pyapp/assets/python/site-packages/jnius/reflect.py:420(cached_autoclass)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:         1    0.001    0.001    1.269    1.269 /data/user/0/com.jventura.pyapp/assets/python/enamlnative/android/app.py:10(<module>)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:         1    0.000    0.000    1.226    1.226 /data/user/0/com.jventura.pyapp/assets/python/stdlib.zip/json/__init__.py:257(load)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:         2    0.000    0.000    1.197    0.598 /data/user/0/com.jventura.pyapp/assets/python/stdlib.zip/json/__init__.py:293(loads)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:         2    0.000    0.000    1.197    0.598 /data/user/0/com.jventura.pyapp/assets/python/stdlib.zip/json/decoder.py:361(decode)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:         2    1.197    0.598    1.197    0.598 /data/user/0/com.jventura.pyapp/assets/python/stdlib.zip/json/decoder.py:372(raw_decode)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:         1    0.000    0.000    1.020    1.020 /data/user/0/com.jventura.pyapp/assets/python/bootstrap.py:22(router)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:         1    0.000    0.000    1.020    1.020 /data/user/0/com.jventura.pyapp/assets/python/bootstrap.py:33(handle)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:         1    0.000    0.000    1.020    1.020 /data/user/0/com.jventura.pyapp/assets/python/bootstrap.py:100(start)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:         1    0.008    0.008    1.020    1.020 /data/user/0/com.jventura.pyapp/assets/python/enamlnative/android/app.py:51(start)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:         1    0.000    0.000    1.012    1.012 /data/user/0/com.jventura.pyapp/assets/python/enamlnative/android/app.py:60(get_view)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:        28    0.056    0.002    0.590    0.021 /data/user/0/com.jventura.pyapp/assets/python/site-packages/jnius/reflect.py:369(load_spec)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:      26/1    0.001    0.000    0.577    0.577 /data/user/0/com.jventura.pyapp/assets/python/site-packages/enaml/widgets/toolkit_object.py:147(initialize)
+05-27 01:54:35.779 19891-19891/com.jventura.pyapp I/pybridge:        26    0.001    0.000    0.574    0.022 /data/user/0/com.jventura.pyapp/assets/python/site-packages/enaml/application.py:351(create_proxy)
  
  
  ```
  Notes: 
-  -  jnius.reflect is taking 10s of this. 
+  -  jnius.reflect is taking 10s of this.  Now a static loading method for JavaClasses is used, reducing this by a factor of 10 !!
   -  Enaml can load quickly when cache files are properly included.
 
 
