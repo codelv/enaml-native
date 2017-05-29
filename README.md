@@ -1,5 +1,5 @@
 # enaml-native
-Build mobile apps in python using with enaml and widgets native to the platform.
+Build mobile apps in python using enaml and widgets native to the platform.
 
 <div>
 <img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app.png" width="240" style="float: left;">
