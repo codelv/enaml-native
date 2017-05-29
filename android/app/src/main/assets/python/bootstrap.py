@@ -66,10 +66,13 @@ def version():
 
 def load(activity):
     """ Get and load the view """
+    ### Comment out to disable profiling
     import cProfile
     pr = cProfile.Profile()
     pr.enable()
     shared['pr'] = pr
+    ### End profiling
+
 
     start_time = time.time()
     print "Start {}".format(start_time)
@@ -79,7 +82,7 @@ def load(activity):
     print "Load enaml {}s".format(time.time()-start_time)
     from atom.api import Atom
     print "Load atom {}s".format(time.time()-start_time)
-
+    
     from enamlnative.android.app import AndroidApplication
     print "Import AndroidApp {}s".format(time.time()-start_time)
 
@@ -102,13 +105,14 @@ def start():
     from enamlnative.android.app import AndroidApplication
     app = AndroidApplication.instance()
     app.start()
-    pr = shared['pr']
-    pr.disable()
-    import pstats, StringIO
-    s = StringIO.StringIO()
-    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
-    ps.print_stats()
-    print s.getvalue()
+    pr = shared.get('pr')
+    if pr:
+        pr.disable()
+        import pstats, StringIO
+        s = StringIO.StringIO()
+        ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+        ps.print_stats()
+        print s.getvalue()
 
 def invoke(callback_id):
     """ Display the view """
