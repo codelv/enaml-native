@@ -3,6 +3,8 @@ Build mobile apps in python using enaml and widgets native to the platform.
 
 [demo](https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-startup-speed-test.gif)
 
+Video here: [on youtube](https://youtu.be/cEYmyObl17A)
+
 <div>
 <img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app.png" width="240" style="float: left;">
 <img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-2.png" width="240" style="float: left;">
