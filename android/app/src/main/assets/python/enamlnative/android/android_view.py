@@ -19,6 +19,19 @@ from .android_widget import AndroidWidget, View
 
 LayoutDirection = jnius.autoclass('android.util.LayoutDirection')
 
+
+class OnClickListener(jnius.PythonJavaClass):
+    __javainterfaces__ = ['android/view/View$OnClickListener']
+
+    def __init__(self, handler):
+        self.__handler__ = handler
+        super(OnClickListener, self).__init__()
+
+    @jnius.java_method('(Landroid/view/View;)V')
+    def onClick(self, view):
+        self.__handler__.on_click(view)
+
+
 class AndroidView(AndroidWidget, ProxyView):
     """ An Android implementation of an Enaml ProxyView.
 

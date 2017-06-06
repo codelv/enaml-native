@@ -31,9 +31,15 @@ enamldef ContentView(DrawerLayout):
         text = "TextView"
       Button:
         text = "PushButton"
-      CheckBox:
+        clicked:: tv1.count += 1
+      TextView: tv1:
+        attr count = 0
+        text << "Clicked {}".format(count)
+      CheckBox: cb1:
         text = "CheckBox"
         checked = True
+      TextView:
+        text << "Checkbox state: {}".format(cb1.checked)
       RadioGroup:
         RadioButton:
           text = "A"
