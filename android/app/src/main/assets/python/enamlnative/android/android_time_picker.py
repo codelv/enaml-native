@@ -16,15 +16,16 @@ from enamlnative.widgets.time_picker import ProxyTimePicker
 
 from .android_frame_layout import AndroidFrameLayout
 
-_Boolean = jnius.autoclass('java.lang.Boolean')
-_TimePicker = jnius.autoclass('android.widget.TimePicker')
+Boolean = jnius.autoclass('java.lang.Boolean')
+TimePicker = jnius.autoclass('android.widget.TimePicker')
+
 
 class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
     """ An Android implementation of an Enaml ProxyFrameLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_TimePicker)
+    widget = Typed(TimePicker)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -33,7 +34,7 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
         """ Create the underlying label widget.
 
         """
-        self.widget = _TimePicker(self.get_context())
+        self.widget = TimePicker(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.
@@ -56,7 +57,7 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
         self.widget.setMinute(minute)
 
     def set_hour_mode(self, mode):
-        self.widget.setIs24HourView(_Boolean(mode=='24'))
+        self.widget.setIs24HourView(Boolean(mode == '24'))
 
     def set_enabled(self, enabled):
         self.widget.setEnabled(enabled)
