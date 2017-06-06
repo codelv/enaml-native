@@ -18,6 +18,7 @@ from .android_linear_layout import AndroidLinearLayout
 
 RadioGroup = jnius.autoclass('android.widget.RadioGroup')
 
+
 class RadioGroupOnCheckedChangeListener(jnius.PythonJavaClass):
     __javainterfaces__ = ['android/widget/RadioGroup$OnCheckedChangeListener']
 
@@ -28,6 +29,7 @@ class RadioGroupOnCheckedChangeListener(jnius.PythonJavaClass):
     @jnius.java_method('(Landroid/widget/RadioGroup;I)V')
     def onCheckedChanged(self, group, checked_id):
         self.__handler__.on_checked_changed(group, checked_id)
+
 
 class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
     """ An Android implementation of an Enaml ProxyLinearLayout.
