@@ -1027,22 +1027,24 @@ class CythonRecipe(PythonRecipe):
             else:
                 info('First build appeared to complete correctly, skipping manual'
                      'cythonising.')
+            if not '--gdb' in self.cython_args:
+                # Then we don't want debug info...
+                
+                if 'python2' in self.ctx.recipe_build_order:
+                    info('Stripping object files')
+                    build_lib = glob.glob('./build/lib*')
+                    shprint(sh.find, build_lib[0], '-name', '*.o', '-exec',
+                            env['STRIP'], '{}', ';', _env=env)
 
-            if 'python2' in self.ctx.recipe_build_order:
-                info('Stripping object files')
-                build_lib = glob.glob('./build/lib*')
-                shprint(sh.find, build_lib[0], '-name', '*.o', '-exec',
-                        env['STRIP'], '{}', ';', _env=env)
-
-            if ('python2crystax' in self.ctx.recipe_build_order or
-                'python3crystax' in self.ctx.recipe_build_order):
-                info('Stripping object files')
-                shprint(sh.find, '.', '-iname', '*.so', '-exec',
-                        '/usr/bin/echo', '{}', ';', _env=env)
-                shprint(sh.find, '.', '-iname', '*.so', '-exec',
-                        env['STRIP'].split(' ')[0], '--strip-unneeded',
-                        # '/usr/bin/strip', '--strip-unneeded',
-                        '{}', ';', _env=env)
+                if ('python2crystax' in self.ctx.recipe_build_order or
+                    'python3crystax' in self.ctx.recipe_build_order):
+                    info('Stripping object files')
+                    shprint(sh.find, '.', '-iname', '*.so', '-exec',
+                            '/usr/bin/echo', '{}', ';', _env=env)
+                    shprint(sh.find, '.', '-iname', '*.so', '-exec',
+                            env['STRIP'].split(' ')[0], '--strip-unneeded',
+                            # '/usr/bin/strip', '--strip-unneeded',
+                            '{}', ';', _env=env)
 
     def cythonize_file(self, env, build_dir, filename):
         short_filename = filename
@@ -1077,7 +1079,9 @@ class CythonRecipe(PythonRecipe):
             ' -L{}'.format(join(self.ctx.bootstrap.build_dir, 'obj', 'local',
                                 arch.arch)))
         if self.ctx.python_recipe.from_crystax:
+            
             env['LDFLAGS'] = (env['LDFLAGS'] +
+                              ' -L{ctx.root_dir}/../../android/app/src/main/libs/{arch.arch}/'.format(ctx=self.ctx,arch=arch) +
                               ' -L{}'.format(join(self.ctx.bootstrap.build_dir, 'libs', arch.arch)))
             # ' -L/home/asandy/.local/share/python-for-android/build/bootstrap_builds/sdl2/libs/armeabi '
         if self.ctx.python_recipe.from_crystax:

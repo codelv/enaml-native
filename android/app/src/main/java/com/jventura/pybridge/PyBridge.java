@@ -45,6 +45,32 @@ public class PyBridge {
         }
     }
 
+    /**
+     * Class
+     */
+    public static class PythonCallback implements Runnable {
+
+        private long mCallbackId;
+
+        public PythonCallback(long callbackId) {
+            mCallbackId = callbackId;
+        }
+
+        @Override
+        public void run() {
+            try {
+                JSONObject json = new JSONObject();
+                json.put("method", "invoke");
+                JSONObject params = new JSONObject();
+                params.put("callback_id",mCallbackId);
+                json.putOpt("params",params);
+                PyBridge.call(json);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     // Load library
     static {
         System.loadLibrary("pybridge");

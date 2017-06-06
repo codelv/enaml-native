@@ -46,5 +46,13 @@ def find_all_javaclasses(path=None, exts=['*.py','*.enaml']):
             
     return sorted(list(set(clsnames)))
     
+def build_cache():
+    from jnius import reflect
+    if not hasattr(reflect,'build_cache'):
+        raise RuntimeError("Using wrong version of jnius if you want caching to work!")
+    reflect.build_cache(find_all_javaclasses())
     
-    
+
+
+
+

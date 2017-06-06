@@ -30,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
     private final String mActivityId = "com.jventura.pyapp.MainActivity";
 
     // Assets version
-    public final int mAssetsVersion = 1;
-    public final boolean mAssetsAlwaysOverwrite = false; // TODO: Set only on debug builds
+    public final int mAssetsVersion = 3;
+    public final boolean mAssetsAlwaysOverwrite = true; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
     // When the view is loaded from python
@@ -172,31 +172,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * Class
-     */
-    private class PythonCallback implements Runnable {
-
-        private long mCallbackId;
-
-        PythonCallback(long callbackId) {
-            mCallbackId = callbackId;
-        }
-
-        @Override
-        public void run() {
-            try {
-                JSONObject json = new JSONObject();
-                json.put("method", "invoke");
-                JSONObject params = new JSONObject();
-                params.put("callback_id",mCallbackId);
-                json.putOpt("params",params);
-                PyBridge.call(json);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     /**
      * Set the content view and fade out the loading view
@@ -243,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public boolean scheduleCallback(long callbackId, long delay) {
         return mCallbackHandler.postDelayed(
-            new PythonCallback(callbackId),delay);
+            new PyBridge.PythonCallback(callbackId),delay);
     }
 
     @Override

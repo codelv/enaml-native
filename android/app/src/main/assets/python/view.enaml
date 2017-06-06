@@ -55,6 +55,7 @@ enamldef ContentView(DrawerLayout):
           text = "EditText"
         EditText:
           text = ""
+          text:: print "TEXT CHANGED  {}".format(change)
 
       VBox:
         TextView:

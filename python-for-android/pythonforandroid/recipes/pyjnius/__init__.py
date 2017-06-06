@@ -12,9 +12,14 @@ class PyjniusRecipe(CythonRecipe):
     name = 'pyjnius'
     depends = [('python2', 'python2crystax', 'python3crystax'), ('sdl2', 'sdl', 'genericndkbuild'), 'six']
     site_packages_name = 'jnius'
-
+    #cython_args = ['--gdb'] # Uncomment to include debugging symbols
     patches = [('sdl2_jnienv_getter.patch', will_build('sdl2')),
                ('genericndkbuild_jnienv_getter.patch', will_build('genericndkbuild'))]
+
+    @property
+    def from_crystax(self):
+        return ('python2crystax' in self.ctx.recipe_build_order or 
+                'python3crystax' in self.ctx.recipe_build_order)
 
     def postbuild_arch(self, arch):
         super(PyjniusRecipe, self).postbuild_arch(arch)

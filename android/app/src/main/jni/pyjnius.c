@@ -93,13 +93,7 @@ static void Android_JNI_ThreadDestroyed(void* value)
     }
 }
 
-void *WebView_AndroidGetJNIEnv()
-{
-    return Android_JNI_GetEnv();
-}
-
-
-void *SDL_AndroidGetJNIEnv()
+void *JNIUS_AndroidGetJNIEnv()
 {
     return Android_JNI_GetEnv();
 }

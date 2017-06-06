@@ -122,6 +122,7 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
 #endif
     Py_OptimizeFlag = 1;
     Py_Initialize();
+    PyEval_InitThreads(); // If threads are used
     setAndroidLog();
 
     // Bootstrap

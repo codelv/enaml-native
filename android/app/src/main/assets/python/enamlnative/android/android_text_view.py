@@ -19,6 +19,7 @@ from .android_view import AndroidView
 TextView = jnius.autoclass('android.widget.TextView')
 
 
+
 class AndroidTextView(AndroidView, ProxyTextView):
     """ An Android implementation of an Enaml ProxyTextView.
 
@@ -47,7 +48,10 @@ class AndroidTextView(AndroidView, ProxyTextView):
     # ProxyTextView API
     #--------------------------------------------------------------------------
     def set_text(self, text):
-        """ Set the text in thae widget.
+        """ Set the text in the widget.
 
         """
-        self.widget.setText(text,0,len(text))
+        print "set_text {}".format(text)
+        self.widget.setText(text, 0, len(text))
+
+

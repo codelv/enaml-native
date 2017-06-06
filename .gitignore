@@ -4,3 +4,6 @@ venv/
 .externalNativeBuild/
 android/build/
 android/app/build/
+*.pyc
+*.pyo
+*.enamlc
