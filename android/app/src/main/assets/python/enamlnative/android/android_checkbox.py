@@ -30,7 +30,7 @@ class AndroidCheckBox(AndroidCompoundButton, ProxyCheckBox):
     # Initialization API
     # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying Android widget.
 
         """
         self.widget = CheckBox(self.get_context())
