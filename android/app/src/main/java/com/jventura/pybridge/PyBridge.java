@@ -60,7 +60,7 @@ public class PyBridge {
         public void run() {
             try {
                 JSONObject json = new JSONObject();
-                json.put("method", "invoke");
+                json.put("method", "callback");
                 JSONObject params = new JSONObject();
                 params.put("callback_id",mCallbackId);
                 json.putOpt("params",params);

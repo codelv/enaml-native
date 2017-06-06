@@ -122,11 +122,13 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
 #endif
     Py_OptimizeFlag = 1;
     Py_Initialize();
-    PyEval_InitThreads(); // If threads are used
+    if (! PyEval_ThreadsInitialized()) {
+        PyEval_InitThreads();
+    }
     setAndroidLog();
 
     // Bootstrap
-    PyRun_SimpleString("import bootstrap");
+    //PyRun_SimpleString("import bootstrap");
 
     // Cleanup
     (*env)->ReleaseStringUTFChars(env, path, pypath);
@@ -161,31 +163,36 @@ JNIEXPORT jstring JNICALL Java_com_jventura_pybridge_PyBridge_call
     jboolean iscopy;
     const char *payload_utf = (*env)->GetStringUTFChars(env, payload, &iscopy);
 
+    //PyGILState_STATE gstate;
+    //gstate = PyGILState_Ensure();
+
     // Import module
-    PyObject* myModuleString = PyUnicode_FromString((char*)"bootstrap");
-    PyObject* myModule = PyImport_Import(myModuleString);
+    PyObject* bootstrapModule = PyUnicode_FromString((char*)"bootstrap");
+    PyObject* bootstrap = PyImport_Import(bootstrapModule);
 
     // Get reference to the router function
-    PyObject* myFunction = PyObject_GetAttrString(myModule, (char*)"router");
+    PyObject* router = PyObject_GetAttrString(bootstrap, (char*)"router");
     PyObject* args = PyTuple_Pack(1, PyUnicode_FromString(payload_utf));
 
     // Call function and get the resulting string
-    PyObject* myResult = PyObject_CallObject(myFunction, args);
-#if PY_MAJOR_VERSION >= 3
-    char *myResultChar = PyUnicode_AsUTF8(myResult);
-#else
-    char *myResultChar = PyString_AsString(myResult);
-#endif
+    PyObject* response = PyObject_CallObject(router, args);
 
     // Store the result on a java.lang.String object
-    jstring result = (*env)->NewStringUTF(env, myResultChar);
+#if PY_MAJOR_VERSION >= 3
+    jstring result = (*env)->NewStringUTF(env, PyUnicode_AsUTF8(response));
+#else
+    jstring result = (*env)->NewStringUTF(env, PyString_AsString(response));
+#endif
 
     // Cleanup
     (*env)->ReleaseStringUTFChars(env, payload, payload_utf);
-    Py_DECREF(myModuleString);
-    Py_DECREF(myModule);
-    Py_DECREF(myFunction);
+    Py_DECREF(router);
     Py_DECREF(args);
-    Py_DECREF(myResult);
+    Py_DECREF(response);
+    Py_DECREF(bootstrapModule);
+    Py_DECREF(bootstrap);
+    // Release the thread. No Python API allowed beyond this point.
+    //PyGILState_Release(gstate);
+    LOG("DONE");
     return result;
 }

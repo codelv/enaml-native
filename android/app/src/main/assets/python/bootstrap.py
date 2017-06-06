@@ -105,6 +105,7 @@ def start():
     from enamlnative.android.app import AndroidApplication
     app = AndroidApplication.instance()
     app.start()
+    shared['app'] = app # So it doesn't get GC'd ?
     pr = shared.get('pr')
     if pr:
         pr.disable()
@@ -114,10 +115,20 @@ def start():
         ps.print_stats()
         print s.getvalue()
 
-def invoke(callback_id):
+def callback(callback_id):
     """ Display the view """
     from enamlnative.android.app import AndroidApplication
     app = AndroidApplication.instance()
     app.invoke_callback(callback_id)
+
+def invoke(ptr, method, *args):
+    import ctypes
+    try:
+        obj = ctypes.cast(ptr,ctypes.py_object).value
+        handler = getattr(obj,method)
+        return handler(*args)
+    except:
+        traceback.print_exc()
+        return
 
 

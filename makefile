@@ -1,12 +1,13 @@
 ARCH=armeabi-v7a
 SDK_DIR=/home/jrm/Android/Sdk
-NDK_DIR=/home/jrm/Android/Crystax/crystax-ndk-10.3.2/
+NDK_DIR=/home/jrm/Android/Crystax/crystax-ndk-10.3.2
 
 clean-python:
 	cd python-for-android/ && python p4a.py clean_dists
 	cd python-for-android/ && python p4a.py clean_builds
 
 build-python:
+	cd android/app/src/main/jni && $(NDK_DIR)/ndk-build
 	cd python-for-android/ && python p4a.py apk --arch=$(ARCH) --private=../src --package=org.example.enamlnative --name="Enaml Native Application" --dist-name="enaml-native" --version=0.1 --requirements=python2crystax,pyjnius,atom,ply,enaml --android-api=25 --bootstrap=enaml --sdk-dir=$(SDK_DIR) --ndk-dir=$(NDK_DIR) --ndk-platform=21 --copy-libs
 	
 copy-python:
@@ -21,6 +22,8 @@ install-assets:
 	#: Install new 
 	cp -R android/app/src/main/python/$(ARCH)/modules android/app/src/main/assets/python/
 	cp -R android/app/src/main/python/$(ARCH)/site-packages android/app/src/main/assets/python/ 
+	#: Copy cache to correct place
+	cp android/app/src/main/assets/python/reflect.javac android/app/src/main/assets/python/site-packages/jnius/
 
 clean-assets:
 	#: Remove any unused modules

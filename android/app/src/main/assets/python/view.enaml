@@ -53,10 +53,10 @@ enamldef ContentView(DrawerLayout):
       VBox:
         TextView:
           text = "EditText"
-        EditText:
+        TextView:
+          text << "You typed: {}".format(et.text)
+        EditText: et:
           text = ""
-          text:: print "TEXT CHANGED  {}".format(change)
-
       VBox:
         TextView:
           text = "Time Picker"

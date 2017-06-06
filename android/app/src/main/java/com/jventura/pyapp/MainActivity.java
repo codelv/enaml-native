@@ -66,45 +66,26 @@ public class MainActivity extends AppCompatActivity {
      *  2. Initializes the python interpreter
      *  3. Calls the app start function of the bootstrap
      */
-    private class PythonTask extends AsyncTask<String,String,JSONObject>{
+    private class PythonTask extends AsyncTask<String,String,String>{
 
-        protected JSONObject doInBackground(String... dirs) {
+        protected String doInBackground(String... dirs) {
             // Extract python files from assets
             String path = dirs[0];
             AssetExtractor assetExtractor = new AssetExtractor(mActivity);
 
             // If assets version changed, remove the old, and copy the new ones
             if (mAssetsAlwaysOverwrite || assetExtractor.getAssetsVersion() != mAssetsVersion) {
-                publishProgress("Unpacking... Please wait.");
+                publishProgress("Loading... Please wait.");
                 assetExtractor.removeAssets(path);
                 assetExtractor.copyAssets(path);
                 assetExtractor.setAssetsVersion(mAssetsVersion);
             }
 
-            // Get the extracted assets directory
-            String pythonPath = assetExtractor.getAssetsDataDir() + path;
-
             // Start the Python interpreter
             publishProgress("Initializing... Please wait.");
-            PyBridge.start(pythonPath);
 
-            // Load the View
-            publishProgress("Loading... Please wait.");
-
-            try {
-                JSONObject json = new JSONObject();
-                JSONObject params = new JSONObject();
-                json.put("method", "load");
-                params.put("activity", mActivityId);
-                json.putOpt("params", params);
-                JSONObject result = PyBridge.call(json);
-                publishProgress("Starting... Please wait.");
-                return result;
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return null;
+            // Get the extracted assets directory
+            return assetExtractor.getAssetsDataDir() + path;
         }
 
         /**
@@ -112,11 +93,25 @@ public class MainActivity extends AppCompatActivity {
          * Call start to display the view.
          * @param result
          */
-        protected void onPostExecute(JSONObject result) {
+        protected void onPostExecute(String pythonPath) {
+            JSONObject result = null;
+
+            // Initialize python
+            // Note: This must be done in the UI thread!
+            PyBridge.start(pythonPath);
+
             try {
+                // Load the View
+                JSONObject json = new JSONObject();
+                JSONObject params = new JSONObject();
+                json.put("method", "load");
+                params.put("activity", mActivityId);
+                json.putOpt("params", params);
+                result = PyBridge.call(json);
+
                 // Start python
                 if (result!=null && !result.has("error")) {
-                    JSONObject json = new JSONObject();
+                    json = new JSONObject();
                     json.put("method", "start");
                     result = PyBridge.call(json);
                 }
