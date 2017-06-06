@@ -40,14 +40,16 @@ enamldef ContentView(DrawerLayout):
         checked = True
       TextView:
         text << "Checkbox state: {}".format(cb1.checked)
-      RadioGroup:
-        RadioButton:
+      RadioGroup: rg1:
+        checked = rb1
+        RadioButton: rb1:
           text = "A"
-          #checked = True
-        RadioButton:
+        RadioButton: rb2:
           text = "B"
-        RadioButton:
+        RadioButton: rb3:
           text = "C"
+      TextView:
+        text << "Radio group state: {}".format(rg1.checked.text if rg1.checked else "Unchecked")
       VBox:
         ProgressBar:
           indeterminate = True # Ignored if style doesn't support it

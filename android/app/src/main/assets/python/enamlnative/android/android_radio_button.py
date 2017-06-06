@@ -16,28 +16,21 @@ from enamlnative.widgets.radio_button import ProxyRadioButton
 
 from .android_compound_button import AndroidCompoundButton
 
-_RadioButton = jnius.autoclass('android.widget.RadioButton')
+RadioButton = jnius.autoclass('android.widget.RadioButton')
 
 
 class AndroidRadioButton(AndroidCompoundButton, ProxyRadioButton):
-    """ An Android implementation of an Enaml ProxyLinearLayout.
+    """ An Android implementation of an Enaml ProxyRadioButton.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_RadioButton)
+    widget = Typed(RadioButton)
 
     #--------------------------------------------------------------------------
     # Initialization API
     #--------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying Android widget.
 
         """
-        self.widget = _RadioButton(self.get_context())
-
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidRadioButton, self).init_widget()
-        d = self.declaration
+        self.widget = RadioButton(self.get_context())
