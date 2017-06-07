@@ -59,6 +59,12 @@ enamldef ContentView(DrawerLayout):
         Chronometer:
           pass
       VBox:
+        padding = (10,0,10,0)
+        TextView:
+          text = "Spinner"
+        Spinner:
+          items = range(10)
+      VBox:
         TextView:
           text = "EditText"
         TextView:

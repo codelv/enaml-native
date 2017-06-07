@@ -27,6 +27,9 @@ class ProxyView(ProxyWidget):
     def set_layout_direction(self, direction):
         raise NotImplementedError
 
+    def set_padding(self, padding):
+        raise NotImplementedError
+
     def set_alpha(self, alpha):
         raise NotImplementedError
 
@@ -139,9 +142,9 @@ class View(Widget):
 
     over_scroll_mode = d_(Int())
 
-    padding = d_(Tuple(int,default=(0,0,0,0)))
+    padding = d_(Tuple(int))
 
-    padding_relative = d_(Tuple(int,default=(0,0,0,0)))
+    padding_relative = d_(Tuple(int))
 
     pivot_x = d_(Float())
 

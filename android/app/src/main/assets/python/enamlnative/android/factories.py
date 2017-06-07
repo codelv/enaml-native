@@ -90,6 +90,11 @@ def scroll_view_factory():
     from .android_scroll_view import AndroidScrollView
     return AndroidScrollView
 
+def spinner_factory():
+    print "Import spinner"
+    from .android_spinner import AndroidSpinner
+    return AndroidSpinner
+
 def view_factory():
     print "Import view"
     from .android_view import AndroidView
@@ -141,6 +146,7 @@ ANDROID_FACTORIES = {
     'TimePicker': time_picker_factory,
     'DatePicker': date_picker_factory,
     'ScrollView': scroll_view_factory,
+    'Spinner': spinner_factory,
     'TabWidget': tab_widget_factory,
     'TabHost': tab_host_factory,
     'ProgressBar': progress_bar_factory,
