@@ -16,23 +16,39 @@ from enamlnative.widgets.date_picker import ProxyDatePicker
 
 from .android_frame_layout import AndroidFrameLayout
 
-_DatePicker = jnius.autoclass('android.widget.DatePicker')
+DatePicker = jnius.autoclass('android.widget.DatePicker')
+
+
+class OnDateChangedListener(jnius.PythonJavaClass):
+    __javainterfaces__ = ['android/widget/DatePicker$OnDateChangedListener']
+
+    def __init__(self, handler):
+        self.__handler__ = handler
+        super(OnDateChangedListener, self).__init__()
+
+    @jnius.java_method('(Landroid/widget/DatePicker;III)V')
+    def onDateChanged(self, view, year, month, day):
+        self.__handler__.on_date_changed(view, year, month, day)
+
 
 class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
-    """ An Android implementation of an Enaml ProxyFrameLayout.
+    """ An Android implementation of an Enaml ProxyDatePicker.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_DatePicker)
+    widget = Typed(DatePicker)
+
+    #: Save a reference to the date changed listener
+    date_listener = Typed(OnDateChangedListener)
 
     #--------------------------------------------------------------------------
     # Initialization API
     #--------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying Android widget.
 
         """
-        self.widget = _DatePicker(self.get_context())
+        self.widget = DatePicker(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.
@@ -40,7 +56,6 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
         """
         super(AndroidDatePicker, self).init_widget()
         d = self.declaration
-        self.update_date()
         self.set_enabled(d.enabled)
         self.set_first_day_of_week(d.first_day_of_week)
         if d.min_date:
@@ -48,9 +63,23 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
         if d.max_date:
             self.set_max_date(d.max_date)
 
-    #--------------------------------------------------------------------------
+        self.date_listener = OnDateChangedListener(self)
+        self.widget.init(d.year, d.month, d.day, self.date_listener)
+
+    # --------------------------------------------------------------------------
+    # OnDateChangedListener API
+    # --------------------------------------------------------------------------
+    def on_date_changed(self, view, year, month, day):
+        d = self.declaration
+        with self.suppress_notifications():
+            d.year = year
+            d.month = month
+            d.day = day
+
+
+    # --------------------------------------------------------------------------
     # ProxyFrameLayout API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_year(self, year):
         self.update_date()
 

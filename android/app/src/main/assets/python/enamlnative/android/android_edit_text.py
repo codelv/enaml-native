@@ -48,13 +48,23 @@ class AndroidEditText(AndroidTextView, ProxyEditText):
         self.watcher = TextWatcher(self)
         self.widget.addTextChangedListener(self.watcher)
 
-    def on_text_changed(self, text):
-        d = self.declaration
-        d.text = text
+    # --------------------------------------------------------------------------
+    # TextWatcher API
+    # --------------------------------------------------------------------------
+    def after_text_changed(self, e):
+        pass
 
-    #--------------------------------------------------------------------------
+    def before_text_changed(self, text, start, before, count):
+        pass
+
+    def on_text_changed(self, text, start, before, count):
+        d = self.declaration
+        with self.suppress_notifications():
+            d.text = text
+
+    # --------------------------------------------------------------------------
     # ProxyEditText API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_selection(self, selection):
         self.widget.setSelection(*selection)
 

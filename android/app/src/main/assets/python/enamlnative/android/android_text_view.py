@@ -27,18 +27,16 @@ class TextWatcher(jnius.PythonJavaClass):
         super(TextWatcher, self).__init__()
 
     @jnius.java_method('(Landroid/text/Editable;)V')
-    def afterTextChanged(self,s):
-        print "afterTextChanged called"
-        pass
+    def afterTextChanged(self,e):
+        self.__handler__.after_text_changed(e)
 
     @jnius.java_method('(Ljava/lang/CharSequence;III)V')
     def beforeTextChanged(self, s, start, before, count):
-        print "beforeTextChanged called"
+        self.__handler__.before_text_changed(s, start, before, count)
 
     @jnius.java_method('(Ljava/lang/CharSequence;III)V')
     def onTextChanged(self, s, start, before, count):
-        print "onTextChanged called"
-        self.__handler__.on_text_changed(s)
+        self.__handler__.on_text_changed(s, start, before, count)
 
 
 class AndroidTextView(AndroidView, ProxyTextView):

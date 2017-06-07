@@ -96,7 +96,7 @@ enamldef ContentView(DrawerLayout):
             indeterminate = True # Ignored if style doesn't support it
 
       Card:
-        HBox:
+        VBox:
           CardTitle:
             text = "Timer"
           Chronometer:
@@ -119,18 +119,22 @@ enamldef ContentView(DrawerLayout):
         VBox:
           CardTitle:
             text = "Time Picker"
-          TimePicker:
+          TimePicker: tp1:
             hour = 6
             minute = 30
+          TextView:
+            text << "Time selected: {hour}:{minute}".format(hour=tp1.hour,minute=tp1.minute)
       Card:
         VBox:
           CardTitle:
             text = "Date Picker"
-          DatePicker:
+          DatePicker: dp1:
             attr today = datetime.now()
             year = today.year
             month = today.month
             day = today.day
+          TextView:
+            text << "Date selected: {month}/{day}/{year}".format(month=dp1.month,day=dp1.day,year=dp1.year)
   LinearLayout:
     layout_gravity = 'left'
     TextView:
