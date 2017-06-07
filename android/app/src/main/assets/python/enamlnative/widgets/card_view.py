@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Int, Bool, Float, Tuple, observe
+    Typed, ForwardTyped, Unicode, Int, Bool, Float, Tuple, observe
 )
 
 from enaml.core.declarative import d_
@@ -50,7 +50,7 @@ class CardView(FrameLayout):
     """
 
     #: Updates the corner radius of the CardView.
-    card_background_color = d_(Int(0))
+    card_background_color = d_(Unicode())
 
     #: Updates the corner radius of the CardView.
     card_elevation = d_(Float(-1))

@@ -16,6 +16,7 @@ from enamlnative.widgets.card_view import ProxyCardView
 
 from .android_frame_layout import AndroidFrameLayout
 
+Color = jnius.autoclass('android.graphics.Color')
 #: You must add "compile 'com.android.support:cardview-v7:21.0.+'" to build.gradle
 CardView = jnius.autoclass('android.support.v7.widget.CardView')
 
@@ -61,7 +62,7 @@ class AndroidCardView(AndroidFrameLayout, ProxyCardView):
     # ProxyCardView API
     #--------------------------------------------------------------------------
     def set_card_background_color(self, color):
-        self.widget.setCardBackgroundColor(color)
+        self.widget.setCardBackgroundColor(Color.parseColor(color))
 
     def set_card_elevation(self, elevation):
         self.widget.setCardElevation(elevation)

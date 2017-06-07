@@ -10,14 +10,13 @@ Created on May 20, 2017
 @author: jrm
 '''
 import jnius
-from atom.api import Typed, Subclass
+from atom.api import Typed
 
 from enamlnative.widgets.view_group import ProxyViewGroup
 
-from .android_view import AndroidView
+from .android_view import AndroidView, LayoutParams
 
 Gravity = jnius.autoclass('android.view.Gravity')
-LayoutParams = jnius.autoclass('android.view.ViewGroup$LayoutParams')
 ViewGroup = jnius.autoclass('android.view.ViewGroup')
 
 
@@ -27,12 +26,6 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(ViewGroup)
-
-    #: Default layout params
-    layout_params = Subclass(jnius.JavaClass)
-
-    def _default_layout_params(self):
-        return LayoutParams
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -62,24 +55,25 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
         self.update_layout_params()
 
     def set_layout_gravity(self, gravity):
-        self.update_layout_params()
+        return
+        # params = self.get_layout_params()
+        # params.gravity = getattr(Gravity,d.layout_gravity.upper())
+        # self.update_layout_params()
 
     def update_layout_params(self):
-        d = self.declaration
-        if d.layout_width:
-            layout_width = getattr(LayoutParams,d.layout_width.upper())\
-                if hasattr(LayoutParams,d.layout_width.upper()) else int(d.layout_width)
-        else:
-            layout_width = LayoutParams.MATCH_PARENT
-        if d.layout_height:
-            layout_height = getattr(LayoutParams,d.layout_width.upper())\
-                if hasattr(LayoutParams,d.layout_height.upper()) else int(d.layout_height)
-        else:
-            layout_height = LayoutParams.MATCH_PARENT
-        params = self.layout_params(
-            layout_width,
-            layout_height
-        )
-        #: apparently this doesnt work... FRICK
-        params.gravity = getattr(Gravity,d.layout_gravity.upper())
-        self.widget.setLayoutParams(params)
+        params = self.get_layout_params()
+        # d = self.declaration
+        # if d.layout_width:
+        #     layout_width = getattr(LayoutParams,d.layout_width.upper())\
+        #         if hasattr(LayoutParams,d.layout_width.upper()) else int(d.layout_width)
+        # else:
+        #     layout_width = LayoutParams.MATCH_PARENT
+        # if d.layout_height:
+        #     layout_height = getattr(LayoutParams,d.layout_height.upper())\
+        #         if hasattr(LayoutParams,d.layout_height.upper()) else int(d.layout_height)
+        # else:
+        #     layout_height = LayoutParams.MATCH_PARENT
+        #
+        # #: Clone existing
+        # params = self.layout_params(params)
+        # self.widget.setLayoutParams(params)

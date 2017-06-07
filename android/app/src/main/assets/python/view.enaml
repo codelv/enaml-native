@@ -21,8 +21,9 @@ enamldef VBox(LinearLayout):
 
 enamldef Card(CardView):
   padding = (20, 20, 20, 20)
+  margins = (0, 10, 0, 10)
   content_padding = (10,10,10,10)
-  card_background_color = 0xff0000
+  #card_background_color = '#FF0000'
 
 enamldef ContentView(DrawerLayout):
   #opened = True # Or swipe to open
@@ -30,7 +31,7 @@ enamldef ContentView(DrawerLayout):
   ScrollView:
     layout_width = 'match_parent'
     layout_height = 'match_parent'
-    background_color = 0xff0000
+    background_color = '#CCCCCC'
     LinearLayout:
       orientation = "vertical"
       padding = (10,10,10,10)

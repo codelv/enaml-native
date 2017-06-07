@@ -31,12 +31,6 @@ class ProxyViewGroup(ProxyView):
     def set_layout_gravity(self, gravity):
         raise NotImplementedError
 
-    def set_layout_width(self, width):
-        raise NotImplementedError
-
-    def set_layout_height(self, height):
-        raise NotImplementedError
-
 class ViewGroup(View):
     """ ViewGroup is a view group that displays
         child views in relative positions.
@@ -45,10 +39,6 @@ class ViewGroup(View):
     #: Describes how the child views are positioned.
     #: Defaults to Gravity.START | Gravity.TOP.
     layout_mode = d_(Int())
-
-    layout_width = d_(Unicode(''))
-
-    layout_height = d_(Unicode(''))
 
     #: Layout gravity
     layout_gravity = d_(Enum(
@@ -63,8 +53,7 @@ class ViewGroup(View):
     #--------------------------------------------------------------------------
     # Observers
     #--------------------------------------------------------------------------
-    @observe('layout_mode', 'layout_gravity',
-             'layout_width', 'layout_height')
+    @observe('layout_mode', 'layout_gravity')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 
