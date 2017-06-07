@@ -69,6 +69,8 @@ class AndroidView(AndroidWidget, ProxyView):
             self.set_y(d.y)
         if d.z:
             self.set_y(d.z)
+        if d.padding:
+            self.set_padding(d.padding)
 
     #--------------------------------------------------------------------------
     # ProxyView API
@@ -90,6 +92,10 @@ class AndroidView(AndroidWidget, ProxyView):
             d = getattr(LayoutDirection,direction.upper())
             self.widget.setLayoutDirection(d)
 
+    def set_padding(self, padding):
+        d = self.get_context().getResources().getDisplayMetrics().density
+        t,l,b,r = padding
+        self.widget.setPadding(t*d,l*d,b*d,r*d)
 
     def set_x(self, x):
         self.widget.setX(x)

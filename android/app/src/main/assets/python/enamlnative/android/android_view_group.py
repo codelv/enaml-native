@@ -14,13 +14,13 @@ from atom.api import Typed
 
 from enamlnative.widgets.view_group import ProxyViewGroup
 
-from .android_widget import AndroidWidget
+from .android_view import AndroidView
 
 Gravity = jnius.autoclass('android.view.Gravity')
 LayoutParams = jnius.autoclass('android.view.ViewGroup$LayoutParams')
 ViewGroup = jnius.autoclass('android.view.ViewGroup')
 
-class AndroidViewGroup(AndroidWidget, ProxyViewGroup):
+class AndroidViewGroup(AndroidView, ProxyViewGroup):
     """ An Android implementation of an Enaml ProxyViewGroup.
 
     """
