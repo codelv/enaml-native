@@ -24,6 +24,9 @@ class ProxyView(ProxyWidget):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: View)
 
+    def set_background_color(self, color):
+        raise NotImplementedError
+
     def set_layout_direction(self, direction):
         raise NotImplementedError
 

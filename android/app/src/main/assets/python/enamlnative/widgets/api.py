@@ -23,6 +23,7 @@ from .view_group import ViewGroup
 from .calendar_view import CalendarView
 from .text_view import TextView
 from .scroll_view import ScrollView
+from .card_view import CardView
 
 #: Controls
 from .button import  Button

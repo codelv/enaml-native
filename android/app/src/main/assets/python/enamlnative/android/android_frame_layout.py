@@ -14,16 +14,17 @@ from atom.api import Typed
 
 from enamlnative.widgets.frame_layout import ProxyFrameLayout
 
-from .android_widget import AndroidWidget
+from .android_view_group import AndroidViewGroup
 
-_FrameLayout = jnius.autoclass('android.widget.FrameLayout')
+FrameLayout = jnius.autoclass('android.widget.FrameLayout')
 
-class AndroidFrameLayout(AndroidWidget, ProxyFrameLayout):
+
+class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
     """ An Android implementation of an Enaml ProxyFrameLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_FrameLayout)
+    widget = Typed(FrameLayout)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -32,7 +33,7 @@ class AndroidFrameLayout(AndroidWidget, ProxyFrameLayout):
         """ Create the underlying label widget.
 
         """
-        self.widget = _FrameLayout(self.get_context())
+        self.widget = FrameLayout(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.

@@ -17,6 +17,7 @@ from enaml.core.declarative import d_
 
 from .view import View, ProxyView
 
+
 class ProxyViewGroup(ProxyView):
     """ The abstract definition of a proxy relative layout object.
 

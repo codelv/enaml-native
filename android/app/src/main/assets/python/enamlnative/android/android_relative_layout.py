@@ -14,16 +14,17 @@ from atom.api import Typed
 
 from enamlnative.widgets.relative_layout import ProxyRelativeLayout
 
-from .android_widget import AndroidWidget
+from .android_view_group import AndroidViewGroup
 
-_RelativeLayout = jnius.autoclass('android.widget.RelativeLayout')
+RelativeLayout = jnius.autoclass('android.widget.RelativeLayout')
 
-class AndroidRelativeLayout(AndroidWidget, ProxyRelativeLayout):
+
+class AndroidRelativeLayout(AndroidViewGroup, ProxyRelativeLayout):
     """ An Android implementation of an Enaml ProxyRelativeLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_RelativeLayout)
+    widget = Typed(RelativeLayout)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -32,7 +33,7 @@ class AndroidRelativeLayout(AndroidWidget, ProxyRelativeLayout):
         """ Create the underlying label widget.
 
         """
-        self.widget = _RelativeLayout(self.get_context())
+        self.widget = RelativeLayout(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.

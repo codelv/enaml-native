@@ -14,11 +14,12 @@ from atom.api import Typed
 
 from enamlnative.widgets.grid_layout import ProxyGridLayout
 
-from .android_widget import AndroidWidget
+from .android_view_group import AndroidViewGroup
 
 GridLayout = jnius.autoclass('android.widget.GridLayout')
 
-class AndroidGridLayout(AndroidWidget, ProxyGridLayout):
+
+class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
     """ An Android implementation of an Enaml ProxyGridLayout.
 
     """

@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 import jnius
-from atom.api import Typed
+from atom.api import Typed, Float
 
 from enamlnative.widgets.view import ProxyView
 
@@ -31,6 +31,8 @@ class OnClickListener(jnius.PythonJavaClass):
     def onClick(self, view):
         self.__handler__.on_click(view)
 
+CACHE = {
+}
 
 class AndroidView(AndroidWidget, ProxyView):
     """ An Android implementation of an Enaml ProxyView.
@@ -38,6 +40,14 @@ class AndroidView(AndroidWidget, ProxyView):
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(View)
+
+    #: Display metrics density
+    dp = Float()
+
+    def _default_dp(self):
+        if 'dp' not in CACHE:
+            CACHE['dp'] = self.get_context().getResources().getDisplayMetrics().density
+        return CACHE['dp']
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -48,6 +58,7 @@ class AndroidView(AndroidWidget, ProxyView):
         """
         self.widget = View(self.get_context())
 
+
     def init_widget(self):
         """ Initialize the underlying widget.
 
@@ -55,6 +66,8 @@ class AndroidView(AndroidWidget, ProxyView):
         super(AndroidView, self).init_widget()
         d = self.declaration
         self.set_layout_direction(d.layout_direction)
+        if d.background_color:
+            self.set_background_color(d.background_color)
         if d.top:
             self.set_top(d.top)
         if d.bottom:
@@ -75,6 +88,9 @@ class AndroidView(AndroidWidget, ProxyView):
     #--------------------------------------------------------------------------
     # ProxyView API
     #--------------------------------------------------------------------------
+    def set_background_color(self, color):
+        self.widget.setBackgroundColor(color)
+
     def set_top(self, top):
         self.widget.setTop(top)
 
@@ -93,9 +109,9 @@ class AndroidView(AndroidWidget, ProxyView):
             self.widget.setLayoutDirection(d)
 
     def set_padding(self, padding):
-        d = self.get_context().getResources().getDisplayMetrics().density
-        t,l,b,r = padding
-        self.widget.setPadding(t*d,l*d,b*d,r*d)
+        dp = self.dp
+        l, t, r, b = padding
+        self.widget.setPadding(l*dp,t*dp,r*dp,b*dp)
 
     def set_x(self, x):
         self.widget.setX(x)

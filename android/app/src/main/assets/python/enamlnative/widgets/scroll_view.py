@@ -17,8 +17,9 @@ from enaml.core.declarative import d_
 
 from .frame_layout import FrameLayout, ProxyFrameLayout
 
+
 class ProxyScrollView(ProxyFrameLayout):
-    """ The abstract definition of a proxy Label object.
+    """ The abstract definition of a proxy ScrollView object.
 
     """
     #: A reference to the Label declaration.
@@ -26,8 +27,8 @@ class ProxyScrollView(ProxyFrameLayout):
 
 
 class ScrollView(FrameLayout):
-    """ A simple control for displaying read-only text.
+    """ A simple control for displaying a ScrollView.
 
     """
-    #: A reference to the ProxyLabel object.
+    #: A reference to the ProxyScrollView object.
     proxy = Typed(ProxyScrollView)

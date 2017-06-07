@@ -19,72 +19,95 @@ enamldef HBox(LinearLayout):
 enamldef VBox(LinearLayout):
   orientation = "vertical"
 
+enamldef Card(CardView):
+  padding = (20, 20, 20, 20)
+  content_padding = (10,10,10,10)
+  card_background_color = 0xff0000
+
 enamldef ContentView(DrawerLayout):
   #opened = True # Or swipe to open
   side = 'left'
   ScrollView:
     layout_width = 'match_parent'
     layout_height = 'match_parent'
+    background_color = 0xff0000
     LinearLayout:
       orientation = "vertical"
-      TextView:
-        text = "TextView"
-      Button:
-        text = "PushButton"
-        clicked:: tv1.count += 1
-      TextView: tv1:
-        attr count = 0
-        text << "Clicked {}".format(count)
-      CheckBox: cb1:
-        text = "CheckBox"
-        checked = True
-      TextView:
-        text << "Checkbox state: {}".format(cb1.checked)
-      RadioGroup: rg1:
-        checked = rb1
-        RadioButton: rb1:
-          text = "A"
-        RadioButton: rb2:
-          text = "B"
-        RadioButton: rb3:
-          text = "C"
-      TextView:
-        text << "Radio group state: {}".format(rg1.checked.text if rg1.checked else "Unchecked")
-      VBox:
-        ProgressBar:
-          indeterminate = True # Ignored if style doesn't support it
-      HBox:
-        TextView:
-          text = "Timer"
-        Chronometer:
-          pass
-      VBox:
-        padding = (10,0,10,0)
-        TextView:
-          text = "Spinner"
-        Spinner:
-          items = range(10)
-      VBox:
-        TextView:
-          text = "EditText"
-        TextView:
-          text << "You typed: {}".format(et.text)
-        EditText: et:
-          text = ""
-      VBox:
-        TextView:
-          text = "Time Picker"
-        TimePicker:
-          hour = 6
-          minute = 30
-      VBox:
-        TextView:
-          text = "Date Picker"
-        DatePicker:
-          attr today = datetime.now()
-          year = today.year
-          month = today.month
-          day = today.day
+      padding = (10,10,10,10)
+      Card:
+        VBox:
+          TextView:
+            text = "TextView"
+      Card:
+        VBox:
+          TextView:
+            text = "TextView"
+          Button:
+            text = "PushButton"
+            clicked:: tv1.count += 1
+          TextView: tv1:
+            attr count = 0
+            text << "Clicked {}".format(count)
+      Card:
+        VBox:
+          CheckBox: cb1:
+            text = "CheckBox"
+            checked = True
+          TextView:
+            text << "Checkbox state: {}".format(cb1.checked)
+      Card:
+        VBox:
+          RadioGroup: rg1:
+            checked = rb1
+            RadioButton: rb1:
+              text = "A"
+            RadioButton: rb2:
+              text = "B"
+            RadioButton: rb3:
+              text = "C"
+          TextView:
+            text << "Radio group state: {}".format(rg1.checked.text if rg1.checked else "Unchecked")
+      Card:
+        VBox:
+          ProgressBar:
+            indeterminate = True # Ignored if style doesn't support it
+
+      Card:
+        HBox:
+          TextView:
+            text = "Timer"
+          Chronometer:
+            pass
+      Card:
+        VBox:
+          TextView:
+            text = "Spinner"
+          Spinner:
+            items = range(10)
+      Card:
+        VBox:
+          TextView:
+            text = "EditText"
+          TextView:
+            text << "You typed: {}".format(et.text)
+          EditText: et:
+            text = ""
+      Card:
+        VBox:
+          TextView:
+            text = "Time Picker"
+          TimePicker:
+            hour = 6
+            minute = 30
+      Card:
+        VBox:
+          TextView:
+            text = "Date Picker"
+          DatePicker:
+            attr today = datetime.now()
+            year = today.year
+            month = today.month
+            day = today.day
   LinearLayout:
     layout_gravity = 'left'
     TextView:

@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 import jnius
-from atom.api import Typed
+from atom.api import Typed, Subclass
 
 from enamlnative.widgets.view_group import ProxyViewGroup
 
@@ -20,6 +20,7 @@ Gravity = jnius.autoclass('android.view.Gravity')
 LayoutParams = jnius.autoclass('android.view.ViewGroup$LayoutParams')
 ViewGroup = jnius.autoclass('android.view.ViewGroup')
 
+
 class AndroidViewGroup(AndroidView, ProxyViewGroup):
     """ An Android implementation of an Enaml ProxyViewGroup.
 
@@ -27,7 +28,11 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
     #: A reference to the widget created by the proxy.
     widget = Typed(ViewGroup)
 
-    layout_params = Typed(LayoutParams)
+    #: Default layout params
+    layout_params = Subclass(jnius.JavaClass)
+
+    def _default_layout_params(self):
+        return LayoutParams
 
     #--------------------------------------------------------------------------
     # Initialization API
