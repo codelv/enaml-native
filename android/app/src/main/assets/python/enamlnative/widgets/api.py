@@ -36,6 +36,7 @@ from .radio_group import RadioGroup
 from .chronometer import Chronometer
 from .edit_text import EditText
 from .spinner import Spinner
+from .rating_bar import RatingBar
 
 #: Pickers
 from .time_picker import TimePicker

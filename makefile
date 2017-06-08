@@ -1,6 +1,7 @@
 ARCH=armeabi-v7a
 SDK_DIR=/home/jrm/Android/Sdk
 NDK_DIR=/home/jrm/Android/Crystax/crystax-ndk-10.3.2
+BUNDLE_ID=com.jventura.pyapp
 
 clean-python:
 	cd python-for-android/ && python p4a.py clean_dists
@@ -8,12 +9,20 @@ clean-python:
 
 build-python:
 	cd android/app/src/main/jni && $(NDK_DIR)/ndk-build
-	cd python-for-android/ && python p4a.py apk --arch=$(ARCH) --private=../src --package=org.example.enamlnative --name="Enaml Native Application" --dist-name="enaml-native" --version=0.1 --requirements=python2crystax,pyjnius,atom,ply,enaml --android-api=25 --bootstrap=enaml --sdk-dir=$(SDK_DIR) --ndk-dir=$(NDK_DIR) --ndk-platform=21 --copy-libs
+	cd python-for-android/ && python p4a.py apk --arch=$(ARCH) --private=../src --package=$(BUNDLE_ID) --name="Enaml Native Application" --dist-name="enaml-native" --version=0.1 --requirements=python2crystax,pyjnius,atom,ply,enaml --android-api=25 --bootstrap=enaml --sdk-dir=$(SDK_DIR) --ndk-dir=$(NDK_DIR) --ndk-platform=21 --copy-libs
 	
 copy-python:
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/libs/$(ARCH) android/app/src/main/libs
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/python/modules android/app/src/main/python/$(ARCH)
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/python/site-packages android/app/src/main/python/$(ARCH)
+	
+pull-cache:
+	#: Pull cache file from device
+	adb root
+	cd android/app/src/main/assets/python/ && adb pull /data/user/0/$(BUNDLE_ID)/assets/python/site-packages/jnius/reflect.javac
+
+install-cache:
+	cp android/app/src/main/assets/python/reflect.javac android/app/src/main/assets/python/site-packages/jnius/
 	
 install-assets:
 	#: Install assets for a specific arch

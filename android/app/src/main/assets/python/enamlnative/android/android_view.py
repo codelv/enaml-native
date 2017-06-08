@@ -95,6 +95,8 @@ class AndroidView(AndroidWidget, ProxyView):
             self.set_padding(d.padding)
         if d.margins:
             self.set_margins(d.margins)
+        if d.layout_width or d.layout_height:
+            self.get_layout_params()
 
     def get_layout_params(self):
         """ Get the layout params for this widget. If none exists,
@@ -145,10 +147,10 @@ class AndroidView(AndroidWidget, ProxyView):
         self.widget.setRight(right)
 
     def set_layout_width(self, width):
-        raise NotImplementedError
+        self.get_layout_params()
 
     def set_layout_height(self, height):
-        raise NotImplementedError
+        self.get_layout_params()
 
     def set_layout_direction(self, direction):
         if direction != 'none':

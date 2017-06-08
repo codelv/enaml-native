@@ -100,6 +100,10 @@ def radio_group_factory():
     from .android_radio_group import AndroidRadioGroup
     return AndroidRadioGroup
 
+def rating_bar_factory():
+    print "Import rating bar"
+    from .android_rating_bar import AndroidRatingBar
+    return AndroidRatingBar
 
 def relative_layout_factory():
     print "Import relative layout"
@@ -179,6 +183,7 @@ ANDROID_FACTORIES = {
     'ProgressBar': progress_bar_factory,
     'RadioButton': radio_button_factory,
     'RadioGroup': radio_group_factory,
+    'RatingBar': rating_bar_factory,
     'RelativeLayout': relative_layout_factory,
     'ScrollView': scroll_view_factory,
     'Spinner': spinner_factory,

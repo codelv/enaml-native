@@ -74,6 +74,16 @@ enamldef ContentView(DrawerLayout):
             checked = True
           TextView:
             text << "Checkbox state: {}".format(cb1.checked)
+          Switch: sw1:
+            text = "Switch"
+            checked = True
+          TextView:
+            text << "Switch state: {}".format(sw1.checked)
+          ToggleButton: tb1:
+            text = "ToggleButton"
+            checked = True
+          TextView:
+            text << "Button state: {}".format(tb1.checked)
       Card:
         VBox:
           CardTitle:
@@ -94,13 +104,20 @@ enamldef ContentView(DrawerLayout):
             text = "Progressbar"
           ProgressBar:
             indeterminate = True # Ignored if style doesn't support it
+          RatingBar: rbar1:
+            num_stars = 5
+            rating = 3
+          TextView:
+            text << "Rating {}".format(rbar1.rating)
 
       Card:
         VBox:
           CardTitle:
             text = "Timer"
-          Chronometer:
-            pass
+          Chronometer: ch1:
+            running = True
+          TextView:
+            text << "Ticks: {}".format(ch1.ticks)
       Card:
         VBox:
           CardTitle:

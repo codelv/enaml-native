@@ -16,6 +16,7 @@ from enamlnative.widgets.switch import ProxySwitch
 
 from .android_compound_button import AndroidCompoundButton
 
+String = jnius.autoclass('java.lang.String')
 Switch = jnius.autoclass('android.widget.Switch')
 
 
@@ -34,3 +35,35 @@ class AndroidSwitch(AndroidCompoundButton, ProxySwitch):
 
         """
         self.widget = Switch(self.get_context())
+
+
+    def init_widget(self):
+        """ Initialize the underlying widget.
+
+        """
+        super(AndroidSwitch, self).init_widget()
+        d = self.declaration
+        self.set_show_text(d.show_text)
+        if d.split_track:
+            self.set_split_track(d.split_track)
+        if d.text_off:
+            self.set_text_off(d.text_off)
+        if d.text_on:
+            self.set_text_on(d.text_on)
+
+
+    # --------------------------------------------------------------------------
+    # ProxySwitch API
+    # --------------------------------------------------------------------------
+
+    def set_show_text(self, show):
+        self.widget.setShowText(show)
+
+    def set_split_track(self, split):
+        self.widget.setSplitTrack(split)
+
+    def set_text_off(self, text):
+        self.widget.setTextOff(String(text))
+
+    def set_text_on(self, text):
+        self.widget.setTextOn(String(text))

@@ -19,7 +19,7 @@ from .view import View, ProxyView
 
 
 class ProxyProgressBar(ProxyView):
-    """ The abstract definition of a proxy Label object.
+    """ The abstract definition of a proxy ProgressBar object.
 
     """
     #: A reference to the Label declaration.
@@ -41,7 +41,7 @@ class ProxyProgressBar(ProxyView):
         raise NotImplementedError
 
 class ProgressBar(View):
-    """ A simple control for displaying read-only text.
+    """ A simple control for displaying a ProgressBar.
 
     """
     #: Sets the current progress to the specified value.
@@ -61,12 +61,12 @@ class ProgressBar(View):
     #: Set the upper range of the progress bar max.
     max = d_(Int())
 
-    #: A reference to the ProxyLabel object.
+    #: A reference to the ProxyProgressBar object.
     proxy = Typed(ProxyProgressBar)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Observers
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     @observe('progress', 'secondary_progress', 'animated', 'indeterminate', 'max')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

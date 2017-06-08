@@ -9,19 +9,13 @@ Created on May 26, 2017
 
 @author: jrm
 '''
+import jnius
 from atom.api import Typed
 from enamlnative.widgets.progress_bar import ProxyProgressBar
-import jnius
-#from jnius import JavaMethod
+
 from .android_view import AndroidView, View
 
 ProgressBar = jnius.autoclass('android.widget.ProgressBar')
-
-# class ProgressBar(View):
-#     __javaclass__ = 'android/widget/ProgressBar'
-#     setProgress = JavaMethod('(IZ)V')
-#     setMax = JavaMethod('(I)V')
-#     setSecondaryProgress = JavaMethod('(I)V')
 
 
 class AndroidProgressBar(AndroidView, ProxyProgressBar):
@@ -52,9 +46,10 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
             self.set_secondary_progress(d.secondary_progress)
         if d.max:
             self.set_max(d.max)
-    #--------------------------------------------------------------------------
+
+    # --------------------------------------------------------------------------
     # ProxyProgressBar API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_progress(self, progress):
         d = self.declaration
         self.widget.setProgress(progress,d.animated)
