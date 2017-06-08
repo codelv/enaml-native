@@ -30,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
     private final String mActivityId = "com.jventura.pyapp.MainActivity";
 
     // Assets version
-    public final int mAssetsVersion = 3;
-    public final boolean mAssetsAlwaysOverwrite = true; // Set only on debug builds
+    public final int mAssetsVersion = 1;
+    public final boolean mAssetsAlwaysOverwrite = false; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
     // When the view is loaded from python
@@ -75,10 +75,17 @@ public class MainActivity extends AppCompatActivity {
 
             // If assets version changed, remove the old, and copy the new ones
             if (mAssetsAlwaysOverwrite || assetExtractor.getAssetsVersion() != mAssetsVersion) {
-                publishProgress("Loading... Please wait.");
+                publishProgress("Unpacking... Please wait.");
                 assetExtractor.removeAssets(path);
                 assetExtractor.copyAssets(path);
                 assetExtractor.setAssetsVersion(mAssetsVersion);
+            } else {
+                // Delay to show loading?
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // Don't care
+                }
             }
 
             // Start the Python interpreter
