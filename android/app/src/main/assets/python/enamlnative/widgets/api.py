@@ -29,6 +29,8 @@ from .card_view import CardView
 from .button import  Button
 from .compound_button import CompoundButton
 from .checkbox import CheckBox
+from .switch import Switch
+from .toggle_button import ToggleButton
 from .radio_button import RadioButton
 from .radio_group import RadioGroup
 from .chronometer import Chronometer

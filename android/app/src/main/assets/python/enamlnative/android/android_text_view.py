@@ -49,9 +49,9 @@ class AndroidTextView(AndroidView, ProxyTextView):
     #: A reference to the text changed listener
     watcher = Typed(TextWatcher)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying label widget.
 
@@ -85,9 +85,9 @@ class AndroidTextView(AndroidView, ProxyTextView):
         if d.max_lines:
             self.set_max_lines(d.max_lines)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # ProxyTextView API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_all_caps(self, enabled):
         self.widget.setAllCaps(enabled)
 

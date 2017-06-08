@@ -118,6 +118,10 @@ def spinner_factory():
     from .android_spinner import AndroidSpinner
     return AndroidSpinner
 
+def switch_factory():
+    print "Import switch"
+    from .android_switch import AndroidSwitch
+    return AndroidSwitch
 
 def text_view_factory():
     print "Import text view"
@@ -142,6 +146,10 @@ def tab_widget_factory():
     from .android_tab_widget import AndroidTabWidget
     return AndroidTabWidget
 
+def toggle_button_factory():
+    print "Import toggle button"
+    from .android_toggle_button import AndroidToggleButton
+    return AndroidToggleButton
 
 def view_factory():
     print "Import view"
@@ -174,10 +182,12 @@ ANDROID_FACTORIES = {
     'RelativeLayout': relative_layout_factory,
     'ScrollView': scroll_view_factory,
     'Spinner': spinner_factory,
+    'Switch': switch_factory,
     'TabWidget': tab_widget_factory,
     'TabHost': tab_host_factory,
     'TextView': text_view_factory,
     'TimePicker': time_picker_factory,
+    'ToggleButton': toggle_button_factory,
     'View': view_factory,
     'ViewGroup': view_group_factory,
 }
