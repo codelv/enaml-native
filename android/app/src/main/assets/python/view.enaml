@@ -11,6 +11,7 @@ Created on May 20, 2017
 '''
 import time
 from enamlnative.widgets.api import *
+from enaml.core.api import Conditional, Looper
 from datetime import datetime
 
 enamldef HBox(LinearLayout):
@@ -152,6 +153,49 @@ enamldef ContentView(DrawerLayout):
             day = today.day
           TextView:
             text << "Date selected: {month}/{day}/{year}".format(month=dp1.month,day=dp1.day,year=dp1.year)
+      Card: card_looper:
+        attr items = []
+        VBox:
+          CardTitle:
+            text = "Looping items"
+          HBox:
+            Button:
+              text = "Add item"
+              clicked::
+                items = card_looper.items[:]
+                items.append(len(items))
+                card_looper.items = items
+            Button:
+              text = "Remove item"
+              clicked::
+                items = card_looper.items[:]
+                items.pop()
+                card_looper.items = items
+          Looper:
+            iterable << card_looper.items
+            TextView:
+              text = "Item index is {}".format(loop_item)
+
+      Card: card_conds:
+          attr loading = True
+          VBox:
+            CardTitle:
+              text = "Conditional rendering"
+            Switch:
+              text = "Simulate loading"
+              checked := card_conds.loading
+
+            Conditional:
+              condition << card_conds.loading
+              ProgressBar:
+                pass
+              TextView:
+                text = "Loading..."
+            Conditional:
+              condition << not card_conds.loading
+              TextView:
+                text = "Loading complete!!!"
+
   LinearLayout:
     layout_gravity = 'left'
     TextView:

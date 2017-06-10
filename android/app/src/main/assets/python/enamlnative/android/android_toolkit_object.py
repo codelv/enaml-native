@@ -101,7 +101,9 @@ class AndroidToolkitObject(ProxyToolkitObject):
         """
         widget = self.widget
         if widget is not None:
-            widget.getParent().removeView(widget)
+            parent = widget.getParent()
+            if parent is not None:
+                parent.removeView(widget)
             del self.widget
         super(AndroidToolkitObject, self).destroy()
 
@@ -124,7 +126,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
 
         Returns
         -------
-        result : QObject or None
+        result : JavaClass or None
             The toolkit widget declared on the declaration parent, or
             None if there is no such parent.
 
@@ -138,7 +140,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
 
         Returns
         -------
-        result : iterable of QObject
+        result : iterable of JavaClass
             The child widgets defined for this object.
 
         """
