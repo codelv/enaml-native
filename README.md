@@ -3,7 +3,7 @@ Build mobile apps in python using enaml and widgets native to the platform.
 
 ![demo](https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app.gif)
 
-Video here: [on youtube](https://youtu.be/fTEfvcnNUOU)
+Latest Video here: [on youtube](https://youtu.be/9Zbb-yg48Vg)
 
 <div>
 <img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app.png" width="240" style="float: left;">
@@ -19,7 +19,12 @@ I made this because wanted to have a more "React Native" like environment that:
 4. Uses enaml's models, and declarative and dynamic widget framework instead of kvlang
 
    
-_Note: This is currently only works for Android and is very limited at the moment as it's very new. I've been working on this for less than a week_
+### Features ###
+
+1. Conditional and Looper based rendering
+2. Data binding
+3. Declarative syntax
+
 
 ## Thanks to ##
  
