@@ -30,6 +30,12 @@ enamldef CardTitle(TextView):
   font_family = "sans-serif-condensed-light"
   text_size = 18
 
+enamldef MenuItem(TextView):
+  font_family = "sans-serif-serif-medium"
+  text_size = 16
+  padding = (10,10,10,10)
+  text_color = "#0000EE"
+
 enamldef ContentView(DrawerLayout):
   #opened = True # Or swipe to open
   side = 'left'
@@ -55,6 +61,20 @@ enamldef ContentView(DrawerLayout):
           TextView:
             text = """This gets trunicated. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
             max_lines = 5
+      Card:
+        VBox:
+          CardTitle:
+            text = "Fonts"
+          Looper:
+            iterable << ["casual", "cursive", "monospace", "sans-serif", "sans-serif-black",
+                         "sans-serif-condensed", "sans-serif-condensed-light", "sans-serif-light",
+                         "sans-serif-medium", "sans-serif-smallcaps", "sans-serif-thin",
+                         "serif", "serif-monospace"]
+            TextView:
+              font_family = loop_item
+              text = loop_item
+
+
 
       Card:
         VBox:
@@ -167,6 +187,7 @@ enamldef ContentView(DrawerLayout):
                 card_looper.items = items
             Button:
               text = "Remove item"
+              enabled << len(card_looper.items) > 0
               clicked::
                 items = card_looper.items[:]
                 items.pop()
@@ -198,8 +219,12 @@ enamldef ContentView(DrawerLayout):
 
   LinearLayout:
     layout_gravity = 'left'
-    TextView:
-      text = "Button"
+    orientation = 'vertical'
+    background_color = '#FFFFFF'
+    Looper:
+      iterable << ["Home", "Models", "Settings", "etc..."]
+      MenuItem:
+        text = loop_item
 
     #CalendarView:
     #  date = long(time.time()*1000)
