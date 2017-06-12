@@ -1,12 +1,16 @@
-#------------------------------------------------------------------------------
-# Copyright (c) 2017, Jairus Martin.
-#
-# Distributed under the terms of the MIT License.
-#
-# The full license is in the file COPYING.txt, distributed with this software.
-#------------------------------------------------------------------------------
+'''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+Created on May 20, 2017
+
+@author: jrm
+'''
 import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.linear_layout import ProxyLinearLayout
 
@@ -17,6 +21,7 @@ LayoutParams = jnius.autoclass('android.view.ViewGroup$LayoutParams')
 LinearLayout = jnius.autoclass('android.widget.LinearLayout')
 LinearLayoutLayoutParams = jnius.autoclass('android.widget.LinearLayout$LayoutParams')
 
+
 class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
     """ An Android implementation of an Enaml ProxyLinearLayout.
 
@@ -25,7 +30,7 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
     widget = Typed(LinearLayout)
 
     #: Layout params constructor for this layout
-    layout_params = LinearLayoutLayoutParams
+    layout_params = set_default(LinearLayoutLayoutParams)
 
     #--------------------------------------------------------------------------
     # Initialization API

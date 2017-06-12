@@ -1,3 +1,14 @@
+'''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+@author jrm
+
+'''
+
 import jnius
 from atom.api import Value, Dict, Long
 from enaml.application import Application, ProxyResolver
@@ -7,6 +18,7 @@ from . import factories
 Activity = jnius.autoclass('android.app.Activity')
 View = jnius.autoclass('android.view.View')
 
+
 class AndroidApplication(Application):
     """ An Android implementation of an Enaml application.
 
@@ -15,7 +27,7 @@ class AndroidApplication(Application):
 
     """
     #: Android Activity
-    activity = Value(Activity) # TODO...
+    activity = Value(Activity)
 
     #: View to display within the activity
     view = Value(View)
@@ -23,8 +35,6 @@ class AndroidApplication(Application):
     #: Callback cache
     _callback_cache = Dict()
     _callback_id = Long()
-
-
 
     def __init__(self, activity):
         """ Initialize a AndroidApplication

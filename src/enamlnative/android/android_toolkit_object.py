@@ -1,13 +1,21 @@
 '''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
 Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 from enaml.widgets.toolkit_object import ProxyToolkitObject
 
-View = jnius.autoclass("android.view.View")
+from jnius import JavaClass, MetaJavaClass, JavaMethod, autoclass
+
+View = autoclass('android.view.View')
+
 
 class AndroidToolkitObject(ProxyToolkitObject):
     """ An Android implementation of an Enaml ProxyToolkitObject.
@@ -93,7 +101,9 @@ class AndroidToolkitObject(ProxyToolkitObject):
         """
         widget = self.widget
         if widget is not None:
-            widget.getParent().removeView(widget)
+            parent = widget.getParent()
+            if parent is not None:
+                parent.removeView(widget)
             del self.widget
         super(AndroidToolkitObject, self).destroy()
 
@@ -116,7 +126,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
 
         Returns
         -------
-        result : QObject or None
+        result : JavaClass or None
             The toolkit widget declared on the declaration parent, or
             None if there is no such parent.
 
@@ -130,7 +140,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
 
         Returns
         -------
-        result : iterable of QObject
+        result : iterable of JavaClass
             The child widgets defined for this object.
 
         """

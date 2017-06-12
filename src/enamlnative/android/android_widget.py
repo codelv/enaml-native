@@ -1,10 +1,14 @@
-#------------------------------------------------------------------------------
-# Copyright (c) 2014, Nucleic Development Team.
-#
-# Distributed under the terms of the Modified BSD License.
-#
-# The full license is in the file COPYING.txt, distributed with this software.
-#------------------------------------------------------------------------------
+'''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+Created on May 20, 2017
+
+@author: jrm
+'''
 import jnius
 
 from atom.api import Typed, Value, Coerced
@@ -13,9 +17,7 @@ from enaml.drag_drop import DropAction
 from enaml.styling import StyleCache
 from enaml.widgets.widget import Feature, ProxyWidget
 from . import focus_registry
-from .android_toolkit_object import AndroidToolkitObject
-
-View = jnius.autoclass('android.view.View')
+from .android_toolkit_object import AndroidToolkitObject, View
 
 class AndroidWidget(AndroidToolkitObject, ProxyWidget):
     """ A Android implementation of an Enaml ProxyWidget.
@@ -519,7 +521,7 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
 
         """
         # 0 - visible, 1 - invisible, 2 - gone
-        self.widget.setVisible(2)
+        self.widget.setVisibility(2)
         #action = self._widget_action
         #if action is not None:
         #    action.setVisible(False)

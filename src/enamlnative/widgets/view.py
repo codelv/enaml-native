@@ -17,6 +17,7 @@ from enaml.core.declarative import d_
 
 from enaml.widgets.widget import Widget, ProxyWidget
 
+
 class ProxyView(ProxyWidget):
     """ The abstract definition of a proxy relative layout object.
 
@@ -24,7 +25,22 @@ class ProxyView(ProxyWidget):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: View)
 
+    def set_background_color(self, color):
+        raise NotImplementedError
+
+    def set_layout_width(self, width):
+        raise NotImplementedError
+
+    def set_layout_height(self, height):
+        raise NotImplementedError
+
     def set_layout_direction(self, direction):
+        raise NotImplementedError
+
+    def set_padding(self, padding):
+        raise NotImplementedError
+
+    def set_margins(self, margins):
         raise NotImplementedError
 
     def set_alpha(self, alpha):
@@ -85,7 +101,7 @@ class View(Widget):
 
     alpha = d_(Int())
 
-    background_color = d_(Int())
+    background_color = d_(Unicode())
 
     bottom = d_(Int())
 
@@ -129,6 +145,10 @@ class View(Widget):
 
     label_for = d_(Int())
 
+    layout_width = d_(Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
+
+    layout_height = d_(Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
+
     layout_direction = d_(Enum('none','inherit','locale','ltr','rtl'))
 
     left = d_(Int())
@@ -137,11 +157,15 @@ class View(Widget):
 
     nested_scrolling_enabled = d_(Bool())
 
+    #: Left, top, right, bottom
+    margins = d_(Tuple(int))
+
     over_scroll_mode = d_(Int())
 
-    padding = d_(Tuple(int,default=(0,0,0,0)))
+    #: Left, top, right, bottom
+    padding = d_(Tuple(int))
 
-    padding_relative = d_(Tuple(int,default=(0,0,0,0)))
+    padding_relative = d_(Tuple(int))
 
     pivot_x = d_(Float())
 
@@ -248,10 +272,13 @@ class View(Widget):
         'important_for_accessibility',
         'keeps_screen_on',
         'label_for',
+        'layout_width',
+        'layout_height',
         'layout_direction',
         'left',
         'long_clickable',
         'nested_scrolling_enabled',
+        'margins',
         'over_scroll_mode',
         'padding',
         'padding_relative',

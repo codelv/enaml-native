@@ -28,30 +28,24 @@ class ProxyTabWidget(ProxyLinearLayout):
     def set_enabled(self, enabled):
         raise NotImplementedError
 
-    def set_hour(self, hour):
+    def set_current_tab(self, index):
         raise NotImplementedError
 
-    def set_minute(self, minute):
-        raise NotImplementedError
-
-    def set_hour_mode(self,mode):
+    def set_strip_enabled(self, enabled):
         raise NotImplementedError
 
 class TabWidget(LinearLayout):
-    """ A simple control for displaying read-only text.
+    """ A tab
 
     """
     #: Set the enabled state of this view.
     enabled = d_(Bool(True))
 
-    #: Sets the currently selected hour using 24-hour time.
-    hour = d_(Int(0))
+    #: Sets the currently selected tab
+    current_tab = d_(Int(0))
 
     #: Sets the currently selected minute.
-    minute = d_(Int(0))
-
-    #: Sets whether this widget displays time in 24-hour mode or 12-hour mode with an AM/PM picker.
-    hour_mode = d_(Enum('24','12'))
+    strip_enabled = d_(Bool(True))
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyTabWidget)
@@ -59,7 +53,7 @@ class TabWidget(LinearLayout):
     #--------------------------------------------------------------------------
     # Observers
     #--------------------------------------------------------------------------
-    @observe('enabled','hour','minute','hour_mode')
+    @observe('enabled','current_tab','strip_enabled')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

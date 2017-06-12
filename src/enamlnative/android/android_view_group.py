@@ -1,29 +1,31 @@
-#------------------------------------------------------------------------------
-# Copyright (c) 2017, Jairus Martin.
-#
-# Distributed under the terms of the MIT License.
-#
-# The full license is in the file COPYING.txt, distributed with this software.
-#------------------------------------------------------------------------------
+'''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+Created on May 20, 2017
+
+@author: jrm
+'''
 import jnius
 from atom.api import Typed
 
 from enamlnative.widgets.view_group import ProxyViewGroup
 
-from .android_widget import AndroidWidget
+from .android_view import AndroidView, LayoutParams
 
 Gravity = jnius.autoclass('android.view.Gravity')
-LayoutParams = jnius.autoclass('android.view.ViewGroup$LayoutParams')
 ViewGroup = jnius.autoclass('android.view.ViewGroup')
 
-class AndroidViewGroup(AndroidWidget, ProxyViewGroup):
+
+class AndroidViewGroup(AndroidView, ProxyViewGroup):
     """ An Android implementation of an Enaml ProxyViewGroup.
 
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(ViewGroup)
-
-    layout_params = Typed(LayoutParams)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -53,24 +55,25 @@ class AndroidViewGroup(AndroidWidget, ProxyViewGroup):
         self.update_layout_params()
 
     def set_layout_gravity(self, gravity):
-        self.update_layout_params()
+        return
+        # params = self.get_layout_params()
+        # params.gravity = getattr(Gravity,d.layout_gravity.upper())
+        # self.update_layout_params()
 
     def update_layout_params(self):
-        d = self.declaration
-        if d.layout_width:
-            layout_width = getattr(LayoutParams,d.layout_width.upper())\
-                if hasattr(LayoutParams,d.layout_width.upper()) else int(d.layout_width)
-        else:
-            layout_width = LayoutParams.MATCH_PARENT
-        if d.layout_height:
-            layout_height = getattr(LayoutParams,d.layout_width.upper())\
-                if hasattr(LayoutParams,d.layout_height.upper()) else int(d.layout_height)
-        else:
-            layout_height = LayoutParams.MATCH_PARENT
-        params = self.layout_params(
-            layout_width,
-            layout_height
-        )
-        #: apparently this doesnt work... FRICK
-        params.gravity = getattr(Gravity,d.layout_gravity.upper())
-        self.widget.setLayoutParams(params)
+        params = self.get_layout_params()
+        # d = self.declaration
+        # if d.layout_width:
+        #     layout_width = getattr(LayoutParams,d.layout_width.upper())\
+        #         if hasattr(LayoutParams,d.layout_width.upper()) else int(d.layout_width)
+        # else:
+        #     layout_width = LayoutParams.MATCH_PARENT
+        # if d.layout_height:
+        #     layout_height = getattr(LayoutParams,d.layout_height.upper())\
+        #         if hasattr(LayoutParams,d.layout_height.upper()) else int(d.layout_height)
+        # else:
+        #     layout_height = LayoutParams.MATCH_PARENT
+        #
+        # #: Clone existing
+        # params = self.layout_params(params)
+        # self.widget.setLayoutParams(params)

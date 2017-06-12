@@ -19,7 +19,7 @@ from .compound_button import CompoundButton, ProxyCompoundButton
 
 
 class ProxyCheckBox(ProxyCompoundButton):
-    """ The abstract definition of a proxy Label object.
+    """ The abstract definition of a proxy CheckBox object.
 
     """
     #: A reference to the Label declaration.
@@ -27,11 +27,11 @@ class ProxyCheckBox(ProxyCompoundButton):
 
 
 class CheckBox(CompoundButton):
-    """ A simple control for displaying read-only text.
+    """ A simple control for displaying a CheckBox.
 
     """
 
-    #: A reference to the ProxyLabel object.
+    #: A reference to the ProxyCheckBox object.
     proxy = Typed(ProxyCheckBox)
 
 

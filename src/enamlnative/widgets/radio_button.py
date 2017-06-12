@@ -10,16 +10,14 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Bool, observe
+    Typed, ForwardTyped
 )
-
-from enaml.core.declarative import d_
 
 from .compound_button import CompoundButton, ProxyCompoundButton
 
 
 class ProxyRadioButton(ProxyCompoundButton):
-    """ The abstract definition of a proxy Label object.
+    """ The abstract definition of a proxy RadioButton object.
 
     """
     #: A reference to the Label declaration.
@@ -27,7 +25,7 @@ class ProxyRadioButton(ProxyCompoundButton):
 
 
 class RadioButton(CompoundButton):
-    """ A simple control for displaying read-only text.
+    """ A simple control for displaying a RadioButton.
 
     """
 

@@ -17,8 +17,9 @@ from enaml.core.declarative import d_
 
 from .view_group import ViewGroup, ProxyViewGroup
 
+
 class ProxyFrameLayout(ProxyViewGroup):
-    """ The abstract definition of a proxy relative layout object.
+    """ The abstract definition of a proxy FrameLayout object.
 
     """
     #: A reference to the Label declaration.
@@ -29,6 +30,7 @@ class ProxyFrameLayout(ProxyViewGroup):
 
     def set_measure_all_children(self, enabled):
         raise NotImplementedError
+
 
 class FrameLayout(ViewGroup):
     """ FrameLayout is a view group that displays
@@ -44,10 +46,10 @@ class FrameLayout(ViewGroup):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyFrameLayout)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Observers
-    #--------------------------------------------------------------------------
-    @observe('foreground_gravity','measure_all_children')
+    # --------------------------------------------------------------------------
+    @observe('foreground_gravity', 'measure_all_children')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 
