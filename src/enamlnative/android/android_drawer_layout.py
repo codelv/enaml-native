@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 import jnius
-from atom.api import Typed
+from atom.api import Typed, Bool
 
 from enamlnative.widgets.drawer_layout import ProxyDrawerLayout
 
@@ -23,14 +23,45 @@ ViewCompat = jnius.autoclass('android.support.v4.view.ViewCompat')
 DrawerLayout = jnius.autoclass('android.support.v4.widget.DrawerLayout')
 DrawerLayoutLayoutParams = jnius.autoclass('android.support.v4.widget.DrawerLayout$LayoutParams')
 
+class DrawerListener(jnius.PythonJavaClass):
+    __javainterfaces__ = ['android/support/v4/widget/DrawerLayout$DrawerListener']
+    __javacontext__ = 'app'
+
+    def __init__(self, handler):
+        self.__handler__ = handler
+        super(DrawerListener, self).__init__()
+
+    @jnius.java_method('(Landroid/view/View;)V')
+    def onDrawerClosed(self, view):
+        self.__handler__.on_drawer_closed(view)
+    
+    @jnius.java_method('(Landroid/view/View;)V')
+    def onDrawerOpened(self, view):
+        self.__handler__.on_drawer_opened(view)
+        
+    @jnius.java_method('(Landroid/view/View;F)V')
+    def onDrawerSlide(self, view, slideOffset):
+        self.__handler__.on_drawer_slide(view, slideOffset)
+    
+    @jnius.java_method('(I)V')
+    def onDrawerStateChanged(self, newState):
+        self.__handler__.on_drawer_state_changed(newState)
+
 class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     """ An Android implementation of an Enaml ProxyDrawerLayout.
 
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(DrawerLayout)
+    
+    #: Save a reference to the drawer listener
+    drawer_listener = Typed(DrawerListener)
 
-    layout_params = DrawerLayoutLayoutParams
+    #: Save reference to the drawer state set by events
+    _opened = Bool(False)
+    
+    def _default_layout_params(self):
+        return DrawerLayoutLayoutParams
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -57,16 +88,45 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
             self.set_scrim_color(d.scrim_color)
         if d.status_bar_background_color:
             self.set_status_bar_background_color(d.status_bar_background_color)
-
+        
     def init_layout(self):
         super(AndroidDrawerLayout, self).init_layout()
         d = self.declaration
-        self.set_opened(d.opened)
+        self.set_opened(d.opened, init=True)
 
-    #--------------------------------------------------------------------------
+        #: Add drawer listener
+        self.drawer_listener = DrawerListener(self)
+        self.widget.addDrawerListener(self.drawer_listener)
+
+    # --------------------------------------------------------------------------
+    # DrawerListener API
+    # --------------------------------------------------------------------------
+    def on_drawer_closed(self, view):
+        self._opened = False
+
+    def on_drawer_opened(self, view):
+        self._opened = True
+
+    def on_drawer_slide(self, view, offset):
+        pass
+    
+    def on_drawer_state_changed(self, state):
+        pass
+
+    def _observe__opened(self, change):
+        d = self.declaration
+        d.opened = self._opened
+
+    # --------------------------------------------------------------------------
     # ProxyDrawerLayout API
-    #--------------------------------------------------------------------------
-    def set_opened(self, opened):
+    # --------------------------------------------------------------------------
+    def set_opened(self, opened, init=False):
+        if not init and (opened == self._opened):
+            # Triggered by user event, ignore
+            return
+        self._opened = opened
+
+        #: Else, triggered from declaration
         d = self.declaration
         view = None
         for c in self.children():
@@ -78,19 +138,19 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
             raise ValueError("DrawerLayout must have a child with layout_gravity==side")
 
         #: Force the view to have the correct layout params
-        _params = view.getLayoutParams()
-        gravity = getattr(Gravity,d.side.upper())
-        params = DrawerLayoutLayoutParams(
-            _params.width,
-            _params.height,
-            gravity
-        )
-        view.setLayoutParams(params)
-
+        if init:
+            _params = view.getLayoutParams()
+            gravity = getattr(Gravity, d.side.upper())
+            params = DrawerLayoutLayoutParams(
+                _params.width,
+                _params.height,
+                gravity
+            )
+            view.setLayoutParams(params)
         if opened:
-            self.widget.openDrawer(view,d.open_animated)
+            self.widget.openDrawer(view, d.open_animated)
         else:
-            self.widget.closeDrawer(view,d.open_animated)
+            self.widget.closeDrawer(view, d.open_animated)
 
     def set_drawer_width(self, width):
         d = self.declaration
