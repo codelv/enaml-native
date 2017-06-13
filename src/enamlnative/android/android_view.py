@@ -45,6 +45,9 @@ class AndroidView(AndroidWidget, ProxyView):
 
     #: Display metrics density
     dp = Float()
+    
+    #: Reference to click listener
+    click_listener = Typed(OnClickListener)
 
     def _default_dp(self):
         if 'dp' not in CACHE:
@@ -97,6 +100,10 @@ class AndroidView(AndroidWidget, ProxyView):
             self.set_margins(d.margins)
         if d.layout_width or d.layout_height:
             self.get_layout_params()
+        if d.clickable:
+            self.click_listener = OnClickListener(self)
+            self.widget.setOnClickListener(self.click_listener)
+            self.set_clickable(d.clickable)
 
     def get_layout_params(self):
         """ Get the layout params for this widget. If none exists,
@@ -127,12 +134,28 @@ class AndroidView(AndroidWidget, ProxyView):
         self.widget.setLayoutParams(params)
 
         return params
+    
+
+    def on_click(self, view):
+        """ Trigger the click
+
+        """
+        d = self.declaration
+        d.clicked()
+
+    # --------------------------------------------------------------------------
+    # ProxyButton API
+    # --------------------------------------------------------------------------
+
 
     #--------------------------------------------------------------------------
     # ProxyView API
     #--------------------------------------------------------------------------
     def set_background_color(self, color):
         self.widget.setBackgroundColor(Color.parseColor(color))
+        
+    def set_clickable(self, clickable):
+        self.widget.setClickable(clickable)    
 
     def set_top(self, top):
         self.widget.setTop(top)

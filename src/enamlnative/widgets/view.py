@@ -24,6 +24,9 @@ class ProxyView(ProxyWidget):
     """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: View)
+    
+    def set_clickable(self, clickable):
+        raise NotImplementedError
 
     def set_background_color(self, color):
         raise NotImplementedError
@@ -108,6 +111,9 @@ class View(Widget):
     camera_distance = d_(Float())
 
     clickable = d_(Bool())
+    
+    #: Called when view is clicked
+    clicked = d_(Event(), writable=False)
 
     clip_bounds = d_(Tuple(int, default=(0, 0, 0, 0)))
 
