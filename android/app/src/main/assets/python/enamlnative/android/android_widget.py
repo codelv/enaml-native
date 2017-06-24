@@ -19,6 +19,7 @@ from enaml.widgets.widget import Feature, ProxyWidget
 from . import focus_registry
 from .android_toolkit_object import AndroidToolkitObject, View
 
+
 class AndroidWidget(AndroidToolkitObject, ProxyWidget):
     """ A Android implementation of an Enaml ProxyWidget.
 
@@ -72,7 +73,8 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
         # then reparented by the status bar. Real top-level widgets must
         # be explicitly shown by calling their .show() method after they
         # are created.
-        if widget.getParent() or not d.visible:
+        #if widget.getParent() or not d.visible:
+        if not d.visible:
             self.set_visible(d.visible)
             
     def destroy(self):

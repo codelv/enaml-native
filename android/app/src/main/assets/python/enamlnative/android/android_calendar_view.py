@@ -14,16 +14,22 @@ from atom.api import Typed
 
 from enamlnative.widgets.calendar_view import ProxyCalendarView
 
-from .android_frame_layout import AndroidFrameLayout
+from .android_frame_layout import AndroidFrameLayout, FrameLayout
+from .bridge import JavaMethod
 
-_CalendarView = jnius.autoclass('android.widget.CalendarView')
+class CalendarView(FrameLayout):
+    __javaclass__ = 'android.widget.CalendarView'
+    setDate = JavaMethod('long')
+    setMinDate = JavaMethod('long')
+    setMaxDate = JavaMethod('long')
+    setFirstDayOfWeek = JavaMethod('int')
 
 class AndroidCalendarView(AndroidFrameLayout, ProxyCalendarView):
     """ An Android implementation of an Enaml ProxyFrameLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_CalendarView)
+    widget = Typed(CalendarView)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -32,7 +38,7 @@ class AndroidCalendarView(AndroidFrameLayout, ProxyCalendarView):
         """ Create the underlying label widget.
 
         """
-        self.widget = _CalendarView(self.get_context())
+        self.widget = CalendarView(self.get_context())
 
     def init_widget(self):
         """ Initialize the underlying widget.

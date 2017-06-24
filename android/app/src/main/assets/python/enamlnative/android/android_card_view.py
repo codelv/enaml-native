@@ -14,12 +14,23 @@ from atom.api import Typed
 
 from enamlnative.widgets.card_view import ProxyCardView
 
-from .android_frame_layout import AndroidFrameLayout
+from .android_frame_layout import AndroidFrameLayout, FrameLayout
+from .bridge import JavaMethod
 
-Color = jnius.autoclass('android.graphics.Color')
-#: You must add "compile 'com.android.support:cardview-v7:21.0.+'" to build.gradle
-CardView = jnius.autoclass('android.support.v7.widget.CardView')
 
+class CardView(FrameLayout):
+    """
+        Note: You must add "compile 'com.android.support:cardview-v7:21.0.+'"
+              to build.gradle for this to work!
+    """
+    __javaclass__ = 'android.support.v7.widget.CardView'
+    setCardBackgroundColor = JavaMethod('android.graphics.Color')
+    setCardElevation = JavaMethod('float')
+    setContentPadding = JavaMethod('int','int','int','int')
+    setMaxCardElevation = JavaMethod('float')
+    setPreventCornerOverlap = JavaMethod('boolean')
+    setRadius = JavaMethod('float')
+    setUseCompatPadding = JavaMethod('boolean')
 
 class AndroidCardView(AndroidFrameLayout, ProxyCardView):
     """ An Android implementation of an Enaml ProxyCardView.
@@ -62,7 +73,7 @@ class AndroidCardView(AndroidFrameLayout, ProxyCardView):
     # ProxyCardView API
     # --------------------------------------------------------------------------
     def set_card_background_color(self, color):
-        self.widget.setCardBackgroundColor(Color.parseColor(color))
+        self.widget.setCardBackgroundColor(color)#Color.parseColor(color))
 
     def set_card_elevation(self, elevation):
         self.widget.setCardElevation(elevation)
@@ -70,7 +81,8 @@ class AndroidCardView(AndroidFrameLayout, ProxyCardView):
     def set_content_padding(self, padding):
         dp = self.dp
         l, t, r, b = padding
-        self.widget.setContentPadding(l*dp,t*dp,r*dp,b*dp)
+        self.widget.setContentPadding(int(l*dp), int(t*dp),
+                                      int(r*dp), int(b*dp))
 
     def set_prevent_corner_overlap(self, enabled):
         self.widget.setPreventCornerOverlap(enabled)

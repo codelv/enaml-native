@@ -10,13 +10,39 @@ The full license is in the file COPYING.txt, distributed with this software.
 '''
 
 import jnius
-from atom.api import Value, Dict, Long
+import msgpack
+from atom.api import List, Value, Dict, Int, Typed
 from enaml.application import Application, ProxyResolver
-
+from twisted.internet import reactor
 from . import factories
 
-Activity = jnius.autoclass('android.app.Activity')
-View = jnius.autoclass('android.view.View')
+from .bridge import msgpack_encoder
+
+
+class AppEventListener(jnius.PythonJavaClass):
+    __javainterfaces__ = ['com/enaml/MainActivity$AppEventListener']
+    __javacontext__ = 'app'
+
+    def __init__(self, handler):
+        self.__handler__ = handler
+        super(AppEventListener, self).__init__()
+
+    @jnius.java_method('([B)V')
+    def onEvents(self, data):
+        self.__handler__.on_events(data)
+
+    @jnius.java_method('()V')
+    def onResume(self):
+        self.__handler__.on_resume()
+
+    @jnius.java_method('()V')
+    def onPause(self):
+        self.__handler__.on_pause()
+
+    @jnius.java_method('()V')
+    def onStop(self):
+        self.__handler__.on_stop()
+
 
 class AndroidApplication(Application):
     """ An Android implementation of an Enaml application.
@@ -26,16 +52,22 @@ class AndroidApplication(Application):
 
     """
     #: Android Activity
-    activity = Value(Activity) # TODO...
+    activity = Value(object)
 
     #: View to display within the activity
-    view = Value(View)
+    view = Value(object)
 
-    #: Callback cache
-    _callback_cache = Dict()
-    _callback_id = Long()
+    #: Save reference to the event listener
+    listener = Typed(AppEventListener)
 
+    #: Events to send to Java
+    _bridge_queue = List()
 
+    #: Delay to wait before sending events
+    _bridge_timeout = Int(100)
+
+    #: Count of pending send calls
+    _bridge_pending = Int(0)
 
     def __init__(self, activity):
         """ Initialize a AndroidApplication
@@ -45,17 +77,21 @@ class AndroidApplication(Application):
         self.activity = activity
         self.resolver = ProxyResolver(factories=factories.ANDROID_FACTORIES)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Abstract API Implementation
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def start(self):
         """ Start the application's main event loop.
 
         """
         activity = self.activity
+        self.listener = AppEventListener(self)
+        activity.setAppEventListener(self.listener)
+        #assert view, "View does not exist!"
+        #activity.setView(view)
         view = self.get_view()
-        assert view, "View does not exist!"
-        activity.setView(view)
+        self.send_event('showView')
+        reactor.run()
 
     def get_view(self):
         """ Prepare the view
@@ -72,23 +108,36 @@ class AndroidApplication(Application):
         """ Stop the application's main event loop.
 
         """
-        activity = self.activity
-        activity.exit()
+        reactor.stop()
 
-    def invoke_callback(self,callback_id):
-        """ Invoke the call with the given id.
+    def send_event(self, name, *args):
+        """ Send an event to Java.
+            This call is queued and batched.
 
-        Parameters
+       Parameters
         ----------
-        callback_id : long
-            The id of a previously scheduled call.
-
+        name : str
+            The event name to be processed by MainActivity.processMessages.
+        *args: args
+            The arguments required by the event.
 
         """
-        if callback_id in self._callback_cache:
-            callback,args,kwargs = self._callback_cache[callback_id]
-            callback(*args,**kwargs)
-            del self._callback_cache[callback_id]
+        self._bridge_pending += 1
+        self._bridge_queue.append((name, args))
+        self.timed_call(self._bridge_timeout, self._bridge_send)
+
+    def _bridge_send(self):
+        """  Send the events over the bridge to be processed by Java
+
+        """
+        self._bridge_pending -= 1
+        if self._bridge_pending == 0:
+            print self._bridge_queue
+            self.activity.processEvents(
+                msgpack.dumps(self._bridge_queue)
+                              #object_hook=msgpack_encoder)
+            )
+            self._bridge_queue = []
 
     def deferred_call(self, callback, *args, **kwargs):
         """ Invoke a callable on the next cycle of the main event loop
@@ -104,7 +153,7 @@ class AndroidApplication(Application):
             the callback.
 
         """
-        self.timed_call(0,callback,*args,**kwargs)
+        reactor.callWhenRunning(callback, *args, **kwargs)
 
     def timed_call(self, ms, callback, *args, **kwargs):
         """ Invoke a callable on the main event loop thread at a
@@ -124,10 +173,7 @@ class AndroidApplication(Application):
             the callback.
 
         """
-        self._callback_id += 1
-        self._callback_cache[self._callback_id] = (callback,args,kwargs)
-        activity = self.activity
-        activity.scheduleCallback(self._callback_id,ms)
+        reactor.callLater(ms/1000.0, callback, *args, **kwargs)
 
     def is_main_thread(self):
         """ Indicates whether the caller is on the main gui thread.
@@ -138,15 +184,20 @@ class AndroidApplication(Application):
             True if called from the main gui thread. False otherwise.
 
         """
-        return True
+        return False
 
-    def create_mime_data(self):
-        """ Create a new mime data object to be filled by the user.
+    # --------------------------------------------------------------------------
+    # AppEventListener API Implementation
+    # --------------------------------------------------------------------------
+    def on_events(self, data):
+        pass
 
-        Returns
-        -------
-        result : MimeData
-            A concrete implementation of the MimeData class.
+    def on_pause(self):
+        pass
 
-        """
-        return {}
+    def on_resume(self):
+        pass
+
+    def on_stop(self):
+        pass
+

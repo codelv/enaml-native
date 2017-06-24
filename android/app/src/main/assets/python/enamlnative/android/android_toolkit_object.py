@@ -12,9 +12,36 @@ Created on May 20, 2017
 from atom.api import Typed
 from enaml.widgets.toolkit_object import ProxyToolkitObject
 
-from jnius import JavaClass, MetaJavaClass, JavaMethod, autoclass
+from .bridge import JavaBridgeObject, JavaMethod
 
-View = autoclass('android.view.View')
+
+class View(JavaBridgeObject):
+    __javaclass__ = 'android.view.View'
+
+    addView = JavaMethod('android.view.View')
+    setOnClickListener = JavaMethod('android.view.View.OnClickListener')
+    setLayoutParams = JavaMethod('android.view.ViewGroup.LayoutParams')
+    setBackgroundColor = JavaMethod('android.graphics.Color')
+    setClickable = JavaMethod('boolean')
+    setTop = JavaMethod('int')
+    setBottom = JavaMethod('int')
+    setLeft = JavaMethod('int')
+    setRight = JavaMethod('int')
+    setLayoutDirection = JavaMethod('int')
+    setPadding = JavaMethod('int','int','int','int')
+    setMargins = JavaMethod('int','int','int','int')
+    setX = JavaMethod('int')
+    setY = JavaMethod('int')
+    setZ = JavaMethod('int')
+    setMaximumHeight = JavaMethod('int')
+    setMaximumWidth = JavaMethod('int')
+    setMinimumHeight = JavaMethod('int')
+    setMinimumWidth = JavaMethod('int')
+    setEnabled = JavaMethod('boolean')
+    setTag = JavaMethod('java.lang.Object')
+    setToolTipText = JavaMethod('java.lang.CharSequence')
+    setVisibility = JavaMethod('int')
+    removeView = JavaMethod('android.view.View')
 
 
 class AndroidToolkitObject(ProxyToolkitObject):
@@ -74,7 +101,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
 
         """
         from .app import AndroidApplication
-        return AndroidApplication.instance().activity
+        return AndroidApplication.instance()
 
     #--------------------------------------------------------------------------
     # ProxyToolkitObject API
@@ -101,7 +128,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
         """
         widget = self.widget
         if widget is not None:
-            parent = widget.getParent()
+            parent = self.parent_widget()
             if parent is not None:
                 parent.removeView(widget)
             del self.widget

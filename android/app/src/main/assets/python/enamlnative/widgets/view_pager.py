@@ -10,54 +10,55 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Int, Enum, Event, observe, set_default
+    Typed, ForwardTyped, Int,  observe
 )
 
 from enaml.core.declarative import d_
 
 from .view_group import ViewGroup, ProxyViewGroup
 
-class ProxyRelativeLayout(ProxyViewGroup):
-    """ The abstract definition of a proxy relative layout object.
+
+class ProxyViewPager(ProxyViewGroup):
+    """ The abstract definition of a proxy ViewPager object.
 
     """
-    #: A reference to the Label declaration.
-    declaration = ForwardTyped(lambda: RelativeLayout)
+    #: A reference to the ViewPager declaration.
+    declaration = ForwardTyped(lambda: ViewPager)
 
-    def set_gravity(self, gravity):
+    def set_current_index(self, index):
         raise NotImplementedError
 
-    def set_horizontal_gravity(self, gravity):
+    def set_offscreen_page_limit(self, limit):
         raise NotImplementedError
 
-    def set_vertical_gravity(self, gravity):
+    def set_page_margin(self, margin):
         raise NotImplementedError
+    
 
-class RelativeLayout(ViewGroup):
-    """ RelativeLayout is a view group that displays
-        child views in relative positions.
+class ViewPager(ViewGroup):
+    """ Layout manager that allows the user to flip left and right through pages of data.
 
     """
-    #: Describes how the child views are positioned.
-    #: Defaults to Gravity.START | Gravity.TOP.
-    gravity = d_(Int())
+    #: Set the currently selected page.
+    current_index = d_(Int())
 
-    #:
-    horizontal_gravity = d_(Int())
+    #: Set the number of pages that should be retained to either side 
+    #: of the current page in the view hierarchy in an idle state.
+    offscreen_page_limit = d_(Int())
 
-    #:
-    vertical_gravity = d_(Int())
+    #: Set the margin between pages.
+    page_margin = d_(Int(-1))
 
     #: A reference to the ProxyLabel object.
-    proxy = Typed(ProxyRelativeLayout)
+    proxy = Typed(ProxyViewPager)
 
     #--------------------------------------------------------------------------
     # Observers
     #--------------------------------------------------------------------------
-    @observe('gravity','horizontal_gravity','vertical_gravity')
+    @observe('current_index','offscreen_page_limit','page_margin')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 
         """
         # The superclass implementation is sufficient.
-        super(RelativeLayout, self)._update_proxy(change)
+        super(ViewPager, self)._update_proxy(change)

@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Unicode, Enum, Event, observe, set_default
+    Typed, ForwardTyped, Unicode, Int, Enum, Event, observe, set_default
 )
 
 from enaml.core.declarative import d_
@@ -30,7 +30,8 @@ class ProxyLinearLayout(ProxyViewGroup):
 
     def set_gravity(self, gravity):
         raise NotImplementedError
-    
+
+
 class LinearLayout(ViewGroup):
     """ A simple control for displaying read-only text.
 
@@ -39,11 +40,12 @@ class LinearLayout(ViewGroup):
     orientation = d_(Enum('horizontal', 'vertical'))
 
     #: View gravity
-    gravity = d_(Enum('top', 'left', 'right',
-                      'bottom','center',
-                      'end','start', 'no_gravity',
-                      'fill_horizontal'))
-    
+    gravity = d_(Int())
+    # Enum('top', 'left', 'right',
+    #                   'bottom','center',
+    #                   'end','start', 'no_gravity',
+    #                   'fill_horizontal'))
+    #
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyLinearLayout)

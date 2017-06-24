@@ -14,12 +14,18 @@ from atom.api import Typed, set_default
 
 from enamlnative.widgets.linear_layout import ProxyLinearLayout
 
-from .android_view_group import AndroidViewGroup
+from .android_view_group import AndroidViewGroup, ViewGroup
+from .bridge import JavaMethod
 
-Gravity = jnius.autoclass('android.view.Gravity')
-LayoutParams = jnius.autoclass('android.view.ViewGroup$LayoutParams')
-LinearLayout = jnius.autoclass('android.widget.LinearLayout')
-LinearLayoutLayoutParams = jnius.autoclass('android.widget.LinearLayout$LayoutParams')
+#Gravity = jnius.autoclass('android.view.Gravity')
+#LayoutParams = jnius.autoclass('android.view.ViewGroup$LayoutParams')
+#LinearLayout = jnius.autoclass('android.widget.LinearLayout')
+#LinearLayoutLayoutParams = jnius.autoclass('android.widget.LinearLayout$LayoutParams')
+
+class LinearLayout(ViewGroup):
+    __javaclass__ = 'android.widget.LinearLayout'
+    setOrientation = JavaMethod('int')
+    setGravity = JavaMethod('int')
 
 
 class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
@@ -30,7 +36,7 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
     widget = Typed(LinearLayout)
 
     #: Layout params constructor for this layout
-    layout_params = set_default(LinearLayoutLayoutParams)
+    #layout_params = set_default(LinearLayoutLayoutParams)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -61,5 +67,5 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
         self.widget.setOrientation(0 if orientation=='horizontal' else 1)
 
     def set_gravity(self, gravity):
-        g = getattr(Gravity,gravity.upper())
-        self.widget.setGravity(g)
+        #g = getattr(Gravity,gravity.upper())
+        self.widget.setGravity(gravity)

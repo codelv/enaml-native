@@ -1,0 +1,13 @@
+from enamlnative.widgets.api import *
+
+
+enamldef ContentView(ScrollView):
+    background_color = '#EEEEEE'
+
+    LinearLayout:
+        orientation = 'vertical'
+        padding = (10,10,10,10)
+        CardView:
+            content_padding = (10,10,10,10)
+            TextView:
+                text = "Hello"

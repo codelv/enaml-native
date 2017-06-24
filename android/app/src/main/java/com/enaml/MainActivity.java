@@ -1,4 +1,4 @@
-package com.jventura.pyapp;
+package com.enaml;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -10,37 +10,48 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.util.Log;
 
+import com.jventura.pyapp.R;
 import com.jventura.pybridge.AssetExtractor;
 import com.jventura.pybridge.PyBridge;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.msgpack.core.MessageBufferPacker;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
+import org.msgpack.value.Value;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
+
+
     // Reference to the activity so it can be accessed from the python interpreter
     public static MainActivity mActivity = null;
 
     // Class name to pass to python for loading
-    private final String mActivityId = "com.jventura.pyapp.MainActivity";
+    private final String mActivityId = "com.enaml.MainActivity";
 
     // Assets version
-    public final int mAssetsVersion = 1;
+    public final int mAssetsVersion = 2;
     public final boolean mAssetsAlwaysOverwrite = true; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
     // When the view is loaded from python
     private FrameLayout mContentView;
     private View mLoadingView;
+    private UiManager mUiManager;
     private int mShortAnimationDuration = 300;
 
     // Handler to hook python into the Android application event loop
     private final Handler mCallbackHandler = new Handler();
+
+    private AppEventListener mAppEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,15 +59,16 @@ public class MainActivity extends AppCompatActivity {
 
         // Save reference so python can access it
         mActivity = this;
+        mUiManager = new UiManager(this);
 
         // Show loading screen
         setContentView(R.layout.activity_main);
 
         // Save views for animation when loading is complete
         mContentView = (FrameLayout) findViewById(R.id.contentView);
-        mLoadingView = (View) findViewById(R.id.loadingView);
+        mLoadingView = findViewById(R.id.loadingView);
 
-        // Load python in the background
+        // Extract and start python in the background
         (new PythonTask()).execute("python");
     }
 
@@ -79,20 +91,19 @@ public class MainActivity extends AppCompatActivity {
                 assetExtractor.removeAssets(path);
                 assetExtractor.copyAssets(path);
                 assetExtractor.setAssetsVersion(mAssetsVersion);
-            } else {
-                // Delay to show loading?
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    // Don't care
-                }
             }
 
             // Start the Python interpreter
             publishProgress("Initializing... Please wait.");
 
             // Get the extracted assets directory
-            return assetExtractor.getAssetsDataDir() + path;
+            String pythonPath = assetExtractor.getAssetsDataDir() + path;
+
+            // Initialize python
+            // Note: This must be done in the UI thread!
+            PyBridge.start(pythonPath);
+
+            return pythonPath;
         }
 
         /**
@@ -101,13 +112,15 @@ public class MainActivity extends AppCompatActivity {
          * @param result
          */
         protected void onPostExecute(String pythonPath) {
-            JSONObject result = null;
-
-            // Initialize python
-            // Note: This must be done in the UI thread!
-            PyBridge.start(pythonPath);
-
+            /*
             try {
+
+                JSONObject json = new JSONObject();
+                json.put("method", "version");
+                result = PyBridge.call(json);
+                TextView textView = (TextView) findViewById(R.id.textView);
+                textView.setText(result.getString("result"));
+
                 // Load the View
                 JSONObject json = new JSONObject();
                 JSONObject params = new JSONObject();
@@ -133,6 +146,8 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 showErrorMessage(e);
             }
+            */
+
         }
 
         /**
@@ -148,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
                 textView.setText(message);
 
                 // Hide progress bar
-                View progressBar = (View) findViewById(R.id.progressBar);
+                View progressBar = findViewById(R.id.progressBar);
                 progressBar.setVisibility(View.INVISIBLE);
             }
         }
@@ -180,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     public void setView(View view) {
+        Log.i(TAG,"View loaded!");
         mContentView.addView(view);
 
         // Set the content view to 0% opacity but visible, so that it is visible
@@ -209,23 +225,162 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     /**
-     * Have android call a python callback after a given delay.
+     * Interface for python to pass it's calls in a structured manner
+     * for Java to actually call.  For instance
      *
-     * Used so python can hook into the Activity's event loop without
-     * blocking.
      *
-     * @param callbackId: Python callbackId to invoke
-     * @param delay
+     * In python, using jnius
+     *
+     * class TextView(JavaProxyClass):
+     *      __javaclass__ = `android.widgets.TextView`
+     *
+     * #: etc.. for other widgets
+     *
+     * v = LinearLayout()
+     *
+     * tv = TextView()
+     * tv.setText("text")
+     *
+     * v.addView(tv)
+     *
+     * maps to:
+     * [
+     *  #: Argument of context is implied
+     *  ("createView", ("android.widgets.LinearLayout",0x01)),
+     *  ("createView", ("android.widgets.TextView",0x02)),
+     *  ("updateView", (0x02,"setText","text")),
+     *  ("updateView", (0x01,"addView",{"ref":0x01})
+     * ]
+     *
+     * @param view
      */
-    public boolean scheduleCallback(long callbackId, long delay) {
-        return mCallbackHandler.postDelayed(
-            new PyBridge.PythonCallback(callbackId),delay);
+    public void processEvents(byte[] data) {
+        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(data);
+        try {
+            int eventCount = unpacker.unpackArrayHeader();
+            for (int i=0; i<eventCount; i++) {
+                int eventTuple = unpacker.unpackArrayHeader(); // Unpack event tuple
+                String eventType = unpacker.unpackString(); // first value
+                int paramCount = unpacker.unpackArrayHeader();
+
+                if (eventType.equals("createView")) {
+                    String viewClass = unpacker.unpackString();
+                    int viewId = unpacker.unpackInt();
+                    runOnUiThread(()->{mUiManager.createView(viewClass, viewId);});
+                } else if (eventType.equals("updateView")) {
+                    int viewId = unpacker.unpackInt();
+                    String viewMethod = unpacker.unpackString();
+                    int argCount = unpacker.unpackArrayHeader();
+                    Value[] args = new Value[argCount];
+                    for (int j=0; j<argCount; j++) {
+                        Value v = unpacker.unpackValue();
+                        args[j] = v;
+                    }
+                    runOnUiThread(()->{mUiManager.updateView(viewId, viewMethod,  args);});
+
+                } else if (eventType.equals("showView")) {
+                    runOnUiThread(()->{setView(mUiManager.getRootView());});
+                }
+                /*unpacker.unp
+                try {
+                    JSONObject event = events.getJSONObject(i);
+                    String method = event.getString("method");
+                    JSONArray params = event.getJSONArray("params");
+                    if (method.equals("createView")) {
+                        String viewClass = params.getString(0);
+                        int viewId = params.getInt(1);
+                        mUiManager.createView(viewClass, viewId);
+                    } else if (method.equals("updateView")) {
+                        int viewId = params.getInt(0);
+                        String viewMethod = params.getString(1);
+                        mUiManager.updateView(viewId, viewMethod, params);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                */
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Post an event to the app listener
+     */
+    public void postEvents(MessageBufferPacker events) {
+        if (mAppEventListener!=null) {
+            mAppEventListener.onEvents(events.toByteArray());
+        }
+    }
+
+
+    /**
+     * Interface for python to listen to events occuring in native widgets. All
+     * events will be batched and called in onEvent or onEvents.
+     */
+    public interface AppEventListener {
+        /**
+         * All widgets created that have listeners will batch their events and dispatch
+         * them to the python interpreter here.
+         * @param event
+         */
+        void onEvents(byte[] data);
+
+        /**
+         * Called when the Activity is resumed from pause
+         */
+        void onResume();
+
+        /**
+         * Called when the Activity is paused
+         */
+        void onPause();
+
+        /**
+         * Called when the Activity is stopped. Do any cleanup
+         * and handling shutdown here.
+         */
+        void onStop();
+
+    }
+
+
+    /**
+     * Set the app event listener to use. Meant to be used from python
+     * so it can receive events from java.
+     * @param listener
+     */
+    public void setAppEventListener(AppEventListener listener) {
+        mAppEventListener = listener;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mAppEventListener!=null) {
+            mAppEventListener.onResume();
+        }
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mAppEventListener!=null) {
+            mAppEventListener.onPause();
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        if (mAppEventListener!=null) {
+            mAppEventListener.onStop();
+        }
         PyBridge.stop();
     }
 }

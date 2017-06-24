@@ -17,7 +17,7 @@ from enamlnative.widgets.view import ProxyView
 from .android_widget import AndroidWidget, View
 
 
-Color = jnius.autoclass('android.graphics.Color')
+#Color = jnius.autoclass('android.graphics.Color')
 LayoutParams = jnius.autoclass('android.view.ViewGroup$LayoutParams')
 MarginLayoutParams = jnius.autoclass('android.view.ViewGroup$MarginLayoutParams')
 LayoutDirection = jnius.autoclass('android.util.LayoutDirection')
@@ -36,6 +36,7 @@ class OnClickListener(jnius.PythonJavaClass):
 
 CACHE = {}
 
+
 class AndroidView(AndroidWidget, ProxyView):
     """ An Android implementation of an Enaml ProxyView.
 
@@ -45,10 +46,13 @@ class AndroidView(AndroidWidget, ProxyView):
 
     #: Display metrics density
     dp = Float()
+    
+    #: Reference to click listener
+    click_listener = Typed(OnClickListener)
 
     def _default_dp(self):
         if 'dp' not in CACHE:
-            CACHE['dp'] = self.get_context().getResources().getDisplayMetrics().density
+            CACHE['dp'] = 1.0#self.get_context().getResources().getDisplayMetrics().density
         return CACHE['dp']
 
     #: Default layout params
@@ -97,12 +101,17 @@ class AndroidView(AndroidWidget, ProxyView):
             self.set_margins(d.margins)
         if d.layout_width or d.layout_height:
             self.get_layout_params()
+        if d.clickable:
+            self.click_listener = OnClickListener(self)
+            self.widget.setOnClickListener(self.click_listener)
+            self.set_clickable(d.clickable)
 
     def get_layout_params(self):
         """ Get the layout params for this widget. If none exists,
             set the layout params to an instance of ViewGroup.MarginLayoutParams
 
         """
+        return  #: TODO: implement
         #: Try to get existing
         params = self.widget.getLayoutParams()
         if params:
@@ -127,12 +136,23 @@ class AndroidView(AndroidWidget, ProxyView):
         self.widget.setLayoutParams(params)
 
         return params
+    
+
+    def on_click(self, view):
+        """ Trigger the click
+
+        """
+        d = self.declaration
+        d.clicked()
 
     #--------------------------------------------------------------------------
     # ProxyView API
     #--------------------------------------------------------------------------
     def set_background_color(self, color):
-        self.widget.setBackgroundColor(Color.parseColor(color))
+        self.widget.setBackgroundColor(color)
+        
+    def set_clickable(self, clickable):
+        self.widget.setClickable(clickable)    
 
     def set_top(self, top):
         self.widget.setTop(top)
@@ -160,12 +180,14 @@ class AndroidView(AndroidWidget, ProxyView):
     def set_margins(self, margins):
         dp = self.dp
         l, t, r, b = margins
-        self.get_layout_params().setMargins(l*dp,t*dp,r*dp,b*dp)
+        self.get_layout_params().setMargins(int(l*dp), int(t*dp),
+                                            int(r*dp), int(b*dp))
 
     def set_padding(self, padding):
         dp = self.dp
         l, t, r, b = padding
-        self.widget.setPadding(l*dp,t*dp,r*dp,b*dp)
+        self.widget.setPadding(int(l*dp), int(t*dp),
+                               int(r*dp), int(b*dp))
 
     def set_x(self, x):
         self.widget.setX(x)

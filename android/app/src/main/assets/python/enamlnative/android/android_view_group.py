@@ -14,10 +14,13 @@ from atom.api import Typed
 
 from enamlnative.widgets.view_group import ProxyViewGroup
 
-from .android_view import AndroidView, LayoutParams
+from .android_view import AndroidView, View
 
 Gravity = jnius.autoclass('android.view.Gravity')
-ViewGroup = jnius.autoclass('android.view.ViewGroup')
+
+
+class ViewGroup(View):
+    __javaclass__ = 'android.view.ViewGroup'
 
 
 class AndroidViewGroup(AndroidView, ProxyViewGroup):
@@ -27,9 +30,9 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
     #: A reference to the widget created by the proxy.
     widget = Typed(ViewGroup)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying label widget.
 
@@ -45,9 +48,9 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
         if d.layout_width or d.layout_height or d.layout_gravity:
             self.update_layout_params()
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # ProxyViewGroup API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_layout_width(self, width):
         self.update_layout_params()
 

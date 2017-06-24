@@ -14,10 +14,22 @@ from atom.api import Typed
 
 from enamlnative.widgets.text_view import ProxyTextView
 
-from .android_view import AndroidView, Color
+from .android_view import AndroidView, View
+from .bridge import JavaMethod
 
-Typeface = jnius.autoclass('android.graphics.Typeface')
-TextView = jnius.autoclass('android.widget.TextView')
+
+class TextView(View):
+    __javaclass__ = 'android.widget.TextView'
+    setAllCaps = JavaMethod('boolean')
+    setAutoLinkMask = JavaMethod('int')
+    setText = JavaMethod('java.lang.CharSequence')
+    setTextColor = JavaMethod('android.graphics.Color')
+    setHighlightColor = JavaMethod('android.graphics.Color')
+    setLinkTextColor = JavaMethod('android.graphics.Color')
+    setTextSize = JavaMethod('float')
+    setTypeface = JavaMethod('android.graphics.Typeface','int')
+    setLines = JavaMethod('int')
+    setMaxLines = JavaMethod('int')
 
 class TextWatcher(jnius.PythonJavaClass):
     __javainterfaces__ = ['android/text/TextWatcher']
@@ -102,24 +114,30 @@ class AndroidTextView(AndroidView, ProxyTextView):
 
     def update_font(self):
         d = self.declaration
-        style = getattr(Typeface, d.font_style.upper() or 'NORMAL')
-        tf = Typeface.create(d.font_family or None, style)
-        self.widget.setTypeface(tf)
+        font_style = {
+            'bold':1,
+            'bold_italic':3,
+            'normal':0,
+            'italic':2
+        }[d.font_style or 'normal']
+        #style = getattr(Typeface, d.font_style.upper() or 'NORMAL')
+        #tf = Typeface.create(d.font_family or None, style)
+        self.widget.setTypeface(d.font_family, font_style)#, d.font_style)
 
     def set_text(self, text):
         """ Set the text in the widget.
 
         """
-        self.widget.setText(text, 0, len(text))
+        self.widget.setText(text)#, 0, len(text))
 
     def set_text_color(self, color):
-        self.widget.setTextColor(Color.parseColor(color))
+        self.widget.setTextColor(color)#Color.parseColor(color))
 
     def set_highlight_color(self, color):
-        self.widget.setHighlightColor(Color.parseColor(color))
+        self.widget.setHighlightColor(color)#Color.parseColor(color))
 
     def set_link_color(self, color):
-        self.widget.setLinkTextColor(Color.parseColor(color))
+        self.widget.setLinkTextColor(color)#Color.parseColor(color))
 
     def set_text_size(self, size):
         self.widget.setTextSize(size)

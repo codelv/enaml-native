@@ -14,9 +14,14 @@ from atom.api import Typed
 
 from enamlnative.widgets.frame_layout import ProxyFrameLayout
 
-from .android_view_group import AndroidViewGroup
+from .android_view_group import AndroidViewGroup, ViewGroup
 
-FrameLayout = jnius.autoclass('android.widget.FrameLayout')
+from .bridge import JavaMethod
+
+class FrameLayout(ViewGroup):
+    __javaclass__ = 'android.widget.FrameLayout'
+    setForegroundGravity = JavaMethod('int')
+    setMeasureAllChildren = JavaMethod('boolean')
 
 
 class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):

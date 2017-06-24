@@ -11,13 +11,58 @@ Forked from https://github.com/joaoventura/pybridge
 @author joaoventura
 @author: jrm
 '''
-
-import time
+### Comment out to disable profiling
+# import cProfile
+# pr = cProfile.Profile()
+# pr.enable()
+#
+# shared = {'pr':pr}
+### End profiling
 import sys
-import json
+import jnius
 import traceback
+import msgpack
 
-shared = {}
+def main():
+    """ Called by PyBridge.start()
+    """
+    import enaml
+    from enamlnative.android.app import AndroidApplication
+    MainActivity = jnius.autoclass('com.enaml.MainActivity')
+    app = AndroidApplication(MainActivity.mActivity)
+
+    from enamlnative.android.bridge import JavaBridgeObject, JavaMethod
+
+    # class View(JavaBridgeObject):
+    #     __javaclass__ = 'android.view.View'
+    #     addView = JavaMethod('android.view.View')
+    #     removeView = JavaMethod('android.view.View')
+    #
+    # class ScrollView(View):
+    #     __javaclass__ = 'android.widget.ScrollView'
+    #
+    # class LinearLayout(View):
+    #     __javaclass__ = 'android.widget.LinearLayout'
+    #     setOrientation = JavaMethod('int')
+    #
+    # class TextView(View):
+    #     __javaclass__ = 'android.widget.TextView'
+    #     setText = JavaMethod('java.lang.CharSequence')
+    #
+    # root = ScrollView(app)
+    # layout = LinearLayout(app)
+    # layout.setOrientation(1)
+    # root.addView(layout)
+    # for i in range(1000):
+    #     tv = TextView(app)
+    #     tv.setText("Widget {}".format(i))
+    #     layout.addView(tv)
+    with enaml.imports():
+        from test import ContentView
+        app.view = ContentView()
+
+    app.start()
+
 
 def router(args):
     """
@@ -26,9 +71,9 @@ def router(args):
     :param args: JSON arguments
     :return: JSON response
     """
-    request = json.loads(args)
+    request = msgpack.loads(args)
     response = handle(request)
-    return json.dumps(response)
+    return msgpack.dumps(response)
 
 def handle(request):
     """ Handle a json-rpc 2.0 request
@@ -66,39 +111,17 @@ def version():
 
 def load(activity):
     """ Get and load the view """
-    ### Comment out to disable profiling
-    import cProfile
-    pr = cProfile.Profile()
-    pr.enable()
-    shared['pr'] = pr
-    ### End profiling
-
-
-    start_time = time.time()
-    print "Start {}".format(start_time)
     import jnius
-    print "Load jnius {}s".format(time.time()-start_time)
     import enaml
-    print "Load enaml {}s".format(time.time()-start_time)
     from atom.api import Atom
-    print "Load atom {}s".format(time.time()-start_time)
-    
     from enamlnative.android.app import AndroidApplication
-    print "Import AndroidApp {}s".format(time.time()-start_time)
-
     MainActivity = jnius.autoclass(activity)
-    print "Create MainActiivty {}s".format(time.time()-start_time)
-
     app = AndroidApplication(MainActivity.mActivity)
-    print "Create AndroidApp {}s".format(time.time()-start_time)
 
     #: Set the view
     with enaml.imports():
-        print "Within imports {}s".format(time.time()-start_time)
         from view import ContentView
-    print "Import View {}s".format(time.time()-start_time)
     app.view = ContentView()
-    print "Created View {}s".format(time.time()-start_time)
 
 def start():
     """ Display the view """
@@ -110,10 +133,11 @@ def start():
     if pr:
         pr.disable()
         import pstats, StringIO
-        s = StringIO.StringIO()
-        ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
-        ps.print_stats()
-        print s.getvalue()
+        for sort_by in ['cumulative', 'time']:
+            s = StringIO.StringIO()
+            ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
+            ps.print_stats()
+            print s.getvalue()
 
 def callback(callback_id):
     """ Display the view """

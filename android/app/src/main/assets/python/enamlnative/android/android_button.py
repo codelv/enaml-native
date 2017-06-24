@@ -14,10 +14,11 @@ from atom.api import Typed
 
 from enamlnative.widgets.button import ProxyButton
 
-from .android_view import OnClickListener
-from .android_text_view import AndroidTextView
+from .android_text_view import AndroidTextView, TextView
 
-Button = jnius.autoclass('android.widget.Button')
+
+class Button(TextView):
+    __javaclass__ = 'android.widget.Button'
 
 
 class AndroidButton(AndroidTextView, ProxyButton):
@@ -26,9 +27,6 @@ class AndroidButton(AndroidTextView, ProxyButton):
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(Button)
-
-    #: Save reference to the on click listener
-    click_listener = Typed(OnClickListener)
 
     #  --------------------------------------------------------------------------
     # Initialization API
@@ -39,21 +37,3 @@ class AndroidButton(AndroidTextView, ProxyButton):
         """
         self.widget = Button(self.get_context())
 
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidButton, self).init_widget()
-        self.click_listener = OnClickListener(self)
-        self.widget.setOnClickListener(self.click_listener)
-
-    def on_click(self, view):
-        """ Trigger the click
-
-        """
-        d = self.declaration
-        d.clicked()
-
-    # --------------------------------------------------------------------------
-    # ProxyButton API
-    # --------------------------------------------------------------------------

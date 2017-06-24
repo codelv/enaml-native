@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Event
+    Typed, ForwardTyped, set_default
 )
 
 from enaml.core.declarative import d_
@@ -30,9 +30,9 @@ class Button(TextView):
     """ A simple control for displaying read-only text.
 
     """
+    #: Button is clickable by default
+    clickable = set_default(True)
+    
     #: A reference to the proxy object.
     proxy = Typed(ProxyButton)
-
-    #: Called when button is clicked
-    clicked = d_(Event(), writable=False)
 

@@ -14,9 +14,14 @@ from atom.api import Typed
 
 from enamlnative.widgets.compound_button import ProxyCompoundButton
 
-from .android_button import AndroidButton
+from .android_button import AndroidButton, Button
+from .bridge import JavaMethod, JavaCallback
 
-CompoundButton = jnius.autoclass('android.widget.CompoundButton')
+
+class CompoundButton(Button):
+    __javaclass__ = 'android.widget.CompoundButton'
+    setChecked = JavaMethod('boolean')
+    onCheckedChanged = JavaCallback('android.widget.CompoundButton','boolean')
 
 
 class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
@@ -42,10 +47,11 @@ class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
         super(AndroidCompoundButton, self).init_widget()
         d = self.declaration
         self.set_checked(d.checked)
+        self.widget.onCheckedChanged.connnect(self.on_checked)
 
-    def on_click(self, view):
+    def on_checked(self, view, checked):
         d = self.declaration
-        d.checked = self.widget.isChecked()
+        d.checked = checked
 
     #--------------------------------------------------------------------------
     # ProxyLabel API
