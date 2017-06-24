@@ -14,9 +14,11 @@ from atom.api import Typed
 
 from enamlnative.widgets.checkbox import ProxyCheckBox
 
-from .android_compound_button import AndroidCompoundButton
+from .android_compound_button import AndroidCompoundButton, CompoundButton
 
-CheckBox = jnius.autoclass('android.widget.CheckBox')
+
+class CheckBox(CompoundButton):
+    __javaclass__ = 'android.widget.CheckBox'
 
 
 class AndroidCheckBox(AndroidCompoundButton, ProxyCheckBox):

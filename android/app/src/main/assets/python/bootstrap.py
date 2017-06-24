@@ -145,14 +145,6 @@ def callback(callback_id):
     app = AndroidApplication.instance()
     app.invoke_callback(callback_id)
 
-def invoke(ptr, method, *args):
-    import ctypes
-    try:
-        obj = ctypes.cast(ptr,ctypes.py_object).value
-        handler = getattr(obj,method)
-        return handler(*args)
-    except:
-        traceback.print_exc()
-        return
+
 
 

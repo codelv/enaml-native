@@ -21,7 +21,8 @@ from .bridge import JavaMethod, JavaCallback
 class CompoundButton(Button):
     __javaclass__ = 'android.widget.CompoundButton'
     setChecked = JavaMethod('boolean')
-    onCheckedChanged = JavaCallback('android.widget.CompoundButton','boolean')
+    setOnCheckedChangeListener = JavaMethod('android.widget.CompoundButton$OnCheckedChangeListener')
+    onCheckedChanged = JavaCallback('android.widget.CompoundButton', 'boolean')
 
 
 class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
@@ -47,14 +48,16 @@ class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
         super(AndroidCompoundButton, self).init_widget()
         d = self.declaration
         self.set_checked(d.checked)
-        self.widget.onCheckedChanged.connnect(self.on_checked)
+        self.widget.setOnCheckedChangeListener(id(self.widget))
+        self.widget.onCheckedChanged.connect(self.on_checked)
 
     def on_checked(self, view, checked):
         d = self.declaration
-        d.checked = checked
+        with self.widget.setChecked.suppressed():
+            d.checked = checked
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # ProxyLabel API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_checked(self, checked):
         self.widget.setChecked(checked)

@@ -71,7 +71,6 @@ class AndroidView(AndroidWidget, ProxyView):
         """
         self.widget = View(self.get_context())
 
-
     def init_widget(self):
         """ Initialize the underlying widget.
 
@@ -102,8 +101,8 @@ class AndroidView(AndroidWidget, ProxyView):
         if d.layout_width or d.layout_height:
             self.get_layout_params()
         if d.clickable:
-            self.click_listener = OnClickListener(self)
-            self.widget.setOnClickListener(self.click_listener)
+            self.widget.setOnClickListener(id(self.widget))
+            self.widget.onClick.connect(self.on_click)
             self.set_clickable(d.clickable)
 
     def get_layout_params(self):
@@ -136,7 +135,6 @@ class AndroidView(AndroidWidget, ProxyView):
         self.widget.setLayoutParams(params)
 
         return params
-    
 
     def on_click(self, view):
         """ Trigger the click
@@ -145,9 +143,9 @@ class AndroidView(AndroidWidget, ProxyView):
         d = self.declaration
         d.clicked()
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # ProxyView API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_background_color(self, color):
         self.widget.setBackgroundColor(color)
         

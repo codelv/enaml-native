@@ -31,9 +31,9 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
     #: A reference to the widget created by the proxy.
     widget = Typed(FrameLayout)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying label widget.
 
@@ -48,11 +48,12 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
         d = self.declaration
         if d.foreground_gravity:
             self.set_foreground_gravity(d.foreground_gravity)
-        self.set_measure_all_children(d.measure_all_children)
+        if d.measure_all_children:
+            self.set_measure_all_children(d.measure_all_children)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # ProxyFrameLayout API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_foreground_gravity(self, gravity):
         self.widget.setForegroundGravity(gravity)
 

@@ -12,14 +12,15 @@ Created on May 20, 2017
 from atom.api import Typed
 from enaml.widgets.toolkit_object import ProxyToolkitObject
 
-from .bridge import JavaBridgeObject, JavaMethod
+from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
 class View(JavaBridgeObject):
     __javaclass__ = 'android.view.View'
 
     addView = JavaMethod('android.view.View')
-    setOnClickListener = JavaMethod('android.view.View.OnClickListener')
+    onClick = JavaCallback('android.view.View')
+    setOnClickListener = JavaMethod('android.view.View$OnClickListener')
     setLayoutParams = JavaMethod('android.view.ViewGroup.LayoutParams')
     setBackgroundColor = JavaMethod('android.graphics.Color')
     setClickable = JavaMethod('boolean')

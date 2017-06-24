@@ -9,6 +9,11 @@ Created on June 21, 2017
 
 @author: jrm
 '''
+import ctypes
+import msgpack
+import traceback
+from pprint import pprint
+from contextlib import contextmanager
 
 
 def msgpack_encoder(sig, obj):
@@ -20,16 +25,61 @@ def msgpack_encoder(sig, obj):
     return (sig, obj)
 
 
+def dumps(data):
+    """ Encodes events for sending over the bridge """
+    print "======== Py --> Java ======"
+    pprint(data)
+    print "==========================="
+    return msgpack.dumps(data)
+
+
+def loads(data):
+    """ Decodes and processes events received from the bridge """
+    events = msgpack.loads(data)
+    print "======== Py <-- Java ======"
+    pprint(events)
+    print "==========================="
+    for event in events:
+        if event[0]=='viewEvent':
+            ptr, method, args = event[1]
+            invoke(ptr, method, *[v for t,v in args])
+
+
+def invoke(ptr, method, *args):
+    """ Dereference the pointer and call the handler method. """
+    try:
+        obj = ctypes.cast(ptr, ctypes.py_object).value
+        handler = getattr(obj, method)
+        print "invoking", ptr, obj, method, handler, args
+        return handler(*args)
+    except:
+        traceback.print_exc()
+        return
+
+
 class JavaMethod(object):
-    __slots__ = ('__signature__', '__view__', '__name__')
+    """ Description of a method of a View (or subclass) in Java. When called, this
+        serializes call, packs the arguments, and delegates handling to a bridge in Java.
+    """
+    __slots__ = ('__signature__', '__view__', '__name__','__suppressed__')
 
     def __init__(self, *args):
         self.__signature__ = args
+        self.__suppressed__ = False
+
+    @contextmanager
+    def suppressed(self):
+        """ Suppress calls within this context to avoid feedback loops"""
+        self.__suppressed__ = True
+        yield
+        self.__suppressed__ = False
 
     def __call__(self, *args):
-        if len(args) != len(self.__signature__):
+        if self.__suppressed__:
+            return
+        elif len(args) != len(self.__signature__):
             raise ValueError("Invalid number of arguments: Given {}, expected {}"
-                             .format(args,self.__signature__))
+                             .format(args, self.__signature__))
         self.__view__.__app__.send_event(
             'updateView',  #: method
             self.__view__.__view_id__,
@@ -37,49 +87,31 @@ class JavaMethod(object):
             [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)]  #: args
         )
 
+    def clone(self):
+        cls = type(self)
+        return cls(*self.__signature__)
+
 
 class JavaCallback(JavaMethod):
-    __slots__ = ('__signature__', '__view__', '__name__')
+    """ Description of a callback method of a View (or subclass) in Java. When called,
+        it fires the connected callback. This is triggered when it receives an event from
+        the bridge indicating the call has occured.
+    """
+    __slots__ = ('__callback__', )
+
+    def __init__(self, *args):
+        super(JavaCallback, self).__init__(*args)
+        self.__callback__ = None
+
+    def __call__(self, *args):
+        """ Fire the callback if one is connected """
+        if self.__callback__ and not self.__suppressed__:
+            self.__callback__(*args)
 
     def connect(self, callback):
+        """ Set the callback to be fired when the event occurs. """
         self.__callback__ = callback
-        self.__view__.__app__.send_event(
-            'connectCallback',  #: method
-            self.__view__.__view_id__,
-            self.__name__,  #: method name
-            [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)]  #: args
-        )
 
-class MetaJavaBridgeObject(type):
-    """
-
-    """
-    def __new__(mcs, name, bases, dct):
-        if '__slots__' not in dct:
-            dct['__slots__'] = ()
-
-        methods = {}
-        #: Get superclass methods
-        for b in reversed(bases):
-            if hasattr(b, '__java_methods__'):
-                for prop, val in b.__java_methods__.iteritems():
-                    clone = JavaMethod(*val.__signature__)
-                    clone.__name__ = prop
-                    methods[prop] = clone
-
-        #: Get declared methods
-        for prop, val in dct.iteritems():
-            if isinstance(val, JavaMethod):
-                clone = JavaMethod(*val.__signature__)
-                clone.__name__ = prop
-                methods[prop] = clone
-
-        #: Update methods
-        dct.update(methods)
-
-        cls = super(MetaJavaBridgeObject, mcs).__new__(mcs, name, bases, dct)
-        cls.__java_methods__ = methods
-        return cls
 
 class JavaBridgeObject(object):
     """ A proxy to a class in java. This sends the commands over
@@ -87,20 +119,21 @@ class JavaBridgeObject(object):
 
     """
     __slots__ = ('__app__', '__view_id__')
-    __metaclass__ = MetaJavaBridgeObject
     __javaclass__ = 'java.lang.Object'
-    __id__ = 0
 
     def __init__(self, context):
         """ Sends the event to create this View in Java """
         self.__app__ = context
-        JavaBridgeObject.__id__ += 1
-        self.__view_id__ = JavaBridgeObject.__id__
+        self.__view_id__ = id(self)
 
-        for m in self.__java_methods__.itervalues():
-            m.__view__ = self
-
-
+        #: Get declared methods
+        for base in reversed(type(self).__mro__):
+            for name, method in base.__dict__.iteritems():
+                if isinstance(method, JavaMethod):
+                    clone = method.clone()
+                    clone.__name__ = name
+                    clone.__view__ = self
+                    setattr(self, name, clone)
 
         #: Send the event over the bridge to construct the view
         self.__app__.send_event(
@@ -108,17 +141,3 @@ class JavaBridgeObject(object):
             self.__javaclass__,
             self.__view_id__ #: args
         )
-
-    # def __getattr__(self, item):
-    #     """ Send the event to call this method in Java.
-    #         This is write only!
-    #     """
-    #     def method(*args):
-    #         #: Send the event over the bridge to update the view
-    #         self.__app__.send_event(
-    #             'updateView', #: method
-    #             self.__view_id__,
-    #             item,
-    #             [msgpack_encoder(arg) for arg in args] #: args
-    #         )
-    #     return method

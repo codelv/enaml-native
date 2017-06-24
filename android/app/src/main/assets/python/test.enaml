@@ -1,13 +1,30 @@
+from datetime import datetime
 from enamlnative.widgets.api import *
 
+enamldef Card(CardView):
+    content_padding = (10,10,10,10)
+
+enamldef VBox(LinearLayout):
+    orientation = 'vertical'
 
 enamldef ContentView(ScrollView):
     background_color = '#EEEEEE'
-
-    LinearLayout:
-        orientation = 'vertical'
-        padding = (10,10,10,10)
-        CardView:
-            content_padding = (10,10,10,10)
+    Card:
+        LinearLayout:
+            orientation = 'vertical'
+            padding = (10,10,10,10)
             TextView:
-                text = "Hello"
+                text << "Checked state is {}".format(cb.checked)
+            CheckBox: cb:
+                text = "Checkbox!"
+            TextView:
+                text << "Checked state is {}".format(cb2.checked)
+            CheckBox: cb2:
+                text = "Checkbox!"
+            DatePicker: dp1:
+                attr today = datetime.now()
+                year = today.year
+                month = today.month
+                day = today.day
+            TextView:
+                text << "Date selected: {month}/{day}/{year}".format(month=dp1.month,day=dp1.day,year=dp1.year)

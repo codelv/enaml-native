@@ -10,13 +10,11 @@ The full license is in the file COPYING.txt, distributed with this software.
 '''
 
 import jnius
-import msgpack
 from atom.api import List, Value, Dict, Int, Typed
 from enaml.application import Application, ProxyResolver
 from twisted.internet import reactor
 from . import factories
-
-from .bridge import msgpack_encoder
+from . import bridge
 
 
 class AppEventListener(jnius.PythonJavaClass):
@@ -29,7 +27,7 @@ class AppEventListener(jnius.PythonJavaClass):
 
     @jnius.java_method('([B)V')
     def onEvents(self, data):
-        self.__handler__.on_events(data)
+        self.__handler__.on_events(bytearray(data))
 
     @jnius.java_method('()V')
     def onResume(self):
@@ -63,8 +61,8 @@ class AndroidApplication(Application):
     #: Events to send to Java
     _bridge_queue = List()
 
-    #: Delay to wait before sending events
-    _bridge_timeout = Int(100)
+    #: Delay to wait before sending events (in ms)
+    _bridge_timeout = Int(10)
 
     #: Count of pending send calls
     _bridge_pending = Int(0)
@@ -132,10 +130,8 @@ class AndroidApplication(Application):
         """
         self._bridge_pending -= 1
         if self._bridge_pending == 0:
-            print self._bridge_queue
             self.activity.processEvents(
-                msgpack.dumps(self._bridge_queue)
-                              #object_hook=msgpack_encoder)
+                bridge.dumps(self._bridge_queue)
             )
             self._bridge_queue = []
 
@@ -190,7 +186,8 @@ class AndroidApplication(Application):
     # AppEventListener API Implementation
     # --------------------------------------------------------------------------
     def on_events(self, data):
-        pass
+        #: Pass to reactor thread
+        reactor.callFromThread(bridge.loads, data)
 
     def on_pause(self):
         pass
