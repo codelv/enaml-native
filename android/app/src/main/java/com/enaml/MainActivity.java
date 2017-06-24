@@ -19,11 +19,14 @@ import com.jventura.pybridge.PyBridge;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
+import org.msgpack.core.buffer.MessageBuffer;
 import org.msgpack.value.Value;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -52,6 +55,9 @@ public class MainActivity extends AppCompatActivity {
     private final Handler mCallbackHandler = new Handler();
 
     private AppEventListener mAppEventListener;
+    private ArrayList<MessageBufferPacker> mEventList = new ArrayList<MessageBufferPacker>();
+    private int mEventCount = 0;
+    private int mEventDelay = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -254,6 +260,8 @@ public class MainActivity extends AppCompatActivity {
      *  ("updateView", (0x01,"addView",{"ref":0x01})
      * ]
      *
+     * @warning This is called from the Python thread, NOT the UI thread!
+     *
      * @param view
      */
     public void processEvents(byte[] data) {
@@ -267,10 +275,10 @@ public class MainActivity extends AppCompatActivity {
 
                 if (eventType.equals("createView")) {
                     String viewClass = unpacker.unpackString();
-                    int viewId = unpacker.unpackInt();
+                    long viewId = unpacker.unpackLong();
                     runOnUiThread(()->{mUiManager.createView(viewClass, viewId);});
                 } else if (eventType.equals("updateView")) {
-                    int viewId = unpacker.unpackInt();
+                    long viewId = unpacker.unpackLong();
                     String viewMethod = unpacker.unpackString();
                     int argCount = unpacker.unpackArrayHeader();
                     Value[] args = new Value[argCount];
@@ -279,7 +287,6 @@ public class MainActivity extends AppCompatActivity {
                         args[j] = v;
                     }
                     runOnUiThread(()->{mUiManager.updateView(viewId, viewMethod,  args);});
-
                 } else if (eventType.equals("showView")) {
                     runOnUiThread(()->{setView(mUiManager.getRootView());});
                 }
@@ -311,16 +318,39 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Post an event to the app listener
      */
-    public void postEvents(MessageBufferPacker events) {
-        if (mAppEventListener!=null) {
-            mAppEventListener.onEvents(events.toByteArray());
+    public void sendEvent(MessageBufferPacker event) {
+        mEventCount += 1;
+        mEventList.add(event);
+        (new Handler()).postDelayed(()->{
+            sendEvents();
+        },mEventDelay);
+    }
+
+    /**
+     * When events stop coming in, send to python.
+     * TODO: Should it have a time limit?
+     */
+    public void sendEvents() {
+        mEventCount -= 1;
+        if (mAppEventListener!=null && mEventCount==0) {
+            MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+            try {
+                packer.packArrayHeader(mEventList.size());
+                for (MessageBufferPacker event: mEventList) {
+                    packer.addPayload(event.toByteArray());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mAppEventListener.onEvents(packer.toByteArray());
+            mEventList.clear();
         }
     }
 
 
     /**
      * Interface for python to listen to events occuring in native widgets. All
-     * events will be batched and called in onEvent or onEvents.
+     * events will be batched and called in onEvents.
      */
     public interface AppEventListener {
         /**

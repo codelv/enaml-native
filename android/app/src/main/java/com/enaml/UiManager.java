@@ -6,19 +6,26 @@ import android.graphics.Typeface;
 import android.view.View;
 import android.view.ViewManager;
 import android.util.Log;
+import android.widget.CheckBox;
 
+import org.msgpack.core.MessageBufferPacker;
+import org.msgpack.core.MessagePack;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.ExtensionValue;
 import org.msgpack.value.FloatValue;
 import org.msgpack.value.IntegerValue;
 import org.msgpack.value.Value;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class UiManager {
 
@@ -37,7 +44,8 @@ public class UiManager {
     final HashMap<String,Method> mMethodCache = new HashMap<String, Method>();
 
     // Cache for views
-    final HashMap<Integer,View> mViewCache = new HashMap<Integer, View>();
+    final HashMap<Long,View> mViewCache = new HashMap<Long, View>();
+    //final HashMap<Long,Object> mProxyCache = new HashMap<Long, Object>();
 
     public UiManager(Context context) {
         mContext = context;
@@ -52,6 +60,12 @@ public class UiManager {
     }
 
     /**
+     * Return the view with the given id.
+     * @return
+     */
+    public View getView(int viewId) { return mViewCache.get(viewId);}
+
+    /**
      * Create a view with the given id.
      *
      * The first call will be set as the root node.
@@ -59,7 +73,7 @@ public class UiManager {
      * @param className
      * @param viewId
      */
-    public void createView(String className, int viewId) {
+    public void createView(String className, long viewId) {
         try {
             //Log.i(TAG,"Create "+className+" id="+viewId);
             if (!mConstructorCache.containsKey(className)) {
@@ -68,7 +82,6 @@ public class UiManager {
             }
             Constructor constructor = mConstructorCache.get(className);
             View view = (View) constructor.newInstance(mContext);
-            view.setId(viewId);
             mViewCache.put(viewId, view);
             if (mRootView==null) {
                 mRootView = view;
@@ -96,11 +109,12 @@ public class UiManager {
      * @param method
      * @param args
      */
-    public void updateView(int viewId, String method, Value[] args) {
+    public void updateView(long viewId, String method, Value[] args) {
         //Log.i(TAG,"Update id="+viewId+" method="+method);
         View view = mViewCache.get(viewId);
         Class viewClass = view.getClass();
         String key = viewClass.getName() + method;
+
 
         // Unpack args
         Object[] methodArgs = new Object[args.length];
@@ -128,9 +142,11 @@ public class UiManager {
 
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
+                return;
             }
 
             Value v = argv.get(1);
+
             switch (v.getValueType()) {
                 case NIL:
                     methodArgs[i] = null;
@@ -142,7 +158,18 @@ public class UiManager {
                     IntegerValue iv = v.asIntegerValue();
                     // Hack for passing references
                     if (argType.equals("android.view.View")) {
-                        methodArgs[i] = mViewCache.get(iv.toInt());
+                        methodArgs[i] = mViewCache.get(iv.toLong());
+                    } else if (methodSpec[i].isInterface()) {
+                        // If an int/long is passed for an interface... create a proxy
+                        // for the interface and pass in the reference.
+                        Class infClass = methodSpec[i];
+                        Object proxy = Proxy.newProxyInstance(
+                            infClass.getClassLoader(),
+                            new Class[]{infClass},
+                            new BridgeInvocationHandler(iv.toLong())
+                        );
+                        //mProxyCache.put(viewId,proxy);
+                        methodArgs[i] = proxy;
                     } else if (iv.isInIntRange()) {
                         methodArgs[i] = iv.toInt();
                     }
@@ -199,8 +226,10 @@ public class UiManager {
                 mMethodCache.put(key, viewClassMethod);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
+                return;
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
+                return;
             }
         }
 
@@ -214,15 +243,32 @@ public class UiManager {
             e.printStackTrace();
         }
 
-        // Invoke it
-        //lambda.invoke_for_void(args[0].asStringValue());
     }
+    /*
+    public void connectView(int viewId, String method, Value[] args) {
+        View view = mViewCache.get(viewId);
+        Class viewClass = view.getClass();
+        ArrayValue argv = args[0].asArrayValue();
+        try {
+            Class infClass = Class.forName(argv.get(0).asStringValue().asString());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return;
+        }
+        Object o = Proxy.newProxyInstance(infClass.getClassLoader(), new Class[]{infClass},
+            (Object proxy, Method proxyMethod, Object[] proxyArgs) -> {
+                MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+                return null;
+        });
+
+    }
+    */
 
     /**
      * Destroy the view by removing it from the widget tree.
      * @param viewId
      */
-    public void destroyView(int viewId) {
+    public void destroyView(long viewId) {
         View view = mViewCache.get(viewId);
         ViewManager parent = (ViewManager) view.getParent();
         if (parent!=null) {
@@ -231,5 +277,72 @@ public class UiManager {
         mViewCache.remove(viewId);
     }
 
+    class BridgeInvocationHandler implements InvocationHandler {
+        private final long mPythonObjectPtr;
+
+        public BridgeInvocationHandler(long ptr) {
+            mPythonObjectPtr = ptr;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            return onEvent(mPythonObjectPtr, proxy, method, args);
+        }
+    }
+
+    /**
+     * Packs an event and sends it to python. The event is packed in the format:
+     *
+     * ("eventName",(pythonObjectId,"method", (args...)))
+     *
+     * @param pythonObjectId
+     * @param proxy
+     * @param method
+     * @param args
+     * @return
+     */
+    public Object onEvent(long pythonObjectId, Object proxy, Method method, Object[] args) {
+        MainActivity activity = MainActivity.mActivity;
+        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+        try {
+            packer.packArrayHeader(2);
+            packer.packString("viewEvent");
+            packer.packArrayHeader(3);
+            packer.packLong(pythonObjectId);
+            packer.packString(method.getName());
+            packer.packArrayHeader(args.length);
+            for (Object arg : args) {
+                packer.packArrayHeader(2);
+                Class argClass = arg.getClass();
+                packer.packString(argClass.getCanonicalName());
+                if (argClass == int.class || arg instanceof Integer) {
+                    packer.packInt((int) arg);
+                } else if (argClass == int.class || arg instanceof Boolean) {
+                    packer.packBoolean((boolean) arg);
+                } else if (argClass == String.class) {
+                    packer.packString((String) arg);
+                } else if (argClass == long.class || arg instanceof Long) {
+                    packer.packLong((long) arg);
+                } else if (argClass == float.class || arg instanceof Float) {
+                    packer.packFloat((float) arg);
+                } else if (argClass == double.class || arg instanceof Double) {
+                    packer.packDouble((double) arg);
+                } else if (argClass == short.class || arg instanceof Short) {
+                    packer.packShort((short) arg);
+                } else if (arg instanceof View) {
+                    packer.packInt(((View) arg).getId());
+                } else {
+                    packer.packString(arg.toString());
+                }
+            }
+            packer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Send events to python
+        activity.sendEvent(packer);
+        return null;
+    }
 
 }
