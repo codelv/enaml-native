@@ -9,27 +9,26 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 
 from enamlnative.widgets.chronometer import ProxyChronometer
 
-from .android_text_view import AndroidTextView
+from .android_text_view import AndroidTextView, TextView
+from .bridge import JavaCallback, JavaMethod
 
-SystemClock = jnius.autoclass('android.os.SystemClock')
-Chronometer = jnius.autoclass('android.widget.Chronometer')
+#SystemClock = jnius.autoclass('android.os.SystemClock')
 
 
-class OnChronometerTickListener(jnius.PythonJavaClass):
-    __javainterfaces__ = ['android/widget/Chronometer$OnChronometerTickListener']
+class Chronometer(TextView):
+    __javaclass__ = 'android.widget.Chronometer'
 
-    def __init__(self, handler):
-        self.__handler__ = handler
-        super(OnChronometerTickListener, self).__init__()
-
-    @jnius.java_method('(Landroid/widget/Chronometer;)V')
-    def onChronometerTick(self, view):
-        self.__handler__.on_chronometer_tick(view)
+    setBase = JavaMethod('long')
+    setCountDown = JavaMethod('boolean')
+    setFormat = JavaMethod('java.lang.String')
+    setOnChronometerTickListener = JavaMethod('android.widget.Chronometer$OnChronometerTickListener')
+    onChronometerTick = JavaCallback('android.widget.Chronometer')
+    start = JavaMethod()
+    stop = JavaMethod()
 
 
 class AndroidChronometer(AndroidTextView, ProxyChronometer):
@@ -39,14 +38,11 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
     #: A reference to the widget created by the proxy.
     widget = Typed(Chronometer)
 
-    #: Save a reference to the tick listener
-    tick_listener = Typed(OnChronometerTickListener)
-
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = Chronometer(self.get_context())
@@ -57,14 +53,15 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
         """
         super(AndroidChronometer, self).init_widget()
         d = self.declaration
-        self.set_base(d.base)
+        if d.base:
+            self.set_base(d.base)
         if d.format:
             self.set_format(d.format)
         if d.direction == 'down':
             self.set_direction(d.direction)
 
-        self.tick_listener = OnChronometerTickListener(self)
-        self.widget.setOnChronometerTickListener(self.tick_listener)
+        self.widget.setOnChronometerTickListener(id(self.widget))
+        self.widget.onChronometerTick.connect(self.on_chronometer_tick)
 
         if d.running:
             self.set_running(d.running)
@@ -74,21 +71,20 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
     # --------------------------------------------------------------------------
     def on_chronometer_tick(self, view):
         d = self.declaration
-        with self.suppress_notifications():
-            d.text = self.widget.getText()
-            d.ticks += 1
+        #d.text = self.widget.getText()
+        d.ticks += 1
 
     # --------------------------------------------------------------------------
     # ProxyChronometer API
     # --------------------------------------------------------------------------
     def set_base(self, base):
-        self.widget.setBase(base or SystemClock.elapsedRealtime())
+        self.widget.setBase(base)  # or SystemClock.elapsedRealtime())
 
     def set_format(self, format):
         self.widget.setFormat(format)
 
     def set_direction(self, direction):
-        self.widget.setCountDown(direction=='down')
+        self.widget.setCountDown(direction == 'down')
 
     def set_running(self, running):
         if running:

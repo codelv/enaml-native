@@ -9,13 +9,19 @@ Created on May 26, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 from enamlnative.widgets.progress_bar import ProxyProgressBar
 
 from .android_view import AndroidView, View
+from .bridge import JavaMethod
 
-ProgressBar = jnius.autoclass('android.widget.ProgressBar')
+class ProgressBar(View):
+    __javaclass__ = 'android.widget.ProgressBar'
+    setIndeterminate = JavaMethod('boolean')
+    setMax = JavaMethod('int')
+    setMin = JavaMethod('int')
+    setProgress = JavaMethod('int', 'boolean')
+    setSecondaryProgress = JavaMethod('int')
 
 
 class AndroidProgressBar(AndroidView, ProxyProgressBar):
@@ -25,11 +31,11 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
     #: A reference to the widget created by the proxy.
     widget = Typed(ProgressBar)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = ProgressBar(self.get_context())
@@ -52,7 +58,7 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
     # --------------------------------------------------------------------------
     def set_progress(self, progress):
         d = self.declaration
-        self.widget.setProgress(progress,d.animated)
+        self.widget.setProgress(progress, d.animated)
 
     def set_animated(self, animated):
         pass

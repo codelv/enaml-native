@@ -31,6 +31,9 @@ class ProxyTextView(View):
     def set_auto_link_mask(self, mask):
         raise NotImplementedError
 
+    def set_input_type(self, input_type):
+        raise NotImplementedError
+
     def set_font_family(self, family):
         raise NotImplementedError
 
@@ -74,7 +77,25 @@ class TextView(View):
     font_family = d_(Unicode())
 
     #: Font style
-    font_style = d_(Enum('normal','bold','italic','bold_italic'))
+    font_style = d_(Enum('normal', 'bold', 'italic', 'bold_italic'))
+
+    #: Input type
+    #: https://developer.android.com/reference/android/widget/TextView.html#attr_android:inputType
+    input_type = d_(Enum('none', 'date', 'datetime', 'number'
+                         'number_decimal', 'number_password',
+                         'number_signed', 'phone', 'text',
+                         'text_auto_complete', 'text_auto_correct',
+                         'text_cap_characters', 'text_cap_sentences', 'text_cap_words',
+                         'text_email_address', 'text_email_subject',
+                         'text_filter', 'text_ime_multi_line',
+                         'text_long_message', 'text_multi_line',
+                         'text_no_suggestions', 'text_password',
+                         'text_person_name', 'text_phonetic',
+                         'text_postal_address', 'text_short_message',
+                         'text_uri', 'text_visible_password',
+                         'text_web_edit_text', 'text_web_email_address',
+                         'text_web_password', 'time',
+                         ))
 
     #: Sets the color used to display the selection highlight.
     highlight_color = d_(Unicode())
@@ -103,7 +124,7 @@ class TextView(View):
     #--------------------------------------------------------------------------
     # Observers
     #--------------------------------------------------------------------------
-    @observe('all_caps', 'auto_link_mask',
+    @observe('all_caps', 'auto_link_mask', 'input_type',
              'font_family', 'font_style',
              'text', 'text_color', 'text_size',
              'link_color', 'highlight_color',

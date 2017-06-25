@@ -9,7 +9,6 @@ Created on June 7, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 
 from enamlnative.widgets.card_view import ProxyCardView
@@ -32,6 +31,7 @@ class CardView(FrameLayout):
     setRadius = JavaMethod('float')
     setUseCompatPadding = JavaMethod('boolean')
 
+
 class AndroidCardView(AndroidFrameLayout, ProxyCardView):
     """ An Android implementation of an Enaml ProxyCardView.
 
@@ -39,11 +39,11 @@ class AndroidCardView(AndroidFrameLayout, ProxyCardView):
     #: A reference to the widget created by the proxy.
     widget = Typed(CardView)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
+        """ Create the underlying widget.
 
         """
         self.widget = CardView(self.get_context())
@@ -67,7 +67,6 @@ class AndroidCardView(AndroidFrameLayout, ProxyCardView):
             self.widget.setRadius(d.radius)
         if d.use_compat_padding:
             self.set_use_compat_padding(d.use_compat_padding)
-
 
     # --------------------------------------------------------------------------
     # ProxyCardView API

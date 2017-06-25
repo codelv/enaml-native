@@ -9,13 +9,14 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 
+from datetime import datetime
 from enamlnative.widgets.calendar_view import ProxyCalendarView
 
 from .android_frame_layout import AndroidFrameLayout, FrameLayout
-from .bridge import JavaMethod
+from .bridge import JavaMethod, JavaCallback
+
 
 class CalendarView(FrameLayout):
     __javaclass__ = 'android.widget.CalendarView'
@@ -23,19 +24,24 @@ class CalendarView(FrameLayout):
     setMinDate = JavaMethod('long')
     setMaxDate = JavaMethod('long')
     setFirstDayOfWeek = JavaMethod('int')
+    setOnDateChangeListener = JavaMethod('android.widget.CalendarView$OnDateChangeListener')
+
+    #: This is not actually a CalendarView method, but still works
+    onSelectedDayChange = JavaCallback('android.widget.CalendarView', 'int', 'int', 'int')
+
 
 class AndroidCalendarView(AndroidFrameLayout, ProxyCalendarView):
-    """ An Android implementation of an Enaml ProxyFrameLayout.
+    """ An Android implementation of an Enaml ProxyCalendarView.
 
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(CalendarView)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = CalendarView(self.get_context())
@@ -53,9 +59,22 @@ class AndroidCalendarView(AndroidFrameLayout, ProxyCalendarView):
             self.set_max_date(d.max_date)
         self.set_first_day_of_week(d.first_day_of_week)
 
-    #--------------------------------------------------------------------------
-    # ProxyFrameLayout API
-    #--------------------------------------------------------------------------
+        #: Setup listener
+        self.widget.setOnDateChangeListener(id(self.widget))
+        self.widget.onSelectedDayChange.connect(self.on_selected_day_change)
+
+    # --------------------------------------------------------------------------
+    # OnDateChangeListener API
+    # --------------------------------------------------------------------------
+    def on_selected_day_change(self, view, year, month, day):
+        d = self.declaration
+        dt = datetime(year, month+1, day)
+        with self.widget.setDate.suppressed():
+            d.date = (dt - datetime(1970, 1, 1)).total_seconds()
+
+    # --------------------------------------------------------------------------
+    # ProxyCalendarView API
+    # --------------------------------------------------------------------------
     def set_date(self, date):
         self.widget.setDate(date)
 

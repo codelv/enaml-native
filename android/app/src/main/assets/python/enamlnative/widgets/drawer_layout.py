@@ -80,13 +80,13 @@ class DrawerLayout(ViewGroup):
     drawer_elevation = d_(Float())
 
     #: Set lock mode
-    lock_mode = d_(Int())
+    lock_mode = d_(Enum('unlocked', 'locked_closed', 'locked_open'))
 
     #: Set a color to use for the scrim that obscures primary content while a drawer is open.
-    scrim_color = d_(Int())
+    scrim_color = d_(Unicode())
 
     #: Statusbar background color
-    status_bar_background_color = d_(Int())
+    status_bar_background_color = d_(Unicode())
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyDrawerLayout)

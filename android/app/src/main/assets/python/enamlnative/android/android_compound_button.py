@@ -9,7 +9,6 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 
 from enamlnative.widgets.compound_button import ProxyCompoundButton
@@ -36,7 +35,7 @@ class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
     # Initialization API
     #--------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = CompoundButton(self.get_context())

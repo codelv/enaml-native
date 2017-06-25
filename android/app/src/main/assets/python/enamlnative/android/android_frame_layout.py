@@ -9,7 +9,6 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 
 from enamlnative.widgets.frame_layout import ProxyFrameLayout
@@ -35,7 +34,7 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
     # Initialization API
     # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = FrameLayout(self.get_context())

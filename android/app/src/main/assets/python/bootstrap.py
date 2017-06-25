@@ -11,6 +11,7 @@ Forked from https://github.com/joaoventura/pybridge
 @author joaoventura
 @author: jrm
 '''
+import traceback
 ### Comment out to disable profiling
 # import cProfile
 # pr = cProfile.Profile()
@@ -30,36 +31,15 @@ def main():
     from enamlnative.android.app import AndroidApplication
     MainActivity = jnius.autoclass('com.enaml.MainActivity')
     app = AndroidApplication(MainActivity.mActivity)
-
-    from enamlnative.android.bridge import JavaBridgeObject, JavaMethod
-
-    # class View(JavaBridgeObject):
-    #     __javaclass__ = 'android.view.View'
-    #     addView = JavaMethod('android.view.View')
-    #     removeView = JavaMethod('android.view.View')
-    #
-    # class ScrollView(View):
-    #     __javaclass__ = 'android.widget.ScrollView'
-    #
-    # class LinearLayout(View):
-    #     __javaclass__ = 'android.widget.LinearLayout'
-    #     setOrientation = JavaMethod('int')
-    #
-    # class TextView(View):
-    #     __javaclass__ = 'android.widget.TextView'
-    #     setText = JavaMethod('java.lang.CharSequence')
-    #
-    # root = ScrollView(app)
-    # layout = LinearLayout(app)
-    # layout.setOrientation(1)
-    # root.addView(layout)
-    # for i in range(1000):
-    #     tv = TextView(app)
-    #     tv.setText("Widget {}".format(i))
-    #     layout.addView(tv)
-    with enaml.imports():
-        from test import ContentView
-        app.view = ContentView()
+    try:
+        with enaml.imports():
+            from test import ContentView
+            app.view = ContentView()
+        app.show_view()
+    except:
+        msg = traceback.format_exc()
+        print msg
+        app.deferred_call(lambda msg=msg:app.send_event('displayError', msg))
 
     app.start()
 

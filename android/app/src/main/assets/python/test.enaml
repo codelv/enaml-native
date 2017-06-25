@@ -28,3 +28,15 @@ enamldef ContentView(ScrollView):
                 day = today.day
             TextView:
                 text << "Date selected: {month}/{day}/{year}".format(month=dp1.month,day=dp1.day,year=dp1.year)
+            Button:
+                text << "Stop" if cm.running else "Start"
+                clicked :: cm.running = not cm.running
+            Chronometer: cm:
+                running = True
+
+            TextView:
+                text << "Typed: {}".format(et1.text)
+            EditText: et1:
+                pass
+
+

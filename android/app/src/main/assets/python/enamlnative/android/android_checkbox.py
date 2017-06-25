@@ -9,7 +9,6 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 
 from enamlnative.widgets.checkbox import ProxyCheckBox
@@ -32,7 +31,7 @@ class AndroidCheckBox(AndroidCompoundButton, ProxyCheckBox):
     # Initialization API
     # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
+        """ Create the underlying widget.
 
         """
         self.widget = CheckBox(self.get_context())

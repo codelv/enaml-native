@@ -157,34 +157,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         /**
-         * Set error message text in loading view.
-         * @param message: Message to display
-         */
-        protected void showErrorMessage(String message) {
-            if (message!=null) {
-                TextView textView = (TextView) findViewById(R.id.textView);
-                textView.setTop(0);
-                textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
-                textView.setTextColor(Color.RED);
-                textView.setText(message);
-
-                // Hide progress bar
-                View progressBar = findViewById(R.id.progressBar);
-                progressBar.setVisibility(View.INVISIBLE);
-            }
-        }
-
-        /**
-         * Set error message text in loading view from an exception
-         * @param e: Exception to display.
-         */
-        protected void showErrorMessage(Exception e) {
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            showErrorMessage(sw.toString());
-        }
-
-        /**
          * Set the progress text to make loading not seem as slow.
          * @param status
          */
@@ -194,6 +166,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    /**
+     * Set error message text in loading view.
+     * @param message: Message to display
+     */
+    protected void showErrorMessage(String message) {
+        if (message!=null) {
+            TextView textView = (TextView) findViewById(R.id.textView);
+            textView.setTop(0);
+            textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+            textView.setTextColor(Color.RED);
+            textView.setText(message);
+
+            // Hide progress bar
+            View progressBar = findViewById(R.id.progressBar);
+            progressBar.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    /**
+     * Set error message text in loading view from an exception
+     * @param e: Exception to display.
+     */
+    protected void showErrorMessage(Exception e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        showErrorMessage(sw.toString());
+    }
 
 
     /**
@@ -289,6 +289,9 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(()->{mUiManager.updateView(viewId, viewMethod,  args);});
                 } else if (eventType.equals("showView")) {
                     runOnUiThread(()->{setView(mUiManager.getRootView());});
+                } else if (eventType.equals("displayError")) {
+                    String errorMessage = unpacker.unpackString();
+                    runOnUiThread(()->{showErrorMessage(errorMessage);});
                 }
                 /*unpacker.unp
                 try {

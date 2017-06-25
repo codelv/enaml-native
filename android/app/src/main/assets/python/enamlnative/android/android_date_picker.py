@@ -24,6 +24,8 @@ class DatePicker(FrameLayout):
     updateDate = JavaMethod('int', 'int', 'int')
     setFirstDayOfWeek = JavaMethod('int')
     setEnabled = JavaMethod('boolean')
+    setMaxDate = JavaMethod('long')
+    setMinDate = JavaMethod('long')
 
 
 class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
@@ -37,7 +39,7 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
     # Initialization API
     # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
+        """ Create the underlying widget.
 
         """
         self.widget = DatePicker(self.get_context())
@@ -68,7 +70,6 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
             d.month = month
             d.day = day
 
-
     # --------------------------------------------------------------------------
     # ProxyDatePicker API
     # --------------------------------------------------------------------------
@@ -84,6 +85,12 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
     def update_date(self):
         d = self.declaration
         self.widget.updateDate(d.year, d.month, d.day)
+
+    def set_min_date(self, date):
+        self.widget.setMinDate(date)
+
+    def set_max_date(self, date):
+        self.widget.setMaxDate(date)
 
     def set_first_day_of_week(self, day):
         self.widget.setFirstDayOfWeek(day)

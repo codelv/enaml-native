@@ -85,11 +85,11 @@ class AndroidApplication(Application):
         activity = self.activity
         self.listener = AppEventListener(self)
         activity.setAppEventListener(self.listener)
-        #assert view, "View does not exist!"
-        #activity.setView(view)
+        reactor.run()
+
+    def show_view(self):
         view = self.get_view()
         self.send_event('showView')
-        reactor.run()
 
     def get_view(self):
         """ Prepare the view

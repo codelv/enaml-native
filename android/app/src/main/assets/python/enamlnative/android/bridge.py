@@ -49,8 +49,9 @@ def invoke(ptr, method, *args):
     """ Dereference the pointer and call the handler method. """
     try:
         obj = ctypes.cast(ptr, ctypes.py_object).value
+        if not hasattr(obj, method):
+            raise NotImplementedError("{}.{} is not implemented.".format(type(obj), method))
         handler = getattr(obj, method)
-        print "invoking", ptr, obj, method, handler, args
         return handler(*args)
     except:
         traceback.print_exc()
