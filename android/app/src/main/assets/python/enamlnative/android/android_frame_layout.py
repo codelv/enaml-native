@@ -14,8 +14,8 @@ from atom.api import Typed
 from enamlnative.widgets.frame_layout import ProxyFrameLayout
 
 from .android_view_group import AndroidViewGroup, ViewGroup
-
 from .bridge import JavaMethod
+
 
 class FrameLayout(ViewGroup):
     __javaclass__ = 'android.widget.FrameLayout'

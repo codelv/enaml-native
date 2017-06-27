@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Unicode, Enum, Float, Int, Bool, observe, set_default
+    Typed, ForwardTyped, Unicode, Enum, Float, Int, Bool, observe
 )
 
 from enaml.core.declarative import d_
@@ -81,7 +81,7 @@ class TextView(View):
 
     #: Input type
     #: https://developer.android.com/reference/android/widget/TextView.html#attr_android:inputType
-    input_type = d_(Enum('none', 'date', 'datetime', 'number'
+    input_type = d_(Enum('', 'date', 'datetime', 'number'
                          'number_decimal', 'number_password',
                          'number_signed', 'phone', 'text',
                          'text_auto_complete', 'text_auto_correct',

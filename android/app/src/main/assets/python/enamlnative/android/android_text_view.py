@@ -9,7 +9,6 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 
 from enamlnative.widgets.text_view import ProxyTextView
@@ -48,7 +47,7 @@ class TextView(View):
     }
 
     INPUT_TYPES = {
-        'none': 0,
+        '': 0,
         'date': 0x14,
         'datetime': 0x4,
         'number': 0x2,

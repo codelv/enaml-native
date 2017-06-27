@@ -60,7 +60,7 @@ class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
             self.set_rows(d.rows)
         if d.row_order_preserved:
             self.set_row_order_preserved(d.row_order_preserved)
-        if d.use_default_margins
+        if d.use_default_margins:
             self.set_use_default_margins(d.use_default_margins)
 
     # --------------------------------------------------------------------------
