@@ -17,7 +17,10 @@ from enaml.drag_drop import DropAction
 from enaml.styling import StyleCache
 from enaml.widgets.widget import Feature, ProxyWidget
 from . import focus_registry
-from .android_toolkit_object import AndroidToolkitObject, View
+from .android_toolkit_object import AndroidToolkitObject, JavaBridgeObject
+
+class Widget(JavaBridgeObject):
+    pass
 
 
 class AndroidWidget(AndroidToolkitObject, ProxyWidget):
@@ -25,7 +28,7 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
 
     """
     #: A reference to the toolkit widget created by the proxy.
-    widget = Typed(View)
+    widget = Typed(Widget)
 
     #: A private copy of the declaration features. This ensures that
     #: feature cleanup will proceed correctly in the event that user
@@ -38,9 +41,9 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
     #: Internal storage for the drag origin position.
     #_drag_origin = Typed(QPoint)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def init_widget(self):
         """ Initialize the underlying View object.
 

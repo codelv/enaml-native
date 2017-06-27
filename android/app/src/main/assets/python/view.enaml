@@ -34,11 +34,10 @@ enamldef MenuItem(TextView):
   font_family = "sans-serif-serif-medium"
   text_size = 16
   padding = (10,10,10,10)
-  text_color = "#0000EE"
 
 enamldef ContentView(DrawerLayout):
   #opened = True # Or swipe to open
-  side = 'left'
+  #side = 'left'
   ScrollView:
     layout_width = 'match_parent'
     layout_height = 'match_parent'
@@ -135,16 +134,22 @@ enamldef ContentView(DrawerLayout):
         VBox:
           CardTitle:
             text = "Timer"
+          ToggleButton:
+            text_on = "STOP"
+            text_off = "START"
+            checked:= ch1.running
           Chronometer: ch1:
-            running = True
+            running = False
           TextView:
             text << "Ticks: {}".format(ch1.ticks)
       Card:
         VBox:
           CardTitle:
             text = "Spinner"
-          Spinner:
-            items = range(10)
+          Spinner: spn1:
+            items = ["Sun", "Moon", "Stars"]
+          TextView:
+            text << "Selected: {}".format(spn1.items[spn1.selected])
       Card:
         VBox:
           CardTitle:
@@ -219,12 +224,24 @@ enamldef ContentView(DrawerLayout):
 
   LinearLayout:
     layout_gravity = 'left'
+    layout_width = '200'
+    layout_height = 'match_parent'
     orientation = 'vertical'
     background_color = '#FFFFFF'
     Looper:
       iterable << ["Home", "Models", "Settings", "etc..."]
       MenuItem:
         text = loop_item
+  LinearLayout:
+    layout_gravity = 'right'
+    layout_width = '200'
+    layout_height = 'match_parent'
+    orientation = 'vertical'
+    background_color = '#FFFFFF'
+    Looper:
+      iterable << range(10)
+      MenuItem:
+        text = "Item {}".format(loop_item)
 
     #CalendarView:
     #  date = long(time.time()*1000)

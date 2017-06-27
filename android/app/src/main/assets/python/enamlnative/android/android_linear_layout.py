@@ -13,8 +13,8 @@ from atom.api import Typed, set_default
 
 from enamlnative.widgets.linear_layout import ProxyLinearLayout
 
-from .android_view_group import AndroidViewGroup, ViewGroup
-from .bridge import JavaMethod
+from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
+from .bridge import JavaMethod, JavaField
 
 
 class LinearLayout(ViewGroup):
@@ -23,12 +23,20 @@ class LinearLayout(ViewGroup):
     setGravity = JavaMethod('int')
 
 
+class LinearLayoutLayoutParams(MarginLayoutParams):
+    __javaclass__ = 'android.widget.LinearLayout$LayoutParams'
+    gravity = JavaField('int')
+    weight = JavaField('int')
+
+
 class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
     """ An Android implementation of an Enaml ProxyLinearLayout.
 
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(LinearLayout)
+
+    layout_param_type = set_default(LinearLayoutLayoutParams)
 
     # --------------------------------------------------------------------------
     # Initialization API

@@ -8,11 +8,9 @@ The full license is in the file COPYING.txt, distributed with this software.
 @author jrm
 
 '''
-
 import jnius
-from atom.api import List, Value, Dict, Int, Typed
+from atom.api import List, Float, Value, Dict, Int, Typed, Bool
 from enaml.application import Application, ProxyResolver
-from twisted.internet import reactor
 from . import factories
 from . import bridge
 
@@ -55,6 +53,23 @@ class AndroidApplication(Application):
     #: View to display within the activity
     view = Value(object)
 
+    #: If true, debug bridge statements
+    debug = Bool(False)
+
+    #:
+    dp = Float()
+
+    def _default_dp(self):
+        return self.activity.getResources().getDisplayMetrics().density
+
+
+    loop = Value()
+
+    def _default_loop(self):
+        #from twisted.internet import reactor
+        from tornado.ioloop import IOLoop
+        return IOLoop.current()
+
     #: Save reference to the event listener
     listener = Typed(AppEventListener)
 
@@ -85,7 +100,8 @@ class AndroidApplication(Application):
         activity = self.activity
         self.listener = AppEventListener(self)
         activity.setAppEventListener(self.listener)
-        reactor.run()
+        self.loop.start()
+        #reactor.run()
 
     def show_view(self):
         view = self.get_view()
@@ -106,7 +122,8 @@ class AndroidApplication(Application):
         """ Stop the application's main event loop.
 
         """
-        reactor.stop()
+        #reactor.stop()
+        self.loop.stop()
 
     def send_event(self, name, *args):
         """ Send an event to Java.
@@ -149,7 +166,8 @@ class AndroidApplication(Application):
             the callback.
 
         """
-        reactor.callWhenRunning(callback, *args, **kwargs)
+        self.loop.add_callback(callback, *args, **kwargs)
+        #reactor.callWhenRunning(callback, *args, **kwargs)
 
     def timed_call(self, ms, callback, *args, **kwargs):
         """ Invoke a callable on the main event loop thread at a
@@ -169,7 +187,8 @@ class AndroidApplication(Application):
             the callback.
 
         """
-        reactor.callLater(ms/1000.0, callback, *args, **kwargs)
+        self.loop.call_later(ms/1000.0, callback, *args, **kwargs)
+        #reactor.callLater(ms/1000.0, callback, *args, **kwargs)
 
     def is_main_thread(self):
         """ Indicates whether the caller is on the main gui thread.
@@ -186,8 +205,9 @@ class AndroidApplication(Application):
     # AppEventListener API Implementation
     # --------------------------------------------------------------------------
     def on_events(self, data):
-        #: Pass to reactor thread
-        reactor.callFromThread(bridge.loads, data)
+        #: Pass to event loop thread
+        self.deferred_call(bridge.loads, data)
+        #reactor.callFromThread(bridge.loads, data)
 
     def on_pause(self):
         pass
@@ -197,4 +217,3 @@ class AndroidApplication(Application):
 
     def on_stop(self):
         pass
-

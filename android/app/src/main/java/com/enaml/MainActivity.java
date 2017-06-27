@@ -19,14 +19,12 @@ import com.jventura.pybridge.PyBridge;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
-import org.msgpack.core.buffer.MessageBuffer;
 import org.msgpack.value.Value;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -41,14 +39,14 @@ public class MainActivity extends AppCompatActivity {
     private final String mActivityId = "com.enaml.MainActivity";
 
     // Assets version
-    public final int mAssetsVersion = 2;
-    public final boolean mAssetsAlwaysOverwrite = true; // Set only on debug builds
+    public final int mAssetsVersion = 3;
+    public final boolean mAssetsAlwaysOverwrite = false; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
     // When the view is loaded from python
     private FrameLayout mContentView;
     private View mLoadingView;
-    private UiManager mUiManager;
+    private Bridge mBridge;
     private int mShortAnimationDuration = 300;
 
     // Handler to hook python into the Android application event loop
@@ -65,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Save reference so python can access it
         mActivity = this;
-        mUiManager = new UiManager(this);
+        mBridge = new Bridge(this);
 
         // Show loading screen
         setContentView(R.layout.activity_main);
@@ -265,6 +263,8 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     public void processEvents(byte[] data) {
+        long startTime = System.nanoTime();
+        Log.i(TAG,"Start processing... ");
         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(data);
         try {
             int eventCount = unpacker.unpackArrayHeader();
@@ -273,49 +273,51 @@ public class MainActivity extends AppCompatActivity {
                 String eventType = unpacker.unpackString(); // first value
                 int paramCount = unpacker.unpackArrayHeader();
 
-                if (eventType.equals("createView")) {
-                    String viewClass = unpacker.unpackString();
-                    long viewId = unpacker.unpackLong();
-                    runOnUiThread(()->{mUiManager.createView(viewClass, viewId);});
-                } else if (eventType.equals("updateView")) {
-                    long viewId = unpacker.unpackLong();
-                    String viewMethod = unpacker.unpackString();
+                if (eventType.equals("createObject")) {
+                    int objId = unpacker.unpackInt();
+                    String objClass = unpacker.unpackString();
                     int argCount = unpacker.unpackArrayHeader();
                     Value[] args = new Value[argCount];
                     for (int j=0; j<argCount; j++) {
                         Value v = unpacker.unpackValue();
                         args[j] = v;
                     }
-                    runOnUiThread(()->{mUiManager.updateView(viewId, viewMethod,  args);});
+                    runOnUiThread(()->{mBridge.createObject(objId, objClass, args);});
+                } else if (eventType.equals("updateObject")) {
+                    int objId = unpacker.unpackInt();
+                    String objMethod = unpacker.unpackString();
+                    int argCount = unpacker.unpackArrayHeader();
+                    Value[] args = new Value[argCount];
+                    for (int j=0; j<argCount; j++) {
+                        Value v = unpacker.unpackValue();
+                        args[j] = v;
+                    }
+                    runOnUiThread(()->{mBridge.updateObject(objId, objMethod, args);});
+                } else if (eventType.equals("updateObjectField")) {
+                    int objId = unpacker.unpackInt();
+                    String objField = unpacker.unpackString();
+                    int argCount = unpacker.unpackArrayHeader();
+                    Value[] args = new Value[argCount];
+                    for (int j=0; j<argCount; j++) {
+                        Value v = unpacker.unpackValue();
+                        args[j] = v;
+                    }
+                    runOnUiThread(()->{mBridge.updateObjectField(objId, objField, args);});
+                } else if (eventType.equals("deleteObject")) {
+                    int objId = unpacker.unpackInt();
+                    runOnUiThread(()->{mBridge.deleteObject(objId);});
                 } else if (eventType.equals("showView")) {
-                    runOnUiThread(()->{setView(mUiManager.getRootView());});
+                    runOnUiThread(()->{setView(mBridge.getRootView());});
                 } else if (eventType.equals("displayError")) {
                     String errorMessage = unpacker.unpackString();
                     runOnUiThread(()->{showErrorMessage(errorMessage);});
                 }
-                /*unpacker.unp
-                try {
-                    JSONObject event = events.getJSONObject(i);
-                    String method = event.getString("method");
-                    JSONArray params = event.getJSONArray("params");
-                    if (method.equals("createView")) {
-                        String viewClass = params.getString(0);
-                        int viewId = params.getInt(1);
-                        mUiManager.createView(viewClass, viewId);
-                    } else if (method.equals("updateView")) {
-                        int viewId = params.getInt(0);
-                        String viewMethod = params.getString(1);
-                        mUiManager.updateView(viewId, viewMethod, params);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                */
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        long duration = (System.nanoTime()-startTime) / 1000000;
+        Log.i(TAG,"Done processing! ("+duration+" ms)");
     }
 
     /**

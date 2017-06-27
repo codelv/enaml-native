@@ -9,32 +9,67 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed, Subclass, Float
+from atom.api import Typed, Instance, Subclass, Float
 
 from enamlnative.widgets.view import ProxyView
 
-from .android_widget import AndroidWidget, View
+from .android_widget import AndroidWidget, Widget
+from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
-#Color = jnius.autoclass('android.graphics.Color')
-LayoutParams = jnius.autoclass('android.view.ViewGroup$LayoutParams')
-MarginLayoutParams = jnius.autoclass('android.view.ViewGroup$MarginLayoutParams')
-LayoutDirection = jnius.autoclass('android.util.LayoutDirection')
+class View(Widget):
+    __javaclass__ = 'android.view.View'
+    __signature__ = ('android.content.Context',)
+
+    def getId(self):
+        return self.__id__
+
+    addView = JavaMethod('android.view.View')
+    onClick = JavaCallback('android.view.View')
+    setOnClickListener = JavaMethod('android.view.View$OnClickListener')
+    setLayoutParams = JavaMethod('android.view.ViewGroup.LayoutParams')
+    setBackgroundColor = JavaMethod('android.graphics.Color')
+    setClickable = JavaMethod('boolean')
+    setTop = JavaMethod('int')
+    setBottom = JavaMethod('int')
+    setLeft = JavaMethod('int')
+    setRight = JavaMethod('int')
+    setLayoutDirection = JavaMethod('int')
+    setLayoutParams = JavaMethod('android.view.ViewGroup$LayoutParams')
+    setPadding = JavaMethod('int', 'int', 'int', 'int')
+
+    setX = JavaMethod('int')
+    setY = JavaMethod('int')
+    setZ = JavaMethod('int')
+    setMaximumHeight = JavaMethod('int')
+    setMaximumWidth = JavaMethod('int')
+    setMinimumHeight = JavaMethod('int')
+    setMinimumWidth = JavaMethod('int')
+    setEnabled = JavaMethod('boolean')
+    setTag = JavaMethod('java.lang.Object')
+    setToolTipText = JavaMethod('java.lang.CharSequence')
+    setVisibility = JavaMethod('int')
+    removeView = JavaMethod('android.view.View')
+
+    LAYOUT_DIRECTIONS = {
+        'ltr': 0,
+        'rtl': 1,
+        'locale': 3,
+        'inherit': 2,
+    }
 
 
-class OnClickListener(jnius.PythonJavaClass):
-    __javainterfaces__ = ['android/view/View$OnClickListener']
+class MarginLayoutParams(JavaBridgeObject):
+    __javaclass__ = 'android.view.ViewGroup$MarginLayoutParams'
+    __signature__ = ('int', 'int')
+    setMargins = JavaMethod('int', 'int', 'int', 'int')
+    setLayoutDirection = JavaMethod('int')
 
-    def __init__(self, handler):
-        self.__handler__ = handler
-        super(OnClickListener, self).__init__()
-
-    @jnius.java_method('(Landroid/view/View;)V')
-    def onClick(self, view):
-        self.__handler__.on_click(view)
-
-CACHE = {}
+    LAYOUTS = {
+        'fill_parent': -1,
+        'match_parent': -1,
+        'wrap_content': -2
+    }
 
 
 class AndroidView(AndroidWidget, ProxyView):
@@ -45,26 +80,24 @@ class AndroidView(AndroidWidget, ProxyView):
     widget = Typed(View)
 
     #: Display metrics density
-    dp = Float()
-    
-    #: Reference to click listener
-    click_listener = Typed(OnClickListener)
+    dp = Float(1.0)
+
+    #: Layout type
+    layout_param_type = Subclass(MarginLayoutParams)
+
+    #: Layout params
+    layout_params = Instance(MarginLayoutParams)
 
     def _default_dp(self):
-        if 'dp' not in CACHE:
-            CACHE['dp'] = 1.0#self.get_context().getResources().getDisplayMetrics().density
-        return CACHE['dp']
-
-    #: Default layout params
-    layout_params = Subclass(jnius.JavaClass)
-
-    def _default_layout_params(self):
-        return MarginLayoutParams
+        return self.get_context().dp
+    #     if 'dp' not in CACHE:
+    #         CACHE['dp'] = 1.0#self.get_context().getResources().getDisplayMetrics().density
+    #     return CACHE['dp']
 
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying label widget.
 
@@ -77,7 +110,8 @@ class AndroidView(AndroidWidget, ProxyView):
         """
         super(AndroidView, self).init_widget()
         d = self.declaration
-        self.set_layout_direction(d.layout_direction)
+        if d.layout_direction != 'ltr':  #: Default, no need to set it
+            self.set_layout_direction(d.layout_direction)
         if d.background_color:
             self.set_background_color(d.background_color)
         if d.top:
@@ -96,46 +130,31 @@ class AndroidView(AndroidWidget, ProxyView):
             self.set_y(d.z)
         if d.padding:
             self.set_padding(d.padding)
-        if d.margins:
-            self.set_margins(d.margins)
-        if d.layout_width or d.layout_height:
-            self.get_layout_params()
+        if d.margins or d.layout_width or d.layout_height:
+            self.set_layout_params(self.layout_params)
+            if d.margins:
+                self.set_margins(d.margins)
         if d.clickable:
             self.widget.setOnClickListener(id(self.widget))
             self.widget.onClick.connect(self.on_click)
             self.set_clickable(d.clickable)
 
-    def get_layout_params(self):
-        """ Get the layout params for this widget. If none exists,
-            set the layout params to an instance of ViewGroup.MarginLayoutParams
-
-        """
-        return  #: TODO: implement
-        #: Try to get existing
-        params = self.widget.getLayoutParams()
-        if params:
-            return params
-
-        #:
+    def _default_layout_params(self):
         d = self.declaration
-        if d.layout_width:
-            layout_width = getattr(LayoutParams, d.layout_width.upper())
-        else:
-            layout_width = LayoutParams.MATCH_PARENT
-        if d.layout_height:
-            layout_height = getattr(LayoutParams, d.layout_height.upper())
-        else:
-            layout_height = LayoutParams.MATCH_PARENT
+        LayoutParams = self.layout_param_type
+        try:
+            w = int(int(d.layout_width)*self.dp)
+        except ValueError:
+            w = MarginLayoutParams.LAYOUTS[d.layout_width or 'match_parent']
+        try:
+            h = int(int(d.layout_height)*self.dp)
+        except ValueError:
+            h = MarginLayoutParams.LAYOUTS[d.layout_height or 'match_parent']
+        return LayoutParams(w, h)
 
-        params = self.layout_params(
-            layout_width,
-            layout_height
-        )
-
-        self.widget.setLayoutParams(params)
-
-        return params
-
+    # --------------------------------------------------------------------------
+    # OnClickListener API
+    # --------------------------------------------------------------------------
     def on_click(self, view):
         """ Trigger the click
 
@@ -165,21 +184,25 @@ class AndroidView(AndroidWidget, ProxyView):
         self.widget.setRight(right)
 
     def set_layout_width(self, width):
-        self.get_layout_params()
+        pass
+        #self.set_layout_params(self.layout_params)
 
     def set_layout_height(self, height):
-        self.get_layout_params()
+        pass
+        #self.set_layout_params(self.layout_params)
 
     def set_layout_direction(self, direction):
-        if direction != 'none':
-            d = getattr(LayoutDirection,direction.upper())
-            self.widget.setLayoutDirection(d)
+        d = View.LAYOUT_DIRECTIONS[direction]
+        self.widget.setLayoutDirection(d)
+
+    def set_layout_params(self, params):
+        self.widget.setLayoutParams(params)
 
     def set_margins(self, margins):
         dp = self.dp
         l, t, r, b = margins
-        self.get_layout_params().setMargins(int(l*dp), int(t*dp),
-                                            int(r*dp), int(b*dp))
+        self.layout_params.setMargins(int(l*dp), int(t*dp),
+                                      int(r*dp), int(b*dp))
 
     def set_padding(self, padding):
         dp = self.dp

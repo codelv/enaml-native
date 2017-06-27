@@ -9,14 +9,15 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 
 from enamlnative.widgets.radio_button import ProxyRadioButton
 
-from .android_compound_button import AndroidCompoundButton
+from .android_compound_button import AndroidCompoundButton, CompoundButton
 
-RadioButton = jnius.autoclass('android.widget.RadioButton')
+
+class RadioButton(CompoundButton):
+    __javaclass__ = 'android.widget.RadioButton'
 
 
 class AndroidRadioButton(AndroidCompoundButton, ProxyRadioButton):
@@ -26,11 +27,11 @@ class AndroidRadioButton(AndroidCompoundButton, ProxyRadioButton):
     #: A reference to the widget created by the proxy.
     widget = Typed(RadioButton)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
+        """ Create the underlying widget.
 
         """
         self.widget = RadioButton(self.get_context())

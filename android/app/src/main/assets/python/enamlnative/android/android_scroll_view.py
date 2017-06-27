@@ -9,7 +9,6 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 
 from enamlnative.widgets.scroll_view import ProxyScrollView
@@ -32,7 +31,7 @@ class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
     # Initialization API
     # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = ScrollView(self.get_context())

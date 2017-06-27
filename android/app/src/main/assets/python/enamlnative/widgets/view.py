@@ -151,11 +151,11 @@ class View(Widget):
 
     label_for = d_(Int())
 
-    layout_width = d_(Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
+    layout_width = d_(Unicode())#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
 
-    layout_height = d_(Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
+    layout_height = d_(Unicode())#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
 
-    layout_direction = d_(Enum('none','inherit','locale','ltr','rtl'))
+    layout_direction = d_(Enum('ltr', 'rtl', 'inherit', 'locale'))
 
     left = d_(Int())
 

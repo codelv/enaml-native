@@ -9,15 +9,20 @@ Created on June 7, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 
 from enamlnative.widgets.switch import ProxySwitch
 
-from .android_compound_button import AndroidCompoundButton
+from .android_compound_button import AndroidCompoundButton, CompoundButton
+from .bridge import JavaMethod
 
-String = jnius.autoclass('java.lang.String')
-Switch = jnius.autoclass('android.widget.Switch')
+
+class Switch(CompoundButton):
+    __javaclass__ = 'android.widget.Switch'
+    setShowText = JavaMethod('boolean')
+    setSplitTrack = JavaMethod('boolean')
+    setTextOff = JavaMethod('java.lang.CharSequence')
+    setTextOn = JavaMethod('java.lang.CharSequence')
 
 
 class AndroidSwitch(AndroidCompoundButton, ProxySwitch):
@@ -31,11 +36,10 @@ class AndroidSwitch(AndroidCompoundButton, ProxySwitch):
     # Initialization API
     # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
+        """ Create the underlying widget.
 
         """
         self.widget = Switch(self.get_context())
-
 
     def init_widget(self):
         """ Initialize the underlying widget.
@@ -51,11 +55,9 @@ class AndroidSwitch(AndroidCompoundButton, ProxySwitch):
         if d.text_on:
             self.set_text_on(d.text_on)
 
-
     # --------------------------------------------------------------------------
     # ProxySwitch API
     # --------------------------------------------------------------------------
-
     def set_show_text(self, show):
         self.widget.setShowText(show)
 
@@ -63,7 +65,7 @@ class AndroidSwitch(AndroidCompoundButton, ProxySwitch):
         self.widget.setSplitTrack(split)
 
     def set_text_off(self, text):
-        self.widget.setTextOff(String(text))
+        self.widget.setTextOff(text)
 
     def set_text_on(self, text):
-        self.widget.setTextOn(String(text))
+        self.widget.setTextOn(text)

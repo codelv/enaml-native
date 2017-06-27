@@ -12,13 +12,13 @@ Forked from https://github.com/joaoventura/pybridge
 @author: jrm
 '''
 import traceback
-### Comment out to disable profiling
+# ### Comment out to disable profiling
 # import cProfile
 # pr = cProfile.Profile()
 # pr.enable()
-#
-# shared = {'pr':pr}
-### End profiling
+
+## End profiling
+import time
 import sys
 import jnius
 import traceback
@@ -31,16 +31,17 @@ def main():
     from enamlnative.android.app import AndroidApplication
     MainActivity = jnius.autoclass('com.enaml.MainActivity')
     app = AndroidApplication(MainActivity.mActivity)
+    #app.debug = True
     try:
         with enaml.imports():
-            from test import ContentView
+            from view import ContentView
             app.view = ContentView()
         app.show_view()
+        #app.deferred_call(dump_stats)
     except:
         msg = traceback.format_exc()
         print msg
         app.deferred_call(lambda msg=msg:app.send_event('displayError', msg))
-
     app.start()
 
 
@@ -110,14 +111,15 @@ def start():
     app.start()
     shared['app'] = app # So it doesn't get GC'd ?
     pr = shared.get('pr')
-    if pr:
-        pr.disable()
-        import pstats, StringIO
-        for sort_by in ['cumulative', 'time']:
-            s = StringIO.StringIO()
-            ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
-            ps.print_stats()
-            print s.getvalue()
+
+def dump_stats():
+    pr.disable()
+    import pstats, StringIO
+    for sort_by in ['cumulative', 'time']:
+        s = StringIO.StringIO()
+        ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
+        ps.print_stats(0.3)
+        print s.getvalue()
 
 def callback(callback_id):
     """ Display the view """

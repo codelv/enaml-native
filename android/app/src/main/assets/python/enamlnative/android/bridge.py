@@ -15,34 +15,45 @@ import traceback
 from pprint import pprint
 from contextlib import contextmanager
 
+def get_app_class():
+    """ Avoid circular import. Probably indicates a
+        poor design...
+    """
+    from .app import AndroidApplication
+    return AndroidApplication
+
 
 def msgpack_encoder(sig, obj):
     """ When passing a JavaBridgeObject encode it in a special way so
         it can properly be interpreted as a reference.
     """
     if isinstance(obj, JavaBridgeObject):
-        return (sig, obj.__view_id__)
+        return (sig, obj.__id__)
+    elif isinstance(obj, get_app_class()):
+        return (sig, -1)
     return (sig, obj)
 
 
 def dumps(data):
     """ Encodes events for sending over the bridge """
-    print "======== Py --> Java ======"
-    pprint(data)
-    print "==========================="
+    if get_app_class().instance().debug:
+        print "======== Py --> Java ======"
+        pprint(data)
+        print "==========================="
     return msgpack.dumps(data)
 
 
 def loads(data):
     """ Decodes and processes events received from the bridge """
     events = msgpack.loads(data)
-    print "======== Py <-- Java ======"
-    pprint(events)
-    print "==========================="
+    if get_app_class().instance().debug:
+        print "======== Py <-- Java ======"
+        pprint(events)
+        print "==========================="
     for event in events:
-        if event[0]=='viewEvent':
+        if event[0] == 'event':
             ptr, method, args = event[1]
-            invoke(ptr, method, *[v for t,v in args])
+            invoke(ptr, method, *[v for t, v in args])
 
 
 def invoke(ptr, method, *args):
@@ -62,9 +73,10 @@ class JavaMethod(object):
     """ Description of a method of a View (or subclass) in Java. When called, this
         serializes call, packs the arguments, and delegates handling to a bridge in Java.
     """
-    __slots__ = ('__signature__', '__view__', '__name__','__suppressed__')
+    __slots__ = ('__signature__', '__javaobj__', '__name__', '__suppressed__', '__returns__')
 
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
+        self.__returns__ = kwargs.get('returns', None)
         self.__signature__ = args
         self.__suppressed__ = False
 
@@ -78,19 +90,54 @@ class JavaMethod(object):
     def __call__(self, *args):
         if self.__suppressed__:
             return
-        elif len(args) != len(self.__signature__):
+
+        vargs = self.__signature__ and self.__signature__[-1].endswith("...")
+        if not vargs and (len(args) != len(self.__signature__)):
             raise ValueError("Invalid number of arguments: Given {}, expected {}"
                              .format(args, self.__signature__))
-        self.__view__.__app__.send_event(
-            'updateView',  #: method
-            self.__view__.__view_id__,
+        if vargs:
+            bridge_args = []
+            varg = self.__signature__[-1].replace('...', '')
+            for i in range(len(args)):
+                sig = self.__signature__[i] if i+1 < len(self.__signature__) else varg
+                bridge_args.append(msgpack_encoder(sig, args[i]))
+        else:
+            bridge_args = [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)]
+
+        self.__javaobj__.__app__.send_event(
+            'updateObject',  #: method
+            self.__javaobj__.__id__,
             self.__name__,  #: method name
-            [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)]  #: args
+            bridge_args  #: args
         )
 
-    def clone(self):
-        cls = type(self)
-        return cls(*self.__signature__)
+    def clone(self, owner):
+        obj = type(self)(*self.__signature__)
+        obj.__name__ = self.__name__
+        obj.__javaobj__ = owner
+        return obj
+
+
+class JavaField(JavaMethod):
+    def __init__(self, arg):
+        super(JavaField, self).__init__(arg)
+
+    def __set__(self, obj, arg):
+        #: Get the cloned field
+        if self.__suppressed__:
+            return
+        obj.__app__.send_event(
+            'updateObjectField',  #: method
+            obj.__id__,
+            self.__name__,  #: method name
+            [msgpack_encoder(self.__signature__[0], arg)]  #: args
+        )
+
+    def __get__(self, obj, objtype=None):
+        raise NotImplementedError("Reading attributes is not yet supported")
+
+    def __call__(self, *args, **kwargs):
+        return object.__call__(self, *args, **kwargs)
 
 
 class JavaCallback(JavaMethod):
@@ -119,26 +166,41 @@ class JavaBridgeObject(object):
         the bridge for execution.
 
     """
-    __slots__ = ('__app__', '__view_id__')
+    __slots__ = ('__app__', '__id__')
     __javaclass__ = 'java.lang.Object'
+    __signature__ = ()
+    __global_id__ = 0
 
-    def __init__(self, context):
+    def __init__(self, *args):
         """ Sends the event to create this View in Java """
-        self.__app__ = context
-        self.__view_id__ = id(self)
+
+        #: Set the object id
+        JavaBridgeObject.__global_id__ +=1
+        self.__id__ = JavaBridgeObject.__global_id__  #: id(self)
+
+        #: Set the app instance
+        self.__app__ = get_app_class().instance()
 
         #: Get declared methods
         for base in reversed(type(self).__mro__):
             for name, method in base.__dict__.iteritems():
-                if isinstance(method, JavaMethod):
-                    clone = method.clone()
-                    clone.__name__ = name
-                    clone.__view__ = self
-                    setattr(self, name, clone)
+                if isinstance(method, JavaField):
+                    method.__name__ = name
+                    #: Do not clone
+                elif isinstance(method, JavaMethod):
+                    method.__name__ = name
+                    setattr(self, name, method.clone(self))
 
         #: Send the event over the bridge to construct the view
         self.__app__.send_event(
-            'createView', #: method
+            'createObject', #: method
+            self.__id__, #: id to assign in java
             self.__javaclass__,
-            self.__view_id__ #: args
+            [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)],
+        )
+
+    def __del__(self):
+        self.__app__.send_event(
+            'deleteObject', #: method
+            self.__id__, #: id to assign in java
         )

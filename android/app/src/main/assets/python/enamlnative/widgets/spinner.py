@@ -25,6 +25,9 @@ class ProxySpinner(ProxyViewGroup):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Spinner)
 
+    def set_mode(self, mode):
+        pass
+
     def set_prompt(self, prompt):
         raise NotImplementedError
 
@@ -52,6 +55,9 @@ class Spinner(ViewGroup):
 
     """
 
+    #: Set the mode
+    mode = d_(Enum('dropdown', 'dialog'))
+
     #: Sets the prompt to display when the dialog is shown.
     prompt = d_(Unicode())
 
@@ -62,7 +68,7 @@ class Spinner(ViewGroup):
     items = d_(List())
 
     #: Gravity setting for positioning the currently selected item.
-    gravity = d_(Enum('fill','bottom', 'center', 'center_horizontal',
+    gravity = d_(Enum('fill', 'bottom', 'center', 'center_horizontal',
                       'center_vertical', 'clip_horizontal',
                       'clip_vertical', 'end', 'fill_horizontal',
                       'fill_vertical', 'left', 'right' 'start', 'top'))
@@ -82,7 +88,7 @@ class Spinner(ViewGroup):
     #--------------------------------------------------------------------------
     # Observers
     #--------------------------------------------------------------------------
-    @observe('prompt', 'selected', 'items', 'gravity',
+    @observe('mode', 'prompt', 'selected', 'items', 'gravity',
             'drop_down_horizontal_offset', 'drop_down_vertical_offset', 'drop_down_width')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

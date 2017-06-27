@@ -9,15 +9,18 @@ Created on June 7, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed
 
 from enamlnative.widgets.toggle_button import ProxyToggleButton
 
-from .android_compound_button import AndroidCompoundButton
+from .android_compound_button import AndroidCompoundButton, CompoundButton
+from .bridge import JavaMethod
 
-String = jnius.autoclass('java.lang.String')
-ToggleButton = jnius.autoclass('android.widget.ToggleButton')
+
+class ToggleButton(CompoundButton):
+    __javaclass__ = 'android.widget.ToggleButton'
+    setTextOff = JavaMethod('java.lang.CharSequence')
+    setTextOn = JavaMethod('java.lang.CharSequence')
 
 
 class AndroidToggleButton(AndroidCompoundButton, ProxyToggleButton):
@@ -31,7 +34,7 @@ class AndroidToggleButton(AndroidCompoundButton, ProxyToggleButton):
     # Initialization API
     # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
+        """ Create the underlyings widget.
 
         """
         self.widget = ToggleButton(self.get_context())
@@ -50,9 +53,8 @@ class AndroidToggleButton(AndroidCompoundButton, ProxyToggleButton):
     # --------------------------------------------------------------------------
     # ProxyToggleButton API
     # --------------------------------------------------------------------------
-
     def set_text_off(self, text):
-        self.widget.setTextOff(String(text))
+        self.widget.setTextOff(text)
 
     def set_text_on(self, text):
-        self.widget.setTextOn(String(text))
+        self.widget.setTextOn(text)

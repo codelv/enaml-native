@@ -9,96 +9,53 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 from atom.api import Typed, List
 
 from enamlnative.widgets.spinner import ProxySpinner
 
-from .android_text_view import TextView
-from .android_view_group import AndroidViewGroup
-
-String = jnius.autoclass('java.lang.String')
-Gravity = jnius.autoclass('android.view.Gravity')
-LayoutParams = jnius.autoclass('android.view.ViewGroup$LayoutParams')
-Spinner = jnius.autoclass('android.widget.Spinner')
-DataSetObservers = jnius.autoclass('android.database.DataSetObserver')
-
-class SpinnerAdapter(jnius.PythonJavaClass):
-    """ Python implementation of an Android SpinnerAdapter.
-        It simply delegates all calls to a handler
-        with "pythonized" versions of the methods (eg camelCase to camel_case).
-
-    """
-    __javainterfaces__ = ['android/widget/SpinnerAdapter']
-
-    def __init__(self, handler):
-        self.__handler__ = handler
-        super(SpinnerAdapter, self).__init__()
-
-    @jnius.java_method('()I')
-    def getCount(self):
-        return self.__handler__.get_count()
-
-    @jnius.java_method('(I)Ljava/lang/Object;')
-    def getItem(self, position):
-        return self.__handler__.get_item(position)
-
-    @jnius.java_method('(I)J')
-    def getItemId(self, position):
-        return self.__handler__.get_item_id(position)
-
-    @jnius.java_method('(I)I')
-    def getItemViewType(self, position):
-        return self.__handler__.get_item_view_type(position)
-
-    @jnius.java_method('()I')
-    def getViewTypeCount(self):
-        return self.__handler__.get_view_type_count()
-
-    @jnius.java_method('()Z')
-    def hasStableIds(self):
-        return self.__handler__.has_stable_ids()
-
-    @jnius.java_method('()Z')
-    def isEmpty(self):
-        return self.__handler__.is_empty()
-
-    @jnius.java_method('(ILandroid/view/View;Landroid/view/ViewGroup;)Landroid/view/View;')
-    def getView(self, position, convertView, parent):
-        return self.__handler__.get_view(position, convertView, parent)
-
-    @jnius.java_method('(ILandroid/view/View;Landroid/view/ViewGroup;)Landroid/view/View;')
-    def getDropDownView(self, position, convertView, parent):
-        return self.__handler__.get_drop_down_view(position, convertView, parent)
-
-    @jnius.java_method('(Landroid/database/DataSetObserver;)V')
-    def registerDataSetObserver(self, observer):
-        return self.__handler__.register_data_set_observer(observer)
-
-    @jnius.java_method('(Landroid/database/DataSetObserver;)V')
-    def unregisterDataSetObserver(self, observer):
-        return self.__handler__.unregister_data_set_observer(observer)
+from .android_view_group import AndroidViewGroup, ViewGroup
+from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
-class OnItemSelectedListener(jnius.PythonJavaClass):
-    """ Python implementation of an Android AdapterView.OnItemSelectedListener.
-        It simply delegates all calls to a handler
-        with "pythonized" versions of the methods (eg camelCase to camel_case).
+class AdapterView(ViewGroup):
+    __javaclass__ = 'android.widget.AdapterView'
+    setEmptyView = JavaMethod('android.view.View')
+    setFocusableInTouchMode = JavaMethod('boolean')
+    setOnItemClickListener = JavaMethod('android.widget.AdapterView$OnItemClickListener')
+    setOnItemLongClickListener = JavaMethod('android.widget.AdapterView$OnItemLongClickListener')
+    setOnItemSelectedListener = JavaMethod('android.widget.AdapterView$OnItemSelectedListener')
+    setSelection = JavaMethod('int')
 
-    """
-    __javainterfaces__ = ['android/widget/AdapterView$OnItemSelectedListener']
+    onItemClick = JavaMethod('android.widget.AdapterView', 'android.view.View', 'int', 'long')
+    onItemLongClick = JavaMethod('android.widget.AdapterView', 'android.view.View', 'int', 'long')
+    onItemSelected = JavaCallback('android.widget.AdapterView', 'android.view.View', 'int', 'long')
+    onNothingSelected = JavaCallback('android.widget.AdapterView')
 
-    def __init__(self, handler):
-        self.__handler__ = handler
-        super(OnItemSelectedListener, self).__init__()
 
-    @jnius.java_method('(Landroid/widget/AdapterView;Landroid/view/View;IJ)V')
-    def onItemSelected(self, parent, view, position, id):
-        return self.__handler__.on_item_selected(parent, view, position, id)
+class AbsSpinner(AdapterView):
+    __javaclass__ = 'android.widget.AbsSpinner'
+    pointToPosition = JavaMethod('int', 'int')
+    setAdapter = JavaMethod('android.widget.SpinnerAdapter')
 
-    @jnius.java_method('(Landroid/widget/AdapterView;)V')
-    def onNothingSelected(self, parent):
-        return self.__handler__.on_nothing_selected(parent)
+
+class Spinner(AbsSpinner):
+    __javaclass__ = 'android.widget.Spinner'
+    __signature__ = ('android.content.Context', 'int')
+    setDropDownHorizontalOffset = JavaMethod('int')
+    setDropDownVerticalOffset = JavaMethod('int')
+    setDropDownWidth = JavaMethod('int')
+    setEnabled = JavaMethod('boolean')
+    setGravity = JavaMethod('int')
+    setPrompt = JavaMethod('java.lang.CharSequence')
+
+
+class ArrayAdapter(JavaBridgeObject):
+    __javaclass__ = 'android.widget.ArrayAdapter'
+    __signature__ = ('android.content.Context', 'int')
+    add = JavaMethod('java.lang.Object')
+    remove = JavaMethod('java.lang.Object')
+    clear = JavaMethod()
+    #addAll = JavaMethod('int...') #: TODO implement this...
 
 
 class AndroidSpinner(AndroidViewGroup, ProxySpinner):
@@ -108,20 +65,8 @@ class AndroidSpinner(AndroidViewGroup, ProxySpinner):
     #: A reference to the widget created by the proxy.
     widget = Typed(Spinner)
 
-    #: Layout params constructor for this layout
-    layout_params = LayoutParams
-
     #: Reference to adapter
-    adapter = Typed(SpinnerAdapter)
-
-    #: Reference to a data set observer
-    observers = List(DataSetObservers)
-
-    #: View cache
-    views = List(TextView, default=[])
-
-    #: Selection listener reference
-    selection_listener = Typed(OnItemSelectedListener)
+    adapter = Typed(ArrayAdapter)
 
     # --------------------------------------------------------------------------
     # Initialization API
@@ -130,7 +75,9 @@ class AndroidSpinner(AndroidViewGroup, ProxySpinner):
         """ Create the underlying label widget.
 
         """
-        self.widget = Spinner(self.get_context())
+        d = self.declaration
+        mode = 1 if d.mode == 'dropdown' else 0
+        self.widget = Spinner(self.get_context(), mode)
 
     def init_widget(self):
         """ Initialize the underlying widget.
@@ -148,63 +95,19 @@ class AndroidSpinner(AndroidViewGroup, ProxySpinner):
         if d.gravity:
             self.set_gravity(d.gravity)
 
-        #: Create the adapter
-        self.adapter = SpinnerAdapter(self)
-        self.set_items(d.items)
+        #: Create the adapter simple_spinner_item = 0x01090008
+        self.adapter = ArrayAdapter(self.get_context(), 0x01090008)
+        if d.items:
+            self.set_items(d.items)
         self.widget.setAdapter(self.adapter)
 
         if d.selected:
             self.set_selected(d.selected)
 
         #: Selection listener
-        self.selection_listener = OnItemSelectedListener(self)
-        self.widget.setOnItemSelectedListener(self.selection_listener)
-
-    # --------------------------------------------------------------------------
-    # SpinnerAdapter API
-    # --------------------------------------------------------------------------
-
-    def get_count(self):
-        d = self.declaration
-        return len(d.items)
-
-    def get_item(self, position):
-        return None # Not implemented, it must be converted to an object
-
-    def get_item_id(self, position):
-        d = self.declaration
-        return id(d.items[position])
-
-    def get_item_view_type(self, position):
-        return 0
-
-    def get_view_type_count(self):
-        return 1
-
-    def has_stable_ids(self):
-        return True
-
-    def is_empty(self):
-        d = self.declaration
-        return len(d.items)==0
-
-    def get_view(self, position, convert_view, parent):
-        return self.views[position]
-
-    def get_drop_down_view(self, position, convert_view, parent):
-        """ Return the view
-
-        """
-        return self.get_view(position, convert_view, parent)
-
-    def register_data_set_observer(self, observer):
-        self.observers.append(observer)
-
-    def unregister_data_set_observer(self, observer):
-        try:
-            self.observers.remove(observer)
-        except:
-            pass
+        self.widget.setOnItemSelectedListener(id(self.widget))
+        self.widget.onItemSelected.connect(self.on_item_selected)
+        self.widget.onNothingSelected.connect(self.on_nothing_selected)
 
     # --------------------------------------------------------------------------
     # OnSelectionListener API
@@ -212,7 +115,8 @@ class AndroidSpinner(AndroidViewGroup, ProxySpinner):
 
     def on_item_selected(self, parent, view, position, id):
         d = self.declaration
-        d.selected = position
+        with self.widget.setSelection.suppressed():
+            d.selected = position
 
     def on_nothing_selected(self, parent):
         pass
@@ -221,7 +125,7 @@ class AndroidSpinner(AndroidViewGroup, ProxySpinner):
     # ProxySpinner API
     # --------------------------------------------------------------------------
     def set_prompt(self, prompt):
-        self.widget.setPrompt(String(prompt))
+        self.widget.setPrompt(prompt)
 
     def set_selected(self, selected):
         self.widget.setSelection(selected)
@@ -230,21 +134,14 @@ class AndroidSpinner(AndroidViewGroup, ProxySpinner):
         """ Generate the view cache
 
         """
-        views = []
-        context = self.get_context()
+        self.adapter.clear()
         for item in items:
-            tv = TextView(context)
-            tv.setText(String(str(item)))
-            views.append(tv)
-        self.views = views
-
-        #: Notify java observers
-        for observer in self.observers:
-            observer.onChanged()
+            self.adapter.add(item)
 
     def set_gravity(self, gravity):
-        g = getattr(Gravity,gravity.upper())
-        self.widget.setGravity(g)
+        #g = getattr(Gravity,gravity.upper())
+        #self.widget.setGravity(gravity)
+        pass
 
     def set_drop_down_horizontal_offset(self, offset):
         self.widget.setDropDownHorizontalOffset(offset)

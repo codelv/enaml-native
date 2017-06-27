@@ -51,7 +51,6 @@ class RatingBar(ProgressBar):
     #: (if another layout width is set, the results may be unpredictable).
     layout_width = set_default('wrap_content')
 
-
     #: Sets the number of stars to show.
     num_stars = d_(Int())
 
