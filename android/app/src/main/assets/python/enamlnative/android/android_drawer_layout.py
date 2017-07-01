@@ -86,7 +86,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
         #: Set the layout params to a drawer layout
         for c in self.drawers():
             c.layout_param_type = DrawerLayoutParams
-        
+
     def init_layout(self):
         super(AndroidDrawerLayout, self).init_layout()
         d = self.declaration
@@ -132,7 +132,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
 
     def on_drawer_slide(self, view, offset):
         pass
-    
+
     def on_drawer_state_changed(self, state):
         pass
 
@@ -143,7 +143,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
         """ Opened is a tuple of the drawer sides that are open
 
         """
-        #self.drawer_state = opened
+        self.drawer_state = opened
 
     def _observe_drawer_state(self, change):
         #: Diff old and new to find changes
@@ -152,21 +152,20 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
 
         #: Closed
         for c in old.difference(new):
-            view = c.widget
+            view = c.proxy.widget
             self.widget.closeDrawer(view)
 
         #: Opened
         for c in new.difference(old):
-            view = c.widget
+            view = c.proxy.widget
             self.widget.openDrawer(view)
 
         #: Rest unchanged
 
     def set_drawer_width(self, width):
-        pass
-    #    d = self.declaration
-    #    self.set_side(d.side)
-    #
+        d = self.declaration
+        self.set_side(d.side)
+
     # def set_drawer_gravity(self,gravity):
     #     d = self.declaration
     #     params = DrawerLayoutLayoutParams(
