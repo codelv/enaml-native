@@ -155,6 +155,10 @@ def toggle_button_factory():
     from .android_toggle_button import AndroidToggleButton
     return AndroidToggleButton
 
+def toolbar_factory():
+    from .android_toolbar import AndroidToolbar
+    return AndroidToolbar
+
 def view_factory():
     # print "Import view"
     from .android_view import AndroidView
@@ -198,6 +202,7 @@ ANDROID_FACTORIES = {
     'TextView': text_view_factory,
     'TimePicker': time_picker_factory,
     'ToggleButton': toggle_button_factory,
+    'Toolbar': toolbar_factory,
     'View': view_factory,
     'ViewGroup': view_group_factory,
     'ViewPager': view_pager_factory,

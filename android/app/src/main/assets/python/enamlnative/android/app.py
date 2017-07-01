@@ -9,7 +9,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 
 '''
 import jnius
-from atom.api import List, Float, Value, Dict, Int, Unicode, Typed, Bool
+from atom.api import Atom, List, Float, Value, Dict, Int, Unicode, Typed, Bool
 from enaml.application import Application, ProxyResolver
 from . import factories
 from . import bridge
@@ -39,6 +39,19 @@ class AppEventListener(jnius.PythonJavaClass):
         self.__handler__.on_stop()
 
 
+class Activity(bridge.JavaBridgeObject):
+    """ Access to the activity over the bridge """
+    __javaclass__ = Unicode('android.support.v7.app.AppCompatActivity')
+    __id__ = Int(-1)
+
+    def __init__(self):
+        Atom.__init__(self)
+
+    setActionBar = bridge.JavaMethod('android.widget.Toolbar')
+    setSupportActionBar = bridge.JavaMethod('android.support.v7.widget.Toolbar')
+    setContentView = bridge.JavaMethod('android.view.View')
+
+
 class AndroidApplication(Application):
     """ An Android implementation of an Enaml application.
 
@@ -50,6 +63,12 @@ class AndroidApplication(Application):
     #: Attributes so it can be seralized over the bridge as a reference
     __javaclass__ = Unicode('android.content.Context')
     __id__ = Int(-1)
+
+    #: Bridge widget
+    widget = Typed(Activity)
+
+    def _default_widget(self):
+        return Activity()
 
     #: Android Activity
     activity = Value(object)

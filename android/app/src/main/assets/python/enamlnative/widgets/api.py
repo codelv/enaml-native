@@ -50,3 +50,4 @@ from .date_picker import DatePicker
 from .tab_widget import TabWidget
 from .tab_host import TabHost
 from .progress_bar import ProgressBar
+from .toolbar import Toolbar

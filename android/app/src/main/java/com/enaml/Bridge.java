@@ -52,6 +52,7 @@ public class Bridge {
 
     public Bridge(Context context) {
         mContext = context;
+        mObjectCache.put(-1, mContext);
     }
 
     /**
@@ -116,7 +117,8 @@ public class Bridge {
                                 // TODO: There should be a generic way for doing this
                                 argType.equals("android.view.ViewGroup$LayoutParams") ||
                                 argType.equals("android.view.View") ||
-                                argType.equals("android.widget.SpinnerAdapter")
+                                argType.equals("android.widget.SpinnerAdapter") ||
+                                argType.equals("android.support.v7.widget.Toolbar")
                                 ) {
                             // Hack for passing references. Assumes that if you pass
                             // an int for a type that is not an int,
