@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.date_picker import ProxyDatePicker
 
@@ -18,7 +18,7 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class DatePicker(FrameLayout):
-    __javaclass__ = 'android.widget.DatePicker'
+    __javaclass__ = set_default('android.widget.DatePicker')
     init = JavaMethod('int', 'int', 'int', 'android.widget.DatePicker$OnDateChangedListener')
     onDateChanged = JavaCallback('android.widget.DatePicker', 'int', 'int', 'int')
     updateDate = JavaMethod('int', 'int', 'int')

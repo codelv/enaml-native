@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.text_view import ProxyTextView
 
@@ -18,7 +18,7 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class TextView(View):
-    __javaclass__ = 'android.widget.TextView'
+    __javaclass__ = set_default('android.widget.TextView')
     setAllCaps = JavaMethod('boolean')
     setAutoLinkMask = JavaMethod('int')
     setText = JavaMethod('java.lang.CharSequence')

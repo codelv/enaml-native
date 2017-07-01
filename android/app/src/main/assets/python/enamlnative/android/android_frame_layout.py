@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.frame_layout import ProxyFrameLayout
 
@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class FrameLayout(ViewGroup):
-    __javaclass__ = 'android.widget.FrameLayout'
+    __javaclass__ = set_default('android.widget.FrameLayout')
     setForegroundGravity = JavaMethod('int')
     setMeasureAllChildren = JavaMethod('boolean')
 

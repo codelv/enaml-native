@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.radio_button import ProxyRadioButton
 
@@ -17,7 +17,7 @@ from .android_compound_button import AndroidCompoundButton, CompoundButton
 
 
 class RadioButton(CompoundButton):
-    __javaclass__ = 'android.widget.RadioButton'
+    __javaclass__ = set_default('android.widget.RadioButton')
 
 
 class AndroidRadioButton(AndroidCompoundButton, ProxyRadioButton):

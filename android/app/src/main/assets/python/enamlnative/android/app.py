@@ -9,11 +9,10 @@ The full license is in the file COPYING.txt, distributed with this software.
 
 '''
 import jnius
-from atom.api import List, Float, Value, Dict, Int, Typed, Bool
+from atom.api import List, Float, Value, Dict, Int, Unicode, Typed, Bool
 from enaml.application import Application, ProxyResolver
 from . import factories
 from . import bridge
-
 
 class AppEventListener(jnius.PythonJavaClass):
     __javainterfaces__ = ['com/enaml/MainActivity$AppEventListener']
@@ -47,6 +46,11 @@ class AndroidApplication(Application):
     runs in the local process.
 
     """
+
+    #: Attributes so it can be seralized over the bridge as a reference
+    __javaclass__ = Unicode('android.content.Context')
+    __id__ = Int(-1)
+
     #: Android Activity
     activity = Value(object)
 
@@ -62,12 +66,14 @@ class AndroidApplication(Application):
     def _default_dp(self):
         return self.activity.getResources().getDisplayMetrics().density
 
-
+    #: Event loop
     loop = Value()
 
     def _default_loop(self):
         #from twisted.internet import reactor
-        from tornado.ioloop import IOLoop
+        #return reactor
+        from enamlnative.core.ioloop import IOLoop
+        #from tornado.ioloop import IOLoop
         return IOLoop.current()
 
     #: Save reference to the event listener
@@ -77,7 +83,7 @@ class AndroidApplication(Application):
     _bridge_queue = List()
 
     #: Delay to wait before sending events (in ms)
-    _bridge_timeout = Int(10)
+    _bridge_timeout = Int(3)
 
     #: Count of pending send calls
     _bridge_pending = Int(0)
@@ -101,7 +107,7 @@ class AndroidApplication(Application):
         self.listener = AppEventListener(self)
         activity.setAppEventListener(self.listener)
         self.loop.start()
-        #reactor.run()
+        #self.loop.run()
 
     def show_view(self):
         view = self.get_view()
@@ -122,7 +128,6 @@ class AndroidApplication(Application):
         """ Stop the application's main event loop.
 
         """
-        #reactor.stop()
         self.loop.stop()
 
     def send_event(self, name, *args):
@@ -167,7 +172,7 @@ class AndroidApplication(Application):
 
         """
         self.loop.add_callback(callback, *args, **kwargs)
-        #reactor.callWhenRunning(callback, *args, **kwargs)
+        #self.loop.callWhenRunning(callback, *args, **kwargs)
 
     def timed_call(self, ms, callback, *args, **kwargs):
         """ Invoke a callable on the main event loop thread at a
@@ -188,7 +193,7 @@ class AndroidApplication(Application):
 
         """
         self.loop.call_later(ms/1000.0, callback, *args, **kwargs)
-        #reactor.callLater(ms/1000.0, callback, *args, **kwargs)
+        #self.loop.callLater(ms/1000.0, callback, *args, **kwargs)
 
     def is_main_thread(self):
         """ Indicates whether the caller is on the main gui thread.
@@ -207,7 +212,6 @@ class AndroidApplication(Application):
     def on_events(self, data):
         #: Pass to event loop thread
         self.deferred_call(bridge.loads, data)
-        #reactor.callFromThread(bridge.loads, data)
 
     def on_pause(self):
         pass

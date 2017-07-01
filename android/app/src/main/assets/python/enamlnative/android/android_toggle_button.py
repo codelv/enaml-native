@@ -9,7 +9,7 @@ Created on June 7, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.toggle_button import ProxyToggleButton
 
@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class ToggleButton(CompoundButton):
-    __javaclass__ = 'android.widget.ToggleButton'
+    __javaclass__ = set_default('android.widget.ToggleButton')
     setTextOff = JavaMethod('java.lang.CharSequence')
     setTextOn = JavaMethod('java.lang.CharSequence')
 

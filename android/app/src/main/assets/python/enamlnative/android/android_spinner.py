@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed, List
+from atom.api import Typed, List, set_default
 
 from enamlnative.widgets.spinner import ProxySpinner
 
@@ -18,7 +18,7 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
 class AdapterView(ViewGroup):
-    __javaclass__ = 'android.widget.AdapterView'
+    __javaclass__ = set_default('android.widget.AdapterView')
     setEmptyView = JavaMethod('android.view.View')
     setFocusableInTouchMode = JavaMethod('boolean')
     setOnItemClickListener = JavaMethod('android.widget.AdapterView$OnItemClickListener')
@@ -33,14 +33,14 @@ class AdapterView(ViewGroup):
 
 
 class AbsSpinner(AdapterView):
-    __javaclass__ = 'android.widget.AbsSpinner'
+    __javaclass__ = set_default('android.widget.AbsSpinner')
     pointToPosition = JavaMethod('int', 'int')
     setAdapter = JavaMethod('android.widget.SpinnerAdapter')
 
 
 class Spinner(AbsSpinner):
-    __javaclass__ = 'android.widget.Spinner'
-    __signature__ = ('android.content.Context', 'int')
+    __javaclass__ = set_default('android.widget.Spinner')
+    __signature__ = set_default(('android.content.Context', 'int'))
     setDropDownHorizontalOffset = JavaMethod('int')
     setDropDownVerticalOffset = JavaMethod('int')
     setDropDownWidth = JavaMethod('int')
@@ -50,8 +50,8 @@ class Spinner(AbsSpinner):
 
 
 class ArrayAdapter(JavaBridgeObject):
-    __javaclass__ = 'android.widget.ArrayAdapter'
-    __signature__ = ('android.content.Context', 'int')
+    __javaclass__ = set_default('android.widget.ArrayAdapter')
+    __signature__ = set_default(('android.content.Context', 'int'))
     add = JavaMethod('java.lang.Object')
     remove = JavaMethod('java.lang.Object')
     clear = JavaMethod()

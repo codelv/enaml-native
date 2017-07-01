@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private final String mActivityId = "com.enaml.MainActivity";
 
     // Assets version
-    public final int mAssetsVersion = 3;
+    public final int mAssetsVersion = 1;
     public final boolean mAssetsAlwaysOverwrite = false; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private AppEventListener mAppEventListener;
     private ArrayList<MessageBufferPacker> mEventList = new ArrayList<MessageBufferPacker>();
     private int mEventCount = 0;
-    private int mEventDelay = 10;
+    private int mEventDelay = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
             String pythonPath = assetExtractor.getAssetsDataDir() + path;
 
             // Initialize python
-            // Note: This must be done in the UI thread!
+            // Note: This must be NOT done in the UI thread!
             PyBridge.start(pythonPath);
 
             return pythonPath;

@@ -9,7 +9,7 @@ Created on June 7, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.rating_bar import ProxyRatingBar
 
@@ -18,7 +18,7 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class RatingBar(ProgressBar):
-    __javaclass__ = 'android.widget.RatingBar'
+    __javaclass__ = set_default('android.widget.RatingBar')
     setIsIndicator = JavaMethod('boolean')
     setMax = JavaMethod('int')
     setNumStars = JavaMethod('int')

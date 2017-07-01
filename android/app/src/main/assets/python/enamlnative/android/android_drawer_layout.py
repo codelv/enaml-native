@@ -9,16 +9,16 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed, List
+from atom.api import Typed, List, set_default
 
 from enamlnative.widgets.drawer_layout import ProxyDrawerLayout
 
 from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField
+from .bridge import JavaMethod, JavaCallback, JavaField
 
 
 class DrawerLayout(ViewGroup):
-    __javaclass__ = 'android.support.v4.widget.DrawerLayout'
+    __javaclass__ = set_default('android.support.v4.widget.DrawerLayout')
     openDrawer = JavaMethod('android.view.View')
     closeDrawer = JavaMethod('android.view.View')
     addDrawerListener = JavaMethod('android.support.v4.widget.DrawerLayout$DrawerListener')
@@ -43,7 +43,7 @@ class DrawerLayout(ViewGroup):
 
 class DrawerLayoutParams(MarginLayoutParams):
     """ Update the child widget with the given params """
-    __javaclass__ = 'android.support.v4.widget.DrawerLayout$LayoutParams'
+    __javaclass__ = set_default('android.support.v4.widget.DrawerLayout$LayoutParams')
     gravity = JavaField('int')
 
 
@@ -118,7 +118,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
         with self.widget.openDrawer.suppressed():
             with self.widget.closeDrawer.suppressed():
                 #: Remove view from state
-                d.opened = [v for v in d.opened if v.widget.getId() != view]
+                d.opened = [v for v in d.opened if v.proxy.widget.getId() != view]
 
     def on_drawer_opened(self, view):
         d = self.declaration
@@ -127,7 +127,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
                 #: Add view to state
                 for c in self.drawers():
                     if c.widget.getId() == view:
-                        d.opened = list(set(d.opened + [c]))
+                        d.opened = list(set(d.opened + [c.declaration]))
                         break
 
     def on_drawer_slide(self, view, offset):

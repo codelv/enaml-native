@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.scroll_view import ProxyScrollView
 
@@ -17,7 +17,7 @@ from .android_frame_layout import AndroidFrameLayout, FrameLayout
 
 
 class ScrollView(FrameLayout):
-    __javaclass__ = 'android.widget.ScrollView'
+    __javaclass__ = set_default('android.widget.ScrollView')
 
 
 class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):

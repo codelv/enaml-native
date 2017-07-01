@@ -13,9 +13,9 @@ Forked from https://github.com/joaoventura/pybridge
 '''
 import traceback
 # ### Comment out to disable profiling
-# import cProfile
-# pr = cProfile.Profile()
-# pr.enable()
+import cProfile
+pr = cProfile.Profile()
+pr.enable()
 
 ## End profiling
 import time
@@ -37,7 +37,7 @@ def main():
             from view import ContentView
             app.view = ContentView()
         app.show_view()
-        #app.deferred_call(dump_stats)
+        app.deferred_call(dump_stats)
     except:
         msg = traceback.format_exc()
         print msg

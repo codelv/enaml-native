@@ -9,7 +9,7 @@ Created on June 7, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.card_view import ProxyCardView
 
@@ -22,7 +22,7 @@ class CardView(FrameLayout):
         Note: You must add "compile 'com.android.support:cardview-v7:21.0.+'"
               to build.gradle for this to work!
     """
-    __javaclass__ = 'android.support.v7.widget.CardView'
+    __javaclass__ = set_default('android.support.v7.widget.CardView')
     setCardBackgroundColor = JavaMethod('android.graphics.Color')
     setCardElevation = JavaMethod('float')
     setContentPadding = JavaMethod('int','int','int','int')

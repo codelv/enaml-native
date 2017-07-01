@@ -9,7 +9,7 @@ Created on June 7, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.switch import ProxySwitch
 
@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class Switch(CompoundButton):
-    __javaclass__ = 'android.widget.Switch'
+    __javaclass__ = set_default('android.widget.Switch')
     setShowText = JavaMethod('boolean')
     setSplitTrack = JavaMethod('boolean')
     setTextOff = JavaMethod('java.lang.CharSequence')

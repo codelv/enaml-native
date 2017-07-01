@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Instance, List, Unicode, Float, Int, Bool, Enum, observe, set_default
+    Typed, ForwardTyped, List, Unicode, Float, Int, Bool, Enum, observe
 )
 
 from enaml.core.declarative import d_
@@ -59,7 +59,7 @@ class DrawerLayout(ViewGroup):
 
     """
     #: List of opened drawers
-    opened = d_(List(Instance(View)))
+    opened = d_(List(View))
 
     #: Drawer width
     drawer_width = d_(Int(200))

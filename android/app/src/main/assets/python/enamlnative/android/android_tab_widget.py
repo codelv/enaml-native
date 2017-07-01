@@ -9,27 +9,33 @@ Created on May 25, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.tab_widget import ProxyTabWidget
 
-from .android_linear_layout import AndroidLinearLayout
+from .android_linear_layout import AndroidLinearLayout, LinearLayout
+from .bridge import JavaMethod
 
-TabWidget = jnius.autoclass('android.widget.TabWidget')
+
+class TabWidget(LinearLayout):
+    __javaclass__ = set_default('android.widget.TabWidget')
+    setStripEnabled = JavaMethod('boolean')
+    setEnabled = JavaMethod('boolean')
+    setCurrentTab = JavaMethod('int')
+
 
 class AndroidTabWidget(AndroidLinearLayout, ProxyTabWidget):
-    """ An Android implementation of an Enaml ProxyFrameLayout.
+    """ An Android implementation of an Enaml ProxyTabWidget.
 
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(TabWidget)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = TabWidget(self.get_context())
@@ -44,10 +50,9 @@ class AndroidTabWidget(AndroidLinearLayout, ProxyTabWidget):
         self.set_enabled(d.enabled)
         self.set_strip_enabled(d.strip_enabled)
 
-
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # ProxyTabWidget API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_strip_enabled(self, enabled):
         self.widget.setStripEnabled(enabled)
 

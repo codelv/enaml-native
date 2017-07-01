@@ -12,8 +12,10 @@ Created on June 21, 2017
 import ctypes
 import msgpack
 import traceback
+import functools
 from pprint import pprint
 from contextlib import contextmanager
+from atom.api import Atom, ForwardInstance, Dict, Property, Callable, Unicode, Tuple, Int,  Instance, set_default
 
 def get_app_class():
     """ Avoid circular import. Probably indicates a
@@ -27,10 +29,8 @@ def msgpack_encoder(sig, obj):
     """ When passing a JavaBridgeObject encode it in a special way so
         it can properly be interpreted as a reference.
     """
-    if isinstance(obj, JavaBridgeObject):
+    if hasattr(obj, '__javaclass__'):
         return (sig, obj.__id__)
-    elif isinstance(obj, get_app_class()):
-        return (sig, -1)
     return (sig, obj)
 
 
@@ -69,26 +69,31 @@ def invoke(ptr, method, *args):
         return
 
 
-class JavaMethod(object):
+class JavaMethod(Property):
     """ Description of a method of a View (or subclass) in Java. When called, this
         serializes call, packs the arguments, and delegates handling to a bridge in Java.
     """
-    __slots__ = ('__signature__', '__javaobj__', '__name__', '__suppressed__', '__returns__')
+    __slots__ = ('__signature__', '__returns__')
 
     def __init__(self, *args, **kwargs):
         self.__returns__ = kwargs.get('returns', None)
         self.__signature__ = args
-        self.__suppressed__ = False
+        super(JavaMethod, self).__init__(self.__fget__)
 
     @contextmanager
-    def suppressed(self):
+    def suppressed(self, obj):
         """ Suppress calls within this context to avoid feedback loops"""
-        self.__suppressed__ = True
+        obj.__suppressed__[self.name] = True
         yield
-        self.__suppressed__ = False
+        obj.__suppressed__[self.name] = False
 
-    def __call__(self, *args):
-        if self.__suppressed__:
+    def __fget__(self, obj):
+        f = functools.partial(self.__call__, obj)
+        f.suppressed = functools.partial(self.suppressed, obj)
+        return f
+
+    def __call__(self, obj, *args):
+        if obj.__suppressed__.get(self.name):
             return
 
         vargs = self.__signature__ and self.__signature__[-1].endswith("...")
@@ -104,40 +109,31 @@ class JavaMethod(object):
         else:
             bridge_args = [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)]
 
-        self.__javaobj__.__app__.send_event(
+        obj.__app__.send_event(
             'updateObject',  #: method
-            self.__javaobj__.__id__,
-            self.__name__,  #: method name
+            obj.__id__,
+            self.name,  #: method name
             bridge_args  #: args
         )
 
-    def clone(self, owner):
-        obj = type(self)(*self.__signature__)
-        obj.__name__ = self.__name__
-        obj.__javaobj__ = owner
-        return obj
 
+class JavaField(Property):
+    __slots__ = ('__signature__',)
 
-class JavaField(JavaMethod):
     def __init__(self, arg):
-        super(JavaField, self).__init__(arg)
+        self.__signature__ = arg
+        super(JavaField, self).__init__(self.__fget__, self.__fset__)
 
-    def __set__(self, obj, arg):
-        #: Get the cloned field
-        if self.__suppressed__:
-            return
+    def __fset__(self, obj, arg):
         obj.__app__.send_event(
             'updateObjectField',  #: method
             obj.__id__,
-            self.__name__,  #: method name
-            [msgpack_encoder(self.__signature__[0], arg)]  #: args
+            self.name,  #: method name
+            [msgpack_encoder(self.__signature__, arg)]  #: args
         )
 
-    def __get__(self, obj, objtype=None):
+    def __fget__(self, obj):
         raise NotImplementedError("Reading attributes is not yet supported")
-
-    def __call__(self, *args, **kwargs):
-        return object.__call__(self, *args, **kwargs)
 
 
 class JavaCallback(JavaMethod):
@@ -145,51 +141,71 @@ class JavaCallback(JavaMethod):
         it fires the connected callback. This is triggered when it receives an event from
         the bridge indicating the call has occured.
     """
-    __slots__ = ('__callback__', )
 
-    def __init__(self, *args):
-        super(JavaCallback, self).__init__(*args)
-        self.__callback__ = None
+    def __fget__(self, obj):
+        f = super(JavaCallback, self).__fget__(obj)
+        #: Add a method so it can be connected like in Qt
+        f.connect = functools.partial(self.connect, obj)
+        return f
 
-    def __call__(self, *args):
+    def __call__(self, obj, *args):
         """ Fire the callback if one is connected """
-        if self.__callback__ and not self.__suppressed__:
-            self.__callback__(*args)
+        if obj.__suppressed__.get(self.name):
+            return
+        callback = obj.__callbacks__.get(self.name)
+        if callback:
+            callback(*args)
 
-    def connect(self, callback):
+    def connect(self, obj, callback):
         """ Set the callback to be fired when the event occurs. """
-        self.__callback__ = callback
+        obj.__callbacks__[self.name] = callback
 
 
-class JavaBridgeObject(object):
+__global_id__ = 0
+
+class JavaBridgeObject(Atom):
     """ A proxy to a class in java. This sends the commands over
         the bridge for execution.
 
     """
-    __slots__ = ('__app__', '__id__')
-    __javaclass__ = 'java.lang.Object'
-    __signature__ = ()
-    __global_id__ = 0
+    #: Java Class name
+    __javaclass__ = Unicode('java.lang.Object')
+
+    #: Constructor signature
+    __signature__ = Tuple()
+
+    #: Suppressed methods / fields
+    __suppressed__ = Dict()
+
+    #: Callbacks
+    __callbacks__ = Dict()
+
+    #: Java object ID
+    __id__ = Int(0)
+
+    #: Bridge
+    __app__ = ForwardInstance(get_app_class)
+
+    def _default___id__(self):
+        global __global_id__
+        __global_id__ += 1
+        return __global_id__
+
+    def _default___app__(self):
+        return get_app_class().instance()
 
     def __init__(self, *args):
         """ Sends the event to create this View in Java """
-
-        #: Set the object id
-        JavaBridgeObject.__global_id__ +=1
-        self.__id__ = JavaBridgeObject.__global_id__  #: id(self)
-
-        #: Set the app instance
-        self.__app__ = get_app_class().instance()
-
-        #: Get declared methods
-        for base in reversed(type(self).__mro__):
-            for name, method in base.__dict__.iteritems():
-                if isinstance(method, JavaField):
-                    method.__name__ = name
-                    #: Do not clone
-                elif isinstance(method, JavaMethod):
-                    method.__name__ = name
-                    setattr(self, name, method.clone(self))
+        super(JavaBridgeObject, self).__init__()
+        # #: Get declared methods
+        # for base in reversed(type(self).__mro__):
+        #     for name, method in base.__dict__.iteritems():
+        #         if isinstance(method, JavaField):
+        #             method.__name__ = name
+        #             #: Do not clone
+        #         elif isinstance(method, JavaMethod):
+        #             method.__name__ = name
+        #             setattr(self, name, method.clone(self))
 
         #: Send the event over the bridge to construct the view
         self.__app__.send_event(
@@ -204,3 +220,83 @@ class JavaBridgeObject(object):
             'deleteObject', #: method
             self.__id__, #: id to assign in java
         )
+
+# def test_bridge():
+#     """ Nothing beats tests with actual usage :) """
+#     class Widget(JavaBridgeObject):
+#         pass
+#
+#     class View(Widget):
+#         __javaclass__ = set_default('android.view.View')
+#         __signature__ = set_default(('android.content.Context',))
+#
+#         def getId(self):
+#             return self.__id__
+#
+#         addView = JavaMethod('android.view.View')
+#         onClick = JavaCallback('android.view.View')
+#         setOnClickListener = JavaMethod('android.view.View$OnClickListener')
+#         setLayoutParams = JavaMethod('android.view.ViewGroup.LayoutParams')
+#         setBackgroundColor = JavaMethod('android.graphics.Color')
+#         setClickable = JavaMethod('boolean')
+#         setTop = JavaMethod('int')
+#         setBottom = JavaMethod('int')
+#         setLeft = JavaMethod('int')
+#         setRight = JavaMethod('int')
+#         setLayoutDirection = JavaMethod('int')
+#         setLayoutParams = JavaMethod('android.view.ViewGroup$LayoutParams')
+#         setPadding = JavaMethod('int', 'int', 'int', 'int')
+#
+#         setX = JavaMethod('int')
+#         setY = JavaMethod('int')
+#         setZ = JavaMethod('int')
+#         setMaximumHeight = JavaMethod('int')
+#         setMaximumWidth = JavaMethod('int')
+#         setMinimumHeight = JavaMethod('int')
+#         setMinimumWidth = JavaMethod('int')
+#         setEnabled = JavaMethod('boolean')
+#         setTag = JavaMethod('java.lang.Object')
+#         setToolTipText = JavaMethod('java.lang.CharSequence')
+#         setVisibility = JavaMethod('int')
+#         removeView = JavaMethod('android.view.View')
+#
+#         LAYOUT_DIRECTIONS = {
+#             'ltr': 0,
+#             'rtl': 1,
+#             'locale': 3,
+#             'inherit': 2,
+#         }
+#
+#     class ViewGroup(View):
+#         __javaclass__ = set_default('android.view.ViewGroup')
+#
+#     class FrameLayout(ViewGroup):
+#         __javaclass__ = set_default('android.widget.FrameLayout')
+#         setForegroundGravity = JavaMethod('int')
+#         setMeasureAllChildren = JavaMethod('boolean')
+#
+#
+#     class DrawerLayout(ViewGroup):
+#         __javaclass__ = set_default('android.support.v4.widget.DrawerLayout')
+#         openDrawer = JavaMethod('android.view.View')
+#         closeDrawer = JavaMethod('android.view.View')
+#         addDrawerListener = JavaMethod('android.support.v4.widget.DrawerLayout$DrawerListener')
+#         onDrawerClosed = JavaCallback('android.view.View')
+#         onDrawerOpened = JavaCallback('android.view.View')
+#         onDrawerSlide = JavaCallback('android.view.View', 'float')
+#         onDrawerStateChanged = JavaCallback('int')
+#
+#         setDrawerElevation = JavaMethod('float')
+#         setDrawerTitle = JavaMethod('int', 'java.lang.CharSequence')
+#         setDrawerLockMode = JavaMethod('int')
+#         setScrimColor = JavaMethod('android.graphics.Color')
+#         setStatusBarBackgroundColor = JavaMethod('android.graphics.Color')
+#
+#         LOCK_MODES = {
+#             'unlocked': 0,
+#             'locked_closed': 1,
+#             'locked_open': 2,
+#             'undefined': 3,
+#         }
+#
+#     return DrawerLayout

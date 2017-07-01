@@ -9,7 +9,6 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 
 from atom.api import Typed, Value, Coerced
 

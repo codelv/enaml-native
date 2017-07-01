@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.grid_layout import ProxyGridLayout
 
@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class GridLayout(ViewGroup):
-    __javaclass__ = 'android.widget.GridLayout'
+    __javaclass__ = set_default('android.widget.GridLayout')
     setOrientation = JavaMethod('int')
     setAlignmentMode = JavaMethod('int')
     setColumnCount = JavaMethod('int')

@@ -9,7 +9,7 @@ Created on May 26, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 from enamlnative.widgets.progress_bar import ProxyProgressBar
 
 from .android_view import AndroidView, View
@@ -17,7 +17,7 @@ from .bridge import JavaMethod
 
 
 class ProgressBar(View):
-    __javaclass__ = 'android.widget.ProgressBar'
+    __javaclass__ = set_default('android.widget.ProgressBar')
     setIndeterminate = JavaMethod('boolean')
     setMax = JavaMethod('int')
     setMin = JavaMethod('int')

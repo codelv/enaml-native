@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.radio_group import ProxyRadioGroup
 
@@ -18,7 +18,7 @@ from .bridge import JavaCallback, JavaMethod
 
 
 class RadioGroup(LinearLayout):
-    __javaclass__ = 'android.widget.RadioGroup'
+    __javaclass__ = set_default('android.widget.RadioGroup')
 
     check = JavaMethod('int')
     clearCheck = JavaMethod()

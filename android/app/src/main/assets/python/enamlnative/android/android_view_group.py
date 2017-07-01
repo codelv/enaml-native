@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.view_group import ProxyViewGroup
 
@@ -17,7 +17,7 @@ from .android_view import AndroidView, View, MarginLayoutParams
 
 
 class ViewGroup(View):
-    __javaclass__ = 'android.view.ViewGroup'
+    __javaclass__ = set_default('android.view.ViewGroup')
 
 
 class AndroidViewGroup(AndroidView, ProxyViewGroup):

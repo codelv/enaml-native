@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 public class NativeInvocationHandler implements InvocationHandler {
-    static boolean DEBUG = true;
+    static boolean DEBUG = false;
     private long ptr;
 
     public NativeInvocationHandler(long ptr) {

@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed, Instance, Subclass, Float
+from atom.api import Typed, Instance, Subclass, Float, set_default
 
 from enamlnative.widgets.view import ProxyView
 
@@ -18,8 +18,8 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
 class View(Widget):
-    __javaclass__ = 'android.view.View'
-    __signature__ = ('android.content.Context',)
+    __javaclass__ = set_default('android.view.View')
+    __signature__ = set_default(('android.content.Context',))
 
     def getId(self):
         return self.__id__
@@ -60,8 +60,8 @@ class View(Widget):
 
 
 class MarginLayoutParams(JavaBridgeObject):
-    __javaclass__ = 'android.view.ViewGroup$MarginLayoutParams'
-    __signature__ = ('int', 'int')
+    __javaclass__ = set_default('android.view.ViewGroup$MarginLayoutParams')
+    __signature__ = set_default(('int', 'int'))
     setMargins = JavaMethod('int', 'int', 'int', 'int')
     setLayoutDirection = JavaMethod('int')
 

@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from datetime import datetime
 from enamlnative.widgets.calendar_view import ProxyCalendarView
@@ -19,7 +19,7 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class CalendarView(FrameLayout):
-    __javaclass__ = 'android.widget.CalendarView'
+    __javaclass__ = set_default('android.widget.CalendarView')
     setDate = JavaMethod('long')
     setMinDate = JavaMethod('long')
     setMaxDate = JavaMethod('long')

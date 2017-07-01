@@ -30,9 +30,10 @@ enamldef CardTitle(TextView):
   font_family = "sans-serif-condensed-light"
   text_size = 18
 
-enamldef MenuItem(TextView):
+enamldef MenuItem(Button):
   font_family = "sans-serif-serif-medium"
   text_size = 16
+  style = 'borderless'
   padding = (10,10,10,10)
 
 enamldef ContentView(DrawerLayout):
@@ -232,16 +233,16 @@ enamldef ContentView(DrawerLayout):
       iterable << ["Home", "Models", "Settings", "etc..."]
       MenuItem:
         text = loop_item
-  LinearLayout:
+  ScrollView:
     layout_gravity = 'right'
     layout_width = '200'
     layout_height = 'match_parent'
-    orientation = 'vertical'
     background_color = '#FFFFFF'
-    Looper:
-      iterable << range(10)
-      MenuItem:
-        text = "Item {}".format(loop_item)
+    VBox:
+      Looper:
+        iterable << range(100)
+        MenuItem:
+          text = "Item {}".format(loop_item)
 
     #CalendarView:
     #  date = long(time.time()*1000)

@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.chronometer import ProxyChronometer
 
@@ -20,7 +20,7 @@ from .bridge import JavaCallback, JavaMethod
 
 
 class Chronometer(TextView):
-    __javaclass__ = 'android.widget.Chronometer'
+    __javaclass__ = set_default('android.widget.Chronometer')
 
     setBase = JavaMethod('long')
     setCountDown = JavaMethod('boolean')

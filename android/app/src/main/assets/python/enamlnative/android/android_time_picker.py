@@ -9,7 +9,7 @@ Created on May 25, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.time_picker import ProxyTimePicker
 
@@ -18,7 +18,7 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class TimePicker(FrameLayout):
-    __javaclass__ = 'android.widget.TimePicker'
+    __javaclass__ = set_default('android.widget.TimePicker')
     onTimeChanged = JavaCallback('android.widget.TimePicker', 'int', 'int')
     setHour = JavaMethod('int')
     setMinute = JavaMethod('int')

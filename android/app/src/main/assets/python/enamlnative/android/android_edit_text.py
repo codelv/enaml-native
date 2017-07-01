@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.edit_text import ProxyEditText
 
@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class EditText(TextView):
-    __javaclass__ = 'android.widget.EditText'
+    __javaclass__ = set_default('android.widget.EditText')
     setSelection = JavaMethod('int', 'int')
     selectAll = JavaMethod()
     extendSelection = JavaMethod('int')

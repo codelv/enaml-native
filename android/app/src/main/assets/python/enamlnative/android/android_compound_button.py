@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.compound_button import ProxyCompoundButton
 
@@ -18,7 +18,7 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class CompoundButton(Button):
-    __javaclass__ = 'android.widget.CompoundButton'
+    __javaclass__ = set_default('android.widget.CompoundButton')
     setChecked = JavaMethod('boolean')
     setOnCheckedChangeListener = JavaMethod('android.widget.CompoundButton$OnCheckedChangeListener')
     onCheckedChanged = JavaCallback('android.widget.CompoundButton', 'boolean')

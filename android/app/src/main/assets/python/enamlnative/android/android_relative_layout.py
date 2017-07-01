@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.relative_layout import ProxyRelativeLayout
 
@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class RelativeLayout(ViewGroup):
-    __javaclass__ = 'android.widget.RelativeLayout'
+    __javaclass__ = set_default('android.widget.RelativeLayout')
     setGravity = JavaMethod('int')
     setHorizontalGravity = JavaMethod('int')
     setVerticalGravity = JavaMethod('int')
