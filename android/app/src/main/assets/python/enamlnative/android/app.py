@@ -239,4 +239,4 @@ class AndroidApplication(Application):
         pass
 
     def on_stop(self):
-        pass
+        jnius.detach()
