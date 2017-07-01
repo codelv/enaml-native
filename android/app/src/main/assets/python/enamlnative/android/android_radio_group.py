@@ -9,26 +9,21 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.radio_group import ProxyRadioGroup
 
-from .android_linear_layout import AndroidLinearLayout
+from .android_linear_layout import AndroidLinearLayout, LinearLayout
+from .bridge import JavaCallback, JavaMethod
 
-RadioGroup = jnius.autoclass('android.widget.RadioGroup')
 
+class RadioGroup(LinearLayout):
+    __javaclass__ = set_default('android.widget.RadioGroup')
 
-class RadioGroupOnCheckedChangeListener(jnius.PythonJavaClass):
-    __javainterfaces__ = ['android/widget/RadioGroup$OnCheckedChangeListener']
-
-    def __init__(self, handler):
-        self.__handler__ = handler
-        super(RadioGroupOnCheckedChangeListener, self).__init__()
-
-    @jnius.java_method('(Landroid/widget/RadioGroup;I)V')
-    def onCheckedChanged(self, group, checked_id):
-        self.__handler__.on_checked_changed(group, checked_id)
+    check = JavaMethod('int')
+    clearCheck = JavaMethod()
+    setOnCheckedChangeListener = JavaMethod('android.widget.RadioGroup$OnCheckedChangeListener')
+    onCheckedChanged = JavaCallback('android.widget.RadioGroup', 'int')
 
 
 class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
@@ -38,14 +33,11 @@ class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
     #: A reference to the widget created by the proxy.
     widget = Typed(RadioGroup)
 
-    #: Save a reference to the CheckedChangeListener
-    change_listener = Typed(RadioGroupOnCheckedChangeListener)
-
     # --------------------------------------------------------------------------
     # Initialization API
     # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
+        """ Create the underlying widget.
 
         """
         self.widget = RadioGroup(self.get_context())
@@ -59,21 +51,27 @@ class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
         if d.checked:
             self.set_checked(d.checked)
 
-        self.change_listener = RadioGroupOnCheckedChangeListener(self)
-        self.widget.setOnCheckedChangeListener(self.change_listener)
+        self.widget.setOnCheckedChangeListener(id(self.widget))
+        self.widget.onCheckedChanged.connect(self.on_checked_changed)
 
+    # --------------------------------------------------------------------------
+    # OnCheckedChangeListener API
+    # --------------------------------------------------------------------------
     def on_checked_changed(self, group, checked_id):
         """ Set the checked property based on the checked state
             of all the children
         """
         d = self.declaration
-        if checked_id<0:
-            d.checked = None
+        if checked_id < 0:
+            with self.widget.clearCheck.suppressed():
+                d.checked = None
+            return
         else:
             for c in self.children():
                 if c.widget.getId() == checked_id:
-                    d.checked = c.declaration
-                    break
+                    with self.widget.check.suppressed():
+                        d.checked = c.declaration
+                    return
 
     # --------------------------------------------------------------------------
     # ProxyRadioGroup API
@@ -88,4 +86,9 @@ class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
             #: Checked is a reference to the radio declaration
             #: so we need to get the ID of it
             rb = checked.proxy.widget
+            if not rb:
+                raise RuntimeError(
+                    "The selected RadioButton is not yet initialized. "
+                    "Make sure it is a child of the RadioGroup and try again."
+                )
             self.widget.check(rb.getId())

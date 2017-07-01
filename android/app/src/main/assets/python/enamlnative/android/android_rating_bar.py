@@ -9,26 +9,23 @@ Created on June 7, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.rating_bar import ProxyRatingBar
 
-from .android_progress_bar import AndroidProgressBar
+from .android_progress_bar import AndroidProgressBar, ProgressBar
+from .bridge import JavaMethod, JavaCallback
 
-RatingBar = jnius.autoclass('android.widget.RatingBar')
 
-
-class OnRatingBarChangeListener(jnius.PythonJavaClass):
-    __javainterfaces__ = ['android/widget/RatingBar$OnRatingBarChangeListener']
-
-    def __init__(self, handler):
-        self.__handler__ = handler
-        super(OnRatingBarChangeListener, self).__init__()
-
-    @jnius.java_method('(Landroid/widget/RatingBar;FZ)V')
-    def onRatingChanged(self, ratingBar, rating, fromUser):
-        self.__handler__.on_rating_changed(ratingBar, rating, fromUser)
+class RatingBar(ProgressBar):
+    __javaclass__ = set_default('android.widget.RatingBar')
+    setIsIndicator = JavaMethod('boolean')
+    setMax = JavaMethod('int')
+    setNumStars = JavaMethod('int')
+    setOnRatingBarChangeListener = JavaMethod('android.widget.RatingBar$OnRatingBarChangeListener')
+    setRating = JavaMethod('float')
+    setStepSize = JavaMethod('float')
+    onRatingChanged = JavaCallback('android.widget.RatingBar', 'float', 'boolean')
 
 
 class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
@@ -38,13 +35,11 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
     #: A reference to the widget created by the proxy.
     widget = Typed(RatingBar)
 
-    rating_listener = Typed(OnRatingBarChangeListener)
-
     # --------------------------------------------------------------------------
     # Initialization API
     # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
+        """ Create the underlying widget.
 
         """
         self.widget = RatingBar(self.get_context())
@@ -64,8 +59,9 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
 
         self.set_rating(d.rating)
 
-        self.rating_listener = OnRatingBarChangeListener(self)
-        self.widget.setOnRatingBarChangeListener(self.rating_listener)
+        #: Setup listener
+        self.widget.setOnRatingBarChangeListener(id(self.widget))
+        self.widget.onRatingChanged.connect(self.on_rating_changed)
 
     # --------------------------------------------------------------------------
     # OnRatingBarChangeListener API
@@ -73,7 +69,8 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
 
     def on_rating_changed(self, bar, rating, user):
         d = self.declaration
-        d.rating = rating
+        with self.widget.setRating.suppressed():
+            d.rating = rating
 
     # --------------------------------------------------------------------------
     # ProxyRatingBar API

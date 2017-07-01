@@ -2,6 +2,9 @@ ARCH=armeabi-v7a
 SDK_DIR=/home/jrm/Android/Sdk
 NDK_DIR=/home/jrm/Android/Crystax/crystax-ndk-10.3.2
 BUNDLE_ID=com.jventura.pyapp
+REQS=python2crystax,pyjnius,atom,ply,enaml,msgpack-python
+#,tornado
+#,twisted,incremental,constantly
 
 clean-python:
 	cd python-for-android/ && python p4a.py clean_dists
@@ -9,7 +12,7 @@ clean-python:
 
 build-python:
 	cd android/app/src/main/jni && $(NDK_DIR)/ndk-build
-	cd python-for-android/ && python p4a.py apk --arch=$(ARCH) --private=../src --package=$(BUNDLE_ID) --name="Enaml Native Application" --dist-name="enaml-native" --version=0.1 --requirements=python2crystax,pyjnius,atom,ply,enaml --android-api=25 --bootstrap=enaml --sdk-dir=$(SDK_DIR) --ndk-dir=$(NDK_DIR) --ndk-platform=21 --copy-libs
+	cd python-for-android/ && python p4a.py apk --arch=$(ARCH) --private=../src --package=$(BUNDLE_ID) --name="Enaml Native Application" --dist-name="enaml-native" --version=0.1 --requirements=$(REQS) --android-api=25 --bootstrap=enaml --sdk-dir=$(SDK_DIR) --ndk-dir=$(NDK_DIR) --ndk-platform=21 --copy-libs
 	
 copy-python:
 	cp -R ~/.local/share/python-for-android/dists/enaml-native/libs/$(ARCH) android/app/src/main/libs
@@ -38,9 +41,10 @@ clean-assets:
 	#: Remove any unused modules
 	#cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.py' -delete
 	#cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.pyc' -delete
-	#cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.pyo' -delete
+	cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.pyo' -delete
 	cd android/app/src/main/assets/python/site-packages && 	rm -R enaml/qt
 	cd android/app/src/main/assets/python/site-packages && 	rm -R *.egg-info
+	cd android/app/src/main/assets/python/site-packages && 	rm -R *.dist-info
 	cd android/app/src/main/assets/python/site-packages && 	rm -R tests
 	cd android/app/src/main/assets/python/site-packages && 	rm -R usr
 

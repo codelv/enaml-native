@@ -19,7 +19,7 @@
 /*   Android log   */
 /* --------------- */
 
-static PyObject *androidlog(PyObject *self, PyObject *args)
+static PyObject *AndroidLog(PyObject *self, PyObject *args)
 {
     char *str;
     if (!PyArg_ParseTuple(args, "s", &str))
@@ -30,55 +30,32 @@ static PyObject *androidlog(PyObject *self, PyObject *args)
 }
 
 
-static PyMethodDef AndroidlogMethods[] = {
-    {"log", androidlog, METH_VARARGS, "Logs to Android stdout"},
+static PyMethodDef AndroidLogMethods[] = {
+    {"log", AndroidLog, METH_VARARGS, "Logs to Android stdout"},
     {NULL, NULL, 0, NULL}
 };
 
 #if PY_MAJOR_VERSION >= 3
 
-static struct PyModuleDef AndroidlogModule = {
+static struct PyModuleDef AndroidLogModule = {
     PyModuleDef_HEAD_INIT,
     "androidlog",        /* m_name */
     "Log for Android",   /* m_doc */
     -1,                  /* m_size */
-    AndroidlogMethods    /* m_methods */
+    AndroidLogMethods    /* m_methods */
 };
 
 
-PyMODINIT_FUNC PyInit_androidlog(void)
+PyMODINIT_FUNC PyInit_AndroidLog(void)
 {
     return PyModule_Create(&AndroidlogModule);
 }
 #else
-PyMODINIT_FUNC PyInit_androidlog(void)
+PyMODINIT_FUNC PyInit_AndroidLog(void)
 {
-  (void)Py_InitModule("androidlog", AndroidlogMethods);
+    (void)Py_InitModule("androidlog", AndroidLogMethods);
 }
 #endif
-
-void setAndroidLog()
-{
-    PyInit_androidlog();
-    // Inject  bootstrap code to redirect python stdin/stdout
-    // to the androidlog module
-    PyRun_SimpleString(
-            "import sys\n" \
-            "import androidlog\n" \
-            "class LogFile(object):\n" \
-            "    def __init__(self):\n" \
-            "        self.buffer = ''\n" \
-            "    def write(self, s):\n" \
-            "        s = self.buffer + s\n" \
-            "        lines = s.split(\"\\n\")\n" \
-            "        for l in lines[:-1]:\n" \
-            "            androidlog.log(l)\n" \
-            "        self.buffer = lines[-1]\n" \
-            "    def flush(self):\n" \
-            "        return\n" \
-            "sys.stdout = sys.stderr = LogFile()\n"
-    );
-}
 
 
 /* ------------------ */
@@ -125,10 +102,31 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
     if (! PyEval_ThreadsInitialized()) {
         PyEval_InitThreads();
     }
-    setAndroidLog();
 
-    // Bootstrap
-    //PyRun_SimpleString("import bootstrap");
+    PyInit_AndroidLog();
+
+
+    // Inject  bootstrap code to redirect python stdin/stdout
+    // to the androidlog module
+    // and run main() from bootstrap.py
+    PyRun_SimpleString(
+      "import sys\n" \
+      "import androidlog\n" \
+      "class LogFile(object):\n" \
+      "    def __init__(self):\n" \
+      "        self.buffer = ''\n" \
+      "    def write(self, s):\n" \
+      "        s = self.buffer + s\n" \
+      "        lines = s.split(\"\\n\")\n" \
+      "        for l in lines[:-1]:\n" \
+      "            androidlog.log(l)\n" \
+      "        self.buffer = lines[-1]\n" \
+      "    def flush(self):\n" \
+      "        return\n" \
+      "sys.stdout = sys.stderr = LogFile()\n" \
+      "from bootstrap import main\n" \
+      "main()\n" \
+    );
 
     // Cleanup
     (*env)->ReleaseStringUTFChars(env, path, pypath);
@@ -143,6 +141,9 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_stop
         (JNIEnv *env, jclass jc)
 {
     LOG("Finalizing the Python interpreter");
+    if (PyEval_ThreadsInitialized()) {
+        PyEval_ReleaseLock();
+    }
     Py_Finalize();
     return 0;
 }
@@ -153,9 +154,9 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_stop
     and sending it to the router function defined in the bootstrap.py
     file.
 
-*/
-JNIEXPORT jstring JNICALL Java_com_jventura_pybridge_PyBridge_call
-        (JNIEnv *env, jclass jc, jstring payload)
+
+JNIEXPORT jstring JNICALL Java_com_jventura_pybridge_PyBridge_invoke
+        (JNIEnv *env, jclass jc, jbyteArray payload)
 {
     LOG("Call into Python interpreter");
 
@@ -172,7 +173,7 @@ JNIEXPORT jstring JNICALL Java_com_jventura_pybridge_PyBridge_call
 
     // Get reference to the router function
     PyObject* router = PyObject_GetAttrString(bootstrap, (char*)"router");
-    PyObject* args = PyTuple_Pack(1, PyUnicode_FromString(payload_utf));
+    PyObject* args = PyTuple_Pack(1, payload);//PyUnicode_FromString(payload_utf));
 
     // Call function and get the resulting string
     PyObject* response = PyObject_CallObject(router, args);
@@ -196,3 +197,4 @@ JNIEXPORT jstring JNICALL Java_com_jventura_pybridge_PyBridge_call
     LOG("DONE");
     return result;
 }
+*/

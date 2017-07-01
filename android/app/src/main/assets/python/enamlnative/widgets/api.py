@@ -24,6 +24,10 @@ from .calendar_view import CalendarView
 from .text_view import TextView
 from .scroll_view import ScrollView
 from .card_view import CardView
+#from .view_animator import ViewAnimator
+#from .view_switcher import ViewSwitcher
+#from .text_switcher import TextSwitcher
+#from .view_pager import ViewPager
 
 #: Controls
 from .button import  Button
@@ -46,3 +50,4 @@ from .date_picker import DatePicker
 from .tab_widget import TabWidget
 from .tab_host import TabHost
 from .progress_bar import ProgressBar
+from .toolbar import Toolbar

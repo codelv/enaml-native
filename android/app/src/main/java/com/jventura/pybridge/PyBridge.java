@@ -1,9 +1,20 @@
 package com.jventura.pybridge;
 
-import org.json.JSONObject;
-import org.json.JSONException;
+/*
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
+import org.msgpack.core.MessageBufferPacker;
+*/
 
+import org.msgpack.core.MessageBufferPacker;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
 
+/**
+ * Modified version of PyBridge to use msgpack instead of json
+ * (msgpack is 3x-10x faster than json in python)
+ * @see https://gist.github.com/cactus/4073643
+ */
 public class PyBridge {
 
     /**
@@ -22,54 +33,23 @@ public class PyBridge {
     public static native int stop();
 
     /**
-     * Sends a string payload to the Python interpreter.
+     * Sends a byte payload to the Python interpreter.
      *
-     * @param payload the payload string
-     * @return a string with the result
+     * @param payload the payload byte array
+     * @return a byte array with the result
      */
-    public static native String call(String payload);
+   // public static native String invoke(String payload);
 
     /**
-     * Sends a JSON payload to the Python interpreter.
+     * Sends a MessageBufferPacker payload to the Python interpreter.
      *
-     * @param payload JSON payload
-     * @return JSON response
+     * @param payload MessageBufferPacker payload
+     * @return MessageUnpacker response
      */
-    public static JSONObject call(JSONObject payload) {
-        String result = call(payload.toString());
-        try {
-            return new JSONObject(result);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Class
-     */
-    public static class PythonCallback implements Runnable {
-
-        private long mCallbackId;
-
-        public PythonCallback(long callbackId) {
-            mCallbackId = callbackId;
-        }
-
-        @Override
-        public void run() {
-            try {
-                JSONObject json = new JSONObject();
-                json.put("method", "callback");
-                JSONObject params = new JSONObject();
-                params.put("callback_id",mCallbackId);
-                json.putOpt("params",params);
-                PyBridge.call(json);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+//    public static MessageUnpacker invoke(MessageBufferPacker packer) {
+//        byte[] result = invoke(packer.toByteArray());
+//        return MessagePack.newDefaultUnpacker(result);
+//    }
 
     // Load library
     static {

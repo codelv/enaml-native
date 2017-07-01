@@ -12,159 +12,168 @@ Created on May 20, 2017
 
 
 def button_factory():
-    print "Import button"
+    # print "Import button"
     from .android_button import AndroidButton
     return AndroidButton
 
 
 def calendar_view_factory():
-    print "Import calendar view"
+    # print "Import calendar view"
     from .android_calendar_view import AndroidCalendarView
     return AndroidCalendarView
 
 
 def card_view_factory():
-    print "Import card view"
+    # print "Import card view"
     from .android_card_view import AndroidCardView
     return AndroidCardView
 
 
 def checkbox_factory():
-    print "Import checkbox"
+    # print "Import checkbox"
     from .android_checkbox import AndroidCheckBox
     return AndroidCheckBox
 
 
 def chronometer_factory():
-    print "Import chronometer"
+    # print "Import chronometer"
     from .android_chronometer import AndroidChronometer
     return AndroidChronometer
 
 
 def compound_button_factory():
-    print "Import compound button"
+    # print "Import compound button"
     from .android_compound_button import AndroidCompoundButton
     return AndroidCompoundButton
 
 
 def date_picker_factory():
-    print "Import date picker"
+    # print "Import date picker"
     from .android_date_picker import AndroidDatePicker
     return AndroidDatePicker
 
 
 def drawer_layout_factory():
-    print "Import drawer layout"
+    # print "Import drawer layout"
     from .android_drawer_layout import AndroidDrawerLayout
     return AndroidDrawerLayout
 
 
 def edit_text_factory():
-    print "Import edit text"
+    # print "Import edit text"
     from .android_edit_text import AndroidEditText
     return AndroidEditText
 
 
 def frame_layout_factory():
-    print "Import frame layout"
+    # print "Import frame layout"
     from .android_frame_layout import AndroidFrameLayout
     return AndroidFrameLayout
 
 
 def grid_layout_factory():
-    print "Import grid layout"
+    # print "Import grid layout"
     from .android_grid_layout import AndroidGridLayout
     return AndroidGridLayout
 
 
 def linear_layout_factory():
-    print "Import linear layout"
+    # print "Import linear layout"
     from .android_linear_layout import AndroidLinearLayout
     return AndroidLinearLayout
 
 
 def progress_bar_factory():
-    print "Import progress bar"
+    # print "Import progress bar"
     from .android_progress_bar import AndroidProgressBar
     return AndroidProgressBar
 
 
 def radio_button_factory():
-    print "Import radio button"
+    # print "Import radio button"
     from .android_radio_button import AndroidRadioButton
     return AndroidRadioButton
 
 
 def radio_group_factory():
-    print "Import radio group"
+    # print "Import radio group"
     from .android_radio_group import AndroidRadioGroup
     return AndroidRadioGroup
 
 def rating_bar_factory():
-    print "Import rating bar"
+    # print "Import rating bar"
     from .android_rating_bar import AndroidRatingBar
     return AndroidRatingBar
 
 def relative_layout_factory():
-    print "Import relative layout"
+    # print "Import relative layout"
     from .android_relative_layout import AndroidRelativeLayout
     return AndroidRelativeLayout
 
 
 def scroll_view_factory():
-    print "Import scroll view"
+    # print "Import scroll view"
     from .android_scroll_view import AndroidScrollView
     return AndroidScrollView
 
 
 def spinner_factory():
-    print "Import spinner"
+    # print "Import spinner"
     from .android_spinner import AndroidSpinner
     return AndroidSpinner
 
 def switch_factory():
-    print "Import switch"
+    # print "Import switch"
     from .android_switch import AndroidSwitch
     return AndroidSwitch
 
 def text_view_factory():
-    print "Import text view"
+    # print "Import text view"
     from .android_text_view import AndroidTextView
     return AndroidTextView
 
 
 def time_picker_factory():
-    print "Import time picker"
+    # print "Import time picker"
     from .android_time_picker import AndroidTimePicker
     return AndroidTimePicker
 
 
 def tab_host_factory():
-    print "Import tab host"
+    # print "Import tab host"
     from .android_tab_host import AndroidTabHost
     return AndroidTabHost
 
 
 def tab_widget_factory():
-    print "Import widget factory"
+    # print "Import widget factory"
     from .android_tab_widget import AndroidTabWidget
     return AndroidTabWidget
 
 def toggle_button_factory():
-    print "Import toggle button"
+    # print "Import toggle button"
     from .android_toggle_button import AndroidToggleButton
     return AndroidToggleButton
 
+def toolbar_factory():
+    from .android_toolbar import AndroidToolbar
+    return AndroidToolbar
+
 def view_factory():
-    print "Import view"
+    # print "Import view"
     from .android_view import AndroidView
     return AndroidView
 
 
 def view_group_factory():
-    print "Import view group"
+    # print "Import view group"
     from .android_view_group import AndroidViewGroup
     return AndroidViewGroup
+
+def view_pager_factory():
+    # print "Import view pager"
+    from .android_view_pager import AndroidViewPager
+    return AndroidViewPager
 
 
 ANDROID_FACTORIES = {
@@ -193,6 +202,8 @@ ANDROID_FACTORIES = {
     'TextView': text_view_factory,
     'TimePicker': time_picker_factory,
     'ToggleButton': toggle_button_factory,
+    'Toolbar': toolbar_factory,
     'View': view_factory,
     'ViewGroup': view_group_factory,
+    'ViewPager': view_pager_factory,
 }

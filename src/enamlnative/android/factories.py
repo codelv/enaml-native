@@ -166,6 +166,11 @@ def view_group_factory():
     from .android_view_group import AndroidViewGroup
     return AndroidViewGroup
 
+def view_pager_factory():
+    # print "Import view pager"
+    from .android_view_pager import AndroidViewPager
+    return AndroidViewPager
+
 
 ANDROID_FACTORIES = {
     'Button': button_factory,
@@ -195,4 +200,5 @@ ANDROID_FACTORIES = {
     'ToggleButton': toggle_button_factory,
     'View': view_factory,
     'ViewGroup': view_group_factory,
+    'ViewPager': view_pager_factory,
 }

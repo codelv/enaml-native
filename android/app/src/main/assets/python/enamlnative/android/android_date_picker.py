@@ -9,26 +9,23 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.date_picker import ProxyDatePicker
 
-from .android_frame_layout import AndroidFrameLayout
+from .android_frame_layout import AndroidFrameLayout, FrameLayout
+from .bridge import JavaMethod, JavaCallback
 
-DatePicker = jnius.autoclass('android.widget.DatePicker')
 
-
-class OnDateChangedListener(jnius.PythonJavaClass):
-    __javainterfaces__ = ['android/widget/DatePicker$OnDateChangedListener']
-
-    def __init__(self, handler):
-        self.__handler__ = handler
-        super(OnDateChangedListener, self).__init__()
-
-    @jnius.java_method('(Landroid/widget/DatePicker;III)V')
-    def onDateChanged(self, view, year, month, day):
-        self.__handler__.on_date_changed(view, year, month, day)
+class DatePicker(FrameLayout):
+    __javaclass__ = set_default('android.widget.DatePicker')
+    init = JavaMethod('int', 'int', 'int', 'android.widget.DatePicker$OnDateChangedListener')
+    onDateChanged = JavaCallback('android.widget.DatePicker', 'int', 'int', 'int')
+    updateDate = JavaMethod('int', 'int', 'int')
+    setFirstDayOfWeek = JavaMethod('int')
+    setEnabled = JavaMethod('boolean')
+    setMaxDate = JavaMethod('long')
+    setMinDate = JavaMethod('long')
 
 
 class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
@@ -38,14 +35,11 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
     #: A reference to the widget created by the proxy.
     widget = Typed(DatePicker)
 
-    #: Save a reference to the date changed listener
-    date_listener = Typed(OnDateChangedListener)
-
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
+        """ Create the underlying widget.
 
         """
         self.widget = DatePicker(self.get_context())
@@ -63,22 +57,21 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
         if d.max_date:
             self.set_max_date(d.max_date)
 
-        self.date_listener = OnDateChangedListener(self)
-        self.widget.init(d.year, d.month, d.day, self.date_listener)
+        self.widget.init(d.year, d.month, d.day, id(self.widget))
+        self.widget.onDateChanged.connect(self.on_date_changed)
 
     # --------------------------------------------------------------------------
     # OnDateChangedListener API
     # --------------------------------------------------------------------------
     def on_date_changed(self, view, year, month, day):
         d = self.declaration
-        with self.suppress_notifications():
+        with self.widget.updateDate.suppressed():
             d.year = year
             d.month = month
             d.day = day
 
-
     # --------------------------------------------------------------------------
-    # ProxyFrameLayout API
+    # ProxyDatePicker API
     # --------------------------------------------------------------------------
     def set_year(self, year):
         self.update_date()
@@ -91,7 +84,13 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
 
     def update_date(self):
         d = self.declaration
-        self.widget.updateDate(d.year,d.month,d.day)
+        self.widget.updateDate(d.year, d.month, d.day)
+
+    def set_min_date(self, date):
+        self.widget.setMinDate(date)
+
+    def set_max_date(self, date):
+        self.widget.setMaxDate(date)
 
     def set_first_day_of_week(self, day):
         self.widget.setFirstDayOfWeek(day)

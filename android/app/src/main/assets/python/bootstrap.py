@@ -11,13 +11,39 @@ Forked from https://github.com/joaoventura/pybridge
 @author joaoventura
 @author: jrm
 '''
+import traceback
+# ### Comment out to disable profiling
+import cProfile
+pr = cProfile.Profile()
+pr.enable()
 
+## End profiling
 import time
 import sys
-import json
+import jnius
 import traceback
+import msgpack
 
-shared = {}
+def main():
+    """ Called by PyBridge.start()
+    """
+    import enaml
+    from enamlnative.android.app import AndroidApplication
+    MainActivity = jnius.autoclass('com.enaml.MainActivity')
+    app = AndroidApplication(MainActivity.mActivity)
+    #app.debug = True
+    try:
+        with enaml.imports():
+            from view import ContentView
+            app.view = ContentView()
+        app.show_view()
+        app.deferred_call(dump_stats)
+    except:
+        msg = traceback.format_exc()
+        print msg
+        app.deferred_call(lambda msg=msg:app.send_event('displayError', msg))
+    app.start()
+
 
 def router(args):
     """
@@ -26,9 +52,9 @@ def router(args):
     :param args: JSON arguments
     :return: JSON response
     """
-    request = json.loads(args)
+    request = msgpack.loads(args)
     response = handle(request)
-    return json.dumps(response)
+    return msgpack.dumps(response)
 
 def handle(request):
     """ Handle a json-rpc 2.0 request
@@ -66,39 +92,17 @@ def version():
 
 def load(activity):
     """ Get and load the view """
-    ### Comment out to disable profiling
-    import cProfile
-    pr = cProfile.Profile()
-    pr.enable()
-    shared['pr'] = pr
-    ### End profiling
-
-
-    start_time = time.time()
-    print "Start {}".format(start_time)
     import jnius
-    print "Load jnius {}s".format(time.time()-start_time)
     import enaml
-    print "Load enaml {}s".format(time.time()-start_time)
     from atom.api import Atom
-    print "Load atom {}s".format(time.time()-start_time)
-    
     from enamlnative.android.app import AndroidApplication
-    print "Import AndroidApp {}s".format(time.time()-start_time)
-
     MainActivity = jnius.autoclass(activity)
-    print "Create MainActiivty {}s".format(time.time()-start_time)
-
     app = AndroidApplication(MainActivity.mActivity)
-    print "Create AndroidApp {}s".format(time.time()-start_time)
 
     #: Set the view
     with enaml.imports():
-        print "Within imports {}s".format(time.time()-start_time)
         from view import ContentView
-    print "Import View {}s".format(time.time()-start_time)
     app.view = ContentView()
-    print "Created View {}s".format(time.time()-start_time)
 
 def start():
     """ Display the view """
@@ -107,12 +111,14 @@ def start():
     app.start()
     shared['app'] = app # So it doesn't get GC'd ?
     pr = shared.get('pr')
-    if pr:
-        pr.disable()
-        import pstats, StringIO
+
+def dump_stats():
+    pr.disable()
+    import pstats, StringIO
+    for sort_by in ['cumulative', 'time']:
         s = StringIO.StringIO()
-        ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
-        ps.print_stats()
+        ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
+        ps.print_stats(0.3)
         print s.getvalue()
 
 def callback(callback_id):
@@ -121,14 +127,6 @@ def callback(callback_id):
     app = AndroidApplication.instance()
     app.invoke_callback(callback_id)
 
-def invoke(ptr, method, *args):
-    import ctypes
-    try:
-        obj = ctypes.cast(ptr,ctypes.py_object).value
-        handler = getattr(obj,method)
-        return handler(*args)
-    except:
-        traceback.print_exc()
-        return
+
 
 

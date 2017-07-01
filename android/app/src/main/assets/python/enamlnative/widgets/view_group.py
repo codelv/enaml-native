@@ -31,6 +31,7 @@ class ProxyViewGroup(ProxyView):
     def set_layout_gravity(self, gravity):
         raise NotImplementedError
 
+
 class ViewGroup(View):
     """ ViewGroup is a view group that displays
         child views in relative positions.

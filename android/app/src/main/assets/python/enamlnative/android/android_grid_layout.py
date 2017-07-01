@@ -9,14 +9,23 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.grid_layout import ProxyGridLayout
 
-from .android_view_group import AndroidViewGroup
+from .android_view_group import AndroidViewGroup, ViewGroup
+from .bridge import JavaMethod
 
-GridLayout = jnius.autoclass('android.widget.GridLayout')
+
+class GridLayout(ViewGroup):
+    __javaclass__ = set_default('android.widget.GridLayout')
+    setOrientation = JavaMethod('int')
+    setAlignmentMode = JavaMethod('int')
+    setColumnCount = JavaMethod('int')
+    setColumnOrderPreserved = JavaMethod('boolean')
+    setRowCount = JavaMethod('int')
+    setRowOrderPreserved = JavaMethod('boolean')
+    setUseDefaultMargins = JavaMethod('boolean')
 
 
 class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
@@ -26,11 +35,11 @@ class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
     #: A reference to the widget created by the proxy.
     widget = Typed(GridLayout)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = GridLayout(self.get_context())
@@ -43,23 +52,25 @@ class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
         d = self.declaration
         self.set_orientation(d.orientation)
         self.set_alignment_mode(d.alignment_mode)
-        self.set_columns(d.columns)
-        self.set_column_order_preserved(d.column_order_preserved)
-        self.set_rows(d.rows)
-        self.set_row_order_preserved(d.row_order_preserved)
-        self.set_use_default_margins(d.use_default_margins)
+        if d.columns:
+            self.set_columns(d.columns)
+        if d.column_order_preserved:
+            self.set_column_order_preserved(d.column_order_preserved)
+        if d.rows:
+            self.set_rows(d.rows)
+        if d.row_order_preserved:
+            self.set_row_order_preserved(d.row_order_preserved)
+        if d.use_default_margins:
+            self.set_use_default_margins(d.use_default_margins)
 
-
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # ProxyGridLayout API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_orientation(self, orientation):
-        v = getattr(GridLayout,orientation.upper())
-        self.widget.setOrientation(v)
+        self.widget.setOrientation(0 if orientation == 'horizontal' else 1)
 
     def set_alignment_mode(self, mode):
-        v = getattr(GridLayout,'ALIGN_{}'.format(mode.upper()))
-        self.widget.setAlignmentMode(v)
+        self.widget.setAlignmentMode(1 if mode == 'margins' else 0)
 
     def set_columns(self, columns):
         self.setColumnCount(columns)

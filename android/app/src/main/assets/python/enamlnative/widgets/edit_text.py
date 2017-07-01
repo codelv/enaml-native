@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Tuple, observe
+    Typed, ForwardTyped, Tuple, observe, set_default
 )
 
 from enaml.core.declarative import d_
@@ -36,6 +36,9 @@ class EditText(TextView):
 
     #: Text selection
     selection = d_(Tuple(int))
+
+    #: Make editable by default
+    input_type = set_default('text')
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyEditText)

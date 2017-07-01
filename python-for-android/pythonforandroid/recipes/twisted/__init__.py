@@ -12,7 +12,7 @@ import sh
 
 
 class TwistedRecipe(CythonRecipe):
-    version = '16.0.0'
+    version = '17.5.0'
     url = 'https://github.com/twisted/twisted/archive/twisted-{version}.tar.gz'
 
     depends = [ 'zope_interface']
@@ -22,8 +22,8 @@ class TwistedRecipe(CythonRecipe):
         super(TwistedRecipe, self).prebuild_arch(arch)
         # TODO Need to whitelist tty.pyo and termios.so here
         with current_directory(self.get_build_dir(arch.arch)):
-            sh.rm('-rf', glob.glob('twisted/*/test'))
-            sh.rm('-f',glob.glob('twisted/test/*.py'))
+            sh.rm('-rf', glob.glob('src/twisted/*/test'))
+            sh.rm('-f',glob.glob('src/twisted/test/*.py'))
 
     def get_recipe_env(self, arch):
         env = super(TwistedRecipe, self).get_recipe_env(arch)

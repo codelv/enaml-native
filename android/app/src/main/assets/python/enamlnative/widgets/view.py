@@ -24,6 +24,9 @@ class ProxyView(ProxyWidget):
     """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: View)
+    
+    def set_clickable(self, clickable):
+        raise NotImplementedError
 
     def set_background_color(self, color):
         raise NotImplementedError
@@ -108,6 +111,9 @@ class View(Widget):
     camera_distance = d_(Float())
 
     clickable = d_(Bool())
+    
+    #: Called when view is clicked
+    clicked = d_(Event(), writable=False)
 
     clip_bounds = d_(Tuple(int, default=(0, 0, 0, 0)))
 
@@ -145,11 +151,11 @@ class View(Widget):
 
     label_for = d_(Int())
 
-    layout_width = d_(Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
+    layout_width = d_(Unicode())#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
 
-    layout_height = d_(Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
+    layout_height = d_(Unicode())#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
 
-    layout_direction = d_(Enum('none','inherit','locale','ltr','rtl'))
+    layout_direction = d_(Enum('ltr', 'rtl', 'inherit', 'locale'))
 
     left = d_(Int())
 

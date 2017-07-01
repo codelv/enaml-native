@@ -9,38 +9,31 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.scroll_view import ProxyScrollView
 
-from .android_frame_layout import AndroidFrameLayout
+from .android_frame_layout import AndroidFrameLayout, FrameLayout
 
-_ScrollView = jnius.autoclass('android.widget.ScrollView')
+
+class ScrollView(FrameLayout):
+    __javaclass__ = set_default('android.widget.ScrollView')
+
 
 class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
     """ An Android implementation of an Enaml ProxyFrameLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_ScrollView)
+    widget = Typed(ScrollView)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
-        self.widget = _ScrollView(self.get_context())
+        self.widget = ScrollView(self.get_context())
 
-    def init_widget(self):
-        """ Initialize the underlying widget.
 
-        """
-        super(AndroidScrollView, self).init_widget()
-        d = self.declaration
-
-    #--------------------------------------------------------------------------
-    # ProxyFrameLayout API
-    #--------------------------------------------------------------------------

@@ -9,14 +9,19 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.compound_button import ProxyCompoundButton
 
-from .android_button import AndroidButton
+from .android_button import AndroidButton, Button
+from .bridge import JavaMethod, JavaCallback
 
-CompoundButton = jnius.autoclass('android.widget.CompoundButton')
+
+class CompoundButton(Button):
+    __javaclass__ = set_default('android.widget.CompoundButton')
+    setChecked = JavaMethod('boolean')
+    setOnCheckedChangeListener = JavaMethod('android.widget.CompoundButton$OnCheckedChangeListener')
+    onCheckedChanged = JavaCallback('android.widget.CompoundButton', 'boolean')
 
 
 class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
@@ -30,7 +35,7 @@ class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
     # Initialization API
     #--------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = CompoundButton(self.get_context())
@@ -42,13 +47,16 @@ class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
         super(AndroidCompoundButton, self).init_widget()
         d = self.declaration
         self.set_checked(d.checked)
+        self.widget.setOnCheckedChangeListener(id(self.widget))
+        self.widget.onCheckedChanged.connect(self.on_checked)
 
-    def on_click(self, view):
+    def on_checked(self, view, checked):
         d = self.declaration
-        d.checked = self.widget.isChecked()
+        with self.widget.setChecked.suppressed():
+            d.checked = checked
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # ProxyLabel API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_checked(self, checked):
         self.widget.setChecked(checked)

@@ -8,15 +8,49 @@ The full license is in the file COPYING.txt, distributed with this software.
 @author jrm
 
 '''
-
 import jnius
-from atom.api import Value, Dict, Long
+from atom.api import Atom, List, Float, Value, Dict, Int, Unicode, Typed, Bool
 from enaml.application import Application, ProxyResolver
-
 from . import factories
+from . import bridge
 
-Activity = jnius.autoclass('android.app.Activity')
-View = jnius.autoclass('android.view.View')
+class AppEventListener(jnius.PythonJavaClass):
+    __javainterfaces__ = ['com/enaml/MainActivity$AppEventListener']
+    __javacontext__ = 'app'
+
+    def __init__(self, handler):
+        self.__handler__ = handler
+        super(AppEventListener, self).__init__()
+
+    @jnius.java_method('([B)V')
+    def onEvents(self, data):
+        self.__handler__.on_events(bytearray(data))
+
+    @jnius.java_method('()V')
+    def onResume(self):
+        self.__handler__.on_resume()
+
+    @jnius.java_method('()V')
+    def onPause(self):
+        self.__handler__.on_pause()
+
+    @jnius.java_method('()V')
+    def onStop(self):
+        self.__handler__.on_stop()
+
+
+class Activity(bridge.JavaBridgeObject):
+    """ Access to the activity over the bridge """
+    __javaclass__ = Unicode('android.support.v7.app.AppCompatActivity')
+    __id__ = Int(-1)
+
+    def __init__(self):
+        Atom.__init__(self)
+
+    setActionBar = bridge.JavaMethod('android.widget.Toolbar')
+    setSupportActionBar = bridge.JavaMethod('android.support.v7.widget.Toolbar')
+    setContentView = bridge.JavaMethod('android.view.View')
+
 
 class AndroidApplication(Application):
     """ An Android implementation of an Enaml application.
@@ -25,17 +59,53 @@ class AndroidApplication(Application):
     runs in the local process.
 
     """
+
+    #: Attributes so it can be seralized over the bridge as a reference
+    __javaclass__ = Unicode('android.content.Context')
+    __id__ = Int(-1)
+
+    #: Bridge widget
+    widget = Typed(Activity)
+
+    def _default_widget(self):
+        return Activity()
+
     #: Android Activity
-    activity = Value(Activity) # TODO...
+    activity = Value(object)
 
     #: View to display within the activity
-    view = Value(View)
+    view = Value(object)
 
-    #: Callback cache
-    _callback_cache = Dict()
-    _callback_id = Long()
+    #: If true, debug bridge statements
+    debug = Bool(False)
 
+    #:
+    dp = Float()
 
+    def _default_dp(self):
+        return self.activity.getResources().getDisplayMetrics().density
+
+    #: Event loop
+    loop = Value()
+
+    def _default_loop(self):
+        #from twisted.internet import reactor
+        #return reactor
+        from enamlnative.core.ioloop import IOLoop
+        #from tornado.ioloop import IOLoop
+        return IOLoop.current()
+
+    #: Save reference to the event listener
+    listener = Typed(AppEventListener)
+
+    #: Events to send to Java
+    _bridge_queue = List()
+
+    #: Delay to wait before sending events (in ms)
+    _bridge_timeout = Int(3)
+
+    #: Count of pending send calls
+    _bridge_pending = Int(0)
 
     def __init__(self, activity):
         """ Initialize a AndroidApplication
@@ -45,17 +115,22 @@ class AndroidApplication(Application):
         self.activity = activity
         self.resolver = ProxyResolver(factories=factories.ANDROID_FACTORIES)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Abstract API Implementation
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def start(self):
         """ Start the application's main event loop.
 
         """
         activity = self.activity
+        self.listener = AppEventListener(self)
+        activity.setAppEventListener(self.listener)
+        self.loop.start()
+        #self.loop.run()
+
+    def show_view(self):
         view = self.get_view()
-        assert view, "View does not exist!"
-        activity.setView(view)
+        self.send_event('showView')
 
     def get_view(self):
         """ Prepare the view
@@ -72,23 +147,34 @@ class AndroidApplication(Application):
         """ Stop the application's main event loop.
 
         """
-        activity = self.activity
-        activity.exit()
+        self.loop.stop()
 
-    def invoke_callback(self,callback_id):
-        """ Invoke the call with the given id.
+    def send_event(self, name, *args):
+        """ Send an event to Java.
+            This call is queued and batched.
 
-        Parameters
+       Parameters
         ----------
-        callback_id : long
-            The id of a previously scheduled call.
-
+        name : str
+            The event name to be processed by MainActivity.processMessages.
+        *args: args
+            The arguments required by the event.
 
         """
-        if callback_id in self._callback_cache:
-            callback,args,kwargs = self._callback_cache[callback_id]
-            callback(*args,**kwargs)
-            del self._callback_cache[callback_id]
+        self._bridge_pending += 1
+        self._bridge_queue.append((name, args))
+        self.timed_call(self._bridge_timeout, self._bridge_send)
+
+    def _bridge_send(self):
+        """  Send the events over the bridge to be processed by Java
+
+        """
+        self._bridge_pending -= 1
+        if self._bridge_pending == 0:
+            self.activity.processEvents(
+                bridge.dumps(self._bridge_queue)
+            )
+            self._bridge_queue = []
 
     def deferred_call(self, callback, *args, **kwargs):
         """ Invoke a callable on the next cycle of the main event loop
@@ -104,7 +190,8 @@ class AndroidApplication(Application):
             the callback.
 
         """
-        self.timed_call(0,callback,*args,**kwargs)
+        self.loop.add_callback(callback, *args, **kwargs)
+        #self.loop.callWhenRunning(callback, *args, **kwargs)
 
     def timed_call(self, ms, callback, *args, **kwargs):
         """ Invoke a callable on the main event loop thread at a
@@ -124,10 +211,8 @@ class AndroidApplication(Application):
             the callback.
 
         """
-        self._callback_id += 1
-        self._callback_cache[self._callback_id] = (callback,args,kwargs)
-        activity = self.activity
-        activity.scheduleCallback(self._callback_id,ms)
+        self.loop.call_later(ms/1000.0, callback, *args, **kwargs)
+        #self.loop.callLater(ms/1000.0, callback, *args, **kwargs)
 
     def is_main_thread(self):
         """ Indicates whether the caller is on the main gui thread.
@@ -138,15 +223,20 @@ class AndroidApplication(Application):
             True if called from the main gui thread. False otherwise.
 
         """
-        return True
+        return False
 
-    def create_mime_data(self):
-        """ Create a new mime data object to be filled by the user.
+    # --------------------------------------------------------------------------
+    # AppEventListener API Implementation
+    # --------------------------------------------------------------------------
+    def on_events(self, data):
+        #: Pass to event loop thread
+        self.deferred_call(bridge.loads, data)
 
-        Returns
-        -------
-        result : MimeData
-            A concrete implementation of the MimeData class.
+    def on_pause(self):
+        pass
 
-        """
-        return {}
+    def on_resume(self):
+        pass
+
+    def on_stop(self):
+        pass

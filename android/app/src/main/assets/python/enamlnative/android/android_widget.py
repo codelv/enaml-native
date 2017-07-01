@@ -9,7 +9,6 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 
 from atom.api import Typed, Value, Coerced
 
@@ -17,14 +16,18 @@ from enaml.drag_drop import DropAction
 from enaml.styling import StyleCache
 from enaml.widgets.widget import Feature, ProxyWidget
 from . import focus_registry
-from .android_toolkit_object import AndroidToolkitObject, View
+from .android_toolkit_object import AndroidToolkitObject, JavaBridgeObject
+
+class Widget(JavaBridgeObject):
+    pass
+
 
 class AndroidWidget(AndroidToolkitObject, ProxyWidget):
     """ A Android implementation of an Enaml ProxyWidget.
 
     """
     #: A reference to the toolkit widget created by the proxy.
-    widget = Typed(View)
+    widget = Typed(Widget)
 
     #: A private copy of the declaration features. This ensures that
     #: feature cleanup will proceed correctly in the event that user
@@ -37,9 +40,9 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
     #: Internal storage for the drag origin position.
     #_drag_origin = Typed(QPoint)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def init_widget(self):
         """ Initialize the underlying View object.
 
@@ -72,7 +75,8 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
         # then reparented by the status bar. Real top-level widgets must
         # be explicitly shown by calling their .show() method after they
         # are created.
-        if widget.getParent() or not d.visible:
+        #if widget.getParent() or not d.visible:
+        if not d.visible:
             self.set_visible(d.visible)
             
     def destroy(self):
