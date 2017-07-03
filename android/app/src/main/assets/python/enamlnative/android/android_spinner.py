@@ -109,6 +109,12 @@ class AndroidSpinner(AndroidViewGroup, ProxySpinner):
         self.widget.onItemSelected.connect(self.on_item_selected)
         self.widget.onNothingSelected.connect(self.on_nothing_selected)
 
+    def destroy(self):
+        """ Properly destroy adapter """
+        super(AndroidSpinner, self).destroy()
+        if self.adapter:
+            del self.adapter
+
     # --------------------------------------------------------------------------
     # OnSelectionListener API
     # --------------------------------------------------------------------------

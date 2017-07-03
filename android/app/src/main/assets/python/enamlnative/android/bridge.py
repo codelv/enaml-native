@@ -11,9 +11,7 @@ Created on June 21, 2017
 '''
 import ctypes
 import msgpack
-import traceback
 import functools
-from pprint import pprint
 from contextlib import contextmanager
 from atom.api import Atom, ForwardInstance, Dict, Property, Callable, Unicode, Tuple, Int,  Instance, set_default
 
@@ -30,43 +28,26 @@ def msgpack_encoder(sig, obj):
         it can properly be interpreted as a reference.
     """
     if hasattr(obj, '__javaclass__'):
-        return (sig, obj.__id__)
+        return (sig, (obj.__id__,))
     return (sig, obj)
 
 
 def dumps(data):
     """ Encodes events for sending over the bridge """
-    if get_app_class().instance().debug:
-        print "======== Py --> Java ======"
-        pprint(data)
-        print "==========================="
     return msgpack.dumps(data)
 
 
 def loads(data):
     """ Decodes and processes events received from the bridge """
-    events = msgpack.loads(data)
-    if get_app_class().instance().debug:
-        print "======== Py <-- Java ======"
-        pprint(events)
-        print "==========================="
-    for event in events:
-        if event[0] == 'event':
-            ptr, method, args = event[1]
-            invoke(ptr, method, *[v for t, v in args])
+    return msgpack.loads(data)
 
 
-def invoke(ptr, method, *args):
-    """ Dereference the pointer and call the handler method. """
-    try:
-        obj = ctypes.cast(ptr, ctypes.py_object).value
-        if not hasattr(obj, method):
-            raise NotImplementedError("{}.{} is not implemented.".format(type(obj), method))
-        handler = getattr(obj, method)
-        return handler(*args)
-    except:
-        traceback.print_exc()
-        return
+def get_handler(ptr, method):
+    """ Dereference the pointer and return the handler method. """
+    obj = ctypes.cast(ptr, ctypes.py_object).value
+    if not hasattr(obj, method):
+        raise NotImplementedError("{}.{} is not implemented.".format(type(obj), method))
+    return obj, getattr(obj, method)
 
 
 class JavaMethod(Property):
@@ -109,12 +90,16 @@ class JavaMethod(Property):
         else:
             bridge_args = [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)]
 
+        result = obj.__app__.create_future() if self.__returns__ else None
         obj.__app__.send_event(
             'updateObject',  #: method
             obj.__id__,
+            id(result) if result else 0,
             self.name,  #: method name
-            bridge_args  #: args
+            bridge_args #: args
         )
+        #: TODO: If GC cleans this up, then boom??
+        return result
 
 
 class JavaField(Property):
@@ -154,7 +139,7 @@ class JavaCallback(JavaMethod):
             return
         callback = obj.__callbacks__.get(self.name)
         if callback:
-            callback(*args)
+            return callback(*args)
 
     def connect(self, obj, callback):
         """ Set the callback to be fired when the event occurs. """

@@ -9,10 +9,12 @@ The full license is in the file COPYING.txt, distributed with this software.
 
 '''
 import jnius
+import traceback
 from atom.api import Atom, List, Float, Value, Dict, Int, Unicode, Typed, Bool
 from enaml.application import Application, ProxyResolver
 from . import factories
 from . import bridge
+
 
 class AppEventListener(jnius.PythonJavaClass):
     __javainterfaces__ = ['com/enaml/MainActivity$AppEventListener']
@@ -91,8 +93,8 @@ class AndroidApplication(Application):
     def _default_loop(self):
         #from twisted.internet import reactor
         #return reactor
-        from enamlnative.core.ioloop import IOLoop
-        #from tornado.ioloop import IOLoop
+        #from enamlnative.core.ioloop import IOLoop
+        from tornado.ioloop import IOLoop
         return IOLoop.current()
 
     #: Save reference to the event listener
@@ -171,6 +173,12 @@ class AndroidApplication(Application):
         """
         self._bridge_pending -= 1
         if self._bridge_pending == 0:
+            if self.debug:
+                print("======== Py --> Java ======")
+                for event in self._bridge_queue:
+                    print(event)
+                print("===========================")
+
             self.activity.processEvents(
                 bridge.dumps(self._bridge_queue)
             )
@@ -225,12 +233,50 @@ class AndroidApplication(Application):
         """
         return False
 
+    def create_future(self):
+        from tornado.concurrent import Future
+        return Future()
+
+    def process_events(self, data):
+        events = bridge.loads(data)
+        if self.debug:
+            print("======== Py <-- Java ======")
+            for event in events:
+                print(event)
+            print("===========================")
+        for event in events:
+            if event[0] == 'event':
+                self.handle_event(event)
+
+    def handle_event(self, event):
+        """ When we get an 'event' type from the bridge
+            handle it by invoking the handler and if needed
+            sending back the result.
+        """
+        result_id, ptr, method, args = event[1]
+        try:
+            obj, handler = bridge.get_handler(ptr, method)
+            result = handler(*[v for t, v in args])
+            if result_id:
+                if hasattr(obj, '__javaclass__'):
+                    sig = getattr(type(obj), method).__returns__
+                else:
+                    sig = type(result).__name__
+
+                self.send_event(
+                    'setResult',  #: method
+                    result_id,
+                    bridge.msgpack_encoder(sig, result)  #: args
+                )
+        except:
+            traceback.print_exc()
+
     # --------------------------------------------------------------------------
     # AppEventListener API Implementation
     # --------------------------------------------------------------------------
     def on_events(self, data):
         #: Pass to event loop thread
-        self.deferred_call(bridge.loads, data)
+        self.deferred_call(self.process_events, data)
 
     def on_pause(self):
         pass
@@ -239,4 +285,5 @@ class AndroidApplication(Application):
         pass
 
     def on_stop(self):
-        jnius.detach()
+        pass
+        #self.deferred_call(jnius.detach)

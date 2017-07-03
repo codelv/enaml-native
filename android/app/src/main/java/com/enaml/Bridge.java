@@ -3,13 +3,15 @@ package com.enaml;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.HandlerThread;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
-import android.view.ViewManager;
 import android.util.Log;
-import android.widget.CheckBox;
 
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.ExtensionValue;
 import org.msgpack.value.FloatValue;
@@ -26,13 +28,23 @@ import java.lang.reflect.Method;
 
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Bridge {
 
     public static final String TAG = "Bridge";
 
+    public static final int IGNORE_RESULT = 0;
+
+    final MainActivity mActivity;
+
     // Context
-    Context mContext;
+    final Context mContext;
 
     // Root view
     View mRootView;
@@ -43,16 +55,31 @@ public class Bridge {
     // Cache for methods
     final HashMap<String,Method> mMethodCache = new HashMap<String, Method>();
 
-    // Cache for fieldss
+    // Cache for fields
     final HashMap<String,Field> mFieldCache = new HashMap<String, Field>();
 
     // Cache for objects
-    final HashMap<Integer,Object> mObjectCache = new HashMap<Integer, Object>();
+    final ConcurrentHashMap<Integer,Object> mObjectCache = new ConcurrentHashMap<Integer, Object>();
 
+
+    // Cache for results
+    final ConcurrentHashMap<Integer,CompletableFuture<Object>> mResultCache = new ConcurrentHashMap<Integer, CompletableFuture<Object>>();
+    private int mResultCount = 0;
+
+    // Looper thread
+    final ConcurrentLinkedQueue<Runnable> mTaskQueue = new ConcurrentLinkedQueue<>();
+    final ConcurrentLinkedQueue<MessageBufferPacker> mEventList = new ConcurrentLinkedQueue<>();
+    final HandlerThread mBridgeHandlerThread = new HandlerThread("bridge");
+    final Handler mBridgeHandler;
+    final AtomicInteger mEventCount = new AtomicInteger();
+    final int mEventDelay = 3;
 
     public Bridge(Context context) {
         mContext = context;
+        mActivity = MainActivity.mActivity;
         mObjectCache.put(-1, mContext);
+        mBridgeHandlerThread.start();
+        mBridgeHandler = new Handler(mBridgeHandlerThread.getLooper());
     }
 
     /**
@@ -100,92 +127,79 @@ public class Bridge {
                 }
 
                 Value v = argv.get(1);
-
-                switch (v.getValueType()) {
-                    case NIL:
-                        mArgs[i] = null;
-                        break;
-                    case BOOLEAN:
-                        mArgs[i] = v.asBooleanValue().getBoolean();
-                        break;
-                    case INTEGER:
-                        IntegerValue iv = v.asIntegerValue();
-                        if (argType.equals("android.content.Context")) {
-                            // Hack for android context
-                            mArgs[i] = mContext;
-                        } else if (
-                                // TODO: There should be a generic way for doing this
-                                argType.equals("android.view.ViewGroup$LayoutParams") ||
-                                argType.equals("android.view.View") ||
-                                argType.equals("android.widget.SpinnerAdapter") ||
-                                argType.equals("android.support.v7.widget.Toolbar")
-                                ) {
-                            // Hack for passing references. Assumes that if you pass
-                            // an int for a type that is not an int,
-                            // we want to reference an object
-                            mArgs[i] = mObjectCache.get(iv.toInt());
-//                            if (mArgs[i]==null) {
-//                                Log.e(TAG, "Failed to dereference id="+iv.toInt()+" for type="+argType);
-//                            } else {
-//                                Log.i(TAG, "Converted id=" + iv.toInt() + " type="+argType+" to=" + mArgs[i].toString());
-//                            }
-                        } else if (mSpec[i].isInterface()) {
-                            // If an int/long is passed for an interface... create a proxy
-                            // for the interface and pass in the reference.
-                            Class infClass = mSpec[i];
-                            Object proxy = Proxy.newProxyInstance(
-                                    infClass.getClassLoader(),
-                                    new Class[]{infClass},
-                                    new BridgeInvocationHandler(iv.toLong())
-                            );
-                            //mProxyCache.put(objId,proxy);
-                            mArgs[i] = proxy;
-                        } else if (iv.isInIntRange()) {
-                            mArgs[i] = iv.toInt();
-                        }
-                        else if (iv.isInLongRange()) {
-                            mArgs[i] = iv.toLong();
-                        } else {
-                            mArgs[i] = iv.toBigInteger();
-                        }
-                        break;
-                    case FLOAT:
-                        FloatValue fv = v.asFloatValue();
-                        if (argType.equals("float")) {
-                            mArgs[i] = fv.toFloat();
-                        } else {
-                            mArgs[i] =  fv.toDouble();
-                        }
-                        break;
-                    case STRING:
-                        if (argType.equals("android.graphics.Color")) {
-                            // Hack for colors
-                            mArgs[i] = Color.parseColor(v.asStringValue().asString());
-                            mSpec[i] = int.class;
-                        } else if (argType.equals("android.graphics.Typeface")) {
-                            // Hack for fonts
-                            mArgs[i] = Typeface.create(v.asStringValue().asString(),0);
-                        } else {
-                            mArgs[i] = v.asStringValue().asString();
-                        }
-                        break;
-                    case BINARY:
-                        byte[] mb = v.asBinaryValue().asByteArray();
-                        System.out.println("read binary: size=" + mb.length);
-                        break;
-                    case ARRAY:
-                        ArrayValue a = v.asArrayValue();
-                        for (Value e : a) {
-                            System.out.println("read array element: " + e);
-                        }
-                        break;
-                    case EXTENSION:
-                        ExtensionValue ev = v.asExtensionValue();
-                        byte extType = ev.getType();
-                        byte[] extValue = ev.getData();
-                        break;
+                if (argType.equals("android.content.Context")) {
+                    // Hack for android context
+                    mArgs[i] = mContext;
+                } else {
+                    switch (v.getValueType()) {
+                        case NIL:
+                            mArgs[i] = null;
+                            break;
+                        case BOOLEAN:
+                            mArgs[i] = v.asBooleanValue().getBoolean();
+                            break;
+                        case INTEGER:
+                            IntegerValue iv = v.asIntegerValue();
+                            if (mSpec[i].isInterface()) {
+                                // If an int/long is passed for an interface... create a proxy
+                                // for the interface and pass in the reference.
+                                Class infClass = mSpec[i];
+                                Object proxy = Proxy.newProxyInstance(
+                                        infClass.getClassLoader(),
+                                        new Class[]{infClass},
+                                        new BridgeInvocationHandler(iv.toLong())
+                                );
+                                //mProxyCache.put(objId,proxy);
+                                mArgs[i] = proxy;
+                            } else if (iv.isInIntRange()) {
+                                mArgs[i] = iv.toInt();
+                            } else if (iv.isInLongRange()) {
+                                mArgs[i] = iv.toLong();
+                            } else {
+                                mArgs[i] = iv.toBigInteger();
+                            }
+                            break;
+                        case FLOAT:
+                            FloatValue fv = v.asFloatValue();
+                            if (argType.equals("float")) {
+                                mArgs[i] = fv.toFloat();
+                            } else {
+                                mArgs[i] = fv.toDouble();
+                            }
+                            break;
+                        case STRING:
+                            if (argType.equals("android.graphics.Color")) {
+                                // Hack for colors
+                                mArgs[i] = Color.parseColor(v.asStringValue().asString());
+                                mSpec[i] = int.class;
+                            } else if (argType.equals("android.graphics.Typeface")) {
+                                // Hack for fonts
+                                mArgs[i] = Typeface.create(v.asStringValue().asString(), 0);
+                            } else {
+                                mArgs[i] = v.asStringValue().asString();
+                            }
+                            break;
+                        case BINARY:
+                            byte[] mb = v.asBinaryValue().asByteArray();
+                            System.out.println("read binary: size=" + mb.length);
+                            break;
+                        case ARRAY:
+                            ArrayValue a = v.asArrayValue();
+                            // Use an array for passing references.
+                            // Assumes the first element in the array is a pointer
+                            // to the reference object we want.
+                            for (Value e : a) {
+                                mArgs[i] = mObjectCache.get(e.asIntegerValue().toInt());
+                                break;
+                            }
+                            break;
+                        case EXTENSION:
+                            ExtensionValue ev = v.asExtensionValue();
+                            byte extType = ev.getType();
+                            byte[] extValue = ev.getData();
+                            break;
+                    }
                 }
-
             }
 
 
@@ -276,8 +290,12 @@ public class Bridge {
      * @param method
      * @param args
      */
-    public void updateObject(int objId, String method, Value[] args) {
+    public void updateObject(int objId, long resultId, String method, Value[] args) {
+        //Log.e(TAG,"id="+objId+" method="+method);
         Object obj = mObjectCache.get(objId);
+        if (obj==null) {
+            Log.e(TAG,"Error: Null object reference when updating id="+objId+" method="+method);
+        }
         Class objClass = obj.getClass();
 
         // Decode args
@@ -300,11 +318,12 @@ public class Bridge {
         // Get the lambda
         Method lambda = mMethodCache.get(key);
         try {
-            lambda.invoke(obj, uv.getArgs());
+            Object result = lambda.invoke(obj, uv.getArgs());
+            onResult(resultId, result);
         } catch (IllegalAccessException e) {
-            Log.e(TAG,"Error invoking id="+objId+" method="+method, e);
+            Log.e(TAG,"Error invoking obj="+ obj +" id="+objId+" method="+method, e);
         } catch (InvocationTargetException e) {
-            Log.e(TAG,"Error invoking id="+objId+" method="+method, e);
+            Log.e(TAG,"Error invoking obj="+ obj +" id="+objId+" method="+method, e);
         }
     }
 
@@ -319,8 +338,10 @@ public class Bridge {
      * @param args
      */
     public void updateObjectField(int objId, String field, Value[] args) {
-        //Log.i(TAG,"Update id="+objId+" method="+method);
         Object obj = mObjectCache.get(objId);
+        if (obj==null) {
+            Log.e(TAG,"Error: Null object reference when updating id="+objId+" field="+field);
+        }
         Class objClass = obj.getClass();
 
         // Decode args
@@ -351,10 +372,11 @@ public class Bridge {
      * @param objId
      */
     public void deleteObject(int objId) {
+        Log.d(TAG, "Delete object id="+objId);
         Object obj = mObjectCache.get(objId);
         if (obj !=null) {
             mObjectCache.remove(objId);
-            obj = null;
+            //obj = null; Will GC handle this??
         }
     }
 
@@ -371,36 +393,69 @@ public class Bridge {
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            return onEvent(mPythonObjectPtr, proxy, method, args);
+            int resultId = IGNORE_RESULT;
+            if (!method.getReturnType().equals(Void.TYPE)) {
+                mResultCount += 1;
+                mResultCache.put(mResultCount, (new CompletableFuture<Object>()));
+                resultId = mResultCount;
+            }
+            return onEvent(resultId, mPythonObjectPtr, method.getName(), args);
         }
+    }
+
+    /**
+     * Set the result of a future. Note, don't do this in the UI thread or we'll get a deadlock.
+     * @param objId
+     * @param result
+     */
+    public void setResult(int objId, Value result) {
+        CompletableFuture<Object> future = mResultCache.get(objId);
+        UnpackedValues uv = new UnpackedValues(new Value[]{result});
+        future.complete(uv.getArgs()[0]);
+    }
+
+    /**
+     * Sets the result of a future in python.
+     * @param pythonObjectId
+     * @param result
+     */
+    public void onResult(long pythonObjectId, Object result) {
+        if (pythonObjectId==IGNORE_RESULT) {
+            return;
+        }
+        onEvent(IGNORE_RESULT, pythonObjectId, "set_result", new Object[]{result});
     }
 
     /**
      * Packs an event and sends it to python. The event is packed in the format:
      *
-     * ("event",(pythonObjectId,"method", (args...)))
-     *
-     * @param pythonObjectId
-     * @param proxy
-     * @param method
-     * @param args
+     * ("event",(returnId, pythonObjectId, "method", (args...)))
+     * @param resultId: id of the future to set the result of. If 0, result shall be ignored.
+     * @param pythonObjectId: ptr to object in python. Cast to object to get a reference
+     * @param method: method name to invoke on the object
+     * @param args: args to pass to the method
      * @return
      */
-    public Object onEvent(long pythonObjectId, Object proxy, Method method, Object[] args) {
-        MainActivity activity = MainActivity.mActivity;
+    public Object onEvent(int resultId, long pythonObjectId, String method, Object[] args) {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
         try {
             packer.packArrayHeader(2);
             packer.packString("event");
-            packer.packArrayHeader(3);
+            packer.packArrayHeader(4);
+            packer.packInt(resultId);
             packer.packLong(pythonObjectId);
-            packer.packString(method.getName());
+            packer.packString(method);
             if (args==null) {
                 packer.packArrayHeader(0);
             } else {
                 packer.packArrayHeader(args.length);
                 for (Object arg : args) {
                     packer.packArrayHeader(2);
+                    if (arg==null) {
+                        // Discard this event??
+                        Log.e(TAG,"Error: Trying to send event '"+method+"' with a null object!");
+                        return null;
+                    }
                     Class argClass = arg.getClass();
                     packer.packString(argClass.getCanonicalName());
                     if (argClass == int.class || arg instanceof Integer) {
@@ -430,8 +485,175 @@ public class Bridge {
         }
 
         // Send events to python
-        activity.sendEvent(packer);
+        sendEvent(packer);
+
+        // If a result is requested, poll async until ready.
+        if (resultId != IGNORE_RESULT) {
+            try {
+                Future<Object> future = mResultCache.get(resultId);
+                while (!future.isDone()) {
+                    // Process pending messages until done
+                    // TODO: Busy loop, maybe block?
+                    Runnable task = mTaskQueue.poll();
+                    if (task != null) {
+                        task.run();
+                    }
+                }
+                Object result = future.get();
+                mResultCache.remove(resultId);
+                return result;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
         return null;
+    }
+
+
+    /**
+     * Interface for python to pass it's calls in a structured manner
+     * for Java to actually call.
+     *
+     *
+     * In python, using jnius
+     *
+     * class TextView(JavaProxyClass):
+     *      __javaclass__ = `android.widgets.TextView`
+     *
+     * #: etc.. for other widgets
+     *
+     * v = LinearLayout()
+     *
+     * tv = TextView()
+     * tv.setText("text")
+     *
+     * v.addView(tv)
+     *
+     * maps to:
+     * [
+     *  #: Argument of context is implied
+     *  ("createView", ("android.widgets.LinearLayout",0x01)),
+     *  ("createView", ("android.widgets.TextView",0x02)),
+     *  ("updateView", (0x02,"setText","text")),
+     *  ("updateView", (0x01,"addView",{"ref":0x01})
+     * ]
+     *
+     * @warning This is called from the Python thread, NOT the UI thread!
+     *
+     * @param view
+     */
+    public void processEvents(byte[] data) {
+        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(data);
+        try {
+            int eventCount = unpacker.unpackArrayHeader();
+            for (int i=0; i<eventCount; i++) {
+                int eventTuple = unpacker.unpackArrayHeader(); // Unpack event tuple
+                String eventType = unpacker.unpackString(); // first value
+                int paramCount = unpacker.unpackArrayHeader();
+
+                if (eventType.equals("createObject")) {
+                    int objId = unpacker.unpackInt();
+                    String objClass = unpacker.unpackString();
+                    int argCount = unpacker.unpackArrayHeader();
+                    Value[] args = new Value[argCount];
+                    for (int j=0; j<argCount; j++) {
+                        Value v = unpacker.unpackValue();
+                        args[j] = v;
+                    }
+                    mTaskQueue.add(()->{createObject(objId, objClass, args);});
+
+                } else if (eventType.equals("updateObject")) {
+                    int objId = unpacker.unpackInt();
+                    long resultId = unpacker.unpackLong();
+                    String objMethod = unpacker.unpackString();
+                    int argCount = unpacker.unpackArrayHeader();
+                    Value[] args = new Value[argCount];
+                    for (int j=0; j<argCount; j++) {
+                        Value v = unpacker.unpackValue();
+                        args[j] = v;
+                    }
+                    mTaskQueue.add(()->{updateObject(objId, resultId, objMethod, args);});
+
+                } else if (eventType.equals("updateObjectField")) {
+                    int objId = unpacker.unpackInt();
+                    String objField = unpacker.unpackString();
+                    int argCount = unpacker.unpackArrayHeader();
+                    Value[] args = new Value[argCount];
+                    for (int j=0; j<argCount; j++) {
+                        Value v = unpacker.unpackValue();
+                        args[j] = v;
+                    }
+                    mTaskQueue.add(()->{updateObjectField(objId, objField, args);});
+
+                } else if (eventType.equals("deleteObject")) {
+                    int objId = unpacker.unpackInt();
+                    mTaskQueue.add(()->{deleteObject(objId);});
+
+                } else if (eventType.equals("setResult")) {
+                    int objId = unpacker.unpackInt();
+                    Value arg = unpacker.unpackValue();
+                    mTaskQueue.add(()->{setResult(objId, arg);});
+
+                } else if (eventType.equals("showView")) {
+                    mTaskQueue.add(()->{mActivity.setView(getRootView());});
+
+                } else if (eventType.equals("displayError")) {
+                    String errorMessage = unpacker.unpackString();
+                    mTaskQueue.add(()->{mActivity.showErrorMessage(errorMessage);});
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // TODO: if we're waiting on a future, this will create a deadlock,
+        // how do i process them now??
+        // TODO: WHY POST?
+        mActivity.runOnUiThread(()->{
+            Log.i(TAG, "Running in process events...");
+            Runnable task = mTaskQueue.poll();
+            while (task != null) {
+                task.run();
+                task = mTaskQueue.poll();
+            }
+            Log.i(TAG, "Running in process events...");
+        });
+    }
+
+    /**
+     * Post an event to the bridge handler thread.
+     * When the delay expires, send the data to the app
+     * event listener.
+     */
+    public void sendEvent(MessageBufferPacker event) {
+        mEventCount.incrementAndGet();
+        mEventList.add(event);
+        // Send to bridge thread for processing
+        mBridgeHandler.postDelayed(() -> {
+            int delays = mEventCount.decrementAndGet();
+            MainActivity.AppEventListener listener = mActivity.getAppEventListener();
+
+            // If events stopped updating temporarily
+            if (listener != null && delays == 0) {
+                MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+                try {
+                    // Events can be added during packing this so pull only what's here now.
+                    int size = mEventList.size();
+                    packer.packArrayHeader(size);
+                    for (int i=0; i<size; i++){
+                        MessageBufferPacker e = mEventList.remove();
+                        packer.addPayload(e.toByteArray());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                listener.onEvents(packer.toByteArray());
+                //mEventList.clear();
+            }
+        }, mEventDelay);
     }
 
 }

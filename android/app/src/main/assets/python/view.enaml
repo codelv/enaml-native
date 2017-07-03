@@ -35,7 +35,35 @@ enamldef MenuItem(Button):
   text_size = 16
   style = 'borderless'
   padding = (10,10,10,10)
+  
+enamldef LeftDrawer(LinearLayout):
+  layout_gravity = 'left'
+  layout_width = '200'
+  layout_height = 'match_parent'
+  orientation = 'vertical'
+  background_color = '#FFFFFF'
+  Looper:
+    iterable << ["Home", "Models", "Settings", "etc..."]
+    MenuItem:
+      text = loop_item
 
+enamldef RightDrawer(ScrollView):
+  layout_gravity = 'right'
+  layout_width = '200'
+  layout_height = 'match_parent'
+  background_color = '#FFFFFF'
+  VBox:
+    Looper:
+      iterable << range(100)
+      MenuItem:
+        text = "Item {}".format(loop_item)
+
+enamldef Scroller(ScrollView):
+  layout_width = 'match_parent'
+  layout_height = 'match_parent'
+  background_color = '#EEEEEE'
+  padding = (10,10,10,10)
+          
 enamldef ContentView(VBox):
   #opened = True # Or swipe to open
   #side = 'left'
@@ -45,171 +73,179 @@ enamldef ContentView(VBox):
     background_color = '#303F9F'
   DrawerLayout:
     layout_height = 'match_parent'
-    ScrollView:
+    ViewPager:
       layout_width = 'match_parent'
       layout_height = 'match_parent'
-      background_color = '#EEEEEE'
-      LinearLayout:
-        orientation = "vertical"
-        padding = (10,10,10,10)
-        Card:
-          VBox:
-            CardTitle:
-              text = "TextView"
-            TextView:
-              text = "Error"
-              font_style = "italic"
-              text_size = 16
-              text_color = "#FF0000"
-            TextView:
-              text = "This takes up three lines"
-              lines = 3
-            TextView:
-              text = """This gets trunicated. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
-              max_lines = 5
-        Card:
-          VBox:
-            CardTitle:
-              text = "Fonts"
-            Looper:
-              iterable << ["casual", "cursive", "monospace", "sans-serif", "sans-serif-black",
-                           "sans-serif-condensed", "sans-serif-condensed-light", "sans-serif-light",
-                           "sans-serif-medium", "sans-serif-smallcaps", "sans-serif-thin",
-                           "serif", "serif-monospace"]
+      Fragment:
+          Scroller:
+            LinearLayout:
+              orientation = "vertical"
+              Card:
+                VBox:
+                  CardTitle:
+                    text = "TextView"
+                  TextView:
+                    text = "Error"
+                    font_style = "italic"
+                    text_size = 16
+                    text_color = "#FF0000"
+                  TextView:
+                    text = "This takes up three lines"
+                    lines = 3
+                  TextView:
+                    text = """This gets trunicated. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
+                    max_lines = 5
+              Card:
+                VBox:
+                  CardTitle:
+                    text = "Fonts"
+                  Looper:
+                    iterable << ["casual", "cursive", "monospace", "sans-serif", "sans-serif-black",
+                                 "sans-serif-condensed", "sans-serif-condensed-light", "sans-serif-light",
+                                 "sans-serif-medium", "sans-serif-smallcaps", "sans-serif-thin",
+                                 "serif", "serif-monospace"]
+                    TextView:
+                      font_family = loop_item
+                      text = loop_item
+
+
+
+              Card:
+                VBox:
+                  CardTitle:
+                    text = "Buttons"
+                  Button:
+                    text = "PushButton"
+                    clicked:: tv1.count += 1
+                  TextView: tv1:
+                    attr count = 0
+                    text << "Clicked {}".format(count)
+              Card:
+                VBox:
+                  CardTitle:
+                    text = "Checkboxes"
+                  CheckBox: cb1:
+                    text = "CheckBox"
+                    checked = True
+                  TextView:
+                    text << "Checkbox state: {}".format(cb1.checked)
+                  Switch: sw1:
+                    text = "Switch"
+                    checked = True
+                  TextView:
+                    text << "Switch state: {}".format(sw1.checked)
+                  ToggleButton: tb1:
+                    text = "ToggleButton"
+                    checked = True
+                  TextView:
+                    text << "Button state: {}".format(tb1.checked)
+              Card:
+                VBox:
+                  CardTitle:
+                    text = "Radio buttons"
+                  RadioGroup: rg1:
+                    checked = rb1
+                    RadioButton: rb1:
+                      text = "A"
+                    RadioButton: rb2:
+                      text = "B"
+                    RadioButton: rb3:
+                      text = "C"
+                  TextView:
+                    text << "Radio group state: {}".format(rg1.checked.text if rg1.checked else "Unchecked")
+              Card:
+                VBox:
+                  CardTitle:
+                    text = "Progressbar"
+                  ProgressBar:
+                    indeterminate = True # Ignored if style doesn't support it
+                  RatingBar: rbar1:
+                    num_stars = 5
+                    rating = 3
+                  TextView:
+                    text << "Rating {}".format(rbar1.rating)
+
+              Card:
+                VBox:
+                  CardTitle:
+                    text = "Timer"
+                  ToggleButton:
+                    text_on = "STOP"
+                    text_off = "START"
+                    checked:= ch1.running
+                  Chronometer: ch1:
+                    running = False
+                  TextView:
+                    text << "Ticks: {}".format(ch1.ticks)
+              Card:
+                VBox:
+                  CardTitle:
+                    text = "Spinner"
+                  Spinner: spn1:
+                    items = ["Sun", "Moon", "Stars"]
+                  TextView:
+                    text << "Selected: {}".format(spn1.items[spn1.selected])
+              Card:
+                VBox:
+                  CardTitle:
+                    text = "EditText"
+                  TextView:
+                    text << "You typed: {}".format(et.text)
+                  EditText: et:
+                    text = ""
+      Fragment:
+        Scroller:
+          Card:
+            VBox:
+              CardTitle:
+                text = "Time Picker"
+              TimePicker: tp1:
+                hour = 6
+                minute = 30
               TextView:
-                font_family = loop_item
-                text = loop_item
+                text << "Time selected: {hour}:{minute}".format(hour=tp1.hour,minute=tp1.minute)
 
-
-
-        Card:
-          VBox:
-            CardTitle:
-              text = "Buttons"
-            Button:
-              text = "PushButton"
-              clicked:: tv1.count += 1
-            TextView: tv1:
-              attr count = 0
-              text << "Clicked {}".format(count)
-        Card:
-          VBox:
-            CardTitle:
-              text = "Checkboxes"
-            CheckBox: cb1:
-              text = "CheckBox"
-              checked = True
-            TextView:
-              text << "Checkbox state: {}".format(cb1.checked)
-            Switch: sw1:
-              text = "Switch"
-              checked = True
-            TextView:
-              text << "Switch state: {}".format(sw1.checked)
-            ToggleButton: tb1:
-              text = "ToggleButton"
-              checked = True
-            TextView:
-              text << "Button state: {}".format(tb1.checked)
-        Card:
-          VBox:
-            CardTitle:
-              text = "Radio buttons"
-            RadioGroup: rg1:
-              checked = rb1
-              RadioButton: rb1:
-                text = "A"
-              RadioButton: rb2:
-                text = "B"
-              RadioButton: rb3:
-                text = "C"
-            TextView:
-              text << "Radio group state: {}".format(rg1.checked.text if rg1.checked else "Unchecked")
-        Card:
-          VBox:
-            CardTitle:
-              text = "Progressbar"
-            ProgressBar:
-              indeterminate = True # Ignored if style doesn't support it
-            RatingBar: rbar1:
-              num_stars = 5
-              rating = 3
-            TextView:
-              text << "Rating {}".format(rbar1.rating)
-
-        Card:
-          VBox:
-            CardTitle:
-              text = "Timer"
-            ToggleButton:
-              text_on = "STOP"
-              text_off = "START"
-              checked:= ch1.running
-            Chronometer: ch1:
-              running = False
-            TextView:
-              text << "Ticks: {}".format(ch1.ticks)
-        Card:
-          VBox:
-            CardTitle:
-              text = "Spinner"
-            Spinner: spn1:
-              items = ["Sun", "Moon", "Stars"]
-            TextView:
-              text << "Selected: {}".format(spn1.items[spn1.selected])
-        Card:
-          VBox:
-            CardTitle:
-              text = "EditText"
-            TextView:
-              text << "You typed: {}".format(et.text)
-            EditText: et:
-              text = ""
-        Card:
-          VBox:
-            CardTitle:
-              text = "Time Picker"
-            TimePicker: tp1:
-              hour = 6
-              minute = 30
-            TextView:
-              text << "Time selected: {hour}:{minute}".format(hour=tp1.hour,minute=tp1.minute)
-        Card:
-          VBox:
-            CardTitle:
-              text = "Date Picker"
-            DatePicker: dp1:
-              attr today = datetime.now()
-              year = today.year
-              month = today.month
-              day = today.day
-            TextView:
-              text << "Date selected: {month}/{day}/{year}".format(month=dp1.month,day=dp1.day,year=dp1.year)
-        Card: card_looper:
-          attr items = []
-          VBox:
-            CardTitle:
-              text = "Looping items"
-            HBox:
-              Button:
-                text = "Add item"
-                clicked::
-                  items = card_looper.items[:]
-                  items.append(len(items))
-                  card_looper.items = items
-              Button:
-                text = "Remove item"
-                enabled << len(card_looper.items) > 0
-                clicked::
-                  items = card_looper.items[:]
-                  items.pop()
-                  card_looper.items = items
-            Looper:
-              iterable << card_looper.items
+      Fragment:
+        Scroller:
+          Card:
+            VBox:
+              CardTitle:
+                text = "Date Picker"
+              DatePicker: dp1:
+                attr today = datetime.now()
+                year = today.year
+                month = today.month
+                day = today.day
               TextView:
-                text = "Item index is {}".format(loop_item)
-
-        Card: card_conds:
+                text << "Date selected: {month}/{day}/{year}".format(month=dp1.month,day=dp1.day,year=dp1.year)
+      Fragment:
+        Scroller:
+          Card: card_looper:
+            attr items = []
+            VBox:
+              CardTitle:
+                text = "Looping items"
+              HBox:
+                Button:
+                  text = "Add item"
+                  clicked::
+                    items = card_looper.items[:]
+                    items.append(len(items))
+                    card_looper.items = items
+                Button:
+                  text = "Remove item"
+                  enabled << len(card_looper.items) > 0
+                  clicked::
+                    items = card_looper.items[:]
+                    items.pop()
+                    card_looper.items = items
+              Looper:
+                iterable << card_looper.items
+                TextView:
+                  text = "Item index is {}".format(loop_item)
+      Fragment:
+        Scroller:
+          Card: card_conds:
             attr loading = True
             VBox:
               CardTitle:
@@ -229,26 +265,7 @@ enamldef ContentView(VBox):
                 TextView:
                   text = "Loading complete!!!"
 
-    LinearLayout:
-      layout_gravity = 'left'
-      layout_width = '200'
-      layout_height = 'match_parent'
-      orientation = 'vertical'
-      background_color = '#FFFFFF'
-      Looper:
-        iterable << ["Home", "Models", "Settings", "etc..."]
-        MenuItem:
-          text = loop_item
-    ScrollView:
-      layout_gravity = 'right'
-      layout_width = '200'
-      layout_height = 'match_parent'
-      background_color = '#FFFFFF'
-      VBox:
-        Looper:
-          iterable << range(100)
-          MenuItem:
-            text = "Item {}".format(loop_item)
-
-        #CalendarView:
-        #  date = long(time.time()*1000)
+    LeftDrawer:
+      pass
+    RightDrawer:
+      pass

@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -16,46 +15,29 @@ import com.jventura.pyapp.R;
 import com.jventura.pybridge.AssetExtractor;
 import com.jventura.pybridge.PyBridge;
 
-import org.msgpack.core.MessageBufferPacker;
-import org.msgpack.core.MessagePack;
-import org.msgpack.core.MessageUnpacker;
-import org.msgpack.value.Value;
-
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
-
+    public static final String TAG = "MainActivity";
 
     // Reference to the activity so it can be accessed from the python interpreter
     public static MainActivity mActivity = null;
 
-    // Class name to pass to python for loading
-    private final String mActivityId = "com.enaml.MainActivity";
-
     // Assets version
-    public final int mAssetsVersion = 1;
-    public final boolean mAssetsAlwaysOverwrite = true; // Set only on debug builds
+    final int mAssetsVersion = 4;
+    final boolean mAssetsAlwaysOverwrite = true; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
     // When the view is loaded from python
-    private FrameLayout mContentView;
-    private View mLoadingView;
-    private Bridge mBridge;
-    private int mShortAnimationDuration = 300;
+    FrameLayout mContentView;
+    View mLoadingView;
+    Bridge mBridge;
+    int mShortAnimationDuration = 300;
 
-    // Handler to hook python into the Android application event loop
-    private final Handler mCallbackHandler = new Handler();
-
-    private AppEventListener mAppEventListener;
-    private ArrayList<MessageBufferPacker> mEventList = new ArrayList<MessageBufferPacker>();
-    private int mEventCount = 0;
-    private int mEventDelay = 3;
+    AppEventListener mAppEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -231,127 +213,21 @@ public class MainActivity extends AppCompatActivity {
 
 
     /**
-     * Interface for python to pass it's calls in a structured manner
-     * for Java to actually call.  For instance
-     *
-     *
-     * In python, using jnius
-     *
-     * class TextView(JavaProxyClass):
-     *      __javaclass__ = `android.widgets.TextView`
-     *
-     * #: etc.. for other widgets
-     *
-     * v = LinearLayout()
-     *
-     * tv = TextView()
-     * tv.setText("text")
-     *
-     * v.addView(tv)
-     *
-     * maps to:
-     * [
-     *  #: Argument of context is implied
-     *  ("createView", ("android.widgets.LinearLayout",0x01)),
-     *  ("createView", ("android.widgets.TextView",0x02)),
-     *  ("updateView", (0x02,"setText","text")),
-     *  ("updateView", (0x01,"addView",{"ref":0x01})
-     * ]
-     *
-     * @warning This is called from the Python thread, NOT the UI thread!
-     *
-     * @param view
+     * Get bridge controller
+     * @return
+     */
+    public Bridge getBridge() {
+        return mBridge;
+    }
+
+
+    /**
+     * Pass data to bridge for processing.
+     * @param data
      */
     public void processEvents(byte[] data) {
-        long startTime = System.nanoTime();
-        Log.i(TAG,"Start processing... ");
-        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(data);
-        try {
-            int eventCount = unpacker.unpackArrayHeader();
-            for (int i=0; i<eventCount; i++) {
-                int eventTuple = unpacker.unpackArrayHeader(); // Unpack event tuple
-                String eventType = unpacker.unpackString(); // first value
-                int paramCount = unpacker.unpackArrayHeader();
-
-                if (eventType.equals("createObject")) {
-                    int objId = unpacker.unpackInt();
-                    String objClass = unpacker.unpackString();
-                    int argCount = unpacker.unpackArrayHeader();
-                    Value[] args = new Value[argCount];
-                    for (int j=0; j<argCount; j++) {
-                        Value v = unpacker.unpackValue();
-                        args[j] = v;
-                    }
-                    runOnUiThread(()->{mBridge.createObject(objId, objClass, args);});
-                } else if (eventType.equals("updateObject")) {
-                    int objId = unpacker.unpackInt();
-                    String objMethod = unpacker.unpackString();
-                    int argCount = unpacker.unpackArrayHeader();
-                    Value[] args = new Value[argCount];
-                    for (int j=0; j<argCount; j++) {
-                        Value v = unpacker.unpackValue();
-                        args[j] = v;
-                    }
-                    runOnUiThread(()->{mBridge.updateObject(objId, objMethod, args);});
-                } else if (eventType.equals("updateObjectField")) {
-                    int objId = unpacker.unpackInt();
-                    String objField = unpacker.unpackString();
-                    int argCount = unpacker.unpackArrayHeader();
-                    Value[] args = new Value[argCount];
-                    for (int j=0; j<argCount; j++) {
-                        Value v = unpacker.unpackValue();
-                        args[j] = v;
-                    }
-                    runOnUiThread(()->{mBridge.updateObjectField(objId, objField, args);});
-                } else if (eventType.equals("deleteObject")) {
-                    int objId = unpacker.unpackInt();
-                    runOnUiThread(()->{mBridge.deleteObject(objId);});
-                } else if (eventType.equals("showView")) {
-                    runOnUiThread(()->{setView(mBridge.getRootView());});
-                } else if (eventType.equals("displayError")) {
-                    String errorMessage = unpacker.unpackString();
-                    runOnUiThread(()->{showErrorMessage(errorMessage);});
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        long duration = (System.nanoTime()-startTime) / 1000000;
-        Log.i(TAG,"Done processing! ("+duration+" ms)");
+        mBridge.processEvents(data);
     }
-
-    /**
-     * Post an event to the app listener
-     */
-    public void sendEvent(MessageBufferPacker event) {
-        mEventCount += 1;
-        mEventList.add(event);
-        (new Handler()).postDelayed(()->{
-            sendEvents();
-        },mEventDelay);
-    }
-
-    /**
-     * When events stop coming in, send to python.
-     * TODO: Should it have a time limit?
-     */
-    public void sendEvents() {
-        mEventCount -= 1;
-        if (mAppEventListener!=null && mEventCount==0) {
-            MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
-            try {
-                packer.packArrayHeader(mEventList.size());
-                for (MessageBufferPacker event: mEventList) {
-                    packer.addPayload(event.toByteArray());
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            mAppEventListener.onEvents(packer.toByteArray());
-            mEventList.clear();
-        }
-    }
-
 
     /**
      * Interface for python to listen to events occuring in native widgets. All
@@ -392,6 +268,8 @@ public class MainActivity extends AppCompatActivity {
     public void setAppEventListener(AppEventListener listener) {
         mAppEventListener = listener;
     }
+
+    public AppEventListener getAppEventListener() { return mAppEventListener; }
 
     @Override
     protected void onResume() {

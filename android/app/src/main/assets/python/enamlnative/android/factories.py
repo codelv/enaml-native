@@ -65,6 +65,12 @@ def edit_text_factory():
     return AndroidEditText
 
 
+def fragment_factory():
+    # print "Import frame layout"
+    from .android_fragment import AndroidFragment
+    return AndroidFragment
+
+
 def frame_layout_factory():
     # print "Import frame layout"
     from .android_frame_layout import AndroidFrameLayout
@@ -100,10 +106,12 @@ def radio_group_factory():
     from .android_radio_group import AndroidRadioGroup
     return AndroidRadioGroup
 
+
 def rating_bar_factory():
     # print "Import rating bar"
     from .android_rating_bar import AndroidRatingBar
     return AndroidRatingBar
+
 
 def relative_layout_factory():
     # print "Import relative layout"
@@ -122,10 +130,12 @@ def spinner_factory():
     from .android_spinner import AndroidSpinner
     return AndroidSpinner
 
+
 def switch_factory():
     # print "Import switch"
     from .android_switch import AndroidSwitch
     return AndroidSwitch
+
 
 def text_view_factory():
     # print "Import text view"
@@ -150,10 +160,12 @@ def tab_widget_factory():
     from .android_tab_widget import AndroidTabWidget
     return AndroidTabWidget
 
+
 def toggle_button_factory():
     # print "Import toggle button"
     from .android_toggle_button import AndroidToggleButton
     return AndroidToggleButton
+
 
 def toolbar_factory():
     from .android_toolbar import AndroidToolbar
@@ -169,6 +181,7 @@ def view_group_factory():
     # print "Import view group"
     from .android_view_group import AndroidViewGroup
     return AndroidViewGroup
+
 
 def view_pager_factory():
     # print "Import view pager"
@@ -186,6 +199,7 @@ ANDROID_FACTORIES = {
     'DatePicker': date_picker_factory,
     'DrawerLayout': drawer_layout_factory,
     'EditText': edit_text_factory,
+    'Fragment': fragment_factory,
     'FrameLayout': frame_layout_factory,
     'GridLayout': grid_layout_factory,
     'LinearLayout': linear_layout_factory,

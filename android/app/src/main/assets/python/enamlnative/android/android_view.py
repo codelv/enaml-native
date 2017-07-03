@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed, Instance, Subclass, Float, set_default
+from atom.api import Typed, Instance, Subclass, Bool, Float, set_default
 
 from enamlnative.widgets.view import ProxyView
 
@@ -88,12 +88,18 @@ class AndroidView(AndroidWidget, ProxyView):
     #: Layout params
     layout_params = Instance(MarginLayoutParams)
 
+    #: Flag to know if layout params should be destroyed
+    _destroy_layout_params = Bool()
+
+    def _observe_layout_params(self, change):
+        """ If layout_params is set, make sure it get's deleted later. """
+        self._destroy_layout_params = True
+
     def _default_dp(self):
         return self.get_context().dp
     #     if 'dp' not in CACHE:
     #         CACHE['dp'] = 1.0#self.get_context().getResources().getDisplayMetrics().density
     #     return CACHE['dp']
-
 
     # --------------------------------------------------------------------------
     # Initialization API
@@ -151,6 +157,12 @@ class AndroidView(AndroidWidget, ProxyView):
         except ValueError:
             h = MarginLayoutParams.LAYOUTS[d.layout_height or 'match_parent']
         return LayoutParams(w, h)
+
+    def destroy(self):
+        """ Destroy layout params if needed. """
+        super(AndroidView, self).destroy()
+        if self._destroy_layout_params:
+            del self.layout_params
 
     # --------------------------------------------------------------------------
     # OnClickListener API

@@ -104,8 +104,9 @@ class AndroidTextView(AndroidView, ProxyTextView):
         """
         super(AndroidTextView, self).init_widget()
         d = self.declaration
-        self.set_text(d.text)
 
+        if d.text:
+            self.set_text(d.text)
         if d.all_caps:
             self.set_all_caps(d.all_caps)
         if d.auto_link_mask:
