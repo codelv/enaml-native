@@ -32,17 +32,53 @@ This project is built on top of several existing projects:
 1. [Enaml](https://github.com/nucleic/enaml)
 2. [python-for-android](https://github.com/kivy/python-for-android/)
 3. [pybridge](https://github.com/joaoventura/pybridge)
+4. [react-native](https://github.com/facebook/react-native) (inspiration)
+5. [pyjnius](https://github.com/kivy/pyjnius/)
 
 _Note: I'm not affiliated with any of these but have contributed to some of them_
 
+## Usage ##
+
+1. Create a `main.py` with a function called `main`
+2. Declare and import an enaml view using widgets from the Android toolkit.
+3. Create an instance of AndroidApplication 
+3. Set the application view
+3. Call `app.start()`
+
 ## How it works ##
 
-1. An  toolkit for enaml was created that uses [pyjnius](https://github.com/kivy/pyjnius) to create native android widgets. (Eventually will use [pyobjus](https://github.com/kivy/pyobjus) for iOS )
-2. A slightly customized version of [pybridge](https://github.com/joaoventura/pybridge) is used that
-    unpacks python assets, starts the python interpreter, and provides an interface to commuicate between the two 
-3. An enaml view  generates the native widgets and displays them using native API's
-4. A customzied bootstrap for [python-for-android](https://github.com/kivy/python-for-android) is used to build python modules for each arch (x86 and armeab-v7a included) 
+1. A slightly customized version of [pybridge](https://github.com/joaoventura/pybridge) is used that unpacks python assets, starts the python interpreter, and provides an interface to commuicate between the two 
+2. An enaml view  generates the native widgets and displays them using native API's
+3. Python and Java commuicate using the bridge.
 
+
+### Startup ###
+
+When the app is started:
+1. A loading view is shown (can be customized to be any view)
+2. The python assets are extracted (if needed)
+3. Python is started in a thread and the `main` function from `main.py` is called
+4. An AndroidAppliction is started that runs an event loop (can use either the builtin, tornado, or twisted) 
+5. The enaml view is constructed, loaded, and shown
+6. The Bridge sends and handles all events
+
+
+### The Bridge ###
+
+Using pyjnius and the JNI was extremely slow, so pyjnius was replaced with a "java - python bridge" that allows you to create proxy python objects that are actually implemented in java. The bridge essentially queues all object creation and manipulation commands, serializes them using msgpack, and sends them over to Java (currently using JNI, may eventually use sockets). Java then unpacks and processes each command using reflection (currently...) and the Proxy interface. Any callbacks and Java widget events are queued, packed, and dispatched back over the bridge to be procssed by the python event loop. The result is a smooth interaction with minimal JNI use (only passes a msgpack byte arrays).
+
+More documentation on how to use the bridge will come soon. 
+
+
+### Original implementation ###
+Note: This is no longer used.
+A toolkit for enaml was created that uses [pyjnius](https://github.com/kivy/pyjnius) to create native android widgets. (Eventually will use [pyobjus](https://github.com/kivy/pyobjus) for iOS )
+
+
+### Python libraries ###
+You can use any pure python modules and any moodule with compiled objects as long as it has a `recipe` to build it. A customzied bootstrap for [python-for-android](https://github.com/kivy/python-for-android) is used to build python modules for each arch (x86 and armeab-v7a included) using the Crystax NDK. 
+
+I'm thinking of making an easier way of doing this similar to node_modules.
 
 
 ## Android ##
@@ -65,22 +101,6 @@ Any python modules with compiled components must be cross compiled for the speci
 4. Run `make clean-python`
 5. Run `make build-python` this will build the required python dependencies and copy the libs and python modules from `~/.local/share/python-for-android/dists/enaml-native/` to `src/main/libs/<arch>/` and `src/main/python/<arch>/` respectively
 6. Remove any unused modules and shared libraries in `src/main/python/<arch>/`
-
-
-### Issues ###
-
-A lot of the same issues as `Kivy` are here. Since it's packaging and must load python.
-
-###### Large Apk / App size ######
-Apk size are probably going to be at least 8 MB (when packaged for one arch).  Installed size will be around 30 MB.
-
-After removing unused libraries the installed size is about ~24 MB.
-
-###### Slow startup times ######
-
-~~Startup times are (now less) SLOW. The loading splash comes immediately but on a nexus 5, it takes ~~about 20~~ 13 seconds for python to start and render the UI. This is a killer at the moment...  Update now loading now takes about 3 seconds. I think even more improvements can be made. ~~ 
-
-With inclusion of jnius cache files the app starts in about 2 seconds (slightly faster with profiling disabled)!    This seems to be a reasonable loading time. 
 
 
 
