@@ -17,8 +17,6 @@ import com.jventura.pybridge.PyBridge;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -29,8 +27,8 @@ public class MainActivity extends AppCompatActivity {
     public static MainActivity mActivity = null;
 
     // Assets version
-    final int mAssetsVersion = 1;
-    final boolean mAssetsAlwaysOverwrite = true; // Set only on debug builds
+    final int mAssetsVersion = 8;
+    final boolean mAssetsAlwaysOverwrite = false; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
     // When the view is loaded from python
@@ -40,11 +38,11 @@ public class MainActivity extends AppCompatActivity {
     int mShortAnimationDuration = 300;
 
     AppEventListener mAppEventListener;
-    final CompletableFuture<Object> mPythonDone = new CompletableFuture<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG,"onCreate");
 
         // Save reference so python can access it
         mActivity = this;
@@ -91,6 +89,9 @@ public class MainActivity extends AppCompatActivity {
             // Initialize python
             // Note: This must be NOT done in the UI thread!
             PyBridge.start(pythonPath);
+            Log.i(TAG, "Python main() finished!");
+            // Done
+            PyBridge.stop();
 
             return pythonPath;
         }
@@ -102,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
          */
         protected void onPostExecute(String pythonPath) {
             Log.i(TAG, "Python thread complete!");
-            mPythonDone.complete(pythonPath);
         }
 
         /**
@@ -277,13 +277,6 @@ public class MainActivity extends AppCompatActivity {
         if (mAppEventListener!=null) {
             mAppEventListener.onDestroy();
         }
-        try {
-            mPythonDone.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        PyBridge.stop();
+
     }
 }

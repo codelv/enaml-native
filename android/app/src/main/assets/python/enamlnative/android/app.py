@@ -8,7 +8,6 @@ The full license is in the file COPYING.txt, distributed with this software.
 @author jrm
 
 '''
-import time
 import jnius
 import traceback
 from atom.api import Atom, List, Float, Value, Dict, Int, Unicode, Typed, Bool
@@ -49,9 +48,10 @@ class AppEventListener(jnius.PythonJavaClass):
 class Activity(bridge.JavaBridgeObject):
     """ Access to the activity over the bridge """
     __javaclass__ = Unicode('android.support.v7.app.AppCompatActivity')
-    __id__ = Int(-1)
+    __id__ = Int(-1) #: ID of -1 is a special reference on the bridge to the activity.
 
     def __init__(self):
+        """ This is only a reference, no object needs created by the bridge """
         Atom.__init__(self)
 
     setActionBar = bridge.JavaMethod('android.widget.Toolbar')
@@ -155,6 +155,7 @@ class AndroidApplication(Application):
 
         """
         self.loop.stop()
+        #jnius.detach()
 
     def send_event(self, name, *args):
         """ Send an event to Java.
