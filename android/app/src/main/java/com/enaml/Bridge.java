@@ -372,7 +372,7 @@ public class Bridge {
      * @param objId
      */
     public void deleteObject(int objId) {
-        Log.d(TAG, "Delete object id="+objId);
+        // Log.d(TAG, "Delete object id="+objId);
         Object obj = mObjectCache.get(objId);
         if (obj !=null) {
             mObjectCache.remove(objId);
@@ -613,13 +613,13 @@ public class Bridge {
         // how do i process them now??
         // TODO: WHY POST?
         mActivity.runOnUiThread(()->{
-            Log.i(TAG, "Running in process events...");
+            //Log.i(TAG, "Running in process events...");
             Runnable task = mTaskQueue.poll();
             while (task != null) {
                 task.run();
                 task = mTaskQueue.poll();
             }
-            Log.i(TAG, "Running in process events...");
+            //Log.i(TAG, "Running in process events...");
         });
     }
 

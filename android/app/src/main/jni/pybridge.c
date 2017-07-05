@@ -83,8 +83,8 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
 
     // Build paths for the Python interpreter
     char paths[512];
-    snprintf(paths, sizeof(paths), "%s:%s/stdlib.zip:%s/modules:%s/site-packages",
-                                    pypath, pypath,pypath, pypath);
+    snprintf(paths, sizeof(paths), "%s:%s/stdlib:%s/modules:%s/site-packages",
+                                    pypath, pypath, pypath, pypath);
 #if PY_MAJOR_VERSION >= 3
     // Set Python paths
     wchar_t *wchar_paths = Py_DecodeLocale(paths, NULL);
@@ -124,7 +124,7 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
       "    def flush(self):\n" \
       "        return\n" \
       "sys.stdout = sys.stderr = LogFile()\n" \
-      "from bootstrap import main\n" \
+      "from main import main\n" \
       "main()\n" \
     );
 
@@ -141,9 +141,6 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_stop
         (JNIEnv *env, jclass jc)
 {
     LOG("Finalizing the Python interpreter");
-    if (PyEval_ThreadsInitialized()) {
-        PyEval_ReleaseLock();
-    }
     Py_Finalize();
     return 0;
 }

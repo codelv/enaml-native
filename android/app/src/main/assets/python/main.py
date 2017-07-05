@@ -14,9 +14,9 @@ Forked from https://github.com/joaoventura/pybridge
 import traceback
 
 # ### Comment out to disable profiling
-# import cProfile
-# pr = cProfile.Profile()
-# pr.enable()
+import cProfile
+pr = cProfile.Profile()
+pr.enable()
 ## End profiling
 
 def main():
@@ -33,7 +33,7 @@ def main():
             from view import ContentView
             app.view = ContentView()
         app.show_view()
-        #app.deferred_call(dump_stats)
+        app.deferred_call(dump_stats)
     except:
         msg = traceback.format_exc()
         print msg
@@ -41,13 +41,16 @@ def main():
     app.start()
 
 def dump_stats():
-    pr.disable()
-    import pstats, StringIO
-    for sort_by in ['cumulative', 'time']:
-        s = StringIO.StringIO()
-        ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
-        ps.print_stats(0.3)
-        print s.getvalue()
+    try:
+        pr.disable()
+        import pstats, StringIO
+        for sort_by in ['cumulative', 'time']:
+            s = StringIO.StringIO()
+            ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
+            ps.print_stats(0.3)
+            print s.getvalue()
+    except:
+        pass
 
 
 

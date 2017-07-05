@@ -17,6 +17,8 @@ import com.jventura.pybridge.PyBridge;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -27,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     public static MainActivity mActivity = null;
 
     // Assets version
-    final int mAssetsVersion = 4;
+    final int mAssetsVersion = 1;
     final boolean mAssetsAlwaysOverwrite = true; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     int mShortAnimationDuration = 300;
 
     AppEventListener mAppEventListener;
+    final CompletableFuture<Object> mPythonDone = new CompletableFuture<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,42 +101,8 @@ public class MainActivity extends AppCompatActivity {
          * @param result
          */
         protected void onPostExecute(String pythonPath) {
-            /*
-            try {
-
-                JSONObject json = new JSONObject();
-                json.put("method", "version");
-                result = PyBridge.call(json);
-                TextView textView = (TextView) findViewById(R.id.textView);
-                textView.setText(result.getString("result"));
-
-                // Load the View
-                JSONObject json = new JSONObject();
-                JSONObject params = new JSONObject();
-                json.put("method", "load");
-                params.put("activity", mActivityId);
-                json.putOpt("params", params);
-                result = PyBridge.call(json);
-
-                // Start python
-                if (result!=null && !result.has("error")) {
-                    json = new JSONObject();
-                    json.put("method", "start");
-                    result = PyBridge.call(json);
-                }
-
-                // Check and display any errors
-                if (result!=null && result.has("error")) {
-                    JSONObject error = result.getJSONObject("error");
-                    if (error!=null) {
-                        showErrorMessage(error.getString("message"));
-                    }
-                }
-            } catch (JSONException e) {
-                showErrorMessage(e);
-            }
-            */
-
+            Log.i(TAG, "Python thread complete!");
+            mPythonDone.complete(pythonPath);
         }
 
         /**
@@ -257,6 +226,8 @@ public class MainActivity extends AppCompatActivity {
          */
         void onStop();
 
+
+        void onDestroy();
     }
 
 
@@ -293,6 +264,25 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         if (mAppEventListener!=null) {
             mAppEventListener.onStop();
+        }
+
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Wait for python to properly exit
+        if (mAppEventListener!=null) {
+            mAppEventListener.onDestroy();
+        }
+        try {
+            mPythonDone.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
         PyBridge.stop();
     }

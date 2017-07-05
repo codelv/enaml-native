@@ -77,18 +77,20 @@ class JavaMethod(Property):
         if obj.__suppressed__.get(self.name):
             return
 
-        vargs = self.__signature__ and self.__signature__[-1].endswith("...")
-        if not vargs and (len(args) != len(self.__signature__)):
+        signature = self.__signature__
+
+        vargs = signature and signature[-1].endswith("...")
+        if not vargs and (len(args) != len(signature)):
             raise ValueError("Invalid number of arguments: Given {}, expected {}"
-                             .format(args, self.__signature__))
+                             .format(args, signature))
         if vargs:
             bridge_args = []
-            varg = self.__signature__[-1].replace('...', '')
+            varg = signature[-1].replace('...', '')
             for i in range(len(args)):
-                sig = self.__signature__[i] if i+1 < len(self.__signature__) else varg
+                sig = signature[i] if i+1 < len(signature) else varg
                 bridge_args.append(msgpack_encoder(sig, args[i]))
         else:
-            bridge_args = [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)]
+            bridge_args = [msgpack_encoder(sig, arg) for sig, arg in zip(signature, args)]
 
         result = obj.__app__.create_future() if self.__returns__ else None
         obj.__app__.send_event(

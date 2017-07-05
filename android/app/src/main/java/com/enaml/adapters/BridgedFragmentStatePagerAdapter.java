@@ -1,10 +1,8 @@
 package com.enaml.adapters;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,10 +30,12 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
 
     public void addFragment(Fragment fragment) {
         mFragments.add(fragment);
+        notifyDataSetChanged();
     }
 
     public void removeFragment(Fragment fragment) {
         mFragments.remove(fragment);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -68,11 +68,8 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
         public View onCreateView(LayoutInflater inflater,
                                  ViewGroup container, Bundle savedInstanceState) {
             //int viewId = savedInstanceState.getInt(BridgedFragment.VIEW_ID);
-            System.out.println("ON CREATE VIEW JAVA");
             if (mListener != null) {
-                System.out.println("Getting view");
                 View view =  mListener.onCreateView();
-                System.out.println("View is "+view);
                 return view;
             }
             return null;

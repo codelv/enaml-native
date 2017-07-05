@@ -8,6 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 @author jrm
 
 '''
+import time
 import jnius
 import traceback
 from atom.api import Atom, List, Float, Value, Dict, Int, Unicode, Typed, Bool
@@ -39,6 +40,10 @@ class AppEventListener(jnius.PythonJavaClass):
     @jnius.java_method('()V')
     def onStop(self):
         self.__handler__.on_stop()
+
+    @jnius.java_method('()V')
+    def onDestroy(self):
+        self.__handler__.on_destroy()
 
 
 class Activity(bridge.JavaBridgeObject):
@@ -198,7 +203,7 @@ class AndroidApplication(Application):
             the callback.
 
         """
-        self.loop.add_callback(callback, *args, **kwargs)
+        return self.loop.add_callback(callback, *args, **kwargs)
         #self.loop.callWhenRunning(callback, *args, **kwargs)
 
     def timed_call(self, ms, callback, *args, **kwargs):
@@ -219,7 +224,7 @@ class AndroidApplication(Application):
             the callback.
 
         """
-        self.loop.call_later(ms/1000.0, callback, *args, **kwargs)
+        return self.loop.call_later(ms/1000.0, callback, *args, **kwargs)
         #self.loop.callLater(ms/1000.0, callback, *args, **kwargs)
 
     def is_main_thread(self):
@@ -279,11 +284,16 @@ class AndroidApplication(Application):
         self.deferred_call(self.process_events, data)
 
     def on_pause(self):
+        # self.loop.stop()
         pass
 
     def on_resume(self):
+        #self.loop.start()
         pass
 
     def on_stop(self):
+        #: Called from thread, make sure the correct thread detaches
         pass
-        #self.deferred_call(jnius.detach)
+
+    def on_destroy(self):
+        self.deferred_call(self.stop)

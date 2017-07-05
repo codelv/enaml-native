@@ -16,6 +16,7 @@ from atom.api import (
 from enaml.core.declarative import d_
 
 from .view_group import ViewGroup, ProxyViewGroup
+from .fragment import  Fragment
 
 
 class ProxyViewPager(ProxyViewGroup):
@@ -49,12 +50,15 @@ class ViewPager(ViewGroup):
     #: Set the margin between pages.
     page_margin = d_(Int(-1))
 
+    #: Read only list of pages
+    pages = property(lambda self: [c for c in self._children if isinstance(c, Fragment)])
+
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyViewPager)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Observers
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     @observe('current_index','offscreen_page_limit','page_margin')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

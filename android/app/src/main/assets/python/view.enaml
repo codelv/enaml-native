@@ -37,15 +37,21 @@ enamldef MenuItem(Button):
   padding = (10,10,10,10)
   
 enamldef LeftDrawer(LinearLayout):
+  attr pager
+  attr drawer
+  attr root
   layout_gravity = 'left'
   layout_width = '200'
   layout_height = 'match_parent'
   orientation = 'vertical'
   background_color = '#FFFFFF'
   Looper:
-    iterable << ["Home", "Models", "Settings", "etc..."]
+    iterable << pager.pages + root.new_pages
     MenuItem:
-      text = loop_item
+      text = loop_item.title
+      clicked ::
+        pager.current_index = loop_index
+        drawer.opened = []
 
 enamldef RightDrawer(ScrollView):
   layout_gravity = 'right'
@@ -63,137 +69,170 @@ enamldef Scroller(ScrollView):
   layout_height = 'match_parent'
   background_color = '#EEEEEE'
   padding = (10,10,10,10)
-          
-enamldef ContentView(VBox):
-  #opened = True # Or swipe to open
-  #side = 'left'
+
+enamldef Page(Fragment):
+  attr title = ""
+
+enamldef CustomPage(Page): page:
+  attr new_page_title = ""
+  attr root
+  Scroller:
+    Card:
+      VBox:
+        TextView:
+          text = "Title"
+        EditText:
+          text := page.new_page_title
+        HBox:
+          Button:
+            text = "Add page"
+            clicked::
+              pages = page.root.new_pages[:]
+              pages.append(page.new_page_title)
+              page.root.new_pages = pages
+              page.parent.current_index +=1
+          Button:
+            text = "Remove page"
+            enabled << page.title in page.root.new_pages
+            clicked::
+              pages = page.root.new_pages[:]
+              pages.remove(page.title)
+              page.parent.current_index -=1
+              page.root.new_pages = pages
+
+enamldef ContentView(VBox): content_view:
+  #: This should be read from the drawer's children...
+  attr new_pages = []
+  attr current_page << view_pager.pages[view_pager.current_index if view_pager.current_index < len(view_pager.pages) else -1] #: TODO: Make pages attribute observable...
   Toolbar:
-    title = "Enaml Native"
+    title << "Enaml Native - {}".format(current_page.title)
     title_color = '#FFFFFF'
     background_color = '#303F9F'
-  DrawerLayout:
+  DrawerLayout: drawer_layout:
     layout_height = 'match_parent'
-    ViewPager:
+    ViewPager: view_pager:
       layout_width = 'match_parent'
       layout_height = 'match_parent'
-      Fragment:
-          Scroller:
-            LinearLayout:
-              orientation = "vertical"
-              Card:
-                VBox:
-                  CardTitle:
-                    text = "TextView"
+      Page:
+        title = "General"
+        Scroller:
+          LinearLayout:
+            orientation = "vertical"
+            Card:
+              VBox:
+                CardTitle:
+                  text = "TextView"
+                TextView:
+                  text = "Error"
+                  font_style = "italic"
+                  text_size = 16
+                  text_color = "#FF0000"
+                TextView:
+                  text = "This takes up three lines"
+                  lines = 3
+                TextView:
+                  text = """This gets trunicated. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
+                  max_lines = 5
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Fonts"
+                Looper:
+                  iterable << ["casual", "cursive", "monospace", "sans-serif", "sans-serif-black",
+                               "sans-serif-condensed", "sans-serif-condensed-light", "sans-serif-light",
+                               "sans-serif-medium", "sans-serif-smallcaps", "sans-serif-thin",
+                               "serif", "serif-monospace"]
                   TextView:
-                    text = "Error"
-                    font_style = "italic"
-                    text_size = 16
-                    text_color = "#FF0000"
-                  TextView:
-                    text = "This takes up three lines"
-                    lines = 3
-                  TextView:
-                    text = """This gets trunicated. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
-                    max_lines = 5
-              Card:
-                VBox:
-                  CardTitle:
-                    text = "Fonts"
-                  Looper:
-                    iterable << ["casual", "cursive", "monospace", "sans-serif", "sans-serif-black",
-                                 "sans-serif-condensed", "sans-serif-condensed-light", "sans-serif-light",
-                                 "sans-serif-medium", "sans-serif-smallcaps", "sans-serif-thin",
-                                 "serif", "serif-monospace"]
-                    TextView:
-                      font_family = loop_item
-                      text = loop_item
+                    font_family = loop_item
+                    text = loop_item
 
 
 
-              Card:
-                VBox:
-                  CardTitle:
-                    text = "Buttons"
-                  Button:
-                    text = "PushButton"
-                    clicked:: tv1.count += 1
-                  TextView: tv1:
-                    attr count = 0
-                    text << "Clicked {}".format(count)
-              Card:
-                VBox:
-                  CardTitle:
-                    text = "Checkboxes"
-                  CheckBox: cb1:
-                    text = "CheckBox"
-                    checked = True
-                  TextView:
-                    text << "Checkbox state: {}".format(cb1.checked)
-                  Switch: sw1:
-                    text = "Switch"
-                    checked = True
-                  TextView:
-                    text << "Switch state: {}".format(sw1.checked)
-                  ToggleButton: tb1:
-                    text = "ToggleButton"
-                    checked = True
-                  TextView:
-                    text << "Button state: {}".format(tb1.checked)
-              Card:
-                VBox:
-                  CardTitle:
-                    text = "Radio buttons"
-                  RadioGroup: rg1:
-                    checked = rb1
-                    RadioButton: rb1:
-                      text = "A"
-                    RadioButton: rb2:
-                      text = "B"
-                    RadioButton: rb3:
-                      text = "C"
-                  TextView:
-                    text << "Radio group state: {}".format(rg1.checked.text if rg1.checked else "Unchecked")
-              Card:
-                VBox:
-                  CardTitle:
-                    text = "Progressbar"
-                  ProgressBar:
-                    indeterminate = True # Ignored if style doesn't support it
-                  RatingBar: rbar1:
-                    num_stars = 5
-                    rating = 3
-                  TextView:
-                    text << "Rating {}".format(rbar1.rating)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Buttons"
+                Button:
+                  text = "PushButton"
+                  clicked:: tv1.count += 1
+                TextView: tv1:
+                  attr count = 0
+                  text << "Clicked {}".format(count)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Checkboxes"
+                CheckBox: cb1:
+                  text = "CheckBox"
+                  checked = True
+                TextView:
+                  text << "Checkbox state: {}".format(cb1.checked)
+                Switch: sw1:
+                  text = "Switch"
+                  checked = True
+                TextView:
+                  text << "Switch state: {}".format(sw1.checked)
+                ToggleButton: tb1:
+                  text = "ToggleButton"
+                  checked = True
+                TextView:
+                  text << "Button state: {}".format(tb1.checked)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Radio buttons"
+                RadioGroup: rg1:
+                  checked = rb1
+                  RadioButton: rb1:
+                    text = "A"
+                  RadioButton: rb2:
+                    text = "B"
+                  RadioButton: rb3:
+                    text = "C"
+                TextView:
+                  text << "Radio group state: {}".format(rg1.checked.text if rg1.checked else "Unchecked")
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Progressbar"
+                ProgressBar:
+                  indeterminate = True # Ignored if style doesn't support it
+                RatingBar: rbar1:
+                  num_stars = 5
+                  rating = 3
+                TextView:
+                  text << "Rating {}".format(rbar1.rating)
 
-              Card:
-                VBox:
-                  CardTitle:
-                    text = "Timer"
-                  ToggleButton:
-                    text_on = "STOP"
-                    text_off = "START"
-                    checked:= ch1.running
-                  Chronometer: ch1:
-                    running = False
-                  TextView:
-                    text << "Ticks: {}".format(ch1.ticks)
-              Card:
-                VBox:
-                  CardTitle:
-                    text = "Spinner"
-                  Spinner: spn1:
-                    items = ["Sun", "Moon", "Stars"]
-                  TextView:
-                    text << "Selected: {}".format(spn1.items[spn1.selected])
-              Card:
-                VBox:
-                  CardTitle:
-                    text = "EditText"
-                  TextView:
-                    text << "You typed: {}".format(et.text)
-                  EditText: et:
-                    text = ""
-      Fragment:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Timer"
+                ToggleButton:
+                  text_on = "STOP"
+                  text_off = "START"
+                  checked:= ch1.running
+                Chronometer: ch1:
+                  running = False
+                TextView:
+                  text << "Ticks: {}".format(ch1.ticks)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Spinner"
+                Spinner: spn1:
+                  items = ["Sun", "Moon", "Stars"]
+                TextView:
+                  text << "Selected: {}".format(spn1.items[spn1.selected])
+            Card:
+              VBox:
+                CardTitle:
+                  text = "EditText"
+                TextView:
+                  text << "You typed: {}".format(et.text)
+                EditText: et:
+                  text = ""
+      Page:
+        title = "Time Picker"
         Scroller:
           Card:
             VBox:
@@ -205,7 +244,8 @@ enamldef ContentView(VBox):
               TextView:
                 text << "Time selected: {hour}:{minute}".format(hour=tp1.hour,minute=tp1.minute)
 
-      Fragment:
+      Page:
+        title = "Date Picker"
         Scroller:
           Card:
             VBox:
@@ -218,7 +258,8 @@ enamldef ContentView(VBox):
                 day = today.day
               TextView:
                 text << "Date selected: {month}/{day}/{year}".format(month=dp1.month,day=dp1.day,year=dp1.year)
-      Fragment:
+      Page:
+        title = "Loopers"
         Scroller:
           Card: card_looper:
             attr items = []
@@ -243,7 +284,8 @@ enamldef ContentView(VBox):
                 iterable << card_looper.items
                 TextView:
                   text = "Item index is {}".format(loop_item)
-      Fragment:
+      Page:
+        title = "Conditionals"
         Scroller:
           Card: card_conds:
             attr loading = True
@@ -264,8 +306,19 @@ enamldef ContentView(VBox):
                 condition << not card_conds.loading
                 TextView:
                   text = "Loading complete!!!"
+      CustomPage:
+        title = "Dynamic Pages"
+        root = content_view
+      Looper:
+        iterable << content_view.new_pages
+        CustomPage:
+          title = loop_item
+          root = content_view
+
 
     LeftDrawer:
-      pass
+      pager = view_pager
+      drawer = drawer_layout
+      root = content_view
     RightDrawer:
       pass
