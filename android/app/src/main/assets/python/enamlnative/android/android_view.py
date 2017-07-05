@@ -21,9 +21,6 @@ class View(Widget):
     __javaclass__ = set_default('android.view.View')
     __signature__ = set_default(('android.content.Context',))
 
-    def getId(self):
-        return self.__id__
-
     addView = JavaMethod('android.view.View')
     onClick = JavaCallback('android.view.View')
     setOnClickListener = JavaMethod('android.view.View$OnClickListener')
@@ -141,7 +138,7 @@ class AndroidView(AndroidWidget, ProxyView):
             if d.margins:
                 self.set_margins(d.margins)
         if d.clickable:
-            self.widget.setOnClickListener(id(self.widget))
+            self.widget.setOnClickListener(self.widget.getId())
             self.widget.onClick.connect(self.on_click)
             self.set_clickable(d.clickable)
 

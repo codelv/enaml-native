@@ -105,7 +105,7 @@ class AndroidSpinner(AndroidViewGroup, ProxySpinner):
             self.set_selected(d.selected)
 
         #: Selection listener
-        self.widget.setOnItemSelectedListener(id(self.widget))
+        self.widget.setOnItemSelectedListener(self.widget.getId())
         self.widget.onItemSelected.connect(self.on_item_selected)
         self.widget.onNothingSelected.connect(self.on_nothing_selected)
 

@@ -14,6 +14,7 @@ from atom.api import Typed, Instance, Subclass, Float, set_default
 from enamlnative.widgets.fragment import ProxyFragment
 
 from .android_toolkit_object import AndroidToolkitObject
+from .android_view_pager import BridgedFragmentStatePagerAdapter
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
@@ -32,6 +33,9 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
     #: A reference to the fragment created by the proxy.
     fragment = Typed(BridgedFragment)
 
+    #: Reference to the adapter
+    adapter = Typed(BridgedFragmentStatePagerAdapter)
+
     # --------------------------------------------------------------------------
     # Initialization API
     # --------------------------------------------------------------------------
@@ -47,7 +51,7 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
         """
         super(AndroidFragment, self).init_widget()
         d = self.declaration
-        self.fragment.setFragmentListener(id(self.fragment))
+        self.fragment.setFragmentListener(self.fragment.getId())
         self.fragment.onCreateView.connect(self.on_create_view)
         self.fragment.onDestroyView.connect(self.on_destroy_view)
 
@@ -61,17 +65,20 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
         """
         parent = self.parent()
         if parent is not None:
-            parent.adapter.addFragment(self.fragment)
+            self.adapter = parent.adapter
+            self.adapter.addFragment(self.fragment)
 
     def destroy(self):
-        """ Custom destructor """
-        super(AndroidFragment, self).destroy()
-
+        """ Custom destructor that deletes the fragment and removes
+            itself from the adapter it was added to.
+        """
         #: Destroy fragment
         if self.fragment:
+            #: Cleanup from fragment
+            if self.adapter is not None:
+                self.adapter.removeFragment(self.fragment)
             del self.fragment
-
-
+        super(AndroidFragment, self).destroy()
 
     # --------------------------------------------------------------------------
     # FragmentListener API

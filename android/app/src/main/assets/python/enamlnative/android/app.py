@@ -260,9 +260,15 @@ class AndroidApplication(Application):
             sending back the result.
         """
         result_id, ptr, method, args = event[1]
+        obj = None
+        result = None
         try:
             obj, handler = bridge.get_handler(ptr, method)
             result = handler(*[v for t, v in args])
+        except:
+            print("Error processing event: {}".format(event))
+            traceback.print_exc()
+        finally:
             if result_id:
                 if hasattr(obj, '__javaclass__'):
                     sig = getattr(type(obj), method).__returns__
@@ -274,8 +280,6 @@ class AndroidApplication(Application):
                     result_id,
                     bridge.msgpack_encoder(sig, result)  #: args
                 )
-        except:
-            traceback.print_exc()
 
     # --------------------------------------------------------------------------
     # AppEventListener API Implementation

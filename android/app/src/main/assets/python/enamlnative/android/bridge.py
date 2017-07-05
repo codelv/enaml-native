@@ -9,11 +9,29 @@ Created on June 21, 2017
 
 @author: jrm
 '''
-import ctypes
+import weakref
 import msgpack
 import functools
 from contextlib import contextmanager
 from atom.api import Atom, ForwardInstance, Dict, Property, Callable, Unicode, Tuple, Int,  Instance, set_default
+from weakref import WeakValueDictionary
+
+CACHE = WeakValueDictionary()
+__global_id__ = 0
+
+
+def _generate_id():
+    """ Generate an id for an object """
+    global __global_id__
+    __global_id__ += 1
+    return __global_id__
+
+def _cleanup_id(obj):
+    """ Removes the object from the """
+    try:
+        del CACHE[obj.__id__]
+    except KeyError:
+        pass
 
 def get_app_class():
     """ Avoid circular import. Probably indicates a
@@ -44,9 +62,12 @@ def loads(data):
 
 def get_handler(ptr, method):
     """ Dereference the pointer and return the handler method. """
-    obj = ctypes.cast(ptr, ctypes.py_object).value
-    if not hasattr(obj, method):
-        raise NotImplementedError("{}.{} is not implemented.".format(type(obj), method))
+    obj = CACHE.get(ptr, None)
+    if obj is None:
+        raise KeyError("Reference id={} never existed or has already been destroyed"
+                       .format(ptr))
+    elif not hasattr(obj, method):
+        raise NotImplementedError("{}.{} is not implemented.".format(obj, method))
     return obj, getattr(obj, method)
 
 
@@ -84,23 +105,29 @@ class JavaMethod(Property):
             raise ValueError("Invalid number of arguments: Given {}, expected {}"
                              .format(args, signature))
         if vargs:
-            bridge_args = []
             varg = signature[-1].replace('...', '')
-            for i in range(len(args)):
-                sig = signature[i] if i+1 < len(signature) else varg
-                bridge_args.append(msgpack_encoder(sig, args[i]))
+            bridge_args = [
+                msgpack_encoder(signature[i] if i+1 < len(signature) else varg, args[i])
+                for i in range(len(args))
+            ]
         else:
             bridge_args = [msgpack_encoder(sig, arg) for sig, arg in zip(signature, args)]
 
         result = obj.__app__.create_future() if self.__returns__ else None
+
+        if result:
+            #: Put the future in the cache so it can be retrieved later
+            result.__id__ = _generate_id()
+            CACHE[result.__id__] = result
+            result.add_done_callback(_cleanup_id)
+
         obj.__app__.send_event(
             'updateObject',  #: method
             obj.__id__,
-            id(result) if result else 0,
+            result.__id__ if result else 0,
             self.name,  #: method name
             bridge_args #: args
         )
-        #: TODO: If GC cleans this up, then boom??
         return result
 
 
@@ -148,13 +175,13 @@ class JavaCallback(JavaMethod):
         obj.__callbacks__[self.name] = callback
 
 
-__global_id__ = 0
-
 class JavaBridgeObject(Atom):
     """ A proxy to a class in java. This sends the commands over
         the bridge for execution.
 
     """
+    __slots__ = ('__weakref__',)
+
     #: Java Class name
     __javaclass__ = Unicode('java.lang.Object')
 
@@ -168,18 +195,16 @@ class JavaBridgeObject(Atom):
     __callbacks__ = Dict()
 
     #: Java object ID
-    __id__ = Int(0)
+    __id__ = Int(0, factory=_generate_id)
 
     #: Bridge
     __app__ = ForwardInstance(get_app_class)
 
-    def _default___id__(self):
-        global __global_id__
-        __global_id__ += 1
-        return __global_id__
-
     def _default___app__(self):
         return get_app_class().instance()
+
+    def getId(self):
+        return self.__id__
 
     def __init__(self, *args):
         """ Sends the event to create this View in Java """
@@ -195,6 +220,7 @@ class JavaBridgeObject(Atom):
         #             setattr(self, name, method.clone(self))
 
         #: Send the event over the bridge to construct the view
+        CACHE[self.__id__] = self
         self.__app__.send_event(
             'createObject', #: method
             self.__id__, #: id to assign in java
@@ -207,6 +233,7 @@ class JavaBridgeObject(Atom):
             'deleteObject', #: method
             self.__id__, #: id to assign in java
         )
+        _cleanup_id(self)
 
 # def test_bridge():
 #     """ Nothing beats tests with actual usage :) """

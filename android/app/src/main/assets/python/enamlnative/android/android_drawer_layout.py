@@ -101,7 +101,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
             self.set_opened(d.opened)
 
         #: Add drawer listener
-        self.widget.addDrawerListener(id(self.widget))
+        self.widget.addDrawerListener(self.widget.getId())
         self.widget.onDrawerClosed.connect(self.on_drawer_closed)
         self.widget.onDrawerOpened.connect(self.on_drawer_opened)
 

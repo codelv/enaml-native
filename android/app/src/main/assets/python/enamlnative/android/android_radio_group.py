@@ -51,7 +51,7 @@ class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
         if d.checked:
             self.set_checked(d.checked)
 
-        self.widget.setOnCheckedChangeListener(id(self.widget))
+        self.widget.setOnCheckedChangeListener(self.widget.getId())
         self.widget.onCheckedChanged.connect(self.on_checked_changed)
 
     # --------------------------------------------------------------------------

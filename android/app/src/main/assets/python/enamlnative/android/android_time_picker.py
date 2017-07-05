@@ -54,7 +54,7 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
         self.set_hour_mode(d.hour_mode)
         self.set_enabled(d.enabled)
 
-        self.widget.setOnTimeChangedListener(id(self.widget))
+        self.widget.setOnTimeChangedListener(self.widget.getId())
         self.widget.onTimeChanged.connect(self.on_time_changed)
 
     # --------------------------------------------------------------------------

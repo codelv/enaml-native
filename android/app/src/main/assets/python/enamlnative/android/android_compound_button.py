@@ -47,7 +47,7 @@ class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
         super(AndroidCompoundButton, self).init_widget()
         d = self.declaration
         self.set_checked(d.checked)
-        self.widget.setOnCheckedChangeListener(id(self.widget))
+        self.widget.setOnCheckedChangeListener(self.widget.getId())
         self.widget.onCheckedChanged.connect(self.on_checked)
 
     def on_checked(self, view, checked):

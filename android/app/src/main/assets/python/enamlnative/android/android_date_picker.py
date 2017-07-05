@@ -57,7 +57,7 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
         if d.max_date:
             self.set_max_date(d.max_date)
 
-        self.widget.init(d.year, d.month, d.day, id(self.widget))
+        self.widget.init(d.year, d.month, d.day, self.widget.getId())
         self.widget.onDateChanged.connect(self.on_date_changed)
 
     # --------------------------------------------------------------------------

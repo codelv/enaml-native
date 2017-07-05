@@ -9,12 +9,13 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed, set_default
+from atom.api import Typed, Int, set_default
 
 from enamlnative.widgets.view_pager import ProxyViewPager
 
 from .android_view_group import AndroidViewGroup, ViewGroup
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .app import AndroidApplication
 
 
 class ViewPager(ViewGroup):
@@ -33,6 +34,7 @@ class BridgedFragmentStatePagerAdapter(JavaBridgeObject):
     __javaclass__ = set_default('com.enaml.adapters.BridgedFragmentStatePagerAdapter')
     addFragment = JavaMethod('android.support.v4.app.Fragment')
     removeFragment = JavaMethod('android.support.v4.app.Fragment')
+    notifyDataSetChanged = JavaMethod()
     # setOnItemRequestedListener = JavaMethod(
     #     'com.enaml.adapters.BridgedFragmentStatePagerAdapter$OnItemRequestedListener')
     # onItemRequested = JavaCallback('int', returns='int')
@@ -47,7 +49,11 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
 
     #: Adapter
     adapter = Typed(BridgedFragmentStatePagerAdapter)
-    
+
+    #: Pending changes
+    _notify_count = Int()
+    _notify_delay = Int(2)
+
     # --------------------------------------------------------------------------
     # Initialization API
     # --------------------------------------------------------------------------
@@ -77,17 +83,35 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
 
         #: Set adapter
         self.widget.setAdapter(self.adapter)
-        self.widget.addOnPageChangeListener(id(self.widget))
+        self.widget.addOnPageChangeListener(self.widget.getId())
         self.widget.onPageSelected.connect(self.on_page_selected)
 
         if d.current_index:
             self.set_current_index(d.current_index)
+
+    def child_added(self, child):
+        """ When a child is added, schedule a data changed notification """
+        super(AndroidViewPager, self).child_added(child)
+        self._notify_count += 1
+        AndroidApplication.instance().timed_call(self._notify_delay, self._notify_change)
+
+    def child_removed(self, child):
+        """ When a child is removed, schedule a data changed notification """
+        super(AndroidViewPager, self).child_removed(child)
+        self._notify_count += 1
+        AndroidApplication.instance().timed_call(self._notify_delay, self._notify_change)
 
     def destroy(self):
         """ Properly destroy adapter """
         super(AndroidViewPager, self).destroy()
         if self.adapter:
             del self.adapter
+
+    def _notify_change(self):
+        """ After all changes have settled, tell Java it changed """
+        self._notify_count -= 1
+        if self._notify_count == 0:
+            self.adapter.notifyDataSetChanged()
 
     # # --------------------------------------------------------------------------
     # # OnItemRequestedListener API

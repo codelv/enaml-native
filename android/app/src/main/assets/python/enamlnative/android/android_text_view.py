@@ -29,6 +29,8 @@ class TextView(View):
     setTextSize = JavaMethod('float')
     setTypeface = JavaMethod('android.graphics.Typeface', 'int')
     setLines = JavaMethod('int')
+    setLineSpacing = JavaMethod('float', 'float')
+    setLetterSpacing = JavaMethod('float')
     setMaxLines = JavaMethod('int')
     setInputType = JavaMethod('int')
     addTextChangedListener = JavaMethod('android.text.TextWatcher')
@@ -123,11 +125,15 @@ class AndroidTextView(AndroidView, ProxyTextView):
             self.set_highlight_color(d.highlight_color)
         if d.lines:
             self.set_lines(d.lines)
+        if d.line_spacing:
+            self.set_line_spacing(d.line_spacing)
+        if d.letter_spacing:
+            self.set_letter_spacing(d.letter_spacing)
         if d.max_lines:
             self.set_max_lines(d.max_lines)
         if d.input_type:
             self.set_input_type(d.input_type)
-            self.widget.addTextChangedListener(id(self.widget))
+            self.widget.addTextChangedListener(self.widget.getId())
             self.widget.onTextChanged.connect(self.on_text_changed)
 
     # --------------------------------------------------------------------------
@@ -184,6 +190,12 @@ class AndroidTextView(AndroidView, ProxyTextView):
 
     def set_lines(self, lines):
         self.widget.setLines(lines)
+
+    def set_line_spacing(self, spacing):
+        self.widget.setLineSpacing(*spacing)
+
+    def set_letter_spacing(self, spacing):
+        self.widget.setLetterSpacing(spacing)
 
     def set_max_lines(self, lines):
         self.widget.setMaxLines(lines)

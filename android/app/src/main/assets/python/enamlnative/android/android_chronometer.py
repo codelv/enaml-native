@@ -60,7 +60,7 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
         if d.direction == 'down':
             self.set_direction(d.direction)
 
-        self.widget.setOnChronometerTickListener(id(self.widget))
+        self.widget.setOnChronometerTickListener(self.widget.getId())
         self.widget.onChronometerTick.connect(self.on_chronometer_tick)
 
         if d.running:

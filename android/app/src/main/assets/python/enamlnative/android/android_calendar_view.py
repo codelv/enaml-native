@@ -60,7 +60,7 @@ class AndroidCalendarView(AndroidFrameLayout, ProxyCalendarView):
         self.set_first_day_of_week(d.first_day_of_week)
 
         #: Setup listener
-        self.widget.setOnDateChangeListener(id(self.widget))
+        self.widget.setOnDateChangeListener(self.widget.getid())
         self.widget.onSelectedDayChange.connect(self.on_selected_day_change)
 
     # --------------------------------------------------------------------------
