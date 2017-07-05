@@ -108,7 +108,9 @@ public class Bridge {
                 String argType = argv.get(0).asStringValue().asString();
                 name += argType;
                 try {
-                    if (argType.equals("int")) {
+                    if (argType.equals("NoneType")) {
+                        mSpec[i] = Void.TYPE;
+                    } else if (argType.equals("int")) {
                         mSpec[i] = int.class;
                     } else if (argType.equals("boolean")) {
                         mSpec[i] = boolean.class;
@@ -147,7 +149,7 @@ public class Bridge {
                                 Object proxy = Proxy.newProxyInstance(
                                         infClass.getClassLoader(),
                                         new Class[]{infClass},
-                                        new BridgeInvocationHandler(iv.toLong())
+                                        new BridgeInvocationHandler(iv.toInt())
                                 );
                                 //mProxyCache.put(objId,proxy);
                                 mArgs[i] = proxy;
@@ -290,7 +292,7 @@ public class Bridge {
      * @param method
      * @param args
      */
-    public void updateObject(int objId, long resultId, String method, Value[] args) {
+    public void updateObject(int objId, int resultId, String method, Value[] args) {
         //Log.e(TAG,"id="+objId+" method="+method);
         Object obj = mObjectCache.get(objId);
         if (obj==null) {
@@ -385,9 +387,9 @@ public class Bridge {
      * invokes the proper callback in Python.
      */
     class BridgeInvocationHandler implements InvocationHandler {
-        private final long mPythonObjectPtr;
+        private final int mPythonObjectPtr;
 
-        public BridgeInvocationHandler(long ptr) {
+        public BridgeInvocationHandler(int ptr) {
             mPythonObjectPtr = ptr;
         }
 
@@ -419,7 +421,7 @@ public class Bridge {
      * @param pythonObjectId
      * @param result
      */
-    public void onResult(long pythonObjectId, Object result) {
+    public void onResult(int pythonObjectId, Object result) {
         if (pythonObjectId==IGNORE_RESULT) {
             return;
         }
@@ -436,14 +438,14 @@ public class Bridge {
      * @param args: args to pass to the method
      * @return
      */
-    public Object onEvent(int resultId, long pythonObjectId, String method, Object[] args) {
+    public Object onEvent(int resultId, int pythonObjectId, String method, Object[] args) {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
         try {
             packer.packArrayHeader(2);
             packer.packString("event");
             packer.packArrayHeader(4);
             packer.packInt(resultId);
-            packer.packLong(pythonObjectId);
+            packer.packInt(pythonObjectId);
             packer.packString(method);
             if (args==null) {
                 packer.packArrayHeader(0);
@@ -567,7 +569,7 @@ public class Bridge {
 
                 } else if (eventType.equals("updateObject")) {
                     int objId = unpacker.unpackInt();
-                    long resultId = unpacker.unpackLong();
+                    int resultId = unpacker.unpackInt();
                     String objMethod = unpacker.unpackString();
                     int argCount = unpacker.unpackArrayHeader();
                     Value[] args = new Value[argCount];

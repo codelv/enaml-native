@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Assets version
     final int mAssetsVersion = 8;
-    final boolean mAssetsAlwaysOverwrite = false; // Set only on debug builds
+    final boolean mAssetsAlwaysOverwrite = true; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
     // When the view is loaded from python
