@@ -136,8 +136,17 @@ class AndroidApplication(Application):
         #self.loop.run()
 
     def show_view(self):
+        """ Show the view. It uses the first view created.
+
+        """
         view = self.get_view()
-        self.send_event('showView')
+        self.send_event(bridge.Command.SHOW)
+
+    def show_error(self, msg):
+        """ Show the error view with the given message
+
+        """
+        self.send_event(bridge.Command.ERROR, msg)
 
     def get_view(self):
         """ Prepare the view
@@ -276,7 +285,7 @@ class AndroidApplication(Application):
                     sig = type(result).__name__
 
                 self.send_event(
-                    'setResult',  #: method
+                    bridge.Command.RESULT,  #: method
                     result_id,
                     bridge.msgpack_encoder(sig, result)  #: args
                 )

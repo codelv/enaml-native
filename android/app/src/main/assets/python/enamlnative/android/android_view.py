@@ -14,7 +14,7 @@ from atom.api import Typed, Instance, Subclass, Bool, Float, set_default
 from enamlnative.widgets.view import ProxyView
 
 from .android_widget import AndroidWidget, Widget
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, loads
 
 
 class View(Widget):
@@ -23,7 +23,11 @@ class View(Widget):
 
     addView = JavaMethod('android.view.View')
     onClick = JavaCallback('android.view.View')
+    onKey = JavaCallback('android.view.View', 'int', 'android.view.KeyEvent')
+    onTouch = JavaCallback('android.view.View', 'android.view.MotionEvent')
     setOnClickListener = JavaMethod('android.view.View$OnClickListener')
+    setOnKeyListener = JavaMethod('android.view.View$OnKeyListener')
+    setOnTouchListener = JavaMethod('android.view.View$OnTouchListener')
     setLayoutParams = JavaMethod('android.view.ViewGroup.LayoutParams')
     setBackgroundColor = JavaMethod('android.graphics.Color')
     setClickable = JavaMethod('boolean')
@@ -141,6 +145,12 @@ class AndroidView(AndroidWidget, ProxyView):
             self.widget.setOnClickListener(self.widget.getId())
             self.widget.onClick.connect(self.on_click)
             self.set_clickable(d.clickable)
+        if d.key_events:
+            self.widget.setOnKeyListener(self.widget.getId())
+            self.widget.onKey.connect(self.on_key)
+        if d.touch_events:
+            self.widget.setOnTouchListener(self.widget.getId())
+            self.widget.onTouch.connect(self.on_touch)
 
     def _default_layout_params(self):
         d = self.declaration
@@ -170,6 +180,47 @@ class AndroidView(AndroidWidget, ProxyView):
         """
         d = self.declaration
         d.clicked()
+
+    # --------------------------------------------------------------------------
+    # OnKeyListener API
+    # --------------------------------------------------------------------------
+    def on_key(self, view, key, event):
+        """ Trigger the key event
+
+        Parameters
+        ----------
+        view: int
+            The ID of the view that sent this event
+        key: int
+            The code of the key that was pressed
+        data: bytes
+            The msgpack encoded key event
+
+        """
+        d = self.declaration
+        r = {'key': key, 'result': False}
+        d.key_event(r)
+        return r['result']
+
+    # --------------------------------------------------------------------------
+    # OnTouchListener API
+    # --------------------------------------------------------------------------
+    def on_touch(self, view, event):
+        """ Trigger the touch event
+
+        Parameters
+        ----------
+        view: int
+            The ID of the view that sent this event
+        data: bytes
+            The msgpack encoded key event
+
+        """
+        d = self.declaration
+        r = {'event':event,'result':False}
+        d.touch_event(r)
+        return r['result']
+
 
     # --------------------------------------------------------------------------
     # ProxyView API

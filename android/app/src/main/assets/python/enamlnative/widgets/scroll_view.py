@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Event, observe
+    Typed, ForwardTyped, Enum, Event, observe
 )
 
 from enaml.core.declarative import d_
@@ -25,6 +25,9 @@ class ProxyScrollView(ProxyFrameLayout):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: ScrollView)
 
+    def set_orientation(self, orientation):
+        raise NotImplementedError
+
     def set_scroll_by(self, delta):
         raise NotImplementedError
 
@@ -36,6 +39,9 @@ class ScrollView(FrameLayout):
     """ A simple control for displaying a ScrollView.
 
     """
+
+    #: Vertical or horizontal scrollview
+    orientation = d_(Enum('vertical', 'horizontal'))
 
     #: Scroll to position (x, y), 'top', or 'bottom
     scroll_to = d_(Event(object))
@@ -49,7 +55,7 @@ class ScrollView(FrameLayout):
     # --------------------------------------------------------------------------
     # Observers
     # --------------------------------------------------------------------------
-    @observe('scroll_to', 'scroll_by')
+    @observe('orientation', 'scroll_to', 'scroll_by')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

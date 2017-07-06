@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Unicode, Enum, Float, Int, Bool, observe
+    Typed, ForwardTyped, Unicode, Tuple, Enum, Event, Float, Int, Bool, observe
 )
 
 from enaml.core.declarative import d_
@@ -58,6 +58,12 @@ class ProxyTextView(View):
     def set_lines(self, lines):
         raise NotImplementedError
 
+    def set_line_spacing(self, spacing):
+        raise NotImplementedError
+
+    def set_letter_spacing(self, spacing):
+        raise NotImplementedError
+
     def set_max_lines(self, lines):
         raise NotImplementedError
 
@@ -73,6 +79,12 @@ class TextView(View):
     #: Sets the autolink mask of the text.
     auto_link_mask = d_(Int(0))
 
+    #: Listen for edit actions
+    editor_actions = d_(Bool())
+
+    #: Listen for editor actions
+    editor_action = d_(Event(dict), writable=False)
+
     #: Font family
     font_family = d_(Unicode())
 
@@ -81,7 +93,7 @@ class TextView(View):
 
     #: Input type
     #: https://developer.android.com/reference/android/widget/TextView.html#attr_android:inputType
-    input_type = d_(Enum('', 'date', 'datetime', 'number'
+    input_type = d_(Enum('', 'date', 'datetime', 'number',
                          'number_decimal', 'number_password',
                          'number_signed', 'phone', 'text',
                          'text_auto_complete', 'text_auto_correct',
@@ -115,20 +127,26 @@ class TextView(View):
     #: Sets the height of the TextView to be exactly lines tall.
     lines = d_(Int())
 
+    #: Sets the line spacing
+    line_spacing = d_(Tuple((int, float)))
+
+    #: Sets the line spacing
+    letter_spacing = d_(Float(strict=False))
+
     #: Sets the height of the TextView to be at most maxLines tall.
     max_lines = d_(Int())
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyTextView)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Observers
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     @observe('all_caps', 'auto_link_mask', 'input_type',
              'font_family', 'font_style',
              'text', 'text_color', 'text_size',
              'link_color', 'highlight_color',
-             'lines', 'max_lines')
+             'lines', 'max_lines', 'line_spacing', 'letter_spacing')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

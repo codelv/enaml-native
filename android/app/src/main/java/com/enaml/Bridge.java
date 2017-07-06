@@ -6,6 +6,8 @@ import android.graphics.Typeface;
 import android.os.HandlerThread;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.util.Log;
 
@@ -40,6 +42,14 @@ public class Bridge {
     public static final String TAG = "Bridge";
 
     public static final int IGNORE_RESULT = 0;
+
+    public static final String CREATE = "c";
+    public static final String METHOD = "m";
+    public static final String FIELD = "f";
+    public static final String DELETE = "d";
+    public static final String RESULT = "r";
+    public static final String SHOW = "s";
+    public static final String ERROR = "e";
 
     final MainActivity mActivity;
 
@@ -455,8 +465,11 @@ public class Bridge {
                     packer.packArrayHeader(2);
                     if (arg==null) {
                         // Discard this event??
-                        Log.e(TAG,"Error: Trying to send event '"+method+"' with a null object!");
-                        return null;
+                        Log.w(TAG,"Warning: Trying to send event '"+method+"' with a null argument!");
+                        //return null;
+                        packer.packString("void");
+                        packer.packNil();
+                        continue;
                     }
                     Class argClass = arg.getClass();
                     packer.packString(argClass.getCanonicalName());
@@ -476,6 +489,12 @@ public class Bridge {
                         packer.packShort((short) arg);
                     } else if (arg instanceof View) {
                         packer.packInt(((View) arg).getId());
+                    } else if (arg instanceof KeyEvent) {
+                        KeyEvent event = (KeyEvent) arg;
+                        packer.packString(KeyEvent.keyCodeToString(event.getKeyCode()));
+//                    } else if (arg instanceof MotionEvent) {
+//                        MotionEvent event = (MotionEvent) arg;
+//                        packer.packString(MotionEvent.actionToString(event.getAction()));
                     } else {
                         packer.packString(arg.toString());
                     }
@@ -556,55 +575,59 @@ public class Bridge {
                 String eventType = unpacker.unpackString(); // first value
                 int paramCount = unpacker.unpackArrayHeader();
 
-                if (eventType.equals("createObject")) {
-                    int objId = unpacker.unpackInt();
-                    String objClass = unpacker.unpackString();
-                    int argCount = unpacker.unpackArrayHeader();
-                    Value[] args = new Value[argCount];
-                    for (int j=0; j<argCount; j++) {
-                        Value v = unpacker.unpackValue();
-                        args[j] = v;
-                    }
-                    mTaskQueue.add(()->{createObject(objId, objClass, args);});
+                switch (eventType) {
+                    case CREATE:
+                        int objId = unpacker.unpackInt();
+                        String objClass = unpacker.unpackString();
+                        int argCount = unpacker.unpackArrayHeader();
+                        Value[] args = new Value[argCount];
+                        for (int j=0; j<argCount; j++) {
+                            Value v = unpacker.unpackValue();
+                            args[j] = v;
+                        }
+                        mTaskQueue.add(()->{createObject(objId, objClass, args);});
+                        break;
 
-                } else if (eventType.equals("updateObject")) {
-                    int objId = unpacker.unpackInt();
-                    int resultId = unpacker.unpackInt();
-                    String objMethod = unpacker.unpackString();
-                    int argCount = unpacker.unpackArrayHeader();
-                    Value[] args = new Value[argCount];
-                    for (int j=0; j<argCount; j++) {
-                        Value v = unpacker.unpackValue();
-                        args[j] = v;
-                    }
-                    mTaskQueue.add(()->{updateObject(objId, resultId, objMethod, args);});
+                    case METHOD:
+                        objId = unpacker.unpackInt();
+                        int resultId = unpacker.unpackInt();
+                        String objMethod = unpacker.unpackString();
+                        argCount = unpacker.unpackArrayHeader();
+                        args = new Value[argCount];
+                        for (int j=0; j<argCount; j++) {
+                            Value v = unpacker.unpackValue();
+                            args[j] = v;
+                        }
+                        mTaskQueue.add(()->{updateObject(objId, resultId, objMethod, args);});
+                        break;
+                    case FIELD:
+                        objId = unpacker.unpackInt();
+                        String objField = unpacker.unpackString();
+                        argCount = unpacker.unpackArrayHeader();
+                        args = new Value[argCount];
+                        for (int j=0; j<argCount; j++) {
+                            Value v = unpacker.unpackValue();
+                            args[j] = v;
+                        }
+                        mTaskQueue.add(()->{updateObjectField(objId, objField, args);});
+                        break;
+                    case DELETE:
+                        objId = unpacker.unpackInt();
+                        mTaskQueue.add(()->{deleteObject(objId);});
+                        break;
 
-                } else if (eventType.equals("updateObjectField")) {
-                    int objId = unpacker.unpackInt();
-                    String objField = unpacker.unpackString();
-                    int argCount = unpacker.unpackArrayHeader();
-                    Value[] args = new Value[argCount];
-                    for (int j=0; j<argCount; j++) {
-                        Value v = unpacker.unpackValue();
-                        args[j] = v;
-                    }
-                    mTaskQueue.add(()->{updateObjectField(objId, objField, args);});
-
-                } else if (eventType.equals("deleteObject")) {
-                    int objId = unpacker.unpackInt();
-                    mTaskQueue.add(()->{deleteObject(objId);});
-
-                } else if (eventType.equals("setResult")) {
-                    int objId = unpacker.unpackInt();
-                    Value arg = unpacker.unpackValue();
-                    mTaskQueue.add(()->{setResult(objId, arg);});
-
-                } else if (eventType.equals("showView")) {
-                    mTaskQueue.add(()->{mActivity.setView(getRootView());});
-
-                } else if (eventType.equals("displayError")) {
-                    String errorMessage = unpacker.unpackString();
-                    mTaskQueue.add(()->{mActivity.showErrorMessage(errorMessage);});
+                    case RESULT:
+                        objId = unpacker.unpackInt();
+                        Value arg = unpacker.unpackValue();
+                        mTaskQueue.add(()->{setResult(objId, arg);});
+                        break;
+                    case SHOW:
+                        mTaskQueue.add(()->{mActivity.setView(getRootView());});
+                        break;
+                    case ERROR:
+                        String errorMessage = unpacker.unpackString();
+                        mTaskQueue.add(()->{mActivity.showErrorMessage(errorMessage);});
+                        break;
                 }
             }
         } catch (IOException e) {
@@ -615,13 +638,13 @@ public class Bridge {
         // how do i process them now??
         // TODO: WHY POST?
         mActivity.runOnUiThread(()->{
-            //Log.i(TAG, "Running in process events...");
+            long start = System.currentTimeMillis();
             Runnable task = mTaskQueue.poll();
             while (task != null) {
                 task.run();
                 task = mTaskQueue.poll();
             }
-            //Log.i(TAG, "Running in process events...");
+            Log.i(TAG, "Running tasks took ("+(System.currentTimeMillis()-start)+" ms)");
         });
     }
 

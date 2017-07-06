@@ -9,7 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import time
+import sys
+import traceback
 from enamlnative.widgets.api import *
 from enaml.core.api import Conditional, Looper
 from datetime import datetime
@@ -22,7 +23,7 @@ enamldef VBox(LinearLayout):
 
 enamldef Card(CardView):
   padding = (20, 20, 20, 20)
-  margins = (0, 10, 0, 10)
+  margins = (10, 10, 10, 10)
   content_padding = (10,10,10,10)
   #card_background_color = '#FF0000'
 
@@ -36,22 +37,22 @@ enamldef MenuItem(Button):
   style = 'borderless'
   padding = (10,10,10,10)
   
-enamldef LeftDrawer(LinearLayout):
+enamldef LeftDrawer(ScrollView):
   attr pager
   attr drawer
   attr root
   layout_gravity = 'left'
   layout_width = '200'
   layout_height = 'match_parent'
-  orientation = 'vertical'
   background_color = '#FFFFFF'
-  Looper:
-    iterable << pager.pages + root.new_pages
-    MenuItem:
-      text = loop_item.title
-      clicked ::
-        pager.current_index = loop_index
-        drawer.opened = []
+  VBox:
+    Looper:
+      iterable << pager.pages + root.new_pages
+      MenuItem:
+        text = loop_item.title
+        clicked ::
+          pager.current_index = loop_index
+          drawer.opened = []
 
 enamldef RightDrawer(ScrollView):
   layout_gravity = 'right'
@@ -68,37 +69,90 @@ enamldef Scroller(ScrollView):
   layout_width = 'match_parent'
   layout_height = 'match_parent'
   background_color = '#EEEEEE'
-  padding = (10,10,10,10)
+  #padding = (10,10,10,10)
 
 enamldef Page(Fragment):
   attr title = ""
 
-enamldef CustomPage(Page): page:
-  attr new_page_title = ""
-  attr root
-  Scroller:
-    Card:
-      VBox:
+# enamldef CustomPage(Page): page:
+#   attr new_page_title = ""
+#   attr root
+#   Scroller:
+#     Card:
+#       VBox:
+#         TextView:
+#           text = "Title"
+#         EditText:
+#           text := page.new_page_title
+#         HBox:
+#           Button:
+#             text = "Add page"
+#             clicked::
+#               pages = page.root.new_pages[:]
+#               pages.append(page.new_page_title)
+#               page.root.new_pages = pages
+#               page.parent.current_index +=1
+#           Button:
+#             text = "Remove page"
+#             enabled << page.title in page.root.new_pages
+#             clicked::
+#               pages = page.root.new_pages[:]
+#               pages.remove(page.title)
+#               page.parent.current_index -=1
+#               page.root.new_pages = pages
+
+enamldef Console(Scroller): console:
+  attr commands = []
+  attr scope = {}
+  background_color = '#FFFFFF'
+  VBox:
+    padding = (10,10,10,10)
+    TextView:
+      text = "Just to prove to you it's python, try using python in mini interpereter here."
+    GridLayout:
+      columns = 2
+      Looper:
+        iterable << console.commands
+      #: Input
         TextView:
-          text = "Title"
-        EditText:
-          text := page.new_page_title
-        HBox:
-          Button:
-            text = "Add page"
-            clicked::
-              pages = page.root.new_pages[:]
-              pages.append(page.new_page_title)
-              page.root.new_pages = pages
-              page.parent.current_index +=1
-          Button:
-            text = "Remove page"
-            enabled << page.title in page.root.new_pages
-            clicked::
-              pages = page.root.new_pages[:]
-              pages.remove(page.title)
-              page.parent.current_index -=1
-              page.root.new_pages = pages
+          text = 'In [{}]: '.format(loop_index+1)
+          text_color = "#0000FF"
+        TextView:
+          text = "{}".format(loop_item[0])
+        #: Output
+        TextView:
+          text = 'Out [{}]: '.format(loop_index+1)
+          text_color = "#FF0000"
+        TextView:
+          text = "{}".format(loop_item[1])
+    EditText: console_input:
+      text = ""
+      #input_type = 'text_multi_line'
+      editor_actions = True
+      editor_action ::
+        action = change['value']
+        if action['key']==6: # IME_ACTION_DONE
+          cmds = console.commands[:]
+          try:
+            #: Try to eval a command
+            result = eval(console_input.text, {}, console.scope)
+          except SyntaxError:
+            #: Run a statement ?
+            try:
+              exec console_input.text in console.scope
+              result = None
+            except:
+              result = traceback.format_exc()
+          except:
+            result = traceback.format_exc()
+          cmds.append((console_input.text,result, len(cmds)))
+          console.commands = cmds
+          action['result'] = True # Tell java we handled it
+    Button:
+      text = "Clear"
+      clicked ::
+          console.commands = []
+          console.scope = {}
 
 enamldef ContentView(VBox): content_view:
   #: This should be read from the drawer's children...
@@ -114,10 +168,28 @@ enamldef ContentView(VBox): content_view:
       layout_width = 'match_parent'
       layout_height = 'match_parent'
       Page:
-        title = "General"
+        title = "Intro"
         Scroller:
-          LinearLayout:
-            orientation = "vertical"
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Intro"
+                TextView:
+                  text = "Hi!\n\n" \
+                         "This app is written in python and enaml using enaml-native. " \
+                         "It is intended to demonstrate and test all the features supported.\n\n" \
+                         "Enjoy!\n\n"
+                TextView:
+                  text = "Python: {}".format(sys.version)
+      Page: console:
+        title = "Console"
+        Console:
+          pass
+      Page:
+        title = "Text"
+        Scroller:
+          VBox:
             Card:
               VBox:
                 CardTitle:
@@ -145,19 +217,46 @@ enamldef ContentView(VBox): content_view:
                   TextView:
                     font_family = loop_item
                     text = loop_item
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Spacing"
+                TextView:
+                  text = "Letter spacing"
+                  letter_spacing = 2
 
-
-
+                TextView:
+                  text = """Double spaced. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
+                  line_spacing = (0, 2)
+      Page:
+        title = "Buttons"
+        Scroller:
+          VBox:
             Card:
               VBox:
                 CardTitle:
                   text = "Buttons"
                 Button:
-                  text = "PushButton"
+                  text = "Button"
                   clicked:: tv1.count += 1
                 TextView: tv1:
                   attr count = 0
                   text << "Clicked {}".format(count)
+
+                Button:
+                  text = "Borderless"
+                  style = 'borderless'
+
+                Button:
+                  text = "Inset"
+                  style = 'inset'
+
+                Button:
+                  text = "Small"
+                  layout_height = 'wrap_content'
+                  layout_width = 'wrap_content'
+                  style = 'small'
+
             Card:
               VBox:
                 CardTitle:
@@ -177,6 +276,7 @@ enamldef ContentView(VBox): content_view:
                   checked = True
                 TextView:
                   text << "Button state: {}".format(tb1.checked)
+
             Card:
               VBox:
                 CardTitle:
@@ -191,38 +291,57 @@ enamldef ContentView(VBox): content_view:
                     text = "C"
                 TextView:
                   text << "Radio group state: {}".format(rg1.checked.text if rg1.checked else "Unchecked")
-            Card:
-              VBox:
-                CardTitle:
-                  text = "Progressbar"
-                ProgressBar:
-                  indeterminate = True # Ignored if style doesn't support it
-                RatingBar: rbar1:
-                  num_stars = 5
-                  rating = 3
-                TextView:
-                  text << "Rating {}".format(rbar1.rating)
+      Page:
+        title = "Progressbar"
+        Scroller:
+          Card:
+            VBox:
+              ProgressBar:
+                indeterminate = True # Ignored if style doesn't support it
+      Page:
+        title = "RatingBar"
+        Scroller:
+          Card:
+            VBox:
+              CardTitle:
+                text = "RatingBar"
+              RatingBar: rbar1:
+                num_stars = 5
+                rating = 3
+              TextView:
+                text << "Rating {}".format(rbar1.rating)
+      Page:
+        title = "Timer"
+        Scroller:
+          Card:
+            VBox:
+              CardTitle:
+                text = "Timer"
+              ToggleButton:
+                text_on = "STOP"
+                text_off = "START"
+                checked:= ch1.running
+              Chronometer: ch1:
+                running = False
+              TextView:
+                text << "Ticks: {}".format(ch1.ticks)
 
-            Card:
-              VBox:
-                CardTitle:
-                  text = "Timer"
-                ToggleButton:
-                  text_on = "STOP"
-                  text_off = "START"
-                  checked:= ch1.running
-                Chronometer: ch1:
-                  running = False
-                TextView:
-                  text << "Ticks: {}".format(ch1.ticks)
-            Card:
-              VBox:
-                CardTitle:
-                  text = "Spinner"
-                Spinner: spn1:
-                  items = ["Sun", "Moon", "Stars"]
-                TextView:
-                  text << "Selected: {}".format(spn1.items[spn1.selected])
+      Page:
+        title = "Spinners"
+        Scroller:
+          Card:
+            VBox:
+              CardTitle:
+                text = "Spinner"
+              Spinner: spn1:
+                items = ["Sun", "Moon", "Stars"]
+              TextView:
+                text << "Selected: {}".format(spn1.items[spn1.selected])
+
+      Page:
+        title = "Fields"
+        Scroller:
+          VBox:
             Card:
               VBox:
                 CardTitle:
@@ -231,6 +350,16 @@ enamldef ContentView(VBox): content_view:
                   text << "You typed: {}".format(et.text)
                 EditText: et:
                   text = ""
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Input types"
+                Looper:
+                  iterable = EditText.input_type.items
+                  TextView:
+                    text = "{}:".format(loop_item)
+                  EditText:
+                    input_type = loop_item
       Page:
         title = "Time Picker"
         Scroller:
@@ -243,7 +372,6 @@ enamldef ContentView(VBox): content_view:
                 minute = 30
               TextView:
                 text << "Time selected: {hour}:{minute}".format(hour=tp1.hour,minute=tp1.minute)
-
       Page:
         title = "Date Picker"
         Scroller:
@@ -306,19 +434,132 @@ enamldef ContentView(VBox): content_view:
                 condition << not card_conds.loading
                 TextView:
                   text = "Loading complete!!!"
-      CustomPage:
-        title = "Dynamic Pages"
-        root = content_view
-      Looper:
-        iterable << content_view.new_pages
-        CustomPage:
-          title = loop_item
-          root = content_view
+      Page:
+        title = "Toolbars"
+        Scroller:
+          Card:
+            VBox:
+              Toolbar:
+                title = "Toolbar"
+                background_color = '#0000FF'
+                margins = (0, 0, 0, 10)
+              Toolbar:
+                title = "Title"
+                subtitle = "Subtitle"
+                background_color = '#0000CC'
+      Page:
+        title = "Cards"
+        Scroller:
+          Card:
+            VBox:
+              TextView:
+                text = "This is a card"
+      Page:
+        title = "Layouts"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "LinearLayout"
+                Button:
+                  text << "Toggle orientation"
+                  clicked:: ll.orientation = 'horizontal' if ll.orientation == 'vertical' else 'vertical'
+                LinearLayout: ll:
+                  orientation << "horizontal"
+                  layout_height = 'fill_parent'
+                  layout_width = 'fill_parent'
+                  Looper:
+                    iterable = range(6)
+                    TextView:
+                      text = "{}".format(loop_index)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "GridLayout"
+                TextView:
+                  text = "Columns"
+                Spinner: glsp:
+                  items = range(1,4)
+                GridLayout: gl:
+                  columns << glsp.items[glsp.selected]
+                  layout_height = 'fill_parent'
+                  layout_width = 'fill_parent'
+                  selected = 2
+                  Looper:
+                    iterable = range(6)
+                    TextView:
+                      text = "{}".format(loop_index)
+      Page:
+        title = "Drawers"
+        Scroller:
+          Card:
+            VBox:
+              TextView:
+                text = "Swipe in from the left or right to open the drawers"
+              TextView:
+                text = "The first child is the content"
+              TextView:
+                text = "Subsequent children will be either a left or right drawer " \
+                       " (depending on layout_gravity). Width is set by the layout_width"
+              TextView:
+                text = "Drawers can be opened and closed using the drawer.opened property " \
+                       "which is a list of the opened drawers. "
+              HBox:
+                Button:
+                  text = "Open left"
+                  clicked:: drawer_layout.opened = [left_drawer]
+                Button:
+                  text = "Open right"
+                  clicked:: drawer_layout.opened = [right_drawer]
 
+      Page:
+        title = "Pages"
+        Scroller:
+          Card:
+            VBox:
+              CardTitle:
+                text = "ViewPager"
+              TextView:
+                text = "Pages are only rendered when the ViewPager requests them " \
+                       "(they subclass conditionals). The ViewPager will automatically " \
+                       "refresh when it's child Fragments change. " \
+                       "The pages can be access using the `pages` property of the pager " \
+                       "And the current page index can be accessed using the `current_index`."
+              TextView:
+                text << "Page count: {}".format(len(view_pager.pages))
+              TextView:
+                text << "Current: {}".format(view_pager.current_index)
+              HBox:
+                Button:
+                  text = "Previous page"
+                  clicked :: view_pager.current_index -=1
+                Button:
+                  text = "Next page"
+                  clicked :: view_pager.current_index +=1
+      Page:
+        title = "ScrollView"
+        VBox:
+          background_color = '#EEEEEE'
+          Card:
+            VBox:
+              CardTitle:
+                text = "ScrollView"
+              TextView:
+                text = "Place a view within a ScrollView to get native scrolling. The orientation can " \
+                       "be set to either vertical or horizontal (cannot be changed dynamically).\n" \
+                       "\nTry below:\n"
+                padding = (0, 0, 10, 0)
 
-    LeftDrawer:
+              ScrollView:
+                orientation = 'horizontal'
+                TextView:
+                  text = """Horizontally scrolled. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
+                  lines = 2
+
+    LeftDrawer: left_drawer:
       pager = view_pager
       drawer = drawer_layout
       root = content_view
-    RightDrawer:
+    RightDrawer: right_drawer:
       pass

@@ -20,6 +20,17 @@ CACHE = WeakValueDictionary()
 __global_id__ = 0
 
 
+class Command:
+    CREATE = "c"
+    METHOD = "m"
+    FIELD = "f"
+    DELETE = "d"
+    RESULT = "r"
+    SHOW = "s"
+    ERROR = "e"
+
+
+
 def _generate_id():
     """ Generate an id for an object """
     global __global_id__
@@ -122,7 +133,7 @@ class JavaMethod(Property):
             result.add_done_callback(_cleanup_id)
 
         obj.__app__.send_event(
-            'updateObject',  #: method
+            Command.METHOD,  #: method
             obj.__id__,
             result.__id__ if result else 0,
             self.name,  #: method name
@@ -140,7 +151,7 @@ class JavaField(Property):
 
     def __fset__(self, obj, arg):
         obj.__app__.send_event(
-            'updateObjectField',  #: method
+            Command.FIELD,  #: method
             obj.__id__,
             self.name,  #: method name
             [msgpack_encoder(self.__signature__, arg)]  #: args
@@ -222,7 +233,7 @@ class JavaBridgeObject(Atom):
         #: Send the event over the bridge to construct the view
         CACHE[self.__id__] = self
         self.__app__.send_event(
-            'createObject', #: method
+            Command.CREATE,  #: method
             self.__id__, #: id to assign in java
             self.__javaclass__,
             [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)],
@@ -230,7 +241,7 @@ class JavaBridgeObject(Atom):
 
     def __del__(self):
         self.__app__.send_event(
-            'deleteObject', #: method
+            Command.DELETE,  #: method
             self.__id__, #: id to assign in java
         )
         _cleanup_id(self)

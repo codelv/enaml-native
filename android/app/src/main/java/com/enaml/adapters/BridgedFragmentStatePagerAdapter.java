@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
  * Created by jrm on 6/30/17.
  */
 public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
+    public final String TAG = "PagerAdapter";
 
     protected final ArrayList<Fragment> mFragments = new ArrayList<>();
 
@@ -30,12 +32,12 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
 
     public void addFragment(Fragment fragment) {
         mFragments.add(fragment);
-        notifyDataSetChanged();
+        //notifyDataSetChanged();
     }
 
     public void removeFragment(Fragment fragment) {
         mFragments.remove(fragment);
-        notifyDataSetChanged();
+        //notifyDataSetChanged();
     }
 
     @Override
@@ -45,7 +47,21 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
 
     @Override
     public Fragment getItem(int position) {
+        // So how does it know that this item is different?
+        //Log.d(TAG,"getItem("+position+")");
         return mFragments.get(position);
+    }
+
+    @Override
+    public int getItemPosition(Object item) {
+        BridgedFragment fragment = (BridgedFragment)item;
+        int position = mFragments.indexOf(fragment);
+        //Log.d(TAG,"getItemPosition("+fragment+") is "+position);
+        if (position >= 0) {
+            return position;
+        } else {
+            return POSITION_NONE;
+        }
     }
 
     interface FragmentListener {
@@ -56,6 +72,7 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
     public static class BridgedFragment extends Fragment {
         //public static final String VIEW_ID = "viewId";
         //protected final Bridge mBridge;
+        protected int mId = 0;
         protected FragmentListener mListener = null;
 
         public BridgedFragment() {}

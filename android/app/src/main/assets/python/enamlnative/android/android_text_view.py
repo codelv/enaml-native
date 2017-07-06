@@ -32,6 +32,7 @@ class TextView(View):
     setLineSpacing = JavaMethod('float', 'float')
     setLetterSpacing = JavaMethod('float')
     setMaxLines = JavaMethod('int')
+    setOnEditorActionListener = JavaMethod('android.widget.TextView$OnEditorActionListener')
     setInputType = JavaMethod('int')
     addTextChangedListener = JavaMethod('android.text.TextWatcher')
     removeTextChangedListener = JavaMethod('android.text.TextWatcher')
@@ -40,6 +41,9 @@ class TextView(View):
     afterTextChanged = JavaCallback('android.text.Editable')
     beforeTextChanged = JavaCallback('java.lang.CharSequence', 'int', 'int', 'int')
     onTextChanged = JavaCallback('java.lang.CharSequence', 'int', 'int', 'int')
+
+    #: EditorAction API
+    onEditorAction = JavaCallback('android.view.TextView', 'int', 'android.view.KeyEvent', returns='boolean')
 
     FONT_STYLES = {
         'bold': 1,
@@ -135,6 +139,9 @@ class AndroidTextView(AndroidView, ProxyTextView):
             self.set_input_type(d.input_type)
             self.widget.addTextChangedListener(self.widget.getId())
             self.widget.onTextChanged.connect(self.on_text_changed)
+        if d.editor_actions:
+            self.widget.setOnEditorActionListener(self.widget.getId())
+            self.widget.onEditorAction.connect(self.on_editor_action)
 
     # --------------------------------------------------------------------------
     # TextWatcher API
@@ -143,6 +150,15 @@ class AndroidTextView(AndroidView, ProxyTextView):
         d = self.declaration
         with self.widget.setTextKeepState.suppressed():
             d.text = text
+
+    # --------------------------------------------------------------------------
+    # OnEditorAction API
+    # --------------------------------------------------------------------------
+    def on_editor_action(self, view, key, key_event):
+        d = self.declaration
+        r = {'key': key, 'result': False}
+        d.editor_action(r)
+        return not not r['result'] # Apparently not not is faster than bool
 
     # --------------------------------------------------------------------------
     # ProxyTextView API

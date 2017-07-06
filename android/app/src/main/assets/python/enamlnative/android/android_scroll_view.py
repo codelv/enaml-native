@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed, set_default
+from atom.api import Instance, set_default
 
 from enamlnative.widgets.scroll_view import ProxyScrollView
 
@@ -27,12 +27,16 @@ class ScrollView(FrameLayout):
     FOCUS_DOWN = 0x00000082
 
 
+class HorizontalScrollView(ScrollView):
+    __javaclass__ = set_default('android.widget.HorizontalScrollView')
+
+
 class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
     """ An Android implementation of an Enaml ProxyFrameLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(ScrollView)
+    widget = Instance(ScrollView)
 
     # --------------------------------------------------------------------------
     # Initialization API
@@ -41,11 +45,19 @@ class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
         """ Create the underlying widget.
 
         """
-        self.widget = ScrollView(self.get_context())
+        d = self.declaration
+        if d.orientation == 'vertical':
+            self.widget = ScrollView(self.get_context())
+        else:
+            self.widget = HorizontalScrollView(self.get_context())
 
     # --------------------------------------------------------------------------
     # ProxyScrollView API
     # --------------------------------------------------------------------------
+    def set_orientation(self, orientation):
+        #: Cannot be changed once set
+        raise NotImplementedError("ScrollView orientation cannot be changed dynamically.")
+
     def set_scroll_by(self, delta):
         self.widget.smoothScrollBy(*delta)
 

@@ -149,6 +149,12 @@ class View(Widget):
 
     keeps_screen_on = d_(Bool())
 
+    #: Observe key events
+    key_events = d_(Bool())
+
+    #: Called when a key event occurs
+    key_event = d_(Event(dict), writable=False)
+
     label_for = d_(Int())
 
     layout_width = d_(Unicode())#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
@@ -224,6 +230,12 @@ class View(Widget):
     text_direction = d_(Int())
 
     top = d_(Int())
+
+    #: Observe touch events
+    touch_events = d_(Bool())
+
+    #: Called when a touch event occurs
+    touch_event = d_(Event(dict), writable=False)
 
     transition_name = d_(Unicode())
 

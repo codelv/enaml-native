@@ -73,16 +73,16 @@ class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
         self.widget.setAlignmentMode(1 if mode == 'margins' else 0)
 
     def set_columns(self, columns):
-        self.setColumnCount(columns)
+        self.widget.setColumnCount(columns)
 
     def set_column_order_preserved(self, preserved):
-        self.setColumnOrderPreserved(preserved)
+        self.widget.setColumnOrderPreserved(preserved)
 
     def set_rows(self, rows):
-        self.setRowCount(rows)
+        self.widget.setRowCount(rows)
 
     def set_row_order_preserved(self, preserved):
-        self.setRowOrderPreserved(preserved)
+        self.widget.setRowOrderPreserved(preserved)
 
     def set_use_default_margins(self, use_default):
-        self.setUseDefaultMargins(use_default)
+        self.widget.setUseDefaultMargins(use_default)

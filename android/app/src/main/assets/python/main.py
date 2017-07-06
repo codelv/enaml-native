@@ -37,7 +37,7 @@ def main():
     except:
         msg = traceback.format_exc()
         print msg
-        app.deferred_call(lambda msg=msg:app.send_event('displayError', msg))
+        app.deferred_call(app.show_error, msg)
     app.start()
 
 def dump_stats():
