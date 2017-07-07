@@ -351,6 +351,12 @@ enamldef ContentView(VBox): content_view:
                 TextClock:
                   text_size = 48
                   font_family = 'sans-serif-condensed-light'
+            Card:
+              VBox:
+                CardTitle:
+                  text = "AnalogClock"
+                AnalogClock:
+                  pass
       Page:
         title = "Spinners"
         Scroller:

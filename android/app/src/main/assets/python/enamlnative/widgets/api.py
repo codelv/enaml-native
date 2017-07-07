@@ -56,3 +56,4 @@ from .view_pager import ViewPager
 from .fragment import Fragment
 from .number_picker import NumberPicker
 from .text_clock import TextClock
+from .analog_clock import AnalogClock

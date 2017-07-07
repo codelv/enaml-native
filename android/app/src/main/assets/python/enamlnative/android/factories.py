@@ -11,6 +11,11 @@ Created on May 20, 2017
 '''
 
 
+def analog_clock_factory():
+    from .android_analog_clock import AndroidAnalogClock
+    return AndroidAnalogClock
+
+
 def button_factory():
     # print "Import button"
     from .android_button import AndroidButton
@@ -207,6 +212,7 @@ def view_pager_factory():
 
 
 ANDROID_FACTORIES = {
+    'AnalogClock': analog_clock_factory,
     'Button': button_factory,
     'CalendarView': calendar_view_factory,
     'CardView': card_view_factory,

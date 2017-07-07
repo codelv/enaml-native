@@ -24,6 +24,9 @@ class ProxyView(ProxyWidget):
     """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: View)
+
+    def set_alpha(self, alpha):
+        raise NotImplementedError
     
     def set_clickable(self, clickable):
         raise NotImplementedError
