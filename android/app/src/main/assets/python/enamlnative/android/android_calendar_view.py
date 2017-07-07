@@ -29,6 +29,7 @@ class CalendarView(FrameLayout):
     #: This is not actually a CalendarView method, but still works
     onSelectedDayChange = JavaCallback('android.widget.CalendarView', 'int', 'int', 'int')
 
+UTC_START = datetime(1970, 1, 1)
 
 class AndroidCalendarView(AndroidFrameLayout, ProxyCalendarView):
     """ An Android implementation of an Enaml ProxyCalendarView.
@@ -52,15 +53,17 @@ class AndroidCalendarView(AndroidFrameLayout, ProxyCalendarView):
         """
         super(AndroidCalendarView, self).init_widget()
         d = self.declaration
-        self.set_date(d.date)
+        if d.date:
+            self.set_date(d.date)
         if d.min_date:
             self.set_min_date(d.min_date)
         if d.max_date:
             self.set_max_date(d.max_date)
-        self.set_first_day_of_week(d.first_day_of_week)
+        if d.first_day_of_week != 1:
+            self.set_first_day_of_week(d.first_day_of_week)
 
         #: Setup listener
-        self.widget.setOnDateChangeListener(self.widget.getid())
+        self.widget.setOnDateChangeListener(self.widget.getId())
         self.widget.onSelectedDayChange.connect(self.on_selected_day_change)
 
     # --------------------------------------------------------------------------
@@ -68,21 +71,26 @@ class AndroidCalendarView(AndroidFrameLayout, ProxyCalendarView):
     # --------------------------------------------------------------------------
     def on_selected_day_change(self, view, year, month, day):
         d = self.declaration
-        dt = datetime(year, month+1, day)
         with self.widget.setDate.suppressed():
-            d.date = (dt - datetime(1970, 1, 1)).total_seconds()
+            d.date = datetime(year, month+1, day)
 
     # --------------------------------------------------------------------------
     # ProxyCalendarView API
     # --------------------------------------------------------------------------
     def set_date(self, date):
-        self.widget.setDate(date)
+        #: Convert date tuple to long
+        s = long((date - UTC_START).total_seconds()*1000)
+        self.widget.setDate(s)
 
     def set_min_date(self, date):
-        self.widget.setMinDate(date)
+        #: Convert to long
+        s = long((date - UTC_START).total_seconds()*1000)
+        self.widget.setMinDate(s)
 
     def set_max_date(self, date):
-        self.widget.setMaxDate(date)
+        #: Convert to long
+        s = long((date - UTC_START).total_seconds()*1000)
+        self.widget.setMaxDate(s)
 
     def set_first_day_of_week(self, day):
         self.widget.setFirstDayOfWeek(day)

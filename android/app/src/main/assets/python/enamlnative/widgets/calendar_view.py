@@ -10,12 +10,13 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Int, Long, Enum, Event, observe, set_default
+    Typed, ForwardTyped, Range, Instance, observe, set_default
 )
-
+from datetime import datetime
 from enaml.core.declarative import d_
 
 from .frame_layout import FrameLayout, ProxyFrameLayout
+
 
 class ProxyCalendarView(ProxyFrameLayout):
     """ The abstract definition of a proxy relative layout object.
@@ -36,29 +37,31 @@ class ProxyCalendarView(ProxyFrameLayout):
     def set_min_date(self, date):
         raise NotImplementedError
 
+
 class CalendarView(FrameLayout):
     """ CalendarView is a view group that displays
         child views in relative positions.
 
     """
-    #: Describes how the child views are positioned.
-    #: Defaults to Gravity.START | Gravity.TOP.
-    date = d_(Long())
+    #: Selected date
+    date = d_(Instance(datetime))
 
-    max_date = d_(Long())
+    #: Max date
+    max_date = d_(Instance(datetime))
 
-    min_date = d_(Long())
+    #: Min date
+    min_date = d_(Instance(datetime))
 
-    #:
-    first_day_of_week = d_(Int())
+    #: First day of week
+    first_day_of_week = d_(Range(1, 7))
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyCalendarView)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Observers
-    #--------------------------------------------------------------------------
-    @observe('date','max_date','min_date','first_day_of_week')
+    # --------------------------------------------------------------------------
+    @observe('date', 'max_date', 'min_date', 'first_day_of_week')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

@@ -397,12 +397,25 @@ enamldef ContentView(VBox): content_view:
               CardTitle:
                 text = "Date Picker"
               DatePicker: dp1:
-                attr today = datetime.now()
-                year = today.year
-                month = today.month
-                day = today.day
+                date = datetime.now()
               TextView:
-                text << "Date selected: {month}/{day}/{year}".format(month=dp1.month,day=dp1.day,year=dp1.year)
+                text << "Date selected: {month}/{day}/{year}".format(month=dp1.date.month,
+                                                                     day=dp1.date.day,
+                                                                     year=dp1.date.year)
+      Page:
+        title = "Calendar"
+        VBox:
+          background_color = '#EEEEEE'
+          Card:
+            VBox:
+              CardTitle:
+                text = "CalendarView"
+              CalendarView: cv1:
+                date = datetime.now()
+              TextView:
+                text << "Date selected: {month}/{day}/{year}".format(month=cv1.date.month,
+                                                                         day=cv1.date.day,
+                                                                       year=cv1.date.year)
       Page:
         title = "Loopers"
         Scroller:
