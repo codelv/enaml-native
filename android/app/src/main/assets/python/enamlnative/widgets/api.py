@@ -29,7 +29,7 @@ from .card_view import CardView
 #from .view_switcher import ViewSwitcher
 #from .text_switcher import TextSwitcher
 from .image_view import ImageView
-from .spacer import Spacer
+from .web_view import  WebView
 
 #: Controls
 from .button import  Button
@@ -49,6 +49,7 @@ from .time_picker import TimePicker
 from .date_picker import DatePicker
 
 #: Widgets
+from .spacer import Spacer
 from .tab_widget import TabWidget
 from .tab_host import TabHost
 from .progress_bar import ProgressBar

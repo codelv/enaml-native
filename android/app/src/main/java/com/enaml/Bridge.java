@@ -481,6 +481,7 @@ public class Bridge {
         if (pythonObjectId==IGNORE_RESULT) {
             return;
         }
+        // TODO: This should use the EventLoop implementation
         onEvent(IGNORE_RESULT, pythonObjectId, "set_result", new Object[]{result});
     }
 
@@ -534,6 +535,7 @@ public class Bridge {
                     } else if (argClass == short.class || arg instanceof Short) {
                         packer.packShort((short) arg);
                     } else if (arg instanceof View) {
+                        // This only works with ids's created in python
                         packer.packInt(((View) arg).getId());
                     } else if (arg instanceof KeyEvent) {
                         KeyEvent event = (KeyEvent) arg;

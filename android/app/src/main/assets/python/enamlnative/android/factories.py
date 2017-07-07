@@ -216,6 +216,11 @@ def view_pager_factory():
     return AndroidViewPager
 
 
+def web_view_factory():
+    from .android_web_view import AndroidWebView
+    return AndroidWebView
+
+
 ANDROID_FACTORIES = {
     'AnalogClock': analog_clock_factory,
     'Button': button_factory,
@@ -252,4 +257,5 @@ ANDROID_FACTORIES = {
     'View': view_factory,
     'ViewGroup': view_group_factory,
     'ViewPager': view_pager_factory,
+    'WebView': web_view_factory,
 }

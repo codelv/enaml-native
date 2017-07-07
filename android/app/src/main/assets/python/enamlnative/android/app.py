@@ -10,7 +10,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 '''
 import jnius
 import traceback
-from atom.api import Atom, List, Float, Value, Dict, Int, Unicode, Typed, Bool
+from atom.api import Atom, List, Float, Instance, Value, Dict, Int, Unicode, Typed, Bool
 from enaml.application import Application, ProxyResolver
 from . import factories
 from . import bridge
@@ -59,6 +59,96 @@ class Activity(bridge.JavaBridgeObject):
     setContentView = bridge.JavaMethod('android.view.View')
 
 
+class EventLoop(Atom):
+    """ Event loop delegation api
+
+    """
+
+    loop = Value()
+
+    def start(self):
+        self.loop.start()
+
+    def stop(self):
+        self.loop.stop()
+
+    def deferred_call(self, callback, *args, **kwargs):
+        raise NotImplementedError
+
+    def timed_call(self, ms, callback, *args, **kwargs):
+        raise NotImplementedError
+
+    def create_future(self):
+        raise NotImplementedError
+
+    def set_error_handler(self, handler):
+        raise NotImplementedError
+
+    def add_done_callback(self, future, callback):
+        raise NotImplementedError
+
+    def set_future_result(self, future, result):
+        raise NotImplementedError
+
+
+class TornadoEventLoop(EventLoop):
+    """ Eventloop using tornado's ioloop """
+
+    def _default_loop(self):
+        from tornado.ioloop import IOLoop
+        return IOLoop.current()
+
+    def deferred_call(self, callback, *args, **kwargs):
+        return self.loop.add_callback(callback, *args, **kwargs)
+
+    def timed_call(self, ms, callback, *args, **kwargs):
+        return self.loop.call_later(ms/1000.0, callback, *args, **kwargs)
+
+    def set_error_handler(self, handler):
+        self.loop.handle_callback_exception = handler
+
+    def create_future(self):
+        from tornado.concurrent import Future
+        return Future()
+
+    def add_done_callback(self, future, callback):
+        return future.add_done_callback(callback)
+
+    def set_future_result(self, future, result):
+        future.result(result)
+
+
+class TwistedEventLoop(EventLoop):
+    """ Eventloop using twisted's reactor """
+
+    def _default_loop(self):
+        from twisted.internet import reactor
+        return reactor
+
+    def start(self):
+        self.loop.run()
+
+    def deferred_call(self, callback, *args, **kwargs):
+        return self.loop.callWhenRunning(callback, *args, **kwargs)
+
+    def timed_call(self, ms, callback, *args, **kwargs):
+        return self.loop.callLater(ms/1000.0, callback, *args, **kwargs)
+
+    def set_error_handler(self, handler):
+        #self.loop.handle_callback_exception = handler
+        raise NotImplementedError
+
+    def create_future(self):
+        from twisted.internet.defer import Deferred
+        return Deferred()
+
+    def add_done_callback(self, future, callback):
+        future.addCallback(callback)
+
+    def set_future_result(self, future, result):
+        future.callback(result)
+
+
 class AndroidApplication(Application):
     """ An Android implementation of an Enaml application.
 
@@ -93,14 +183,10 @@ class AndroidApplication(Application):
         return self.activity.getResources().getDisplayMetrics().density
 
     #: Event loop
-    loop = Value()
+    loop = Instance(EventLoop)
 
     def _default_loop(self):
-        #from twisted.internet import reactor
-        #return reactor
-        #from enamlnative.core.ioloop import IOLoop
-        from tornado.ioloop import IOLoop
-        return IOLoop.current()
+        return TornadoEventLoop()
 
     #: Save reference to the event listener
     listener = Typed(AppEventListener)
@@ -165,13 +251,6 @@ class AndroidApplication(Application):
 
         """
         self.loop.stop()
-        #jnius.detach()
-
-    def init_error_handler(self):
-        """ When an error occurs, set the error view in the App
-
-        """
-        self.loop.handle_callback_exception = self.handle_error
 
     def send_event(self, name, *args):
         """ Send an event to Java.
@@ -220,8 +299,7 @@ class AndroidApplication(Application):
             the callback.
 
         """
-        return self.loop.add_callback(callback, *args, **kwargs)
-        #self.loop.callWhenRunning(callback, *args, **kwargs)
+        return self.loop.deferred_call(callback, *args, **kwargs)
 
     def timed_call(self, ms, callback, *args, **kwargs):
         """ Invoke a callable on the main event loop thread at a
@@ -241,8 +319,7 @@ class AndroidApplication(Application):
             the callback.
 
         """
-        return self.loop.call_later(ms/1000.0, callback, *args, **kwargs)
-        #self.loop.callLater(ms/1000.0, callback, *args, **kwargs)
+        return self.loop.timed_call(ms, callback, *args, **kwargs)
 
     def is_main_thread(self):
         """ Indicates whether the caller is on the main gui thread.
@@ -255,10 +332,47 @@ class AndroidApplication(Application):
         """
         return False
 
-    def create_future(self):
-        from tornado.concurrent import Future
-        return Future()
+    # --------------------------------------------------------------------------
+    # EventLoop API Implementation
+    # --------------------------------------------------------------------------
+    def init_error_handler(self):
+        """ When an error occurs, set the error view in the App
 
+        """
+        self.loop.set_error_handler(self.handle_error)
+
+    def create_future(self):
+        """ Create a future object using the EventLoop implementation """
+        return self.loop.create_future()
+
+    def add_done_callback(self, future, callback):
+        """ Add a callback on a future object put here so it can be
+            implemented with different event loops.
+
+        Parameters
+        -----------
+            future: Future or Deferred
+                Future implementation for the current EventLoop
+            callback: callable
+                Callback to invoke when the future is done
+        """
+        return self.loop.add_done_callback(future, callback)
+
+    def set_future_result(self, future, result):
+        """ Set the result of the future
+
+        Parameters
+        -----------
+            future: Future or Deferred
+                Future implementation for the current EventLoop
+            result: object
+                Result to set
+        """
+        return self.loop.set_future_result(future, result)
+
+    # --------------------------------------------------------------------------
+    # Bridge API Implementation
+    # --------------------------------------------------------------------------
     def process_events(self, data):
         events = bridge.loads(data)
         if self.debug:

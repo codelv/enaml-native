@@ -154,6 +154,47 @@ enamldef Console(Scroller): console:
           console.commands = []
           console.scope = {}
 
+
+enamldef WebBrowser(ScrollView): browser:
+  VBox:
+
+    EditText: web_url:
+      text = "www.google.com"
+      input_type = 'text_uri'
+      editor_actions = True
+      editor_action ::
+        #: When done editing, load the page
+        action = change['value']
+
+        if action['key']==5: # Why 5 now?
+          url = web_url.text.lower()
+          if not (url.startswith("http://") or url.startswith("https://")):
+            url = "https://"+url
+          web_view.url = url
+
+    ProgressBar:
+      visible << web_view.loading
+      progress << web_view.progress
+    TextView:
+      visible << web_view.error
+      text_color = '#FF0000'
+      text << "Error: {} - {}".format(web_view.error_code, web_view.error_message)
+    TextView:
+      text << "Url: {}".format(web_view.url)
+    TextView:
+      #: Title is unicode!
+      text << u"Title: {}".format(web_view.title)
+
+    WebView: web_view:
+      layout_height = 'match_parent'
+      layout_width = 'match_parent'
+      #: When url updates, set the text
+      url = "http://github.com"
+      url >> web_url.text
+
+
+
+
 enamldef ContentView(VBox): content_view:
   #: This should be read from the drawer's children...
   attr new_pages = []
@@ -627,6 +668,11 @@ enamldef ContentView(VBox): content_view:
                 TextView:
                   text = """Horizontally scrolled. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
                   lines = 2
+      Page:
+        title = "WebView"
+        WebBrowser:
+          pass
+
     LeftDrawer: left_drawer:
       pager = view_pager
       drawer = drawer_layout

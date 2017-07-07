@@ -130,7 +130,7 @@ class JavaMethod(Property):
             #: Put the future in the cache so it can be retrieved later
             result.__id__ = _generate_id()
             CACHE[result.__id__] = result
-            result.add_done_callback(_cleanup_id)
+            obj.__app__.add_done_callback(result, _cleanup_id)
 
         obj.__app__.send_event(
             Command.METHOD,  #: method
