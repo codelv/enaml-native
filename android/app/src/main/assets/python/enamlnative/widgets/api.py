@@ -17,6 +17,7 @@ from .frame_layout import FrameLayout
 from .drawer_layout import DrawerLayout
 from .grid_layout import GridLayout
 
+
 #: Views
 from .view import View
 from .view_group import ViewGroup
@@ -28,6 +29,7 @@ from .card_view import CardView
 #from .view_switcher import ViewSwitcher
 #from .text_switcher import TextSwitcher
 from .image_view import ImageView
+from .spacer import Spacer
 
 #: Controls
 from .button import  Button

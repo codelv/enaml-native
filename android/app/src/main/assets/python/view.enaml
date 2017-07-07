@@ -549,6 +549,17 @@ enamldef ContentView(VBox): content_view:
                     iterable = range(6)
                     TextView:
                       text = "{}".format(loop_index)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Spacer"
+                HBox:
+                  TextView:
+                    text = "Start"
+                  Spacer:
+                    layout_width = '100' #: Percentages NOT supported yet...
+                  TextView:
+                    text = "End"
       Page:
         title = "Drawers"
         VBox:
