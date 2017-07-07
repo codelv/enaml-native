@@ -15,10 +15,10 @@ from atom.api import (
 
 from enaml.core.declarative import d_
 
-from .text_view import TextView, ProxyTextView
+from .view import View, ProxyView
 
 
-class ProxyAnalogClock(ProxyTextView):
+class ProxyAnalogClock(ProxyView):
     """ The abstract definition of a proxy AnalogClock object.
 
     """
@@ -26,7 +26,7 @@ class ProxyAnalogClock(ProxyTextView):
     declaration = ForwardTyped(lambda: AnalogClock)
 
 
-class AnalogClock(TextView):
+class AnalogClock(View):
     """ A simple control for displaying an AnalogClock
 
     """
