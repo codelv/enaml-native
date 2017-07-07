@@ -89,6 +89,12 @@ def linear_layout_factory():
     return AndroidLinearLayout
 
 
+def number_picker_factory():
+    # print "Import view"
+    from .android_number_picker import AndroidNumberPicker
+    return AndroidNumberPicker
+
+
 def progress_bar_factory():
     # print "Import progress bar"
     from .android_progress_bar import AndroidProgressBar
@@ -171,6 +177,7 @@ def toolbar_factory():
     from .android_toolbar import AndroidToolbar
     return AndroidToolbar
 
+
 def view_factory():
     # print "Import view"
     from .android_view import AndroidView
@@ -203,6 +210,7 @@ ANDROID_FACTORIES = {
     'FrameLayout': frame_layout_factory,
     'GridLayout': grid_layout_factory,
     'LinearLayout': linear_layout_factory,
+    'NumberPicker': number_picker_factory,
     'ProgressBar': progress_bar_factory,
     'RadioButton': radio_button_factory,
     'RadioGroup': radio_group_factory,

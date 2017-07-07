@@ -337,15 +337,24 @@ enamldef ContentView(VBox): content_view:
       Page:
         title = "Spinners"
         Scroller:
-          Card:
-            VBox:
-              CardTitle:
-                text = "Spinner"
-              Spinner: spn1:
-                items = ["Sun", "Moon", "Stars"]
-              TextView:
-                text << "Selected: {}".format(spn1.items[spn1.selected])
-
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Spinner"
+                Spinner: spn1:
+                  items = ["Sun", "Moon", "Stars"]
+                TextView:
+                  text << "Selected: {}".format(spn1.items[spn1.selected])
+            Card:
+              VBox:
+                CardTitle:
+                  text = "NumberPicker"
+                NumberPicker: npk1:
+                  min_value = 0
+                  max_value = 100
+                TextView:
+                  text << "Selected: {}".format(npk1.value)
       Page:
         title = "Fields"
         Scroller:

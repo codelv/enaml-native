@@ -27,7 +27,7 @@ from .card_view import CardView
 #from .view_animator import ViewAnimator
 #from .view_switcher import ViewSwitcher
 #from .text_switcher import TextSwitcher
-#from .view_pager import ViewPager
+from .image_view import ImageView
 
 #: Controls
 from .button import  Button
@@ -53,3 +53,4 @@ from .progress_bar import ProgressBar
 from .toolbar import Toolbar
 from .view_pager import ViewPager
 from .fragment import Fragment
+from .number_picker import NumberPicker
