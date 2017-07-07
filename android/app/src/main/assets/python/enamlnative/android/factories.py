@@ -143,6 +143,11 @@ def switch_factory():
     return AndroidSwitch
 
 
+def text_clock_factory():
+    from .android_text_clock import AndroidTextClock
+    return AndroidTextClock
+
+
 def text_view_factory():
     # print "Import text view"
     from .android_text_view import AndroidTextView
@@ -221,6 +226,7 @@ ANDROID_FACTORIES = {
     'Switch': switch_factory,
     'TabWidget': tab_widget_factory,
     'TabHost': tab_host_factory,
+    'TextClock': text_clock_factory,
     'TextView': text_view_factory,
     'TimePicker': time_picker_factory,
     'ToggleButton': toggle_button_factory,

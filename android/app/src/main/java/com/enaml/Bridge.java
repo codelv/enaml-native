@@ -134,7 +134,7 @@ public class Bridge {
                     }
 
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    mActivity.showErrorMessage(e);
                 }
 
                 Value v = argv.get(1);
@@ -279,15 +279,15 @@ public class Bridge {
             // Save to cache
             mObjectCache.put(objId, obj);
         } catch (InstantiationException e) {
-            e.printStackTrace();
+            mActivity.showErrorMessage(e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            mActivity.showErrorMessage(e);
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            mActivity.showErrorMessage(e);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            mActivity.showErrorMessage(e);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            mActivity.showErrorMessage(e);
         }
     }
 
@@ -319,9 +319,11 @@ public class Bridge {
                 mMethodCache.put(key, objClass.getMethod(method, uv.getSpec()));
             } catch (NoSuchMethodException e) {
                 Log.e(TAG,"Error getting method id="+objId+" method="+method, e);
+                mActivity.showErrorMessage(e);
                 return;
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 Log.e(TAG,"Error getting method id="+objId+" method="+method, e);
+                mActivity.showErrorMessage(e);
                 return;
             }
         }
@@ -333,8 +335,10 @@ public class Bridge {
             onResult(resultId, result);
         } catch (IllegalAccessException e) {
             Log.e(TAG,"Error invoking obj="+ obj +" id="+objId+" method="+method, e);
+            mActivity.showErrorMessage(e);
         } catch (InvocationTargetException e) {
             Log.e(TAG,"Error invoking obj="+ obj +" id="+objId+" method="+method, e);
+            mActivity.showErrorMessage(e);
         }
     }
 
@@ -363,8 +367,8 @@ public class Bridge {
         if (!mFieldCache.containsKey(key)) {
             try {
                 mFieldCache.put(key, objClass.getField(field));
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
+            } catch (Exception e) {
+                mActivity.showErrorMessage(e);
                 return;
             }
         }
@@ -374,7 +378,7 @@ public class Bridge {
         try {
             lambda.set(obj, uv.getArgs()[0]);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            mActivity.showErrorMessage(e);
         }
     }
 
@@ -544,7 +548,7 @@ public class Bridge {
             }
             packer.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            mActivity.showErrorMessage(e);
         }
 
         // Send events to python
@@ -566,9 +570,9 @@ public class Bridge {
                 mResultCache.remove(resultId);
                 return result;
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                mActivity.showErrorMessage(e);
             } catch (ExecutionException e) {
-                e.printStackTrace();
+                mActivity.showErrorMessage(e);
             }
         }
 
@@ -673,7 +677,7 @@ public class Bridge {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            mActivity.showErrorMessage(e);
         }
 
         // TODO: if we're waiting on a future, this will create a deadlock,
@@ -715,7 +719,7 @@ public class Bridge {
                         packer.addPayload(e.toByteArray());
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    mActivity.showErrorMessage(e);
                 }
                 listener.onEvents(packer.toByteArray());
                 //mEventList.clear();

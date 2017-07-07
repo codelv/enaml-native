@@ -54,3 +54,4 @@ from .toolbar import Toolbar
 from .view_pager import ViewPager
 from .fragment import Fragment
 from .number_picker import NumberPicker
+from .text_clock import TextClock

@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.util.Log;
@@ -28,13 +29,15 @@ public class MainActivity extends AppCompatActivity {
 
     // Assets version
     final int mAssetsVersion = 2;
-    final boolean mAssetsAlwaysOverwrite = false; // Set only on debug builds
+    final boolean mAssetsAlwaysOverwrite = true; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
     // When the view is loaded from python
     FrameLayout mContentView;
+    View mPythonView;
     View mLoadingView;
     Bridge mBridge;
+    boolean mLoadingDone = false;
     int mShortAnimationDuration = 300;
 
     AppEventListener mAppEventListener;
@@ -120,10 +123,12 @@ public class MainActivity extends AppCompatActivity {
      * Set error message text in loading view.
      * @param message: Message to display
      */
-    protected void showErrorMessage(String message) {
+    public void showErrorMessage(String message) {
         if (message!=null) {
             TextView textView = (TextView) findViewById(R.id.textView);
             textView.setTop(0);
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) textView.getLayoutParams();
+            params.setMargins(10,10, 10, 10);
             textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
             textView.setTextColor(Color.RED);
             textView.setText(message);
@@ -131,6 +136,12 @@ public class MainActivity extends AppCompatActivity {
             // Hide progress bar
             View progressBar = findViewById(R.id.progressBar);
             progressBar.setVisibility(View.INVISIBLE);
+
+            // If error occured after view was loaded, animate the error back in
+            if (mLoadingDone) {
+                // Swap the views back
+                animateView(mLoadingView, mPythonView);
+            }
         }
     }
 
@@ -138,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
      * Set error message text in loading view from an exception
      * @param e: Exception to display.
      */
-    protected void showErrorMessage(Exception e) {
+    public void showErrorMessage(Exception e) {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         showErrorMessage(sw.toString());
@@ -150,17 +161,22 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     public void setView(View view) {
-        Log.i(TAG,"View loaded!");
+        Log.i(TAG, "View loaded!");
+        mPythonView = view;
         mContentView.addView(view);
+        animateView(view, mLoadingView);
+        mLoadingDone = true;
+    }
 
+    protected void animateView(View in, View out) {
         // Set the content view to 0% opacity but visible, so that it is visible
         // (but fully transparent) during the animation.
-        view.setAlpha(0f);
-        view.setVisibility(View.VISIBLE);
+        in.setAlpha(0f);
+        in.setVisibility(View.VISIBLE);
 
         // Animate the content view to 100% opacity, and clear any animation
         // listener set on the view.
-        view.animate()
+        in.animate()
             .alpha(1f)
             .setDuration(mShortAnimationDuration)
             .setListener(null);
@@ -168,16 +184,15 @@ public class MainActivity extends AppCompatActivity {
         // Animate the loading view to 0% opacity. After the animation ends,
         // set its visibility to GONE as an optimization step (it won't
         // participate in layout passes, etc.)
-        mLoadingView.animate()
+        out.animate()
             .alpha(0f)
             .setDuration(mShortAnimationDuration)
             .setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mLoadingView.setVisibility(View.GONE);
+                    out.setVisibility(View.GONE);
                 }
             });
-
     }
 
 

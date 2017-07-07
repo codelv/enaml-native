@@ -318,22 +318,29 @@ enamldef ContentView(VBox): content_view:
               TextView:
                 text << "Rating {}".format(rbar1.rating)
       Page:
-        title = "Timer"
+        title = "Clocks"
         Scroller:
-          Card:
-            VBox:
-              CardTitle:
-                text = "Timer"
-              ToggleButton:
-                text = "START"
-                text_on = "STOP"
-                text_off = "START"
-                checked:= ch1.running
-              Chronometer: ch1:
-                running = False
-              TextView:
-                text << "Ticks: {}".format(ch1.ticks)
-
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Timer"
+                ToggleButton:
+                  text = "START"
+                  text_on = "STOP"
+                  text_off = "START"
+                  checked:= ch1.running
+                Chronometer: ch1:
+                  running = False
+                TextView:
+                  text << "Ticks: {}".format(ch1.ticks)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "TextClock"
+                TextClock:
+                  text_size = 48
+                  font_family = 'sans-serif-condensed-light'
       Page:
         title = "Spinners"
         Scroller:

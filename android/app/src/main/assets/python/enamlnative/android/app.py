@@ -121,6 +121,7 @@ class AndroidApplication(Application):
         super(AndroidApplication, self).__init__()
         self.activity = activity
         self.resolver = ProxyResolver(factories=factories.ANDROID_FACTORIES)
+        self.init_error_handler()
 
     # --------------------------------------------------------------------------
     # Abstract API Implementation
@@ -165,6 +166,12 @@ class AndroidApplication(Application):
         """
         self.loop.stop()
         #jnius.detach()
+
+    def init_error_handler(self):
+        """ When an error occurs, set the error view in the App
+
+        """
+        self.loop.handle_callback_exception = self.handle_error
 
     def send_event(self, name, *args):
         """ Send an event to Java.
@@ -275,8 +282,9 @@ class AndroidApplication(Application):
             obj, handler = bridge.get_handler(ptr, method)
             result = handler(*[v for t, v in args])
         except:
+            #: Log the event
             print("Error processing event: {}".format(event))
-            traceback.print_exc()
+            raise
         finally:
             if result_id:
                 if hasattr(obj, '__javaclass__'):
@@ -289,6 +297,18 @@ class AndroidApplication(Application):
                     result_id,
                     bridge.msgpack_encoder(sig, result)  #: args
                 )
+
+    def handle_error(self, callback):
+        """ Called when an error occurs in an event loop callback.
+            By default, sets the error view.
+        """
+        from tornado.log import app_log
+        app_log.error("Exception in callback %r", callback, exc_info=True)
+        msg = "\n".join([
+            "Exception in callback %r"%callback,
+            traceback.format_exc()
+        ])
+        self.send_event(bridge.Command.ERROR, msg)
 
     # --------------------------------------------------------------------------
     # AppEventListener API Implementation
