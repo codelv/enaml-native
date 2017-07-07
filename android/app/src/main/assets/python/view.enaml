@@ -161,7 +161,7 @@ enamldef ContentView(VBox): content_view:
   Toolbar:
     title << "Enaml Native - {}".format(current_page.title)
     title_color = '#FFFFFF'
-    background_color = '#303F9F'
+    background_color = '#004981'
   DrawerLayout: drawer_layout:
     layout_height = 'match_parent'
     ViewPager: view_pager:
@@ -295,7 +295,16 @@ enamldef ContentView(VBox): content_view:
               CardTitle:
                 text = "ProgressBar"
               ProgressBar:
-                indeterminate = True # Ignored if style doesn't support it
+                indeterminate = True
+              ProgressBar:
+                indeterminate = True
+                style = 'small'
+              ProgressBar:
+                indeterminate = True
+                style = 'large'
+              ProgressBar:
+                progress = 32
+
       Page:
         title = "RatingBar"
         Scroller:
@@ -413,7 +422,8 @@ enamldef ContentView(VBox): content_view:
                   text = "Item index is {}".format(loop_item)
       Page:
         title = "Conditionals"
-        Scroller:
+        VBox:
+          background_color = '#EEEEEE'
           Card: card_conds:
             attr loading = True
             VBox:
@@ -426,7 +436,7 @@ enamldef ContentView(VBox): content_view:
               Conditional:
                 condition << card_conds.loading
                 ProgressBar:
-                  pass
+                  indeterminate = True
                 TextView:
                   text = "Loading..."
               Conditional:
@@ -442,15 +452,16 @@ enamldef ContentView(VBox): content_view:
                 text = "Toolbars"
               Toolbar:
                 title = "Toolbar"
-                background_color = '#0000FF'
+                background_color = '#004981'
                 margins = (0, 0, 0, 10)
               Toolbar:
                 title = "Title"
                 subtitle = "Subtitle"
-                background_color = '#0000CC'
+                background_color = '#004981'
       Page:
         title = "Cards"
-        Scroller:
+        VBox:
+          background_color = '#EEEEEE'
           Card:
             VBox:
               CardTitle:
@@ -495,7 +506,8 @@ enamldef ContentView(VBox): content_view:
                       text = "{}".format(loop_index)
       Page:
         title = "Drawers"
-        Scroller:
+        VBox:
+          background_color = '#EEEEEE'
           Card:
             VBox:
               CardTitle:
@@ -517,7 +529,8 @@ enamldef ContentView(VBox): content_view:
 
       Page:
         title = "Pages"
-        Scroller:
+        VBox:
+          background_color = '#EEEEEE'
           Card:
             VBox:
               CardTitle:

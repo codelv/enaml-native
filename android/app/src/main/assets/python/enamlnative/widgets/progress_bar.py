@@ -10,7 +10,7 @@ Created on May 26, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Int, Bool, observe
+    Typed, ForwardTyped, Int, Bool, Enum, observe
 )
 
 from enaml.core.declarative import d_
@@ -53,6 +53,9 @@ class ProgressBar(View):
     #: Animate the visual position between the current and target values.
     animated = d_(Bool(True))
 
+    #: Style for indeterminate
+    style = d_(Enum('normal', 'small', 'large'))
+
     #: Change the indeterminate mode for this progress bar.
     #: In indeterminate mode, the progress is ignored and the progress
     #: bar shows an infinite animation instead.
@@ -67,7 +70,7 @@ class ProgressBar(View):
     # --------------------------------------------------------------------------
     # Observers
     # --------------------------------------------------------------------------
-    @observe('progress', 'secondary_progress', 'animated', 'indeterminate', 'max')
+    @observe('progress', 'secondary_progress', 'animated', 'indeterminate', 'max', 'style')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 
