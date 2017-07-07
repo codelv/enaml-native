@@ -20,4 +20,8 @@
         </activity>
     </application>
 
+    <!-- If using WebView this is required. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+
 </manifest>
