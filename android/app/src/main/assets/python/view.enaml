@@ -306,17 +306,27 @@ enamldef ContentView(VBox): content_view:
                 progress = 32
 
       Page:
-        title = "RatingBar"
+        title = "SeekBars"
         Scroller:
-          Card:
-            VBox:
-              CardTitle:
-                text = "RatingBar"
-              RatingBar: rbar1:
-                num_stars = 5
-                rating = 3
-              TextView:
-                text << "Rating {}".format(rbar1.rating)
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "RatingBar"
+                RatingBar: rbar1:
+                  num_stars = 5
+                  rating = 3
+                TextView:
+                  text << "Rating {}".format(rbar1.rating)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "SeekBar"
+                SeekBar: seekbar:
+                  progress = 5
+                  max = 10
+                TextView:
+                  text << "Value {}".format(seekbar.progress)
       Page:
         title = "Clocks"
         Scroller:

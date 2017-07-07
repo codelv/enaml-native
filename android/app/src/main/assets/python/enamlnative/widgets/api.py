@@ -50,6 +50,7 @@ from .date_picker import DatePicker
 from .tab_widget import TabWidget
 from .tab_host import TabHost
 from .progress_bar import ProgressBar
+from .seek_bar import SeekBar
 from .toolbar import Toolbar
 from .view_pager import ViewPager
 from .fragment import Fragment

@@ -70,11 +70,15 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
         self.set_indeterminate(d.indeterminate)
 
         if not d.indeterminate:
+            if d.max:
+                self.set_max(d.max)
+            if d.min:
+                self.set_min(d.min)
+
             self.set_progress(d.progress)
-        if d.secondary_progress:
-            self.set_secondary_progress(d.secondary_progress)
-        if d.max:
-            self.set_max(d.max)
+
+            if d.secondary_progress:
+                self.set_secondary_progress(d.secondary_progress)
 
     # --------------------------------------------------------------------------
     # ProxyProgressBar API
@@ -92,8 +96,11 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
     def set_secondary_progress(self, progress):
         self.widget.setSecondaryProgress(progress)
 
-    def set_max(self, max):
-        self.widget.setMax(max)
+    def set_max(self, value):
+        self.widget.setMax(value)
+
+    def set_min(self, value):
+        self.widget.setMin(value)
 
     def set_style(self, style):
         pass

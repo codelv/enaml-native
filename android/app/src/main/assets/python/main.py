@@ -18,27 +18,26 @@ import traceback
 # pr = cProfile.Profile()
 # pr.enable()
 ## End profiling
+import jnius
+import enaml
+from enamlnative.android.app import AndroidApplication
 
 def main():
     """ Called by PyBridge.start()
     """
-    import jnius
-    import enaml
-    from enamlnative.android.app import AndroidApplication
     MainActivity = jnius.autoclass('com.enaml.MainActivity')
     app = AndroidApplication(MainActivity.mActivity)
-    #app.debug = True
-    try:
-        with enaml.imports():
-            from view import ContentView
-            app.view = ContentView()
-        app.show_view()
-        app.deferred_call(dump_stats)
-    except:
-        msg = traceback.format_exc()
-        print msg
-        app.deferred_call(app.show_error, msg)
+    app.deferred_call(load_view, app)
+    app.deferred_call(dump_stats)
     app.start()
+
+
+def load_view(app):
+    with enaml.imports():
+        from view import ContentView
+        app.view = ContentView()
+    app.show_view()
+
 
 def dump_stats():
     try:

@@ -37,8 +37,12 @@ class ProxyProgressBar(ProxyView):
     def set_secondary_progress(self, progress):
         raise NotImplementedError
 
-    def set_max(self, max):
+    def set_max(self, value):
         raise NotImplementedError
+
+    def set_min(self, value):
+        raise NotImplementedError
+
 
 class ProgressBar(View):
     """ A simple control for displaying a ProgressBar.
@@ -64,13 +68,16 @@ class ProgressBar(View):
     #: Set the upper range of the progress bar max.
     max = d_(Int())
 
+    #: Set the lower range of the progress bar
+    min = d_(Int())
+
     #: A reference to the ProxyProgressBar object.
     proxy = Typed(ProxyProgressBar)
 
     # --------------------------------------------------------------------------
     # Observers
     # --------------------------------------------------------------------------
-    @observe('progress', 'secondary_progress', 'animated', 'indeterminate', 'max', 'style')
+    @observe('progress', 'secondary_progress', 'animated', 'indeterminate', 'max', 'min', 'style')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

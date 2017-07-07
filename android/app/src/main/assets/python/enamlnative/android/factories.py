@@ -131,6 +131,11 @@ def scroll_view_factory():
     return AndroidScrollView
 
 
+def seek_bar_factory():
+    from .android_seek_bar import AndroidSeekBar
+    return AndroidSeekBar
+
+
 def spinner_factory():
     # print "Import spinner"
     from .android_spinner import AndroidSpinner
@@ -222,6 +227,7 @@ ANDROID_FACTORIES = {
     'RatingBar': rating_bar_factory,
     'RelativeLayout': relative_layout_factory,
     'ScrollView': scroll_view_factory,
+    'SeekBar': seek_bar_factory,
     'Spinner': spinner_factory,
     'Switch': switch_factory,
     'TabWidget': tab_widget_factory,

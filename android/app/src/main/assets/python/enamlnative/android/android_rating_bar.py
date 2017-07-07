@@ -60,7 +60,7 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
         self.set_rating(d.rating)
 
         #: Setup listener
-        self.widget.setOnRatingBarChangeListener(self.widget.__id__)
+        self.widget.setOnRatingBarChangeListener(self.widget.getId())
         self.widget.onRatingChanged.connect(self.on_rating_changed)
 
     # --------------------------------------------------------------------------
