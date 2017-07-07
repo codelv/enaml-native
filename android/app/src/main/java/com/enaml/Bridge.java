@@ -5,9 +5,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.HandlerThread;
 import android.os.Handler;
-import android.os.Looper;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.util.Log;
 
@@ -30,11 +28,12 @@ import java.lang.reflect.Method;
 
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Bridge {
@@ -73,7 +72,7 @@ public class Bridge {
 
 
     // Cache for results
-    final ConcurrentHashMap<Integer,CompletableFuture<Object>> mResultCache = new ConcurrentHashMap<Integer, CompletableFuture<Object>>();
+    final ConcurrentHashMap<Integer,BridgeFuture<Object>> mResultCache = new ConcurrentHashMap<Integer, BridgeFuture<Object>>();
     private int mResultCount = 0;
 
     // Looper thread
@@ -393,6 +392,49 @@ public class Bridge {
     }
 
     /**
+     * BridgeFuture access is always done in the main same thread,
+     * so it's really simple...
+     *
+     * @param <T>
+     */
+    class BridgeFuture<T> implements Future<T> {
+        private boolean mDone = false;
+        private boolean mCancelled = false;
+        private T mResult = null;
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            mCancelled = true;
+            return true;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return mCancelled;
+        }
+
+        @Override
+        public boolean isDone() {
+            return mDone;
+        }
+
+        public void setResult(T result) {
+            mResult = result;
+            mDone = true;
+        }
+
+        @Override
+        public T get() throws InterruptedException, ExecutionException {
+            return (T) mResult;
+        }
+
+        @Override
+        public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return mResult;
+        }
+    }
+
+    /**
      * InvocationHandler that dispatches the event over the bridge and
      * invokes the proper callback in Python.
      */
@@ -408,7 +450,7 @@ public class Bridge {
             int resultId = IGNORE_RESULT;
             if (!method.getReturnType().equals(Void.TYPE)) {
                 mResultCount += 1;
-                mResultCache.put(mResultCount, (new CompletableFuture<Object>()));
+                mResultCache.put(mResultCount, (new BridgeFuture<Object>()));
                 resultId = mResultCount;
             }
             return onEvent(resultId, mPythonObjectPtr, method.getName(), args);
@@ -421,9 +463,9 @@ public class Bridge {
      * @param result
      */
     public void setResult(int objId, Value result) {
-        CompletableFuture<Object> future = mResultCache.get(objId);
+        BridgeFuture<Object> future = mResultCache.get(objId);
         UnpackedValues uv = new UnpackedValues(new Value[]{result});
-        future.complete(uv.getArgs()[0]);
+        future.setResult(uv.getArgs()[0]);
     }
 
     /**

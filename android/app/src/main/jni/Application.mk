@@ -1,2 +1,3 @@
 APP_PLATFORM := android-19
-APP_ABI := armeabi-v7a x86
+# Use x86 for simulator
+APP_ABI := armeabi-v7a

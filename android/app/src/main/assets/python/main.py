@@ -14,9 +14,9 @@ Forked from https://github.com/joaoventura/pybridge
 import traceback
 
 # ### Comment out to disable profiling
-import cProfile
-pr = cProfile.Profile()
-pr.enable()
+# import cProfile
+# pr = cProfile.Profile()
+# pr.enable()
 ## End profiling
 
 def main():

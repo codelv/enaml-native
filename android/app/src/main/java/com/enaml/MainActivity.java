@@ -11,7 +11,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.util.Log;
 
-import com.jventura.pyapp.R;
+import com.frmdstryr.enamlnative.demo.R;
 import com.jventura.pybridge.AssetExtractor;
 import com.jventura.pybridge.PyBridge;
 
@@ -27,8 +27,8 @@ public class MainActivity extends AppCompatActivity {
     public static MainActivity mActivity = null;
 
     // Assets version
-    final int mAssetsVersion = 3;
-    final boolean mAssetsAlwaysOverwrite = true; // Set only on debug builds
+    final int mAssetsVersion = 2;
+    final boolean mAssetsAlwaysOverwrite = false; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
     // When the view is loaded from python

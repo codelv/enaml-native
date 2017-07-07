@@ -108,7 +108,7 @@ enamldef Console(Scroller): console:
   VBox:
     padding = (10,10,10,10)
     TextView:
-      text = "Just to prove to you it's python, try using python in mini interpereter here."
+      text = "Just to prove to you it's python, try using python in mini interpreter here."
     GridLayout:
       columns = 2
       Looper:
@@ -248,10 +248,6 @@ enamldef ContentView(VBox): content_view:
                   style = 'borderless'
 
                 Button:
-                  text = "Inset"
-                  style = 'inset'
-
-                Button:
                   text = "Small"
                   layout_height = 'wrap_content'
                   layout_width = 'wrap_content'
@@ -292,10 +288,12 @@ enamldef ContentView(VBox): content_view:
                 TextView:
                   text << "Radio group state: {}".format(rg1.checked.text if rg1.checked else "Unchecked")
       Page:
-        title = "Progressbar"
+        title = "ProgressBar"
         Scroller:
           Card:
             VBox:
+              CardTitle:
+                text = "ProgressBar"
               ProgressBar:
                 indeterminate = True # Ignored if style doesn't support it
       Page:
@@ -318,6 +316,7 @@ enamldef ContentView(VBox): content_view:
               CardTitle:
                 text = "Timer"
               ToggleButton:
+                text = "START"
                 text_on = "STOP"
                 text_off = "START"
                 checked:= ch1.running
@@ -439,6 +438,8 @@ enamldef ContentView(VBox): content_view:
         Scroller:
           Card:
             VBox:
+              CardTitle:
+                text = "Toolbars"
               Toolbar:
                 title = "Toolbar"
                 background_color = '#0000FF'
@@ -452,6 +453,8 @@ enamldef ContentView(VBox): content_view:
         Scroller:
           Card:
             VBox:
+              CardTitle:
+                text = "CardView"
               TextView:
                 text = "This is a card"
       Page:
@@ -495,15 +498,14 @@ enamldef ContentView(VBox): content_view:
         Scroller:
           Card:
             VBox:
+              CardTitle:
+                text = "DrawerLayout"
               TextView:
-                text = "Swipe in from the left or right to open the drawers"
-              TextView:
-                text = "The first child is the content"
-              TextView:
-                text = "Subsequent children will be either a left or right drawer " \
-                       " (depending on layout_gravity). Width is set by the layout_width"
-              TextView:
-                text = "Drawers can be opened and closed using the drawer.opened property " \
+                text = "Swipe in from the left or right to open the drawers. " \
+                       "The first child is the main content. " \
+                       "Subsequent children will be either a left or right drawer " \
+                       "depending on layout_gravity. The width is set by the layout_width" \
+                       "Drawers can be opened and closed using the drawer.opened property " \
                        "which is a list of the opened drawers. "
               HBox:
                 Button:
@@ -556,7 +558,6 @@ enamldef ContentView(VBox): content_view:
                 TextView:
                   text = """Horizontally scrolled. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
                   lines = 2
-
     LeftDrawer: left_drawer:
       pager = view_pager
       drawer = drawer_layout
