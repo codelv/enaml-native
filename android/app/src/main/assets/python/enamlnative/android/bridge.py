@@ -70,12 +70,14 @@ def loads(data):
     """ Decodes and processes events received from the bridge """
     return msgpack.loads(data)
 
+class JavaReferenceError(KeyError):
+    pass
 
 def get_handler(ptr, method):
     """ Dereference the pointer and return the handler method. """
     obj = CACHE.get(ptr, None)
     if obj is None:
-        raise KeyError("Reference id={} never existed or has already been destroyed"
+        raise JavaReferenceError("Reference id={} never existed or has already been destroyed"
                        .format(ptr))
     elif not hasattr(obj, method):
         raise NotImplementedError("{}.{} is not implemented.".format(obj, method))

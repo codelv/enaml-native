@@ -395,8 +395,12 @@ class AndroidApplication(Application):
         try:
             obj, handler = bridge.get_handler(ptr, method)
             result = handler(*[v for t, v in args])
+        except bridge.JavaReferenceError:
+            #: Log the event, don't blow up here
+            print("Error processing event: {}".format(event))
+            traceback.format_exc()
         except:
-            #: Log the event
+            #: Log the event, blow up in user's face
             print("Error processing event: {}".format(event))
             raise
         finally:

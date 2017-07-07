@@ -32,6 +32,7 @@ class BridgedWebViewClient(JavaBridgeObject):
     __javaclass__ = set_default('com.enaml.adapters.BridgedWebViewClient')
     setWebView = JavaMethod('android.webkit.WebView',
                             'com.enaml.adapters.BridgedWebViewClient$WebViewListener')
+    setJavaScriptEnabled = JavaMethod('boolean')
     onLoadResource = JavaCallback('android.webkit.WebView', 'java.lang.String')
     onPageStarted = JavaCallback('android.webkit.WebView', 'java.lang.String',
                                  'android.graphics.Bitmap')
@@ -83,9 +84,12 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
 
         #: Done by setWebView
         #self.widget.setWebViewClient(self.client)
+        if d.javascript_enabled:
+            self.set_javascript_enabled(d.javascript_enabled)
 
         if d.url:
             self.set_url(d.url)
+
 
     def destroy(self):
         """ Destroy the client
@@ -135,6 +139,9 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
     # --------------------------------------------------------------------------
     def set_url(self, url):
         self.widget.loadUrl(url)
+
+    def set_javascript_enabled(self, enabled):
+        self.client.setJavaScriptEnabled(enabled)
 
     def do_reload(self):
         self.widget.reload()

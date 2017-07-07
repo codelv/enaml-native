@@ -26,6 +26,14 @@ public class BridgedWebViewClient extends WebViewClient {
         mWebView.setWebChromeClient(mChromeClient);
     }
 
+    /**
+     * Enable javascript
+     * @param enabled
+     */
+    public void setJavaScriptEnabled(boolean enabled) {
+        mWebView.getSettings().setJavaScriptEnabled(enabled);
+    }
+
     @Override
     public void onLoadResource(WebView view, String url) {
         if (mListener!=null) {

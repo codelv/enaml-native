@@ -48,14 +48,6 @@ class WebView(ViewGroup):
     """ A layout that places its children in a rectangular grid.
 
     """
-    #: Read only title from the loaded page
-    title = d_(Unicode(), writable=False)
-
-    #: Read only loading progress
-    progress = d_(Int(), writable=False)
-
-    #: State
-    loading = d_(Bool(), writable=False)
 
     #: Page load error occurred
     error = d_(Bool(), writable=False)
@@ -65,6 +57,18 @@ class WebView(ViewGroup):
 
     #: Error message
     error_message = d_(Unicode(), writable=False)
+
+    #: Enable javascript
+    javascript_enabled = d_(Bool(True))
+
+    #: Read only title from the loaded page
+    title = d_(Unicode(), writable=False)
+
+    #: Read only loading progress
+    progress = d_(Int(), writable=False)
+
+    #: State
+    loading = d_(Bool(), writable=False)
 
     #: Loads the given URL.
     url = d_(Unicode())
@@ -90,7 +94,8 @@ class WebView(ViewGroup):
     # --------------------------------------------------------------------------
     # Observers
     # --------------------------------------------------------------------------
-    @observe('url', 'reload', 'go_forward', 'go_back', 'zoom_in', 'zoom_out')
+    @observe('javascript_enabled', 'url', 'reload',
+             'go_forward', 'go_back', 'zoom_in', 'zoom_out')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

@@ -72,7 +72,8 @@ enamldef Scroller(ScrollView):
   #padding = (10,10,10,10)
 
 enamldef Page(Fragment):
-  attr title = ""
+  attr title = u""
+  attr subtitle = u""
 
 # enamldef CustomPage(Page): page:
 #   attr new_page_title = ""
@@ -156,6 +157,7 @@ enamldef Console(Scroller): console:
 
 
 enamldef WebBrowser(ScrollView): browser:
+  attr page
   VBox:
 
     EditText: web_url:
@@ -178,12 +180,12 @@ enamldef WebBrowser(ScrollView): browser:
     TextView:
       visible << web_view.error
       text_color = '#FF0000'
-      text << "Error: {} - {}".format(web_view.error_code, web_view.error_message)
-    TextView:
-      text << "Url: {}".format(web_view.url)
-    TextView:
-      #: Title is unicode!
-      text << u"Title: {}".format(web_view.title)
+      text << u"Error: {} - {}".format(web_view.error_code, web_view.error_message)
+    # TextView:
+    #   text << u"Url: {}".format(web_view.url)
+    # TextView:
+    #   #: Title is unicode!
+    #   text << u"Title: {}".format(web_view.title)
 
     WebView: web_view:
       layout_height = 'match_parent'
@@ -191,6 +193,7 @@ enamldef WebBrowser(ScrollView): browser:
       #: When url updates, set the text
       url = "http://github.com"
       url >> web_url.text
+      title >> page.subtitle
 
 
 
@@ -200,9 +203,12 @@ enamldef ContentView(VBox): content_view:
   attr new_pages = []
   attr current_page << view_pager.pages[view_pager.current_index if view_pager.current_index < len(view_pager.pages) else -1] #: TODO: Make pages attribute observable...
   Toolbar:
-    title << "Enaml Native - {}".format(current_page.title)
+    title << u"Enaml Native - {}".format(current_page.title)
+    subtitle << current_page.subtitle
     title_color = '#FFFFFF'
+    subtitle_color = '#EEEEEE'
     background_color = '#004981'
+
   DrawerLayout: drawer_layout:
     layout_height = 'match_parent'
     ViewPager: view_pager:
@@ -668,10 +674,10 @@ enamldef ContentView(VBox): content_view:
                 TextView:
                   text = """Horizontally scrolled. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
                   lines = 2
-      Page:
+      Page: browser_page:
         title = "WebView"
         WebBrowser:
-          pass
+          page = browser_page
 
     LeftDrawer: left_drawer:
       pager = view_pager
