@@ -8,9 +8,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 /**
+ * A web view client that allows all events to be observed by a listener.
+ *
  * Created by jrm on 7/7/17.
  */
-
 public class BridgedWebViewClient extends WebViewClient {
     protected WebViewListener mListener;
     protected WebView mWebView;

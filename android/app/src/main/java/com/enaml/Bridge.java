@@ -9,6 +9,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.util.Log;
 
+import com.frmdstryr.enamlnative.demo.R;
+
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
@@ -104,7 +106,7 @@ public class Bridge {
         protected final Class[] mSpec;
         protected final String mName;
 
-        public UnpackedValues(Value[] args) {
+        public UnpackedValues(Value[] args) throws ClassNotFoundException {
             // Unpack args
             mArgs = new Object[args.length];
             mSpec = new Class[args.length];
@@ -116,25 +118,20 @@ public class Bridge {
                 ArrayValue argv = arg.asArrayValue();
                 String argType = argv.get(0).asStringValue().asString();
                 name += argType;
-                try {
-                    if (argType.equals("NoneType")) {
-                        mSpec[i] = Void.TYPE;
-                    } else if (argType.equals("int")) {
-                        mSpec[i] = int.class;
-                    } else if (argType.equals("boolean")) {
-                        mSpec[i] = boolean.class;
-                    } else if (argType.equals("float")) {
-                        mSpec[i] = float.class;
-                    } else if (argType.equals("long")) {
-                        mSpec[i] = long.class;
-                    } else if (argType.equals("double")) {
-                        mSpec[i] = double.class;
-                    } else {
-                        mSpec[i] = Class.forName(argType);
-                    }
-
-                } catch (ClassNotFoundException e) {
-                    mActivity.showErrorMessage(e);
+                if (argType.equals("NoneType")) {
+                    mSpec[i] = Void.TYPE;
+                } else if (argType.equals("int")) {
+                    mSpec[i] = int.class;
+                } else if (argType.equals("boolean")) {
+                    mSpec[i] = boolean.class;
+                } else if (argType.equals("float")) {
+                    mSpec[i] = float.class;
+                } else if (argType.equals("long")) {
+                    mSpec[i] = long.class;
+                } else if (argType.equals("double")) {
+                    mSpec[i] = double.class;
+                } else {
+                    mSpec[i] = Class.forName(argType);
                 }
 
                 Value v = argv.get(1);
@@ -182,6 +179,26 @@ public class Bridge {
                             if (argType.equals("android.graphics.Color")) {
                                 // Hack for colors
                                 mArgs[i] = Color.parseColor(v.asStringValue().asString());
+                                mSpec[i] = int.class;
+                            } else if (argType.equals("android.R")) {
+                                // Hack for resources such as
+                                // @drawable/icon_name
+                                // @string/bla
+                                // @layout/etc
+                                // Strip off the @ and split by path
+                                String sv = v.asStringValue().asString();
+                                String[] res = sv.substring(1).split("/");
+                                assert res.length == 2: "Resources must match @<type>/<name>, got '"+sv+"'!";
+                                int resId = mActivity.getResources().getIdentifier(
+                                        res[1], res[0], "android"
+                                );
+                                if (resId==0) {
+                                    resId = mActivity.getResources().getIdentifier(
+                                            res[1], res[0], mActivity.getPackageName()
+                                    );
+                                }
+                                Log.d(TAG,"Replacing resource `"+sv+"` with id "+resId);
+                                mArgs[i] = resId;
                                 mSpec[i] = int.class;
                             } else if (argType.equals("android.graphics.Typeface")) {
                                 // Hack for fonts
@@ -267,6 +284,8 @@ public class Bridge {
             Constructor constructor = mConstructorCache.get(className);
             Object obj = constructor.newInstance(uv.getArgs());
 
+            assert obj!=null: "Failed to create id="+objId+" type="+className;
+
             // For views, set the id as well
             if (obj instanceof View) {
                 View view = (View) obj;
@@ -288,6 +307,8 @@ public class Bridge {
             mActivity.showErrorMessage(e);
         } catch (NoSuchMethodException e) {
             mActivity.showErrorMessage(e);
+        } catch (AssertionError e) {
+            mActivity.showErrorMessage(e.getMessage());
         }
     }
 
@@ -305,32 +326,36 @@ public class Bridge {
         //Log.e(TAG,"id="+objId+" method="+method);
         Object obj = mObjectCache.get(objId);
         if (obj==null) {
-            Log.e(TAG,"Error: Null object reference when updating id="+objId+" method="+method);
-        }
-        Class objClass = obj.getClass();
-
-        // Decode args
-        UnpackedValues uv = new UnpackedValues(args);
-        String key = objClass.getName() + method+ uv.getName();
-
-        // Cache the lambda methods
-        if (!mMethodCache.containsKey(key)) {
-            try {
-                mMethodCache.put(key, objClass.getMethod(method, uv.getSpec()));
-            } catch (NoSuchMethodException e) {
-                Log.e(TAG,"Error getting method id="+objId+" method="+method, e);
-                mActivity.showErrorMessage(e);
-                return;
-            } catch (Exception e) {
-                Log.e(TAG,"Error getting method id="+objId+" method="+method, e);
-                mActivity.showErrorMessage(e);
-                return;
-            }
+            mActivity.showErrorMessage(
+                    "Error: Null object reference when updating id="+objId+" method="+method);
+            return;
         }
 
-        // Get the lambda
-        Method lambda = mMethodCache.get(key);
         try {
+            Class objClass = obj.getClass();
+
+            // Decode args
+            UnpackedValues uv = new UnpackedValues(args);
+            String key = objClass.getName() + method+ uv.getName();
+
+            // Cache the lambda methods
+            if (!mMethodCache.containsKey(key)) {
+                try {
+                    mMethodCache.put(key, objClass.getMethod(method, uv.getSpec()));
+                } catch (NoSuchMethodException e) {
+                    Log.e(TAG,"Error getting method id="+objId+" method="+method, e);
+                    mActivity.showErrorMessage(e);
+                    return;
+                } catch (Exception e) {
+                    Log.e(TAG,"Error getting method id="+objId+" method="+method, e);
+                    mActivity.showErrorMessage(e);
+                    return;
+                }
+            }
+
+
+            // Get the lambda
+            Method lambda = mMethodCache.get(key);
             Object result = lambda.invoke(obj, uv.getArgs());
             onResult(resultId, result);
         } catch (IllegalAccessException e) {
@@ -338,6 +363,8 @@ public class Bridge {
             mActivity.showErrorMessage(e);
         } catch (InvocationTargetException e) {
             Log.e(TAG,"Error invoking obj="+ obj +" id="+objId+" method="+method, e);
+            mActivity.showErrorMessage(e);
+        } catch (ClassNotFoundException e) {
             mActivity.showErrorMessage(e);
         }
     }
@@ -355,29 +382,34 @@ public class Bridge {
     public void updateObjectField(int objId, String field, Value[] args) {
         Object obj = mObjectCache.get(objId);
         if (obj==null) {
-            Log.e(TAG,"Error: Null object reference when updating id="+objId+" field="+field);
-        }
-        Class objClass = obj.getClass();
-
-        // Decode args
-        UnpackedValues uv = new UnpackedValues(args);
-        String key = objClass.getName() + field;
-
-        // Cache the lambda methods
-        if (!mFieldCache.containsKey(key)) {
-            try {
-                mFieldCache.put(key, objClass.getField(field));
-            } catch (Exception e) {
-                mActivity.showErrorMessage(e);
-                return;
-            }
+            mActivity.showErrorMessage(
+                    "Error: Null object reference when updating id="+objId+" field="+field);
+            return;
         }
 
-        // Get the lambda
-        Field lambda = mFieldCache.get(key);
         try {
+            Class objClass = obj.getClass();
+
+            // Decode args
+            UnpackedValues uv = new UnpackedValues(args);
+            String key = objClass.getName() + field;
+
+            // Cache the lambda methods
+            if (!mFieldCache.containsKey(key)) {
+                try {
+                    mFieldCache.put(key, objClass.getField(field));
+                } catch (Exception e) {
+                    mActivity.showErrorMessage(e);
+                    return;
+                }
+            }
+
+            // Get the lambda
+            Field lambda = mFieldCache.get(key);
             lambda.set(obj, uv.getArgs()[0]);
         } catch (IllegalAccessException e) {
+            mActivity.showErrorMessage(e);
+        } catch (ClassNotFoundException e ) {
             mActivity.showErrorMessage(e);
         }
     }
@@ -467,9 +499,13 @@ public class Bridge {
      * @param result
      */
     public void setResult(int objId, Value result) {
-        BridgeFuture<Object> future = mResultCache.get(objId);
-        UnpackedValues uv = new UnpackedValues(new Value[]{result});
-        future.setResult(uv.getArgs()[0]);
+        try {
+            BridgeFuture<Object> future = mResultCache.get(objId);
+            UnpackedValues uv = new UnpackedValues(new Value[]{result});
+            future.setResult(uv.getArgs()[0]);
+        } catch (ClassNotFoundException e) {
+            mActivity.showErrorMessage(e);
+        }
     }
 
     /**

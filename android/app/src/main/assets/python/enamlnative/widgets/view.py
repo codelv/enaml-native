@@ -97,6 +97,7 @@ class ProxyView(ProxyWidget):
     def set_z(self, z):
         raise NotImplementedError
 
+
 class View(Widget):
     """ View is a view group that displays
         child views in relative positions.

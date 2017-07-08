@@ -13,7 +13,8 @@ import com.enaml.MainActivity;
 import java.util.ArrayList;
 
 /**
- * A
+ * A fragment state adapter that takes a list of fragments with unpopulated views and
+ * dispatches an event to request the view when it is shown (or next to a shown view).
  *
  * Created by jrm on 6/30/17.
  */

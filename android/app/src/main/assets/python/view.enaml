@@ -161,7 +161,7 @@ enamldef WebBrowser(ScrollView): browser:
   VBox:
 
     EditText: web_url:
-      text = "www.google.com"
+      text = "github.com/frmdstryr/enaml-native"
       input_type = 'text_uri'
       editor_actions = True
       editor_action ::
@@ -181,17 +181,11 @@ enamldef WebBrowser(ScrollView): browser:
       visible << web_view.error
       text_color = '#FF0000'
       text << u"Error: {} - {}".format(web_view.error_code, web_view.error_message)
-    # TextView:
-    #   text << u"Url: {}".format(web_view.url)
-    # TextView:
-    #   #: Title is unicode!
-    #   text << u"Title: {}".format(web_view.title)
-
     WebView: web_view:
       layout_height = 'match_parent'
       layout_width = 'match_parent'
       #: When url updates, set the text
-      url = "http://github.com"
+      url = "https://github.com/frmdstryr/enaml-native"
       url >> web_url.text
       title >> page.subtitle
 
@@ -233,6 +227,10 @@ enamldef ContentView(VBox): content_view:
         title = "Console"
         Console:
           pass
+      Page: browser_page:
+        title = "WebView"
+        WebBrowser:
+          page = browser_page
       Page:
         title = "Text"
         Scroller:
@@ -440,13 +438,28 @@ enamldef ContentView(VBox): content_view:
             Card:
               VBox:
                 CardTitle:
+                  text = "AutoComplete"
+                TextView:
+                  text = "Try typing a US state name"
+                AutoCompleteTextView: autoet:
+                  choices = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
+                  text = ""
+                  threshold = 2
+                TextView:
+                  text << "You typed: {}".format(autoet.text)
+            Card:
+              VBox:
+                CardTitle:
                   text = "Input types"
+                TextView:
+                  text = "Can be any of:\n{}".format('\n'.join(EditText.input_type.items))
                 Looper:
-                  iterable = EditText.input_type.items
+                  iterable = EditText.input_type.items[0:5]
                   TextView:
                     text = "{}:".format(loop_item)
                   EditText:
                     input_type = loop_item
+
       Page:
         title = "Time Picker"
         Scroller:
@@ -674,10 +687,47 @@ enamldef ContentView(VBox): content_view:
                 TextView:
                   text = """Horizontally scrolled. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
                   lines = 2
-      Page: browser_page:
-        title = "WebView"
-        WebBrowser:
-          page = browser_page
+      Page:
+        title = "Images"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Image resources"
+                TextView:
+                  text = "Use @<type>/<name> for a resource"
+                ImageView:
+                  src= "@mipmap/ic_launcher"
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Image URIs"
+                TextView:
+                  text = "Use @<type>/<name> for a URI"
+                ImageView:
+                   src = "@mipmap/ic_launcher"
+      Page:
+        title = "Icons"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Icons"
+                TextView:
+                  text = "Use {icon-name} within the text. Uses android-iconify. Try an icon pack below"
+
+                Spinner: icon_pack:
+                  items = ['Entypo','Font awesome','Ionicons', 'Material community', 'Material',
+                           'Meteocons', "Weather"]
+                #: Use one because it's way faster than a looper
+                Icon:
+                  attr icons << getattr(Icon,"PACK_%s"%icon_pack.items[icon_pack.selected].replace(" ","_").upper())
+                  text_size = 32
+                  text << u" ".join([u"{%s}"%n for n in icons])
+            Spacer:
+              layout_height = '10'
 
     LeftDrawer: left_drawer:
       pager = view_pager

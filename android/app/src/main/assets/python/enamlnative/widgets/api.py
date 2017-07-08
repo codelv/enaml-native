@@ -41,6 +41,7 @@ from .radio_button import RadioButton
 from .radio_group import RadioGroup
 from .chronometer import Chronometer
 from .edit_text import EditText
+from .auto_complete_text_view import AutoCompleteTextView
 from .spinner import Spinner
 from .rating_bar import RatingBar
 
@@ -51,7 +52,7 @@ from .date_picker import DatePicker
 #: Widgets
 from .spacer import Spacer
 from .tab_widget import TabWidget
-from .tab_host import TabHost
+from .tab_host import TabHost, TabSpec
 from .progress_bar import ProgressBar
 from .seek_bar import SeekBar
 from .toolbar import Toolbar
@@ -60,3 +61,4 @@ from .fragment import Fragment
 from .number_picker import NumberPicker
 from .text_clock import TextClock
 from .analog_clock import AnalogClock
+from .icon import Icon

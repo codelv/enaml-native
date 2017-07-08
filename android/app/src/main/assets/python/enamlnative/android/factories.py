@@ -16,6 +16,11 @@ def analog_clock_factory():
     return AndroidAnalogClock
 
 
+def auto_complete_text_view_factory():
+    from .android_auto_complete_text_view import AndroidAutoCompleteTextView
+    return AndroidAutoCompleteTextView
+
+
 def button_factory():
     # print "Import button"
     from .android_button import AndroidButton
@@ -88,6 +93,16 @@ def grid_layout_factory():
     return AndroidGridLayout
 
 
+def icon_factory():
+    from .android_icon import AndroidIcon
+    return AndroidIcon
+
+
+def image_view_factory():
+    from .android_image_view import AndroidImageView
+    return AndroidImageView
+
+
 def linear_layout_factory():
     # print "Import linear layout"
     from .android_linear_layout import AndroidLinearLayout
@@ -146,6 +161,7 @@ def spacer_factory():
     from .android_spacer import AndroidSpacer
     return AndroidSpacer
 
+
 def spinner_factory():
     # print "Import spinner"
     from .android_spinner import AndroidSpinner
@@ -179,6 +195,12 @@ def tab_host_factory():
     # print "Import tab host"
     from .android_tab_host import AndroidTabHost
     return AndroidTabHost
+
+
+def tab_spec_factory():
+    # print "Import tab host"
+    from .android_tab_host import AndroidTabSpec
+    return AndroidTabSpec
 
 
 def tab_widget_factory():
@@ -223,6 +245,7 @@ def web_view_factory():
 
 ANDROID_FACTORIES = {
     'AnalogClock': analog_clock_factory,
+    'AutoCompleteTextView': auto_complete_text_view_factory,
     'Button': button_factory,
     'CalendarView': calendar_view_factory,
     'CardView': card_view_factory,
@@ -235,6 +258,8 @@ ANDROID_FACTORIES = {
     'Fragment': fragment_factory,
     'FrameLayout': frame_layout_factory,
     'GridLayout': grid_layout_factory,
+    'Icon': icon_factory,
+    'ImageView': image_view_factory,
     'LinearLayout': linear_layout_factory,
     'NumberPicker': number_picker_factory,
     'ProgressBar': progress_bar_factory,
@@ -249,6 +274,7 @@ ANDROID_FACTORIES = {
     'Switch': switch_factory,
     'TabWidget': tab_widget_factory,
     'TabHost': tab_host_factory,
+    'TabSpec': tab_spec_factory,
     'TextClock': text_clock_factory,
     'TextView': text_view_factory,
     'TimePicker': time_picker_factory,

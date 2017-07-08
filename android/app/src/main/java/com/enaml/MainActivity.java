@@ -13,6 +13,16 @@ import android.widget.TextView;
 import android.util.Log;
 
 import com.frmdstryr.enamlnative.demo.R;
+import com.joanzapata.iconify.Iconify;
+import com.joanzapata.iconify.fonts.EntypoModule;
+import com.joanzapata.iconify.fonts.FontAwesomeModule;
+import com.joanzapata.iconify.fonts.IoniconsModule;
+import com.joanzapata.iconify.fonts.MaterialCommunityModule;
+import com.joanzapata.iconify.fonts.MaterialModule;
+import com.joanzapata.iconify.fonts.MeteoconsModule;
+import com.joanzapata.iconify.fonts.SimpleLineIconsModule;
+import com.joanzapata.iconify.fonts.TypiconsModule;
+import com.joanzapata.iconify.fonts.WeathericonsModule;
 import com.jventura.pybridge.AssetExtractor;
 import com.jventura.pybridge.PyBridge;
 
@@ -53,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Show loading screen
         setContentView(R.layout.activity_main);
+
+        initIcons();
 
         // Save views for animation when loading is complete
         mContentView = (FrameLayout) findViewById(R.id.contentView);
@@ -118,6 +130,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Init for icons
+     */
+    public void initIcons() {
+        Iconify
+                .with(new FontAwesomeModule())
+                .with(new EntypoModule())
+                .with(new TypiconsModule())
+                .with(new MaterialModule())
+                .with(new MaterialCommunityModule())
+                .with(new MeteoconsModule())
+                .with(new WeathericonsModule())
+                .with(new SimpleLineIconsModule())
+                .with(new IoniconsModule());
+
+    }
+
 
     /**
      * Set error message text in loading view.
@@ -125,6 +154,8 @@ public class MainActivity extends AppCompatActivity {
      */
     public void showErrorMessage(String message) {
         if (message!=null) {
+            Log.e(TAG,message);
+
             TextView textView = (TextView) findViewById(R.id.textView);
             textView.setTop(0);
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) textView.getLayoutParams();

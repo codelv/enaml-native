@@ -30,12 +30,12 @@ class Command:
     ERROR = "e"
 
 
-
 def _generate_id():
     """ Generate an id for an object """
     global __global_id__
     __global_id__ += 1
     return __global_id__
+
 
 def _cleanup_id(obj):
     """ Removes the object from the """
@@ -43,6 +43,7 @@ def _cleanup_id(obj):
         del CACHE[obj.__id__]
     except KeyError:
         pass
+
 
 def get_app_class():
     """ Avoid circular import. Probably indicates a
@@ -70,8 +71,10 @@ def loads(data):
     """ Decodes and processes events received from the bridge """
     return msgpack.loads(data)
 
+
 class JavaReferenceError(KeyError):
     pass
+
 
 def get_handler(ptr, method):
     """ Dereference the pointer and return the handler method. """
@@ -190,7 +193,14 @@ class JavaCallback(JavaMethod):
 
 class JavaBridgeObject(Atom):
     """ A proxy to a class in java. This sends the commands over
-        the bridge for execution.
+        the bridge for execution.  The object is stored in a map
+        with the given id and is valid until this object is deleted.
+    Parameters
+    ----------
+    __id__: Int
+        If an __id__ keyward argument is passed during creation,
+        this will assume the object was already created and
+        only a reference to the object with the given id is needed.
 
     """
     __slots__ = ('__weakref__',)
@@ -219,9 +229,9 @@ class JavaBridgeObject(Atom):
     def getId(self):
         return self.__id__
 
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         """ Sends the event to create this View in Java """
-        super(JavaBridgeObject, self).__init__()
+        super(JavaBridgeObject, self).__init__(**kwargs)
         # #: Get declared methods
         # for base in reversed(type(self).__mro__):
         #     for name, method in base.__dict__.iteritems():
@@ -233,13 +243,15 @@ class JavaBridgeObject(Atom):
         #             setattr(self, name, method.clone(self))
 
         #: Send the event over the bridge to construct the view
+        __id__ = kwargs.get('__id__', None)
         CACHE[self.__id__] = self
-        self.__app__.send_event(
-            Command.CREATE,  #: method
-            self.__id__, #: id to assign in java
-            self.__javaclass__,
-            [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)],
-        )
+        if __id__ is None:
+            self.__app__.send_event(
+                Command.CREATE,  #: method
+                self.__id__, #: id to assign in java
+                self.__javaclass__,
+                [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)],
+            )
 
     def __del__(self):
         self.__app__.send_event(
@@ -247,6 +259,9 @@ class JavaBridgeObject(Atom):
             self.__id__, #: id to assign in java
         )
         _cleanup_id(self)
+
+
+
 
 # def test_bridge():
 #     """ Nothing beats tests with actual usage :) """

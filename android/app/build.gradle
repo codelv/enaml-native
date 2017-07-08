@@ -11,6 +11,7 @@ android {
         targetSdkVersion 25
         versionCode 4
         versionName "1.4"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -33,9 +34,29 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:25.1.1'
-    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:cardview-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+
     compile 'org.msgpack:msgpack-core:0.8.13'
+
+    compile 'com.github.bumptech.glide:glide:4.0.0-RC1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
+
+
+    // Icons
+    compile 'com.joanzapata.iconify:android-iconify-fontawesome:2.2.2' // (v4.5)
+    compile 'com.joanzapata.iconify:android-iconify-entypo:2.2.2' // (v3,2015)
+    compile 'com.joanzapata.iconify:android-iconify-typicons:2.2.2' // (v2.0.7)
+    compile 'com.joanzapata.iconify:android-iconify-material:2.2.2' // (v2.0.0)
+    compile 'com.joanzapata.iconify:android-iconify-material-community:2.2.2' // (v1.4.57)
+    compile 'com.joanzapata.iconify:android-iconify-meteocons:2.2.2' // (latest)
+    compile 'com.joanzapata.iconify:android-iconify-weathericons:2.2.2' // (v2.0)
+    compile 'com.joanzapata.iconify:android-iconify-simplelineicons:2.2.2' // (v1.0.0)
+    compile 'com.joanzapata.iconify:android-iconify-ionicons:2.2.2' // (v2.0.1)
+
 }
 
 //task copyPythonSource(type: Copy)

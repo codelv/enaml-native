@@ -13,6 +13,7 @@ from atom.api import Typed, List, set_default
 
 from enamlnative.widgets.spinner import ProxySpinner
 
+from .android_adapter import ArrayAdapter
 from .android_view_group import AndroidViewGroup, ViewGroup
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
@@ -48,14 +49,6 @@ class Spinner(AbsSpinner):
     setGravity = JavaMethod('int')
     setPrompt = JavaMethod('java.lang.CharSequence')
 
-
-class ArrayAdapter(JavaBridgeObject):
-    __javaclass__ = set_default('android.widget.ArrayAdapter')
-    __signature__ = set_default(('android.content.Context', 'int'))
-    add = JavaMethod('java.lang.Object')
-    remove = JavaMethod('java.lang.Object')
-    clear = JavaMethod()
-    #addAll = JavaMethod('int...') #: TODO implement this...
 
 
 class AndroidSpinner(AndroidViewGroup, ProxySpinner):
@@ -96,7 +89,7 @@ class AndroidSpinner(AndroidViewGroup, ProxySpinner):
             self.set_gravity(d.gravity)
 
         #: Create the adapter simple_spinner_item = 0x01090008
-        self.adapter = ArrayAdapter(self.get_context(), 0x01090008)
+        self.adapter = ArrayAdapter(self.get_context(), '@layout/simple_spinner_dropdown_item')
         if d.items:
             self.set_items(d.items)
         self.widget.setAdapter(self.adapter)
