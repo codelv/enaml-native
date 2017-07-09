@@ -29,6 +29,9 @@ class Command:
     SHOW = "s"
     ERROR = "e"
 
+class ExtType:
+    REF = 1
+
 
 def _generate_id():
     """ Generate an id for an object """
@@ -58,8 +61,8 @@ def msgpack_encoder(sig, obj):
         it can properly be interpreted as a reference.
     """
     if hasattr(obj, '__javaclass__'):
-        return (sig, (obj.__id__,))
-    return (sig, obj)
+        return sig, msgpack.ExtType(ExtType.REF, msgpack.packb(obj.__id__))
+    return sig, obj
 
 
 def dumps(data):

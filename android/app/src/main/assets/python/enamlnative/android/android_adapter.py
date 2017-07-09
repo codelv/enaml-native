@@ -18,8 +18,8 @@ class ArrayAdapter(JavaBridgeObject):
     __javaclass__ = set_default('android.widget.ArrayAdapter')
     __signature__ = set_default(('android.content.Context', 'android.R'))
     add = JavaMethod('java.lang.Object')
+    addAll = JavaMethod('[Ljava.lang.Object;')
     remove = JavaMethod('java.lang.Object')
     clear = JavaMethod()
-    #addAll = JavaMethod('int...') #: TODO implement this...
 
 

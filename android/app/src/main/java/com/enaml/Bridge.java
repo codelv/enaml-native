@@ -9,10 +9,9 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.util.Log;
 
-import com.frmdstryr.enamlnative.demo.R;
-
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessagePacker;
 import org.msgpack.core.MessageUnpacker;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.ExtensionValue;
@@ -21,6 +20,7 @@ import org.msgpack.value.IntegerValue;
 import org.msgpack.value.Value;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
@@ -29,6 +29,8 @@ import java.lang.reflect.Method;
 
 
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -38,12 +40,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.msgpack.core.MessagePack.newDefaultUnpacker;
+
 public class Bridge {
 
     public static final String TAG = "Bridge";
 
+    // Result handling
+    public static final int TYPE_REF = 1;
     public static final int IGNORE_RESULT = 0;
 
+    // Bridge commands
     public static final String CREATE = "c";
     public static final String METHOD = "m";
     public static final String FIELD = "f";
@@ -72,9 +79,9 @@ public class Bridge {
     // Cache for objects
     final ConcurrentHashMap<Integer,Object> mObjectCache = new ConcurrentHashMap<Integer, Object>();
 
-
     // Cache for results
     final ConcurrentHashMap<Integer,BridgeFuture<Object>> mResultCache = new ConcurrentHashMap<Integer, BridgeFuture<Object>>();
+    // For generating IDs
     private int mResultCount = 0;
 
     // Looper thread
@@ -93,6 +100,23 @@ public class Bridge {
         mBridgeHandler = new Handler(mBridgeHandlerThread.getLooper());
     }
 
+    public static Class getClass(String name) throws ClassNotFoundException {
+        if (name.equals("NoneType")) {
+            return Void.TYPE;
+        } else if (name.equals("int")) {
+            return int.class;
+        } else if (name.equals("boolean") || name.equals("bool")) {
+            return boolean.class;
+        } else if (name.equals("float")) {
+            return float.class;
+        } else if (name.equals("long")) {
+            return long.class;
+        } else if (name.equals("double")) {
+            return double.class;
+        }
+        return Class.forName(name);
+    }
+
     /**
      * Unpacks encoded bridge values. Each value is a tuple of type:
      *
@@ -106,7 +130,16 @@ public class Bridge {
         protected final Class[] mSpec;
         protected final String mName;
 
-        public UnpackedValues(Value[] args) throws ClassNotFoundException {
+        public class UnpackedValue {
+            public final Class cls;
+            public final Object arg;
+            public UnpackedValue(Class cls, Object arg) {
+                this.cls = cls;
+                this.arg = arg;
+            }
+        }
+
+        public UnpackedValues(Value[] args) throws ClassNotFoundException, IOException {
             // Unpack args
             mArgs = new Object[args.length];
             mSpec = new Class[args.length];
@@ -114,124 +147,155 @@ public class Bridge {
 
             // Decode each value
             for (int i=0; i<args.length; i++) {
-                Value arg = args[i];
-                ArrayValue argv = arg.asArrayValue();
-                String argType = argv.get(0).asStringValue().asString();
-                name += argType;
-                if (argType.equals("NoneType")) {
-                    mSpec[i] = Void.TYPE;
-                } else if (argType.equals("int")) {
-                    mSpec[i] = int.class;
-                } else if (argType.equals("boolean")) {
-                    mSpec[i] = boolean.class;
-                } else if (argType.equals("float")) {
-                    mSpec[i] = float.class;
-                } else if (argType.equals("long")) {
-                    mSpec[i] = long.class;
-                } else if (argType.equals("double")) {
-                    mSpec[i] = double.class;
-                } else {
-                    mSpec[i] = Class.forName(argType);
-                }
+                // Every arg is a tuple of (String type ,Value arg)
+                ArrayValue argv = args[i].asArrayValue();
 
+                assert argv.size()==2: "Invalid bridge argument format. Must be (String type ,Value arg)";
+
+                // Get the argument type
+                String argType = argv.get(0).asStringValue().asString();
+
+                // Get the argument value
                 Value v = argv.get(1);
-                if (argType.equals("android.content.Context")) {
-                    // Hack for android context
-                    mArgs[i] = mContext;
-                } else {
-                    switch (v.getValueType()) {
-                        case NIL:
-                            mArgs[i] = null;
-                            break;
-                        case BOOLEAN:
-                            mArgs[i] = v.asBooleanValue().getBoolean();
-                            break;
-                        case INTEGER:
-                            IntegerValue iv = v.asIntegerValue();
-                            if (mSpec[i].isInterface()) {
-                                // If an int/long is passed for an interface... create a proxy
-                                // for the interface and pass in the reference.
-                                Class infClass = mSpec[i];
-                                Object proxy = Proxy.newProxyInstance(
-                                        infClass.getClassLoader(),
-                                        new Class[]{infClass},
-                                        new BridgeInvocationHandler(iv.toInt())
-                                );
-                                //mProxyCache.put(objId,proxy);
-                                mArgs[i] = proxy;
-                            } else if (iv.isInIntRange()) {
-                                mArgs[i] = iv.toInt();
-                            } else if (iv.isInLongRange()) {
-                                mArgs[i] = iv.toLong();
-                            } else {
-                                mArgs[i] = iv.toBigInteger();
-                            }
-                            break;
-                        case FLOAT:
-                            FloatValue fv = v.asFloatValue();
-                            if (argType.equals("float")) {
-                                mArgs[i] = fv.toFloat();
-                            } else {
-                                mArgs[i] = fv.toDouble();
-                            }
-                            break;
-                        case STRING:
-                            if (argType.equals("android.graphics.Color")) {
-                                // Hack for colors
-                                mArgs[i] = Color.parseColor(v.asStringValue().asString());
-                                mSpec[i] = int.class;
-                            } else if (argType.equals("android.R")) {
-                                // Hack for resources such as
-                                // @drawable/icon_name
-                                // @string/bla
-                                // @layout/etc
-                                // Strip off the @ and split by path
-                                String sv = v.asStringValue().asString();
-                                String[] res = sv.substring(1).split("/");
-                                assert res.length == 2: "Resources must match @<type>/<name>, got '"+sv+"'!";
-                                int resId = mActivity.getResources().getIdentifier(
-                                        res[1], res[0], "android"
-                                );
-                                if (resId==0) {
-                                    resId = mActivity.getResources().getIdentifier(
-                                            res[1], res[0], mActivity.getPackageName()
-                                    );
-                                }
-                                Log.d(TAG,"Replacing resource `"+sv+"` with id "+resId);
-                                mArgs[i] = resId;
-                                mSpec[i] = int.class;
-                            } else if (argType.equals("android.graphics.Typeface")) {
-                                // Hack for fonts
-                                mArgs[i] = Typeface.create(v.asStringValue().asString(), 0);
-                            } else {
-                                mArgs[i] = v.asStringValue().asString();
-                            }
-                            break;
-                        case BINARY:
-                            byte[] mb = v.asBinaryValue().asByteArray();
-                            System.out.println("read binary: size=" + mb.length);
-                            break;
-                        case ARRAY:
-                            ArrayValue a = v.asArrayValue();
-                            // Use an array for passing references.
-                            // Assumes the first element in the array is a pointer
-                            // to the reference object we want.
-                            for (Value e : a) {
-                                mArgs[i] = mObjectCache.get(e.asIntegerValue().toInt());
-                                break;
-                            }
-                            break;
-                        case EXTENSION:
-                            ExtensionValue ev = v.asExtensionValue();
-                            byte extType = ev.getType();
-                            byte[] extValue = ev.getData();
-                            break;
-                    }
-                }
+
+                // For building the key
+                name += argType;
+
+                // Determine the class
+                UnpackedValue uv = unpackValue(Bridge.getClass(argType), argType, v);
+                mSpec[i] = uv.cls;
+                mArgs[i] = uv.arg;
             }
 
-
+            // Set the name of this method
             mName = name;
+        }
+
+        /**
+         * Set the
+         * @param i
+         * @param argType
+         * @param v
+         */
+        protected UnpackedValue unpackValue(Class spec, String argType, Value v) throws IOException {
+            if (argType.equals("android.content.Context")) {
+                // Hack for android context
+                return new UnpackedValue(spec, mContext);
+            }
+            Object arg = null;
+            switch (v.getValueType()) {
+                case NIL:
+                    break;
+
+                case BOOLEAN:
+                    arg = v.asBooleanValue().getBoolean();
+                    break;
+
+                case INTEGER:
+                    IntegerValue iv = v.asIntegerValue();
+                    if (spec.isInterface()) {
+                        // If an int/long is passed for an interface... create a proxy
+                        // for the interface and pass in the reference.
+                        Class infClass = spec;
+                        Object proxy = Proxy.newProxyInstance(
+                                infClass.getClassLoader(),
+                                new Class[]{infClass},
+                                new BridgeInvocationHandler(iv.toInt())
+                        );
+                        //mProxyCache.put(objId,proxy);
+                        arg = proxy;
+                    } else if (iv.isInIntRange()) {
+                        arg = iv.toInt();
+                    } else if (iv.isInLongRange()) {
+                        arg = iv.toLong();
+                    } else {
+                        arg = iv.toBigInteger();
+                    }
+                    break;
+
+                case FLOAT:
+                    FloatValue fv = v.asFloatValue();
+                    if (argType.equals("float") || spec == Float.TYPE) {
+                        arg = fv.toFloat();
+                    } else {
+                        arg = fv.toDouble();
+                    }
+                    break;
+
+                case STRING:
+                    if (argType.equals("android.graphics.Color")) {
+                        // Hack for colors
+                        spec = int.class; // Umm?
+                        arg = Color.parseColor(v.asStringValue().asString());
+                    } else if (argType.equals("android.R")) {
+                        // Hack for resources such as
+                        // @drawable/icon_name
+                        // @string/bla
+                        // @layout/etc
+                        // Strip off the @ and split by path
+                        String sv = v.asStringValue().asString();
+                        String[] res = sv.substring(1).split("/");
+                        assert res.length == 2: "Resources must match @<type>/<name>, got '"+sv+"'!";
+                        int resId = mActivity.getResources().getIdentifier(
+                                res[1], res[0], "android"
+                        );
+                        if (resId==0) {
+                            resId = mActivity.getResources().getIdentifier(
+                                    res[1], res[0], mActivity.getPackageName()
+                            );
+                        }
+                        Log.d(TAG,"Replacing resource `"+sv+"` with id "+resId);
+                        spec = int.class;
+                        arg = resId;
+                    } else if (argType.equals("android.graphics.Typeface")) {
+                        // Hack for fonts
+                        arg = Typeface.create(v.asStringValue().asString(), 0);
+                    } else {
+                        arg = v.asStringValue().asString();
+                    }
+                    break;
+
+                case BINARY:
+                    arg = v.asBinaryValue().asByteArray();
+                    break;
+
+                case ARRAY:
+                    ArrayValue a = v.asArrayValue();
+                    // Use an array for passing references.
+                    // Assumes the first element in the array is a pointer
+                    // to the reference object we want.
+                    if (spec.isInstance(Collection.class)) {
+                        ArrayList list = new ArrayList<>();
+                        for (int i=0; i<a.size(); i++) {
+                            UnpackedValue uv = unpackValue(Object.class, "java.lang.Object", a.get(i));
+                            list.add(uv.arg);
+                        }
+                        arg = list;
+                    } else {
+                        // Primitive array?
+                        Class arrayType = spec.getComponentType();
+                        assert arrayType != null : "Array values must have an array arg type matching the JNI syntax" +
+                                ". Ex '[Ljava.lang.String' or `[I` ";
+                        arg = Array.newInstance(arrayType, a.size());
+                        for (int i = 0; i < a.size(); i++) {
+                            UnpackedValue uv = unpackValue(arrayType, arrayType.getCanonicalName(), a.get(i));
+                            Array.set(arg, i, uv.arg);
+                        }
+                    }
+                    break;
+
+                case EXTENSION:
+                    // Currenly only extension is JavaBridgeObjects
+                    ExtensionValue ev = v.asExtensionValue();
+                    int extType = (int) ev.getType();
+                    if (extType==TYPE_REF) {
+                        MessageUnpacker ref =  MessagePack.newDefaultUnpacker(ev.getData());
+                        arg = mObjectCache.get(ref.unpackInt());
+                    }
+
+                    break;
+            }
+            return new UnpackedValue(spec, arg);
         }
 
         public Object[] getArgs() {
@@ -309,6 +373,8 @@ public class Bridge {
             mActivity.showErrorMessage(e);
         } catch (AssertionError e) {
             mActivity.showErrorMessage(e.getMessage());
+        } catch (IOException e) {
+            mActivity.showErrorMessage(e);
         }
     }
 
@@ -318,12 +384,15 @@ public class Bridge {
      * Uses lambdas (via retrolambda) to have as fast as direct use performance:
      * @see  https://github.com/Hervian/lambda-factory/
      *
-     * @param objId
-     * @param method
-     * @param args
+     * @param objId: ID of object to invoke the method on
+     * @param resultId: Serves two purposes,
+     *                  1. ID that result should be stored as
+     *                  2. and ID of the Future in python that can be used to retrieve the result
+     * @param method: Method to invoke on the given object
+     * @param args: Args to pass to the object
      */
     public void updateObject(int objId, int resultId, String method, Value[] args) {
-        //Log.e(TAG,"id="+objId+" method="+method);
+        //Log.d(TAG,"id="+objId+" method="+method);
         Object obj = mObjectCache.get(objId);
         if (obj==null) {
             mActivity.showErrorMessage(
@@ -365,6 +434,8 @@ public class Bridge {
             Log.e(TAG,"Error invoking obj="+ obj +" id="+objId+" method="+method, e);
             mActivity.showErrorMessage(e);
         } catch (ClassNotFoundException e) {
+            mActivity.showErrorMessage(e);
+        } catch (IOException e) {
             mActivity.showErrorMessage(e);
         }
     }
@@ -410,6 +481,8 @@ public class Bridge {
         } catch (IllegalAccessException e) {
             mActivity.showErrorMessage(e);
         } catch (ClassNotFoundException e ) {
+            mActivity.showErrorMessage(e);
+        } catch (IOException e) {
             mActivity.showErrorMessage(e);
         }
     }
@@ -505,11 +578,14 @@ public class Bridge {
             future.setResult(uv.getArgs()[0]);
         } catch (ClassNotFoundException e) {
             mActivity.showErrorMessage(e);
+        } catch (IOException e) {
+            mActivity.showErrorMessage(e);
         }
     }
 
     /**
-     * Sets the result of a future in python.
+     * If the pythonObjectId!=IGNORE_RESULT, this sets the result of a future in python and
+     * stores the result locally within the object cache if it is not a primitive type.
      * @param pythonObjectId
      * @param result
      */
@@ -517,16 +593,51 @@ public class Bridge {
         if (pythonObjectId==IGNORE_RESULT) {
             return;
         }
-        // TODO: This should use the EventLoop implementation
+
+        if (!isPackableResult(result)) {
+            // Store the result with the given ID, the python implementation
+            // guarantees that the ID is unique and will not overwrite an existing object
+            mObjectCache.put(pythonObjectId, result);
+        }
+
+        // Send the result to python
+        // TODO: This should use the EventLoop implementation, currently assumes a tornado Future
         onEvent(IGNORE_RESULT, pythonObjectId, "set_result", new Object[]{result});
+    }
+
+    /**
+     * A very crude way of determining if the result is of a primitive type or if a reference
+     * needs created.  Results that can be sent via msgpack do not need to have a reference created.
+     * @param result
+     * @return
+     */
+    protected boolean isPackableResult(Object result) {
+        Class resultType = result.getClass();
+        if (resultType == int.class || result instanceof Integer) {
+            return true;
+        } else if (resultType == boolean.class || result instanceof Boolean) {
+            return true;
+        } else if (result instanceof String) {
+            return true;
+        } else if (resultType == long.class || result instanceof Long) {
+            return true;
+        } else if (resultType == float.class || result instanceof Float) {
+            return true;
+        } else if (resultType == double.class || result instanceof Double) {
+            return true;
+        } else if (resultType == short.class || result instanceof Short) {
+            return true;
+        }
+        return false;
     }
 
     /**
      * Packs an event and sends it to python. The event is packed in the format:
      *
      * ("event",(returnId, pythonObjectId, "method", (args...)))
-     * @param resultId: id of the future to set the result of. If 0, result shall be ignored.
-     * @param pythonObjectId: ptr to object in python. Cast to object to get a reference
+     * @param resultId: Id of the Future in Java to return the result to.
+     *                  If resultId==IGNORE_RESULT, python shall not send a result back.
+     * @param pythonObjectId: ptr to object in python object cache.
      * @param method: method name to invoke on the object
      * @param args: args to pass to the method
      * @return
@@ -596,14 +707,7 @@ public class Bridge {
         if (resultId != IGNORE_RESULT) {
             try {
                 Future<Object> future = mResultCache.get(resultId);
-                while (!future.isDone()) {
-                    // Process pending messages until done
-                    // TODO: Busy loop, maybe block?
-                    Runnable task = mTaskQueue.poll();
-                    if (task != null) {
-                        task.run();
-                    }
-                }
+                runUntilDone(future);
                 Object result = future.get();
                 mResultCache.remove(resultId);
                 return result;
@@ -615,6 +719,35 @@ public class Bridge {
         }
 
         return null;
+    }
+
+    /**
+     * Run UI tasks until the future is completed. This MUST be called in the UI thread.
+     * @param future: Future to wait for.
+     */
+    public void runUntilDone(Future future) {
+        while (!future.isDone()) {
+            // Process pending messages until done
+            // TODO: Busy loop, maybe block?
+            Runnable task = mTaskQueue.poll();
+            if (task != null) {
+                task.run();
+            }
+        }
+    }
+
+    /**
+     * Run UI tasks until the queue is empty.
+     * This MUST only be called in the UI thread.
+     */
+    public void runUntilCurrent() {
+        long start = System.currentTimeMillis();
+        Runnable task = mTaskQueue.poll();
+        while (task != null) {
+            task.run();
+            task = mTaskQueue.poll();
+        }
+        Log.i(TAG, "Running tasks took ("+(System.currentTimeMillis()-start)+" ms)");
     }
 
 
@@ -651,7 +784,7 @@ public class Bridge {
      * @param view
      */
     public void processEvents(byte[] data) {
-        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(data);
+        MessageUnpacker unpacker = newDefaultUnpacker(data);
         try {
             int eventCount = unpacker.unpackArrayHeader();
             for (int i=0; i<eventCount; i++) {
@@ -684,6 +817,7 @@ public class Bridge {
                         }
                         mTaskQueue.add(()->{updateObject(objId, resultId, objMethod, args);});
                         break;
+
                     case FIELD:
                         objId = unpacker.unpackInt();
                         String objField = unpacker.unpackString();
@@ -695,6 +829,7 @@ public class Bridge {
                         }
                         mTaskQueue.add(()->{updateObjectField(objId, objField, args);});
                         break;
+
                     case DELETE:
                         objId = unpacker.unpackInt();
                         mTaskQueue.add(()->{deleteObject(objId);});
@@ -705,9 +840,11 @@ public class Bridge {
                         Value arg = unpacker.unpackValue();
                         mTaskQueue.add(()->{setResult(objId, arg);});
                         break;
+
                     case SHOW:
                         mTaskQueue.add(()->{mActivity.setView(getRootView());});
                         break;
+
                     case ERROR:
                         String errorMessage = unpacker.unpackString();
                         mTaskQueue.add(()->{mActivity.showErrorMessage(errorMessage);});
@@ -715,31 +852,26 @@ public class Bridge {
                 }
             }
         } catch (IOException e) {
-            mActivity.showErrorMessage(e);
+            mActivity.runOnUiThread(()->{
+                mActivity.showErrorMessage(e);
+            });
         }
 
-        // TODO: if we're waiting on a future, this will create a deadlock,
-        // how do i process them now??
-        // TODO: WHY POST?
+        // Process requested tasks
         mActivity.runOnUiThread(()->{
-            long start = System.currentTimeMillis();
-            Runnable task = mTaskQueue.poll();
-            while (task != null) {
-                task.run();
-                task = mTaskQueue.poll();
-            }
-            Log.i(TAG, "Running tasks took ("+(System.currentTimeMillis()-start)+" ms)");
+            runUntilCurrent();
         });
     }
 
     /**
      * Post an event to the bridge handler thread.
      * When the delay expires, send the data to the app
-     * event listener.
+     * event listener (which goes to Python).
      */
     public void sendEvent(MessageBufferPacker event) {
         mEventCount.incrementAndGet();
         mEventList.add(event);
+
         // Send to bridge thread for processing
         mBridgeHandler.postDelayed(() -> {
             int delays = mEventCount.decrementAndGet();
@@ -760,7 +892,6 @@ public class Bridge {
                     mActivity.showErrorMessage(e);
                 }
                 listener.onEvents(packer.toByteArray());
-                //mEventList.clear();
             }
         }, mEventDelay);
     }

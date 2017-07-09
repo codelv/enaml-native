@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     public static MainActivity mActivity = null;
 
     // Assets version
-    final int mAssetsVersion = 2;
+    final int mAssetsVersion = 5;
     final boolean mAssetsAlwaysOverwrite = true; // Set only on debug builds
 
     // Save layout elements to display a fade in animation

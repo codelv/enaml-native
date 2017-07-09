@@ -77,8 +77,7 @@ class AndroidAutoCompleteTextView(AndroidEditText, ProxyAutoCompleteTextView):
     # --------------------------------------------------------------------------
     def set_choices(self, choices):
         self.adapter.clear()
-        for c in choices:
-            self.adapter.add(c)
+        self.adapter.addAll(choices)
 
     def set_drop_down_height(self, height):
         self.widget.setDropDownHeight(height)

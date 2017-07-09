@@ -27,6 +27,7 @@ def main():
     """
     MainActivity = jnius.autoclass('com.enaml.MainActivity')
     app = AndroidApplication(MainActivity.mActivity)
+    #app.debug = True #: Makes a lot of lag!
     app.deferred_call(load_view, app)
     app.deferred_call(dump_stats)
     app.start()
