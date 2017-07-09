@@ -75,7 +75,7 @@ def loads(data):
     return msgpack.loads(data)
 
 
-class JavaReferenceError(KeyError):
+class JavaReferenceError(ReferenceError):
     pass
 
 

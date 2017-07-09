@@ -13,24 +13,8 @@ from atom.api import Typed, List, set_default
 
 from enamlnative.widgets.spinner import ProxySpinner
 
-from .android_adapter import ArrayAdapter
-from .android_view_group import AndroidViewGroup, ViewGroup
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
-
-
-class AdapterView(ViewGroup):
-    __javaclass__ = set_default('android.widget.AdapterView')
-    setEmptyView = JavaMethod('android.view.View')
-    setFocusableInTouchMode = JavaMethod('boolean')
-    setOnItemClickListener = JavaMethod('android.widget.AdapterView$OnItemClickListener')
-    setOnItemLongClickListener = JavaMethod('android.widget.AdapterView$OnItemLongClickListener')
-    setOnItemSelectedListener = JavaMethod('android.widget.AdapterView$OnItemSelectedListener')
-    setSelection = JavaMethod('int')
-
-    onItemClick = JavaMethod('android.widget.AdapterView', 'android.view.View', 'int', 'long')
-    onItemLongClick = JavaMethod('android.widget.AdapterView', 'android.view.View', 'int', 'long')
-    onItemSelected = JavaCallback('android.widget.AdapterView', 'android.view.View', 'int', 'long')
-    onNothingSelected = JavaCallback('android.widget.AdapterView')
+from .android_adapter import ArrayAdapter, AndroidAdapterView, AdapterView
+from .bridge import JavaMethod
 
 
 class AbsSpinner(AdapterView):
@@ -50,8 +34,7 @@ class Spinner(AbsSpinner):
     setPrompt = JavaMethod('java.lang.CharSequence')
 
 
-
-class AndroidSpinner(AndroidViewGroup, ProxySpinner):
+class AndroidSpinner(AndroidAdapterView, ProxySpinner):
     """ An Android implementation of an Enaml ProxySpinner.
 
     """
@@ -102,16 +85,9 @@ class AndroidSpinner(AndroidViewGroup, ProxySpinner):
         self.widget.onItemSelected.connect(self.on_item_selected)
         self.widget.onNothingSelected.connect(self.on_nothing_selected)
 
-    def destroy(self):
-        """ Properly destroy adapter """
-        super(AndroidSpinner, self).destroy()
-        if self.adapter:
-            del self.adapter
-
     # --------------------------------------------------------------------------
     # OnSelectionListener API
     # --------------------------------------------------------------------------
-
     def on_item_selected(self, parent, view, position, id):
         d = self.declaration
         with self.widget.setSelection.suppressed():

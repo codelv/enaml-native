@@ -763,6 +763,21 @@ enamldef ContentView(VBox): content_view:
         title = "Icons"
         IconFinder:
           pass
+      Page:
+        title = "Tabs"
+        #: Android tab's design is so STUPID
+        ViewPager: tab_pager:
+          PagerTabStrip:
+            titles = ['A', 'B', 'C']
+          Looper:
+            iterable = range(3)#tab_host.tabs
+            Fragment:
+              Card:
+                VBox:
+                  CardTitle:
+                    text = "Tab {} Content Title".format(loop_index)
+                  TextView:
+                    text = "Very original tab content"
 
     LeftDrawer: left_drawer:
       pager = view_pager

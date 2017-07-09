@@ -115,6 +115,16 @@ def number_picker_factory():
     return AndroidNumberPicker
 
 
+def pager_title_strip_factory():
+    from .android_view_pager import AndroidPagerTitleStrip
+    return AndroidPagerTitleStrip
+
+
+def pager_tab_strip_factory():
+    from .android_view_pager import AndroidPagerTabStrip
+    return AndroidPagerTabStrip
+
+
 def progress_bar_factory():
     # print "Import progress bar"
     from .android_progress_bar import AndroidProgressBar
@@ -262,6 +272,8 @@ ANDROID_FACTORIES = {
     'ImageView': image_view_factory,
     'LinearLayout': linear_layout_factory,
     'NumberPicker': number_picker_factory,
+    'PagerTitleStrip': pager_title_strip_factory,
+    'PagerTabStrip': pager_tab_strip_factory,
     'ProgressBar': progress_bar_factory,
     'RadioButton': radio_button_factory,
     'RadioGroup': radio_group_factory,
@@ -272,9 +284,9 @@ ANDROID_FACTORIES = {
     'Spacer': spacer_factory,
     'Spinner': spinner_factory,
     'Switch': switch_factory,
-    'TabWidget': tab_widget_factory,
-    'TabHost': tab_host_factory,
-    'TabSpec': tab_spec_factory,
+    #'TabWidget': tab_widget_factory,
+    #'TabHost': tab_host_factory,
+    #'TabSpec': tab_spec_factory,
     'TextClock': text_clock_factory,
     'TextView': text_view_factory,
     'TimePicker': time_picker_factory,

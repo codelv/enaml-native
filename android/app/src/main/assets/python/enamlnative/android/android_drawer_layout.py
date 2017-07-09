@@ -92,10 +92,10 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
         d = self.declaration
 
         #: Set the proper layout for each child
-        for c in self.drawers():
-            #: Set the gravity
-            gravity = 3 if c.declaration.layout_gravity == 'left' else 5
-            c.layout_params.gravity = gravity
+        # for c in self.drawers():
+        #     #: Set the gravity
+        #     gravity = 3 if c.declaration.layout_gravity == 'left' else 5
+        #     c.layout_params.gravity = gravity
 
         if d.opened:
             self.set_opened(d.opened)

@@ -9,9 +9,10 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import set_default
+from atom.api import Typed, set_default
 
-from .bridge import JavaBridgeObject, JavaMethod
+from .android_view_group import AndroidViewGroup, ViewGroup
+from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
 class ArrayAdapter(JavaBridgeObject):
@@ -22,4 +23,30 @@ class ArrayAdapter(JavaBridgeObject):
     remove = JavaMethod('java.lang.Object')
     clear = JavaMethod()
 
+
+class AdapterView(ViewGroup):
+    __javaclass__ = set_default('android.widget.AdapterView')
+    setEmptyView = JavaMethod('android.view.View')
+    setFocusableInTouchMode = JavaMethod('boolean')
+    setOnItemClickListener = JavaMethod('android.widget.AdapterView$OnItemClickListener')
+    setOnItemLongClickListener = JavaMethod('android.widget.AdapterView$OnItemLongClickListener')
+    setOnItemSelectedListener = JavaMethod('android.widget.AdapterView$OnItemSelectedListener')
+    setSelection = JavaMethod('int')
+
+    onItemClick = JavaMethod('android.widget.AdapterView', 'android.view.View', 'int', 'long')
+    onItemLongClick = JavaMethod('android.widget.AdapterView', 'android.view.View', 'int', 'long')
+    onItemSelected = JavaCallback('android.widget.AdapterView', 'android.view.View', 'int', 'long')
+    onNothingSelected = JavaCallback('android.widget.AdapterView')
+
+
+class AndroidAdapterView(AndroidViewGroup):
+
+    #: Adapter reference
+    adapter = Typed(ArrayAdapter)
+
+    def destroy(self):
+        """ Destroy the adapter """
+        super(AdapterView, self).destroy()
+        if self.adapter:
+            del self.adapter
 

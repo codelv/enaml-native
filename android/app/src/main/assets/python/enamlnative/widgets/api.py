@@ -51,12 +51,12 @@ from .date_picker import DatePicker
 
 #: Widgets
 from .spacer import Spacer
-from .tab_widget import TabWidget
-from .tab_host import TabHost, TabSpec
+#from .tab_widget import TabWidget
+#from .tab_host import TabHost, TabSpec
 from .progress_bar import ProgressBar
 from .seek_bar import SeekBar
 from .toolbar import Toolbar
-from .view_pager import ViewPager
+from .view_pager import ViewPager, PagerTitleStrip, PagerTabStrip
 from .fragment import Fragment
 from .number_picker import NumberPicker
 from .text_clock import TextClock

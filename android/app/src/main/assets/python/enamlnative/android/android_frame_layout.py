@@ -13,14 +13,20 @@ from atom.api import Typed, set_default
 
 from enamlnative.widgets.frame_layout import ProxyFrameLayout
 
-from .android_view_group import AndroidViewGroup, ViewGroup
-from .bridge import JavaMethod
+from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
+from .bridge import JavaMethod, JavaField
 
 
 class FrameLayout(ViewGroup):
     __javaclass__ = set_default('android.widget.FrameLayout')
     setForegroundGravity = JavaMethod('int')
     setMeasureAllChildren = JavaMethod('boolean')
+
+
+class FrameLayoutParams(MarginLayoutParams):
+    """ Update the child widget with the given params """
+    __javaclass__ = set_default('android.widget.FrameLayout$LayoutParams')
+    gravity = JavaField('int')
 
 
 class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
