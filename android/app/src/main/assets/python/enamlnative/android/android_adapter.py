@@ -46,7 +46,7 @@ class AndroidAdapterView(AndroidViewGroup):
 
     def destroy(self):
         """ Destroy the adapter """
-        super(AdapterView, self).destroy()
+        super(AndroidAdapterView, self).destroy()
         if self.adapter:
             del self.adapter
 
