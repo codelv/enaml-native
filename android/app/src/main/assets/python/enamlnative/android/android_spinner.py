@@ -134,8 +134,8 @@ class AndroidSpinner(AndroidViewGroup, ProxySpinner):
 
         """
         self.adapter.clear()
-        for item in items:
-            self.adapter.add(item)
+        self.adapter.addAll(items)
+        #self.adapter.add(item)
 
     def set_gravity(self, gravity):
         #g = getattr(Gravity,gravity.upper())
