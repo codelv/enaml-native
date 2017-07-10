@@ -13,7 +13,7 @@ from atom.api import Typed, set_default
 
 from enamlnative.widgets.view_group import ProxyViewGroup
 
-from .android_view import AndroidView, View, MarginLayoutParams
+from .android_view import AndroidView, View, LayoutParams, MarginLayoutParams
 
 
 class Gravity:

@@ -14,7 +14,7 @@ from atom.api import Typed, Instance, Subclass, Bool, Float, set_default
 from enamlnative.widgets.view import ProxyView
 
 from .android_widget import AndroidWidget, Widget
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, loads
+from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField
 
 
 class View(Widget):
@@ -60,17 +60,23 @@ class View(Widget):
     }
 
 
-class MarginLayoutParams(JavaBridgeObject):
-    __javaclass__ = set_default('android.view.ViewGroup$MarginLayoutParams')
-    __signature__ = set_default(('int', 'int'))
-    setMargins = JavaMethod('int', 'int', 'int', 'int')
-    setLayoutDirection = JavaMethod('int')
-
+class LayoutParams(JavaBridgeObject):
+    __javaclass__ = set_default('android.view.ViewGroup$LayoutParams')
+    width = JavaField('int')
+    height = JavaField('int')
     LAYOUTS = {
         'fill_parent': -1,
         'match_parent': -1,
         'wrap_content': -2
     }
+
+
+class MarginLayoutParams(LayoutParams):
+    __javaclass__ = set_default('android.view.ViewGroup$MarginLayoutParams')
+    __signature__ = set_default(('int', 'int'))
+    setMargins = JavaMethod('int', 'int', 'int', 'int')
+    setLayoutDirection = JavaMethod('int')
+
 
 
 class AndroidView(AndroidWidget, ProxyView):
@@ -84,10 +90,10 @@ class AndroidView(AndroidWidget, ProxyView):
     dp = Float(1.0)
 
     #: Layout type
-    layout_param_type = Subclass(MarginLayoutParams)
+    layout_param_type = Subclass(LayoutParams, default=MarginLayoutParams)
 
     #: Layout params
-    layout_params = Instance(MarginLayoutParams)
+    layout_params = Instance(LayoutParams)
 
     #: Flag to know if layout params should be destroyed
     _destroy_layout_params = Bool()
@@ -154,16 +160,16 @@ class AndroidView(AndroidWidget, ProxyView):
 
     def _default_layout_params(self):
         d = self.declaration
-        LayoutParams = self.layout_param_type
+        LayoutParamsFactory = self.layout_param_type
         try:
             w = int(int(d.layout_width)*self.dp)
         except ValueError:
-            w = MarginLayoutParams.LAYOUTS[d.layout_width or 'match_parent']
+            w = LayoutParams.LAYOUTS[d.layout_width or 'match_parent']
         try:
             h = int(int(d.layout_height)*self.dp)
         except ValueError:
-            h = MarginLayoutParams.LAYOUTS[d.layout_height or 'match_parent']
-        return LayoutParams(w, h)
+            h = LayoutParams.LAYOUTS[d.layout_height or 'match_parent']
+        return LayoutParamsFactory(w, h)
 
     def destroy(self):
         """ Destroy layout params if needed. """
@@ -243,13 +249,19 @@ class AndroidView(AndroidWidget, ProxyView):
     def set_right(self, right):
         self.widget.setRight(right)
 
-    def set_layout_width(self, width):
-        pass
-        #self.set_layout_params(self.layout_params)
-
     def set_layout_height(self, height):
-        pass
-        #self.set_layout_params(self.layout_params)
+        try:
+            h = int(int(height)*self.dp)
+        except ValueError:
+            h = LayoutParams.LAYOUTS[height or 'match_parent']
+        self.layout_params.height = h
+
+    def set_layout_width(self, width):
+        try:
+            w = int(int(width)*self.dp)
+        except ValueError:
+            w = LayoutParams.LAYOUTS[width or 'match_parent']
+        self.layout_params.width = w
 
     def set_layout_direction(self, direction):
         d = View.LAYOUT_DIRECTIONS[direction]

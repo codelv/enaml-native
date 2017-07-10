@@ -94,8 +94,18 @@ def grid_layout_factory():
 
 
 def icon_factory():
-    from .android_icon import AndroidIcon
+    from .android_iconify import AndroidIcon
     return AndroidIcon
+
+
+def icon_button_factory():
+    from .android_iconify import AndroidIconButton
+    return AndroidIconButton
+
+
+def icon_toggle_button_factory():
+    from .android_iconify import AndroidIconToggleButton
+    return AndroidIconToggleButton
 
 
 def image_view_factory():
@@ -123,6 +133,11 @@ def pager_title_strip_factory():
 def pager_tab_strip_factory():
     from .android_view_pager import AndroidPagerTabStrip
     return AndroidPagerTabStrip
+
+
+def pager_fragment_factory():
+    from .android_fragment import AndroidPagerFragment
+    return AndroidPagerFragment
 
 
 def progress_bar_factory():
@@ -201,22 +216,16 @@ def time_picker_factory():
     return AndroidTimePicker
 
 
-def tab_host_factory():
+def tab_layout_factory():
     # print "Import tab host"
-    from .android_tab_host import AndroidTabHost
-    return AndroidTabHost
+    from .android_tab_layout import AndroidTabLayout
+    return AndroidTabLayout
 
 
-def tab_spec_factory():
+def tab_fragment_factory():
     # print "Import tab host"
-    from .android_tab_host import AndroidTabSpec
-    return AndroidTabSpec
-
-
-def tab_widget_factory():
-    # print "Import widget factory"
-    from .android_tab_widget import AndroidTabWidget
-    return AndroidTabWidget
+    from .android_tab_layout import AndroidTabFragment
+    return AndroidTabFragment
 
 
 def toggle_button_factory():
@@ -269,11 +278,14 @@ ANDROID_FACTORIES = {
     'FrameLayout': frame_layout_factory,
     'GridLayout': grid_layout_factory,
     'Icon': icon_factory,
+    'IconButton': icon_button_factory,
+    'IconToggleButton': icon_toggle_button_factory,
     'ImageView': image_view_factory,
     'LinearLayout': linear_layout_factory,
     'NumberPicker': number_picker_factory,
     'PagerTitleStrip': pager_title_strip_factory,
     'PagerTabStrip': pager_tab_strip_factory,
+    'PagerFragment': pager_fragment_factory,
     'ProgressBar': progress_bar_factory,
     'RadioButton': radio_button_factory,
     'RadioGroup': radio_group_factory,
@@ -284,9 +296,8 @@ ANDROID_FACTORIES = {
     'Spacer': spacer_factory,
     'Spinner': spinner_factory,
     'Switch': switch_factory,
-    #'TabWidget': tab_widget_factory,
-    #'TabHost': tab_host_factory,
-    #'TabSpec': tab_spec_factory,
+    'TabFragment': tab_fragment_factory,
+    'TabLayout': tab_layout_factory,
     'TextClock': text_clock_factory,
     'TextView': text_view_factory,
     'TimePicker': time_picker_factory,

@@ -37,12 +37,14 @@ enamldef MenuItem(Button):
   style = 'borderless'
   padding = (10,10,10,10)
 
-enamldef MenuIcon(Icon):
+
+enamldef MenuIcon(IconButton):
   #: This should have the fancy ripple effect on press
   padding = (12, 12, 12 ,12)
+  style = 'borderless'
   text_size = 48
-  clickable = True
-  
+
+
 enamldef LeftDrawer(ScrollView):
   attr pager
   attr drawer
@@ -348,6 +350,9 @@ enamldef ContentView(VBox): content_view:
                   layout_height = 'wrap_content'
                   layout_width = 'wrap_content'
                   style = 'small'
+
+                IconButton:
+                  text = u"{entypo-home} Home"
 
             Card:
               VBox:
@@ -764,20 +769,70 @@ enamldef ContentView(VBox): content_view:
         IconFinder:
           pass
       Page:
-        title = "Tabs"
+        title = "Pager Tab Strip"
         #: Android tab's design is so STUPID
         ViewPager: tab_pager:
-          PagerTabStrip:
-            titles = ['A', 'B', 'C']
+          PagerTabStrip: pager_tab_strip:
+            text_color << toolbar.title_color
+            background_color << toolbar.background_color
+            tab_indicator_color = '#97c024'
+            layout_gravity = 'bottom'
+            #tab_full_underline = True
           Looper:
-            iterable = range(3)#tab_host.tabs
-            Fragment:
-              Card:
-                VBox:
-                  CardTitle:
-                    text = "Tab {} Content Title".format(loop_index)
-                  TextView:
-                    text = "Very original tab content"
+            iterable = ['First', 'Second', 'Third']#tab_host.tabs
+            PagerFragment:
+              title = loop_item
+              VBox:
+                background_color = '#EEEEEE'
+                Card:
+                  VBox:
+                    CardTitle:
+                      text = "{} Tab".format(loop_item)
+                    TextView:
+                      text = "Add a PagerTitleStrip or PagerTabStrip to a ViewPager for tabs. " \
+                             "They can be placed at the top or bottom using layout_gravity."
+                    Spinner:
+                      items = ['top', 'bottom']
+                      selected << 0 if pager_tab_strip.layout_gravity == 'top' else 1
+                      selected::
+                        pager_tab_strip.layout_gravity = self.items[self.selected]
+      Page:
+        title = "Tabs"
+        #: Android tab's design is so STUPID
+        ViewPager:
+          TabLayout: tab_layout:
+            tab_color = '#CCCCCC'
+            tab_color_selected << toolbar.title_color
+            background_color << toolbar.background_color
+          Looper:
+            iterable << ['First', 'Second', 'Third']
+            TabFragment:
+              title = loop_item
+              VBox:
+                background_color = '#EEEEEE'
+                Card:
+                  VBox:
+                    CardTitle:
+                      text = "{} Tab".format(loop_item)
+                    TextView:
+                      text = "Add a TabLayout to a ViewPager for tabs. " \
+                             "They can be placed at the top or bottom using layout_gravity."
+                    Spinner:
+                      items = ['top', 'bottom']
+                      selected << 0 if tab_layout.layout_gravity == 'top' else 1
+                      selected :: tab_layout.layout_gravity = self.items[self.selected]
+                    TextView:
+                      text = "Tab modes"
+                    Spinner:
+                      items = ['scrollable', 'fixed']
+                      selected << 0 if tab_layout.tab_mode == 'scrollable' else 1
+                      selected :: tab_layout.tab_mode = self.items[self.selected]
+                    TextView:
+                      text = "Tab gravity"
+                    Spinner:
+                      items = ['fill', 'center']
+                      selected << 0 if tab_layout.tab_gravity == 'fill' else 1
+                      selected :: tab_layout.tab_gravity = self.items[self.selected]
 
     LeftDrawer: left_drawer:
       pager = view_pager

@@ -4,13 +4,14 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.enaml.MainActivity;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 
 /**
  * A fragment state adapter that takes a list of fragments with unpopulated views and
@@ -54,6 +55,11 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
     }
 
     @Override
+    public String getPageTitle(int position) {
+        return ((BridgedFragment) mFragments.get(position)).getTitle();
+    }
+
+    @Override
     public int getItemPosition(Object item) {
         BridgedFragment fragment = (BridgedFragment)item;
         int position = mFragments.indexOf(fragment);
@@ -74,6 +80,7 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
         //public static final String VIEW_ID = "viewId";
         //protected final Bridge mBridge;
         protected int mId = 0;
+        protected String mTitle = "";
         protected FragmentListener mListener = null;
 
         public BridgedFragment() {}
@@ -81,6 +88,9 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
         public void setFragmentListener(FragmentListener listener) {
             mListener = listener;
         }
+
+        public void setTitle(String title) { mTitle = title; }
+        public String getTitle() { return mTitle; }
 
         @Override
         public View onCreateView(LayoutInflater inflater,

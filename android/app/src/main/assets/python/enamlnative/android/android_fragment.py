@@ -12,6 +12,7 @@ Created on May 20, 2017
 from atom.api import Typed, Instance, Subclass, Float, set_default
 
 from enamlnative.widgets.fragment import ProxyFragment
+from enamlnative.widgets.view_pager import ProxyPagerFragment
 
 from .android_toolkit_object import AndroidToolkitObject
 from .android_view_pager import BridgedFragmentStatePagerAdapter
@@ -20,7 +21,7 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 class BridgedFragment(JavaBridgeObject):
     __javaclass__ = set_default('com.enaml.adapters.BridgedFragmentStatePagerAdapter$BridgedFragment')
-
+    setTitle = JavaMethod('java.lang.String')
     setFragmentListener = JavaMethod('com.enaml.adapters.BridgedFragmentStatePagerAdapter$FragmentListener')
     onCreateView = JavaCallback(returns='android.view.View')
     onDestroyView = JavaCallback()
@@ -106,3 +107,29 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
             if not view.proxy_is_active:
                 view.activate_proxy()
             return view.proxy.widget
+
+
+class AndroidPagerFragment(AndroidFragment, ProxyPagerFragment):
+    """ An Android implementation of an Enaml ProxyPagerFragment.
+
+    """
+    def init_widget(self):
+        """ Initialize the underlying widget.
+
+        """
+        super(AndroidPagerFragment, self).init_widget()
+        d = self.declaration
+        if d.title:
+            self.set_title(d.title)
+        if d.icon:
+            self.set_icon(d.icon)
+
+    # --------------------------------------------------------------------------
+    # ProxyPagerTabStrip API
+    # --------------------------------------------------------------------------
+    def set_title(self, title):
+        self.fragment.setTitle(title)
+
+    def set_icon(self, icon):
+        pass
+        #self.adapter.setPageIcon(self.widget, icon)

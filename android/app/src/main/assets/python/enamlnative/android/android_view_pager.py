@@ -11,11 +11,13 @@ Created on May 20, 2017
 '''
 from atom.api import Typed, Int, set_default
 
-from enamlnative.widgets.view_pager import ProxyViewPager, ProxyPagerTitleStrip, ProxyPagerTabStrip
+from enamlnative.widgets.view_pager import (
+    ProxyViewPager, ProxyPagerTitleStrip, ProxyPagerTabStrip, ProxyPagerFragment
+)
 
+from .android_view import LayoutParams
 from .android_view_group import AndroidViewGroup, ViewGroup
-from .android_frame_layout import FrameLayoutParams
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField
 from .app import AndroidApplication
 
 
@@ -29,6 +31,12 @@ class ViewPager(ViewGroup):
     onPageScrollStateChanged = JavaCallback('int')
     onPageScrolled = JavaCallback('int', 'float', 'int')
     onPageSelected = JavaCallback('int')
+
+
+class ViewPagerLayoutParams(LayoutParams):
+    __javaclass__ = set_default('android.support.v4.view.ViewPager$LayoutParams')
+    gravity = JavaField('int')
+    isDecor = JavaField('boolean')
 
 
 class PagerTitleStrip(ViewGroup):
@@ -45,13 +53,14 @@ class PagerTitleStrip(ViewGroup):
 class PagerTabStrip(PagerTitleStrip):
     __javaclass__ = set_default('android.support.v4.view.PagerTabStrip')
     setTabIndicatorColor = JavaMethod('android.graphics.Color')
+    setDrawFullUnderline = JavaMethod('boolean')
 
 
 class BridgedFragmentStatePagerAdapter(JavaBridgeObject):
     __javaclass__ = set_default('com.enaml.adapters.BridgedFragmentStatePagerAdapter')
     addFragment = JavaMethod('android.support.v4.app.Fragment')
     removeFragment = JavaMethod('android.support.v4.app.Fragment')
-    setTitles = JavaMethod('[java.langString;')
+    setTitles = JavaMethod('[Ljava.lang.String;')
     clearTitles = JavaMethod()
     notifyDataSetChanged = JavaMethod()
     # setOnItemRequestedListener = JavaMethod(
@@ -175,7 +184,25 @@ class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):
     #: A reference to the widget created by the proxy.
     widget = Typed(PagerTitleStrip)
 
-    layout_param_type = set_default(FrameLayoutParams)
+    #: ViewPager views should have the given layout params
+    layout_param_type = set_default(ViewPagerLayoutParams)
+
+    def _default_layout_params(self):
+        d = self.declaration
+        try:
+            w = int(int(d.layout_width)*self.dp)
+        except ValueError:
+            w = LayoutParams.LAYOUTS[d.layout_width or 'match_parent']
+        try:
+            h = int(int(d.layout_height)*self.dp)
+        except ValueError:
+            h = LayoutParams.LAYOUTS[d.layout_height or 'match_parent']
+        #: Takes no arguments
+        layout_params = self.layout_param_type()
+        layout_params.width = w
+        layout_params.height = h
+        layout_params.isDecor = True
+        return layout_params
 
     # --------------------------------------------------------------------------
     # Initialization API
@@ -192,8 +219,8 @@ class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):
         """
         super(AndroidPagerTitleStrip, self).init_widget()
         d = self.declaration
-        if d.titles:
-            self.set_titles(d.titles)
+        #if d.titles:
+        #    self.set_titles(d.titles)
         if d.text_color:
             self.set_text_color(d.text_color)
         if d.text_size:
@@ -206,12 +233,12 @@ class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):
     # --------------------------------------------------------------------------
     # ProxyPagerTitleStrip API
     # --------------------------------------------------------------------------
-    def set_titles(self, titles):
-        parent = self.parent()
-        adapter = parent.adapter
-        adapter.clearTitles()
-        adapter.setTitles(titles)
-        self.widget.requestLayout()
+    # def set_titles(self, titles):
+    #     parent = self.parent()
+    #     adapter = parent.adapter
+    #     adapter.clearTitles()
+    #     adapter.setTitles(titles)
+    #     self.widget.requestLayout()
 
     def set_inactive_alpha(self, alpha):
         self.widget.setNonPrimaryAlpha(alpha)
@@ -246,8 +273,10 @@ class AndroidPagerTabStrip(AndroidPagerTitleStrip, ProxyPagerTabStrip):
         """ Initialize the underlying widget.
 
         """
-        super(AndroidPagerTitleStrip, self).init_widget()
+        super(AndroidPagerTabStrip, self).init_widget()
         d = self.declaration
+        if d.tab_full_underline:
+            self.set_tab_full_underline(d.tab_full_underline)
         if d.tab_indicator_color:
             self.set_tab_indicator_color(d.tab_indicator_color)
 
@@ -256,3 +285,8 @@ class AndroidPagerTabStrip(AndroidPagerTitleStrip, ProxyPagerTabStrip):
     # --------------------------------------------------------------------------
     def set_tab_indicator_color(self, alpha):
         self.widget.setTabIndicatorColor(alpha)
+
+    def set_tab_full_underline(self, enabled):
+        self.widget.setDrawFullUnderline(enabled)
+
+

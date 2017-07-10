@@ -10,13 +10,13 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Unicode, List, Float, Int,  observe, set_default
+    Typed, ForwardTyped, Unicode, List, Float, Int, Bool, observe, set_default
 )
 
 from enaml.core.declarative import d_
 
 from .view_group import ViewGroup, ProxyViewGroup
-from .fragment import  Fragment
+from .fragment import  Fragment, ProxyFragment
 
 
 class ProxyViewPager(ProxyViewGroup):
@@ -69,6 +69,23 @@ class ProxyPagerTabStrip(ProxyPagerTitleStrip):
     def set_tab_indicator_color(self, color):
         raise NotImplementedError
 
+    def set_tab_full_underline(self, enabled):
+        raise NotImplementedError
+
+
+class ProxyPagerFragment(ProxyFragment):
+    """ The abstract definition of a proxy ProxyPagerFragment object.
+
+        """
+    #: A reference to the declaration.
+    declaration = ForwardTyped(lambda: PagerFragment)
+
+    def set_title(self, title):
+        raise NotImplementedError
+
+    def set_icon(self, icon):
+        raise NotImplementedError
+
 
 class ViewPager(ViewGroup):
     """ Layout manager that allows the user to flip left and right through pages of data.
@@ -105,7 +122,7 @@ class ViewPager(ViewGroup):
 class PagerTitleStrip(ViewGroup):
 
     #: Titles to use
-    titles = d_(List(basestring))
+    #titles = d_(List(basestring))
 
     #: Update defaults
     layout_width = set_default("match_parent")
@@ -127,7 +144,7 @@ class PagerTitleStrip(ViewGroup):
     # --------------------------------------------------------------------------
     # Observers
     # --------------------------------------------------------------------------
-    @observe('titles', 'text_color', 'text_size', 'text_spacing')
+    @observe('text_color', 'text_size', 'text_spacing')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 
@@ -141,10 +158,14 @@ class PagerTabStrip(PagerTitleStrip):
     #: Set the color of the tab indicator bar.
     tab_indicator_color = d_(Unicode())
 
+    #: Set whether this tab strip should draw a full-width underline
+    #: in the current tab indicator color.
+    tab_full_underline = d_(Bool())
+
     # --------------------------------------------------------------------------
     # Observers
     # --------------------------------------------------------------------------
-    @observe('tab_indicator_color')
+    @observe('tab_indicator_color', 'tab_full_underline')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 
@@ -152,3 +173,24 @@ class PagerTabStrip(PagerTitleStrip):
         # The superclass implementation is sufficient.
         super(PagerTabStrip, self)._update_proxy(change)
 
+
+class PagerFragment(Fragment):
+    """ A Fragment that sets page content and provides a title for tabs and title sliders.
+
+    """
+    #: Set the title for the title or tab pager
+    title = d_(Unicode())
+
+    #: Set the icon or drawable resource for the title or tab pager
+    icon = d_(Unicode())
+
+    # --------------------------------------------------------------------------
+    # Observers
+    # --------------------------------------------------------------------------
+    @observe('title', 'icon')
+    def _update_proxy(self, change):
+        """ An observer which sends the state change to the proxy.
+
+        """
+        # The superclass implementation is sufficient.
+        super(PagerFragment, self)._update_proxy(change)
