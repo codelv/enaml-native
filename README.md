@@ -2,9 +2,9 @@
 Build mobile apps in python using enaml and widgets native to the platform.
 
 
-Latest video (HD and real speed)  here: [on youtube](https://youtu.be/4bm5fb5k5mc)
+Latest video here [on youtube](https://youtu.be/4bm5fb5k5mc)
 
-Download the demo app here: [on google play](https://play.google.com/apps/testing/com.frmdstryr.enamlnative.demo)
+Try out the beta demo app here [on google play](https://play.google.com/apps/testing/com.frmdstryr.enamlnative.demo)
 
 
 <div>
