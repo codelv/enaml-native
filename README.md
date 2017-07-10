@@ -1,9 +1,11 @@
 # enaml-native
 Build mobile apps in python using enaml and widgets native to the platform.
 
-![demo](https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app.gif)
 
-Latest video (HD and real speed)  here: [on youtube](https://youtu.be/dKhbCUSdvnA)
+Latest video (HD and real speed)  here: [on youtube](https://youtu.be/4bm5fb5k5mc)
+
+Download the demo app here: [on google play](https://play.google.com/apps/testing/com.frmdstryr.enamlnative.demo)
+
 
 <div>
 <img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app.png" width="240" style="float: left;">

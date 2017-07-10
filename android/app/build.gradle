@@ -9,8 +9,8 @@ android {
         applicationId "com.frmdstryr.enamlnative.demo"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 4
-        versionName "1.4"
+        versionCode 6
+        versionName "1.6"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
