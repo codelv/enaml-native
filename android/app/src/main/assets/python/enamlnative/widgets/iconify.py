@@ -16,6 +16,8 @@ from atom.api import (
 from enaml.core.declarative import d_
 
 from .text_view import TextView, ProxyTextView
+from .button import Button, ProxyButton
+from .toggle_button import ToggleButton, ProxyToggleButton
 
 
 class ProxyIcon(ProxyTextView):
@@ -25,8 +27,15 @@ class ProxyIcon(ProxyTextView):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Icon)
 
-    def set_selection(self, selection):
-        raise NotImplementedError
+
+class ProxyIconButton(ProxyButton):
+    #: A reference to the IconButton declaration.
+    declaration = ForwardTyped(lambda: IconButton)
+
+
+class ProxyIconToggleButton(ProxyToggleButton):
+    #: A reference to the IconToggleButton declaration.
+    declaration = ForwardTyped(lambda: IconToggleButton)
 
 
 class Icon(TextView):
@@ -47,21 +56,16 @@ class Icon(TextView):
     PACK_ALL = tuple(PACK_ENTYPO + PACK_FONT_AWESOME + PACK_IONICONS +
                      PACK_MATERIAL + PACK_MATERIAL_COMMUNITY + PACK_METEOCONS +
                      PACK_WEATHER)
-    #...
-
-    #: Alias to text that only shows an icon
-    #icon = d_(Unicode())
 
     #: A reference to the ProxyIcon object.
-    proxy = Typed(ProxyIcon) \
+    proxy = Typed(ProxyIcon)
 
-    # @observe('icon')
-    # def _update_proxy(self, change):
-    #     """ An observer which sends the state change to the proxy.
-    #
-    #     """
-    #     # The superclass implementation is sufficient.
-    #     if change['name'] == 'icon':
-    #         self.proxy.set_text(u'{%s}'%change['value'])
-    #     else:
-    #         super(Icon, self)._update_proxy(change)
+
+class IconButton(Button):
+    #: A reference to the ProxyIconButton object.
+    proxy = Typed(ProxyIconButton)
+
+
+class IconToggleButton(ToggleButton):
+    #: A reference to the ProxyIconToggleButton object.
+    proxy = Typed(ProxyIconToggleButton)
