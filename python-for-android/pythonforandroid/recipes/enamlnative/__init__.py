@@ -1,10 +1,11 @@
-from pythonforandroid.recipe import CppCompiledComponentsPythonRecipe
+from pythonforandroid.recipe import PythonRecipe
 
 
-class EnamlNativeRecipe(CppCompiledComponentsPythonRecipe):
-    site_packages_name = 'atom'
+class EnamlNativeRecipe(PythonRecipe):
+    #call_hostpython_via_targetpython = False
+    site_packages_name = 'enamlnative'
     version = '2.1'
-    url = 'http://github.com/frmdstryr/enaml-native'
+    url = 'https://github.com/frmdstryr/enaml-native/archive/master.zip'
     depends = [('python2', 'python2crystax'), 'enaml', 'msgpack-python', 'pyjnius']
 
 

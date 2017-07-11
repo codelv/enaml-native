@@ -88,8 +88,9 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
 
     // Build paths for the Python interpreter
     char paths[512];
-    snprintf(paths, sizeof(paths), "%s:%s/stdlib:%s/stdlib.zip:%s/modules:%s/site-packages:%s/site-packages.zip",
-                                    pypath, pypath, pypath, pypath, pypath, pypath);
+    snprintf(paths, sizeof(paths),
+      "%s:%s/stdlib:%s/stdlib.zip:%s/modules:%s/site-packages:%s/site-packages.zip",
+        pypath, pypath, pypath, pypath, pypath);
 #if PY_MAJOR_VERSION >= 3
     // Set Python paths
     wchar_t *wchar_paths = Py_DecodeLocale(paths, NULL);

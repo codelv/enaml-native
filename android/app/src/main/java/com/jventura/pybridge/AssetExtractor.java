@@ -15,18 +15,24 @@ import android.content.res.AssetManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 
 public class AssetExtractor {
 
-    private final static String LOGTAG = "AssetExtractor";
+    private final static String TAG = "AssetExtractor";
+    private final static int BUFFER = 8192;
     private Context mContext;
     private AssetManager mAssetManager;
 
@@ -103,7 +109,7 @@ public class AssetExtractor {
      */
     private void copyAssetFile(String src, String dst) {
         File file = new File(dst);
-        Log.i(LOGTAG, String.format("Copying %s -> %s", src, dst));
+        Log.i(TAG, String.format("Copying %s -> %s", src, dst));
 
         try {
             File dir = file.getParentFile();
@@ -135,6 +141,58 @@ public class AssetExtractor {
     public void copyAssets(String path) {
         for (String asset : listAssets(path)) {
             copyAssetFile(asset, getAssetsDataDir() + asset);
+            if (asset.endsWith(".zip")) {
+                unzipAsset(getAssetsDataDir() + asset);
+            }
+        }
+    }
+
+    /**
+     * Decompresses an asset and removes the source
+     *
+     * @param asset: the path within the assets folder
+     */
+    public void unzipAsset(String asset) {
+        try {
+            Log.d(TAG, "Extracting: " +asset);
+            // Extract zip
+            String extractDir = (new File(asset)).getParent();
+            BufferedOutputStream dest = null;
+            BufferedInputStream is = null;
+            ZipEntry entry;
+            ZipFile zipfile = new ZipFile(asset);
+            Enumeration e = zipfile.entries();
+            while(e.hasMoreElements()) {
+                entry = (ZipEntry) e.nextElement();
+
+
+                File destFile = new File(extractDir, entry.getName());
+                File destinationParent = destFile.getParentFile();
+                //If entry is directory create sub directory on file system
+                destinationParent.mkdirs();
+
+                if (!entry.isDirectory()) {
+                    //Log.d(TAG, "Extracting: " +entry);
+                    is = new BufferedInputStream(zipfile.getInputStream(entry));
+                    int count;
+                    byte data[] = new byte[BUFFER];
+                    FileOutputStream fos = new FileOutputStream(destFile.getAbsolutePath());
+
+                    dest = new BufferedOutputStream(fos, BUFFER);
+                    while ((count = is.read(data, 0, BUFFER)) != -1) {
+                        dest.write(data, 0, count);
+                    }
+                    dest.flush();
+                    dest.close();
+                    is.close();
+                }
+            }
+
+            // Remove source zip
+            (new File(asset)).delete();
+
+        } catch(Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -149,7 +207,7 @@ public class AssetExtractor {
                 recursiveDelete(f);
         }
 
-        Log.i(LOGTAG, "Removing " + file.getAbsolutePath());
+        Log.i(TAG, "Removing " + file.getAbsolutePath());
         file.delete();
     }
 

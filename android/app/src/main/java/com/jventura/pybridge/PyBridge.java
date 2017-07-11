@@ -20,7 +20,8 @@ public class PyBridge {
     /**
      * Initializes the Python interpreter.
      *
-     * @param datapath the location of the extracted python files
+     * @param pythonPath the location of the extracted python files
+     * @param nativePath the location of native libraries
      * @return error code
      */
     public static native int start(String pythonPath, String nativePath);
