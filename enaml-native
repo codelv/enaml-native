@@ -194,36 +194,80 @@ class TrimAssets(Command):
                         pass
 
 
-class InstallAssets(Command):
-    title = set_default("install-assets")
-    help = set_default("Copies site-packages to android assets")
+class BundleAssets(Command):
+    title = set_default("bundle-assets")
+    help = set_default("Creates a python.zip bundle of all py files")
+    args = set_default([
+        ('-p', dict(action='store_true', help="Create bundle by pulling from device "
+                                             "(recommended for release, includes generated cache files)")),
+    ])
 
     def run(self, args=None):
         ctx = self.ctx
-
+        env = ctx['env']
         #: Clean each arch
         for arch in ctx['arches']:
             #: Remove old
-            with cd('android/app/src/main/assets/python/'):
-                sh.rm('-R','modules','site-packages')
+            cfg = dict(arch=arch)
+            cfg.update(env)
+            root = abspath(os.getcwd())
+            with cd('android/app/src/main/python/'):
+                #: Remove old build
+                if os.path.exists('build'):
+                    shprint(sh.rm, '-R', 'build')
 
-            shprint(sh.cp,'-R',
-                'android/app/src/main/python/{arch}/site-packages/'.format(arch=arch),
-                'android/app/src/main/assets/python/'.format(arch=arch),
-            )
-            #: Copy cache to correct place
-            #-cp android/app/src/main/assets/python/reflect.javac android/app/src/main/assets/python/site-packages/jnius/
+                if args and args.p:
+                    #: Restart as root
+                    shprint(sh.adb, 'root')
+
+                    #: Pull assets and cache from device
+                    shprint(sh.adb, 'pull',
+                            '/data/user/0/{bundle_id}/assets/python/'.format(**cfg),
+                            'build')
+                else:
+                    #: Extract stdlib.zip to build/
+                    shprint(sh.mkdir,'build')
+
+                    with cd('build'):
+                        shprint(sh.unzip,
+                                '{ndk}/sources/python/2.7/libs/{arch}/stdlib.zip'.format(**cfg),
+                                '-d', 'stdlib')
+
+                        #: Copy site-packages to build/
+                    with cd('{arch}/site-packages/'.format(**cfg)):
+                        shprint(sh.cp, '-R', '.', '../../build/site-packages')
+
+                    #: Copy sources from app source
+                    #: TODO, or just let gradle?
+                    for src in ctx['sources']:
+                        shprint(sh.cp, '-R', join(root, src, '.'), 'build')
+
+                #: Remove old
+                if os.path.exists('python.zip'):
+                    shprint(sh.rm, 'python.zip')
+
+                #: Zip everything and copy to assets arch to build
+                with cd('build'):
+                    #shprint(sh.zip, '-r', 'android/app/src/main/assets/python/python.zip', '.')
+                    shprint(sh.zip, '-r', '../python.zip', '.')
 
 
             break #: They should all be the same so stop after the first
 
+        #: Now copy to android assets folder
+        shprint(sh.cp,
+                'android/app/src/main/python/python.zip',
+                'android/app/src/main/assets/python/python.zip')
+
 
 class AllPython(Command):
     title = set_default("all-python")
-    help = set_default("Does, clean, build, trim, install")
+    help = set_default("Does clean, build, trim, and bundle")
 
     def run(self, args=None):
-        for cmd in ['build-python', 'trim-assets', 'install-assets']:
+        for cmd in ['build-python',
+                    'trim-assets',
+                    'bundle-assets']:
             self.cmds[cmd].run()
 
 
@@ -231,7 +275,7 @@ class BuildAndroid(Command):
     title = set_default("build-android")
     help = set_default("Build android project")
     args = set_default([
-        ('-r', dict(action='store_true',help="Release mode")),
+        ('-r', dict(action='store_true', help="Release mode")),
     ])
 
     def run(self, args=None):
@@ -240,6 +284,7 @@ class BuildAndroid(Command):
             if args.r:
                 shprint(gradlew, 'assembleRelease')
             else:
+                self.cmds['bundle-assets'].run()
                 shprint(gradlew, 'assembleDebug')
 
 
