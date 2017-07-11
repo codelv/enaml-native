@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
             // If assets version changed, remove the old, and copy the new ones
             if (mAssetsAlwaysOverwrite || assetExtractor.getAssetsVersion() != mAssetsVersion) {
-                publishProgress("Unpacking (this may take a while)...\nPlease wait.");
+                publishProgress("Unpacking... Please wait.");
                 assetExtractor.removeAssets(path);
                 assetExtractor.copyAssets(path);
                 assetExtractor.setAssetsVersion(mAssetsVersion);
