@@ -9,14 +9,24 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.frame_layout import ProxyFrameLayout
 
-from .android_view_group import AndroidViewGroup
+from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
+from .bridge import JavaMethod, JavaField
 
-FrameLayout = jnius.autoclass('android.widget.FrameLayout')
+
+class FrameLayout(ViewGroup):
+    __javaclass__ = set_default('android.widget.FrameLayout')
+    setForegroundGravity = JavaMethod('int')
+    setMeasureAllChildren = JavaMethod('boolean')
+
+
+class FrameLayoutParams(MarginLayoutParams):
+    """ Update the child widget with the given params """
+    __javaclass__ = set_default('android.widget.FrameLayout$LayoutParams')
+    gravity = JavaField('int')
 
 
 class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
@@ -26,11 +36,11 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
     #: A reference to the widget created by the proxy.
     widget = Typed(FrameLayout)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = FrameLayout(self.get_context())
@@ -43,11 +53,12 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
         d = self.declaration
         if d.foreground_gravity:
             self.set_foreground_gravity(d.foreground_gravity)
-        self.set_measure_all_children(d.measure_all_children)
+        if d.measure_all_children:
+            self.set_measure_all_children(d.measure_all_children)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # ProxyFrameLayout API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_foreground_gravity(self, gravity):
         self.widget.setForegroundGravity(gravity)
 

@@ -9,38 +9,63 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Instance, set_default
 
 from enamlnative.widgets.scroll_view import ProxyScrollView
 
-from .android_frame_layout import AndroidFrameLayout
+from .android_frame_layout import AndroidFrameLayout, FrameLayout
+from .bridge import JavaMethod
 
-_ScrollView = jnius.autoclass('android.widget.ScrollView')
+
+class ScrollView(FrameLayout):
+    __javaclass__ = set_default('android.widget.ScrollView')
+    smoothScrollBy = JavaMethod('int', 'int')
+    smoothScrollTo = JavaMethod('int', 'int')
+    fullScroll = JavaMethod('int')
+
+    FOCUS_UP = 0x00000021
+    FOCUS_DOWN = 0x00000082
+
+
+class HorizontalScrollView(ScrollView):
+    __javaclass__ = set_default('android.widget.HorizontalScrollView')
+
 
 class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
     """ An Android implementation of an Enaml ProxyFrameLayout.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(_ScrollView)
+    widget = Instance(ScrollView)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
-        self.widget = _ScrollView(self.get_context())
-
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidScrollView, self).init_widget()
         d = self.declaration
+        if d.orientation == 'vertical':
+            self.widget = ScrollView(self.get_context())
+        else:
+            self.widget = HorizontalScrollView(self.get_context())
 
-    #--------------------------------------------------------------------------
-    # ProxyFrameLayout API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
+    # ProxyScrollView API
+    # --------------------------------------------------------------------------
+    def set_orientation(self, orientation):
+        #: Cannot be changed once set
+        raise NotImplementedError("ScrollView orientation cannot be changed dynamically.")
+
+    def set_scroll_by(self, delta):
+        self.widget.smoothScrollBy(*delta)
+
+    def set_scroll_to(self, point):
+        if point in ('top', 'bottom'):
+            #: FOCUS_UP or FOCUS_DOWN
+            #: TODO: This does not work!
+            self.widget.fullScroll(ScrollView.FOCUS_UP if point == 'top' else ScrollView.FOCUS_DOWN)
+        else:
+            self.widget.smoothScrollTo(*point)
+

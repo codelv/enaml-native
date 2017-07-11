@@ -23,7 +23,7 @@ public class PyBridge {
      * @param datapath the location of the extracted python files
      * @return error code
      */
-    public static native int start(String datapath);
+    public static native int start(String pythonPath, String nativePath);
 
     /**
      * Stops the Python interpreter.

@@ -9,28 +9,22 @@ Created on May 25, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.time_picker import ProxyTimePicker
 
-from .android_frame_layout import AndroidFrameLayout
-
-Boolean = jnius.autoclass('java.lang.Boolean')
-TimePicker = jnius.autoclass('android.widget.TimePicker')
+from .android_frame_layout import AndroidFrameLayout, FrameLayout
+from .bridge import JavaMethod, JavaCallback
 
 
-class OnTimeChangedListener(jnius.PythonJavaClass):
-    __javainterfaces__ = ['android/widget/TimePicker$OnTimeChangedListener']
-
-    def __init__(self, handler):
-        self.__handler__ = handler
-        super(OnTimeChangedListener, self).__init__()
-
-    @jnius.java_method('(Landroid/widget/TimePicker;II)V')
-    def onTimeChanged(self, view, hour, minute):
-        self.__handler__.on_time_changed(view, hour, minute)
-
+class TimePicker(FrameLayout):
+    __javaclass__ = set_default('android.widget.TimePicker')
+    onTimeChanged = JavaCallback('android.widget.TimePicker', 'int', 'int')
+    setHour = JavaMethod('int')
+    setMinute = JavaMethod('int')
+    setEnabled = JavaMethod('boolean')
+    setIs24HourView = JavaMethod('java.lang.Boolean')
+    setOnTimeChangedListener = JavaMethod('android.widget.TimePicker$OnTimeChangedListener')
 
 
 class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
@@ -40,14 +34,11 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
     #: A reference to the widget created by the proxy.
     widget = Typed(TimePicker)
 
-    #: Save a reference to the time changed listener
-    time_listener = Typed(OnTimeChangedListener)
-
     # --------------------------------------------------------------------------
     # Initialization API
     # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = TimePicker(self.get_context())
@@ -63,16 +54,17 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
         self.set_hour_mode(d.hour_mode)
         self.set_enabled(d.enabled)
 
-        self.time_listener = OnTimeChangedListener(self)
-        self.widget.setOnTimeChangedListener(self.time_listener)
+        self.widget.setOnTimeChangedListener(self.widget.getId())
+        self.widget.onTimeChanged.connect(self.on_time_changed)
 
     # --------------------------------------------------------------------------
     # OnTimeChangedListener API
     # --------------------------------------------------------------------------
     def on_time_changed(self, view, hour, minute):
         d = self.declaration
-        with self.suppress_notifications():
+        with self.widget.setHour.suppressed():
             d.hour = hour
+        with self.widget.setMinute.suppressed():
             d.minute = minute
 
     # --------------------------------------------------------------------------
@@ -85,7 +77,7 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
         self.widget.setMinute(minute)
 
     def set_hour_mode(self, mode):
-        self.widget.setIs24HourView(Boolean(mode == '24'))
+        self.widget.setIs24HourView(mode == '24')
 
     def set_enabled(self, enabled):
         self.widget.setEnabled(enabled)

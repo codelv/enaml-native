@@ -9,14 +9,19 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.relative_layout import ProxyRelativeLayout
 
-from .android_view_group import AndroidViewGroup
+from .android_view_group import AndroidViewGroup, ViewGroup
+from .bridge import JavaMethod
 
-RelativeLayout = jnius.autoclass('android.widget.RelativeLayout')
+
+class RelativeLayout(ViewGroup):
+    __javaclass__ = set_default('android.widget.RelativeLayout')
+    setGravity = JavaMethod('int')
+    setHorizontalGravity = JavaMethod('int')
+    setVerticalGravity = JavaMethod('int')
 
 
 class AndroidRelativeLayout(AndroidViewGroup, ProxyRelativeLayout):
@@ -26,11 +31,11 @@ class AndroidRelativeLayout(AndroidViewGroup, ProxyRelativeLayout):
     #: A reference to the widget created by the proxy.
     widget = Typed(RelativeLayout)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = RelativeLayout(self.get_context())
@@ -48,9 +53,9 @@ class AndroidRelativeLayout(AndroidViewGroup, ProxyRelativeLayout):
         if d.vertical_gravity:
             self.set_vertical_gravity(d.vertical_gravity)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # ProxyRelativeLayout API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def set_gravity(self, gravity):
         self.widget.setGravity(gravity)
 

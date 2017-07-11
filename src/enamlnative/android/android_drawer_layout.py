@@ -9,43 +9,43 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed, Bool
+from atom.api import Typed, List, set_default
 
 from enamlnative.widgets.drawer_layout import ProxyDrawerLayout
 
-from .android_view_group import AndroidViewGroup
+from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
+from .bridge import JavaMethod, JavaCallback, JavaField
 
-LayoutParams = jnius.autoclass('android.view.ViewGroup$LayoutParams')
-Gravity = jnius.autoclass('android.view.Gravity')
-GravityCompat = jnius.autoclass('android.support.v4.view.GravityCompat')
-ViewCompat = jnius.autoclass('android.support.v4.view.ViewCompat')
-DrawerLayout = jnius.autoclass('android.support.v4.widget.DrawerLayout')
-DrawerLayoutLayoutParams = jnius.autoclass('android.support.v4.widget.DrawerLayout$LayoutParams')
 
-class DrawerListener(jnius.PythonJavaClass):
-    __javainterfaces__ = ['android/support/v4/widget/DrawerLayout$DrawerListener']
-    __javacontext__ = 'app'
+class DrawerLayout(ViewGroup):
+    __javaclass__ = set_default('android.support.v4.widget.DrawerLayout')
+    openDrawer = JavaMethod('android.view.View')
+    closeDrawer = JavaMethod('android.view.View')
+    addDrawerListener = JavaMethod('android.support.v4.widget.DrawerLayout$DrawerListener')
+    onDrawerClosed = JavaCallback('android.view.View')
+    onDrawerOpened = JavaCallback('android.view.View')
+    onDrawerSlide = JavaCallback('android.view.View', 'float')
+    onDrawerStateChanged = JavaCallback('int')
 
-    def __init__(self, handler):
-        self.__handler__ = handler
-        super(DrawerListener, self).__init__()
+    setDrawerElevation = JavaMethod('float')
+    setDrawerTitle = JavaMethod('int', 'java.lang.CharSequence')
+    setDrawerLockMode = JavaMethod('int')
+    setScrimColor = JavaMethod('android.graphics.Color')
+    setStatusBarBackgroundColor = JavaMethod('android.graphics.Color')
 
-    @jnius.java_method('(Landroid/view/View;)V')
-    def onDrawerClosed(self, view):
-        self.__handler__.on_drawer_closed(view)
-    
-    @jnius.java_method('(Landroid/view/View;)V')
-    def onDrawerOpened(self, view):
-        self.__handler__.on_drawer_opened(view)
-        
-    @jnius.java_method('(Landroid/view/View;F)V')
-    def onDrawerSlide(self, view, slideOffset):
-        self.__handler__.on_drawer_slide(view, slideOffset)
-    
-    @jnius.java_method('(I)V')
-    def onDrawerStateChanged(self, newState):
-        self.__handler__.on_drawer_state_changed(newState)
+    LOCK_MODES = {
+        'unlocked': 0,
+        'locked_closed': 1,
+        'locked_open': 2,
+        'undefined': 3,
+    }
+
+
+class DrawerLayoutParams(MarginLayoutParams):
+    """ Update the child widget with the given params """
+    __javaclass__ = set_default('android.support.v4.widget.DrawerLayout$LayoutParams')
+    gravity = JavaField('int')
+
 
 class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     """ An Android implementation of an Enaml ProxyDrawerLayout.
@@ -53,21 +53,15 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(DrawerLayout)
-    
-    #: Save a reference to the drawer listener
-    drawer_listener = Typed(DrawerListener)
 
-    #: Save reference to the drawer state set by events
-    _opened = Bool(False)
-    
-    def _default_layout_params(self):
-        return DrawerLayoutLayoutParams
+    #: Drawer state
+    drawer_state = List()
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = DrawerLayout(self.get_context())
@@ -88,69 +82,85 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
             self.set_scrim_color(d.scrim_color)
         if d.status_bar_background_color:
             self.set_status_bar_background_color(d.status_bar_background_color)
-        
+
+        #: Set the layout params to a drawer layout
+        for c in self.drawers():
+            c.layout_param_type = DrawerLayoutParams
+
     def init_layout(self):
         super(AndroidDrawerLayout, self).init_layout()
         d = self.declaration
-        self.set_opened(d.opened, init=True)
+
+        #: Set the proper layout for each child
+        # for c in self.drawers():
+        #     #: Set the gravity
+        #     gravity = 3 if c.declaration.layout_gravity == 'left' else 5
+        #     c.layout_params.gravity = gravity
+
+        if d.opened:
+            self.set_opened(d.opened)
 
         #: Add drawer listener
-        self.drawer_listener = DrawerListener(self)
-        self.widget.addDrawerListener(self.drawer_listener)
+        self.widget.addDrawerListener(self.widget.getId())
+        self.widget.onDrawerClosed.connect(self.on_drawer_closed)
+        self.widget.onDrawerOpened.connect(self.on_drawer_opened)
+
+    def drawers(self):
+        for i, c in enumerate(self.children()):
+            if i != 0:
+                yield c
 
     # --------------------------------------------------------------------------
     # DrawerListener API
     # --------------------------------------------------------------------------
     def on_drawer_closed(self, view):
-        self._opened = False
+        d = self.declaration
+        with self.widget.openDrawer.suppressed():
+            with self.widget.closeDrawer.suppressed():
+                #: Remove view from state
+                d.opened = [v for v in d.opened if v.proxy.widget.getId() != view]
 
     def on_drawer_opened(self, view):
-        self._opened = True
+        d = self.declaration
+        with self.widget.openDrawer.suppressed():
+            with self.widget.closeDrawer.suppressed():
+                #: Add view to state
+                for c in self.drawers():
+                    if c.widget.getId() == view:
+                        d.opened = list(set(d.opened + [c.declaration]))
+                        break
 
     def on_drawer_slide(self, view, offset):
         pass
-    
+
     def on_drawer_state_changed(self, state):
         pass
-
-    def _observe__opened(self, change):
-        d = self.declaration
-        d.opened = self._opened
 
     # --------------------------------------------------------------------------
     # ProxyDrawerLayout API
     # --------------------------------------------------------------------------
-    def set_opened(self, opened, init=False):
-        if not init and (opened == self._opened):
-            # Triggered by user event, ignore
-            return
-        self._opened = opened
+    def set_opened(self, opened):
+        """ Opened is a tuple of the drawer sides that are open
 
-        #: Else, triggered from declaration
-        d = self.declaration
-        view = None
-        for c in self.children():
-            if hasattr(c.declaration,'layout_gravity') and \
-                        c.declaration.layout_gravity==d.side:
-                view = c.widget
-                break
-        if not view:
-            raise ValueError("DrawerLayout must have a child with layout_gravity==side")
+        """
+        self.drawer_state = opened
 
-        #: Force the view to have the correct layout params
-        if init:
-            _params = view.getLayoutParams()
-            gravity = getattr(Gravity, d.side.upper())
-            params = DrawerLayoutLayoutParams(
-                _params.width,
-                _params.height,
-                gravity
-            )
-            view.setLayoutParams(params)
-        if opened:
-            self.widget.openDrawer(view, d.open_animated)
-        else:
-            self.widget.closeDrawer(view, d.open_animated)
+    def _observe_drawer_state(self, change):
+        #: Diff old and new to find changes
+        old = set(change.get('oldvalue', []))
+        new = set(change.get('value', []))
+
+        #: Closed
+        for c in old.difference(new):
+            view = c.proxy.widget
+            self.widget.closeDrawer(view)
+
+        #: Opened
+        for c in new.difference(old):
+            view = c.proxy.widget
+            self.widget.openDrawer(view)
+
+        #: Rest unchanged
 
     def set_drawer_width(self, width):
         d = self.declaration
@@ -167,16 +177,17 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
 
     def set_title(self, title):
         d = self.declaration
-        self.widget.setTitle(title,d.title_gravity)
+        self.widget.setDrawerTitle(d.title_gravity, title)
 
     def set_title_gravity(self, gravity):
         d = self.declaration
-        self.widget.setTitle(d.title,gravity)
+        self.widget.setDrawerTitle(gravity, d.title)
 
     def set_drawer_elevation(self, elevation):
         self.widget.setDrawerElevation(elevation)
 
-    def set_lock_mode(self, mode):
+    def set_lock_mode(self, lock_mode):
+        mode = DrawerLayout.LOCK_MODES[lock_mode]
         self.widget.setDrawerLockMode(mode)
 
     def set_scrim_color(self, color):

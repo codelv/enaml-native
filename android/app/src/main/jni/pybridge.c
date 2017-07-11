@@ -73,18 +73,23 @@ PyMODINIT_FUNC PyInit_AndroidLog(void)
 
 */
 JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
-        (JNIEnv *env, jclass jc, jstring path)
+        (JNIEnv *env, jclass jc, jstring path, jstring jni_path)
 {
     LOG("Initializing the Python interpreter");
 
     // Get the location of the python files
     const char *pypath = (*env)->GetStringUTFChars(env, path, NULL);
+    const char *jnipath = (*env)->GetStringUTFChars(env, jni_path, NULL);
     LOG(pypath);
+    LOG(jnipath);
+
+    // Set JNI path
+    setenv("APK_LIB_DIR", jnipath, 1);
 
     // Build paths for the Python interpreter
     char paths[512];
-    snprintf(paths, sizeof(paths), "%s:%s/stdlib:%s/modules:%s/site-packages",
-                                    pypath, pypath, pypath, pypath);
+    snprintf(paths, sizeof(paths), "%s:%s/stdlib:%s/stdlib.zip:%s/modules:%s/site-packages:%s/site-packages.zip",
+                                    pypath, pypath, pypath, pypath, pypath, pypath);
 #if PY_MAJOR_VERSION >= 3
     // Set Python paths
     wchar_t *wchar_paths = Py_DecodeLocale(paths, NULL);
@@ -130,6 +135,7 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
 
     // Cleanup
     (*env)->ReleaseStringUTFChars(env, path, pypath);
+    (*env)->ReleaseStringUTFChars(env, jni_path, jnipath);
 #if PY_MAJOR_VERSION >= 3
     PyMem_RawFree(wchar_paths);
 #endif

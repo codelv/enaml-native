@@ -9,7 +9,6 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
 
 from atom.api import Typed, Value, Coerced
 
@@ -17,14 +16,21 @@ from enaml.drag_drop import DropAction
 from enaml.styling import StyleCache
 from enaml.widgets.widget import Feature, ProxyWidget
 from . import focus_registry
-from .android_toolkit_object import AndroidToolkitObject, View
+from .android_toolkit_object import AndroidToolkitObject, JavaBridgeObject
+
+class Widget(JavaBridgeObject):
+
+    VISIBILITY_VISIBLE = 0
+    VISIBILITY_INVISIBLE = 4
+    VISIBILITY_GONE = 8
+
 
 class AndroidWidget(AndroidToolkitObject, ProxyWidget):
     """ A Android implementation of an Enaml ProxyWidget.
 
     """
     #: A reference to the toolkit widget created by the proxy.
-    widget = Typed(View)
+    widget = Typed(Widget)
 
     #: A private copy of the declaration features. This ensures that
     #: feature cleanup will proceed correctly in the event that user
@@ -37,9 +43,9 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
     #: Internal storage for the drag origin position.
     #_drag_origin = Typed(QPoint)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def init_widget(self):
         """ Initialize the underlying View object.
 
@@ -49,12 +55,12 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
         focus_registry.register(widget, self)
         self._setup_features()
         d = self.declaration
-        if d.background:
-            self.set_background(d.background)
-        if d.foreground:
-            self.set_foreground(d.foreground)
-        if d.font:
-            self.set_font(d.font)
+        # if d.background:
+        #     self.set_background(d.background)
+        # if d.foreground:
+        #     self.set_foreground(d.foreground)
+        # if d.font:
+        #     self.set_font(d.font)
         if -1 not in d.minimum_size:
             self.set_minimum_size(d.minimum_size)
         if -1 not in d.maximum_size:
@@ -65,14 +71,15 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
             self.set_status_tip(d.status_tip)
         if not d.enabled:
             self.set_enabled(d.enabled)
-        self.refresh_style_sheet()
+        #self.refresh_style_sheet()
         # Don't make toplevel widgets visible during init or they will
         # flicker onto the screen. This applies particularly for things
         # like status bar widgets which are created with no parent and
         # then reparented by the status bar. Real top-level widgets must
         # be explicitly shown by calling their .show() method after they
         # are created.
-        if widget.getParent() or not d.visible:
+        #if widget.getParent() or not d.visible:
+        if self.widget and not d.visible:
             self.set_visible(d.visible)
             
     def destroy(self):
@@ -86,12 +93,12 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
         # taken ownership of the widget and the widget will be deleted
         # when the QWidgetAction is garbage collected. This means the
         # superclass destroy() method must run before the reference to
-        # the QWidgetAction is dropped.
+        # the QWidgetAction is dropped.s
         del self._widget_action
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Private API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def _setup_features(self):
         """ Setup the advanced widget feature handlers.
@@ -341,17 +348,6 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
         drag_data = self.declaration.drag_start()
         if drag_data is None:
             return
-        # widget = self.widget
-        # qdrag = QDrag(widget)
-        # qdrag.setMimeData(drag_data.mime_data.q_data())
-        # if drag_data.image is not None:
-        #     qimg = get_cached_qimage(drag_data.image)
-        #     qdrag.setPixmap(QPixmap.fromImage(qimg))
-        # else:
-        #     qdrag.setPixmap(QPixmap.grabWidget(widget))
-        # default = Qt.DropAction(drag_data.default_drop_action)
-        # supported = Qt.DropActions(drag_data.supported_actions)
-        # qresult = qdrag.exec_(supported, default)
         qresult = 0
         self.declaration.drag_end(drag_data, DropAction(int(qresult)))
 
@@ -436,62 +432,31 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
 
         """
         self.widget.setEnabled(enabled)
-        #action = self._widget_action
-        #if action is not None:
-        #    action.setEnabled(enabled)
 
     def set_visible(self, visible):
         """ Set the visibility of the widget.
 
         """
-        self.widget.setVisibility(0 if visible else 2)
-        #action = self._widget_action
-        #if action is not None:
-        #    action.setVisible(visible)
+        v = Widget.VISIBILITY_VISIBLE if visible else Widget.VISIBILITY_GONE
+        self.widget.setVisibility(v)
 
     def set_background(self, background):
         """ Set the background color of the widget.
 
         """
         return # TODO: Not implemented
-        # widget = self.widget
-        # role = widget.backgroundRole()
-        # if background is not None:
-        #     qcolor = get_cached_qcolor(background)
-        #     widget.setAutoFillBackground(True)
-        # else:
-        #     app_palette = QApplication.instance().palette(widget)
-        #     qcolor = app_palette.color(role)
-        #     widget.setAutoFillBackground(False)
-        # palette = widget.palette()
-        # palette.setColor(role, qcolor)
-        # widget.setPalette(palette)
 
     def set_foreground(self, foreground):
         """ Set the foreground color of the widget.
 
         """
         return # TODO: Not implemented
-        # widget = self.widget
-        # role = widget.foregroundRole()
-        # if foreground is not None:
-        #     qcolor = get_cached_qcolor(foreground)
-        # else:
-        #     app_palette = QApplication.instance().palette(widget)
-        #     qcolor = app_palette.color(role)
-        # palette = widget.palette()
-        # palette.setColor(role, qcolor)
-        # widget.setPalette(palette)
 
     def set_font(self, font):
         """ Set the font of the widget.
 
         """
         return # Not implemented
-        #if font is not None:
-        #    self.widget.setFont(get_cached_qfont(font))
-        #else:
-        #    self.widget.setFont(QFont())
 
     def set_tool_tip(self, tool_tip):
         """ Set the tool tip for the widget.
@@ -504,27 +469,20 @@ class AndroidWidget(AndroidToolkitObject, ProxyWidget):
 
         """
         return # Not implemented on android
-        #self.widget.setStatusTip(status_tip)
 
     def ensure_visible(self):
         """ Ensure the widget is visible.
 
         """
-        # 0 - visible, 1 - invisible, 2 - gone
-        self.widget.setVisibility(0)
-        #action = self._widget_action
-        #if action is not None:
-        #    action.setVisible(True)
+        # 0 - visible, 4 - invisible, 8 - gone
+        self.widget.setVisibility(Widget.VISIBILITY_VISIBLE)
 
     def ensure_hidden(self):
         """ Ensure the widget is hidden.
 
         """
-        # 0 - visible, 1 - invisible, 2 - gone
-        self.widget.setVisibility(2)
-        #action = self._widget_action
-        #if action is not None:
-        #    action.setVisible(False)
+        # 0 - visible, 2 - invisible, 8 - gone
+        self.widget.setVisibility(Widget.VISIBILITY_GONE)
 
     def restyle(self):
         """ Restyle the widget with the current style data.

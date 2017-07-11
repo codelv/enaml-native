@@ -9,14 +9,22 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.button import ProxyButton
 
-from .android_text_view import AndroidTextView
+from .android_text_view import AndroidTextView, TextView
 
-Button = jnius.autoclass('android.widget.Button')
+
+class Button(TextView):
+    __javaclass__ = set_default('android.widget.Button')
+    __signature__ = set_default(('android.content.Context', 'android.util.AttributeSet', 'int'))
+    STYLES = {
+        '': 0x01010048,
+        'borderless': 0x0101032b,
+        'inset': 0x0101004a,
+        'small': 0x01010049,
+    }
 
 
 class AndroidButton(AndroidTextView, ProxyButton):
@@ -26,12 +34,22 @@ class AndroidButton(AndroidTextView, ProxyButton):
     #: A reference to the widget created by the proxy.
     widget = Typed(Button)
 
-    #  --------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
     # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
-        self.widget = Button(self.get_context())
+        d = self.declaration
+        if d.style:
+            style = Button.STYLES[d.style]
+            self.widget = Button(self.get_context(), None, style)
+        else:
+            self.widget = Button(self.get_context())
 
+    # --------------------------------------------------------------------------
+    # ProxyButton API
+    # --------------------------------------------------------------------------
+    def set_style(self, style):
+        pass

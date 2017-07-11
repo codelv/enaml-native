@@ -9,14 +9,15 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.checkbox import ProxyCheckBox
 
-from .android_compound_button import AndroidCompoundButton
+from .android_compound_button import AndroidCompoundButton, CompoundButton
 
-CheckBox = jnius.autoclass('android.widget.CheckBox')
+
+class CheckBox(CompoundButton):
+    __javaclass__ = set_default('android.widget.CheckBox')
 
 
 class AndroidCheckBox(AndroidCompoundButton, ProxyCheckBox):
@@ -30,7 +31,7 @@ class AndroidCheckBox(AndroidCompoundButton, ProxyCheckBox):
     # Initialization API
     # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
+        """ Create the underlying widget.
 
         """
         self.widget = CheckBox(self.get_context())

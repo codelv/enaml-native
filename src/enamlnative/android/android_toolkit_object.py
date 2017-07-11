@@ -12,9 +12,7 @@ Created on May 20, 2017
 from atom.api import Typed
 from enaml.widgets.toolkit_object import ProxyToolkitObject
 
-from jnius import JavaClass, MetaJavaClass, JavaMethod, autoclass
-
-View = autoclass('android.view.View')
+from .bridge import JavaBridgeObject
 
 
 class AndroidToolkitObject(ProxyToolkitObject):
@@ -23,7 +21,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
     """
 
     #: A reference to the toolkit widget created by the proxy.
-    widget = Typed(View)
+    widget = Typed(JavaBridgeObject)
 
     #--------------------------------------------------------------------------
     # Initialization API
@@ -36,7 +34,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
         toolkit widget and assign it to the 'widget' attribute.
 
         """
-        self.widget = View(self.get_context())
+        self.widget = JavaBridgeObject(self.get_context())
 
     def init_widget(self):
         """ Initialize the state of the toolkit widget.
@@ -47,15 +45,15 @@ class AndroidToolkitObject(ProxyToolkitObject):
 
         """
         widget = self.widget
-        if widget is not None:
-            # Each Qt object gets a name. If one is not provided by the
-            # widget author, one is generated. This is required so that
-            # Qt stylesheet cascading can be prevented (Enaml's styling
-            # engine applies the cascade itself). Names provided by the
-            # widget author are assumed to be unique.
-            d = self.declaration
-            name = d.name or u'obj-%d' % id(d)
-            widget.setTag(name)
+        # if widget is not None:
+        #     # Each Qt object gets a name. If one is not provided by the
+        #     # widget author, one is generated. This is required so that
+        #     # Qt stylesheet cascading can be prevented (Enaml's styling
+        #     # engine applies the cascade itself). Names provided by the
+        #     # widget author are assumed to be unique.
+        #     d = self.declaration
+        #     name = d.name or u'obj-%d' % id(d)
+        #     widget.setTag(name)
 
     def init_layout(self):
         """ Initialize the layout of the toolkit widget.
@@ -74,7 +72,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
 
         """
         from .app import AndroidApplication
-        return AndroidApplication.instance().activity
+        return AndroidApplication.instance()
 
     #--------------------------------------------------------------------------
     # ProxyToolkitObject API
@@ -101,7 +99,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
         """
         widget = self.widget
         if widget is not None:
-            parent = widget.getParent()
+            parent = self.parent_widget()
             if parent is not None:
                 parent.removeView(widget)
             del self.widget

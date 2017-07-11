@@ -10,15 +10,17 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Unicode, Float, Int, Bool, Enum, observe, set_default
+    Typed, ForwardTyped, List, Unicode, Float, Int, Bool, Enum, observe
 )
 
 from enaml.core.declarative import d_
 
+from .view import View
 from .view_group import ViewGroup, ProxyViewGroup
 
+
 class ProxyDrawerLayout(ProxyViewGroup):
-    """ The abstract definition of a proxy Label object.
+    """ The abstract definition of a proxy DrawerLayout object.
 
     """
     #: A reference to the Label declaration.
@@ -26,9 +28,6 @@ class ProxyDrawerLayout(ProxyViewGroup):
 
     def set_opened(self, opened):
         raise NotImplementedError
-
-    def set_open_animated(self, animated):
-        pass
 
     def set_side(self, side):
         pass
@@ -54,18 +53,13 @@ class ProxyDrawerLayout(ProxyViewGroup):
     def set_status_bar_background_color(self, color):
         raise NotImplementedError
 
+
 class DrawerLayout(ViewGroup):
-    """ A simple control for displaying read-only text.
+    """ A simple control for displaying a drawer
 
     """
-    #: Set the enabled state of this view.
-    opened = d_(Bool())
-
-    #: Use animation when opening
-    open_animated = d_(Bool(True))
-
-    #: Open drawer gravity
-    side = d_(Enum('left', 'right', 'start', 'end'))
+    #: List of opened drawers
+    opened = d_(List(View))
 
     #: Drawer width
     drawer_width = d_(Int(200))
@@ -80,21 +74,21 @@ class DrawerLayout(ViewGroup):
     drawer_elevation = d_(Float())
 
     #: Set lock mode
-    lock_mode = d_(Int())
+    lock_mode = d_(Enum('unlocked', 'locked_closed', 'locked_open'))
 
     #: Set a color to use for the scrim that obscures primary content while a drawer is open.
-    scrim_color = d_(Int())
+    scrim_color = d_(Unicode())
 
     #: Statusbar background color
-    status_bar_background_color = d_(Int())
+    status_bar_background_color = d_(Unicode())
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyDrawerLayout)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Observers
-    #--------------------------------------------------------------------------
-    @observe('opened', 'drawer_width', 'side', 'open_animated', 'title', 'title_gravity',
+    # --------------------------------------------------------------------------
+    @observe('opened', 'drawer_width', 'title', 'title_gravity',
              'drawer_elevation', 'drawer_lock_mode', 'scrim_color',
              'status_bar_background_color')
     def _update_proxy(self, change):

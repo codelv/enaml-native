@@ -12,6 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.util.Log;
 
+import com.frmdstryr.enamlnative.demo.BuildConfig;
 import com.frmdstryr.enamlnative.demo.R;
 import com.joanzapata.iconify.Iconify;
 import com.joanzapata.iconify.fonts.EntypoModule;
@@ -38,8 +39,8 @@ public class MainActivity extends AppCompatActivity {
     public static MainActivity mActivity = null;
 
     // Assets version
-    final int mAssetsVersion = 6;
-    final boolean mAssetsAlwaysOverwrite = false; // Set only on debug builds
+    final int mAssetsVersion = 3; // BuildConfig.VERSION_CODE;
+    final boolean mAssetsAlwaysOverwrite = false;//BuildConfig.DEBUG; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
     // When the view is loaded from python
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
             // If assets version changed, remove the old, and copy the new ones
             if (mAssetsAlwaysOverwrite || assetExtractor.getAssetsVersion() != mAssetsVersion) {
-                publishProgress("Unpacking... Please wait.");
+                publishProgress("Unpacking (this may take a while)...\nPlease wait.");
                 assetExtractor.removeAssets(path);
                 assetExtractor.copyAssets(path);
                 assetExtractor.setAssetsVersion(mAssetsVersion);
@@ -100,10 +101,10 @@ public class MainActivity extends AppCompatActivity {
 
             // Get the extracted assets directory
             String pythonPath = assetExtractor.getAssetsDataDir() + path;
-
+            String nativePath = getApplicationInfo().nativeLibraryDir;
             // Initialize python
             // Note: This must be NOT done in the UI thread!
-            PyBridge.start(pythonPath);
+            PyBridge.start(pythonPath, nativePath);
             Log.i(TAG, "Python main() finished!");
             // Done
             PyBridge.stop();
@@ -153,26 +154,28 @@ public class MainActivity extends AppCompatActivity {
      * @param message: Message to display
      */
     public void showErrorMessage(String message) {
-        if (message!=null) {
-            Log.e(TAG,message);
+        if (!BuildConfig.DEBUG) {
+            // Crash on release
+            throw new RuntimeException(message);
+        }
+        Log.e(TAG,message);
 
-            TextView textView = (TextView) findViewById(R.id.textView);
-            textView.setTop(0);
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) textView.getLayoutParams();
-            params.setMargins(10,10, 10, 10);
-            textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
-            textView.setTextColor(Color.RED);
-            textView.setText(message);
+        TextView textView = (TextView) findViewById(R.id.textView);
+        textView.setTop(0);
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) textView.getLayoutParams();
+        params.setMargins(10,10, 10, 10);
+        textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+        textView.setTextColor(Color.RED);
+        textView.setText(message);
 
-            // Hide progress bar
-            View progressBar = findViewById(R.id.progressBar);
-            progressBar.setVisibility(View.INVISIBLE);
+        // Hide progress bar
+        View progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.INVISIBLE);
 
-            // If error occured after view was loaded, animate the error back in
-            if (mLoadingDone) {
-                // Swap the views back
-                animateView(mLoadingView, mPythonView);
-            }
+        // If error occured after view was loaded, animate the error back in
+        if (mLoadingDone) {
+            // Swap the views back
+            animateView(mLoadingView, mPythonView);
         }
     }
 
@@ -181,10 +184,17 @@ public class MainActivity extends AppCompatActivity {
      * @param e: Exception to display.
      */
     public void showErrorMessage(Exception e) {
-        StringWriter sw = new StringWriter();
-        e.printStackTrace(new PrintWriter(sw));
-        showErrorMessage(sw.toString());
+        if (BuildConfig.DEBUG) {
+            // do something for a debug build
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            showErrorMessage(sw.toString());
+        } else {
+            // Crash on release
+            throw new RuntimeException(e);
+        }
     }
+
 
 
     /**

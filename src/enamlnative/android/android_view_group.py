@@ -9,15 +9,31 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
 from enamlnative.widgets.view_group import ProxyViewGroup
 
-from .android_view import AndroidView, LayoutParams
+from .android_view import AndroidView, View, LayoutParams, MarginLayoutParams
 
-Gravity = jnius.autoclass('android.view.Gravity')
-ViewGroup = jnius.autoclass('android.view.ViewGroup')
+
+class Gravity:
+    NO_GRAVITY = 0
+    CENTER_HORIZONTAL = 1
+    CENTER_VERTICAL = 16
+    CENTER = 11
+    FILL = 119
+    FILL_HORIZONTAL = 7
+    FILL_VERTICAL = 112
+    TOP = 48
+    BOTTOM = 80
+    LEFT = 3
+    RIGHT = 5
+    START = 8388611
+    END = 8388613
+
+
+class ViewGroup(View):
+    __javaclass__ = set_default('android.view.ViewGroup')
 
 
 class AndroidViewGroup(AndroidView, ProxyViewGroup):
@@ -27,9 +43,9 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
     #: A reference to the widget created by the proxy.
     widget = Typed(ViewGroup)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying label widget.
 
@@ -42,38 +58,12 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
         """
         super(AndroidViewGroup, self).init_widget()
         d = self.declaration
-        if d.layout_width or d.layout_height or d.layout_gravity:
-            self.update_layout_params()
+        if d.layout_gravity:
+            self.set_layout_gravity(d.layout_gravity)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # ProxyViewGroup API
-    #--------------------------------------------------------------------------
-    def set_layout_width(self, width):
-        self.update_layout_params()
-
-    def set_layout_height(self, height):
-        self.update_layout_params()
-
+    # --------------------------------------------------------------------------
     def set_layout_gravity(self, gravity):
-        return
-        # params = self.get_layout_params()
-        # params.gravity = getattr(Gravity,d.layout_gravity.upper())
-        # self.update_layout_params()
-
-    def update_layout_params(self):
-        params = self.get_layout_params()
-        # d = self.declaration
-        # if d.layout_width:
-        #     layout_width = getattr(LayoutParams,d.layout_width.upper())\
-        #         if hasattr(LayoutParams,d.layout_width.upper()) else int(d.layout_width)
-        # else:
-        #     layout_width = LayoutParams.MATCH_PARENT
-        # if d.layout_height:
-        #     layout_height = getattr(LayoutParams,d.layout_height.upper())\
-        #         if hasattr(LayoutParams,d.layout_height.upper()) else int(d.layout_height)
-        # else:
-        #     layout_height = LayoutParams.MATCH_PARENT
-        #
-        # #: Clone existing
-        # params = self.layout_params(params)
-        # self.widget.setLayoutParams(params)
+        g = getattr(Gravity, gravity.upper()) #3 if c.declaration.layout_gravity == 'left' else 5
+        self.layout_params.gravity = g

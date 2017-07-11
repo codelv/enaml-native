@@ -1,14 +1,17 @@
 ARCH=armeabi-v7a
 SDK_DIR=/home/jrm/Android/Sdk
 NDK_DIR=/home/jrm/Android/Crystax/crystax-ndk-10.3.2
-BUNDLE_ID=com.jventura.pyapp
-REQS=python2crystax,pyjnius,atom,ply,enaml,msgpack-python
+BUNDLE_ID=com.frmdstryr.enamlnative.demo
+REQS=python2crystax,enamlnative,ply
 #,tornado
 #,twisted,incremental,constantly
 
 clean-python:
 	cd python-for-android/ && python p4a.py clean_dists
 	cd python-for-android/ && python p4a.py clean_builds
+	
+ndk-build:
+	cd android/app/src/main/jni && $(NDK_DIR)/ndk-build
 
 build-python:
 	cd android/app/src/main/jni && $(NDK_DIR)/ndk-build
@@ -22,10 +25,15 @@ copy-python:
 pull-cache:
 	#: Pull cache file from device
 	adb root
-	cd android/app/src/main/assets/python/ && adb pull /data/user/0/$(BUNDLE_ID)/assets/python/site-packages/jnius/reflect.javac
+	cd android/app/src/main/python/ && adb pull /data/user/0/$(BUNDLE_ID)/assets/python/site-packages/jnius/reflect.javac
+	
+pull-assets:
+	#: Pull cache file from device
+	adb root
+	cd android/app/src/main/python && adb pull /data/user/0/$(BUNDLE_ID)/assets/python
 
 install-cache:
-	cp android/app/src/main/assets/python/reflect.javac android/app/src/main/assets/python/site-packages/jnius/
+	cp android/app/src/main/python/reflect.javac android/app/src/main/assets/python/site-packages/jnius/
 	
 install-assets:
 	#: Install assets for a specific arch
@@ -35,22 +43,23 @@ install-assets:
 	cp -R android/app/src/main/python/$(ARCH)/modules android/app/src/main/assets/python/
 	cp -R android/app/src/main/python/$(ARCH)/site-packages android/app/src/main/assets/python/ 
 	#: Copy cache to correct place
-	cp android/app/src/main/assets/python/reflect.javac android/app/src/main/assets/python/site-packages/jnius/
+	-cp android/app/src/main/assets/python/reflect.javac android/app/src/main/assets/python/site-packages/jnius/
 
 clean-assets:
 	#: Remove any unused modules
 	#cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.py' -delete
-	#cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.pyc' -delete
-	cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.pyo' -delete
-	cd android/app/src/main/assets/python/site-packages && 	rm -R enaml/qt
-	cd android/app/src/main/assets/python/site-packages && 	rm -R *.egg-info
-	cd android/app/src/main/assets/python/site-packages && 	rm -R *.dist-info
-	cd android/app/src/main/assets/python/site-packages && 	rm -R tests
-	cd android/app/src/main/assets/python/site-packages && 	rm -R usr
+	-cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.pyc' -delete
+	#-cd android/app/src/main/assets/python/site-packages && 	find . -type f -name '*.pyo' -delete
+	-cd android/app/src/main/assets/python/site-packages && 	rm -R enaml/qt
+	-cd android/app/src/main/assets/python/site-packages && 	rm -R tornado/test
+	-cd android/app/src/main/assets/python/site-packages && 	rm -R *.egg-info
+	-cd android/app/src/main/assets/python/site-packages && 	rm -R *.dist-info
+	-cd android/app/src/main/assets/python/site-packages && 	rm -R tests
+	-cd android/app/src/main/assets/python/site-packages && 	rm -R usr
 
 all-python: clean-python build-python copy-python install-assets clean-assets
 
 run-android:
-	adb install -r EnamlNativeApplication-0.1-debug.apk
-	adb shell am start -n org.example.enamlnative/org.kivy.android.PythonActivity
+	adb install -r android/app/build/outputs/apk/app-debug.apk
+	adb shell am start -n $(BUNDLE_ID)/org.enaml.MainActivity
 	adb logcat

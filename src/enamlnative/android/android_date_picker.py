@@ -9,26 +9,26 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-import jnius
-from atom.api import Typed
+from atom.api import Typed, set_default
 
+from datetime import datetime
 from enamlnative.widgets.date_picker import ProxyDatePicker
 
-from .android_frame_layout import AndroidFrameLayout
+from .android_frame_layout import AndroidFrameLayout, FrameLayout
+from .bridge import JavaMethod, JavaCallback
 
-DatePicker = jnius.autoclass('android.widget.DatePicker')
+UTC_START = datetime(1970, 1, 1)
 
 
-class OnDateChangedListener(jnius.PythonJavaClass):
-    __javainterfaces__ = ['android/widget/DatePicker$OnDateChangedListener']
-
-    def __init__(self, handler):
-        self.__handler__ = handler
-        super(OnDateChangedListener, self).__init__()
-
-    @jnius.java_method('(Landroid/widget/DatePicker;III)V')
-    def onDateChanged(self, view, year, month, day):
-        self.__handler__.on_date_changed(view, year, month, day)
+class DatePicker(FrameLayout):
+    __javaclass__ = set_default('android.widget.DatePicker')
+    init = JavaMethod('int', 'int', 'int', 'android.widget.DatePicker$OnDateChangedListener')
+    onDateChanged = JavaCallback('android.widget.DatePicker', 'int', 'int', 'int')
+    updateDate = JavaMethod('int', 'int', 'int')
+    setFirstDayOfWeek = JavaMethod('int')
+    setEnabled = JavaMethod('boolean')
+    setMaxDate = JavaMethod('long')
+    setMinDate = JavaMethod('long')
 
 
 class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
@@ -38,14 +38,11 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
     #: A reference to the widget created by the proxy.
     widget = Typed(DatePicker)
 
-    #: Save a reference to the date changed listener
-    date_listener = Typed(OnDateChangedListener)
-
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
+        """ Create the underlying widget.
 
         """
         self.widget = DatePicker(self.get_context())
@@ -56,45 +53,41 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
         """
         super(AndroidDatePicker, self).init_widget()
         d = self.declaration
-        self.set_enabled(d.enabled)
-        self.set_first_day_of_week(d.first_day_of_week)
+
         if d.min_date:
             self.set_min_date(d.min_date)
         if d.max_date:
             self.set_max_date(d.max_date)
+        if d.first_day_of_week != 1:
+            self.set_first_day_of_week(d.first_day_of_week)
 
-        self.date_listener = OnDateChangedListener(self)
-        self.widget.init(d.year, d.month, d.day, self.date_listener)
+        self.widget.init(d.date.year, d.date.month-1, d.date.day, self.widget.getId())
+        self.widget.onDateChanged.connect(self.on_date_changed)
 
     # --------------------------------------------------------------------------
     # OnDateChangedListener API
     # --------------------------------------------------------------------------
     def on_date_changed(self, view, year, month, day):
         d = self.declaration
-        with self.suppress_notifications():
-            d.year = year
-            d.month = month
-            d.day = day
-
+        with self.widget.updateDate.suppressed():
+            d.date = datetime(year, month+1, day)
 
     # --------------------------------------------------------------------------
-    # ProxyFrameLayout API
+    # ProxyDatePicker API
     # --------------------------------------------------------------------------
-    def set_year(self, year):
-        self.update_date()
+    def set_date(self, date):
+        self.widget.updateDate(date.year, date.month-1, date.day)
 
-    def set_month(self, month):
-        self.update_date()
+    def set_min_date(self, date):
+        #: Convert to long
+        s = long((date - UTC_START).total_seconds()*1000)
+        self.widget.setMinDate(s)
 
-    def set_day(self, day):
-        self.update_date()
-
-    def update_date(self):
-        d = self.declaration
-        self.widget.updateDate(d.year,d.month,d.day)
+    def set_max_date(self, date):
+        #: Convert to long
+        s = long((date - UTC_START).total_seconds()*1000)
+        self.widget.setMaxDate(s)
 
     def set_first_day_of_week(self, day):
         self.widget.setFirstDayOfWeek(day)
 
-    def set_enabled(self, enabled):
-        self.widget.setEnabled(enabled)
