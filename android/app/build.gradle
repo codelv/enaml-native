@@ -9,8 +9,8 @@ android {
         applicationId "com.frmdstryr.enamlnative.demo"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 9
-        versionName "1.9"
+        versionCode 10
+        versionName "1.10"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
@@ -59,25 +59,15 @@ dependencies {
 
 }
 
-task bundlePython(type: Exec) {
-    workingDir '../../'
-    commandLine "./enaml-native", "bundle-assets"
+afterEvaluate {
+    task bundlePython(type: Exec) {
+        workingDir '../../'
+        if (project.hasProperty("preReleaseBuild")) {
+            commandLine "./enaml-native", "bundle-assets", "-p"
+        } else {
+            commandLine "./enaml-native", "bundle-assets"
+        }
+
+    }
+    preBuild.dependsOn bundlePython
 }
-preBuild.dependsOn bundlePython
-
-
-//task copyPythonSource(type: Copy)
-//
-//copyPythonSource {
-//    description = 'Copy src files to assets...'
-//    from '../../src'
-//    into 'src/main/assets/python'
-//    include('**/*')
-//}
-//
-//
-//project.afterEvaluate {
-//    preBuild.dependsOn copyPythonSource
-//}
-//clean.dependsOn copyPythonSource
-//clean.mustRunAfter copyPythonSource
