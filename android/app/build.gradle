@@ -59,6 +59,13 @@ dependencies {
 
 }
 
+task bundlePython(type: Exec) {
+    workingDir '../../'
+    commandLine "./enaml-native", "bundle-assets"
+}
+preBuild.dependsOn bundlePython
+
+
 //task copyPythonSource(type: Copy)
 //
 //copyPythonSource {

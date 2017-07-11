@@ -90,14 +90,19 @@ public class MainActivity extends AppCompatActivity {
 
             // If assets version changed, remove the old, and copy the new ones
             if (mAssetsAlwaysOverwrite || assetExtractor.getAssetsVersion() != mAssetsVersion) {
-                publishProgress("Unpacking... Please wait.");
+                publishProgress("Preparing... Please wait.");
                 assetExtractor.removeAssets(path);
                 assetExtractor.copyAssets(path);
                 assetExtractor.setAssetsVersion(mAssetsVersion);
+
+                // On first load change message
+                publishProgress("Loading... Please wait.\n(may take a few seconds)");
+            } else {
+                // Start the Python interpreter
+                publishProgress("Loading... Please wait.");
             }
 
-            // Start the Python interpreter
-            publishProgress("Initializing... Please wait.");
+
 
             // Get the extracted assets directory
             String pythonPath = assetExtractor.getAssetsDataDir() + path;
