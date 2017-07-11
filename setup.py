@@ -23,5 +23,5 @@ setup(
     description="Build native mobile apps in python",
     long_description=open("README.md").read(),
     packages=find_packages('src/'),
-    requires=['enaml', 'msgpack-python'],
+    install_requires=['enaml', 'msgpack-python'],
 )
