@@ -1,0 +1,18 @@
+{
+  "name": "Enaml-Native Demo",
+  "version": "1.8",
+  "private": true,
+  "env": {
+    "ndk":"/home/jrm/Android/Crystax/crystax-ndk-10.3.2",
+    "sdk":"/home/jrm/Android/Sdk",
+    "bundle_id":"com.frmdstryr.enamlnative.demo"
+  },
+  "arches": ["armeabi-v7a","x86"],
+  "dependencies": {
+    "python2crystax": "2.7.10",
+    "enamlnative": ">=2.1",
+    "tornado": ">=4.0",
+    "ply": "==3.10"
+  }
+
+}

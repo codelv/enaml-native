@@ -1,0 +1,298 @@
+#!/usr/bin/python
+import sh
+import os
+import re
+import sys
+import json
+from glob import glob
+from os.path import join, abspath, expanduser
+from argparse import ArgumentParser, Namespace
+from atom.api import Atom, Dict, List, Unicode, Instance, set_default
+from contextlib import contextmanager
+
+sys.path.append('python-for-android')
+from pythonforandroid.logger import shprint
+
+
+@contextmanager
+def cd(newdir):
+    prevdir = os.getcwd()
+    os.chdir(os.path.expanduser(newdir))
+    try:
+        print("Entering into {}".format(newdir))
+        yield
+        print("Returning to {}".format(prevdir))
+    finally:
+        os.chdir(prevdir)
+
+
+class Command(Atom):
+    title = Unicode()
+    desc = Unicode()
+    help = Unicode()
+    ctx = Dict()
+    cmds = Dict()
+    args = List(tuple)
+    parser = Instance(ArgumentParser)
+
+    def run(self, args):
+        pass
+
+
+class Init(Command):
+    title = set_default('init')
+    help = set_default("Start a new enaml-native project")
+
+    def run(self, args=None):
+        pass
+
+
+class CleanPython(Command):
+    title = set_default("clean-python")
+    help = set_default("Remove python-for-android build and .so libs")
+    args = set_default([
+        ('-a', dict(action='store_true',help="Clean all")),
+    ])
+
+    def run(self, args=None):
+        ctx = self.ctx
+        with cd("python-for-android/"):
+            if args and args.a:
+                shprint(sh.python,'p4a.py','clean_all')
+                for arch in ctx['arches']:
+                    #: Clean so
+                    shprint(sh.rm, '-R', 'android/app/src/main/libs/{}/'.format(arch))
+            else:
+                shprint(sh.python,'p4a.py','clean_dists')
+                shprint(sh.python,'p4a.py','clean_builds')
+
+
+class NdkBuild(Command):
+    title = set_default("ndk-build")
+    help = set_default("Run ndk-build on the android project")
+
+    def run(self, args=None):
+        ctx = self.ctx
+        ndk_build = sh.Command(join(ctx['env']['ndk'],'ndk-build'))
+        arches = ctx['arches']
+        with cd('android/app/src/main/jni'):
+
+            #: Patch Applicaiton.mk to have the correct ABI's
+            with open('Application.mk') as f:
+                app_mk = f.read()
+
+            #: APP_ABI := armeabi-v7a
+            new_mk = []
+            for line in app_mk.split("\n"):
+                if re.match(r'APP_ABI\s*:=\s*.+', line):
+                    line = 'APP_ABI := {}'.format(" ".join(arches))
+                new_mk.append(line)
+
+            with open('Application.mk','w') as f:
+                f.write("\n".join(new_mk))
+
+            #: Now run nkd-build
+            shprint(ndk_build)
+
+
+class BuildPython(Command):
+    """ Builds an enaml-native python app using the following steps:
+
+        1. Runs ndk-build to build JNI modules
+        2. Run p4a apk to build python requirements for each arch
+            and copies them to the lib a local folder
+        3. Pull all so files from site-packages and rename to lib.pkg.to.so
+            and place them in the lib/<arch> folder
+    """
+    title = set_default("build-python")
+    help = set_default("Build the python requirements")
+
+    def run(self, args=None):
+        ctx = self.ctx
+
+        env = ctx['env']
+        reqs = ",".join(ctx['dependencies'].keys())
+
+        #: Run ndk build
+        #: Um, we're passing args from another command?
+        self.cmds['ndk-build'].run(args)
+
+        #: Build for each arch
+        for arch in ctx['arches']:
+            cfg = dict(
+               arch=arch,
+               reqs=reqs
+            )
+            cfg.update(env)
+
+            #: Um, we're passing args from another command?
+            #: Clean whatever build from previous arch
+            self.cmds['clean-python'].run()
+
+            with cd("python-for-android/"):
+                shprint(sh.python,*'p4a.py apk --arch={arch} '
+                          '--private=../src '
+                          '--package={bundle_id} '
+                          '--name=EnamlNativeApplication '
+                          '--dist-name=enaml-native '
+                          '--version=0.1 '
+                          '--requirements={reqs} '
+                          '--android-api=25 '
+                          '--bootstrap=enaml '
+                          '--sdk-dir={sdk} '
+                          '--ndk-dir={ndk} '
+                          '--ndk-platform=21 '
+                          '--copy-libs'.format(**cfg).split(' '))
+
+            #: Copy lib folder
+            shprint(sh.cp,'-R',
+                  expanduser('~/.local/share/python-for-android/dists/enaml-native/libs/{arch}'.format(**cfg)),
+                  'android/app/src/main/libs')
+
+            #: Copy modules
+            for f in ['modules', 'site-packages']:
+                shprint(sh.cp,'-R',
+                      expanduser('~/.local/share/python-for-android/dists/enaml-native/python/{}'.format(f)),
+                      'android/app/src/main/python/{arch}'.format(**cfg))
+
+            #: Where .so files go
+            dst = abspath('android/app/src/main/libs/{arch}'.format(**cfg))
+
+            #: Collect all .so files and rename them
+            with cd('android/app/src/main/python/{arch}'.format(**cfg)):
+                for mod in sh.find('.','-name', '*.so').stdout.strip().split("\n"):
+                    #: Strip ./modules or ./site-packages
+                    pgk = ".".join(['lib']+mod.split("/")[2:])
+                    #: Rename mod.so to pkg.mod.so and move to libs
+                    shprint(sh.mv,mod, join(dst, pgk))
+
+
+class TrimAssets(Command):
+    title = set_default("trim-assets")
+    help = set_default("Trim away unused files from the python install for each arch")
+
+    def run(self, args=None):
+        ctx = self.ctx
+
+        #: Clean each arch
+        for arch in ctx['arches']:
+            with cd('android/app/src/main/python/{arch}/site-packages/'.format(arch=arch)):
+                #shprint(sh.find,'.','-type','f','-name','*.py','-delete')
+                shprint(sh.find,'.','-type','f','-name','*.pyc','-delete')
+                #shprint(sh.find,'.','-type','f','-name','*.pyo','-delete')
+                for p in [
+                            'enaml/qt',
+                            'tornado/test',
+                            '*.egg-info',
+                            '*.dist-info',
+                            'tests',
+                            'usr',
+                          ]:
+                    try:
+                        sh.rm('-R', *glob(p))
+                    except:
+                        pass
+
+
+class InstallAssets(Command):
+    title = set_default("install-assets")
+    help = set_default("Copies site-packages to android assets")
+
+    def run(self, args=None):
+        ctx = self.ctx
+
+        #: Clean each arch
+        for arch in ctx['arches']:
+            #: Remove old
+            with cd('android/app/src/main/assets/python/'):
+                sh.rm('-R','modules','site-packages')
+
+            shprint(sh.cp,'-R',
+                'android/app/src/main/python/{arch}/site-packages/'.format(arch=arch),
+                'android/app/src/main/assets/python/'.format(arch=arch),
+            )
+            #: Copy cache to correct place
+            #-cp android/app/src/main/assets/python/reflect.javac android/app/src/main/assets/python/site-packages/jnius/
+
+
+            break #: They should all be the same so stop after the first
+
+
+class AllPython(Command):
+    title = set_default("all-python")
+    help = set_default("Does, clean, build, trim, install")
+
+    def run(self, args=None):
+        for cmd in ['build-python', 'trim-assets', 'install-assets']:
+            self.cmds[cmd].run()
+
+def find_commands(cls):
+    """ Finds commands by finding the subclasses of Command"""
+    cmds = []
+    for subclass in cls.__subclasses__():
+        cmds.append(subclass)
+        cmds.extend(find_commands(subclass))
+    return cmds
+
+
+class EnamlNativeCli(Atom):
+    #: Root parser
+    parser = Instance(ArgumentParser)
+
+    #: Loaded from package
+    ctx = Dict()
+
+    #: Parsed args
+    args = Instance(Namespace)
+
+    #: Location of package file
+    package = Unicode("package.json")
+
+    #: Commands
+    commands = List(Command)
+
+    def _default_commands(self):
+        return [c() for c in find_commands(Command)]
+
+    def _default_parser(self):
+        parser = ArgumentParser(prog='enaml-native')
+
+        #: Build commands by name
+        cmds = {c.title:c for c in self.commands}
+
+        with open(self.package) as f:
+            self.ctx = json.load(f)
+
+
+        #: Build parser, prepare commands
+        subparsers = parser.add_subparsers()
+        for c in self.commands:
+            p = subparsers.add_parser(c.title, help=c.help)
+            c.parser = p
+            for (flags,kwargs) in c.args:
+                p.add_argument(flags,**kwargs)
+            p.set_defaults(cmd=c)
+            c.ctx = self.ctx
+            c.cmds = cmds
+
+        return parser
+
+    def start(self):
+        """ Run the commands"""
+        self.args = self.parser.parse_args()
+
+        cmd = self.args.cmd
+        try:
+            cmd.run(self.args)
+        except sh.ErrorReturnCode as e:
+            print(e.stderr)
+            print(e.stdout)
+            raise
+
+
+
+def main():
+    EnamlNativeCli().start()
+
+if __name__ == '__main__':
+    main()
