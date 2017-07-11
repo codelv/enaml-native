@@ -226,6 +226,54 @@ class AllPython(Command):
         for cmd in ['build-python', 'trim-assets', 'install-assets']:
             self.cmds[cmd].run()
 
+
+class BuildAndroid(Command):
+    title = set_default("build-android")
+    help = set_default("Build android project")
+    args = set_default([
+        ('-r', dict(action='store_true',help="Release mode")),
+    ])
+
+    def run(self, args=None):
+        with cd("android"):
+            gradlew = sh.Command('./gradlew')
+            if args.r:
+                shprint(gradlew, 'assembleRelease')
+            else:
+                shprint(gradlew, 'assembleDebug')
+
+
+class CleanAndroid(Command):
+    title = set_default("run-android")
+    help = set_default("Clean the android project")
+
+    def run(self, args=None):
+        with cd('android'):
+            gradlew = sh.Command('./gradlew')
+            shprint(gradlew, 'installDebug')
+
+
+class RunAndroid(Command):
+    title = set_default("run-android")
+    help = set_default("Build android project, install it, and run")
+
+    def run(self, args=None):
+        ctx = self.ctx
+        bundle_id = ctx['env']['bundle_id']
+        with cd("android"):
+            gradlew = sh.Command('./gradlew')
+
+            #: If no devices are connected, start the simulator
+            if len(sh.adb('devices').stdout.strip())==1:
+                device = sh.emulator('-list-avds').stdout.split("\n")[0]
+                shprint(sh.emulator, '-avd', device)
+
+            shprint(gradlew, 'installDebug')
+            shprint(sh.adb, 'shell', 'am', 'start', '-n',
+                        '{}/org.enaml.MainActivity'.format(bundle_id))
+
+
+
 def find_commands(cls):
     """ Finds commands by finding the subclasses of Command"""
     cmds = []
