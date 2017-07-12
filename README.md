@@ -46,12 +46,11 @@ This project is built on top of several existing projects:
 _Note: I'm not affiliated with any of these but have contributed to some of them_
 
 ## Usage ##
-
-1. Create a `main.py` with a function called `main`
-2. Declare and import an enaml view using widgets from the Android toolkit.
-3. Create an instance of AndroidApplication 
-3. Set the application view
-3. Call `app.start()`
+ 
+1. Clone the repo
+2. Run `enaml-native init <ProjectName> <bundleId> <Destintation>`
+3. Cd to destination
+4. Run `enaml-native run` or Open in android folder in Android Studio and click run 
 
 ## How it works ##
 

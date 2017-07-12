@@ -5,14 +5,11 @@ import re
 import sys
 import json
 from glob import glob
-from os.path import join, abspath, expanduser
+from os.path import join, exists, abspath, expanduser, realpath, dirname
 from argparse import ArgumentParser, Namespace
 from atom.api import Atom, Dict, List, Unicode, Instance, set_default
 from contextlib import contextmanager
-
-sys.path.append('python-for-android')
-from pythonforandroid.logger import shprint
-
+from collections import OrderedDict
 
 @contextmanager
 def cd(newdir):
@@ -24,6 +21,11 @@ def cd(newdir):
         print("Returning to {}".format(prevdir))
     finally:
         os.chdir(prevdir)
+
+#: Hack...
+sys.path.append(join(dirname(realpath(__file__)),'python-for-android'))
+from pythonforandroid.logger import shprint
+
 
 
 class Command(Atom):
@@ -42,9 +44,82 @@ class Command(Atom):
 class Init(Command):
     title = set_default('init')
     help = set_default("Start a new enaml-native project")
+    args = set_default([
+        ('name',dict(help="Project name")),
+        ('bundle_id',dict(help="App bundleId")),
+        ('destination', dict(help="Project destination folder")),
+        #('-t --template', dict(dest='template', action='store_const',help="Project destination folder")),
+    ])
 
-    def run(self, args=None):
-        pass
+    def run(self, args):
+        dest = abspath(args.destination)
+        assert not exists(dest), "Error: Destination folder already exists! ({})".format(dest)
+        root = dirname(realpath(__file__))
+
+        #: Clean root android project
+        with cd(root):
+            self.cmds['clean-android'].run()
+
+        #: Make project dir
+        os.makedirs(dest)
+        with cd(args.destination):
+            #: Copy everything
+            #: TODO: Should clean build first
+            for f in ['android', 'ios', 'src', 'package.json']:
+                shprint(sh.cp, '-R', join(root, f), '.')
+
+            #: TODO: Make a readme
+
+            #: Make simlink to enaml-native
+            shprint(sh.ln, '-s' ,join(root, 'enaml-native'), 'enaml-native')
+
+            #: Patch package
+            with open('package.json') as f:
+                pkg = json.load(f,object_pairs_hook=OrderedDict)
+            pkg['name'] = args.name
+            pkg['version'] = "1.0"
+            pkg['env']['bundle_id'] = args.bundle_id
+            with open('package.json', 'w') as f:
+                json.dump(pkg, f, indent=4)
+
+            #: Patch android
+            #: This is a hack haha
+            with cd('android/app/'):
+                build_gradle = []
+                with open("build.gradle") as f:
+                    lines = f.read().split("\n")
+
+                for line in lines:
+                    if re.match(r'\s+applicationId\s+".+"', line):
+                        line = '        applicationId "{}"'.format(args.bundle_id)
+                    elif re.match(r'\s+versionCode\s+\d+', line):
+                        line = '        versionCode 1'
+                    elif re.match(r'\s+versionName\s+".+"', line):
+                        line = '        versionName "1.0"'
+                    build_gradle.append(line)
+
+                with open("build.gradle", 'w') as f:
+                    f.write('\n'.join(build_gradle))
+
+                with cd("src/main/"):
+                    for src in ['AndroidManifest.xml',
+                                'java/com/enaml/MainActivity.java']:
+                        with open(src) as f:
+                            data = f.read()
+                        with open(src, 'w') as f:
+                            f.write(data.replace("com.frmdstryr.enamlnative.demo",args.bundle_id))
+
+                    with cd("res/values/"):
+                        with open("strings.xml") as f:
+                            data = f.read()
+                        with open("strings.xml", "w") as f:
+                            f.write(data.replace(
+                                '<string name="app_name">Enaml-Native Demo</string>',
+                                '<string name="app_name">{}</string>'.format(args.name)
+                            ))
+
+        #: Init VCS
+        shprint(sh.git,'init')
 
 
 class CleanPython(Command):
@@ -284,18 +359,17 @@ class BuildAndroid(Command):
             if args.r:
                 shprint(gradlew, 'assembleRelease')
             else:
-                self.cmds['bundle-assets'].run()
                 shprint(gradlew, 'assembleDebug')
 
 
 class CleanAndroid(Command):
-    title = set_default("run-android")
+    title = set_default("clean-android")
     help = set_default("Clean the android project")
 
     def run(self, args=None):
         with cd('android'):
             gradlew = sh.Command('./gradlew')
-            shprint(gradlew, 'installDebug')
+            shprint(gradlew, 'clean')
 
 
 class RunAndroid(Command):
@@ -315,7 +389,7 @@ class RunAndroid(Command):
 
             shprint(gradlew, 'installDebug')
             shprint(sh.adb, 'shell', 'am', 'start', '-n',
-                        '{}/org.enaml.MainActivity'.format(bundle_id))
+                        '{}/com.enaml.MainActivity'.format(bundle_id))
 
 
 
