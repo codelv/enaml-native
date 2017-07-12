@@ -834,6 +834,34 @@ enamldef ContentView(VBox): content_view:
                       selected << 0 if tab_layout.tab_gravity == 'fill' else 1
                       selected :: tab_layout.tab_gravity = self.items[self.selected]
 
+      Page:
+        title = "ListView"
+        ListView: list_view:
+          items = list(Icon.PACK_FONT_AWESOME)
+          divider_height = 0
+          background_color = '#EEEEEE'
+          attr count << len(items)
+          Looper:
+            iterable = range(20) #: MUST ALWAYS be > list_view.visible_count
+            ListItem:
+                VBox:
+                    attr item << parent.item #: Item requested to shows
+                    attr index << parent.index
+                    padding = (10,5,10,5)
+                    CardView:
+                      content_padding = (10,10,10,10)
+                      HBox:
+                        Icon:
+                          text_size = 32
+                          text << u"{%s}"%item
+                        Spacer:
+                          layout_width = '10'
+                        VBox:
+                          CardTitle:
+                            text << "Card {}".format(index)
+                          TextView:
+                            text << item
+
     LeftDrawer: left_drawer:
       pager = view_pager
       drawer = drawer_layout

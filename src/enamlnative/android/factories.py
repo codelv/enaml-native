@@ -119,6 +119,18 @@ def linear_layout_factory():
     return AndroidLinearLayout
 
 
+def list_item_factory():
+    # print "Import linear layout"
+    from .android_list_view import AndroidListItem
+    return AndroidListItem
+
+
+def list_view_factory():
+    # print "Import linear layout"
+    from .android_list_view import AndroidListView
+    return AndroidListView
+
+
 def number_picker_factory():
     # print "Import view"
     from .android_number_picker import AndroidNumberPicker
@@ -282,6 +294,8 @@ ANDROID_FACTORIES = {
     'IconToggleButton': icon_toggle_button_factory,
     'ImageView': image_view_factory,
     'LinearLayout': linear_layout_factory,
+    'ListItem': list_item_factory,
+    'ListView': list_view_factory,
     'NumberPicker': number_picker_factory,
     'PagerTitleStrip': pager_title_strip_factory,
     'PagerTabStrip': pager_tab_strip_factory,

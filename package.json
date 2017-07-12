@@ -2,7 +2,10 @@
   "name": "Enaml-Native Demo",
   "version": "1.8",
   "private": true,
-  "sources": ["src/app"],
+  "sources": [
+    "src/app",
+    "src"
+  ],
   "env": {
     "ndk":"/home/jrm/Android/Crystax/crystax-ndk-10.3.2",
     "sdk":"/home/jrm/Android/Sdk",

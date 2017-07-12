@@ -56,13 +56,23 @@ def get_app_class():
     return AndroidApplication
 
 
+def encode(obj):
+    """ Encode an object for proper decoding by Java
+    """
+    if hasattr(obj, '__javaclass__'):
+        return msgpack.ExtType(ExtType.REF, msgpack.packb(obj.__id__))
+    return obj
+
+
 def msgpack_encoder(sig, obj):
     """ When passing a JavaBridgeObject encode it in a special way so
         it can properly be interpreted as a reference.
+
+        TODO: This should use the object hooks for doing this automatically
     """
-    if hasattr(obj, '__javaclass__'):
-        return sig, msgpack.ExtType(ExtType.REF, msgpack.packb(obj.__id__))
-    return sig, obj
+    #if isinstance(obj, (list, tuple)):
+    #    return sig, [encode(o) for o in obj]
+    return sig, encode(obj)
 
 
 def dumps(data):
