@@ -8,9 +8,15 @@ Try out the beta demo app here [on google play](https://play.google.com/apps/tes
 
 
 <div>
-<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app.png" width="240" style="float: left;">
+<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-1.png" width="240" style="float: left;">
 <img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-2.png" width="240" style="float: left;">
-<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-3.png" width="240" style="float: left;"></div>
+<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-3.png" width="240" style="float: left;">
+<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-4.png" width="240" style="float: left;">
+<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-5.png" width="240" style="float: left;">
+<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-6.png" width="240" style="float: left;">
+<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-7.png" width="240" style="float: left;">
+<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-8.png" width="240" style="float: left;">
+</div>
 
 The goal of this project is to be an alternative to using [kivy](https://kivy.org/) for building mobile apps with python. 
 
