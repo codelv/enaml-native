@@ -843,24 +843,24 @@ enamldef ContentView(VBox): content_view:
           attr count << len(items)
           Looper:
             iterable = range(20) #: MUST ALWAYS be > list_view.visible_count
-            ListItem:
-                VBox:
-                    attr item << parent.item #: Item requested to shows
-                    attr index << parent.index
-                    padding = (10,5,10,5)
-                    CardView:
-                      content_padding = (10,10,10,10)
-                      HBox:
-                        Icon:
-                          text_size = 32
-                          text << u"{%s}"%item
-                        Spacer:
-                          layout_width = '10'
-                        VBox:
-                          CardTitle:
-                            text << "Card {}".format(index)
-                          TextView:
-                            text << item
+            ListItem: li:
+              VBox:
+                #attr item << parent.item #: Item requested to shows
+                #attr index << parent.index
+                padding = (10,5,10,5)
+                CardView:
+                  content_padding = (10,10,10,10)
+                  HBox:
+                    Icon:
+                      text_size = 32
+                      text << u"{%s}"%li.item
+                    Spacer:
+                      layout_width = '10'
+                    VBox:
+                      CardTitle:
+                        text << "Card {}".format(li.index)
+                      TextView:
+                        text << li.item
 
     LeftDrawer: left_drawer:
       pager = view_pager
