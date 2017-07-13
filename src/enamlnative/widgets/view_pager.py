@@ -35,6 +35,9 @@ class ProxyViewPager(ProxyViewGroup):
     def set_page_margin(self, margin):
         raise NotImplementedError
 
+    def set_paging_enabled(self, enabled):
+        raise NotImplementedError
+
 
 class ProxyPagerTitleStrip(ProxyViewGroup):
     """ The abstract definition of a proxy PagerTitleStrip object.
@@ -98,6 +101,9 @@ class ViewPager(ViewGroup):
     #: of the current page in the view hierarchy in an idle state.
     offscreen_page_limit = d_(Int())
 
+    #: Enable or disable paging by swiping
+    paging_enabled = d_(Bool(True))
+
     #: Set the margin between pages.
     page_margin = d_(Int(-1))
 
@@ -110,7 +116,7 @@ class ViewPager(ViewGroup):
     # --------------------------------------------------------------------------
     # Observers
     # --------------------------------------------------------------------------
-    @observe('current_index', 'offscreen_page_limit','page_margin')
+    @observe('current_index', 'offscreen_page_limit', 'page_margin', 'paging_enabled')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

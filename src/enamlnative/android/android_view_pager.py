@@ -22,7 +22,7 @@ from .app import AndroidApplication
 
 
 class ViewPager(ViewGroup):
-    __javaclass__ = set_default('android.support.v4.view.ViewPager')
+    __javaclass__ = set_default('com.enaml.adapters.BridgedViewPager')
     addOnPageChangeListener = JavaMethod('android.support.v4.view.ViewPager$OnPageChangeListener')
     setCurrentItem = JavaMethod('int')
     setOffscreenPageLimit = JavaMethod('int')
@@ -31,6 +31,7 @@ class ViewPager(ViewGroup):
     onPageScrollStateChanged = JavaCallback('int')
     onPageScrolled = JavaCallback('int', 'float', 'int')
     onPageSelected = JavaCallback('int')
+    setPagingEnabled = JavaMethod('boolean')
 
 
 class ViewPagerLayoutParams(LayoutParams):
@@ -101,9 +102,12 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
             self.set_offscreen_page_limit(d.offscreen_page_limit)
         if d.page_margin >= 0:
             self.set_page_margin(d.page_margin)
+        if not d.paging_enabled:
+            self.set_paging_enabled(d.paging_enabled)
 
         #: Create adapter
         self.adapter = BridgedFragmentStatePagerAdapter()
+
 
     def init_layout(self):
         super(AndroidViewPager, self).init_layout()
@@ -175,6 +179,9 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
 
     def set_page_margin(self, margin):
         self.widget.setPageMargin(margin)
+
+    def set_paging_enabled(self, enabled):
+        self.widget.setPagingEnabled(enabled)
 
 
 class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):

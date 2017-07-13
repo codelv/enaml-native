@@ -713,11 +713,15 @@ enamldef ContentView(VBox): content_view:
                        "(they subclass conditionals). The ViewPager will automatically " \
                        "refresh when it's child Fragments change. " \
                        "The pages can be access using the `pages` property of the pager " \
-                       "And the current page index can be accessed using the `current_index`."
+                       "And the current page index can be accessed using the `current_index`." \
+                       "Swiping of pages can be enabled and disabled using the `paging_enabled`."
               TextView:
                 text << "Page count: {}".format(len(view_pager.pages))
               TextView:
                 text << "Current: {}".format(view_pager.current_index)
+              Switch:
+                text = "Paging enabled"
+                checked := view_pager.paging_enabled
               HBox:
                 Button:
                   text = "Previous page"
@@ -840,13 +844,10 @@ enamldef ContentView(VBox): content_view:
           items = list(Icon.PACK_FONT_AWESOME)
           divider_height = 0
           background_color = '#EEEEEE'
-          attr count << len(items)
           Looper:
             iterable = range(20) #: MUST ALWAYS be > list_view.visible_count
             ListItem: li:
               VBox:
-                #attr item << parent.item #: Item requested to shows
-                #attr index << parent.index
                 padding = (10,5,10,5)
                 CardView:
                   content_padding = (10,10,10,10)
@@ -861,6 +862,7 @@ enamldef ContentView(VBox): content_view:
                         text << "Card {}".format(li.index)
                       TextView:
                         text << li.item
+
 
     LeftDrawer: left_drawer:
       pager = view_pager
