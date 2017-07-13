@@ -65,7 +65,7 @@ class TabLayout(FrameLayout):
     layout_gravity = set_default('top')
 
     #: Set the behavior mode for the Tabs in this layout.
-    tab_mode = d_(Enum('scrollable', 'fixed'))
+    tab_mode = d_(Enum('fixed', 'scrollable'))
 
     #: Set the gravity to use when laying out the tabs.
     tab_gravity = d_(Enum('fill', 'center'))

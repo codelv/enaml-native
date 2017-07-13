@@ -101,9 +101,9 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
         """
         super(AndroidTabLayout, self).init_widget()
         d = self.declaration
-        if d.tab_mode != 'scrollable': # Default
+        if d.tab_mode != 'fixed':  #: Default
             self.set_tab_mode(d.tab_mode)
-        if d.tab_gravity != 'fill':
+        if d.tab_gravity != 'fill':  #: Default
             self.set_tab_gravity(d.tab_gravity)
         if d.tab_indicator_color_selected:
             self.set_tab_indicator_color_selected(d.tab_indicator_color_selected)
