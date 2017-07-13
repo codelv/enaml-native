@@ -23,7 +23,8 @@ def cd(newdir):
         os.chdir(prevdir)
 
 #: Hack...
-sys.path.append(join(dirname(realpath(__file__)),'python-for-android'))
+p4a_root = join(dirname(realpath(__file__)),'python-for-android')
+sys.path.append(p4a_root)
 from pythonforandroid.logger import shprint
 
 
@@ -131,15 +132,16 @@ class CleanPython(Command):
 
     def run(self, args=None):
         ctx = self.ctx
-        with cd("python-for-android/"):
+
+        with cd(ctx['env']['p4a']):
             if args and args.a:
-                shprint(sh.python,'p4a.py','clean_all')
-                for arch in ctx['arches']:
-                    #: Clean so
-                    shprint(sh.rm, '-R', 'android/app/src/main/libs/{}/'.format(arch))
+                shprint(sh.python, 'p4a.py', 'clean_all')
+                #for arch in ctx['arches']:
+                #    #: Clean so
+                #    shprint(sh.rm, '-R', 'android/app/src/main/libs/{}/'.format(arch))
             else:
-                shprint(sh.python,'p4a.py','clean_dists')
-                shprint(sh.python,'p4a.py','clean_builds')
+                shprint(sh.python, 'p4a.py', 'clean_dists')
+                shprint(sh.python, 'p4a.py', 'clean_builds')
 
 
 class NdkBuild(Command):
@@ -148,7 +150,7 @@ class NdkBuild(Command):
 
     def run(self, args=None):
         ctx = self.ctx
-        ndk_build = sh.Command(join(ctx['env']['ndk'],'ndk-build'))
+        ndk_build = sh.Command(join(ctx['env']['ndk'], 'ndk-build'))
         arches = ctx['arches']
         with cd('android/app/src/main/jni'):
 
@@ -204,7 +206,7 @@ class BuildPython(Command):
             #: Clean whatever build from previous arch
             self.cmds['clean-python'].run()
 
-            with cd("python-for-android/"):
+            with cd(ctx['env']['p4a']):
                 shprint(sh.python,*'p4a.py apk --arch={arch} '
                           '--private=../src '
                           '--package={bundle_id} '
@@ -430,6 +432,9 @@ class EnamlNativeCli(Atom):
         with open(self.package) as f:
             self.ctx = json.load(f)
 
+        #: Add p4a to ctx
+        global p4a_root
+        self.ctx['env']['p4a'] = p4a_root
 
         #: Build parser, prepare commands
         subparsers = parser.add_subparsers()
