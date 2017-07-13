@@ -625,6 +625,14 @@ def run_pymodules_install(ctx, modules):
             "PYTHONPATH={0} pip install --target '{0}' --no-deps -r requirements.txt"
         ).format(ctx.get_site_packages_dir()))
 
+        #: Compile pip packages to bytecode
+        shprint(sh.bash,
+                '-c',
+                "source venv/bin/activate && env CC=/bin/false CXX=/bin/false"
+                "PYTHONPATH={0} python -O -m compileall -f {0}".format(ctx.get_site_packages_dir()))
+        #subprocess.call([PYTHON, '-OO', '-m', 'compileall', '-f', dfn])
+
+
 
 def biglink(ctx, arch):
     # First, collate object files from each recipe
