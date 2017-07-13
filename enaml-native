@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import json
+import logging
 from glob import glob
 from os.path import join, exists, abspath, expanduser, realpath, dirname
 from argparse import ArgumentParser, Namespace
@@ -127,7 +128,7 @@ class CleanPython(Command):
     title = set_default("clean-python")
     help = set_default("Remove python-for-android build and .so libs")
     args = set_default([
-        ('-a', dict(action='store_true',help="Clean all")),
+        ('-a', dict(action='store_true', help="Clean all")),
     ])
 
     def run(self, args=None):
@@ -183,6 +184,9 @@ class BuildPython(Command):
     """
     title = set_default("build-python")
     help = set_default("Build the python requirements")
+    args = set_default([
+        ('-d', dict(action='store_true', help="Print full debug log")),
+    ])
 
     def run(self, args=None):
         ctx = self.ctx
@@ -206,6 +210,12 @@ class BuildPython(Command):
             #: Clean whatever build from previous arch
             self.cmds['clean-python'].run()
 
+            #: Add debug arg if needed
+            cfg['debug'] = '--debug ' if args.d else ''
+            if args.d:
+                logger = logging.getLogger('p4a')
+                logger.level = logging.DEBUG
+
             with cd(ctx['env']['p4a']):
                 shprint(sh.python,*'p4a.py apk --arch={arch} '
                           '--private=../src '
@@ -219,6 +229,7 @@ class BuildPython(Command):
                           '--sdk-dir={sdk} '
                           '--ndk-dir={ndk} '
                           '--ndk-platform=21 '
+                          '{debug}'
                           '--copy-libs'.format(**cfg).split(' '))
 
             #: Copy lib folder
@@ -232,6 +243,10 @@ class BuildPython(Command):
                       expanduser('~/.local/share/python-for-android/dists/enaml-native/python/{}'.format(f)),
                       'android/app/src/main/python/{arch}'.format(**cfg))
 
+            #: Copy ca-cert
+            with cd('android/app/src/main/python/{arch}/site-packages/tornado/'.format(**cfg)):
+                shprint(sh.cp, '/etc/ssl/certs/ca-certificates.crt', '.')
+
             #: Where .so files go
             dst = abspath('android/app/src/main/libs/{arch}'.format(**cfg))
 
@@ -244,6 +259,10 @@ class BuildPython(Command):
                     shprint(sh.mv,mod, join(dst, pgk))
 
 
+        #: Extra cleanup
+        self.cmds['trim-assets'].run()
+
+
 class TrimAssets(Command):
     title = set_default("trim-assets")
     help = set_default("Trim away unused files from the python install for each arch")
@@ -254,9 +273,9 @@ class TrimAssets(Command):
         #: Clean each arch
         for arch in ctx['arches']:
             with cd('android/app/src/main/python/{arch}/site-packages/'.format(arch=arch)):
-                #shprint(sh.find,'.','-type','f','-name','*.py','-delete')
+                shprint(sh.find,'.','-type','f','-name','*.py','-delete')
                 shprint(sh.find,'.','-type','f','-name','*.pyc','-delete')
-                #shprint(sh.find,'.','-type','f','-name','*.pyo','-delete')
+                #shprint(sh.find,'.','-type','f','-name','*.pyo','-delete') #: Use pyo
                 for p in [
                             'enaml/qt',
                             'tornado/test',
@@ -272,6 +291,8 @@ class TrimAssets(Command):
 
 
 class BundleAssets(Command):
+    """ This is used by the gradle build to pack python into a zip.
+    """
     title = set_default("bundle-assets")
     help = set_default("Creates a python.zip bundle of all py files")
     args = set_default([

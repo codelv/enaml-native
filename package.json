@@ -11,12 +11,16 @@
     "sdk":"/home/jrm/Android/Sdk",
     "bundle_id":"com.frmdstryr.enamlnative.demo"
   },
-  "arches": ["armeabi-v7a","x86"],
+  "arches": ["armeabi-v7a"],
   "dependencies": {
     "python2crystax": "2.7.10",
     "enamlnative": ">=2.1",
     "tornado": ">=4.0",
+    "singledispatch":">=0",
+    "backports_abc":">=0",
     "ply": "==3.10"
+  },
+  "optional": {
+    "openssl":">=0"
   }
-
 }
