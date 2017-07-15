@@ -1,26 +1,37 @@
 {
   "name": "Enaml-Native Demo",
+  "bundle_id":"com.frmdstryr.enamlnative.App",
   "version": "1.8",
   "private": true,
   "sources": [
     "src/app",
     "src"
   ],
-  "env": {
+  "android": {
     "ndk":"/home/jrm/Android/Crystax/crystax-ndk-10.3.2",
     "sdk":"/home/jrm/Android/Sdk",
-    "bundle_id":"com.frmdstryr.enamlnative.demo"
+    "arches": ["armeabi-v7a"],
+    "dependencies": {
+      "python2crystax": "2.7.10",
+      "enamlnative": ">=2.1",
+      "tornado": ">=4.0",
+      "singledispatch":">=0",
+      "backports_abc":">=0",
+      "ply": "==3.10"
+    }
   },
-  "arches": ["armeabi-v7a"],
-  "dependencies": {
-    "python2crystax": "2.7.10",
-    "enamlnative": ">=2.1",
-    "tornado": ">=4.0",
-    "singledispatch":">=0",
-    "backports_abc":">=0",
-    "ply": "==3.10"
-  },
-  "optional": {
-    "openssl":">=0"
+  "ios": {
+    "targets": [
+      "macOS",
+      "iOS"
+    ],
+    "dependencies": {
+      "openssl":"1.0.2l",
+      "python":"2.7.13",
+      "tornado": ">=4.0",
+      "singledispatch": ">=0",
+      "backports_abc": ">=0",
+      "ply": "==3.10"
+    }
   }
 }
