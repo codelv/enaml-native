@@ -71,6 +71,14 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
         }
     }
 
+
+//    @Override
+//    public void notifyDataSetChanged() {
+//        try {
+//            super.notifyDataSetChanged();
+//        } catch (IllegalState)
+//    }
+
     interface FragmentListener {
         View onCreateView();
         void onDestroyView();
