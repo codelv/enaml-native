@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 import sh
 import os
 import re
@@ -25,9 +25,10 @@ def cd(newdir):
 
 #: Hack...
 p4a_root = join(dirname(realpath(__file__)),'python-for-android')
+p4i_root = join(dirname(realpath(__file__)),'python-for-ios')
+
 sys.path.append(p4a_root)
 from pythonforandroid.logger import shprint
-
 
 
 class Command(Atom):
@@ -80,7 +81,7 @@ class Init(Command):
                 pkg = json.load(f,object_pairs_hook=OrderedDict)
             pkg['name'] = args.name
             pkg['version'] = "1.0"
-            pkg['env']['bundle_id'] = args.bundle_id
+            pkg['bundle_id'] = args.bundle_id
             with open('package.json', 'w') as f:
                 json.dump(pkg, f, indent=4)
 
@@ -129,21 +130,35 @@ class CleanPython(Command):
     help = set_default("Remove python-for-android build and .so libs")
     args = set_default([
         ('-a', dict(action='store_true', help="Clean all")),
+        ('--ios',dict(action='store_true', help="Clean iOS only")),
+        ('--android',dict(action='store_true', help="Clean android only")),
     ])
 
     def run(self, args=None):
         ctx = self.ctx
 
-        with cd(ctx['env']['p4a']):
-            if args and args.a:
-                shprint(sh.python, 'p4a.py', 'clean_all')
-                #for arch in ctx['arches']:
-                #    #: Clean so
-                #    shprint(sh.rm, '-R', 'android/app/src/main/libs/{}/'.format(arch))
-            else:
-                shprint(sh.python, 'p4a.py', 'clean_dists')
-                shprint(sh.python, 'p4a.py', 'clean_builds')
-
+        if args is None or not args.ios:
+            with cd(ctx['android']['p4a']):
+                if args and args.a:
+                    shprint(sh.python, 'p4a.py', 'clean_all')
+                    #for arch in ctx['arches']:
+                    #    #: Clean so
+                    #    shprint(sh.rm, '-R', 'android/app/src/main/libs/{}/'.format(arch))
+                else:
+                    shprint(sh.python, 'p4a.py', 'clean_dists')
+                    shprint(sh.python, 'p4a.py', 'clean_builds')
+        if args is None or not args.android:
+            if args and args.a: #: Only for clean all, building takes FOREVER
+                with cd(ctx['ios']['p4i']):
+                    recipes = []
+                    for line in sh.python('toolchain.py','status').stdout.split("\n"):
+                        print(line)
+                        if line.split("-")[-1].strip().lower()=="not built":
+                            continue
+                        recipes.append(line.split(" ")[0])
+                    print("Cleaning {}".format(recipes))
+                    for r in recipes:
+                        shprint(sh.python,'toolchain.py','clean',r)
 
 class NdkBuild(Command):
     title = set_default("ndk-build")
@@ -151,8 +166,8 @@ class NdkBuild(Command):
 
     def run(self, args=None):
         ctx = self.ctx
-        ndk_build = sh.Command(join(ctx['env']['ndk'], 'ndk-build'))
-        arches = ctx['arches']
+        ndk_build = sh.Command(join(ctx['android']['ndk'], 'ndk-build'))
+        arches = ctx['android']['arches']
         with cd('android/app/src/main/jni'):
 
             #: Patch Applicaiton.mk to have the correct ABI's
@@ -173,36 +188,88 @@ class NdkBuild(Command):
             shprint(ndk_build)
 
 
+class CrossCompile(Command):
+    title = set_default("cross-compile")
+    help = set_default("Build the python requirements for ios")
+
+    def run(self, args=None):
+        import crosscompile
+        from crosscompile.recipe import Platform,Arch
+        b = crosscompile.Builder(
+            requirements=[
+                crosscompile.recipes.openssl.Recipe,
+            ],
+            platforms=[
+                    Platform(name='macOS',arches=[
+                        Arch(name='macosx.x86_64'),
+                    ]),
+                    Platform(name='iOS',arches=[
+                        Arch(name='iphonesimulator.x86_64'),
+                        Arch(name='iphonesimulator.i386'),
+                        Arch(name='iphoneos.armv7'),
+                        Arch(name='iphoneos.armv7s'),
+                        Arch(name='iphoneos.armv64'),
+                    ]),
+                    Platform(name='tvOS',arches=[
+                        Arch(name='appletvsimulator.x86_64'),
+                        Arch(name='appletvos.arm64'),
+                    ]),
+                    Platform(name='watchOS',arches=[
+                        Arch(name='watchsimulator.i386'),
+                        Arch(name='watchos.armv7k'),
+                    ]),
+                ],
+
+        )
+        b.build()
+
+
+
 class BuildPython(Command):
     """ Builds an enaml-native python app using the following steps:
 
+        For Android:
         1. Runs ndk-build to build JNI modules
         2. Run p4a apk to build python requirements for each arch
             and copies them to the lib a local folder
         3. Pull all so files from site-packages and rename to lib.pkg.to.so
             and place them in the lib/<arch> folder
+
+        For iOS:
+        1. Run p4i toolchain build <req>
     """
     title = set_default("build-python")
     help = set_default("Build the python requirements")
     args = set_default([
         ('-d', dict(action='store_true', help="Print full debug log")),
+        ('--ios', dict(action='store_true', help="iOS only")),
+        ('--android', dict(action='store_true', help="Android only")),
     ])
 
     def run(self, args=None):
-        ctx = self.ctx
+        if args is None or not args.ios:
+            self.run_android(args)
+        if args is None or not args.android:
+            self.run_ios(args)
 
-        env = ctx['env']
-        reqs = ",".join(ctx['dependencies'].keys())
+        #: Extra cleanup
+        self.cmds['trim-assets'].run()
+
+    def run_android(self,args):
+        ctx = self.ctx
+        env = ctx['android']
+        reqs = ",".join(env['dependencies'].keys())
 
         #: Run ndk build
         #: Um, we're passing args from another command?
         self.cmds['ndk-build'].run(args)
 
         #: Build for each arch
-        for arch in ctx['arches']:
+        for arch in env['arches']:
             cfg = dict(
                arch=arch,
-               reqs=reqs
+               reqs=reqs,
+               bundle_id=ctx['bundle_id']
             )
             cfg.update(env)
 
@@ -216,10 +283,10 @@ class BuildPython(Command):
                 logger = logging.getLogger('p4a')
                 logger.level = logging.DEBUG
 
-            with cd(ctx['env']['p4a']):
+            with cd(ctx['android']['p4a']):
                 shprint(sh.python,*'p4a.py apk --arch={arch} '
                           '--private=../src '
-                          '--package={bundle_id} '
+                          '--package={} '
                           '--name=EnamlNativeApplication '
                           '--dist-name=enaml-native '
                           '--version=0.1 '
@@ -258,9 +325,14 @@ class BuildPython(Command):
                     #: Rename mod.so to pkg.mod.so and move to libs
                     shprint(sh.mv,mod, join(dst, pgk))
 
+    def run_ios(self,args):
+        ctx = self.ctx
+        env = ctx['ios']
+        #: Replace crystax with just python on ios
+        reqs = env['dependencies'].keys()
 
-        #: Extra cleanup
-        self.cmds['trim-assets'].run()
+        with cd('python-for-ios'):
+            shprint(sh.python,'toolchain.py','build',*reqs)
 
 
 class TrimAssets(Command):
@@ -271,7 +343,7 @@ class TrimAssets(Command):
         ctx = self.ctx
 
         #: Clean each arch
-        for arch in ctx['arches']:
+        for arch in ctx['android']['arches']:
             with cd('android/app/src/main/python/{arch}/site-packages/'.format(arch=arch)):
                 shprint(sh.find,'.','-type','f','-name','*.py','-delete')
                 shprint(sh.find,'.','-type','f','-name','*.pyc','-delete')
@@ -302,11 +374,11 @@ class BundleAssets(Command):
 
     def run(self, args=None):
         ctx = self.ctx
-        env = ctx['env']
+        env = ctx['android']
         #: Clean each arch
-        for arch in ctx['arches']:
+        for arch in env['arches']:
             #: Remove old
-            cfg = dict(arch=arch)
+            cfg = dict(arch=arch,bundle_id=ctx['bundle_id'])
             cfg.update(env)
             root = abspath(os.getcwd())
             with cd('android/app/src/main/python/'):
@@ -357,6 +429,11 @@ class BundleAssets(Command):
                 'android/app/src/main/python/python.zip',
                 'android/app/src/main/assets/python/python.zip')
 
+        #: And wth, just copy it to the ios folder too :)
+        shprint(sh.cp,
+                'android/app/src/main/python/python.zip',
+                'ios/App/Python/python.zip')
+        #: Can iOS unpack this??
 
 class AllPython(Command):
     title = set_default("all-python")
@@ -401,7 +478,7 @@ class RunAndroid(Command):
 
     def run(self, args=None):
         ctx = self.ctx
-        bundle_id = ctx['env']['bundle_id']
+        bundle_id = ctx['bundle_id']
         with cd("android"):
             gradlew = sh.Command('./gradlew')
 
@@ -413,6 +490,42 @@ class RunAndroid(Command):
             shprint(gradlew, 'installDebug')
             shprint(sh.adb, 'shell', 'am', 'start', '-n',
                         '{}/com.enaml.MainActivity'.format(bundle_id))
+
+
+class CleanIOS(Command):
+    title = set_default("clean-ios")
+    help = set_default("Clean the ios project")
+
+    def run(self, args=None):
+        with cd('ios'):
+            shprint(sh.xcodebuild, 'clean', '-project', 'App.xcodeproj',
+                    '-configuration', 'ReleaseAdhoc', '-alltargets')
+
+
+class RunIOS(Command):
+    title = set_default("run-ios")
+    help = set_default("Build and run the ios project")
+    # args = set_default([
+    #     ('name',dict(help="Project name")),
+    #     ('bundle_id',dict(help="App bundleId")),
+    #     ('destination', dict(help="Project destination folder")),
+    #     #('-t --template', dict(dest='template', action='store_const',help="Project destination folder")),
+    # ])
+
+    def run(self, args=None):
+        ctx = self.ctx
+        with cd('ios'):
+            shprint(sh.xcrun, 'xcodebuild',
+                    '-scheme', 'App',
+                    '-project', 'App.xcodeproj',
+                    '-configuration', 'Debug',
+                    #'-destination', 'platform=iOS Simulator,name=iPhone 7 Plus,OS=10.2',
+                    '-derivedDataPath',
+                    'build')
+            shprint(sh.xcrun, 'simctl', 'install', 'booted',
+                    'build/Build/Products/Debug-iphonesimulator/App.app')
+            shprint(sh.xcrun, 'simctl', 'launch', 'booted', ctx['bundle_id'])
+
 
 
 
@@ -453,9 +566,11 @@ class EnamlNativeCli(Atom):
         with open(self.package) as f:
             self.ctx = json.load(f)
 
-        #: Add p4a to ctx
+        #: Hack.. Add p4a to ctx
         global p4a_root
-        self.ctx['env']['p4a'] = p4a_root
+        global p4i_root
+        self.ctx['android']['p4a'] = p4a_root
+        self.ctx['ios']['p4i'] = p4i_root
 
         #: Build parser, prepare commands
         subparsers = parser.add_subparsers()
