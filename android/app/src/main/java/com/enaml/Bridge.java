@@ -784,82 +784,84 @@ public class Bridge {
      * @param view
      */
     public void processEvents(byte[] data) {
-        MessageUnpacker unpacker = newDefaultUnpacker(data);
-        try {
-            int eventCount = unpacker.unpackArrayHeader();
-            for (int i=0; i<eventCount; i++) {
-                int eventTuple = unpacker.unpackArrayHeader(); // Unpack event tuple
-                String eventType = unpacker.unpackString(); // first value
-                int paramCount = unpacker.unpackArrayHeader();
+        mBridgeHandler.post(()->{
+            MessageUnpacker unpacker = newDefaultUnpacker(data);
+            try {
+                int eventCount = unpacker.unpackArrayHeader();
+                for (int i=0; i<eventCount; i++) {
+                    int eventTuple = unpacker.unpackArrayHeader(); // Unpack event tuple
+                    String eventType = unpacker.unpackString(); // first value
+                    int paramCount = unpacker.unpackArrayHeader();
 
-                switch (eventType) {
-                    case CREATE:
-                        int objId = unpacker.unpackInt();
-                        String objClass = unpacker.unpackString();
-                        int argCount = unpacker.unpackArrayHeader();
-                        Value[] args = new Value[argCount];
-                        for (int j=0; j<argCount; j++) {
-                            Value v = unpacker.unpackValue();
-                            args[j] = v;
-                        }
-                        mTaskQueue.add(()->{createObject(objId, objClass, args);});
-                        break;
+                    switch (eventType) {
+                        case CREATE:
+                            int objId = unpacker.unpackInt();
+                            String objClass = unpacker.unpackString();
+                            int argCount = unpacker.unpackArrayHeader();
+                            Value[] args = new Value[argCount];
+                            for (int j=0; j<argCount; j++) {
+                                Value v = unpacker.unpackValue();
+                                args[j] = v;
+                            }
+                            mTaskQueue.add(()->{createObject(objId, objClass, args);});
+                            break;
 
-                    case METHOD:
-                        objId = unpacker.unpackInt();
-                        int resultId = unpacker.unpackInt();
-                        String objMethod = unpacker.unpackString();
-                        argCount = unpacker.unpackArrayHeader();
-                        args = new Value[argCount];
-                        for (int j=0; j<argCount; j++) {
-                            Value v = unpacker.unpackValue();
-                            args[j] = v;
-                        }
-                        mTaskQueue.add(()->{updateObject(objId, resultId, objMethod, args);});
-                        break;
+                        case METHOD:
+                            objId = unpacker.unpackInt();
+                            int resultId = unpacker.unpackInt();
+                            String objMethod = unpacker.unpackString();
+                            argCount = unpacker.unpackArrayHeader();
+                            args = new Value[argCount];
+                            for (int j=0; j<argCount; j++) {
+                                Value v = unpacker.unpackValue();
+                                args[j] = v;
+                            }
+                            mTaskQueue.add(()->{updateObject(objId, resultId, objMethod, args);});
+                            break;
 
-                    case FIELD:
-                        objId = unpacker.unpackInt();
-                        String objField = unpacker.unpackString();
-                        argCount = unpacker.unpackArrayHeader();
-                        args = new Value[argCount];
-                        for (int j=0; j<argCount; j++) {
-                            Value v = unpacker.unpackValue();
-                            args[j] = v;
-                        }
-                        mTaskQueue.add(()->{updateObjectField(objId, objField, args);});
-                        break;
+                        case FIELD:
+                            objId = unpacker.unpackInt();
+                            String objField = unpacker.unpackString();
+                            argCount = unpacker.unpackArrayHeader();
+                            args = new Value[argCount];
+                            for (int j=0; j<argCount; j++) {
+                                Value v = unpacker.unpackValue();
+                                args[j] = v;
+                            }
+                            mTaskQueue.add(()->{updateObjectField(objId, objField, args);});
+                            break;
 
-                    case DELETE:
-                        objId = unpacker.unpackInt();
-                        mTaskQueue.add(()->{deleteObject(objId);});
-                        break;
+                        case DELETE:
+                            objId = unpacker.unpackInt();
+                            mTaskQueue.add(()->{deleteObject(objId);});
+                            break;
 
-                    case RESULT:
-                        objId = unpacker.unpackInt();
-                        Value arg = unpacker.unpackValue();
-                        mTaskQueue.add(()->{setResult(objId, arg);});
-                        break;
+                        case RESULT:
+                            objId = unpacker.unpackInt();
+                            Value arg = unpacker.unpackValue();
+                            mTaskQueue.add(()->{setResult(objId, arg);});
+                            break;
 
-                    case SHOW:
-                        mTaskQueue.add(()->{mActivity.setView(getRootView());});
-                        break;
+                        case SHOW:
+                            mTaskQueue.add(()->{mActivity.setView(getRootView());});
+                            break;
 
-                    case ERROR:
-                        String errorMessage = unpacker.unpackString();
-                        mTaskQueue.add(()->{mActivity.showErrorMessage(errorMessage);});
-                        break;
+                        case ERROR:
+                            String errorMessage = unpacker.unpackString();
+                            mTaskQueue.add(()->{mActivity.showErrorMessage(errorMessage);});
+                            break;
+                    }
                 }
+            } catch (IOException e) {
+                mActivity.runOnUiThread(()->{
+                    mActivity.showErrorMessage(e);
+                });
             }
-        } catch (IOException e) {
-            mActivity.runOnUiThread(()->{
-                mActivity.showErrorMessage(e);
-            });
-        }
 
-        // Process requested tasks
-        mActivity.runOnUiThread(()->{
-            runUntilCurrent();
+            // Process requested tasks
+            mActivity.runOnUiThread(()->{
+                runUntilCurrent();
+            });
         });
     }
 
