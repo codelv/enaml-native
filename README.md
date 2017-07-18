@@ -1,10 +1,15 @@
 # enaml-native
 Build native mobile apps in python using enaml and widgets native to the platform.  Android apps are currently working, iOS implementation planned.
 
+   
+### Features ###
+1. Enaml's features: declarative syntax, conditional and looper rendering, automatic data binding
+2. Live app code reloading (like react-native's live reload)
 
-Latest video here [on youtube](https://youtu.be/4bm5fb5k5mc)
-
-Try out the beta demo app here [on google play](https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo)
+### Demos ###
+1. Latest video here [on youtube](https://youtu.be/4bm5fb5k5mc)
+2. Live app reloading is now supported [demo](https://youtu.be/CbxVc_vNiNk)
+3. Try out the beta demo app here [on google play](https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo)
 
 
 <div>
@@ -25,13 +30,6 @@ I made this because wanted to have a more "React Native" like environment that:
 2. Uses native widgets (Android / iOS)
 3. Can be run from Android Studio / XCode (ie no bootstraps)
 4. Uses enaml's models, and declarative and dynamic widget framework instead of kvlang
-
-   
-### Features ###
-
-1. Conditional and Looper based rendering
-2. Data binding
-3. Declarative syntax
 
 
 ## Thanks to ##
