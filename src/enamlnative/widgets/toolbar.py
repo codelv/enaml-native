@@ -25,6 +25,9 @@ class ProxyToolbar(ProxyViewGroup):
     #: A reference to the widget declaration.
     declaration = ForwardTyped(lambda: Toolbar)
 
+    def set_content_padding(self, padding):
+        raise NotImplementedError
+
     def set_title(self, text):
         raise NotImplementedError
 
@@ -41,11 +44,14 @@ class ProxyToolbar(ProxyViewGroup):
         raise NotImplementedError
 
 
-
 class Toolbar(ViewGroup):
     """ A standard toolbar for use within application content.
 
     """
+
+    #: Sets the content padding
+    content_padding = d_(Tuple(int))
+
     #: Set the title of this toolbar.
     title = d_(Unicode())
 
@@ -67,7 +73,7 @@ class Toolbar(ViewGroup):
     # --------------------------------------------------------------------------
     # Observers
     # --------------------------------------------------------------------------
-    @observe('title', 'title_color', 'title_margins', 'subtitle', 'subtitle_color')
+    @observe('content_padding','title', 'title_color', 'title_margins', 'subtitle', 'subtitle_color')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

@@ -13,8 +13,8 @@ from atom.api import Typed, set_default
 
 from enamlnative.widgets.toolbar import ProxyToolbar
 
-from .android_view_group import AndroidViewGroup, ViewGroup
-from .bridge import JavaMethod, JavaCallback
+from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
+from .bridge import JavaMethod, JavaCallback, JavaField
 
 
 class Toolbar(ViewGroup):
@@ -26,9 +26,15 @@ class Toolbar(ViewGroup):
     setTitleTextColor = JavaMethod('android.graphics.Color')
     setNavigationOnClickListener = JavaMethod('android.view.View$OnClickListener')
     setOnMenuItemClickListener = JavaMethod('android.widget.Toolbar$OnMenuItemClickListener')
-
+    setContentInsetsAbsolute = JavaMethod('int', 'int')
+    setContentInsetsRelative = JavaMethod('int', 'int')
     onNavigationClick = JavaCallback('android.view.View')
     onMenuItemClick = JavaCallback('android.view.MenuItem')
+
+
+class ToolbarLayoutParams(MarginLayoutParams):
+    __javaclass__ = set_default('android.support.v7.widget.Toolbar$LayoutParams')
+    gravity = JavaField('int')
 
 
 class AndroidToolbar(AndroidViewGroup, ProxyToolbar):
@@ -53,16 +59,23 @@ class AndroidToolbar(AndroidViewGroup, ProxyToolbar):
         """
         super(AndroidToolbar, self).init_widget()
         d = self.declaration
+        if d.content_padding:
+            self.set_content_padding(d.content_padding)
         if d.title:
             self.set_title(d.title)
         if d.title_margins:
-            self.set_title_color(d.title_margins)
+            self.set_title_margins(d.title_margins)
         if d.title_color:
             self.set_title_color(d.title_color)
         if d.subtitle:
             self.set_subtitle(d.subtitle)
         if d.subtitle_color:
             self.set_subtitle_color(d.subtitle_color)
+
+        #: Force all children to use ToolbarLayoutParams
+        #for c in self.children():
+        #    c.layout_param_type = ToolbarLayoutParams
+
 
     # def init_layout(self):
     #     """
@@ -74,6 +87,13 @@ class AndroidToolbar(AndroidViewGroup, ProxyToolbar):
     # --------------------------------------------------------------------------
     # ProxyToolbar API
     # --------------------------------------------------------------------------
+    def set_content_padding(self, padding):
+        # Left right
+        self.widget.setContentInsetsAbsolute(padding[0], padding[2])
+        # Start, end
+        self.widget.setContentInsetsRelative(padding[1], padding[3])
+
+
     def set_title(self, text):
         self.widget.setTitle(text)
 
