@@ -11,6 +11,10 @@ Build native mobile apps in python using enaml and widgets native to the platfor
 2. Live app reloading is now supported [demo](https://youtu.be/CbxVc_vNiNk)
 3. Try out the beta demo app here [on google play](https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo)
 
+### Docs and Examples ###
+
+See the wiki https://github.com/frmdstryr/enaml-native/wiki 
+
 
 <div>
 <img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-1.png" width="240" style="float: left;">
