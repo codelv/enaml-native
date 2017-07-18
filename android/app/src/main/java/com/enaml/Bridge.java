@@ -56,16 +56,12 @@ public class Bridge {
     public static final String FIELD = "f";
     public static final String DELETE = "d";
     public static final String RESULT = "r";
-    public static final String SHOW = "s";
     public static final String ERROR = "e";
 
     final MainActivity mActivity;
 
     // Context
     final Context mContext;
-
-    // Root view
-    View mRootView;
 
     // Cache for constructors methods
     final HashMap<String,Constructor> mConstructorCache = new HashMap<String, Constructor>();
@@ -312,20 +308,6 @@ public class Bridge {
     }
 
     /**
-     * Return the root view
-     * @return
-     */
-    public View getRootView() {
-        return mRootView;
-    }
-
-    /**
-     * Return the view with the given id.
-     * @return
-     */
-    public View getView(int objId) { return (View) mObjectCache.get(objId);}
-
-    /**
      * Create a view with the given id.
      *
      * The first call will be set as the root node.
@@ -354,9 +336,6 @@ public class Bridge {
             if (obj instanceof View) {
                 View view = (View) obj;
                 view.setId(objId);
-                if (mRootView==null) {
-                    mRootView = view;
-                }
             }
 
             // Save to cache
@@ -840,10 +819,6 @@ public class Bridge {
                             objId = unpacker.unpackInt();
                             Value arg = unpacker.unpackValue();
                             mTaskQueue.add(()->{setResult(objId, arg);});
-                            break;
-
-                        case SHOW:
-                            mTaskQueue.add(()->{mActivity.setView(getRootView());});
                             break;
 
                         case ERROR:

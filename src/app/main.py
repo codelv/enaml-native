@@ -30,14 +30,11 @@ def main():
         from enamlnative.android.app import AndroidApplication
         app = AndroidApplication('com.enaml.MainActivity')
     #app.debug = True #: Makes a lot of lag!
+    app.dev = '192.168.34.103'
+    app.reload_view = reload_view
     app.deferred_call(load_view, app)
     app.deferred_call(dump_stats)
     app.start()
-
-
-def import_hooks(bundle_id):
-    """ Add an import hook for loading so files renamed pkg.name.so"""
-
 
 
 def load_view(app):
@@ -49,6 +46,16 @@ def load_view(app):
             app.view = ContentView()
     app.show_view()
 
+
+def reload_view(app):
+    import enaml
+    import enamlnative
+    with enamlnative.imports():
+        with enaml.imports():
+            import view
+            reload(view)
+            app.view = view.ContentView()
+    app.show_view()
 
 def dump_stats():
     try:

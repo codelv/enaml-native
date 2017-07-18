@@ -37,7 +37,6 @@ enamldef MenuItem(Button):
   style = 'borderless'
   padding = (10,10,10,10)
 
-
 enamldef MenuIcon(IconButton):
   #: This should have the fancy ripple effect on press
   padding = (12, 12, 12 ,12)
@@ -250,11 +249,35 @@ enamldef ContentView(VBox): content_view:
   attr new_pages = []
   attr current_page << view_pager.pages[view_pager.current_index if view_pager.current_index < len(view_pager.pages) else -1] #: TODO: Make pages attribute observable...
   Toolbar: toolbar:
-    title << u"Enaml Native - {}".format(current_page.title)
-    subtitle << current_page.subtitle
+    #title << u"Enaml Native - {}".format(current_page.title)
+    #subtitle << current_page.subtitle
     title_color = '#FFFFFF'
     subtitle_color = '#EEEEEE'
     background_color = '#004981'
+    content_padding = (0,0,0,0)
+    HBox:
+      layout_gravity = "left"
+      IconButton:
+        text = u"{md-menu}"
+        text_size = 24
+        text_color << toolbar.title_color
+        style = "borderless"
+        layout_width = "48"
+        layout_height = "48"
+        clicked ::
+          if not drawer_layout.opened:
+            drawer_layout.opened = [left_drawer]
+          else:
+            drawer_layout.opened = []
+      TextView:
+        text_size = 18
+        text_color = "#FFFFFF"
+        text << u"Enaml Native - {}".format(current_page.title)
+        # Conditional:
+        #   condition << bool(current_page.subtitle)
+        #   TextView:
+        #     text << current_page.subtitle
+        #     text_color = '#EEEEEE'
 
   DrawerLayout: drawer_layout:
     layout_height = 'match_parent'

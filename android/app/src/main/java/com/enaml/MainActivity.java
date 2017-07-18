@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     public static MainActivity mActivity = null;
 
     // Assets version
-    final int mAssetsVersion = 9; // BuildConfig.VERSION_CODE;
+    final int mAssetsVersion = BuildConfig.VERSION_CODE;
     final boolean mAssetsAlwaysOverwrite = BuildConfig.DEBUG; // Set only on debug builds
 
     // Save layout elements to display a fade in animation
@@ -165,10 +165,9 @@ public class MainActivity extends AppCompatActivity {
         }
         Log.e(TAG,message);
 
+        // Move to top of screen
         TextView textView = (TextView) findViewById(R.id.textView);
-        textView.setTop(0);
-        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) textView.getLayoutParams();
-        params.setMargins(10,10, 10, 10);
+        ((ViewGroup.MarginLayoutParams) textView.getLayoutParams()).setMargins(10, 10, 10, 10);
         textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
         textView.setTextColor(Color.RED);
         textView.setText(message);
@@ -208,11 +207,40 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setView(View view) {
         Log.i(TAG, "View loaded!");
+        // Support reloading the view
+        if (mPythonView!=null) {
+            mContentView.removeView(mPythonView);
+            mContentView.forceLayout();
+            mLoadingView.setVisibility(View.VISIBLE);
+            //animateView(mLoadingView,mContentView);
+        }
         mPythonView = view;
         mContentView.addView(view);
         animateView(view, mLoadingView);
         mLoadingDone = true;
     }
+
+    /**
+     * Show the loading screen again with the given message
+     */
+    public void showLoading(String message) {
+        // Set the message
+        TextView textView = (TextView) findViewById(R.id.textView);
+        float dp = getResources().getDisplayMetrics().density;
+        ((ViewGroup.MarginLayoutParams) textView.getLayoutParams()).setMargins(10, Math.round(200*dp), 10, 10);
+        textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        textView.setTextColor(Color.GRAY);
+        textView.setText(message);
+
+        // Show progress bar
+        View progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.VISIBLE);
+
+        // Swap the views back
+        animateView(mLoadingView, mPythonView);
+    }
+
+
 
     protected void animateView(View in, View out) {
         // Set the content view to 0% opacity but visible, so that it is visible
@@ -252,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     /**
-     * Pass data to bridge for processing.
+     * Pass data to bridge for processing. Called by Python via the JNI
      * @param data
      */
     public void processEvents(byte[] data) {

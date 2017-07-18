@@ -2,13 +2,15 @@
 import sh
 import os
 import re
+import io
 import sys
 import json
 import logging
+import json
 from glob import glob
 from os.path import join, exists, abspath, expanduser, realpath, dirname
 from argparse import ArgumentParser, Namespace
-from atom.api import Atom, Dict, List, Unicode, Instance, set_default
+from atom.api import Atom, Value, Callable, Dict, List, Unicode, Float, Int, Instance, set_default
 from contextlib import contextmanager
 from collections import OrderedDict
 
@@ -32,6 +34,7 @@ from pythonforandroid.logger import shprint
 
 
 class Command(Atom):
+    _instance = None
     title = Unicode()
     desc = Unicode()
     help = Unicode()
@@ -39,6 +42,10 @@ class Command(Atom):
     cmds = Dict()
     args = List(tuple)
     parser = Instance(ArgumentParser)
+
+    @classmethod
+    def instance(cls):
+        return cls._instance
 
     def run(self, args):
         pass
@@ -527,6 +534,189 @@ class RunIOS(Command):
             shprint(sh.xcrun, 'simctl', 'launch', 'booted', ctx['bundle_id'])
 
 
+class Server(Command):
+    """ Run a dev server to host files. Only view files can be reloaded at the moment. """
+    title = set_default("start")
+    help = set_default("Start a debug server for serving files to the app")
+    #: Dev server index page to render
+    index_page = Unicode("enaml-native dev server. "
+                         "When you change a source file it pushes to the app.")
+    #: Server port
+    port = Int(8888)
+
+    #: Time in ms to wait before triggering a reload
+    reload_delay = Float(1)
+    _reload_count = Int() #: Pending reload requests
+
+    #: Watchdog  observer
+    observer = Instance(object)
+
+    #: Watchdog handler
+    watcher = Instance(object)
+
+    #: Websocket handler implementation
+    handler = Instance(object)
+
+    #: Callable to add a callback from a thread into the event loop
+    add_callback = Callable()
+
+    #: Callable to add a callback at some later time
+    call_later = Callable()
+
+    def run(self, args=None):
+        ctx = self.ctx
+        #: Look for tornado or twisted in reqs
+        use_twisted = 'twisted' in ctx['android']['dependencies']
+
+        #: Setup observer
+        try:
+            from watchdog.observers import Observer
+            from watchdog.events import LoggingEventHandler
+        except ImportError:
+            print("Watchdog is required the dev server: pip install watchdog")
+            return
+        self.observer = Observer()
+        server = self
+
+        class AppNotifier(LoggingEventHandler):
+            def on_any_event(self, event):
+                super(AppNotifier, self).on_any_event(event)
+                #: Use add callback to push to event loop thread
+                server.add_callback(server.on_file_changed, event)
+
+        with cd('src'):
+            print("Watching {}".format(abspath('.')))
+            self.watcher = AppNotifier()
+            self.observer.schedule(self.watcher, abspath('.'), recursive=True)
+            self.observer.start()
+
+            if use_twisted:
+                self.run_twisted(args)
+            else:
+                self.run_tornado(args)
+
+    def run_tornado(self, args):
+        """ Tornado dev server implementation """
+        server = self
+        import tornado.ioloop
+        import tornado.web
+        import tornado.websocket
+
+        ioloop = tornado.ioloop.IOLoop.current()
+
+        class DevWebSocketHandler(tornado.websocket.WebSocketHandler):
+            def open(self):
+                super(DevWebSocketHandler, self).open()
+                server.on_open(self)
+
+            def on_message(self, message):
+                server.on_message(message)
+
+            def on_close(self):
+                super(DevWebSocketHandler, self).on_close()
+                server.on_close(self)
+
+        class MainHandler(tornado.web.RequestHandler):
+            def get(self):
+                self.write(server.index_page)
+
+        #: Set the call later method
+        server.call_later = ioloop.call_later
+        server.add_callback = ioloop.add_callback
+
+        app = tornado.web.Application([
+            (r"/", MainHandler),
+            (r"/dev", DevWebSocketHandler),
+        ])
+
+        app.listen(self.port)
+        print("Tornado Dev server started on {}".format(self.port))
+        ioloop.start()
+
+    def run_twisted(self, args):
+        """ Twisted dev server implementation """
+        server = self
+
+        from twisted.internet import reactor
+        from twisted.web import resource
+        from twisted.web.websocket import WebSocketHandler, WebSocketSite
+
+        class DevWebSocketHandler(WebSocketHandler):
+            def connectionMade(self):
+                super(DevWebSocketHandler, self).connectionMade()
+                server.on_open()
+
+            def frameReceived(self, frame):
+                server.on_message(frame)
+
+            def connectionLost(self,reason=None):
+                super(DevWebSocketHandler,self).connectionLost(reason)
+                server.on_close()
+                
+            def write_message(self, message):
+                self.transport.write(message)
+
+        #: Set the call later method
+        server.call_later = reactor.callLater
+        server.add_callback = reactor.callFromThread
+
+        class MainHandler(resource.Resource):
+            def render_GET(self, req):
+                return server.index_page
+
+        root = MainHandler()
+        site = WebSocketSite(root)
+        site.addHandler("/dev", DevWebSocketHandler)
+        reactor.listenTCP(self.port, site)
+        print("Twisted Dev server started on {}".format(self.port))
+        reactor.run()
+
+    #: ========================================================
+    #: Shared protocol implementation
+    #: ========================================================
+    def on_open(self, handler):
+        self._reload_count = 0
+        print("Client connected!")
+        self.handler = handler
+
+    def on_message(self, msg):
+        print(msg)
+        
+    def send_message(self, msg):
+        """ Send a message to the client """
+        if self.handler is None:
+            return #: Client not connected
+        self.handler.write_message(msg)
+
+    def on_close(self, handler):
+        print("Client left!")
+        self.handler = None
+
+    def on_file_changed(self, event):
+        """ """
+        print(event)
+        self._reload_count +=1
+        self.call_later(self.reload_delay, self._trigger_reload)
+
+    def _trigger_reload(self):
+        self._reload_count -=1
+        if self._reload_count == 0:
+            print("Triggering reload")
+            #: For now just do the view...
+            with open('app/view.enaml') as f:
+                data = f.read()
+            msg = {
+                'type':'reload',
+                'files':{
+                    'view.enaml':data,
+                }
+            }
+            #buf = io.BytesIO(msgpack.dumps(msg))
+            #def read_chunk():
+            #    return buf.read(1024)
+            #for chunk in iter(read_chunk,''):
+            #    print("Send message")
+            self.send_message(json.dumps(msg))
 
 
 def find_commands(cls):

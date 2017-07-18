@@ -26,7 +26,6 @@ class Command:
     FIELD = "f"
     DELETE = "d"
     RESULT = "r"
-    SHOW = "s"
     ERROR = "e"
 
 class ExtType:
@@ -123,7 +122,7 @@ class JavaMethod(Property):
         f.suppressed = functools.partial(self.suppressed, obj)
         return f
 
-    def __call__(self, obj, *args):
+    def __call__(self, obj, *args, **kwargs):
         if obj.__suppressed__.get(self.name):
             return
 
@@ -155,7 +154,8 @@ class JavaMethod(Property):
             obj.__id__,
             result.__id__ if result else 0,
             self.name,  #: method name
-            bridge_args #: args
+            bridge_args, #: args
+            **kwargs #: kwargs to send_event
         )
         return result
 

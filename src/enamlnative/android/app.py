@@ -10,7 +10,8 @@ The full license is in the file COPYING.txt, distributed with this software.
 '''
 import jnius
 import traceback
-from atom.api import Atom, List, Float, Instance, Value, Dict, Int, Unicode, Typed, Bool
+import unicodedata #: Required by tornado for encodings
+from atom.api import Atom, Callable, List, Float, Instance, Value, Dict, Int, Unicode, Typed, Bool
 from enaml.application import Application, ProxyResolver
 from . import factories
 from . import bridge
@@ -47,13 +48,15 @@ class AppEventListener(jnius.PythonJavaClass):
 
 class Activity(bridge.JavaBridgeObject):
     """ Access to the activity over the bridge """
-    __javaclass__ = Unicode('android.support.v7.app.AppCompatActivity')
+    __javaclass__ = Unicode('com.enaml.MainActivity')
     __id__ = Int(-1) #: ID of -1 is a special reference on the bridge to the activity.
 
     def __init__(self):
         """ This is only a reference, no object needs created by the bridge """
         Atom.__init__(self)
 
+    setView = bridge.JavaMethod('android.view.View')
+    showLoading = bridge.JavaMethod('java.lang.String')
     setActionBar = bridge.JavaMethod('android.widget.Toolbar')
     setSupportActionBar = bridge.JavaMethod('android.support.v7.widget.Toolbar')
     setContentView = bridge.JavaMethod('android.view.View')
@@ -164,29 +167,25 @@ class AndroidApplication(Application):
     #: Bridge widget
     widget = Typed(Activity)
 
-    def _default_widget(self):
-        return Activity()
-
     #: Android Activity
-    activity = Value(object)
+    activity = Value()
 
     #: View to display within the activity
-    view = Value(object)
+    view = Value()
 
     #: If true, debug bridge statements
-    debug = Bool(False)
+    debug = Bool()
+
+    #: Use dev server
+    dev = Unicode()
+    _dev_client = Value()
+    reload_view = Callable()
 
     #:
     dp = Float()
 
-    def _default_dp(self):
-        return self.activity.getResources().getDisplayMetrics().density
-
     #: Event loop
     loop = Instance(EventLoop)
-
-    def _default_loop(self):
-        return TornadoEventLoop()
 
     #: Save reference to the event listener
     listener = Typed(AppEventListener)
@@ -199,6 +198,15 @@ class AndroidApplication(Application):
 
     #: Count of pending send calls
     _bridge_pending = Int(0)
+
+    def _default_widget(self):
+        return Activity()
+
+    def _default_loop(self):
+        return TornadoEventLoop()
+
+    def _default_dp(self):
+        return self.activity.getResources().getDisplayMetrics().density
 
     def __init__(self, activity):
         """ Initialize a AndroidApplication
@@ -217,17 +225,21 @@ class AndroidApplication(Application):
 
         """
         activity = self.activity
+
+        #: Hook for JNI using jnius
         self.listener = AppEventListener(self)
         activity.setAppEventListener(self.listener)
+
+        if self.dev:
+            self.start_dev_session()
+
         self.loop.start()
-        #self.loop.run()
 
     def show_view(self):
         """ Show the view. It uses the first view created.
 
         """
-        view = self.get_view()
-        self.send_event(bridge.Command.SHOW)
+        self.widget.setView(self.get_view())
 
     def show_error(self, msg):
         """ Show the error view with the given message
@@ -252,28 +264,43 @@ class AndroidApplication(Application):
         """
         self.loop.stop()
 
-    def send_event(self, name, *args):
+    def send_event(self, name, *args, **kwargs):
         """ Send an event to Java.
             This call is queued and batched.
 
-       Parameters
+        Parameters
         ----------
         name : str
             The event name to be processed by MainActivity.processMessages.
         *args: args
             The arguments required by the event.
+        **kwargs: kwargs
+            Options for sending. These are:
+
+            now: boolean
+                Send the event now
 
         """
         self._bridge_pending += 1
         self._bridge_queue.append((name, args))
-        self.timed_call(self._bridge_timeout, self._bridge_send)
 
-    def _bridge_send(self):
+        if kwargs.get('now'):
+            self._bridge_send(now=True)
+        else:
+            self.timed_call(self._bridge_timeout, self._bridge_send)
+
+    def _bridge_send(self, now=False):
         """  Send the events over the bridge to be processed by Java
+
+        Parameters
+        ----------
+        now: boolean
+            Send all pending events now instead of waiting for deferred calls to finish.
+            Use this when you want to update the screen
 
         """
         self._bridge_pending -= 1
-        if self._bridge_pending == 0:
+        if self._bridge_queue and (self._bridge_pending == 0 or now):
             if self.debug:
                 print("======== Py --> Java ======")
                 for event in self._bridge_queue:
@@ -452,3 +479,31 @@ class AndroidApplication(Application):
 
     def on_destroy(self):
         self.deferred_call(self.stop)
+
+    # --------------------------------------------------------------------------
+    # Dev Session Implementation
+    # --------------------------------------------------------------------------
+    def start_dev_session(self):
+        """ Start a client that attempts to connect to the dev server
+            running on the host `app.dev`
+        """
+        from .dev import DevServerClient
+        client = DevServerClient.initialize(host=self.dev)
+        client.start()
+
+        #: Save a reference
+        self._dev_client = client
+
+    def reload(self):
+        """ Called when the dev server wants to reload the view. """
+        if self.reload_view is None:
+            print("Warning: Reloading the view is not implemented. "
+                  "Please set `app.reload_view` to support this.")
+            return
+        if self.view is not None:
+            try:
+                self.view.destroy()
+            except:
+                pass
+        self.view = None
+        self.deferred_call(self.reload_view, self)
