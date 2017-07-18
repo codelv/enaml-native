@@ -45,15 +45,6 @@ class AndroidToolkitObject(ProxyToolkitObject):
 
         """
         widget = self.widget
-        # if widget is not None:
-        #     # Each Qt object gets a name. If one is not provided by the
-        #     # widget author, one is generated. This is required so that
-        #     # Qt stylesheet cascading can be prevented (Enaml's styling
-        #     # engine applies the cascade itself). Names provided by the
-        #     # widget author are assumed to be unique.
-        #     d = self.declaration
-        #     name = d.name or u'obj-%d' % id(d)
-        #     widget.setTag(name)
 
     def init_layout(self):
         """ Initialize the layout of the toolkit widget.
@@ -63,9 +54,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
         will be fully initialized and layed out when this is called.
 
         """
-        widget = self.parent_widget()
-        if widget:
-            widget.addView(self.widget)
+        pass
 
     def get_context(self):
         """ Get the context of the View.
@@ -105,17 +94,6 @@ class AndroidToolkitObject(ProxyToolkitObject):
             del self.widget
         super(AndroidToolkitObject, self).destroy()
 
-    def child_removed(self, child):
-        """ Handle the child removed event from the declaration.
-
-        This handler will unparent the child toolkit widget. Subclasses
-        which need more control should reimplement this method.
-
-        """
-        super(AndroidToolkitObject, self).child_removed(child)
-        if child.widget is not None:
-            self.widget.removeView(child.widget)
-
     #--------------------------------------------------------------------------
     # Public API
     #--------------------------------------------------------------------------
@@ -143,6 +121,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
 
         """
         for child in self.children():
-            w = child.widget
-            if w is not None:
-                yield w
+            if child is not None: #: Not sure how this happens
+                w = child.widget
+                if w is not None:
+                    yield w

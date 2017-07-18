@@ -43,8 +43,6 @@ class ListView(AbsListView):
 class BridgedListAdapter(JavaBridgeObject):
     """ An adapter that implements a recycleview pattern.
 
-
-
     """
     __javaclass__ = set_default('com.enaml.adapters.BridgedListAdapter')
     setListView = JavaMethod('android.widget.ListView',
@@ -57,6 +55,7 @@ class BridgedListAdapter(JavaBridgeObject):
     onRecycleView = JavaCallback('int', 'int', 'int')
     onVisibleCountChanged = JavaCallback('int','int')
     onScrollStateChanged = JavaCallback('android.widget.AbsListView','int')
+
 
 class AndroidListView(AndroidAdapterView, ProxyListView):
     """ An Android implementation of an Enaml ProxyListView.

@@ -21,7 +21,6 @@ class View(Widget):
     __javaclass__ = set_default('android.view.View')
     __signature__ = set_default(('android.content.Context',))
 
-    addView = JavaMethod('android.view.View')
     onClick = JavaCallback('android.view.View')
     onKey = JavaCallback('android.view.View', 'int', 'android.view.KeyEvent')
     onTouch = JavaCallback('android.view.View', 'android.view.MotionEvent')
@@ -50,7 +49,6 @@ class View(Widget):
     setTag = JavaMethod('java.lang.Object')
     setToolTipText = JavaMethod('java.lang.CharSequence')
     setVisibility = JavaMethod('int')
-    removeView = JavaMethod('android.view.View')
 
     LAYOUT_DIRECTIONS = {
         'ltr': 0,
