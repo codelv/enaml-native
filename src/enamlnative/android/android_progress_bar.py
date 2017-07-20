@@ -86,9 +86,6 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
     def set_progress(self, progress):
         self.widget.setProgress(progress)
 
-    def set_animated(self, animated):
-        pass
-
     def set_indeterminate(self, indeterminate):
         self.widget.setIndeterminate(indeterminate)
 
