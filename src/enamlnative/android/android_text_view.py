@@ -17,6 +17,30 @@ from .android_view import AndroidView, View
 from .bridge import JavaMethod, JavaCallback
 
 
+class Gravity:
+    bottom = 50  # Push object to the bottom of its container, not changing its size.
+    center = 11  # Place the object in the center of its container in both the vertical and horizontal axis, not changing its size.
+    center_horizontal = 1  # Place object in the horizontal center of its container, not changing its size.
+    center_vertical = 10  # Place object in the vertical center of its container, not changing its size.
+    clip_horizontal = 8  # Additional option that can be set to have the left and/or right edges of the child clipped to its container's bounds. The clip will be based on the horizontal gravity: a left gravity will clip the right edge, a right gravity will clip the left edge, and neither will clip both edges.
+    clip_vertical = 80  # Additional option that can be set to have the top and/or bottom edges of the child clipped to its container's bounds. The clip will be based on the vertical gravity: a top gravity will clip the bottom edge, a bottom gravity will clip the top edge, and neither will clip both edges.
+    end = 800005  # Push object to the end of its container, not changing its size.
+    fill = 77  # Grow the horizontal and vertical size of the object if needed so it completely fills its container.
+    fill_horizontal = 7 # Grow the horizontal size of the object if needed so it completely fills its container.
+    fill_vertical = 70 # Grow the vertical size of the object if needed so it completely fills its container.
+    left = 3 # Push object to the left of its container, not changing its size.
+    right = 5 # Push object to the right of its container, not changing its size.
+    start = 800003 # Push object to the beginning of its container, not changing its size.
+    top = 30
+
+    @staticmethod
+    def parse(gravity):
+        g = 0
+        for key in gravity.split("|"):
+            g |= getattr(Gravity, key)
+        return g
+
+
 class TextView(View):
     __javaclass__ = set_default('android.widget.TextView')
     setAllCaps = JavaMethod('boolean')
@@ -26,6 +50,7 @@ class TextView(View):
     setTextColor = JavaMethod('android.graphics.Color')
     setHighlightColor = JavaMethod('android.graphics.Color')
     setLinkTextColor = JavaMethod('android.graphics.Color')
+    setGravity = JavaMethod('int')
     setTextSize = JavaMethod('float')
     setTypeface = JavaMethod('android.graphics.Typeface', 'int')
     setLines = JavaMethod('int')
@@ -123,6 +148,8 @@ class AndroidTextView(AndroidView, ProxyTextView):
             self.set_text_size(d.text_size)
         if d.text_color:
             self.set_text_color(d.text_color)
+        if d.text_alignment:
+            self.set_text_alignment(d.text_alignment)
         if d.link_color:
             self.set_link_color(d.link_color)
         if d.highlight_color:
@@ -191,6 +218,9 @@ class AndroidTextView(AndroidView, ProxyTextView):
 
         """
         self.widget.setTextKeepState(text)#, 0, len(text))
+
+    def set_text_alignment(self, alignment):
+        self.widget.setGravity(Gravity.parse(alignment))
 
     def set_text_color(self, color):
         self.widget.setTextColor(color)#Color.parseColor(color))

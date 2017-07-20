@@ -46,6 +46,9 @@ class ProxyTextView(View):
     def set_text_color(self, color):
         raise NotImplementedError
 
+    def set_text_alignment(self, alignment):
+        raise NotImplementedError
+
     def set_highlight_color(self, color):
         raise NotImplementedError
 
@@ -118,6 +121,9 @@ class TextView(View):
     #: The unicode text for the label.
     text = d_(Unicode())
 
+    #: Text alignment
+    text_alignment = d_(Unicode())
+
     #: Sets the text color for all the states (normal, selected, focused) to be this color.
     text_color = d_(Unicode())
 
@@ -144,7 +150,7 @@ class TextView(View):
     # --------------------------------------------------------------------------
     @observe('all_caps', 'auto_link_mask', 'input_type',
              'font_family', 'font_style',
-             'text', 'text_color', 'text_size',
+             'text', 'text_color', 'text_size', 'text_alignment',
              'link_color', 'highlight_color',
              'lines', 'max_lines', 'line_spacing', 'letter_spacing')
     def _update_proxy(self, change):
