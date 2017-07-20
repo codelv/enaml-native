@@ -22,7 +22,7 @@ class ProgressBar(View):
     setIndeterminate = JavaMethod('boolean')
     setMax = JavaMethod('int')
     setMin = JavaMethod('int')
-    setProgress = JavaMethod('int', 'boolean')
+    setProgress = JavaMethod('int')#, 'boolean')
     setSecondaryProgress = JavaMethod('int')
 
     STYLE_HORIZONTAL = 0x01010078
@@ -84,8 +84,7 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
     # ProxyProgressBar API
     # --------------------------------------------------------------------------
     def set_progress(self, progress):
-        d = self.declaration
-        self.widget.setProgress(progress, d.animated)
+        self.widget.setProgress(progress)
 
     def set_animated(self, animated):
         pass
