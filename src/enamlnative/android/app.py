@@ -289,6 +289,12 @@ class AndroidApplication(Application):
         else:
             self.timed_call(self._bridge_timeout, self._bridge_send)
 
+    def force_update(self):
+        """ Force an update now. """
+        #: So we don't get out of order
+        self._bridge_pending += 1
+        self._bridge_send(now=True)
+
     def _bridge_send(self, now=False):
         """  Send the events over the bridge to be processed by Java
 

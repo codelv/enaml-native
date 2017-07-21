@@ -13,6 +13,7 @@ import sys
 import traceback
 from enamlnative.widgets.api import *
 from enaml.core.api import Conditional, Looper
+from enamlnative.core.http import AsyncHttpClient
 from datetime import datetime
 
 enamldef HBox(LinearLayout):
@@ -273,11 +274,6 @@ enamldef ContentView(VBox): content_view:
         text_size = 18
         text_color = "#FFFFFF"
         text << u"Enaml Native - {}".format(current_page.title)
-        # Conditional:
-        #   condition << bool(current_page.subtitle)
-        #   TextView:
-        #     text << current_page.subtitle
-        #     text_color = '#EEEEEE'
 
   DrawerLayout: drawer_layout:
     layout_height = 'match_parent'
@@ -299,6 +295,12 @@ enamldef ContentView(VBox): content_view:
                          "Enjoy!\n\n"
                 TextView:
                   text = "Python: {}".format(sys.version)
+            Card:
+               VBox:
+                 CardTitle:
+                   text = "Reloaded"
+                 TextView:
+                   text = "This card was added on the fly via an app reload!"
       Page: console:
         title = "Console"
         Console:
@@ -885,6 +887,39 @@ enamldef ContentView(VBox): content_view:
                         text << "Card {}".format(li.index)
                       TextView:
                         text << li.item
+      Page:
+        title = "Http Client"
+        Scroller:
+          VBox:
+            Card: http_card:
+              attr httpclient = AsyncHttpClient()
+              attr request
+              VBox:
+                CardTitle:
+                  text = "Http Client"
+                TextView:
+                  text = "A bridged wrapper for loopj's AsyncHttpClient "
+                EditText: http_url:
+                  text = "https://raw.githubusercontent.com/frmdstryr/enaml-native/master/package.json"
+                Button:
+                  text = "Download"
+                  clicked ::
+                    f = httpclient.fetch(http_url.text)
+                    http_card.request = f.request
+
+                Conditional:
+                  condition << request is not None
+                  ProgressBar:
+                    progress << request.response.progress
+                  TextView:
+                    text << "Status: {} Reason: ".format(
+                                  request.response.status_code,
+                                  request.response.reason,
+                            )
+                  Conditional:
+                    condition << request.response.ok
+                    TextView:
+                      text << "{}".format(request.response.content)
 
 
     LeftDrawer: left_drawer:

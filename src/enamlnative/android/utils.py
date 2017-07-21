@@ -13,6 +13,7 @@ import re
 import os
 from glob import glob
 
+
 def find_all_javaclasses(path=None, exts=['*.py','*.enaml']):
     """
         Attempts to find all the usage of autoclass in the given directory and

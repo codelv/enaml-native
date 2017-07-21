@@ -660,6 +660,10 @@ public class Bridge {
                         packer.packDouble((double) arg);
                     } else if (argClass == short.class || arg instanceof Short) {
                         packer.packShort((short) arg);
+                    } else if (argClass == byte[].class) {
+                        byte[] bytes = (byte[]) arg;
+                        packer.packBinaryHeader(bytes.length);
+                        packer.addPayload(bytes);
                     } else if (arg instanceof View) {
                         // This only works with ids's created in python
                         packer.packInt(((View) arg).getId());

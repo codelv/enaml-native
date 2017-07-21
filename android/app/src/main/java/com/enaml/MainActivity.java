@@ -200,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     /**
      * Set the content view and fade out the loading view
      * @param view
