@@ -17,7 +17,7 @@ See the wiki https://github.com/frmdstryr/enaml-native/wiki
 
 ### Apps ###
 
-See the wiki for apps using enaml-native.
+See the wiki for [apps using enaml-native](https://github.com/frmdstryr/enaml-native/wiki/Apps).
 
 
 <div>
