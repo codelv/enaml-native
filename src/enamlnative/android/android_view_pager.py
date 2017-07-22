@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed, Int, set_default
+from atom.api import Typed, Int, List, set_default
 
 from enamlnative.widgets.view_pager import (
     ProxyViewPager, ProxyPagerTitleStrip, ProxyPagerTabStrip, ProxyPagerFragment
@@ -82,6 +82,14 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
     #: Pending changes
     _notify_count = Int()
     _notify_delay = Int(2)
+    _pending_calls = List()
+
+    @property
+    def pages(self):
+        """ Get pages """
+        #: Defer the import
+        for p in self.declaration.pages:
+            yield p.proxy
 
     # --------------------------------------------------------------------------
     # Initialization API
@@ -107,7 +115,6 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
 
         #: Create adapter
         self.adapter = BridgedFragmentStatePagerAdapter()
-
 
     def init_layout(self):
         super(AndroidViewPager, self).init_layout()
@@ -141,9 +148,25 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
 
     def _notify_change(self):
         """ After all changes have settled, tell Java it changed """
+        d = self.declaration
         self._notify_count -= 1
         if self._notify_count == 0:
             self.adapter.notifyDataSetChanged()
+            #: Now wait for current page to load, then invoke any pending calls
+            for i, page in enumerate(self.pages):
+                if i == d.current_index:
+                    #: Trigger when the current page is loaded
+                    future = page.ready
+                    #: If the page is already complete it will be called right away
+                    AndroidApplication.instance().add_done_callback(
+                        future, self._run_pending_calls)
+                    break
+
+    def _run_pending_calls(self, *args):
+        if self._pending_calls:
+            for call in self._pending_calls:
+                call()
+            self._pending_calls = []
 
     # # --------------------------------------------------------------------------
     # # OnItemRequestedListener API
@@ -172,7 +195,17 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
     # ProxyViewPager API
     # --------------------------------------------------------------------------
     def set_current_index(self, index):
-        self.widget.setCurrentItem(index)
+        """ We can only set the index once the page has been created.
+            otherwise we get `FragmentManager is already executing transactions`
+            errors in Java. To avoid this, we only call this once has been loaded.
+        """
+        # d = self.declaration
+        # #: We have to wait for the current_index to be ready before we can
+        # #: change pages
+        if self._notify_count > 0:
+            self._pending_calls.append(lambda index=index:self.widget.setCurrentItem(index))
+        else:
+            self.widget.setCurrentItem(index)
 
     def set_offscreen_page_limit(self, limit):
         self.widget.setOffscreenPageLimit(limit)

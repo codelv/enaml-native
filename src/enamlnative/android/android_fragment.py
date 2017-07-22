@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 '''
-from atom.api import Typed, Instance, Subclass, Float, set_default
+from atom.api import Typed, Value, set_default
 
 from enamlnative.widgets.fragment import ProxyFragment
 from enamlnative.widgets.view_pager import ProxyPagerFragment
@@ -17,6 +17,7 @@ from enamlnative.widgets.view_pager import ProxyPagerFragment
 from .android_toolkit_object import AndroidToolkitObject
 from .android_view_pager import BridgedFragmentStatePagerAdapter
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .app import AndroidApplication
 
 
 class BridgedFragment(JavaBridgeObject):
@@ -36,6 +37,12 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
 
     #: Reference to the adapter
     adapter = Typed(BridgedFragmentStatePagerAdapter)
+
+    #: Future set when ready
+    ready = Value()
+
+    def _default_ready(self):
+        return AndroidApplication.instance().create_future()
 
     # --------------------------------------------------------------------------
     # Initialization API
@@ -90,11 +97,18 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
         """
         d = self.declaration
         d.condition = True
-        return self.get_view()
+        view = self.get_view()
+
+        app = AndroidApplication.instance()
+        app.deferred_call(app.set_future_result, self.ready, True)
+        return view
 
     def on_destroy_view(self):
         d = self.declaration
         d.condition = False
+
+        #: Clear the ready state again!
+        self.ready = self._default_ready()
 
     # --------------------------------------------------------------------------
     # ProxyFragment API
