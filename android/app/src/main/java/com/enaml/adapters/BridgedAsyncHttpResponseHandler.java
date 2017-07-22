@@ -1,15 +1,25 @@
 package com.enaml.adapters;
 
-import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.DataAsyncHttpResponseHandler;
+
 import cz.msebera.android.httpclient.Header;
 
 /**
  * Created by jrm on 7/20/17.
  */
-public class BridgedAsyncHttpResponseHandler extends AsyncHttpResponseHandler {
-
+public class BridgedAsyncHttpResponseHandler extends DataAsyncHttpResponseHandler {
+    private static final String TAG = "BridgeAsyncHttpH";
     protected AsyncHttpResponseListener mListener;
     protected boolean mStream = false;
+    protected int mBytesSent = 0;
+
+    /**
+     * Creates a new AsyncHttpResponseHandler
+     */
+    public BridgedAsyncHttpResponseHandler() {
+        super();
+    }
+
 
     /**
      * Set a listener that will be notified of all the events. If stream is true data
@@ -40,7 +50,8 @@ public class BridgedAsyncHttpResponseHandler extends AsyncHttpResponseHandler {
      */
     public void onProgress(long bytesWritten, long totalSize) {
         if (mListener!=null) {
-            mListener.onProgress(bytesWritten, totalSize);
+            // Wtf do I have to divide by 3 for?
+            mListener.onProgress((bytesWritten>0)?bytesWritten:mBytesSent/3, totalSize);
         }
     }
 
@@ -50,6 +61,7 @@ public class BridgedAsyncHttpResponseHandler extends AsyncHttpResponseHandler {
      * @param responseBody stream data
      */
     public void onProgressData(byte[] responseBody) {
+        mBytesSent += responseBody.length;
         if (mListener!=null && mStream) {
             mListener.onProgressData(responseBody);
         }
@@ -112,6 +124,7 @@ public class BridgedAsyncHttpResponseHandler extends AsyncHttpResponseHandler {
             mListener.onFailure(statusCode, headers, (mStream)?null:responseBody, error);
         }
     }
+
 
     /**
      * Interface for listening from Python

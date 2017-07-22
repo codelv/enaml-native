@@ -10,7 +10,6 @@ Created on July 18, 2017
 @author: jrm
 '''
 
-import io
 import time
 from atom.api import (Atom, Callable, Dict, List, ForwardInstance, Int,
                       Float, Bool, Unicode, Instance, set_default)
@@ -102,7 +101,7 @@ class HttpRequest(Atom):
     callback = Callable()
 
     #: Streaming callback
-    streaming_handler = Callable()
+    streaming_callback = Callable()
 
     #: Start time
     time = Float()
@@ -114,7 +113,7 @@ class HttpRequest(Atom):
 
     def _default_handler(self):
         handler = LoopjAsyncHttpResponseHandler()
-        handler.setAsyncHttpResponseListener(handler.getId(), self.streaming_handler is not None)
+        handler.setAsyncHttpResponseListener(handler.getId(), self.streaming_callback is not None)
         handler.onStart.connect(self.on_start)
         handler.onCancel.connect(self.on_cancel)
         handler.onFailure.connect(self.on_failure)
@@ -139,7 +138,7 @@ class HttpRequest(Atom):
         self.response.status_code = status
         self.response.headers = headers.split("\n")
         if data:
-            self.response.content = data#.write(data)
+            self.response.content = data
         self.response.ok = True
 
     def on_failure(self, status, headers, data, error):
@@ -147,7 +146,7 @@ class HttpRequest(Atom):
         self.response.headers = headers.split("\n")
         self.response.reason = error
         if data:
-            self.response.content = data#.write(data)
+            self.response.content = data
         self.response.ok = False
 
     def on_finish(self):
@@ -160,8 +159,8 @@ class HttpRequest(Atom):
         self.response.progress = int(100*written/total)
 
     def on_progress_data(self, data):
-        if self.streaming_handler:
-            self.streaming_handler(data)
+        if self.streaming_callback:
+            self.streaming_callback(data)
 
 
 class HttpResponse(Atom):
@@ -176,7 +175,9 @@ class HttpResponse(Atom):
     ok = Bool()
 
     #: Response body
-    content = Unicode()#Instance(io.cStringIO,())
+    #: if a streaming_callback is given to the request
+    #: then this is NOT used
+    content = Unicode()
 
     #: Size
     content_length = Int()
@@ -224,12 +225,12 @@ class AsyncHttpClient(Atom):
         #: Get the method to use
         method = getattr(self.client, kwargs.get('method', 'get').lower())
 
-        if callback is not None:
-            self.app.add_done_callback(future, callback)
-
         #: Create the RequestParams
         params = LoopjRequest()
         request = HttpRequest(url=url, **kwargs)
+
+        if callback is not None:
+            self.app.add_done_callback(future, lambda f:callback(f.request.response))
 
         def handle_response(response):
             """ Callback when the request is complete. """

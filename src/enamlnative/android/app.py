@@ -118,7 +118,7 @@ class TornadoEventLoop(EventLoop):
         return future.add_done_callback(callback)
 
     def set_future_result(self, future, result):
-        future.result(result)
+        future.set_result(result)
 
 
 class TwistedEventLoop(EventLoop):
