@@ -42,6 +42,21 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
         //notifyDataSetChanged();
     }
 
+    /**
+     * A safe notify
+     */
+    @Override
+    public void notifyDataSetChanged() {
+        try{
+            super.notifyDataSetChanged();
+        } catch (IllegalStateException e) {
+//            // Try again later
+//            mHandler.post(()->{
+//               notifyDataSetChanged();
+//            });
+        }
+    }
+
     @Override
     public int getCount() {
         return mFragments.size();
