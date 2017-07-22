@@ -6,19 +6,18 @@ Build native mobile apps in python using enaml and native widgets!  Android apps
 1. Enaml's features: declarative syntax, conditional and looper rendering, automatic data binding
 2. Live app code reloading (like react-native's live reload)
 
-### Demos ###
-1. Latest video here [on youtube](https://youtu.be/4bm5fb5k5mc)
-2. Live app reloading is now supported [demo](https://youtu.be/CbxVc_vNiNk)
-3. Try out the beta demo app here [on google play](https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo)
-
 ### Docs and Examples ###
 
-See the wiki https://github.com/frmdstryr/enaml-native/wiki 
+See the [wiki](https://github.com/frmdstryr/enaml-native/wiki)
 
 ### Apps ###
 
 See the wiki for [apps using enaml-native](https://github.com/frmdstryr/enaml-native/wiki/Apps).
 
+### Demos ###
+1. Latest video here [on youtube](https://youtu.be/4bm5fb5k5mc)
+2. Live app reloading is now supported [demo](https://youtu.be/CbxVc_vNiNk)
+3. Try out the beta demo app here [on google play](https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo)
 
 <div>
 <img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-1.png" width="240" style="float: left;">
