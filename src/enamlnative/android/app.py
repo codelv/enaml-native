@@ -390,8 +390,9 @@ class AndroidApplication(Application):
                 Callback to invoke when the future is done
         """
         if future is None:
-            raise bridge.JavaReferenceError("Future is None, make sure you pass the returns argument "
-                                 "to your JavaMethod")
+            raise bridge.JavaReferenceError(
+                "Tried to add a callback to a nonexistent Future. "
+                "Make sure you pass the `returns` argument to your JavaMethod")
         return self.loop.add_done_callback(future, callback)
 
     def set_future_result(self, future, result):
