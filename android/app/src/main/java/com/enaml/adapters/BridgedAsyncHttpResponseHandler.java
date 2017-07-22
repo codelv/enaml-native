@@ -11,7 +11,7 @@ public class BridgedAsyncHttpResponseHandler extends DataAsyncHttpResponseHandle
     private static final String TAG = "BridgeAsyncHttpH";
     protected AsyncHttpResponseListener mListener;
     protected boolean mStream = false;
-    protected int mBytesSent = 0;
+    protected long mBytesSent = 0;
 
     /**
      * Creates a new AsyncHttpResponseHandler
@@ -50,8 +50,7 @@ public class BridgedAsyncHttpResponseHandler extends DataAsyncHttpResponseHandle
      */
     public void onProgress(long bytesWritten, long totalSize) {
         if (mListener!=null) {
-            // Wtf do I have to divide by 3 for?
-            mListener.onProgress((bytesWritten>0)?bytesWritten:mBytesSent/3, totalSize);
+            mListener.onProgress((bytesWritten>0)?bytesWritten:mBytesSent, totalSize);
         }
     }
 
