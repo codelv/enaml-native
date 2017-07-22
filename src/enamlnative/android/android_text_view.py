@@ -48,6 +48,7 @@ class TextView(View):
     setText = JavaMethod('java.lang.CharSequence')
     setTextKeepState = JavaMethod('java.lang.CharSequence')
     setTextColor = JavaMethod('android.graphics.Color')
+    setTextIsSelectable = JavaMethod('boolean')
     setHighlightColor = JavaMethod('android.graphics.Color')
     setLinkTextColor = JavaMethod('android.graphics.Color')
     setGravity = JavaMethod('int')
@@ -150,6 +151,8 @@ class AndroidTextView(AndroidView, ProxyTextView):
             self.set_text_color(d.text_color)
         if d.text_alignment:
             self.set_text_alignment(d.text_alignment)
+        if d.text_selectable:
+            self.set_text_selectable(d.text_selectable)
         if d.link_color:
             self.set_link_color(d.link_color)
         if d.highlight_color:
@@ -221,6 +224,9 @@ class AndroidTextView(AndroidView, ProxyTextView):
 
     def set_text_alignment(self, alignment):
         self.widget.setGravity(Gravity.parse(alignment))
+
+    def set_text_selectable(self, selectable):
+        self.widget.setTextIsSelectable(selectable)
 
     def set_text_color(self, color):
         self.widget.setTextColor(color)#Color.parseColor(color))

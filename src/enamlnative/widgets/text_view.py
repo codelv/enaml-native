@@ -70,6 +70,9 @@ class ProxyTextView(View):
     def set_max_lines(self, lines):
         raise NotImplementedError
 
+    def set_text_selectable(self, selectable):
+        raise NotImplementedError
+
 
 class TextView(View):
     """ A simple control for displaying read-only text.
@@ -130,6 +133,9 @@ class TextView(View):
     #: Set the default text size to the given value, interpreted as "scaled pixel" units.
     text_size = d_(Float(strict=False))
 
+    #: Set text s
+    text_selectable = d_(Bool())
+
     #: Sets the height of the TextView to be exactly lines tall.
     lines = d_(Int())
 
@@ -149,7 +155,7 @@ class TextView(View):
     # Observers
     # --------------------------------------------------------------------------
     @observe('all_caps', 'auto_link_mask', 'input_type',
-             'font_family', 'font_style',
+             'font_family', 'font_style', 'text_selectable',
              'text', 'text_color', 'text_size', 'text_alignment',
              'link_color', 'highlight_color',
              'lines', 'max_lines', 'line_spacing', 'letter_spacing')
