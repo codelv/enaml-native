@@ -1,5 +1,5 @@
 # enaml-native
-Build native mobile apps in python using enaml and widgets native to the platform.  Android apps are currently working, iOS implementation planned.
+Build native mobile apps in python using enaml and native widgets!  Android apps are currently working, iOS implementation planned.
 
    
 ### Features ###
@@ -14,6 +14,10 @@ Build native mobile apps in python using enaml and widgets native to the platfor
 ### Docs and Examples ###
 
 See the wiki https://github.com/frmdstryr/enaml-native/wiki 
+
+### Apps ###
+
+See the wiki for apps using enaml-native.
 
 
 <div>
@@ -47,72 +51,3 @@ This project is built on top of several existing projects:
 
 _Note: I'm not affiliated with any of these but have contributed to some of them_
 
-## Usage ##
- 
-1. Clone the repo
-2. Run `enaml-native init <ProjectName> <bundleId> <Destintation>`
-3. Cd to destination
-4. Run `enaml-native run` or Open in android folder in Android Studio and click run 
-
-## How it works ##
-
-1. A slightly customized version of [pybridge](https://github.com/joaoventura/pybridge) is used that unpacks python assets, starts the python interpreter, and provides an interface to commuicate between the two 
-2. An enaml view  generates the native widgets and displays them using native API's
-3. Python and Java commuicate using the bridge.
-
-
-### Startup ###
-
-When the app is started:
-1. A loading view is shown (can be customized to be any view)
-2. The python assets are extracted (if needed)
-3. Python is started in a thread and the `main` function from `main.py` is called
-4. An AndroidAppliction is started that runs an event loop (can use either the builtin, tornado, or twisted) 
-5. The enaml view is constructed, loaded, and shown
-6. The Bridge sends and handles all events
-
-
-### The Bridge ###
-
-Using pyjnius and the JNI was extremely slow, so pyjnius was replaced with a "java - python bridge" that allows you to create proxy python objects that are actually implemented in java. The bridge essentially queues all object creation and manipulation commands, serializes them using msgpack, and sends them over to Java (currently using JNI, may eventually use sockets). Java then unpacks and processes each command using reflection (currently...) and the Proxy interface. Any callbacks and Java widget events are queued, packed, and dispatched back over the bridge to be procssed by the python event loop. The result is a smooth interaction with minimal JNI use (only passes a msgpack byte arrays).
-
-More documentation on how to use the bridge will come soon. 
-
-
-### Original implementation ###
-Note: This is no longer used.
-A toolkit for enaml was created that uses [pyjnius](https://github.com/kivy/pyjnius) to create native android widgets. (Eventually will use [pyobjus](https://github.com/kivy/pyobjus) for iOS )
-
-
-### Python libraries ###
-You can use any pure python modules and any moodule with compiled objects as long as it has a `recipe` to build it. A customzied bootstrap for [python-for-android](https://github.com/kivy/python-for-android) is used to build python modules for each arch (x86 and armeab-v7a included) using the Crystax NDK. 
-
-I'm thinking of making an easier way of doing this similar to node_modules.
-
-
-## Android ##
-
-### Running ###
-
-1. Clone the project
-2. Open in Android Studio, install Android API 25, if it's not already included.
-3. Copy prebuilt python modules from `src/main/python/<arch>/` to `src/main/assets/python` for the arch you want to run on
-4. Run project in Android Studio
-
-
-### Cross compiling ###
-
-Any python modules with compiled components must be cross compiled for the specific platform. To make this easier a modifed version of  kivy's [python-for-android](https://github.com/kivy/python-for-android/) is included in this repo with a new bootstrap and support for Crystax's Python 2.7.10. 
-
-1. Install the [Crystax NDK v10.3.2](https://www.crystax.net/en/download) (or latest)
-2. Clone the project, install dependencies for python-for-android
-3. Edit the makefile and update `ARCH`, `SDK_DIR`, `NDK_DIR`, and packages as needed 
-4. Run `make clean-python`
-5. Run `make build-python` this will build the required python dependencies and copy the libs and python modules from `~/.local/share/python-for-android/dists/enaml-native/` to `src/main/libs/<arch>/` and `src/main/python/<arch>/` respectively
-6. Remove any unused modules and shared libraries in `src/main/python/<arch>/`
-
-
-
-## iOS ##
-
-Will come if the Android version works well...
