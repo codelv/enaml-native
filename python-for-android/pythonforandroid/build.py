@@ -36,6 +36,8 @@ class Context(object):
 
     ccache = None  # whether to use ccache
     cython = None  # the cython interpreter name
+    minify = None  # use pyminifier to minify code
+    optimize = None  # optimization flag when compiling to pyc/pyo
 
     ndk_platform = None  # the ndk platform directory
 
@@ -625,13 +627,119 @@ def run_pymodules_install(ctx, modules):
             "PYTHONPATH={0} pip install --target '{0}' --no-deps -r requirements.txt"
         ).format(ctx.get_site_packages_dir()))
 
-        #: Compile pip packages to bytecode
-        shprint(sh.bash,
-                '-c',
-                "source venv/bin/activate && env CC=/bin/false CXX=/bin/false"
-                "PYTHONPATH={0} python -O -m compileall -f {0}".format(ctx.get_site_packages_dir()))
-        #subprocess.call([PYTHON, '-OO', '-m', 'compileall', '-f', dfn])
+        if ctx.python_recipe.from_crystax:
+            #: This should probably be done in the bootstrap but whatever
+            #: extract stdlib.zip to site-packages, loading from the zipfile is slow
+            #: and we want to compile them with optimizations
+            arch = ctx.archs[0] #: They should all be the same so it doesn't matter
+            stdlib_zip = join(ctx.ndk_dir, 'sources', 'python', ctx.python_recipe.version,
+                                'libs', arch.arch, 'stdlib.zip')
+            with current_directory(ctx.get_site_packages_dir()):
+                shprint(sh.unzip, stdlib_zip)
 
+        if ctx.minify:
+            #: Minify ALL site packages and python files
+            #: Minification compiles to pyo to make sure it's ok
+            #: Minifier is crap
+
+            #: What did we minify?
+            #shprint(sh.cp,'-R', ctx.get_site_packages_dir(),'/home/jrm/Workspace/enaml-native/tmp/before')
+
+            minifiy_sources(ctx, ctx.get_site_packages_dir())
+
+            #: What did we minify?
+            #shprint(sh.cp,'-R', ctx.get_site_packages_dir(),'/home/jrm/Workspace/enaml-native/tmp/after')
+
+
+        else:
+            #: Compile pip packages to bytecode
+            shprint(sh.bash,
+                    '-c',
+                    "source venv/bin/activate && env CC=/bin/false CXX=/bin/false"
+                    "PYTHONPATH={0} python -{1} -m compileall -f {0}"
+                    .format(ctx.get_site_packages_dir(), ctx.optimize))
+
+
+def minifiy_sources(ctx, src):
+    """ Finds all .py files within a path and runs minification on them.
+        this should be done BEFORE compileall is run.
+
+        Warning: This does IN PLACE minification.
+    """
+
+    info("Minifying sources, this may take some time...")
+    from pyminifier import token_utils, minification
+
+    class Options(object):
+        tabs = False  #: Replace indentation with tabs (vs single space)
+
+    cwd = os.getcwd()
+    original = 0
+    minified = 0
+    passed = 0
+    total = 0
+    with current_directory(src):
+        #: Find all files
+        for py in shprint(sh.find, '.', '-name', '*.py').split("\n"):
+            py_file = realpath(join(src, py))
+            if not exists(py_file) or isdir(py_file):
+                continue
+            total +=1
+            #: Read source code
+            with open(py_file) as f:
+                code = f.read()
+                original += len(code)
+            try:
+                #: Minify code
+                #: The operators seem to have a bug...
+                minified_code = code
+                for f in [minification.remove_comments_and_docstrings,
+                          minification.fix_empty_methods,
+                          minification.remove_blank_lines,
+                          minification.reduce_operators,
+                          minification.dedent
+                          ]:
+                    minified_code = f(minified_code)
+
+                #tokens = token_utils.listified_tokenizer(code)
+                #minified_code = minification.minify(tokens, Options)
+                #print("OK",)
+            except Exception as e:
+                info("Minifying {}... Failed! Reason: {}".format(py, e))
+                #raise
+                continue  # Can't minify, leave it as is!
+
+            #: Write minified code
+            with open(py_file, 'wb') as f:
+                f.write(minified_code)
+
+            #: Make sure it compiles
+            try:
+                #: Minification compiles to pyo to make sure it's ok
+                #: Compile pip packages to bytecode
+                sh.bash('-c',
+                        "source {}/venv/bin/activate && env CC=/bin/false CXX=/bin/false"
+                        "PYTHONPATH={} python -{} -m py_compile {}"
+                        .format(cwd, ctx.get_site_packages_dir(), ctx.optimize, py_file))
+
+                minified += len(minified_code)
+                passed +=1
+            except Exception as e:
+                info("Compile {}... Failed! Reason: {}".format(py, e))
+                #: Undo
+                with open(py_file, 'wb') as f:
+                    f.write(code)
+            #     #raise
+                minified += len(code)
+
+                #: Optimize original file
+                sh.bash('-c',
+                        "source {}/venv/bin/activate && env CC=/bin/false CXX=/bin/false"
+                        "PYTHONPATH={} python -{} -m py_compile {}"
+                        .format(cwd, ctx.get_site_packages_dir(), ctx.optimize, py_file))
+
+    info_main("Minification complete total={} passed={}({}%) savings={}%!"
+         .format(total, passed, round(100*passed/total), round(100*minified/original)))
 
 
 def biglink(ctx, arch):

@@ -167,6 +167,7 @@ class CleanPython(Command):
                     for r in recipes:
                         shprint(sh.python,'toolchain.py','clean',r)
 
+
 class NdkBuild(Command):
     title = set_default("ndk-build")
     help = set_default("Run ndk-build on the android project")
@@ -231,7 +232,6 @@ class CrossCompile(Command):
         b.build()
 
 
-
 class BuildPython(Command):
     """ Builds an enaml-native python app using the following steps:
 
@@ -251,16 +251,17 @@ class BuildPython(Command):
         ('-d', dict(action='store_true', help="Print full debug log")),
         ('--ios', dict(action='store_true', help="iOS only")),
         ('--android', dict(action='store_true', help="Android only")),
+        ('--minify', dict(action='store_true', help="Minify")),
     ])
 
     def run(self, args=None):
         if args is None or not args.ios:
             self.run_android(args)
-        if args is None or not args.android:
+        if args is None or not args.android and sys.platform == 'darwin':
             self.run_ios(args)
 
         #: Extra cleanup
-        self.cmds['trim-assets'].run()
+        self.cmds['trim-assets'].run(args)
 
     def run_android(self,args):
         ctx = self.ctx
@@ -286,14 +287,18 @@ class BuildPython(Command):
 
             #: Add debug arg if needed
             cfg['debug'] = '--debug ' if args.d else ''
+
+            #: Add minification
+            cfg['minify'] = '--minify ' if args.minify else ''
+
             if args.d:
                 logger = logging.getLogger('p4a')
                 logger.level = logging.DEBUG
 
             with cd(ctx['android']['p4a']):
-                shprint(sh.python,*'p4a.py apk --arch={arch} '
+                shprint(sh.python, *'p4a.py apk --arch={arch} '
                           '--private=../src '
-                          '--package={} '
+                          '--package={bundle_id} '
                           '--name=EnamlNativeApplication '
                           '--dist-name=enaml-native '
                           '--version=0.1 '
@@ -304,6 +309,7 @@ class BuildPython(Command):
                           '--ndk-dir={ndk} '
                           '--ndk-platform=21 '
                           '{debug}'
+                          '{minify}'
                           '--copy-libs'.format(**cfg).split(' '))
 
             #: Copy lib folder
@@ -339,12 +345,15 @@ class BuildPython(Command):
         reqs = env['dependencies'].keys()
 
         with cd('python-for-ios'):
-            shprint(sh.python,'toolchain.py','build',*reqs)
+            shprint(sh.python, 'toolchain.py', 'build', *reqs)
 
 
 class TrimAssets(Command):
     title = set_default("trim-assets")
     help = set_default("Trim away unused files from the python install for each arch")
+    args = set_default([
+        ('--minify', dict(action='store_true', help="Minify using pyminifier")),
+    ])
 
     def run(self, args=None):
         ctx = self.ctx
@@ -403,16 +412,16 @@ class BundleAssets(Command):
                             'build')
                 else:
                     #: Extract stdlib.zip to build/
-                    shprint(sh.mkdir,'build')
+                    shprint(sh.mkdir, 'build')
 
-                    with cd('build'):
-                        shprint(sh.unzip,
-                                '{ndk}/sources/python/2.7/libs/{arch}/stdlib.zip'.format(**cfg),
-                                '-d', 'stdlib')
+                    #with cd('build'):
+                    #    shprint(sh.unzip,
+                    #            '{ndk}/sources/python/2.7/libs/{arch}/stdlib.zip'.format(**cfg),
+                    #            '-d', 'stdlib')
 
-                        #: Copy site-packages to build/
+                    #: Copy site-packages to build/
                     with cd('{arch}/site-packages/'.format(**cfg)):
-                        shprint(sh.cp, '-R', '.', '../../build/site-packages')
+                        shprint(sh.cp, '-R', '.', '../../build/')
 
                     #: Copy sources from app source
                     #: TODO, or just let gradle?

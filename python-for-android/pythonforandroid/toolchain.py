@@ -242,6 +242,13 @@ class ToolchainCL(object):
             default=False,
             help='Display debug output and all build info')
         generic_parser.add_argument(
+            '--minify', dest='minify', action='store_true',
+            default=False,
+            help='Minify .py files using pyminifier')
+        generic_parser.add_argument(
+            '--optimize', dest='optimize', default='O',
+            help='Optimization flag to pass when compiling to pyc/pyo')
+        generic_parser.add_argument(
             '--color', dest='color', choices=['always', 'never', 'auto'],
             help='Enable or disable color output (default enabled on tty)')
         generic_parser.add_argument(
@@ -497,6 +504,8 @@ class ToolchainCL(object):
         self.ndk_version = args.ndk_version
         self.ctx.ndk_platform_version = args.ndk_platform or self.android_api
         self.ctx.symlink_java_src = args.symlink_java_src
+        self.ctx.minify = args.minify
+        self.ctx.optimize = args.optimize
 
         self._archs = split_argument_list(args.arch)
 
