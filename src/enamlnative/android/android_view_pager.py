@@ -151,16 +151,20 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         d = self.declaration
         self._notify_count -= 1
         if self._notify_count == 0:
-            self.adapter.notifyDataSetChanged()
-            #: Now wait for current page to load, then invoke any pending calls
-            for i, page in enumerate(self.pages):
-                if i == d.current_index:
-                    #: Trigger when the current page is loaded
-                    future = page.ready
-                    #: If the page is already complete it will be called right away
-                    AndroidApplication.instance().add_done_callback(
-                        future, self._run_pending_calls)
-                    break
+            #: Tell the UI we made changes
+            self.adapter.notifyDataSetChanged(now=True)
+            AndroidApplication.instance().timed_call(500, self._queue_pending_calls)
+
+    def _queue_pending_calls(self):
+        #: Now wait for current page to load, then invoke any pending calls
+        for i, page in enumerate(self.pages):
+            #: Wait for first page!
+            #: Trigger when the current page is loaded
+            future = page.ready
+            #: If the page is already complete it will be called right away
+            AndroidApplication.instance().add_done_callback(
+                future, self._run_pending_calls)
+            break
 
     def _run_pending_calls(self, *args):
         if self._pending_calls:
