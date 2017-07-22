@@ -105,7 +105,11 @@ public class BridgedAsyncHttpResponseHandler extends DataAsyncHttpResponseHandle
     @Override
     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
         if (mListener!=null) {
-            mListener.onSuccess(statusCode, headers, (mStream)?null:responseBody);
+            String headerData = "";
+            for (Header h:headers) {
+                headerData+=h.getName()+":"+h.getValue()+"\n";
+            }
+            mListener.onSuccess(statusCode, headerData, (mStream)?null:responseBody);
         }
 
     }
@@ -121,7 +125,11 @@ public class BridgedAsyncHttpResponseHandler extends DataAsyncHttpResponseHandle
     @Override
     public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
         if (mListener!=null) {
-            mListener.onFailure(statusCode, headers, (mStream)?null:responseBody, error);
+            String headerData = "";
+            for (Header h:headers) {
+                headerData+=h.getName()+":"+h.getValue()+"\n";
+            }
+            mListener.onFailure(statusCode, headerData, (mStream)?null:responseBody, error);
         }
     }
 
@@ -136,8 +144,8 @@ public class BridgedAsyncHttpResponseHandler extends DataAsyncHttpResponseHandle
         void onFinish();
         void onRetry(int retryNo);
         void onCancel();
-        void onSuccess(int statusCode, Header[] headers, byte[] responseBody);
-        void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error);
+        void onSuccess(int statusCode, String headers, byte[] responseBody);
+        void onFailure(int statusCode, String headers, byte[] responseBody, Throwable error);
     }
 
 }
