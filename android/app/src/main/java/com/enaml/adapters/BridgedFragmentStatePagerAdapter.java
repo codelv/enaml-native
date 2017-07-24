@@ -50,10 +50,10 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
         try{
             super.notifyDataSetChanged();
         } catch (IllegalStateException e) {
-//            // Try again later
-//            mHandler.post(()->{
-//               notifyDataSetChanged();
-//            });
+            // Try again later
+            mHandler.post(()->{
+               notifyDataSetChanged();
+            });
         }
     }
 
