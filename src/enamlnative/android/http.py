@@ -230,7 +230,7 @@ class AsyncHttpClient(Atom):
         request = HttpRequest(url=url, **kwargs)
 
         if callback is not None:
-            self.app.add_done_callback(future, lambda f:callback(f.request.response))
+            future.then(callback)
 
         def handle_response(response):
             """ Callback when the request is complete. """
