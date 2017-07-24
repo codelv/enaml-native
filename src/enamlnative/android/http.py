@@ -229,6 +229,7 @@ class AsyncHttpClient(Atom):
         params = LoopjRequest()
         request = HttpRequest(url=url, **kwargs)
 
+        #: Set callback for when response is in
         if callback is not None:
             future.then(callback)
 
