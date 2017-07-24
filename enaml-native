@@ -428,6 +428,13 @@ class BundleAssets(Command):
                     for src in ctx['sources']:
                         shprint(sh.cp, '-R', join(root, src, '.'), 'build')
 
+                    #: Clean any excluded sources
+                    with cd('build'):
+                        for pattern in env.get('excluded', []):
+                            matches = glob(pattern)
+                            if matches:
+                                shprint(sh.rm, '-R', *matches)
+
                 #: Remove old
                 if os.path.exists('python.zip'):
                     shprint(sh.rm, 'python.zip')

@@ -1,6 +1,6 @@
 {
   "name": "Enaml-Native Demo",
-  "bundle_id":"com.frmdstryr.enamlnative.App",
+  "bundle_id":"com.frmdstryr.enamlnative.demo",
   "version": "1.8",
   "private": true,
   "sources": [
@@ -18,7 +18,8 @@
       "singledispatch":">=0",
       "backports_abc":">=0",
       "ply": "==3.10"
-    }
+    },
+    "excluded":[]
   },
   "ios": {
     "targets": [
@@ -32,6 +33,7 @@
       "singledispatch": ">=0",
       "backports_abc": ">=0",
       "ply": "==3.10"
-    }
+    },
+    "excluded":[]
   }
 }
