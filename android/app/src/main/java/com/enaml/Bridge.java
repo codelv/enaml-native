@@ -391,11 +391,11 @@ public class Bridge {
                 try {
                     mMethodCache.put(key, objClass.getMethod(method, uv.getSpec()));
                 } catch (NoSuchMethodException e) {
-                    Log.e(TAG,"Error getting method id="+objId+" method="+method, e);
+                    Log.e(TAG,"Error getting method id="+objId+" method="+method+" on object="+obj, e);
                     mActivity.showErrorMessage(e);
                     return;
                 } catch (Exception e) {
-                    Log.e(TAG,"Error getting method id="+objId+" method="+method, e);
+                    Log.e(TAG,"Error getting method id="+objId+" method="+method+" on object="+obj, e);
                     mActivity.showErrorMessage(e);
                     return;
                 }
@@ -673,6 +673,9 @@ public class Bridge {
 //                    } else if (arg instanceof MotionEvent) {
 //                        MotionEvent event = (MotionEvent) arg;
 //                        packer.packString(MotionEvent.actionToString(event.getAction()));
+                    } else if (pythonObjectId!=IGNORE_RESULT && method.equals("set_result")) {
+                        // If it was packable, it should already be packed
+                        packer.packInt(pythonObjectId);
                     } else {
                         packer.packString(arg.toString());
                     }

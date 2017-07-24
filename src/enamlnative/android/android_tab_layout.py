@@ -49,7 +49,8 @@ class TabLayout(FrameLayout):
 
 class Tab(JavaBridgeObject):
     __javaclass__ = set_default('android.support.design.widget.TabLayout$Tab')
-    setText = JavaMethod('java.lang.String')
+    setText = JavaMethod('java.lang.CharSequence')
+    setIcon = JavaMethod('android.graphics.drawable.Drawable')
     # setContent = JavaMethod('int')
     # setIndicator = JavaMethod('java.lang.CharSequence')
     #
@@ -124,9 +125,8 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
         app = self.get_context()
         d = self.declaration
         parent = self.parent()
-        for page in parent.declaration.pages:
-            result = self.widget.newTab()
-            app.add_done_callback(result, lambda tab,page=page: self.on_new_tab(tab,page))
+        #for page in parent.declaration.pages:
+        #    self.widget.newTab().then(lambda tab,page=page: self.on_new_tab(tab,page))
 
     # --------------------------------------------------------------------------
     # OnTabSelectedListener API

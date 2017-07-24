@@ -39,6 +39,12 @@ def _generate_id():
     return __global_id__
 
 
+def tag_object_with_id(obj):
+    """ Generate and assign a id for the object"""
+    obj.__id__ = _generate_id()
+    CACHE[obj.__id__] = obj
+
+
 def _cleanup_id(obj):
     """ Removes the object from the """
     try:
@@ -103,11 +109,12 @@ class JavaMethod(Property):
     """ Description of a method of a View (or subclass) in Java. When called, this
         serializes call, packs the arguments, and delegates handling to a bridge in Java.
     """
-    __slots__ = ('__signature__', '__returns__')
+    __slots__ = ('__signature__', '__returns__', '__cache__')
 
     def __init__(self, *args, **kwargs):
         self.__returns__ = kwargs.get('returns', None)
         self.__signature__ = args
+        self.__cache__ = {}  # Result cache otherwise gc cleans up
         super(JavaMethod, self).__init__(self.__fget__)
 
     @contextmanager
@@ -144,10 +151,16 @@ class JavaMethod(Property):
         result = obj.__app__.create_future() if self.__returns__ else None
 
         if result:
-            #: Put the future in the cache so it can be retrieved later
-            result.__id__ = _generate_id()
-            CACHE[result.__id__] = result
-            obj.__app__.add_done_callback(result, _cleanup_id)
+            #: Store in local cache or global cache (weakref) removes it
+            #: resulting in a Reference error when the result is returned
+            self.__cache__[result.__id__] = result
+
+            def resolve(r, f=result):
+                #: Remove from local cache to free future
+                del self.__cache__[f.__id__]
+
+            #: Delete from the local cache once resolved.
+            result.then(resolve)
 
         obj.__app__.send_event(
             Command.METHOD,  #: method
@@ -245,15 +258,6 @@ class JavaBridgeObject(Atom):
     def __init__(self, *args, **kwargs):
         """ Sends the event to create this View in Java """
         super(JavaBridgeObject, self).__init__(**kwargs)
-        # #: Get declared methods
-        # for base in reversed(type(self).__mro__):
-        #     for name, method in base.__dict__.iteritems():
-        #         if isinstance(method, JavaField):
-        #             method.__name__ = name
-        #             #: Do not clone
-        #         elif isinstance(method, JavaMethod):
-        #             method.__name__ = name
-        #             setattr(self, name, method.clone(self))
 
         #: Send the event over the bridge to construct the view
         __id__ = kwargs.get('__id__', None)
@@ -272,86 +276,3 @@ class JavaBridgeObject(Atom):
             self.__id__, #: id to assign in java
         )
         _cleanup_id(self)
-
-
-
-
-# def test_bridge():
-#     """ Nothing beats tests with actual usage :) """
-#     class Widget(JavaBridgeObject):
-#         pass
-#
-#     class View(Widget):
-#         __javaclass__ = set_default('android.view.View')
-#         __signature__ = set_default(('android.content.Context',))
-#
-#         def getId(self):
-#             return self.__id__
-#
-#         addView = JavaMethod('android.view.View')
-#         onClick = JavaCallback('android.view.View')
-#         setOnClickListener = JavaMethod('android.view.View$OnClickListener')
-#         setLayoutParams = JavaMethod('android.view.ViewGroup.LayoutParams')
-#         setBackgroundColor = JavaMethod('android.graphics.Color')
-#         setClickable = JavaMethod('boolean')
-#         setTop = JavaMethod('int')
-#         setBottom = JavaMethod('int')
-#         setLeft = JavaMethod('int')
-#         setRight = JavaMethod('int')
-#         setLayoutDirection = JavaMethod('int')
-#         setLayoutParams = JavaMethod('android.view.ViewGroup$LayoutParams')
-#         setPadding = JavaMethod('int', 'int', 'int', 'int')
-#
-#         setX = JavaMethod('int')
-#         setY = JavaMethod('int')
-#         setZ = JavaMethod('int')
-#         setMaximumHeight = JavaMethod('int')
-#         setMaximumWidth = JavaMethod('int')
-#         setMinimumHeight = JavaMethod('int')
-#         setMinimumWidth = JavaMethod('int')
-#         setEnabled = JavaMethod('boolean')
-#         setTag = JavaMethod('java.lang.Object')
-#         setToolTipText = JavaMethod('java.lang.CharSequence')
-#         setVisibility = JavaMethod('int')
-#         removeView = JavaMethod('android.view.View')
-#
-#         LAYOUT_DIRECTIONS = {
-#             'ltr': 0,
-#             'rtl': 1,
-#             'locale': 3,
-#             'inherit': 2,
-#         }
-#
-#     class ViewGroup(View):
-#         __javaclass__ = set_default('android.view.ViewGroup')
-#
-#     class FrameLayout(ViewGroup):
-#         __javaclass__ = set_default('android.widget.FrameLayout')
-#         setForegroundGravity = JavaMethod('int')
-#         setMeasureAllChildren = JavaMethod('boolean')
-#
-#
-#     class DrawerLayout(ViewGroup):
-#         __javaclass__ = set_default('android.support.v4.widget.DrawerLayout')
-#         openDrawer = JavaMethod('android.view.View')
-#         closeDrawer = JavaMethod('android.view.View')
-#         addDrawerListener = JavaMethod('android.support.v4.widget.DrawerLayout$DrawerListener')
-#         onDrawerClosed = JavaCallback('android.view.View')
-#         onDrawerOpened = JavaCallback('android.view.View')
-#         onDrawerSlide = JavaCallback('android.view.View', 'float')
-#         onDrawerStateChanged = JavaCallback('int')
-#
-#         setDrawerElevation = JavaMethod('float')
-#         setDrawerTitle = JavaMethod('int', 'java.lang.CharSequence')
-#         setDrawerLockMode = JavaMethod('int')
-#         setScrimColor = JavaMethod('android.graphics.Color')
-#         setStatusBarBackgroundColor = JavaMethod('android.graphics.Color')
-#
-#         LOCK_MODES = {
-#             'unlocked': 0,
-#             'locked_closed': 1,
-#             'locked_open': 2,
-#             'undefined': 3,
-#         }
-#
-#     return DrawerLayout

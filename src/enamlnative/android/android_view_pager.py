@@ -160,10 +160,8 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         for i, page in enumerate(self.pages):
             #: Wait for first page!
             #: Trigger when the current page is loaded
-            future = page.ready
+            page.ready.then(self._run_pending_calls)
             #: If the page is already complete it will be called right away
-            AndroidApplication.instance().add_done_callback(
-                future, self._run_pending_calls)
             break
 
     def _run_pending_calls(self, *args):
