@@ -202,15 +202,19 @@ class CrossCompile(Command):
 
     def run(self, args=None):
         import crosscompile
+        import logging
+        logger = logging.getLogger('p4a')
+        logger.setLevel(logging.DEBUG)
         from crosscompile.recipe import Platform,Arch
+
         b = crosscompile.Builder(
             requirements=[
-                crosscompile.recipes.openssl.Recipe,
+                crosscompile.recipes.python.Recipe,
             ],
             platforms=[
-                    Platform(name='macOS',arches=[
-                        Arch(name='macosx.x86_64'),
-                    ]),
+                    # Platform(name='macOS',arches=[
+                    #     Arch(name='macosx.x86_64'),
+                    # ]),
                     Platform(name='iOS',arches=[
                         Arch(name='iphonesimulator.x86_64'),
                         Arch(name='iphonesimulator.i386'),
@@ -218,14 +222,14 @@ class CrossCompile(Command):
                         Arch(name='iphoneos.armv7s'),
                         Arch(name='iphoneos.armv64'),
                     ]),
-                    Platform(name='tvOS',arches=[
-                        Arch(name='appletvsimulator.x86_64'),
-                        Arch(name='appletvos.arm64'),
-                    ]),
-                    Platform(name='watchOS',arches=[
-                        Arch(name='watchsimulator.i386'),
-                        Arch(name='watchos.armv7k'),
-                    ]),
+                    # Platform(name='tvOS',arches=[
+                    #     Arch(name='appletvsimulator.x86_64'),
+                    #     Arch(name='appletvos.arm64'),
+                    # ]),
+                    # Platform(name='watchOS',arches=[
+                    #     Arch(name='watchsimulator.i386'),
+                    #     Arch(name='watchos.armv7k'),
+                    # ]),
                 ],
 
         )
@@ -802,7 +806,6 @@ class EnamlNativeCli(Atom):
             print(e.stderr)
             print(e.stdout)
             raise
-
 
 
 def main():
