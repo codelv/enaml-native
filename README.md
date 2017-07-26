@@ -1,5 +1,7 @@
 # enaml-native
-Build native mobile apps in python using enaml and native widgets!  Android apps are currently working, iOS implementation planned.
+Build native mobile apps in python using enaml and native widgets!  
+
+Android apps are currently working, iOS implementation is in the works (see #10).
 
    
 ### Features ###
