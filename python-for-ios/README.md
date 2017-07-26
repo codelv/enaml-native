@@ -12,6 +12,8 @@ Major changes:
 5. Added recipes for atom, enaml, msgpack-python.
 6. Added generic PipRecipe so you can build pip libraries the normal way (./toolchain.py build <x>) instead of using (./toolchain pip install <x>)
 
+More info here [on my blog](http://jrm5555.blogspot.com/2017/07/enaml-native-ios-support-cross.html)
+
 
 Kivy for iOS
 ============
