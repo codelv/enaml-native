@@ -5,16 +5,15 @@ This is a heavily modified version of Kivy for iOS.
 
 Major changes:
 
-1. Min iPhoneOS version changed to 8.0 and __converted to build dynamic instead of static__
+1. Min iPhoneOS version changed to 8.0 and _converted to build dynamic instead of static_
 2. Support added for building python shared modules with compiled componets (build_ext)
-2. Python updated to 2.7.13
-3. Openssl updated to 1.0.2k
-4. Added recipes for atom, enaml, msgpack-python.
-5. Added generic PipRecipe so you can build pip libraries the normal way (./toolchain.py build <x>)
-instead of using (./toolchain pip install <x>)
+3. Python updated to 2.7.13
+4. Openssl updated to 1.0.2k
+5. Added recipes for atom, enaml, msgpack-python.
+6. Added generic PipRecipe so you can build pip libraries the normal way (./toolchain.py build <x>) instead of using (./toolchain pip install <x>)
 
 
-Python for iOS
+Kivy for iOS
 ============
 
 This toolchain is designed to compile the necessary libraries for iOS to run
