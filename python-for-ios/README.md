@@ -5,7 +5,8 @@ This is a heavily modified version of Kivy for iOS.
 
 Major changes:
 
-1. Min iPhoneOS version changed to 8.0 and _converted to build dynamic instead of static_
+1. Min iPhoneOS version changed to 8.0 
+2. Converted recipes to build dynamic libs instead of static
 2. Support added for building python shared modules with compiled componets (build_ext)
 3. Python updated to 2.7.13
 4. Openssl updated to 1.0.2k
