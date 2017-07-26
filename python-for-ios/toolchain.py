@@ -976,7 +976,7 @@ class PipRecipe(PythonRecipe):
 
     def reduce_python_package(self):
         with current_directory(self.ctx.site_packages_dir):
-            shprint(sh.find,'.','-type','f','-name','*.py','-delete')
+            #shprint(sh.find,'.','-type','f','-name','*.py','-delete')
             shprint(sh.find,'.','-type','f','-name','*.pyc','-delete')
             #shprint(sh.find,'.','-type','f','-name','*.pyo','-delete') #: Use pyo
             for p in [
@@ -1089,7 +1089,7 @@ class CppPythonRecipe(PythonRecipe):
             join(self.ctx.dist_dir, "include", arch.arch, "libffi"),
             #join(self.ctx.dist_dir, "lib", arch.arch, "libbz2"),
         )
-        env['LDFLAGS'] += " -shared -lpython -lffi -lz -L{}".format(
+        env['LDFLAGS'] += " -shared -lpython -L{}".format(
             join(self.ctx.dist_dir, "lib", arch.arch),
         )
         env['PYTHONXCPREFIX'] = self.get_build_dir(arch.arch)
@@ -1097,11 +1097,11 @@ class CppPythonRecipe(PythonRecipe):
         env['CROSS_COMPILE'] = arch.arch
         env['CROSS_COMPILE_TARGET'] = 'yes'
         env['_PYTHON_HOST_PLATFORM'] = 'darwin-{}'.format(self.get_local_arch(arch))
-        if "openssl.build_all" in self.ctx.state:
-            env['LDFLAGS'] += " -lssl -lcrypto"
-            env['CFLAGS'] += " -I{}".format(
-                join(self.ctx.dist_dir, "include", arch.arch, "openssl"),
-            )
+        #if "openssl.build_all" in self.ctx.state:
+        #    env['LDFLAGS'] += " -lssl -lcrypto"
+        #    env['CFLAGS'] += " -I{}".format(
+        #        join(self.ctx.dist_dir, "include", arch.arch, "openssl"),
+        #    )
         return env
 
     def build_arch(self, arch):
@@ -1131,27 +1131,50 @@ class CppPythonRecipe(PythonRecipe):
 
         It will works with the first filtered_archs, and the name of the recipe.
         """
+        self.install_modules(arch)
+        # env = self.get_recipe_env(arch)
+        # info("Install {} into the site-packages".format(self))
+        # build_dir = self.get_build_dir(arch.arch)
+        # with current_directory(build_dir):
+        #     hostpython = sh.Command(self.ctx.hostpython)
+        #
+        #     #: Install in dist/python/arch folder,
+        #     #: make sure python path exists or setuptools complains
+        #     install_dir = join(self.ctx.dist_dir, "python", arch.arch)
+        #     site_packages_dir = join(install_dir,'lib','python2.7','site-packages')
+        #     env['PYTHONPATH'] = ":".join([install_dir,site_packages_dir])
+        #
+        #     #: Make sure it exists or we blow up
+        #     if not exists(site_packages_dir):
+        #         os.makedirs(site_packages_dir)
+        #
+        #     #: Run install into the arch specifc install dir
+        #     shprint(hostpython, "setup.py", "install", "-O2",
+        #             "--prefix", install_dir, _env=env)
+        #
+        # self.install_modules(arch)
 
+    def install_modules(self, arch):
+        """Automate the installation of a Python package into the target
+        site-packages.
+
+        """
         env = self.get_recipe_env(arch)
-        info("Install {} into the site-packages".format(self))
         build_dir = self.get_build_dir(arch.arch)
-        with current_directory(build_dir):
-            hostpython = sh.Command(self.ctx.hostpython)
+        with current_directory(join(build_dir, 'build',
+                                    'lib.{}-2.7'.format(env['_PYTHON_HOST_PLATFORM']))):
+            dest = join(self.ctx.dist_dir, 'python', arch.arch)
+            if not exists(dest):
+                os.makedirs(dest)
 
-            #: Install in dist/python/arch folder,
-            #: make sure python path exists or setuptools complains
-            install_dir = join(self.ctx.dist_dir, "python", arch.arch)
-            site_packages_dir = join(install_dir,'lib','python2.7','site-packages')
-            env['PYTHONPATH'] = ":".join([install_dir,site_packages_dir])
-
-            #: Make sure it exists or we blow up
-            if not exists(site_packages_dir):
-                os.makedirs(site_packages_dir)
-
-            #: Run install into the arch specifc install dir
-            shprint(hostpython, "setup.py", "install", "-O2",
-                    "--prefix", install_dir, _env=env)
-
+            #: Find all the so files
+            for f in sh.find('.','-name','*.so').strip().split("\n"):
+                so_name = ".".join(f.split("/")[1:])
+                so_file = join(dest,so_name)
+                if exists(so_file):
+                    os.remove(so_file)
+                #: Copy
+                shprint(sh.mv, f, so_file)
 
 def build_recipes(names, ctx):
     # gather all the dependencies

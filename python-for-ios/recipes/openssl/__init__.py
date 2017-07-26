@@ -59,10 +59,10 @@ class OpensslRecipe(Recipe):
                       "SHLIB_VERSION_NUMBER={}!".format(self.version), "Makefile")
 
         shprint(sh.make, "clean")
-        shprint(sh.make, "-j4", "build_libs","LIBDIR=ssl")#, _env=build_env)
+        shprint(sh.make, "-j4", "build_libs","LIBDIR=.")#, _env=build_env)
 
         #: Copy to dist/lib/arch folder
-        arch_lib_dir = join(self.ctx.dist_dir,'lib',arch.arch)
+        arch_lib_dir = join(self.ctx.dist_dir,'.',arch.arch)
         if not exists(arch_lib_dir):
             os.makedirs(arch_lib_dir)
 
@@ -70,8 +70,9 @@ class OpensslRecipe(Recipe):
         with current_directory(self.build_dir):
             for f in ['crypto','ssl']:
                 #: Copy and rename
-                sh.cp('lib{}.{}.dylib'.format(f,self.version[:-1]),
-                      join(arch_lib_dir,'lib{}.dylib'.format(f)))
+                v = self.version[:-1]
+                sh.cp('-f','lib{}.{}.dylib'.format(f,v),
+                      join(arch_lib_dir,'lib{}.{}.dylib'.format(f,v)))
 
 
 

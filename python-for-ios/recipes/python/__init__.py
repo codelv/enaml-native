@@ -89,7 +89,7 @@ class PythonRecipe(Recipe):
             os.makedirs(arch_lib_dir)
         self.copy_file(
             join(self.get_build_dir(arch.arch),'libpython2.7.dylib'),
-            join(arch_lib_dir,'libpython.dylib')
+            join(arch_lib_dir,'libpython2.7.dylib')
         )
 
 
