@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import subprocess
+
+sofiles = []
+for dir in sys.argv[2:]:
+    for fn in os.listdir(dir):
+        if fn.endswith(".so"):
+            fn = os.path.join(dir, fn)
+            if os.path.exists(fn + ".o") and os.path.exists(fn + ".libs"):
+                sofiles.append(fn)
+
+args = []  # The raw argument list.
+for fn in sofiles:
+    args.append(fn + ".o")
+    args.extend(open(fn + ".libs").read().split(" "))
+
+unique_args = ' '.join(x for x in sorted(set(args)) if x.endswith('.so.o'))
+print('Biglink create %s library' % sys.argv[1])
+cmd = "ar -q %s %s" % (sys.argv[1], unique_args)
+print(cmd)
+subprocess.Popen(cmd, shell=True).communicate()

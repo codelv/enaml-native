@@ -66,21 +66,20 @@
     const char* main_script;
     
     NSString * resourcePath = [[NSBundle mainBundle] resourcePath];
-    NSString * bundleId = @"com.frmdstryr.enamlnative.App";
     
     // Special environment to avoid writing bytecode because
     // the process will not have write attribute on the device.
     putenv("PYTHONDONTWRITEBYTECODE=1");
     
     // Set the home for the Python interpreter
-    python_home = [NSString stringWithFormat:@"%@/Library/Python.framework/Resources", resourcePath, nil];
+    python_home = [NSString stringWithFormat:@"%@/Python/stdlib", resourcePath, nil];
     NSLog(@"PythonHome is: %@", python_home);
     wpython_home = strdup([python_home UTF8String]);
     Py_SetPythonHome(wpython_home);
     
     // Set the PYTHONPATH
-    python_path = [NSString stringWithFormat:@"PYTHONPATH=%@/Library/Application Support/%@/Python:%@/Library/Application Support/%@/Python/site-packages:%@/Library/Application Support/%@/Python/stdlib",
-                   resourcePath, bundleId, resourcePath, bundleId, resourcePath, bundleId, nil];
+    python_path = [NSString stringWithFormat:@"PYTHONPATH=%@/Python:%@/Python/site-packages:%@/Python/stdlib",
+                   resourcePath, resourcePath, resourcePath, nil];
     NSLog(@"PYTHONPATH is: %@", python_path);
     putenv((char *)[python_path UTF8String]);
     
@@ -92,7 +91,7 @@
     Py_Initialize();
     
     // Set the name of the main script
-    NSString *mainScript = [NSString stringWithFormat:@"Library/Application Support/%@/Python/main", bundleId, nil];
+    NSString *mainScript = [NSString stringWithFormat:@"Python/main", nil];
     main_script = [[[NSBundle mainBundle] pathForResource:mainScript ofType:@"py"] cStringUsingEncoding:NSUTF8StringEncoding];
     
     if (main_script == NULL) {
