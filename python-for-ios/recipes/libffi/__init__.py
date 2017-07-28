@@ -1,7 +1,13 @@
-from toolchain import Recipe, shprint
+from toolchain import Recipe, FrameworkLibrary, shprint
 import sh
 import os
 from os.path import join,exists
+
+
+class LibffiFramework(FrameworkLibrary):
+    #: TODO should be ARCH independent
+    libraries = ['lib/{arch}/libffi.dylib']
+
 
 class LibffiRecipe(Recipe):
     version = "3.2.1"
@@ -9,6 +15,7 @@ class LibffiRecipe(Recipe):
     #library = "build/Release-{arch.sdk}/ffi.dynlib"
     include_per_arch = True
     include_dir = "build_{arch.sdk}-{arch.arch}/include"
+    framework = LibffiFramework()
 
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
@@ -29,6 +36,7 @@ class LibffiRecipe(Recipe):
         shprint(sh.xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
+                # "ENABLE_BITCODE=YES",
                 "-sdk", arch.sdk,
                 "-project", "libffi.xcodeproj",
                 "-target", "libffi-iOS",

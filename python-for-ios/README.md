@@ -1,7 +1,7 @@
 Python for iOS
 ============
 
-This is a heavily modified version of Kivy for iOS.
+This is a heavily modified version of [kivy-ios](https://github.com/kivy/kiv-ios).
 
 Major changes:
 
@@ -9,12 +9,53 @@ Major changes:
 2. Converted recipes to build dynamic libs instead of static
 2. Support added for building python shared modules with compiled componets (build_ext)
 3. Python updated to 2.7.13
-4. Openssl updated to 1.0.2k
+4. Openssl updated to 1.0.2l
 5. Added recipes for atom, enaml, msgpack-python.
 6. Added generic PipRecipe so you can build pip libraries the normal way (./toolchain.py build <x>) instead of using (./toolchain pip install <x>)
+7. Added ability to create a Framework from recipes and include multiple libraries, headers, and resources.
 
 More info here [on my blog](http://jrm5555.blogspot.com/2017/07/enaml-native-ios-support-cross.html)
 
+
+Several projects (libffi and openssl) were converted for bitcode but then 
+I decided to disable it after reading on security issues that enabling bitcode creates.
+
+## Usage ###
+
+This is a simple example of what you need to do to use this toolchain to include
+python in an iOS project.
+ 
+1. Install the dependencies of kivy-ios (see below).  
+
+>> Note: Kivy is not required.
+
+2. Build hostpython and python
+
+```sh
+
+#: Build hostpython with ssl support
+./toolchain.py build hostopenssl hostpyhon host_setuptools
+
+#: Build python with SSL support
+./toolchain.py build openssl python
+
+#: Build any other modules you want
+
+```
+
+
+>> A framework will be created in `dist/frameworks` named `Python.framework`.
+
+3. Create a new xcode project (in xcode) 
+4. Copy in the `Python.framework` (drag and drop). 
+5. Add it to `Embedded binaries` or create a `Copy Files` phase and add the framework.
+6. Include `Python/Python.h` in your code and use however you like :)
+
+
+
+<div><hr/></div>
+
+Original readme is below
 
 Kivy for iOS
 ============

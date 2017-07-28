@@ -20,6 +20,7 @@ import shutil
 import fnmatch
 import glob
 import virtualenv
+import plistlib
 from contextlib import contextmanager
 from datetime import datetime
 from logger import setup_color, info, info_main, info_notify, shprint
@@ -420,18 +421,322 @@ class Context(object):
         return "IDEBuildOperationMaxNumberOfConcurrentCompileTasks={}".format(self.num_cores)
 
 
-class Recipe(object):
-    version = None
-    url = None
-    archs = []
-    depends = []
-    optional_depends = []
+class Framework(object):
+    """ A delegate for building a framework for a recipe. This should be subclassed and
+        assigned as the framework of your recipe.
+
+        The goal is to be able to include one Python.framework in the xcode project that includes
+        everything required for the app. This means, all Libraries, shared libraries
+        (python extensions), and python sources.
+
+    Ex.
+
+        class MyFramework(Framework):
+            name = "MyFramework"
+
+        class MyRecipe(Recipe):
+            framework = MyFramework()
+
+    #: See the following for more info
+    https://developer.apple.com/library/content/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/FrameworkAnatomy.html
+
+    The framework structure created is:
+
+        MyFramework.framework/
+            Headers      -> Versions/Current/Headers
+            MyFramework  -> Versions/Current/MyFramework
+            Resources    -> Versions/Current/Resources
+            Libraries    -> Versions/Current/Libraries
+            Versions/
+                A/
+                    Headers/
+                        MyHeader.h
+                    MyFramework
+                    Resources/
+                        English.lproj/
+                            Documentation
+                            InfoPlist.strings
+                        Info.plist
+                B/
+                    Headers/
+                        MyHeader.h
+                    MyFramework
+                    Resources/
+                        English.lproj/
+                            Documentation
+                            InfoPlist.strings
+                        Info.plist
+                Current  -> B
+
+    """
+
+    #: Name
+    name = ""
+
+    #: Bundle id to use for plist
+    bundle_id = ""
+
+    #: Add anything you want to override in the plist
+    plist = {}
+
+    #: Version code
+    version = "A"
+
+    #: Headers to copy, relative to build dir
+    #: (can be glob patterns such as include/python2.7/*.h)
+    headers = []
+
+    #: Resources to copy relative to build dir
+    #:  (can be any glob pattern)
+    resources = []
+
+    #: Library to link, relative to the dist dir
+    #: the path will be formatted with the arch parameters
+    #: and passed to lipo to create a universal library
     library = None
+
+    #: Any sub libraries these are relative to the dist folder
+    #: the path will be formatted with the arch parameters
+    #: and passed to lipo to create a universal library
     libraries = []
+
+    def build(self, recipe):
+        """ Create a framework for this recipe
+        """
+        info("Building or adding to {}.framework...".format(self.name))
+
+        #: Copy ctx and recipe
+        self.ctx = recipe.ctx
+        self.recipe = recipe
+
+        framework_dir = recipe.get_framework_dir()
+
+        if not hasattr(recipe,'build_dir'):
+            recipe.build_dir = recipe.get_build_dir(recipe.filtered_archs[0].arch)
+
+        if not exists(framework_dir):
+            os.makedirs(framework_dir)
+
+        #: Create framework folder structure
+        with current_directory(framework_dir):
+            version_dir = join('Versions', self.version)
+
+            if not exists(version_dir):
+                os.makedirs(version_dir)
+
+            with current_directory(version_dir):
+                self.install_headers(recipe)
+                self.install_resources(recipe)
+                self.install_binary(recipe)
+                self.install_libraries(recipe)
+
+            #: Finally create symlinkes to the current version
+            self.install_links(recipe)
+
+            #: Create Info.plist
+            self.install_plist(recipe)
+
+    def install_headers(self, recipe):
+        """ Install headers.
+        Current directory is the framework's version folder.
+            ex. MyFramework.framework/Versions/A/
+
+        """
+        if not self.headers:
+            return
+
+        #: Create and copy headers
+        if not exists('Headers'):
+            os.makedirs('Headers')
+
+        #: Copy to headers
+        with current_directory('Headers'):
+            for pattern in self.headers:
+                for h in glob.glob(join(recipe.build_dir, pattern)):
+                    info("Adding Header {} to {}.framework...".format(h, self.name))
+                    shprint(sh.cp, '-Rf', h, '.')
+
+    def install_resources(self, recipe):
+        """ Install any resources the framework requires.
+            Current directory is the framework's version folder.
+        """
+        if not self.resources:
+            return
+
+        #: Create and copy headers
+        if not exists('Resources'):
+            os.makedirs('Resources')
+
+        #: Copy to headers
+        with current_directory('Resources'):
+
+            for pattern in self.resources:
+                for r in glob.glob(join(recipe.build_dir, pattern)):
+                    info("Adding Resource {} to {}.framework...".format(r, self.name))
+                    shprint(sh.cp, '-Rf', r, '.')
+
+    def install_plist(self, recipe):
+        """ Create or update the Info.plist file required by a framework.
+        """
+        #: Already created and  we don't want to update it
+        if exists('Info.plist') and not self.plist:
+            return
+
+        if exists('Info.plist'):
+            #: Read existing
+            plist = plistlib.readPlist('Info.plist')
+        else:
+            #: Create new  Info.plist
+            plist = dict(
+                CFBundleDevelopmentRegion="en",  #: Shouldn't hard code..
+                CFBundleExecutable=self.name,
+                CFBundleIdentifier=self.bundle_id or self.name,
+                CFBundleInfoDictionaryVersion="6.0",
+                CFBundleName=self.name,
+                CFBundlePackageType="FMWK",
+                CFBundleShortVersionString=self.version,
+                CFBundleVersion=self.version,
+                NSPrincipalClass="",
+            )
+
+        #: Update with any customized params
+        plist.update(plist)
+
+        #: Save it
+        plistlib.writePlist(plist,'Info.plist')
+
+
+
+
+def install_libraries(self, recipe):
+        """ Install any libraries the framework requires.
+            Current directory is the framework's version folder.
+        """
+        if not self.libraries:
+            return
+
+        #: Create and copy libraries
+        if not exists('Libraries'):
+            os.makedirs('Libraries')
+        with current_directory('Libraries'):
+            for library in self.libraries:
+                info("Adding Library {} to {}.framework...".format(library, self.name))
+                dest = os.path.split(library)[-1]
+                lib = join(recipe.ctx.dist_dir, library)
+
+                #: Make a universal library and saves it to the destination
+                self.lipo(recipe, lib, dest)
+                #shprint(sh.cp, lib, dest)
+
+    def install_binary(self, recipe):
+        """ Install any resources the framework requires.
+            Current directory is the framework's version folder.
+        """
+        if not self.library:
+            return
+        info("Adding Binary {} to {}.framework...".format(self.library, self.name))
+        #: Copy the library renamed to the framework name
+        framework_binary = join(recipe.ctx.dist_dir, self.library)
+
+        #: Make a universal library and saves it to the destination
+        self.lipo(recipe, framework_binary, self.name)
+        #shprint(sh.cp, framework_binary, self.name)
+
+
+    def install_links(self, recipe):
+        """ Create symlinks to the current version of this framework.
+            Current directory is the framework folder.
+
+        """
+        #: Create version symlink
+        if not exists('Versions/Current'):
+            shprint(sh.ln, '-sf', '{}'.format(self.version), 'Versions/Current')
+
+        #: Create symlinks (if required)
+        for path in ['Headers', 'Resources', 'Libraries', self.name]:
+            if exists('Versions/Current/{}'.format(path)) and not exists(path):
+                shprint(sh.ln, '-sf', 'Versions/Current/{}'.format(path), path)
+
+    def lipo(self, recipe, lib, dest):
+        """ Run lipo on the given library and return the generated output
+            that supports every arch
+
+        """
+        libs = [lib.format(arch=arch.arch) for arch in recipe.filtered_archs]
+        shprint(sh.lipo, '-output', dest, '-create', *libs)
+
+
+class FrameworkLibrary(Framework):
+    """
+        A framework that ADDS libraries to the Python framework
+        this should be used for pretty much everything except the python recipe itself.
+
+        If you need to use headers from this library, don't use this, instead
+        create a separate framework for it.
+
+
+        For example:
+
+            Python.framework:
+                Versions:
+                    2.7:
+                        Libraries:
+                            yourlib.dylib # <-- libraries added here
+
+        Note: the actual python recipe may not exist yet.
+    """
+    #: Add to the Python framework by default
+    name = "Python"
+
+    #: Add to python version 2.7
+    version = "2.7"
+
+    #: Add your libraries here
+    libraries = []
+
+
+class Recipe(object):
+    #: Version to build
+    version = None
+
+    #: Unformatted url where the source can be downloaded
+    url = None
+
+    #: Arches that are supported
+    archs = []
+
+    #: Dependent recipes
+    depends = []
+
+    #: Optional dependencies
+    optional_depends = []
+
+    #: Library that will be built by this recipe
+    library = None
+
+    #: Libraries that will be built by this recipe
+    libraries = []
+
+    #: Include sources from this directory
     include_dir = None
+
+    #: Include sources are specific to each arch
+    #: and should be copied for each
     include_per_arch = False
+
+    #: Name of framework to build, excluding .framework ex (Python)
+    framework = None
+
+    #: Version to use when creating the framework, by default uses the recipe version
+    framework_version = None
+
+    #: Frameworks to include
     frameworks = []
+
+    #: Sources to include
     sources = []
+
+    #: Idk what these are
     pbx_frameworks = []
     pbx_libraries = []
 
@@ -442,6 +747,7 @@ class Recipe(object):
         """
         if not url:
             return
+
         def report_hook(index, blksize, size):
             if size <= 0:
                 progression = '{0} bytes'.format(index * blksize)
@@ -525,6 +831,10 @@ class Recipe(object):
         sh.patch("-t", "-d", target_dir, "-p1", "-i", filename)
 
     def copy_file(self, filename, dest):
+        """
+        Copy a file from the recipe folder
+        to somewhere in the build folder.
+        """
         info("Copy {} to {}".format(filename, dest))
         filename = join(self.recipe_dir, filename)
         dest = join(self.build_dir, dest)
@@ -637,6 +947,7 @@ class Recipe(object):
         return value
 
     def execute(self):
+        """ Build api """
         if self.custom_dir:
             self.ctx.state.remove_all(self.name)
         self.download()
@@ -701,7 +1012,7 @@ class Recipe(object):
     def build(self, arch):
         self.build_dir = self.get_build_dir(arch.arch)
         if self.has_marker("building"):
-            info("Warning: {} build for {} has been incomplete".format(
+            info("Warning: {} build for {} was incomplete".format(
                 self.name, arch.arch))
             info("Warning: deleting the build and restarting.")
             shutil.rmtree(self.build_dir)
@@ -729,26 +1040,17 @@ class Recipe(object):
         info("Build {} for {} (filtered)".format(
             self.name,
             ", ".join([x.arch for x in filtered_archs])))
+
+        #: Build each
         for arch in self.filtered_archs:
             self.build(arch)
 
-        name = self.name
-        #: NO LONGER DO STATIC LIBRARIES
-        if self.library:
-            info("Create lipo library for {}".format(name))
-            if not name.startswith("lib"):
-                name = "lib{}".format(name)
-            static_fn = join(self.ctx.dist_dir, "lib", "{}.a".format(name))
-            ensure_dir(dirname(static_fn))
-            info("Lipo {} to {}".format(self.name, static_fn))
-            self.make_lipo(static_fn)
-        if self.libraries:
-            info("Create multiple lipo for {}".format(name))
-            for library in self.libraries:
-                static_fn = join(self.ctx.dist_dir, "lib", basename(library))
-                ensure_dir(dirname(static_fn))
-                info("  - Lipo-ize {}".format(library))
-                self.make_lipo(static_fn, library)
+        #: Create a 'universal' library
+        self.build_library()
+
+        #: Create a framework using the universal library
+        self.build_framework()
+
         info("Install include files for {}".format(self.name))
         self.install_include()
         info("Install frameworks for {}".format(self.name))
@@ -773,11 +1075,41 @@ class Recipe(object):
         if hasattr(self, postbuild):
             getattr(self, postbuild)()
 
+    def build_library(self):
+        """ Build a cross platform library that supports multiple arches """
+        name = self.name
+        #: NO LONGER DO STATIC LIBRARIES
+        if self.library:
+            info("Create lipo library for {}".format(name))
+            if not name.startswith("lib"):
+                name = "lib{}".format(name)
+            static_fn = join(self.ctx.dist_dir, "lib", "{}.a".format(name))
+            ensure_dir(dirname(static_fn))
+            info("Lipo {} to {}".format(self.name, static_fn))
+            self.make_lipo(static_fn)
+        if self.libraries:
+            info("Create multiple lipo for {}".format(name))
+            for library in self.libraries:
+                static_fn = join(self.ctx.dist_dir, "lib", basename(library))
+                ensure_dir(dirname(static_fn))
+                info("  - Lipo-ize {}".format(library))
+                self.make_lipo(static_fn, library)
+
+    def get_framework_dir(self):
+        """ Return directory where framework will go """
+        if not self.framework:
+            raise RuntimeError("This recipe does not have a framework. "
+                               "Please define a framework if this is needed.")
+        return join(self.ctx.dist_dir, 'frameworks', '{}.framework'.format(self.framework.name))
+
+    def build_framework(self):
+        """ Build a framework for this recipe """
+        if self.framework:
+            self.framework.build(self)
+
     @cache_execution
     def make_lipo(self, filename, library=None):
-        #raise RuntimeError("make_lipo is DISABLED")
-        if library is None:
-            library = self.library
+        library = library or self.library
         if not library:
             return
         args = []
@@ -992,82 +1324,11 @@ class PipRecipe(PythonRecipe):
                 except:
                     pass
 
+class PythonExtensionRecipe(PythonRecipe):
+    """ Add common methods and environment variables
+        needed for compiling extensions.
 
-class CythonRecipe(PythonRecipe):
-    pre_build_ext = False
-    cythonize = True
-    support_ssl = False # TODO: Read from dependencies
-
-    def cythonize_file(self, filename):
-        if filename.startswith(self.build_dir):
-            filename = filename[len(self.build_dir) + 1:]
-        info("Cythonize {}".format(filename))
-        cmd = sh.Command(join(self.ctx.root_dir, "tools", "cythonize.py"))
-        shprint(cmd, filename)
-
-    def cythonize_build(self):
-        if not self.cythonize:
-            return
-        root_dir = self.build_dir
-        for root, dirnames, filenames in walk(root_dir):
-            for filename in fnmatch.filter(filenames, "*.pyx"):
-                self.cythonize_file(join(root, filename))
-
-    def biglink(self):
-        raise RuntimeError("biglink IS DISABLED")
-        dirs = []
-        for root, dirnames, filenames in walk(self.build_dir):
-            if fnmatch.filter(filenames, "*.so.libs"):
-                dirs.append(root)
-        cmd = sh.Command(join(self.ctx.root_dir, "tools", "biglink"))
-        shprint(cmd, join(self.build_dir, "lib{}.a".format(self.name)), *dirs)
-
-    def get_recipe_env(self, arch):
-        env = super(CythonRecipe, self).get_recipe_env(arch)
-        #env['PYTHONHOME'] = join(self.ctx.dist_dir,'hostpython','lib','python2.7')
-        env["KIVYIOSROOT"] = self.ctx.root_dir
-        env["IOSSDKROOT"] = arch.sysroot
-        #: LIB LINK NOT USED
-        #env["LDSHARED"] = join(self.ctx.root_dir, "tools", "liblink")
-        env["ARM_LD"] = env["LD"]
-        env["ARCH"] = arch.arch
-
-        env["C_INCLUDE_PATH"] = join(arch.sysroot, "usr", "include")
-        env["LIBRARY_PATH"] = join(arch.sysroot, "usr", "lib")
-        env["CFLAGS"] += " -I{}".format(
-            join(self.ctx.dist_dir, "include", arch.arch, "libffi"),
-            #join(self.ctx.dist_dir, "lib", arch.arch, "libbz2"),
-        )
-        env['LDFLAGS'] += " -L{}".format(
-            join(self.ctx.dist_dir, "lib", arch.arch),
-        )
-        env["LDFLAGS"] += " -lpython -lffi -lz"
-        if "openssl.build_all" in self.ctx.state:
-            env['LDFLAGS'] += " -lssl -lcrypto"
-            env['CFLAGS'] += " -I{}".format(
-                join(self.ctx.dist_dir, "include", arch.arch, "openssl"),
-            )
-        return env
-
-    def build_arch(self, arch):
-        build_env = self.get_recipe_env(arch)
-        hostpython = sh.Command(self.ctx.hostpython)
-        if self.pre_build_ext:
-            try:
-                shprint(hostpython, "setup.py", "build_ext", "-g",
-                        _env=build_env)
-            except:
-                pass
-        self.cythonize_build()
-        shprint(hostpython, "setup.py", "build_ext", "-g",
-                _env=build_env)
-
-
-
-
-
-class CppPythonRecipe(PythonRecipe):
-    """ """
+    """
 
     def get_local_arch(self, arch):
         if arch.arch == "arm64":
@@ -1077,36 +1338,10 @@ class CppPythonRecipe(PythonRecipe):
         else:
             return arch.arch
 
-    def get_recipe_env(self, arch):
-        env = super(PythonRecipe, self).get_recipe_env(arch)
-        env["KIVYIOSROOT"] = self.ctx.root_dir
-        env["IOSSDKROOT"] = arch.sysroot
-        env["ARM_LD"] = env["LD"]
-        env["ARCH"] = arch.arch
-        env["C_INCLUDE_PATH"] = join(arch.sysroot, "usr", "include")
-        env["LIBRARY_PATH"] = join(arch.sysroot, "usr", "lib")
-        env["CFLAGS"] += " -I{}".format(
-            join(self.ctx.dist_dir, "include", arch.arch, "libffi"),
-            #join(self.ctx.dist_dir, "lib", arch.arch, "libbz2"),
-        )
-        env['LDFLAGS'] += " -shared -lpython -L{}".format(
-            join(self.ctx.dist_dir, "lib", arch.arch),
-        )
-        env['PYTHONXCPREFIX'] = self.get_build_dir(arch.arch)
-        env['LDSHARED'] = "{CC} -shared".format(**env)
-        env['CROSS_COMPILE'] = arch.arch
-        env['CROSS_COMPILE_TARGET'] = 'yes'
-        env['_PYTHON_HOST_PLATFORM'] = 'darwin-{}'.format(self.get_local_arch(arch))
-        #if "openssl.build_all" in self.ctx.state:
-        #    env['LDFLAGS'] += " -lssl -lcrypto"
-        #    env['CFLAGS'] += " -I{}".format(
-        #        join(self.ctx.dist_dir, "include", arch.arch, "openssl"),
-        #    )
-        return env
-
-    def build_arch(self, arch):
-        build_env = self.get_recipe_env(arch)
-        hostpython = sh.Command(self.ctx.hostpython)
+    def install_sysconfigdata(self, arch):
+        """ Hostpython needs _sysconfigdata for the arch we are building
+            so copy it to the build directory.
+        """
         build_dir = self.get_build_dir(arch.arch)
         local_arch = self.get_local_arch(arch)
 
@@ -1117,10 +1352,136 @@ class CppPythonRecipe(PythonRecipe):
                                   'lib.darwin-{}-2.7'.format(local_arch),
                                   '_sysconfigdata.py')
             #: Copy python config here
-            shprint(sh.cp,_sysconfigdata,'.')
+            shprint(sh.cp,_sysconfigdata, '.')
+
+    def get_recipe_env(self, arch):
+        env = super(PythonExtensionRecipe, self).get_recipe_env(arch)
+        #env['PYTHONHOME'] = join(self.ctx.dist_dir,'hostpython','lib','python2.7')
+        env["KIVYIOSROOT"] = self.ctx.root_dir
+        env["IOSSDKROOT"] = arch.sysroot
+        #: LIB LINK NOT USED
+        #env["LDSHARED"] = join(self.ctx.root_dir, "tools", "liblink")
+        env["ARM_LD"] = env["LD"]
+        env["ARCH"] = arch.arch
+
+        env["C_INCLUDE_PATH"] = join(arch.sysroot, "usr", "include")
+        env["LIBRARY_PATH"] = join(arch.sysroot, "usr", "lib")
+
+        #: Tell the compiler we want to include headers from libffi
+        #: and use bitcode. Update no bitcode
+        #env["CFLAGS"] += " -fembed-bitcode -I{}".format(
+        env["CFLAGS"] += " -I{}".format(
+            join(self.ctx.dist_dir, "include", arch.arch, "libffi"),
+            #join(self.ctx.dist_dir, "lib", arch.arch, "libbz2"),
+        )
+
+        #: Magic flag for osx cross compiling
+        env['_PYTHON_HOST_PLATFORM'] = 'darwin-{}'.format(self.get_local_arch(arch))
+
+        #: Tell the loader we want to load libraries from dist/lib/arch
+        env['LDFLAGS'] += " -L{}".format(
+            join(self.ctx.dist_dir, "lib", arch.arch),
+        )
+
+        #: We want to link python
+        env["LDFLAGS"] += " -lpython"# -lffi -lz"
+
+        #: If you need to link ssl add this
+        # if "openssl.build_all" in self.ctx.state:
+        #     env['LDFLAGS'] += " -lssl -lcrypto"
+        #     env['CFLAGS'] += " -I{}".format(
+        #         join(self.ctx.dist_dir, "include", arch.arch, "openssl"),
+        #     )
+        return env
+
+    def create_framework(arch):
+        """ Create an iOS framework """
+
+
+class CythonRecipe(PythonExtensionRecipe):
+    """ Use for python extensions that use cython (.pyx files) """
+    pre_build_ext = False
+    cythonize = True
+
+    def cythonize_file(self, filename):
+        """ Convert a cython .pyx file to .c """
+        if filename.startswith(self.build_dir):
+            filename = filename[len(self.build_dir) + 1:]
+        info("Cythonize {}".format(filename))
+        cmd = sh.Command(join(self.ctx.root_dir, "tools", "cythonize.py"))
+        shprint(cmd, filename)
+
+    def cythonize_build(self):
+        """ Convert all cython files to .c files """
+        if not self.cythonize:
+            return
+        root_dir = self.build_dir
+        for root, dirnames, filenames in walk(root_dir):
+            for filename in fnmatch.filter(filenames, "*.pyx"):
+                self.cythonize_file(join(root, filename))
+
+    def biglink(self):
+        raise RuntimeError("biglink IS DISABLED") #: We're building shared libs
+        dirs = []
+        for root, dirnames, filenames in walk(self.build_dir):
+            if fnmatch.filter(filenames, "*.so.libs"):
+                dirs.append(root)
+        cmd = sh.Command(join(self.ctx.root_dir, "tools", "biglink"))
+        shprint(cmd, join(self.build_dir, "lib{}.a".format(self.name)), *dirs)
+
+    def build_arch(self, arch):
+        """ Build a recipe with cython files """
+        build_env = self.get_recipe_env(arch)
+        hostpython = sh.Command(self.ctx.hostpython)
+        build_dir = self.get_build_dir(arch.arch)
+
+        with current_directory(build_dir):
+            self.install_sysconfigdata(arch)
+
+            if self.pre_build_ext:
+                try:
+                    #: This build should fail because there is no cython in the hostpython env
+                    #: so it fails to compile, but it generates the necessary files for cythonizing
+                    shprint(hostpython, "setup.py", "build_ext", "--debug",
+                            _env=build_env)
+                except:
+                    pass
+
+            #: Convert pyx to .c using your SYSTEM cython, NOT hostpython.
+            self.cythonize_build()
+
+            #: Build using the regular compiler
+            shprint(hostpython, "setup.py", "build_ext", "--debug",
+                    _env=build_env)
+
+
+class CppPythonRecipe(PythonExtensionRecipe):
+    """ Recipe for Python Extensions that use C++ """
+
+    def get_recipe_env(self, arch):
+        env = super(CppPythonRecipe, self).get_recipe_env(arch)
+
+        env['PYTHONXCPREFIX'] = self.get_build_dir(arch.arch)
+
+        #: Make sure it's a shared library (should it be dylib --> doesn't make a difference?)
+        env['LDFLAGS'] += " -shared"
+        env['LDSHARED'] = "{CC} -shared".format(**env)
+
+        #: Cross compile build
+        env['CROSS_COMPILE'] = arch.arch
+        env['CROSS_COMPILE_TARGET'] = 'yes'
+
+        return env
+
+    def build_arch(self, arch):
+        build_env = self.get_recipe_env(arch)
+        hostpython = sh.Command(self.ctx.hostpython)
+        build_dir = self.get_build_dir(arch.arch)
+
+        with current_directory(build_dir):
+            self.install_sysconfigdata(arch)
 
             shprint(hostpython, "setup.py", "build_ext", "--debug",
-                    #'--plat-name=darwin-{}'.format(local_arch),
                     _env=build_env)
 
         self.install_package(arch)

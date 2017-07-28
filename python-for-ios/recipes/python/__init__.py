@@ -1,7 +1,28 @@
-from toolchain import Recipe, shprint
+from toolchain import Recipe, Framework, shprint, current_directory, info
 from os.path import join, exists
 import sh
 import os
+
+
+class PythonFramework(Framework):
+    name = "Python"
+    version = "2.7"
+    bundle_id = "com.frmdstryr.enamlnative.Python"
+    headers = ["Include/*.h", "pyconfig.h"]
+    library = "lib/{arch}/libpython2.7.dylib"
+    libraries = ["lib/{arch}/libpython2.7.dylib"]
+
+    def install_binary(self, recipe):
+        """ We want linked extensions to be able to use libpython from the Libraries
+            so instead of dupilcating it, use a symlink.
+        """
+
+        info("Adding a simlink of Python {} to {}.framework...".format(self.library, self.name))
+        #: Copy the library renamed to the framework name
+        libname = os.path.split(self.library)[-1]
+
+        #: Make a universal library and saves it to the destination
+        shprint(sh.ln, '-sf', 'Libraries/{}'.format(libname), self.name)
 
 
 class PythonRecipe(Recipe):
@@ -10,6 +31,7 @@ class PythonRecipe(Recipe):
     depends = ["libffi", ]
     optional_depends = ["openssl"]
     #library = "libpython2.7.dylib"
+    framework = PythonFramework()
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
 
     def init_with_ctx(self, ctx):
@@ -38,9 +60,16 @@ class PythonRecipe(Recipe):
 
     def build_arch(self, arch):
         build_env = arch.get_env()
+        #build_env['ENABLE_BITCODE'] = "YES"
         if "openssl.build_all" in self.ctx.state:
+            #: Probably not the place to put it but make an ln to the version
+            with current_directory(join(self.ctx.dist_dir,'lib',arch.arch)):
+                for x in ['ssl', 'crypto']:
+                    shprint(sh.ln, '-sf',
+                            'lib{}.1.0.2.dylib'.format(x),
+                            'lib{}.dylib'.format(x))
             build_env['LDFLAGS'] += " -L{}".format(
-                join(self.ctx.dist_dir, 'lib' ,arch.arch)
+                join(self.ctx.dist_dir, 'lib', arch.arch)
             )
 
         configure = sh.Command(join(self.build_dir, "configure"))
@@ -48,11 +77,11 @@ class PythonRecipe(Recipe):
         if arch.arch == "arm64" :
             local_arch = "aarch64"
         shprint(configure,
+                #"CC={} -fembed-bitcode".format(build_env["CC"]),
                 "CC={}".format(build_env["CC"]),
                 "LD={}".format(build_env["LD"]),
                 "CFLAGS={}".format(build_env["CFLAGS"]),
                 "LDFLAGS={} -undefined dynamic_lookup".format(build_env["LDFLAGS"]),
-                "LDFLAGS={}".format(build_env["LDFLAGS"]),
                 "ac_cv_file__dev_ptmx=no",
                 "ac_cv_file__dev_ptc=no",
                 "--without-pymalloc",
@@ -62,7 +91,7 @@ class PythonRecipe(Recipe):
                 "--prefix=/python",
                 #"--exec_prefix=@executable_path/../Frameworks",  #: Install prefix
                 "--enable-ipv6",
-                "--enable-shared", #: Build shared library
+                "--enable-shared",  #: Build shared library
                 "--with-system-ffi",
                 "--without-doc-strings",
                 _env=build_env)
