@@ -27,7 +27,7 @@ python in an iOS project.
  
 1. Install the dependencies of kivy-ios (see below).  
 
->> Note: Kivy is not required.
+> Note: Kivy is not required.
 
 2. Build hostpython and python
 
@@ -44,13 +44,25 @@ python in an iOS project.
 ```
 
 
->> A framework will be created in `dist/frameworks` named `Python.framework`.
+> A framework will be created in `dist/frameworks` named `Python.framework`.
 
 3. Create a new xcode project (in xcode) 
 4. Copy in the `Python.framework` (drag and drop). 
 5. Add it to `Embedded binaries` or create a `Copy Files` phase and add the framework.
 6. Include `Python/Python.h` in your code and use however you like :)
+7. If you get code signing errors add a script to sign just the libraries
 
+```sh
+
+#: Manually sign the module libraries 
+cd "$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/Frameworks/Python.framework/Libraries"
+
+/usr/bin/codesign --force --sign - *.dylib
+
+#: If you have python extensions
+#/usr/bin/codesign --force --sign - *.so
+
+```
 
 
 <div><hr/></div>

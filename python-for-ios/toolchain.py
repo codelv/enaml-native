@@ -600,7 +600,7 @@ class Framework(object):
             )
 
         #: Update with any customized params
-        plist.update(plist)
+        plist.update(self.plist)
 
         #: Save it
         plistlib.writePlist(plist,'Info.plist')
