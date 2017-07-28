@@ -44,11 +44,13 @@ I made this because wanted to have a more "React Native" like environment that:
 ## Thanks to ##
  
 This project is built on top of several existing projects:
-1. [Enaml](https://github.com/nucleic/enaml)
+1. [enaml](https://github.com/nucleic/enaml)
 2. [python-for-android](https://github.com/kivy/python-for-android/)
 3. [pybridge](https://github.com/joaoventura/pybridge)
 4. [react-native](https://github.com/facebook/react-native) (inspiration)
 5. [pyjnius](https://github.com/kivy/pyjnius/)
+6. [kivy-ios](https://github.com/kivy/kivy-ios/)
 
-_Note: I'm not affiliated with any of these but have contributed to some of them_
+
+> Note: I'm not affiliated with any of these but have contributed to some of them_
 
