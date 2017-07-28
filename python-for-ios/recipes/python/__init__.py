@@ -61,6 +61,10 @@ class PythonRecipe(Recipe):
     def build_arch(self, arch):
         build_env = arch.get_env()
         #build_env['ENABLE_BITCODE'] = "YES"
+
+        #: Required flag or we get linking errors when loading from a framework!
+        build_env['LDFLAGS'] += " -lffi"
+
         if "openssl.build_all" in self.ctx.state:
             #: Probably not the place to put it but make an ln to the version
             with current_directory(join(self.ctx.dist_dir,'lib',arch.arch)):
@@ -68,9 +72,10 @@ class PythonRecipe(Recipe):
                     shprint(sh.ln, '-sf',
                             'lib{}.1.0.2.dylib'.format(x),
                             'lib{}.dylib'.format(x))
-            build_env['LDFLAGS'] += " -L{}".format(
+            build_env['LDFLAGS'] += " -lssl -lcrypto -L{}".format(
                 join(self.ctx.dist_dir, 'lib', arch.arch)
             )
+
 
         configure = sh.Command(join(self.build_dir, "configure"))
         local_arch = arch.arch

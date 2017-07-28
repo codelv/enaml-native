@@ -605,10 +605,7 @@ class Framework(object):
         #: Save it
         plistlib.writePlist(plist,'Info.plist')
 
-
-
-
-def install_libraries(self, recipe):
+    def install_libraries(self, recipe):
         """ Install any libraries the framework requires.
             Current directory is the framework's version folder.
         """
