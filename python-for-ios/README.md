@@ -40,29 +40,37 @@ python in an iOS project.
 ./toolchain.py build openssl python
 
 #: Build any other modules you want
-
+#: anything with compiled extensions needs a recipe.
+./toolchain.py build <requirement>
 ```
 
-
 > A framework will be created in `dist/frameworks` named `Python.framework`.
+
+
+### Adding Python to an xcode Project
+3. Create a new xcode project
+4. Create a folder within the project call `Libraries` and another called `Headers`
+5. Go to `python-for-ios/dist/frameworks/Python.framework/Libraries/` and copy all of the `dylib` files to your project `Libraries` folder. 
+6. Add a new `Copy Files` build phase and add all of the dylibs, make sure sign on copy is checked.
+7. Copy the `python2.7` folder from `python-for-ios/dist/root/python/include` and paste it in your projects `Headers` directory and rename `python2.7` to `Python`.
+8. Next, create a folder for your python source files in your xcode project like `Python`. Copy in the python files from `python-for-ios/dist/root/python/lib/python2.7/`.
+9. Add a `Run Script` build phase and have it copy this directory to the App using rsync
+10. Finally, include `Python/Python.h` in your code and use however you like :). See the AppDelegate.m for an example on how to setup the path and launch a main script.
+11. Build and run!
+
+I'm working on a better way of doing this.
+
+
+### Using Python.framework
+Ideally everything should be in one framework that you just embed and it does everything above. I started working on this but could not get it to work reliably on both a device and simulator. 
+
+> Note: I had issues getting the framework to work on both the simulator and actual device. After spending several days digging through logs and errors, I gave up. If you can find a solution, please share! Until then use the working (yet annoying) method above.
 
 3. Create a new xcode project (in xcode) 
 4. Copy in the `Python.framework` (drag and drop). 
 5. Add it to `Embedded binaries` or create a `Copy Files` phase and add the framework.
 6. Include `Python/Python.h` in your code and use however you like :)
-7. If you get code signing errors add a script to sign just the libraries
 
-```sh
-
-#: Manually sign the module libraries 
-cd "$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/Frameworks/Python.framework/Libraries"
-
-/usr/bin/codesign --force --sign - *.dylib
-
-#: If you have python extensions
-#/usr/bin/codesign --force --sign - *.so
-
-```
 
 
 <div><hr/></div>
