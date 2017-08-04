@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class TextClock(TextView):
-    __javaclass__ = set_default('android.widget.TextClock')
+    __nativeclass__ = set_default('android.widget.TextClock')
     setFormat24Hour = JavaMethod('java.lang.CharSequence')
     setFormat24Hour = JavaMethod('java.lang.CharSequence')
     setTimeZone = JavaMethod('java.lang.String')

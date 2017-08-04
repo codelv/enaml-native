@@ -17,7 +17,7 @@ from .bridge import JavaMethod
 
 
 class ProgressBar(View):
-    __javaclass__ = set_default('android.widget.ProgressBar')
+    __nativeclass__ = set_default('android.widget.ProgressBar')
     __signature__ = set_default(('android.content.Context', 'android.util.AttributeSet', 'int'))
     setIndeterminate = JavaMethod('boolean')
     setMax = JavaMethod('int')

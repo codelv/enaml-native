@@ -18,7 +18,7 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField
 
 
 class View(Widget):
-    __javaclass__ = set_default('android.view.View')
+    __nativeclass__ = set_default('android.view.View')
     __signature__ = set_default(('android.content.Context',))
 
     onClick = JavaCallback('android.view.View')
@@ -59,7 +59,7 @@ class View(Widget):
 
 
 class LayoutParams(JavaBridgeObject):
-    __javaclass__ = set_default('android.view.ViewGroup$LayoutParams')
+    __nativeclass__ = set_default('android.view.ViewGroup$LayoutParams')
     width = JavaField('int')
     height = JavaField('int')
     LAYOUTS = {
@@ -70,7 +70,7 @@ class LayoutParams(JavaBridgeObject):
 
 
 class MarginLayoutParams(LayoutParams):
-    __javaclass__ = set_default('android.view.ViewGroup$MarginLayoutParams')
+    __nativeclass__ = set_default('android.view.ViewGroup$MarginLayoutParams')
     __signature__ = set_default(('int', 'int'))
     setMargins = JavaMethod('int', 'int', 'int', 'int')
     setLayoutDirection = JavaMethod('int')

@@ -618,12 +618,28 @@ class Framework(object):
         with current_directory('Libraries'):
             for library in self.libraries:
                 info("Adding Library {} to {}.framework...".format(library, self.name))
-                dest = os.path.split(library)[-1]
-                lib = join(recipe.ctx.dist_dir, library)
 
-                #: Make a universal library and saves it to the destination
-                self.lipo(recipe, lib, dest)
-                #shprint(sh.cp, lib, dest)
+                #: Allow glob patterns
+                if '*' in library:
+                    #: Expand the glob pattern for each arch and run lipo for each created
+                    libs = {}
+                    for arch in recipe.filtered_archs:
+                        pattern = join(recipe.ctx.dist_dir, library.format(arch=arch.arch))
+                        for lib in glob.glob(pattern):
+                            libname = os.path.split(lib)[-1]
+                            if libname not in libs:
+                                libs[libname] = []
+                            libs[libname].append(lib)
+
+                    for lib in libs:
+                        dest = os.path.split(lib)[-1]
+                        self.lipo(recipe, libs[lib], dest)
+                else:
+                    dest = os.path.split(library)[-1]
+                    lib = join(recipe.ctx.dist_dir, library)
+
+                    #: Make a universal library and saves it to the destination
+                    self.lipo(recipe, lib, dest)
 
     def install_binary(self, recipe):
         """ Install any resources the framework requires.
@@ -637,8 +653,6 @@ class Framework(object):
 
         #: Make a universal library and saves it to the destination
         self.lipo(recipe, framework_binary, self.name)
-        #shprint(sh.cp, framework_binary, self.name)
-
 
     def install_links(self, recipe):
         """ Create symlinks to the current version of this framework.
@@ -656,10 +670,18 @@ class Framework(object):
 
     def lipo(self, recipe, lib, dest):
         """ Run lipo on the given library and return the generated output
-            that supports every arch
+            that supports every arch.
+
+            lib can be either a str or list. If it's a list it will be passed
+            directly to lipo. If it's a string it will be formatted with each
+            arch and then passed to lipo.
 
         """
-        libs = [lib.format(arch=arch.arch) for arch in recipe.filtered_archs]
+        if isinstance(lib, (tuple, list)):
+            libs = lib
+        else:
+            #: Format for each arch
+            libs = [lib.format(arch=arch.arch) for arch in recipe.filtered_archs]
         shprint(sh.lipo, '-output', dest, '-create', *libs)
 
 
@@ -1321,6 +1343,7 @@ class PipRecipe(PythonRecipe):
                 except:
                     pass
 
+
 class PythonExtensionRecipe(PythonRecipe):
     """ Add common methods and environment variables
         needed for compiling extensions.
@@ -1334,6 +1357,16 @@ class PythonExtensionRecipe(PythonRecipe):
             return "arm"
         else:
             return arch.arch
+
+    def prebuild_arch(self, arch):
+        """ Make sure libpython.dylib exists under dist/lib/<arch>/
+            by simlinking to the current version
+        """
+
+        with current_directory(join(self.ctx.dist_dir, 'lib', arch.arch)):
+            if not exists('libpython.dylib'):
+                #: Make a simlink
+                shprint(sh.ln, '-sf', 'libpython2.7.dylib', 'libpython.dylib')
 
     def install_sysconfigdata(self, arch):
         """ Hostpython needs _sysconfigdata for the arch we are building
@@ -1350,6 +1383,33 @@ class PythonExtensionRecipe(PythonRecipe):
                                   '_sysconfigdata.py')
             #: Copy python config here
             shprint(sh.cp,_sysconfigdata, '.')
+
+            #: Patch SO name
+            #: it already builds Mach-O libraries but the filetype is wrong
+            shprint(sh.sed, '-id', "s!'SO': '.so',!'SO': '.dylib',!", '_sysconfigdata.py')
+
+
+    def install_modules(self, arch):
+        """Automate the installation of a Python package into the target
+        site-packages.
+
+        """
+        env = self.get_recipe_env(arch)
+        build_dir = self.get_build_dir(arch.arch)
+        with current_directory(join(build_dir, 'build',
+                                    'lib.{}-2.7'.format(env['_PYTHON_HOST_PLATFORM']))):
+            dest = join(self.ctx.dist_dir, 'python', arch.arch)
+            if not exists(dest):
+                os.makedirs(dest)
+
+            #: Find all the so files
+            for f in sh.find('.','-name','*.dylib').strip().split("\n"):
+                so_name = ".".join(f.split("/")[1:])
+                so_file = join(dest, so_name)
+                if exists(so_file):
+                    os.remove(so_file)
+                #: Copy
+                shprint(sh.mv, f, so_file)
 
     def get_recipe_env(self, arch):
         env = super(PythonExtensionRecipe, self).get_recipe_env(arch)
@@ -1390,9 +1450,6 @@ class PythonExtensionRecipe(PythonRecipe):
         #         join(self.ctx.dist_dir, "include", arch.arch, "openssl"),
         #     )
         return env
-
-    def create_framework(arch):
-        """ Create an iOS framework """
 
 
 class CythonRecipe(PythonExtensionRecipe):
@@ -1451,6 +1508,9 @@ class CythonRecipe(PythonExtensionRecipe):
             shprint(hostpython, "setup.py", "build_ext", "--debug",
                     _env=build_env)
 
+            #: Now copy all the compiled libraries
+            self.install_modules(arch)
+
 
 class CppPythonRecipe(PythonExtensionRecipe):
     """ Recipe for Python Extensions that use C++ """
@@ -1483,6 +1543,10 @@ class CppPythonRecipe(PythonExtensionRecipe):
 
         self.install_package(arch)
 
+    def install(self):
+        """ Do our own install"""
+        pass
+
     def install_package(self, arch):
         """Automate the installation of a Python package into the target
         site-packages.
@@ -1512,27 +1576,8 @@ class CppPythonRecipe(PythonExtensionRecipe):
         #
         # self.install_modules(arch)
 
-    def install_modules(self, arch):
-        """Automate the installation of a Python package into the target
-        site-packages.
 
-        """
-        env = self.get_recipe_env(arch)
-        build_dir = self.get_build_dir(arch.arch)
-        with current_directory(join(build_dir, 'build',
-                                    'lib.{}-2.7'.format(env['_PYTHON_HOST_PLATFORM']))):
-            dest = join(self.ctx.dist_dir, 'python', arch.arch)
-            if not exists(dest):
-                os.makedirs(dest)
 
-            #: Find all the so files
-            for f in sh.find('.','-name','*.so').strip().split("\n"):
-                so_name = ".".join(f.split("/")[1:])
-                so_file = join(dest,so_name)
-                if exists(so_file):
-                    os.remove(so_file)
-                #: Copy
-                shprint(sh.mv, f, so_file)
 
 def build_recipes(names, ctx):
     # gather all the dependencies

@@ -20,7 +20,7 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
 class TabLayout(FrameLayout):
-    __javaclass__ = set_default('android.support.design.widget.TabLayout')
+    __nativeclass__ = set_default('android.support.design.widget.TabLayout')
     addTab = JavaMethod('android.support.design.widget.TabLayout$Tab')
     removeTab = JavaMethod('android.support.design.widget.TabLayout$Tab')
     removeAllTabs = JavaMethod()
@@ -48,7 +48,7 @@ class TabLayout(FrameLayout):
 
 
 class Tab(JavaBridgeObject):
-    __javaclass__ = set_default('android.support.design.widget.TabLayout$Tab')
+    __nativeclass__ = set_default('android.support.design.widget.TabLayout$Tab')
     setText = JavaMethod('java.lang.CharSequence')
     setIcon = JavaMethod('android.graphics.drawable.Drawable')
     # setContent = JavaMethod('int')

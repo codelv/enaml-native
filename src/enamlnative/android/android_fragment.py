@@ -21,7 +21,7 @@ from .app import AndroidApplication
 
 
 class BridgedFragment(JavaBridgeObject):
-    __javaclass__ = set_default('com.enaml.adapters.BridgedFragmentStatePagerAdapter$BridgedFragment')
+    __nativeclass__ = set_default('com.enaml.adapters.BridgedFragmentStatePagerAdapter$BridgedFragment')
     setTitle = JavaMethod('java.lang.String')
     setFragmentListener = JavaMethod('com.enaml.adapters.BridgedFragmentStatePagerAdapter$FragmentListener')
     onCreateView = JavaCallback(returns='android.view.View')

@@ -18,7 +18,7 @@ from .bridge import JavaCallback, JavaMethod
 
 
 class NumberPicker(LinearLayout):
-    __javaclass__ = set_default('android.widget.NumberPicker')
+    __nativeclass__ = set_default('android.widget.NumberPicker')
     #: TODO: How to do a list??
     #setDisplayedValues = JavaMethod('java.lang.String[]')
     setMaxValue = JavaMethod('int')

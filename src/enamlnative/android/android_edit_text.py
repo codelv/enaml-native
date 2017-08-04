@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class EditText(TextView):
-    __javaclass__ = set_default('android.widget.EditText')
+    __nativeclass__ = set_default('android.widget.EditText')
     setSelection = JavaMethod('int', 'int')
     selectAll = JavaMethod()
     extendSelection = JavaMethod('int')

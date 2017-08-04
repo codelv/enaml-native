@@ -16,7 +16,7 @@ from .bridge import JavaBridgeObject, JavaMethod
 
 class Activity(JavaBridgeObject):
     """ Access to the activity over the bridge """
-    __javaclass__ = set_default('com.enaml.MainActivity')
+    __nativeclass__ = set_default('com.enaml.MainActivity')
     __id__ = Int(-1) #: ID of -1 is a special reference on the bridge to the activity.
 
     setView = JavaMethod('android.view.View')

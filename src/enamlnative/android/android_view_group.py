@@ -33,7 +33,7 @@ class Gravity:
 
 
 class ViewGroup(View):
-    __javaclass__ = set_default('android.view.ViewGroup')
+    __nativeclass__ = set_default('android.view.ViewGroup')
     addView = JavaMethod('android.view.View', 'int')
     removeView = JavaMethod('android.view.View')
 

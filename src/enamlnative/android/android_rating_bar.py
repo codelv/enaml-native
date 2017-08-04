@@ -18,7 +18,7 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class RatingBar(ProgressBar):
-    __javaclass__ = set_default('android.widget.RatingBar')
+    __nativeclass__ = set_default('android.widget.RatingBar')
     setIsIndicator = JavaMethod('boolean')
     setMax = JavaMethod('int')
     setNumStars = JavaMethod('int')

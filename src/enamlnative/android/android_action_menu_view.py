@@ -18,7 +18,7 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
 class ActionMenuView(LinearLayout):
-    __javaclass__ = set_default('android.support.v7.widget.ActionMenuView')
+    __nativeclass__ = set_default('android.support.v7.widget.ActionMenuView')
     getMenu = JavaMethod()
     showOverflowMenu = JavaMethod()
     hideOverflowMenu = JavaMethod()
@@ -30,7 +30,7 @@ class ActionMenuView(LinearLayout):
 
 
 class Menu(JavaBridgeObject):
-    __javaclass__ = set_default('android.view.Menu')
+    __nativeclass__ = set_default('android.view.Menu')
 
     def __init__(self):
         #: Menu is an Interface, we can't create it
@@ -39,7 +39,7 @@ class Menu(JavaBridgeObject):
 
 
 class MenuItem(JavaBridgeObject):
-    __javaclass__ = set_default('android.view.MenuItem')
+    __nativeclass__ = set_default('android.view.MenuItem')
 
 
 class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):

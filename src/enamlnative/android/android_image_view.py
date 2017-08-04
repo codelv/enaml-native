@@ -18,7 +18,7 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
 class ImageView(View):
-    __javaclass__ = set_default('android.widget.ImageView')
+    __nativeclass__ = set_default('android.widget.ImageView')
     setImageAlpha = JavaMethod('int')
     setColorFilter = JavaMethod('int')
     setCropToPadding = JavaMethod('boolean')
@@ -34,12 +34,12 @@ class ImageView(View):
 
 
 class Drawable(JavaBridgeObject):
-    __javaclass__ = set_default('android.graphics.drawable.Drawable')
+    __nativeclass__ = set_default('android.graphics.drawable.Drawable')
     onDrawableLoaded = JavaCallback('android.graphics.drawable.Drawable')
 
 
 class Icon(JavaBridgeObject):
-    __javaclass__ = set_default('android.graphics.drawable.Icon')
+    __nativeclass__ = set_default('android.graphics.drawable.Icon')
     createWithFilePath = JavaMethod('java.lang.String', returns='android.graphics.drawable.Icon')
     createWithContentUri = JavaMethod('java.lang.String', returns='android.graphics.drawable.Icon')
 

@@ -18,7 +18,7 @@ from .android_frame_layout import AndroidFrameLayout, FrameLayout
 
 
 class ViewAnimator(FrameLayout):
-    __javaclass__ = set_default('android.widget.ViewAnimator')
+    __nativeclass__ = set_default('android.widget.ViewAnimator')
 
 
 class AndroidViewAnimator(AndroidFrameLayout, ProxyViewAnimator):

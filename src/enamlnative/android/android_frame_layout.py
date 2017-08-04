@@ -18,14 +18,14 @@ from .bridge import JavaMethod, JavaField
 
 
 class FrameLayout(ViewGroup):
-    __javaclass__ = set_default('android.widget.FrameLayout')
+    __nativeclass__ = set_default('android.widget.FrameLayout')
     setForegroundGravity = JavaMethod('int')
     setMeasureAllChildren = JavaMethod('boolean')
 
 
 class FrameLayoutParams(MarginLayoutParams):
     """ Update the child widget with the given params """
-    __javaclass__ = set_default('android.widget.FrameLayout$LayoutParams')
+    __nativeclass__ = set_default('android.widget.FrameLayout$LayoutParams')
     gravity = JavaField('int')
 
 

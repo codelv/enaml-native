@@ -1,5 +1,10 @@
 from os.path import join
-from toolchain import CythonRecipe
+from toolchain import CythonRecipe, FrameworkLibrary
+
+
+class MsgPackFramework(FrameworkLibrary):
+    #: Include all msgpack dylibs
+    libraries = ['python/{arch}/msgpack.*.dylib']
 
 
 class MsgPackRecipe(CythonRecipe):
@@ -8,21 +13,7 @@ class MsgPackRecipe(CythonRecipe):
     depends = ['python']#,'host_setuptools']
     #library = "libmsgpack.a"
     pre_build_ext = True
-    support_ssl = False
-    pbx_libraries = ["libz", "libpython"]
+    framework = MsgPackFramework()
 
-    def get_recipe_env(self, arch):
-        env = super(MsgPackRecipe, self).get_recipe_env(arch)
-        env["LDFLAGS"] += " -lpython -lffi -lz"
-        env["CC"] += " -I{}".format(
-            join(self.ctx.dist_dir, "include", arch.arch, "libffi"),
-        )
-
-        if self.support_ssl:
-            env['LDFLAGS'] += " -lssl -lcrypto"
-            env['CC'] += " -I{}".format(
-                join(self.ctx.dist_dir, "include", arch.arch, "openssl"),
-            )
-        return env
 
 recipe = MsgPackRecipe()

@@ -17,7 +17,7 @@ from .android_text_view import AndroidTextView, TextView
 
 
 class Button(TextView):
-    __javaclass__ = set_default('android.widget.Button')
+    __nativeclass__ = set_default('android.widget.Button')
     __signature__ = set_default(('android.content.Context', 'android.util.AttributeSet', 'int'))
     STYLES = {
         '': 0x01010048,

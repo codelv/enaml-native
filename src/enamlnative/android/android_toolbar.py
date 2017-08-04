@@ -18,7 +18,7 @@ from .bridge import JavaMethod, JavaCallback, JavaField
 
 
 class Toolbar(ViewGroup):
-    __javaclass__ = set_default('android.support.v7.widget.Toolbar')
+    __nativeclass__ = set_default('android.support.v7.widget.Toolbar')
     setTitle = JavaMethod('java.lang.CharSequence')
     setSubtitle = JavaMethod('java.lang.CharSequence')
     setSubtitleTextColor = JavaMethod('android.graphics.Color')
@@ -33,7 +33,7 @@ class Toolbar(ViewGroup):
 
 
 class ToolbarLayoutParams(MarginLayoutParams):
-    __javaclass__ = set_default('android.support.v7.widget.Toolbar$LayoutParams')
+    __nativeclass__ = set_default('android.support.v7.widget.Toolbar$LayoutParams')
     gravity = JavaField('int')
 
 

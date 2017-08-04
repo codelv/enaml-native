@@ -16,7 +16,7 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
 class ArrayAdapter(JavaBridgeObject):
-    __javaclass__ = set_default('android.widget.ArrayAdapter')
+    __nativeclass__ = set_default('android.widget.ArrayAdapter')
     __signature__ = set_default(('android.content.Context', 'android.R'))
     add = JavaMethod('java.lang.Object')
     addAll = JavaMethod('[Ljava.lang.Object;')
@@ -25,7 +25,7 @@ class ArrayAdapter(JavaBridgeObject):
 
 
 class AdapterView(ViewGroup):
-    __javaclass__ = set_default('android.widget.AdapterView')
+    __nativeclass__ = set_default('android.widget.AdapterView')
     setEmptyView = JavaMethod('android.view.View')
     setFocusableInTouchMode = JavaMethod('boolean')
     setOnItemClickListener = JavaMethod('android.widget.AdapterView$OnItemClickListener')

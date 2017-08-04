@@ -22,7 +22,7 @@ from .app import AndroidApplication
 
 
 class ViewPager(ViewGroup):
-    __javaclass__ = set_default('com.enaml.adapters.BridgedViewPager')
+    __nativeclass__ = set_default('com.enaml.adapters.BridgedViewPager')
     addOnPageChangeListener = JavaMethod('android.support.v4.view.ViewPager$OnPageChangeListener')
     setCurrentItem = JavaMethod('int')
     setOffscreenPageLimit = JavaMethod('int')
@@ -35,13 +35,13 @@ class ViewPager(ViewGroup):
 
 
 class ViewPagerLayoutParams(LayoutParams):
-    __javaclass__ = set_default('android.support.v4.view.ViewPager$LayoutParams')
+    __nativeclass__ = set_default('android.support.v4.view.ViewPager$LayoutParams')
     gravity = JavaField('int')
     isDecor = JavaField('boolean')
 
 
 class PagerTitleStrip(ViewGroup):
-    __javaclass__ = set_default('android.support.v4.view.PagerTitleStrip')
+    __nativeclass__ = set_default('android.support.v4.view.PagerTitleStrip')
     setNonPrimaryAlpha = JavaMethod('float')
     setCurrentItem = JavaMethod('int')
     setTextColor = JavaMethod('android.graphics.Color')
@@ -52,13 +52,13 @@ class PagerTitleStrip(ViewGroup):
 
 
 class PagerTabStrip(PagerTitleStrip):
-    __javaclass__ = set_default('android.support.v4.view.PagerTabStrip')
+    __nativeclass__ = set_default('android.support.v4.view.PagerTabStrip')
     setTabIndicatorColor = JavaMethod('android.graphics.Color')
     setDrawFullUnderline = JavaMethod('boolean')
 
 
 class BridgedFragmentStatePagerAdapter(JavaBridgeObject):
-    __javaclass__ = set_default('com.enaml.adapters.BridgedFragmentStatePagerAdapter')
+    __nativeclass__ = set_default('com.enaml.adapters.BridgedFragmentStatePagerAdapter')
     addFragment = JavaMethod('android.support.v4.app.Fragment')
     removeFragment = JavaMethod('android.support.v4.app.Fragment')
     setTitles = JavaMethod('[Ljava.lang.String;')

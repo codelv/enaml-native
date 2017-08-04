@@ -11,6 +11,7 @@ class PythonFramework(Framework):
     headers = ["Include/*.h", "pyconfig.h"]
     library = "lib/{arch}/libpython2.7.dylib"
     libraries = ["lib/{arch}/libpython2.7.dylib"]
+    resources = []
 
     def install_binary(self, recipe):
         """ We want linked extensions to be able to use libpython from the Libraries
@@ -118,7 +119,7 @@ class PythonRecipe(Recipe):
                 #"HOSTPGEN={}".format(self.ctx.hostpgen))
 
         #: Copy libpython to dist/lib/arch folder
-        arch_lib_dir = join(self.ctx.dist_dir,'lib',arch.arch)
+        arch_lib_dir = join(self.ctx.dist_dir, 'lib', arch.arch)
         if not exists(arch_lib_dir):
             os.makedirs(arch_lib_dir)
         self.copy_file(

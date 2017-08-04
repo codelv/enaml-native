@@ -11,6 +11,7 @@
 #import <UIKit/UIKit.h>
 #include <Python/Python.h>
 #include <dlfcn.h>
+#include "ENBridge.h"
 
 @interface AppDelegate ()
 
@@ -19,9 +20,17 @@
 @implementation AppDelegate
 
 
+ENBridge* bridge;
+
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
-    //[self startPython:application];
+    
+    // Bring up the bridge
+    bridge = [ENBridge instance];
+    bridge.appDelegate = self;
+        
+    // Start python
     [self performSelectorInBackground:@selector(startPython:) withObject:application];
     return YES;
 }
@@ -30,12 +39,15 @@
 - (void)applicationWillResignActive:(UIApplication *)application {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+    
+    
 }
 
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    
 }
 
 
@@ -60,6 +72,7 @@
     char *argv[argc]; // Needed for some stupid reason
     int ret = 0;
     NSString *tmp_path;
+    NSString *libs_path;
     NSString *python_home;
     NSString *python_path;
     char *wpython_home;
@@ -86,6 +99,10 @@
     // iOS provides a specific directory for temp files.
     tmp_path = [NSString stringWithFormat:@"TMP=%@/tmp", resourcePath, nil];
     putenv((char *)[tmp_path UTF8String]);
+    
+    // Set library Loader path
+    libs_path = [NSString stringWithFormat:@"PY_LIB_DIR=%@/Libs", resourcePath, nil];
+    putenv((char *)[libs_path UTF8String]);
     
     NSLog(@"Initializing Python runtime");
     Py_Initialize();
@@ -115,7 +132,7 @@
     
     // Start the main.py script
     NSLog(@"Running %s", main_script);
-    
+        
     @try {
         FILE* fd = fopen(main_script, "r");
         if (fd == NULL) {

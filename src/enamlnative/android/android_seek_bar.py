@@ -18,7 +18,7 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class SeekBar(ProgressBar):
-    __javaclass__ = set_default('android.widget.SeekBar')
+    __nativeclass__ = set_default('android.widget.SeekBar')
     setSplitTrack = JavaMethod('boolean')
     setOnSeekBarChangeListener = JavaMethod('android.widget.SeekBar$OnSeekBarChangeListener')
     setKeyProgressIncrement = JavaMethod('int')
