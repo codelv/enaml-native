@@ -1,8 +1,8 @@
-# Enaml-Native
+### Enaml-Native
 
 Documentation for enaml-native. Use the menu on the right. 
 
-## What is enaml-native?
+### What is enaml-native?
 The goal of enaml-native is to be the python version of [react-native](https://facebook.github.io/react-native/). To borrow react-native's tagline:
 >  enaml-native lets you build mobile apps using only python. It uses the same design as enaml, letting you compose a rich mobile UI from declarative components.
 
