@@ -158,7 +158,7 @@ __Example 8 - Handling return values__
 
 _Note: This API may change in the future._
 
-With `JavaMethod` returns values, as in the above example, the `TabLayout.newTab` method returns a newly created tab (Tabs have no public constructors).  This value is returned `asynchronously`, what you actually get a is a `Future` object that will complete when the value is returned from Java. To do something when it is complete you have to add a callback on the future when it is done. You can have the app instance do this for you, by calling `app.add_done_callback(future,callback)`. Or you can decorate your function (ex. `@inlineCallbacks` with twisted) and use the `yield` statement.
+With `JavaMethod` returns values, as in the above example, the `TabLayout.newTab` method returns a newly created tab (Tabs have no public constructors).  This value is returned `asynchronously`, what you actually get a is a `Future` object that will complete when the value is returned from Java. To do something when it is complete you have to add a callback on the future when it is done. You can do this by calling `result.then(callback)` on the resturned value (or use the app's method  `app.add_done_callback(result,callback)`). You can also decorate your function (ex. `@inlineCallbacks` with twisted) and use the `yield` statement.
 
 __Example 9 - Creating references__
     
