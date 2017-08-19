@@ -103,6 +103,7 @@ __Example 5 - Defining Java Callbacks__
 Callbacks are defined using the `JavaCallback` property. You pass the types of parameters method receives.  Then you can `connect` the callback to a handler as you would in PyQt or PySide.
 
 __Example 6 - Connecting Java Callbacks__
+
     :::python
 
     self.widget = RatingBar(self.get_context())
@@ -152,8 +153,8 @@ __Example 8 - Handling return values__
     #...
     app = AndroidApplication.instance()
     for page in pages:
-    result = self.widget.newTab()
-    app.add_done_callback(result, lambda tab,page=page: self.on_new_tab(tab,page))
+        result = self.widget.newTab()
+        result.then(lambda tab,page=page: self.on_new_tab(tab,page))
 
 _Note: This API may change in the future._
 
@@ -164,10 +165,10 @@ __Example 9 - Creating references__
     :::python
 
     def on_new_tab(self, tab, page):
-    tab = Tab(__id__=tab)
-    d = page
-    if d.title:
-        tab.setText(d.title)
+        tab = Tab(__id__=tab)
+        d = page
+        if d.title:
+            tab.setText(d.title)
 
 As mentioned earlier, primitive data types (those that can be packed with msgpack) such as int, boolean, long, string, etc.. are sent directly in callbacks and results. Objects, such as view or references (the Tab in the example above) are passed via a `reference`. The reference is simply an integer that can be _casted_ to the object in python by passing the `__id__` keyword argument when constructing a `JavaBridgeObject`. Once this is done, all of the method calls on that object will properly be sent to the correct object as if it were created in python.
 
