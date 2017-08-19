@@ -22,10 +22,11 @@ __Example 1 - Defining Obj-C objects using the bridge__
         onClick = ObjcCallback()
 
 
-Bridge objects are used to define how the bridge should pack and unpack the values over the bridge. Methods are defined like they are in Obj-C just instead of parameters adding to the method name `setTitle_forName` we're using the keyword arguments to do this behind the scenes.  
+Bridge objects are used to define how the bridge should pack and unpack the values over the bridge. Methods are defined like they are in Obj-C just instead of parameters adding to the method name `setTitle_forName` we pass a dictionary of possible keyword arguments and do the rest behind the scenes.  
 
 
 __Example 2 - Using Obj-C bridge objects__
+    
     :::python
 
     button = UIButton(buttonWithType=UIKit.UIButtonTypeRoundedRect)
