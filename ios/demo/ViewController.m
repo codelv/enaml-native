@@ -17,8 +17,16 @@
 
 @implementation ViewController
 
-- (void) showView:(UIView *)view {
-    [self.view]
+- (void) displayView:(UIView *)view {
+    //self.view.backgroundColor = [UIColor redColor];
+    /*UILabel *fromLabel = [[UILabel alloc]initWithFrame:CGRectMake(91, 15, 200, 20)];
+    fromLabel.text = @"CRAP";
+    fromLabel.textColor = [UIColor blackColor];
+    //fromLabel.textAlignment = NSTextAlignmentLeft;
+     */
+    //[self.view addSubview:[self.bridge getObject:@1]];
+    //[self.view addSubview:fromLabel];
+    //[self.view addSubview:view];
 }
 
 - (void) showError:(NSString *)message {
@@ -29,13 +37,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     self.bridge = [ENBridge instance];
-    self.bridge.viewController = self;
-    
-    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.backgroundColor = [UIColor blueColor];
-    [button setTitle:@"Show View" forState:UIControlStateNormal];
-    button.frame = CGRectMake(80.0, 210.0, 160.0, 40.0);
-    [self.view addSubview:button];
+    [self.bridge setViewController:self];
 }
 
 
