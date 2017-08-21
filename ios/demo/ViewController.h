@@ -11,7 +11,7 @@
 @interface ViewController : UIViewController
 
 - (void)showError:(NSString *) message;
-- (void)showView:(UIView *) view;
+- (void)displayView:(UIView *) view;
 
 @end
 

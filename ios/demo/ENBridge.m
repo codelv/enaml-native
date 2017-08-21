@@ -9,10 +9,15 @@
 #import "ENBridge.h"
 #import <Foundation/Foundation.h>
 #import <MPMessagePack/MPMessagePack.h>
+#import <UIKit/UIKit.h>
 #include <Python/Python.h>
+#import "UIColor+HexString.h"
 
 
 @interface ENBridge ()
+
+    @property AppDelegate* appDelegate;
+    @property ViewController* viewController;
 
     @property NSMutableDictionary* objectCache;
 
@@ -24,7 +29,10 @@
     @property NSOperationQueue* taskQueue;
 
     -(void)runUntilCurrent;
-    -(void)onResult:(int)resuiltId withValue:(NSObject*) result;
+    -(void)onResult:(NSNumber *)resuiltId withValue:(NSObject*) result;
+    -(id)convertArg:(NSArray *)spec;
+
+    + (UIColor *) colorWithHexString: (NSString *) hexString;
 
 @end
 
@@ -74,57 +82,153 @@
         return self;
     }
 
+
+
     /**
-     * Create an object over the bridge
+     * Set app delegate and store it in the cache with id = -1
      */
-    - (void)createObject:(int)objId withType:(NSString *)className withArgs:(NSArray *)args {
-        NSLog(@"Creating %@ with id %i",className,objId);
-        NSObject * obj = [NSClassFromString(className) new];
-        [self.objectCache setObject:obj forKey:[NSNumber numberWithInt:objId]];
+    -(void)setAppDelegate:(AppDelegate *)delegate {
+        _appDelegate = delegate;
+        [self.objectCache setObject:delegate forKey:@(-1)];
     }
 
     /**
-     * Update an object by calling a method and returning the value (if needed)
+     * Set view controller and store it in the cache with id = -2
      */
-    - (void)updateObject:(int)objId andReturn:(int)returnId usingMethod:(NSString *)method withArgs:(NSArray *)args {
-        NSObject *obj = self.objectCache[[NSNumber numberWithInt:objId]];
+    -(void)setViewController:(ViewController *) controller {
+        _viewController = controller;
+        [self.objectCache setObject:controller forKey:@(-2)];
+        [self.objectCache setObject:controller.view forKey:@(-3)];
+    }
+
+    -(id) getObject:(NSNumber *) objId{
+        return self.objectCache[objId];
+    }
+
+    /**
+     * Convert msgpack arg to correct format based on arg tuple from python
+     */
+    -(id)convertArg:(NSArray *)spec {
+        NSString* argType = spec[0];
+        
+        // If a string is passed for a UIColor argument, convert it
+        if ([argType isEqualToString:@"UIColor"] && [spec[1] isKindOfClass:[NSString class]]) {
+            return [UIColor colorWithHexString: (NSString *) spec[1]];
+        } else if ([argType isEqualToString:@"CGRect"] && [spec[1] isKindOfClass:[NSArray class]]) {
+            return [NSValue valueWithCGRect:CGRectMake([(NSNumber *)spec[1][0] floatValue],
+                              [(NSNumber *)spec[1][1] floatValue],
+                              [(NSNumber *)spec[1][2] floatValue],
+                              [(NSNumber *)spec[1][3] floatValue])];
+        // Extensions are passed as dictionaries
+        } else if ([spec[1] isKindOfClass:[NSDictionary class]]) {
+            NSDictionary* arg = spec[1];
+            NSData* data = arg[@"data"];
+            const int* refNumber = data.bytes;
+            NSNumber* objId = [NSNumber numberWithInt:*refNumber];
+            return self.objectCache[objId];
+            
+        }
+        return spec[1];
+    }
+
+    /**
+     * Create an object over the bridge
+     */
+    - (void)createObject:(NSNumber *)objId withType:(NSString *)className withArgs:(NSArray *)args {
+        NSLog(@"Creating %@ with id %@",className,objId);
+        NSObject * obj = [[NSClassFromString(className) alloc] init];//initWithFrame:CGRectMake(0, 0, 100, 100)];
+        [self.objectCache setObject:obj forKey:objId];
+    }
+
+    /**
+     * Update an object by calling a method and returning the value (if needed).
+     * 
+     * Parameters
+     * ----------------
+     *  objId: reference id to use as key in the cache
+     *  returnId: id of python object to return the result to
+     *  method: method to invoke
+     *  args: list of tuples containing the type and value
+     *
+     */
+    - (void)updateObject:(NSNumber *)objId andReturn:(NSNumber *)returnId usingMethod:(NSString *)method withArgs:(NSArray *)args {
+        NSLog(@"Updating id=%@ using method %@ with args %@",objId,method,args);
+        
+        // Get the object from the cache
+        NSObject *obj = self.objectCache[objId];
+        
+        if (!obj) {
+            NSLog(@"Warning: Null object when referencing id=%@", objId);
+            return;
+        }
+        
+        SEL selector = NSSelectorFromString(method);
         
         // Get signature
-        NSMethodSignature *signature = [NSMutableArray instanceMethodSignatureForSelector:NSSelectorFromString(method)];
+        NSMethodSignature *signature = [[obj class] instanceMethodSignatureForSelector:selector];
+        if (!signature) {
+            NSLog(@"Null signature for %@",method);
+        }
         
         // Get method
         NSInvocation* lambda = [NSInvocation invocationWithMethodSignature:signature];
         
         // Set target
         [lambda setTarget:obj];
+        [lambda setSelector:selector];
+        
+        // Set args
+        int i = 2;
+        for (NSArray* arg in args) {
+            NSObject* val = [self convertArg:arg];
+            [lambda setArgument:&val atIndex:i];
+            i++;
+        }
         
         // Call it
-        // How do i get the return value?
         [lambda invoke];
-        if (returnId) {
+        
+        if (returnId.intValue) {
             //[self onResult:resultId withValue:result];
+            NSObject* result;
+            [lambda getReturnValue: &result];
+            [self onResult:returnId withValue:result];
         }
     }
 
     /**
      * Update an object by setting a property value
      */
-    - (void)updateObject:(int)objId usingField:(NSString *)field withValue:(NSObject *)value {
-    
+    - (void)updateObject:(NSNumber *)objId usingField:(NSString *)field withValue:(NSObject *)value {
+        
+        NSLog(@"Setting id=%@ using field %@ with args %@",objId,field,value);
+        
+        // Get the object from the cache
+        NSObject *obj = self.objectCache[objId];
+        
+        if (!obj) {
+            NSLog(@"Warning: Null object when referencing id=%@", objId);
+            return;
+        }
+        
+        // Parse arg
+        NSObject* val = [self convertArg:value];
+        [obj setValue:val forKey:field];
+
     }
 
     /**
      * Remove an object from the cache so it can be deallocated
      */
-    - (void)deleteObject:(int)objId {
-        [self.objectCache removeObjectForKey:[NSNumber numberWithInt:objId]];
+    - (void)deleteObject:(NSNumber *)objId {
+        [self.objectCache removeObjectForKey:objId];
     }
 
-    - (void)setResult:(int)objId withValue:(NSObject *)result {
+    - (void)setResult:(NSNumber *)objId withValue:(NSObject *)result {
         //[self.resultCache s]
     }
 
-    - (void)onResult:(int)resultId withValue:(NSObject*) result {
+    - (void)onResult:(NSNumber *)resultId withValue:(NSObject*) result {
     
     }
 
@@ -148,45 +252,67 @@
      * Called from python thread. Sends encoded msgpack data.
      */
     - (void)processEvents:(char *)bytes length:(int)len {
-        
         // Read data
-        NSData* data = [NSData dataWithBytesNoCopy:(const void *)bytes
+        NSData* data = [NSData dataWithBytesNoCopy:(void *)bytes
                                length:len freeWhenDone:NO];
         
         // Parse it
         NSError* error;
         NSArray* events = [MPMessagePackReader readData:data error:&error];
         
+        if (error) {
+            [self.viewController showError:error];
+        }
         // Houston we have Data
         //NSLog(@"%@",events);
         for (NSArray* event in events) {
-            NSLog(@"Event %@",event);
+            //NSLog(@"Event %@",event);
             // Pull cmd and args
             NSString* cmd = event[0];
             NSArray* args = event[1];
             
             if ([cmd isEqualToString:CREATE]) {
-                [self createObject: (int) args[0]
-                      withType: (NSString*) args[1]
-                          withArgs: [args subarrayWithRange:(NSRange) {[args count]-2,2}]];
+                // Run on UI thread
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                    [self createObject: (NSNumber *) args[0]
+                              withType: (NSString*) args[1]
+                              withArgs: [args subarrayWithRange:(NSRange) {[args count]-2,2}]];
+
+                }];
                 
             } else if ([cmd isEqualToString:METHOD]) {
-                [self updateObject: (int) args[0]
-                      andReturn: (int) args[1]
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+
+                    [self updateObject:  (NSNumber *)args[0]
+                      andReturn: (NSNumber *) args[1]
                       usingMethod: (NSString*) args[2]
-                      withArgs: [args subarrayWithRange:(NSRange){[args count]-3,3}]];
+                      withArgs: args[3]];
+                    
+                }];
                 
             } else if ([cmd isEqualToString:FIELD]) {
-                [self updateObject: (int) args[0]
+                
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+
+                    [self updateObject: (NSNumber *) args[0]
                       usingField: (NSString*) args[1]
-                      withValue: args[2]];
+                      withValue: args[2][0]];
+                    
+                }];
                 
             } else if ([cmd isEqualToString:DELETE]) {
-                [self deleteObject: (int) args[0]];
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+
+                    [self deleteObject: (NSNumber *) args[0]];
+                }];
                 
             } else if ([cmd isEqualToString:RESULT]) {
-                [self setResult: (int) args[0]
+                
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+
+                    [self setResult: (NSNumber *) args[0]
                       withValue: args[2]];
+                }];
             } else if ([cmd isEqualToString:ERROR]) {
                 // TODO...
                 NSLog(@"%@", args);

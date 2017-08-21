@@ -1,0 +1,39 @@
+'''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+Created on June 21, 2017
+
+@author: jrm
+'''
+from enamlnative.widgets.api import *
+
+
+enamldef MainView(View):
+    #background_color = "#00F"
+
+    #ProgressBar:
+    #    progress = 30
+    LinearLayout:
+        orientation = "vertical"
+        width = 300
+        height = 500
+        View:
+            #text = "Hello world!"
+            background_color = "#00F"
+            #width = 100
+            #height = 20
+        TextView:
+            text = "Good work!"
+            text_color = "#F0F"
+            width = 100
+            height = 20
+        ProgressBar:
+            progress = 30
+            width = 100
+            height = 5
+    #TextView:
+    #    text = "Test 2"

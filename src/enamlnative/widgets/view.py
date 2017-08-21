@@ -97,6 +97,12 @@ class ProxyView(ProxyWidget):
     def set_z(self, z):
         raise NotImplementedError
 
+    def set_width(self, width):
+        raise NotImplementedError
+
+    def set_height(self, height):
+        raise NotImplementedError
+
 
 class View(Widget):
     """ View is a view group that displays
@@ -161,9 +167,9 @@ class View(Widget):
 
     label_for = d_(Int())
 
-    layout_width = d_(Unicode())#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
+    layout_width = d_(Unicode()).tag(ios=False)#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
 
-    layout_height = d_(Unicode())#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
+    layout_height = d_(Unicode()).tag(ios=False)#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
 
     layout_direction = d_(Enum('ltr', 'rtl', 'inherit', 'locale'))
 
@@ -265,6 +271,14 @@ class View(Widget):
 
     z = d_(Float())
 
+    #: Width of frame
+    #: on android use layout_width instead
+    width = d_(Float()).tag(android=False)
+
+    #: Height of frame
+    #: on android use layout_width instead
+    height = d_(Float()).tag(android=False)
+
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyView)
 
@@ -342,6 +356,8 @@ class View(Widget):
         'x',
         'y',
         'z',
+        'width',
+        'height',
     )
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

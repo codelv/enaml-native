@@ -11,15 +11,13 @@ The full license is in the file COPYING.txt, distributed with this software.
 from atom.api import Atom, Float, Value, Unicode, Typed, set_default
 from enaml.application import ProxyResolver
 from . import factories
-from .bridge import ObjcBridgeObject
+from .bridge import ObjcBridgeObject, ObjcMethod
 from ..core.app import BridgedApplication
 import ctypes
 from ctypes.util import find_library
 
 
-class AppDelegate(ObjcBridgeObject):
-    __nativeclass__ = set_default("AppDelegate")
-
+class ENBridge(Atom):
     """ Access ENBridge.m using ctypes.
 
     Based on:
@@ -33,6 +31,7 @@ class AppDelegate(ObjcBridgeObject):
     bridge = Value()
 
     def _default_objc(self):
+        """ Load the objc library using ctypes. """
         objc = ctypes.cdll.LoadLibrary(find_library('objc'))
         objc.objc_getClass.restype = ctypes.c_void_p
         objc.sel_registerName.restype = ctypes.c_void_p
@@ -41,16 +40,28 @@ class AppDelegate(ObjcBridgeObject):
         return objc
 
     def _default_bridge(self):
+        """ Get an instance of the ENBridge object using ctypes. """
         objc = self.objc
         ENBridge = objc.objc_getClass('ENBridge')
         return objc.objc_msgSend(ENBridge, objc.sel_registerName('instance'))
 
     def processEvents(self, data):
+        """ Sends msgpack data to the ENBridge instance by calling the processEvents method. """
+        print("Dispatch!")
         objc = self.objc
         bridge = self.bridge
         #: This must come after the above as it changes the arguments!
-        objc.objc_msgSend.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int]
+        objc.objc_msgSend.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
+                                      ctypes.c_char_p, ctypes.c_int]
         objc.objc_msgSend(bridge, objc.sel_registerName('processEvents:length:'), data, len(data))
+
+
+class AppDelegate(ObjcBridgeObject):
+    pass
+
+
+class ViewController(ObjcBridgeObject):
+    displayView = ObjcMethod('UIView')
 
 
 class IPhoneApplication(BridgedApplication):
@@ -66,14 +77,14 @@ class IPhoneApplication(BridgedApplication):
 
     """
 
-    #: Attributes so it can be seralized over the bridge as a reference
-    __nativeclass__ = Unicode('android.content.Context')
-
     #: AppDelegate widget
-    widget = Typed(AppDelegate)
+    app_delegate = Typed(AppDelegate)
 
-    #: Android Activity
-    activity = Value()
+    #: ViewControler
+    view_controller = Typed(ViewController)
+
+    #: ENBridge
+    bridge = Typed(ENBridge)
 
     #: Pixel density of the device
     #: Loaded immediately as this is used often.
@@ -82,9 +93,21 @@ class IPhoneApplication(BridgedApplication):
     # --------------------------------------------------------------------------
     # Defaults
     # --------------------------------------------------------------------------
-    def _default_widget(self):
-        """ Return a bridge object reference to the MainActivity """
+    def _default_app_delegate(self):
+        """ Return a bridge object reference to the AppDelegate
+            this bridge sets this using a special id of -1
+        """
         return AppDelegate(__id__=-1)
+
+    def _default_view_controller(self):
+        """ Return a bridge object reference to the ViewController
+            the bridge sets this using a special id of -2
+        """
+        return ViewController(__id__=-2)
+
+    def _default_bridge(self):
+        """ Access the bridge using ctypes. Everything else should use bridge objects. """
+        return ENBridge()
 
     def _default_dp(self):
         #:TODO: return self.activity.getResources().getDisplayMetrics().density
@@ -106,11 +129,11 @@ class IPhoneApplication(BridgedApplication):
         """ Show the current `app.view`. This will fade out the previous
             with the new view.
         """
-        self.widget.setView(self.get_view())
+        self.view_controller.displayView(self.get_view())
 
     def dispatch_events(self, data):
         """ Send the data to the Native application for processing """
-        self.widget.processEvents(data)
+        self.bridge.processEvents(data)
 
     # --------------------------------------------------------------------------
     # iPhone utilities API Implementation

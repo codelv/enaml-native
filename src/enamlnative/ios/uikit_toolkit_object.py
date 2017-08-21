@@ -88,13 +88,12 @@ class UiKitToolkitObject(ProxyToolkitObject):
         """
         widget = self.widget
         if widget is not None:
-            widget.removeFromSuperview()
             del self.widget
         super(UiKitToolkitObject, self).destroy()
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Public API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def parent_widget(self):
         """ Get the parent toolkit widget for this object.
 

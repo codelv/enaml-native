@@ -14,21 +14,24 @@
 
 @interface ENBridge : NSObject
 
-@property AppDelegate* appDelegate;
-@property ViewController* viewController;
 
 + (ENBridge *)instance;
-- (void)createObject:(int)objId withType:(NSString *) className withArgs:(NSArray *) args;
-- (void)updateObject:(int)objId andReturn:(int)returnId usingMethod:(NSString *) method withArgs:(NSArray *) args;
-- (void)updateObject:(int)objId usingField: (NSString *) field withValue: (NSObject *) value;
-- (void)deleteObject:(int)objId;
 
-- (void)setResult:(int)objId withValue:(NSObject *) result;
+- (void) setAppDelegate:(AppDelegate *) delegate;
+- (void) setViewController:(ViewController *) controller;
 
-- (void)sendEvent:(NSDictionary *) event;
-- (void)processEvents:(char *) data length:(int) len;
+- (id) getObject:(NSNumber *) objId;
+- (void) createObject:(NSNumber *)objId withType:(NSString *) className withArgs:(NSArray *) args;
+- (void) updateObject:(NSNumber *)objId andReturn:(NSNumber *)returnId usingMethod:(NSString *) method withArgs:(NSArray *) args;
+- (void) updateObject:(NSNumber *)objId usingField: (NSString *) field withValue: (NSObject *) value;
+- (void) deleteObject:(NSNumber *)objId;
 
-- (void)sendEventsToPython:(NSData *) data;
+- (void) setResult:(NSNumber *)objId withValue:(NSObject *) result;
+
+- (void) sendEvent:(NSDictionary *) event;
+- (void) processEvents:(char *) data length:(int) len;
+
+- (void) sendEventsToPython:(NSData *) data;
 
 
 @end

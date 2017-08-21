@@ -10,8 +10,10 @@ Created on June 21, 2017
 @author: jrm
 '''
 import msgpack
-from atom.api import Atom, ForwardInstance, Dict, Unicode, Tuple, Int
+import functools
+from atom.api import Atom, Property, ForwardInstance, Dict, Unicode, Tuple, Int
 from weakref import WeakValueDictionary
+from contextlib import contextmanager
 
 CACHE = WeakValueDictionary()
 __global_id__ = 0
@@ -103,6 +105,157 @@ def get_handler(ptr, method):
     return obj, getattr(obj, method)
 
 
+class BridgeMethod(Property):
+    """ A method that is callable via the bridge.
+        When called, this serializes the call, packs the arguments,
+            and delegates handling to a bridge in native code.
+
+        Example:
+            #: Define it
+            class View(BridgeObject):
+                addView = BridgeMethod('android.view.View')
+
+            #: Create instance
+            view = View()
+            view2 = View()
+
+            #: Use it
+            view.addView(view2)
+
+    """
+    __slots__ = ('__signature__', '__returns__', '__cache__')
+
+    def __init__(self, *args, **kwargs):
+        self.__returns__ = kwargs.get('returns', None)
+        self.__signature__ = args
+        self.__cache__ = {}  # Result cache otherwise gc cleans up
+        super(BridgeMethod, self).__init__(self.__fget__)
+
+    @contextmanager
+    def suppressed(self, obj):
+        """ Suppress calls within this context to avoid feedback loops"""
+        obj.__suppressed__[self.name] = True
+        yield
+        obj.__suppressed__[self.name] = False
+
+    def __fget__(self, obj):
+        f = functools.partial(self.__call__, obj)
+        f.suppressed = functools.partial(self.suppressed, obj)
+        return f
+
+    def __call__(self, obj, *args, **kwargs):
+        """ The Swift like syntax is used"""
+        if obj.__suppressed__.get(self.name):
+            return
+
+        #: Format the args as needed
+        method_name, method_args = self.pack_args(obj, *args, **kwargs)
+
+        #: Create a future to retrieve the result if needed
+        result = obj.__app__.create_future() if self.__returns__ else None
+
+        if result:
+            #: Store in local cache or global cache (weakref) removes it
+            #: resulting in a Reference error when the result is returned
+            self.__cache__[result.__id__] = result
+
+            def resolve(r, f=result):
+                #: Remove from local cache to free future
+                del self.__cache__[f.__id__]
+
+            #: Delete from the local cache once resolved.
+            result.then(resolve)
+
+        obj.__app__.send_event(
+            Command.METHOD,  #: method
+            obj.__id__,
+            result.__id__ if result else 0,
+            method_name,  #: method name
+            method_args,  #: args
+            **kwargs  #: kwargs to send_event
+        )
+        return result
+
+    def pack_args(self, obj, *args, **kwargs):
+        """ Subclasses should implement this to pack args as needed
+            for the native bridge implementation. Must return a tuple containing
+            ("methodName", [list, of, encoded, args])
+        """
+        raise NotImplementedError
+
+
+class BridgeField(Property):
+    """ Allows you to set fields or properties over the bridge using normal python syntax.
+
+        Example:
+            #: Define it
+            class View(BridgeObject):
+                width = BridgeField('int')
+
+            #: Create instance
+            view = View()
+
+            #: Set field
+            view.width = 200
+
+    """
+    __slots__ = ('__signature__',)
+
+    def __init__(self, arg):
+        self.__signature__ = arg
+        super(BridgeField, self).__init__(self.__fget__, self.__fset__)
+
+    def __fset__(self, obj, arg):
+        obj.__app__.send_event(
+            Command.FIELD,  #: method
+            obj.__id__,
+            self.name,  #: method name
+            [msgpack_encoder(self.__signature__, arg)]  #: args
+        )
+
+    def __fget__(self, obj):
+        raise NotImplementedError("Reading attributes is not yet supported")
+
+
+class BridgeCallback(BridgeMethod):
+    """ Description of a callback method of a View (or subclass) in Objc. When called,
+        it fires the connected callback. This is triggered when it receives an event from
+        the bridge indicating the call has occurred.
+
+        Example:
+            #: Define it
+            class View(BridgeObject):
+                onClick = BridgeCallback()
+
+            #: Create instance
+            view = View()
+
+            def on_click():
+                print("Clicked!")
+
+            #: Connect to callback
+            view.onClick.connect(on_click)
+    """
+
+    def __fget__(self, obj):
+        f = super(BridgeCallback, self).__fget__(obj)
+        #: Add a method so it can be connected like in Qt
+        f.connect = functools.partial(self.connect, obj)
+        return f
+
+    def __call__(self, obj, *args):
+        """ Fire the callback if one is connected """
+        if obj.__suppressed__.get(self.name):
+            return
+        callback = obj.__callbacks__.get(self.name)
+        if callback:
+            return callback(*args)
+
+    def connect(self, obj, callback):
+        """ Set the callback to be fired when the event occurs. """
+        obj.__callbacks__[self.name] = callback
+
+
 class BridgeObject(Atom):
     """ A proxy to a class in java. This sends the commands over
     the bridge for execution.  The object is stored in a map
@@ -129,7 +282,7 @@ class BridgeObject(Atom):
     #: Callbacks
     __callbacks__ = Dict()
 
-    #: Java object ID
+    #: Bridge object ID
     __id__ = Int(0, factory=_generate_id)
 
     #: Bridge
@@ -157,6 +310,9 @@ class BridgeObject(Atom):
             )
 
     def __del__(self):
+        """ Destroy this object and send a command to destroy the actual object
+            reference the bridge implementation holds (allowing it to be released).
+        """
         self.__app__.send_event(
             Command.DELETE,  #: method
             self.__id__,  #: id to assign in java

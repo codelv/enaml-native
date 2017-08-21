@@ -11,17 +11,18 @@ Created on Aug 3, 2017
 '''
 
 from atom.api import Typed, set_default
-from enaml.widgets.toolkit_object import ProxyToolkitObject
-
 from enamlnative.widgets.view import ProxyView
 
 from .bridge import ObjcBridgeObject, ObjcMethod, ObjcProperty
+from .uikit_toolkit_object import UiKitToolkitObject
 
 
 class UIView(ObjcBridgeObject):
     """ From:
         https://developer.apple.com/documentation/uikit/uiview?language=objc
     """
+    #__signature__ = set_default((dict(initWithFrame='CGRect'),))
+
     #: Properties
     backgroundColor = ObjcProperty('UIColor')
     hidden = ObjcProperty('boolean')
@@ -35,10 +36,14 @@ class UIView(ObjcBridgeObject):
     userInteractionEnabled = ObjcProperty('boolean')
     multipleTouchEnabled = ObjcProperty('boolean')
     exclusiveTouch = ObjcProperty('boolean')
+
     frame = ObjcProperty('CGRect')
     bounds = ObjcProperty('CGRect')
     center = ObjcProperty('CGPoint')
     transform = ObjcProperty('CGAffineTransform')
+
+    layoutMargins = ObjcProperty('UIEdgeInserts')
+    preservesSuperviewLayoutMargins = ObjcProperty('boolean')
 
     #: Methods
     addSubview = ObjcMethod('UIView')
@@ -48,19 +53,20 @@ class UIView(ObjcBridgeObject):
     insertSubview = ObjcMethod('UIView', dict(atIndex='NSInteger',
                                               aboveSubview='UIView',
                                               belowSubview='UIView'))
+    exchangeSubviewAtIndex = ObjcMethod('NSInteger', dict(withSubviewAtIndex='NSInteger'))
 
 
-class UiKitView(ProxyToolkitObject):
+class UiKitView(UiKitToolkitObject, ProxyView):
     """ An UiKit implementation of an Enaml ProxyToolkitObject.
 
     """
 
     #: A reference to the toolkit widget created by the proxy.
-    widget = Typed(ObjcBridgeObject)
+    widget = Typed(UIView)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
 
@@ -69,7 +75,13 @@ class UiKitView(ProxyToolkitObject):
         toolkit widget and assign it to the 'widget' attribute.
 
         """
-        self.widget = UIView()
+        if self.parent() is None: #: Root view?
+            #: Testing...
+            self.widget = UIView(__id__=-3)
+        else:
+            d = self.declaration
+            #frame = (d.x,d.y,200, 100)
+            self.widget = UIView()#initWithFrame=frame)
 
     def init_widget(self):
         """ Initialize the state of the toolkit widget.
@@ -81,15 +93,25 @@ class UiKitView(ProxyToolkitObject):
         """
         widget = self.widget
 
+        d = self.declaration
+        if d.background_color:
+            self.set_background_color(d.background_color)
+
     def init_layout(self):
         """ Initialize the layout of the toolkit widget.
 
-        This method is called during the bottom-up pass. This method
-        should initialize the layout of the widget. The child widgets
-        will be fully initialized and layed out when this is called.
+         This method is called during the bottom-up pass. This method
+         should initialize the layout of the widget. The child widgets
+         will be fully initialized and layed out when this is called.
 
-        """
-        pass
+         """
+        widget = self.widget
+        for child_widget in self.child_widgets():
+            widget.addSubview(child_widget)
+
+        d = self.declaration
+        if d.x or d.y or d.width or d.height:
+            self.update_frame()
 
     def get_app(self):
         """ Get the app of the View.
@@ -98,28 +120,9 @@ class UiKitView(ProxyToolkitObject):
         from .app import IPhoneApplication
         return IPhoneApplication.instance()
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # ProxyToolkitObject API
-    #--------------------------------------------------------------------------
-    def activate_top_down(self):
-        """ Activate the proxy for the top-down pass.
-
-        """
-        self.create_widget()
-        self.init_widget()
-
-    def activate_bottom_up(self):
-        """ Activate the proxy tree for the bottom-up pass.
-
-        """
-        self.init_layout()
-
-    def init_layout(self):
-        """ Add all child widgets to the view
-        """
-        widget = self.widget
-        for child_widget in self.child_widgets():
-            widget.addSubview(child_widget)
+    # --------------------------------------------------------------------------
 
     def child_added(self, child):
         """ Handle the child added event from the declaration.
@@ -142,6 +145,7 @@ class UiKitView(ProxyToolkitObject):
         """
         super(UiKitView, self).child_moved(child)
         #: Remove and re-add in correct spot
+        #: TODO: Should use exchangeSubviewAtIndex
         self.child_removed(child)
         self.child_added(child)
 
@@ -154,49 +158,91 @@ class UiKitView(ProxyToolkitObject):
         """
         super(UiKitView, self).child_removed(child)
         if child.widget is not None:
-            self.widget.removeView(child.widget)
+            child.widget.removeFromSuperview()
 
     def destroy(self):
         """ A reimplemented destructor.
 
-        This destructor will clear the reference to the toolkit widget
-        and set its parent to None.
+        This destructor will remove itself from the superview.
 
         """
         widget = self.widget
         if widget is not None:
             widget.removeFromSuperview()
-            del self.widget
-        super(UiKitToolkitObject, self).destroy()
+        super(UiKitView, self).destroy()
 
-    #--------------------------------------------------------------------------
-    # Public API
-    #--------------------------------------------------------------------------
-    def parent_widget(self):
-        """ Get the parent toolkit widget for this object.
+    # --------------------------------------------------------------------------
+    # ProxyView API
+    # --------------------------------------------------------------------------
+    def update_frame(self):
+        d = self.declaration
+        self.widget.frame = (d.x, d.y, d.width, d.height)
 
-        Returns
-        -------
-        result : ObjcBridgeObject or None
-            The toolkit widget declared on the declaration parent, or
-            None if there is no such parent.
+    def set_alpha(self, alpha):
+        self.widget.alpha = alpha
 
-        """
-        parent = self.parent()
-        if parent is not None:
-            return parent.widget
+    def set_clickable(self, clickable):
+        raise NotImplementedError
 
-    def child_widgets(self):
-        """ Get the child toolkit widgets for this object.
+    def set_background_color(self, color):
+        self.widget.backgroundColor = color
 
-        Returns
-        -------
-        result : iterable of ObjcBridgeObjects
-            The child widgets defined for this object.
+    def set_layout_width(self, width):
+        raise NotImplementedError
 
-        """
-        for child in self.children():
-            if child is not None:  #: Not sure how this happens
-                w = child.widget
-                if w is not None:
-                    yield w
+    def set_layout_height(self, height):
+        raise NotImplementedError
+
+    def set_layout_direction(self, direction):
+        raise NotImplementedError
+
+    def set_padding(self, padding):
+        raise NotImplementedError
+
+    def set_margins(self, margins):
+        raise NotImplementedError
+
+    def set_top(top):
+        raise NotImplementedError
+
+    def set_left(left):
+        raise NotImplementedError
+
+    def set_right(right):
+        raise NotImplementedError
+
+    def set_bottom(bottom):
+        raise NotImplementedError
+
+    def set_rotation(self,rotation):
+        raise NotImplementedError
+
+    def set_rotation_x(self, rotation):
+        raise NotImplementedError
+
+    def set_rotation_y(self, rotation):
+        raise NotImplementedError
+
+    def set_scale_x(self, scale):
+        raise NotImplementedError
+
+    def set_scale_y(self, scale):
+        raise NotImplementedError
+
+    def set_translation_x(self, translation):
+        raise NotImplementedError
+
+    def set_translation_y(self, translation):
+        raise NotImplementedError
+
+    def set_translation_z(self, translation):
+        raise NotImplementedError
+
+    def set_x(self, x):
+        raise NotImplementedError
+
+    def set_y(self, y):
+        raise NotImplementedError
+
+    def set_z(self, z):
+        raise NotImplementedError

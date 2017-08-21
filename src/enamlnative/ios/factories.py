@@ -12,266 +12,266 @@ Created on May 20, 2017
 
 
 def analog_clock_factory():
-    from .android_analog_clock import AndroidAnalogClock
-    return AndroidAnalogClock
+    from .uikit_analog_clock import UiKitAnalogClock
+    return UiKitAnalogClock
 
 
 def auto_complete_text_view_factory():
-    from .android_auto_complete_text_view import AndroidAutoCompleteTextView
-    return AndroidAutoCompleteTextView
+    from .uikit_auto_complete_text_view import UiKitAutoCompleteTextView
+    return UiKitAutoCompleteTextView
 
 
 def button_factory():
     # print "Import button"
-    from .android_button import AndroidButton
-    return AndroidButton
+    from .uikit_button import UiKitButton
+    return UiKitButton
 
 
 def calendar_view_factory():
     # print "Import calendar view"
-    from .android_calendar_view import AndroidCalendarView
-    return AndroidCalendarView
+    from .uikit_calendar_view import UiKitCalendarView
+    return UiKitCalendarView
 
 
 def card_view_factory():
     # print "Import card view"
-    from .android_card_view import AndroidCardView
-    return AndroidCardView
+    from .uikit_card_view import UiKitCardView
+    return UiKitCardView
 
 
 def checkbox_factory():
     # print "Import checkbox"
-    from .android_checkbox import AndroidCheckBox
-    return AndroidCheckBox
+    from .uikit_checkbox import UiKitCheckBox
+    return UiKitCheckBox
 
 
 def chronometer_factory():
     # print "Import chronometer"
-    from .android_chronometer import AndroidChronometer
-    return AndroidChronometer
+    from .uikit_chronometer import UiKitChronometer
+    return UiKitChronometer
 
 
 def compound_button_factory():
     # print "Import compound button"
-    from .android_compound_button import AndroidCompoundButton
-    return AndroidCompoundButton
+    from .uikit_compound_button import UiKitCompoundButton
+    return UiKitCompoundButton
 
 
 def date_picker_factory():
     # print "Import date picker"
-    from .android_date_picker import AndroidDatePicker
-    return AndroidDatePicker
+    from .uikit_date_picker import UiKitDatePicker
+    return UiKitDatePicker
 
 
 def drawer_layout_factory():
     # print "Import drawer layout"
-    from .android_drawer_layout import AndroidDrawerLayout
-    return AndroidDrawerLayout
+    from .uikit_drawer_layout import UiKitDrawerLayout
+    return UiKitDrawerLayout
 
 
 def edit_text_factory():
     # print "Import edit text"
-    from .android_edit_text import AndroidEditText
-    return AndroidEditText
+    from .uikit_edit_text import UiKitEditText
+    return UiKitEditText
 
 
 def fragment_factory():
     # print "Import frame layout"
-    from .android_fragment import AndroidFragment
-    return AndroidFragment
+    from .uikit_fragment import UiKitFragment
+    return UiKitFragment
 
 
 def frame_layout_factory():
     # print "Import frame layout"
-    from .android_frame_layout import AndroidFrameLayout
-    return AndroidFrameLayout
+    from .uikit_frame_layout import UiKitFrameLayout
+    return UiKitFrameLayout
 
 
 def grid_layout_factory():
     # print "Import grid layout"
-    from .android_grid_layout import AndroidGridLayout
-    return AndroidGridLayout
+    from .uikit_grid_layout import UiKitGridLayout
+    return UiKitGridLayout
 
 
 def icon_factory():
-    from .android_iconify import AndroidIcon
-    return AndroidIcon
+    from .uikit_iconify import UiKitIcon
+    return UiKitIcon
 
 
 def icon_button_factory():
-    from .android_iconify import AndroidIconButton
-    return AndroidIconButton
+    from .uikit_iconify import UiKitIconButton
+    return UiKitIconButton
 
 
 def icon_toggle_button_factory():
-    from .android_iconify import AndroidIconToggleButton
-    return AndroidIconToggleButton
+    from .uikit_iconify import UiKitIconToggleButton
+    return UiKitIconToggleButton
 
 
 def image_view_factory():
-    from .android_image_view import AndroidImageView
-    return AndroidImageView
+    from .uikit_image_view import UiKitImageView
+    return UiKitImageView
 
 
 def linear_layout_factory():
     # print "Import linear layout"
-    from .android_linear_layout import AndroidLinearLayout
-    return AndroidLinearLayout
+    from .uikit_linear_layout import UiKitLinearLayout
+    return UiKitLinearLayout
 
 
 def list_item_factory():
     # print "Import linear layout"
-    from .android_list_view import AndroidListItem
-    return AndroidListItem
+    from .uikit_list_view import UiKitListItem
+    return UiKitListItem
 
 
 def list_view_factory():
     # print "Import linear layout"
-    from .android_list_view import AndroidListView
-    return AndroidListView
+    from .uikit_list_view import UiKitListView
+    return UiKitListView
 
 
 def number_picker_factory():
     # print "Import view"
-    from .android_number_picker import AndroidNumberPicker
-    return AndroidNumberPicker
+    from .uikit_number_picker import UiKitNumberPicker
+    return UiKitNumberPicker
 
 
 def pager_title_strip_factory():
-    from .android_view_pager import AndroidPagerTitleStrip
-    return AndroidPagerTitleStrip
+    from .uikit_view_pager import UiKitPagerTitleStrip
+    return UiKitPagerTitleStrip
 
 
 def pager_tab_strip_factory():
-    from .android_view_pager import AndroidPagerTabStrip
-    return AndroidPagerTabStrip
+    from .uikit_view_pager import UiKitPagerTabStrip
+    return UiKitPagerTabStrip
 
 
 def pager_fragment_factory():
-    from .android_fragment import AndroidPagerFragment
-    return AndroidPagerFragment
+    from .uikit_fragment import UiKitPagerFragment
+    return UiKitPagerFragment
 
 
 def progress_bar_factory():
     # print "Import progress bar"
-    from .android_progress_bar import AndroidProgressBar
-    return AndroidProgressBar
+    from .uikit_progress_view import UiKitProgressView
+    return UiKitProgressView
 
 
 def radio_button_factory():
     # print "Import radio button"
-    from .android_radio_button import AndroidRadioButton
-    return AndroidRadioButton
+    from .uikit_radio_button import UiKitRadioButton
+    return UiKitRadioButton
 
 
 def radio_group_factory():
     # print "Import radio group"
-    from .android_radio_group import AndroidRadioGroup
-    return AndroidRadioGroup
+    from .uikit_radio_group import UiKitRadioGroup
+    return UiKitRadioGroup
 
 
 def rating_bar_factory():
     # print "Import rating bar"
-    from .android_rating_bar import AndroidRatingBar
-    return AndroidRatingBar
+    from .uikit_rating_bar import UiKitRatingBar
+    return UiKitRatingBar
 
 
 def relative_layout_factory():
     # print "Import relative layout"
-    from .android_relative_layout import AndroidRelativeLayout
-    return AndroidRelativeLayout
+    from .uikit_relative_layout import UiKitRelativeLayout
+    return UiKitRelativeLayout
 
 
 def scroll_view_factory():
     # print "Import scroll view"
-    from .android_scroll_view import AndroidScrollView
-    return AndroidScrollView
+    from .uikit_scroll_view import UiKitScrollView
+    return UiKitScrollView
 
 
 def seek_bar_factory():
-    from .android_seek_bar import AndroidSeekBar
-    return AndroidSeekBar
+    from .uikit_seek_bar import UiKitSeekBar
+    return UiKitSeekBar
 
 
 def spacer_factory():
     # print "Import switch"
-    from .android_spacer import AndroidSpacer
-    return AndroidSpacer
+    from .uikit_spacer import UiKitSpacer
+    return UiKitSpacer
 
 
 def spinner_factory():
     # print "Import spinner"
-    from .android_spinner import AndroidSpinner
-    return AndroidSpinner
+    from .uikit_spinner import UiKitSpinner
+    return UiKitSpinner
 
 
 def switch_factory():
     # print "Import switch"
-    from .android_switch import AndroidSwitch
-    return AndroidSwitch
+    from .uikit_switch import UiKitSwitch
+    return UiKitSwitch
 
 
 def text_clock_factory():
-    from .android_text_clock import AndroidTextClock
-    return AndroidTextClock
+    from .uikit_text_clock import UiKitTextClock
+    return UiKitTextClock
 
 
 def text_view_factory():
     # print "Import text view"
-    from .android_text_view import AndroidTextView
-    return AndroidTextView
+    from .uikit_text_view import UiKitTextView
+    return UiKitTextView
 
 
 def time_picker_factory():
     # print "Import time picker"
-    from .android_time_picker import AndroidTimePicker
-    return AndroidTimePicker
+    from .uikit_time_picker import UiKitTimePicker
+    return UiKitTimePicker
 
 
 def tab_layout_factory():
     # print "Import tab host"
-    from .android_tab_layout import AndroidTabLayout
-    return AndroidTabLayout
+    from .uikit_tab_layout import UiKitTabLayout
+    return UiKitTabLayout
 
 
 def tab_fragment_factory():
     # print "Import tab host"
-    from .android_tab_layout import AndroidTabFragment
-    return AndroidTabFragment
+    from .uikit_tab_layout import UiKitTabFragment
+    return UiKitTabFragment
 
 
 def toggle_button_factory():
     # print "Import toggle button"
-    from .android_toggle_button import AndroidToggleButton
-    return AndroidToggleButton
+    from .uikit_toggle_button import UiKitToggleButton
+    return UiKitToggleButton
 
 
 def toolbar_factory():
-    from .android_toolbar import AndroidToolbar
-    return AndroidToolbar
+    from .uikit_toolbar import UiKitToolbar
+    return UiKitToolbar
 
 
 def view_factory():
     # print "Import view"
-    from .android_view import AndroidView
-    return AndroidView
+    from .uikit_view import UiKitView
+    return UiKitView
 
 
 def view_group_factory():
     # print "Import view group"
-    from .android_view_group import AndroidViewGroup
-    return AndroidViewGroup
+    from .uikit_view_group import UiKitViewGroup
+    return UiKitViewGroup
 
 
 def view_pager_factory():
     # print "Import view pager"
-    from .android_view_pager import AndroidViewPager
-    return AndroidViewPager
+    from .uikit_view_pager import UiKitViewPager
+    return UiKitViewPager
 
 
 def web_view_factory():
-    from .android_web_view import AndroidWebView
-    return AndroidWebView
+    from .uikit_web_view import UiKitWebView
+    return UiKitWebView
 
 
 IOS_FACTORIES = {
