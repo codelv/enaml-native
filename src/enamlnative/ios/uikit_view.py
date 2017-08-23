@@ -10,7 +10,7 @@ Created on Aug 3, 2017
 @author: jrm
 '''
 
-from atom.api import Typed, set_default
+from atom.api import Typed, Tuple, set_default, observe
 from enamlnative.widgets.view import ProxyView
 
 from .bridge import ObjcBridgeObject, ObjcMethod, ObjcProperty
@@ -64,6 +64,9 @@ class UiKitView(UiKitToolkitObject, ProxyView):
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UIView)
 
+    #: Frame in (x,y,width,height)
+    frame = Tuple()
+
     # --------------------------------------------------------------------------
     # Initialization API
     # --------------------------------------------------------------------------
@@ -75,13 +78,13 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         toolkit widget and assign it to the 'widget' attribute.
 
         """
-        if self.parent() is None: #: Root view?
-            #: Testing...
-            self.widget = UIView(__id__=-3)
-        else:
-            d = self.declaration
-            #frame = (d.x,d.y,200, 100)
-            self.widget = UIView()#initWithFrame=frame)
+        #if self.parent() is None: #: Root view?
+        #    #: Testing...
+        #    self.widget = UIView(__id__=-3)
+        #else:
+        #    d = self.declaration
+        #    #frame = (d.x,d.y,200, 100)
+        self.widget = UIView()#initWithFrame=frame)
 
     def init_widget(self):
         """ Initialize the state of the toolkit widget.
@@ -92,6 +95,8 @@ class UiKitView(UiKitToolkitObject, ProxyView):
 
         """
         widget = self.widget
+
+        self.update_frame()
 
         d = self.declaration
         if d.background_color:
@@ -109,9 +114,11 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         for child_widget in self.child_widgets():
             widget.addSubview(child_widget)
 
+    def update_frame(self):
+        """ Define the view frame for this widgets"""
         d = self.declaration
         if d.x or d.y or d.width or d.height:
-            self.update_frame()
+            self.frame = (d.x, d.y, d.width, d.height)
 
     def get_app(self):
         """ Get the app of the View.
@@ -174,9 +181,9 @@ class UiKitView(UiKitToolkitObject, ProxyView):
     # --------------------------------------------------------------------------
     # ProxyView API
     # --------------------------------------------------------------------------
-    def update_frame(self):
-        d = self.declaration
-        self.widget.frame = (d.x, d.y, d.width, d.height)
+    @observe('frame')
+    def set_frame(self, change):
+        self.widget.frame = self.frame if self.frame else (0,0,0,0)
 
     def set_alpha(self, alpha):
         self.widget.alpha = alpha

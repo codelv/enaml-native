@@ -10,29 +10,28 @@ Created on Aug 3, 2017
 @author: jrm
 '''
 
-from atom.api import Typed, set_default
-from enamlnative.widgets.progress_bar import ProxyProgressBar
+from atom.api import Typed
+from enamlnative.widgets.activity_indicator import ProxyActivityIndicator
 
 from .bridge import ObjcMethod, ObjcProperty
 from .uikit_view import UIView, UiKitView
 
 
-class UIProgressView(UIView):
-    """ From:
-        https://developer.apple.com/documentation/uikit/uiview?language=objc
-    """
+class UIActivityIndicatorView(UIView):
     #: Properties
-    progress = ObjcProperty('UIColor')
-    setProgress = ObjcMethod('float', dict(animated='boolean'))
+    color = ObjcProperty('UIColor')
+    activityIndicatorViewStyle = ObjcProperty('UIActivityIndicatorViewStyle')
+    startAnimating = ObjcMethod()
+    stopAnimating = ObjcMethod()
 
 
-class UiKitProgressView(UiKitView, ProxyProgressBar):
+class UiKitActivityIndicator(UiKitView, ProxyActivityIndicator):
     """ An UiKit implementation of an Enaml ProxyToolkitObject.
 
     """
 
     #: A reference to the toolkit widget created by the proxy.
-    widget = Typed(UIProgressView)
+    widget = Typed(UIActivityIndicatorView)
 
     # --------------------------------------------------------------------------
     # Initialization API
@@ -40,7 +39,7 @@ class UiKitProgressView(UiKitView, ProxyProgressBar):
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
         """
-        self.widget = UIProgressView()
+        self.widget = UIActivityIndicatorView()
 
     def init_widget(self):
         """ Initialize the state of the toolkit widget.
@@ -50,16 +49,23 @@ class UiKitProgressView(UiKitView, ProxyProgressBar):
         state of the widget. The child widgets will not yet be created.
 
         """
-        super(UiKitProgressView, self).init_widget()
+        super(UiKitActivityIndicator, self).init_widget()
 
-        widget = self.widget
         d = self.declaration
+        if d.style != 'normal':
+            self.set_style(d.style)
+        if d.color:
+            self.set_color(d.color)
 
-        if d.progress:
-            self.set_progress(d.progress)
+        #: Why would you want to stop an activity indicator?
+        self.widget.startAnimating()
 
     # --------------------------------------------------------------------------
-    # ProxyProgressBar API
+    # ProxyActivityIndicator API
     # --------------------------------------------------------------------------
-    def set_progress(self, progress):
-        self.widget.setProgress(progress/100.0, animated=True)
+    def set_style(self, style):
+        raise NotImplementedError
+        self.widget.activityIndicatorViewStyle = style
+
+    def set_color(self, color):
+        self.widget.color = color

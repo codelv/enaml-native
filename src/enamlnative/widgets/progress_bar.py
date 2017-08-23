@@ -10,7 +10,7 @@ Created on May 26, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Int, Bool, Enum, observe
+    Typed, ForwardTyped, Int, observe
 )
 
 from enaml.core.declarative import d_
@@ -28,8 +28,8 @@ class ProxyProgressBar(ProxyView):
     def set_progress(self, progress):
         raise NotImplementedError
 
-    def set_indeterminate(self, indeterminate):
-        raise NotImplementedError
+    #def set_indeterminate(self, indeterminate):
+    #    raise NotImplementedError
 
     def set_secondary_progress(self, progress):
         raise NotImplementedError
@@ -51,13 +51,9 @@ class ProgressBar(View):
     #: Sets the current progress to the specified value.
     secondary_progress = d_(Int())
 
-    #: Style for indeterminate
-    style = d_(Enum('normal', 'small', 'large'))
-
     #: Change the indeterminate mode for this progress bar.
     #: In indeterminate mode, the progress is ignored and the progress
     #: bar shows an infinite animation instead.
-    indeterminate = d_(Bool())
 
     #: Set the upper range of the progress bar max.
     max = d_(Int())
@@ -71,7 +67,7 @@ class ProgressBar(View):
     # --------------------------------------------------------------------------
     # Observers
     # --------------------------------------------------------------------------
-    @observe('progress', 'secondary_progress', 'indeterminate', 'max', 'min', 'style')
+    @observe('progress', 'secondary_progress', 'max', 'min')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

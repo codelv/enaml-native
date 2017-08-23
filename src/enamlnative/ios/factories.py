@@ -11,6 +11,11 @@ Created on May 20, 2017
 '''
 
 
+def activity_indicator_factory():
+    from .uikit_activity_indicator import UiKitActivityIndicator
+    return UiKitActivityIndicator
+
+
 def analog_clock_factory():
     from .uikit_analog_clock import UiKitAnalogClock
     return UiKitAnalogClock
@@ -257,12 +262,6 @@ def view_factory():
     return UiKitView
 
 
-def view_group_factory():
-    # print "Import view group"
-    from .uikit_view_group import UiKitViewGroup
-    return UiKitViewGroup
-
-
 def view_pager_factory():
     # print "Import view pager"
     from .uikit_view_pager import UiKitViewPager
@@ -275,6 +274,7 @@ def web_view_factory():
 
 
 IOS_FACTORIES = {
+    'ActivityIndicator': activity_indicator_factory,
     'AnalogClock': analog_clock_factory,
     'AutoCompleteTextView': auto_complete_text_view_factory,
     'Button': button_factory,
@@ -318,7 +318,6 @@ IOS_FACTORIES = {
     'ToggleButton': toggle_button_factory,
     'Toolbar': toolbar_factory,
     'View': view_factory,
-    'ViewGroup': view_group_factory,
     'ViewPager': view_pager_factory,
     'WebView': web_view_factory,
 }

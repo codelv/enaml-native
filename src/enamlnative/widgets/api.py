@@ -53,6 +53,7 @@ from .date_picker import DatePicker
 #: Widgets
 from .spacer import Spacer
 from .progress_bar import ProgressBar
+from .activity_indicator import ActivityIndicator
 from .seek_bar import SeekBar
 from .toolbar import Toolbar
 from .view_pager import ViewPager, PagerTitleStrip, PagerTabStrip, PagerFragment

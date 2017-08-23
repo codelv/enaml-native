@@ -9,7 +9,7 @@ Created on May 26, 2017
 
 @author: jrm
 '''
-from atom.api import Typed, set_default
+from atom.api import Typed, Bool, set_default
 from enamlnative.widgets.progress_bar import ProxyProgressBar
 
 from .android_view import AndroidView, View
@@ -33,14 +33,24 @@ class ProgressBar(View):
     STYLE_NORMAL = 0x01010077
     STYLE_SMALL_INVERSE = 0x01010288
 
+    STYLES = {
+        'normal': STYLE_NORMAL,
+        'small': STYLE_SMALL,
+        'large': STYLE_LARGE,
+    }
 
 
 class AndroidProgressBar(AndroidView, ProxyProgressBar):
     """ An Android implementation of an Enaml ProxyProgressBar.
 
+    For an indeterminate ProgressBar use the ActivityIndicator.
+
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(ProgressBar)
+
+    #: Set to True to make the progress bar an activity indicator
+    indeterminate = Bool()
 
     # --------------------------------------------------------------------------
     # Initialization API
@@ -51,12 +61,9 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
         """
         d = self.declaration
 
-        if d.indeterminate:
-            style = {
-                'normal': ProgressBar.STYLE_NORMAL,
-                'small': ProgressBar.STYLE_SMALL,
-                'large': ProgressBar.STYLE_LARGE,
-            }[d.style]
+        if self.indeterminate:
+            #: Note: Style will only exist on activity indicators!
+            style = ProgressBar.STYLES[d.style]
         else:
             style = ProgressBar.STYLE_HORIZONTAL
         self.widget = ProgressBar(self.get_context(), None, style)
@@ -67,9 +74,9 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
         """
         super(AndroidProgressBar, self).init_widget()
         d = self.declaration
-        self.set_indeterminate(d.indeterminate)
+        self.set_indeterminate(self.indeterminate)
 
-        if not d.indeterminate:
+        if not self.indeterminate:
             if d.max:
                 self.set_max(d.max)
             if d.min:
@@ -99,4 +106,5 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
         self.widget.setMin(value)
 
     def set_style(self, style):
+        """ Style cannot be changed dynamically. """
         pass
