@@ -26,7 +26,7 @@
      */
     //[self.view addSubview:[self.bridge getObject:@1]];
     //[self.view addSubview:fromLabel];
-    //[self.view addSubview:view];
+    [self.view addSubview:view];
 }
 
 - (void) showError:(NSString *)message {
