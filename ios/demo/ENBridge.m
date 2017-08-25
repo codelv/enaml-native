@@ -119,6 +119,9 @@
                               [(NSNumber *)spec[1][1] floatValue],
                               [(NSNumber *)spec[1][2] floatValue],
                               [(NSNumber *)spec[1][3] floatValue])];
+        } else if ([argType isEqualToString:@"CGSize"] && [spec[1] isKindOfClass:[NSArray class]]) {
+            return [NSValue valueWithCGSize:CGSizeMake([(NSNumber *)spec[1][0] floatValue],
+                                                       [(NSNumber *)spec[1][1] floatValue])];
         // Extensions are passed as dictionaries
         } else if ([spec[1] isKindOfClass:[NSDictionary class]]) {
             NSDictionary* arg = spec[1];
@@ -126,7 +129,6 @@
             const int* refNumber = data.bytes;
             NSNumber* objId = [NSNumber numberWithInt:*refNumber];
             return self.objectCache[objId];
-            
         }
         return spec[1];
     }

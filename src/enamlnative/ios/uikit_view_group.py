@@ -73,8 +73,9 @@ class UiKitViewGroup(UiKitView, ProxyViewGroup):
         super(UiKitViewGroup, self).update_frame()
         if not self.frame:
             d = self.declaration
-            x,y,w,h = self.parent().frame
-            self.frame = (d.x,d.y,w,h)
+            if d.parent and not (d.x or d.y or d.width or d.height):
+                d.width, d.height = d.parent.width, d.parent.height
+            self.frame = (d.x,d.y,d.width,d.height)
 
     def child_added(self, child):
         """ Handle the child added event from the declaration.

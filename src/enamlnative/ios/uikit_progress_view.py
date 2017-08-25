@@ -22,7 +22,7 @@ class UIProgressView(UIView):
         https://developer.apple.com/documentation/uikit/uiview?language=objc
     """
     #: Properties
-    progress = ObjcProperty('UIColor')
+    progress = ObjcProperty('float')
     setProgress = ObjcMethod('float', dict(animated='boolean'))
 
 
@@ -52,9 +52,7 @@ class UiKitProgressView(UiKitView, ProxyProgressBar):
         """
         super(UiKitProgressView, self).init_widget()
 
-        widget = self.widget
         d = self.declaration
-
         if d.progress:
             self.set_progress(d.progress)
 
@@ -62,4 +60,5 @@ class UiKitProgressView(UiKitView, ProxyProgressBar):
     # ProxyProgressBar API
     # --------------------------------------------------------------------------
     def set_progress(self, progress):
-        self.widget.setProgress(progress/100.0, animated=True)
+        self.widget.progress = progress/100.0
+        #, animated=True)

@@ -10,41 +10,41 @@ Created on June 21, 2017
 @author: jrm
 '''
 from enamlnative.widgets.api import *
+from enaml.core.api import Looper, Conditional
 
-
-enamldef MainView(View):
+enamldef MainView(LinearLayout):
     y = 20
-    width = 480
-    height = 700
-    background_color = "#9090e3"
-
+    width = 420
+    height = 720
+    background_color = "#EEE"
+    orientation = "vertical"
     #ProgressBar:
     #    progress = 30
-    LinearLayout:
-        orientation = "vertical"
-        background_color = "#0FF"
+    # LinearLayout:
+    #
+    #     #height = parent.height*0.5
+    #     #width = parent.width
+    #     background_color = "#123"
+    #     TextView:
+    #         text = "THIS IS NOT SHOWING"
+    #     TextView:
+    #         text = "WHER IS THIS?"
+    ScrollView:
+        width = parent.width
+        height = 1720
         LinearLayout:
-            height = 200
-            width = parent.width
-            background_color = "#F00"
+            orientation = "vertical"
+            #height = parent.height*0.5
+            #width = parent.width
+            ActivityIndicator:
+                color = "#333"
+            ProgressBar:
+                progress = 50
             TextView:
-                text = "#00F"
-            TextView:
-                text = "#0F0"
-        TextView:
-            text = "Good work!"
-            text_color = "#F0F"
-        ActivityIndicator:
-            color = "#F00"
-        ProgressBar:
-            progress = 50
-        TextView:
-            text = "What is this crap doing work!"
-            text_color = "#000"
-                    #width = 100
-            #height = 20
-
-            #width = 100
-            #height = 5
-    #TextView:
-    #    text = "Test 2"
+                text = "Loading!"
+                text_color = "#333"
+            Looper:
+                iterable = range(100)
+                TextView:
+                    text = "Item {}".format(loop_index)
+                    #text_color = "#F0F"

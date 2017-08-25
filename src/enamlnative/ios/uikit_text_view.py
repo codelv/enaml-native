@@ -40,7 +40,7 @@ class UiKitTextView(UiKitView, ProxyTextView):
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
         """
-        self.widget = UILabel()#initWithFrame=(91,35,200,20))
+        self.widget = UILabel()
 
     def init_widget(self):
         """ Initialize the state of the toolkit widget.
@@ -52,9 +52,7 @@ class UiKitTextView(UiKitView, ProxyTextView):
         """
         super(UiKitTextView, self).init_widget()
 
-        widget = self.widget
         d = self.declaration
-
         if d.text:
             self.set_text(d.text)
         if d.text_color:
