@@ -87,8 +87,8 @@ def dumps(data):
 
 def loads(data):
     """ Decodes and processes events received from the bridge """
-    if not data:
-        raise ValueError("Tried to load empty data!")
+    #if not data:
+    #    raise ValueError("Tried to load empty data!")
     return msgpack.loads(data)
 
 
@@ -207,7 +207,16 @@ class BridgeField(Property):
         self.__signature__ = arg
         super(BridgeField, self).__init__(self.__fget__, self.__fset__)
 
+    @contextmanager
+    def suppressed(self, obj):
+        """ Suppress calls within this context to avoid feedback loops"""
+        obj.__suppressed__[self.name] = True
+        yield
+        obj.__suppressed__[self.name] = False
+
     def __fset__(self, obj, arg):
+        if obj.__suppressed__.get(self.name):
+            return
         obj.__app__.send_event(
             Command.FIELD,  #: method
             obj.__id__,
@@ -216,6 +225,7 @@ class BridgeField(Property):
         )
 
     def __fget__(self, obj):
+        """ Return an object that can be used to retrieve the value. """
         raise NotImplementedError("Reading attributes is not yet supported")
 
 

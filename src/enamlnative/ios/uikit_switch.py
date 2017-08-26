@@ -78,10 +78,10 @@ class UiKitSwitch(UiKitControl, ProxySwitch):
         self.widget.onValueChanged.connect(self.on_checked_changed)
 
     def on_checked_changed(self, state):
-        #: How do i suppress the on property??
-        #with self.widget.on.suppressed():
-        d = self.declaration
-        d.checked = state
+        #: Suppressing a property is pretty ugly...
+        with self.widget.get_member('on').suppressed(self.widget):
+            d = self.declaration
+            d.checked = state
 
 
 
