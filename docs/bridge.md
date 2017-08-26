@@ -1,6 +1,6 @@
 ### Bridge
 
-The bridge is an async way of communicating between python and java. It's based partially on this talk [Alexander Kotliarskyi - React Native: Under the Hood | YGLF2015](https://youtu.be/hDviGU-57lU).  Using an async bridge keeps the _slowness_ of python and the JNI from blocking the UI. It is essentially a python-java  rpc interface that allows python to create, update, and delete Java objects and listen to events and results those objects create. Instead of using JSON (like react-native) it uses msgpack, since msgpack is [significantly faster](https://gist.github.com/schlamar/3134391) in python.
+The bridge is an async way of communicating between python and java. It's based partially on this talk [Alexander Kotliarskyi - React Native: Under the Hood | YGLF2015](https://youtu.be/hDviGU-57lU).  Using an async bridge keeps the _slowness_ of python and from blocking the UI. It is essentially a python <-> native rpc interface that allows python to create, update, and delete Java/ObjC objects and listen to events and results those objects create. Instead of using JSON (like react-native) it uses msgpack, since msgpack is [significantly faster](https://gist.github.com/schlamar/3134391) in python.
 
 This uses a different approach than pyjnius which creates all of these fields for you automatically via reflection. The tradeoff here is speed. Even when you cache and recreate `jnius` classes it is still significantly slower in object creation and method calling than the bridge approach used here (we're talking several orders of magnitude slower). The bridge was designed to have as little overhead as possible. All bridge objects are implemented using the `Atom` framework's `Properties` which is implemented in c++ and has minimal memory overhead.
 
@@ -275,7 +275,7 @@ In java, the method invoke commands are mapped to reflection calls that must mat
 2. Passing a `JavaBridgeObject` will get mapped to the `object with that id` from the cache. 
 3. Defining a signature that takes the an `android.graphics.Color` and passing a string argument 
 
-    ::python
+    :::python
     backgroundColor = JavaMethod('android.graphics.Color')
 
 will get mapped to `backgroundColor(int color)` where the color is created using `Color.parseColor(arg)`.
