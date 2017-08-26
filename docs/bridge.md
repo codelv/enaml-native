@@ -1,15 +1,19 @@
-### Bridge - (Java - Python) 
+### Bridge
 
 The bridge is an async way of communicating between python and java. It's based partially on this talk [Alexander Kotliarskyi - React Native: Under the Hood | YGLF2015](https://youtu.be/hDviGU-57lU).  Using an async bridge keeps the _slowness_ of python and the JNI from blocking the UI. It is essentially a python-java  rpc interface that allows python to create, update, and delete Java objects and listen to events and results those objects create. Instead of using JSON (like react-native) it uses msgpack, since msgpack is [significantly faster](https://gist.github.com/schlamar/3134391) in python.
 
 This uses a different approach than pyjnius which creates all of these fields for you automatically via reflection. The tradeoff here is speed. Even when you cache and recreate `jnius` classes it is still significantly slower in object creation and method calling than the bridge approach used here (we're talking several orders of magnitude slower). The bridge was designed to have as little overhead as possible. All bridge objects are implemented using the `Atom` framework's `Properties` which is implemented in c++ and has minimal memory overhead.
 
 
-The bridge is implemented in two files:
+### Android
+
+
+The Android bridge is implemented in three files:
 1. [com.enaml.Bridge](https://github.com/frmdstryr/enaml-native/blob/master/android/app/src/main/java/com/enaml/Bridge.java) in Java
 2. [enamlnative.android.bridge](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/android/bridge.py) in Python 
+3. [enamlnative.core.bridge](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/core/bridge.py) in Python 
 
-### Usage
+#### Usage
 
 In python, define a subclass of `JavaBridgeObject` and declare the JavaMethods, JavaFields, and JavaCallbacks you need. For example:
 
@@ -187,7 +191,7 @@ That's about it (for now). There's plenty of examples in the `enamlnative.androi
 ***
 
 
-### Details
+#### Details
 
 The bridge works by serializing every creation, method call, and deletion, into a msgpack message which java then handles using reflection (currently).  You can set `app.debug = True` to see all the messages being sent back and forth.  
 
@@ -216,7 +220,7 @@ The message format depends on the command, the basic format is :
 
 These commands then get processed by `processEvents` in `Bridge.java` which maps to either do a creation, update, or deletion of the given object (and a few others). The objects are stored using a given id in a cache and deleted when the python object get's gc'd. This id is passed back as the reference id in callbacks.
 
-### Serialization and conversion
+#### Serialization and conversion
 There's a few things you need to know about how conversion occurs when passing back and forth across the bridge:
 
 1. First, primitives are sent directly, strings, ints, bools, etc.. 
@@ -240,6 +244,44 @@ will get mapped to `backgroundColor(int color)` where the color is created using
 
 That's all for now! Cheers!
 
+### iOS
 
+The iOS bridge implementation uses the CPython API for invoking python from Obj-C (ie callbacks) and uses ctypes for invoking the required bridge methods.  It is designed to look and be used more like Swift than Obj-C. 
+
+The iOS bridge is implemented in three files:
+1. [ENBridge](https://github.com/frmdstryr/enaml-native/blob/master/ios/demo/ENBridge.m) in Objective-C
+2. [enamlnative.ios.bridge](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/ios/bridge.py) in Python 
+3. [enamlnative.core.bridge](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/core/bridge.py) in Python 
+
+
+#### Usage
+In python, define a subclass of `ObjcBridgeObject` and declare the ObjcMethods, ObjcProperties, and ObjcCallbacks you need.
+
+__Example 1 - Defining Obj-C objects using the bridge__
+
+    :::python
+
+    class UIButton(UIControl):
+        __signature__ = set_default(dict(buttonWithType='UIButtonType))
+        setTitle = ObjcMethod('NSString', dict(forState='UIControlState'))
+        
+
+Bridge objects are used to define how the bridge should pack and unpack the values over the bridge. Methods are defined like they are in Obj-C just instead of parameters adding to the method name `setTitle_forName` we pass a dictionary of possible keyword arguments and do the rest behind the scenes.  
+
+
+__Example 2 - Using Obj-C bridge objects__
+    
+    :::python
+
+    button = UIButton(buttonWithType=UIButton.UIButtonTypeRoundedRect)
+    button.setTitle("Click me", forState=UIKit.ControlStateNormal)
+    button.frame = (15, 50, 300, 500)
+    #...
+
+There's a few things to note here. 
+
+First, it does not use the Obj-C like syntax that many other python/obj-c implementations do (pyobjc, pyobjus). It's more like Swift and it's more pythonic. 
+
+More to come!
 
 
