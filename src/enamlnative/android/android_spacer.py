@@ -17,7 +17,7 @@ from .android_view import AndroidView, View
 
 
 class Spacer(View):
-    __javaclass__ = set_default('android.widget.Space')
+    __nativeclass__ = set_default('android.widget.Space')
 
 
 class AndroidSpacer(AndroidView, ProxySpacer):

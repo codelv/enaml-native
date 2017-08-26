@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class Switch(CompoundButton):
-    __javaclass__ = set_default('android.widget.Switch')
+    __nativeclass__ = set_default('android.widget.Switch')
     setShowText = JavaMethod('boolean')
     setSplitTrack = JavaMethod('boolean')
     setTextOff = JavaMethod('java.lang.CharSequence')

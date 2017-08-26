@@ -20,14 +20,14 @@ from .app import AndroidApplication
 class LoopjRequest(JavaBridgeObject):
     """ Since this is passed with every request, use this for listening for events
     """
-    __javaclass__ = set_default('com.loopj.android.http.RequestParams')
+    __nativeclass__ = set_default('com.loopj.android.http.RequestParams')
 
     #: Java methods
     put = JavaMethod('java.lang.String', 'java.lang.String')  #: Need overloading....
 
 
 class LoopjAsyncHttpResponseHandler(JavaBridgeObject):
-    __javaclass__ = set_default('com.enaml.adapters.BridgedAsyncHttpResponseHandler')
+    __nativeclass__ = set_default('com.enaml.adapters.BridgedAsyncHttpResponseHandler')
     setAsyncHttpResponseListener = JavaMethod(
         'com.enaml.adapters.BridgedAsyncHttpResponseHandler$AsyncHttpResponseListener', 'boolean')
 
@@ -55,7 +55,7 @@ class LoopjAsyncHttpClient(JavaBridgeObject):
     """
     #: It's recommended to use this statically, so make a singleton
     _instance = None
-    __javaclass__ = set_default('com.loopj.android.http.AsyncHttpClient')
+    __nativeclass__ = set_default('com.loopj.android.http.AsyncHttpClient')
 
     @classmethod
     def instance(cls):

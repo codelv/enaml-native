@@ -19,7 +19,7 @@ from .bridge import JavaMethod
 
 
 class AutoCompleteTextView(EditText):
-    __javaclass__ = set_default('android.widget.AutoCompleteTextView')
+    __nativeclass__ = set_default('android.widget.AutoCompleteTextView')
     setAdapter = JavaMethod('android.widget.ListAdapter')
     setDropDownHeight = JavaMethod('int')
     setDropDownWidth = JavaMethod('int')

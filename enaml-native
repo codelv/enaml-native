@@ -541,16 +541,17 @@ class RunIOS(Command):
 
     def run(self, args=None):
         ctx = self.ctx
+        env = ctx['ios']
         with cd('ios'):
             shprint(sh.xcrun, 'xcodebuild',
-                    '-scheme', 'App',
-                    '-project', 'App.xcodeproj',
+                    '-scheme', env['project'],
+                    '-workspace', '{project}.xcworkspace'.format(**env),
                     '-configuration', 'Debug',
                     #'-destination', 'platform=iOS Simulator,name=iPhone 7 Plus,OS=10.2',
                     '-derivedDataPath',
-                    'build')
-            shprint(sh.xcrun, 'simctl', 'install', 'booted',
-                    'build/Build/Products/Debug-iphonesimulator/App.app')
+                    'run')
+            #shprint(sh.xcrun, 'simctl', 'install', 'booted',
+            #        'build/Build/Products/Debug-iphonesimulator/{project}.app'.format(**env))
             shprint(sh.xcrun, 'simctl', 'launch', 'booted', ctx['bundle_id'])
 
 

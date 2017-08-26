@@ -19,15 +19,15 @@ from .android_toggle_button import AndroidToggleButton, ToggleButton
 
 
 class Icon(TextView):
-    __javaclass__ = set_default('com.joanzapata.iconify.widget.IconTextView')
+    __nativeclass__ = set_default('com.joanzapata.iconify.widget.IconTextView')
 
 
 class IconButton(Button):
-    __javaclass__ = set_default('com.joanzapata.iconify.widget.IconButton')
+    __nativeclass__ = set_default('com.joanzapata.iconify.widget.IconButton')
 
 
 class IconToggleButton(ToggleButton):
-    __javaclass__ = set_default('com.joanzapata.iconify.widget.IconToggleButton')
+    __nativeclass__ = set_default('com.joanzapata.iconify.widget.IconToggleButton')
 
 
 class AndroidIcon(AndroidTextView, ProxyIcon):

@@ -17,7 +17,7 @@ from .android_compound_button import AndroidCompoundButton, CompoundButton
 
 
 class CheckBox(CompoundButton):
-    __javaclass__ = set_default('android.widget.CheckBox')
+    __nativeclass__ = set_default('android.widget.CheckBox')
 
 
 class AndroidCheckBox(AndroidCompoundButton, ProxyCheckBox):

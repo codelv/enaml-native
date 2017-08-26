@@ -84,7 +84,7 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
     LOG(jnipath);
 
     // Set JNI path
-    setenv("APK_LIB_DIR", jnipath, 1);
+    setenv("PY_LIB_DIR", jnipath, 1);
 
     // Build paths for the Python interpreter
     char paths[512];

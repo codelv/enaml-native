@@ -20,7 +20,7 @@ from .bridge import JavaCallback, JavaMethod
 
 
 class Chronometer(TextView):
-    __javaclass__ = set_default('android.widget.Chronometer')
+    __nativeclass__ = set_default('android.widget.Chronometer')
 
     setBase = JavaMethod('long')
     setCountDown = JavaMethod('boolean')

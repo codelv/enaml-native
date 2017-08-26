@@ -8,9 +8,10 @@ The full license is in the file COPYING.txt, distributed with this software.
 @author jrm
 
 '''
-from atom.api import Atom, Value
+from atom.api import Atom, Value, Subclass
 from functools import partial
 from . import bridge
+
 
 class EventLoop(Atom):
     """ Event loop delegation api
@@ -26,7 +27,8 @@ class EventLoop(Atom):
             based on which packages are installed."""
         for impl in [
                 TornadoEventLoop,
-                TwistedEventLoop
+                TwistedEventLoop,
+                BuiltinEventLoop,
                 ]:
             if impl.available():
                 return impl()
@@ -87,6 +89,10 @@ class EventLoop(Atom):
 
 class TornadoEventLoop(EventLoop):
     """ Eventloop using tornado's ioloop """
+
+    #: Future implementation
+    future = Subclass(object)
+
     @classmethod
     def available(cls):
         try:
@@ -108,9 +114,12 @@ class TornadoEventLoop(EventLoop):
     def set_error_handler(self, handler):
         self.loop.handle_callback_exception = handler
 
-    def create_future(self):
+    def _default_future(self):
         from tornado.concurrent import Future
-        f = Future()
+        return Future
+
+    def create_future(self):
+        f = self.future()
         bridge.tag_object_with_id(f)
 
         #: Add then method so you can easily chain callbacks
@@ -182,3 +191,25 @@ class TwistedEventLoop(EventLoop):
 
     def set_future_result(self, future, result):
         future.callback(result)
+
+
+class BuiltinEventLoop(TornadoEventLoop):
+    """ Use the built in event loop. It's a stripped down version of tornado,
+        It's currently slightly slower than tornado at the moment so use
+        tornado if possible.
+    """
+    @classmethod
+    def available(cls):
+        try:
+            from . import eventloop
+            return True
+        except ImportError:
+            return False
+
+    def _default_future(self):
+        from .eventloop.concurrent import Future
+        return Future
+
+    def _default_loop(self):
+        from .eventloop.ioloop import IOLoop
+        return IOLoop.current()

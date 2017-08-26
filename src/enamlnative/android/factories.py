@@ -10,6 +10,10 @@ Created on May 20, 2017
 @author: jrm
 '''
 
+def activity_indicator_factory():
+    from .android_activity_indicator import AndroidActivityIndicator
+    return AndroidActivityIndicator
+
 
 def analog_clock_factory():
     from .android_analog_clock import AndroidAnalogClock
@@ -257,12 +261,6 @@ def view_factory():
     return AndroidView
 
 
-def view_group_factory():
-    # print "Import view group"
-    from .android_view_group import AndroidViewGroup
-    return AndroidViewGroup
-
-
 def view_pager_factory():
     # print "Import view pager"
     from .android_view_pager import AndroidViewPager
@@ -275,6 +273,7 @@ def web_view_factory():
 
 
 ANDROID_FACTORIES = {
+    'ActivityIndicator': activity_indicator_factory,
     'AnalogClock': analog_clock_factory,
     'AutoCompleteTextView': auto_complete_text_view_factory,
     'Button': button_factory,
@@ -318,7 +317,6 @@ ANDROID_FACTORIES = {
     'ToggleButton': toggle_button_factory,
     'Toolbar': toolbar_factory,
     'View': view_factory,
-    'ViewGroup': view_group_factory,
     'ViewPager': view_pager_factory,
     'WebView': web_view_factory,
 }

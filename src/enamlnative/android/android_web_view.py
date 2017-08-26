@@ -18,7 +18,7 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
 class WebView(ViewGroup):
-    __javaclass__ = set_default('android.webkit.WebView')
+    __nativeclass__ = set_default('android.webkit.WebView')
     loadUrl = JavaMethod('java.lang.String')
     setWebViewClient = JavaMethod('android.webkit.WebViewClient')
     reload = JavaMethod()
@@ -29,7 +29,7 @@ class WebView(ViewGroup):
 
 
 class BridgedWebViewClient(JavaBridgeObject):
-    __javaclass__ = set_default('com.enaml.adapters.BridgedWebViewClient')
+    __nativeclass__ = set_default('com.enaml.adapters.BridgedWebViewClient')
     setWebView = JavaMethod('android.webkit.WebView',
                             'com.enaml.adapters.BridgedWebViewClient$WebViewListener')
     setJavaScriptEnabled = JavaMethod('boolean')

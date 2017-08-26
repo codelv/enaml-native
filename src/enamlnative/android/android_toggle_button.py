@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class ToggleButton(CompoundButton):
-    __javaclass__ = set_default('android.widget.ToggleButton')
+    __nativeclass__ = set_default('android.widget.ToggleButton')
     setTextOff = JavaMethod('java.lang.CharSequence')
     setTextOn = JavaMethod('java.lang.CharSequence')
 

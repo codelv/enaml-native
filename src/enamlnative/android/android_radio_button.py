@@ -17,7 +17,7 @@ from .android_compound_button import AndroidCompoundButton, CompoundButton
 
 
 class RadioButton(CompoundButton):
-    __javaclass__ = set_default('android.widget.RadioButton')
+    __nativeclass__ = set_default('android.widget.RadioButton')
 
 
 class AndroidRadioButton(AndroidCompoundButton, ProxyRadioButton):

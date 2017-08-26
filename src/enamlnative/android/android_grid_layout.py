@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class GridLayout(ViewGroup):
-    __javaclass__ = set_default('android.widget.GridLayout')
+    __nativeclass__ = set_default('android.widget.GridLayout')
     setOrientation = JavaMethod('int')
     setAlignmentMode = JavaMethod('int')
     setColumnCount = JavaMethod('int')

@@ -21,7 +21,7 @@ UTC_START = datetime(1970, 1, 1)
 
 
 class DatePicker(FrameLayout):
-    __javaclass__ = set_default('android.widget.DatePicker')
+    __nativeclass__ = set_default('android.widget.DatePicker')
     init = JavaMethod('int', 'int', 'int', 'android.widget.DatePicker$OnDateChangedListener')
     onDateChanged = JavaCallback('android.widget.DatePicker', 'int', 'int', 'int')
     updateDate = JavaMethod('int', 'int', 'int')

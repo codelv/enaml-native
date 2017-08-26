@@ -19,13 +19,13 @@ from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, encode
 
 
 class AbsListView(AdapterView):
-    __javaclass__ = set_default('android.widget.AbsListView')
+    __nativeclass__ = set_default('android.widget.AbsListView')
     pointToPosition = JavaMethod('int', 'int')
     setAdapter = JavaMethod('android.widget.ListAdapter')
 
 
 class ListView(AbsListView):
-    __javaclass__ = set_default('android.widget.ListView')
+    __nativeclass__ = set_default('android.widget.ListView')
     setDividerHeight = JavaMethod('int')
     setFooterDividersEnabled = JavaMethod('boolean')
     setHeaderDividersEnabled = JavaMethod('boolean')
@@ -44,7 +44,7 @@ class BridgedListAdapter(JavaBridgeObject):
     """ An adapter that implements a recycleview pattern.
 
     """
-    __javaclass__ = set_default('com.enaml.adapters.BridgedListAdapter')
+    __nativeclass__ = set_default('com.enaml.adapters.BridgedListAdapter')
     setListView = JavaMethod('android.widget.ListView',
                              'com.enaml.adapters.BridgedListAdapter$BridgedListAdapterListener')
     setCount = JavaMethod('int')

@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import shutil
-from atom.api import Atom, Instance, ForwardInstance, Unicode, Int, Bool
+from atom.api import Atom, ForwardInstance, Unicode, Int, Bool
 from contextlib import contextmanager
 
 @contextmanager
@@ -17,14 +17,14 @@ def cd(newdir):
         os.chdir(prevdir)
 
 
-def android_app():
-    from .app import AndroidApplication
-    return AndroidApplication
+def get_app():
+    from .app import BridgedApplication
+    return BridgedApplication
 
 
 class DevServerClient(Atom):
     _instance = None
-    app = ForwardInstance(android_app)
+    app = ForwardInstance(get_app())
     host = Unicode()
     port = Int(8888)
     url = Unicode('ws://192.168.21.119:8888/dev')
@@ -35,7 +35,7 @@ class DevServerClient(Atom):
         return 'ws://{}:{}/dev'.format(self.host,self.port)
 
     def _default_app(self):
-        return android_app().instance()
+        return get_app().instance()
 
     @classmethod
     def initialize(cls,*args, **kwargs):

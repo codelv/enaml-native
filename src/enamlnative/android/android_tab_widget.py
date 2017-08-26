@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class TabWidget(LinearLayout):
-    __javaclass__ = set_default('android.widget.TabWidget')
+    __nativeclass__ = set_default('android.widget.TabWidget')
     setStripEnabled = JavaMethod('boolean')
     setEnabled = JavaMethod('boolean')
     setCurrentTab = JavaMethod('int')

@@ -18,13 +18,13 @@ from .bridge import JavaMethod, JavaField
 
 
 class LinearLayout(ViewGroup):
-    __javaclass__ = set_default('android.widget.LinearLayout')
+    __nativeclass__ = set_default('android.widget.LinearLayout')
     setOrientation = JavaMethod('int')
     setGravity = JavaMethod('int')
 
 
 class LinearLayoutLayoutParams(MarginLayoutParams):
-    __javaclass__ = set_default('android.widget.LinearLayout$LayoutParams')
+    __nativeclass__ = set_default('android.widget.LinearLayout$LayoutParams')
     gravity = JavaField('int')
     weight = JavaField('int')
 

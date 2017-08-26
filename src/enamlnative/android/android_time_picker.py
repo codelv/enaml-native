@@ -18,7 +18,7 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class TimePicker(FrameLayout):
-    __javaclass__ = set_default('android.widget.TimePicker')
+    __nativeclass__ = set_default('android.widget.TimePicker')
     onTimeChanged = JavaCallback('android.widget.TimePicker', 'int', 'int')
     setHour = JavaMethod('int')
     setMinute = JavaMethod('int')

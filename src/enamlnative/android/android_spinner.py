@@ -18,13 +18,13 @@ from .bridge import JavaMethod
 
 
 class AbsSpinner(AdapterView):
-    __javaclass__ = set_default('android.widget.AbsSpinner')
+    __nativeclass__ = set_default('android.widget.AbsSpinner')
     pointToPosition = JavaMethod('int', 'int')
     setAdapter = JavaMethod('android.widget.SpinnerAdapter')
 
 
 class Spinner(AbsSpinner):
-    __javaclass__ = set_default('android.widget.Spinner')
+    __nativeclass__ = set_default('android.widget.Spinner')
     __signature__ = set_default(('android.content.Context', 'int'))
     setDropDownHorizontalOffset = JavaMethod('int')
     setDropDownVerticalOffset = JavaMethod('int')

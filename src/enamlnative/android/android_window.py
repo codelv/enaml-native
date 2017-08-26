@@ -16,7 +16,7 @@ from .bridge import JavaBridgeObject, JavaMethod
 
 class Window(JavaBridgeObject):
     """ Access to the activity over the bridge """
-    __javaclass__ = set_default('android.view.Window')
+    __nativeclass__ = set_default('android.view.Window')
 
     #: https://developer.android.com/reference/android/view/WindowManager.LayoutParams.html#FLAG_KEEP_SCREEN_ON
     FLAG_KEEP_SCREEN_ON = 128

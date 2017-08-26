@@ -18,7 +18,7 @@ from .bridge import JavaMethod, JavaCallback, JavaField
 
 
 class DrawerLayout(ViewGroup):
-    __javaclass__ = set_default('android.support.v4.widget.DrawerLayout')
+    __nativeclass__ = set_default('android.support.v4.widget.DrawerLayout')
     openDrawer = JavaMethod('android.view.View')
     closeDrawer = JavaMethod('android.view.View')
     addDrawerListener = JavaMethod('android.support.v4.widget.DrawerLayout$DrawerListener')
@@ -43,7 +43,7 @@ class DrawerLayout(ViewGroup):
 
 class DrawerLayoutParams(MarginLayoutParams):
     """ Update the child widget with the given params """
-    __javaclass__ = set_default('android.support.v4.widget.DrawerLayout$LayoutParams')
+    __nativeclass__ = set_default('android.support.v4.widget.DrawerLayout$LayoutParams')
     gravity = JavaField('int')
 
 

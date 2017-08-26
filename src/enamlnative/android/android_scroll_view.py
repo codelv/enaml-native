@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class ScrollView(FrameLayout):
-    __javaclass__ = set_default('android.widget.ScrollView')
+    __nativeclass__ = set_default('android.widget.ScrollView')
     smoothScrollBy = JavaMethod('int', 'int')
     smoothScrollTo = JavaMethod('int', 'int')
     fullScroll = JavaMethod('int')
@@ -28,7 +28,7 @@ class ScrollView(FrameLayout):
 
 
 class HorizontalScrollView(ScrollView):
-    __javaclass__ = set_default('android.widget.HorizontalScrollView')
+    __nativeclass__ = set_default('android.widget.HorizontalScrollView')
 
 
 class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):

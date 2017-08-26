@@ -19,7 +19,7 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class CalendarView(FrameLayout):
-    __javaclass__ = set_default('android.widget.CalendarView')
+    __nativeclass__ = set_default('android.widget.CalendarView')
     setDate = JavaMethod('long')
     setMinDate = JavaMethod('long')
     setMaxDate = JavaMethod('long')

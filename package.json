@@ -22,9 +22,12 @@
     "excluded":[]
   },
   "ios": {
-    "targets": [
-      "macOS",
-      "iOS"
+    "project": "demo",
+    "arches": [
+      "x86_64",
+      "i386",
+      "armv7",
+      "arm64"
     ],
     "dependencies": {
       "openssl":"1.0.2l",

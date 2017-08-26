@@ -1,0 +1,55 @@
+'''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+Created on June 21, 2017
+
+@author: jrm
+'''
+from enamlnative.widgets.api import *
+from enaml.core.api import Looper, Conditional
+
+enamldef MainView(LinearLayout):
+    y = 20
+    width = 420
+    height = 720
+    background_color = "#EEE"
+    orientation = "vertical"
+    #ProgressBar:
+    #    progress = 30
+    # LinearLayout:
+    #
+    #     #height = parent.height*0.5
+    #     #width = parent.width
+    #     background_color = "#123"
+    #     TextView:
+    #         text = "THIS IS NOT SHOWING"
+    #     TextView:
+    #         text = "WHER IS THIS?"
+    ScrollView:
+        width = parent.width
+        height = 1720
+        LinearLayout:
+            orientation = "vertical"
+            #height = parent.height*0.5
+            #width = parent.width
+            Switch: sw:
+                checked = True
+            TextView:
+                text << "Switch: {}".format(sw.checked)
+
+            ActivityIndicator:
+                color = "#333"
+            ProgressBar:
+                progress = 50
+            TextView:
+                text = "Loading!"
+                text_color = "#333"
+            Looper:
+                iterable = range(100)
+                TextView:
+                    text = "Item {}".format(loop_index)
+                    #text_color = "#F0F"

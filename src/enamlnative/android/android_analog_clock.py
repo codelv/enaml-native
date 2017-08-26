@@ -17,7 +17,7 @@ from .android_view import AndroidView, View
 
 
 class AnalogClock(View):
-    __javaclass__ = set_default('android.widget.AnalogClock')
+    __nativeclass__ = set_default('android.widget.AnalogClock')
 
 
 class AndroidAnalogClock(AndroidView, ProxyAnalogClock):

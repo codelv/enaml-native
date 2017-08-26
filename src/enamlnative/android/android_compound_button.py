@@ -18,7 +18,7 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class CompoundButton(Button):
-    __javaclass__ = set_default('android.widget.CompoundButton')
+    __nativeclass__ = set_default('android.widget.CompoundButton')
     setChecked = JavaMethod('boolean')
     setOnCheckedChangeListener = JavaMethod('android.widget.CompoundButton$OnCheckedChangeListener')
     onCheckedChanged = JavaCallback('android.widget.CompoundButton', 'boolean')

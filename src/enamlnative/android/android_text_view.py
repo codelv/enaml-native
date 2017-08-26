@@ -42,7 +42,7 @@ class Gravity:
 
 
 class TextView(View):
-    __javaclass__ = set_default('android.widget.TextView')
+    __nativeclass__ = set_default('android.widget.TextView')
     setAllCaps = JavaMethod('boolean')
     setAutoLinkMask = JavaMethod('int')
     setText = JavaMethod('java.lang.CharSequence')
