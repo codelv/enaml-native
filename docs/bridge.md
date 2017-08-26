@@ -9,6 +9,7 @@ This uses a different approach than pyjnius which creates all of these fields fo
 
 
 The Android bridge is implemented in three files:
+
 1. [com.enaml.Bridge](https://github.com/frmdstryr/enaml-native/blob/master/android/app/src/main/java/com/enaml/Bridge.java) in Java
 2. [enamlnative.android.bridge](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/android/bridge.py) in Python 
 3. [enamlnative.core.bridge](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/core/bridge.py) in Python 
@@ -249,6 +250,7 @@ That's all for now! Cheers!
 The iOS bridge implementation uses the CPython API for invoking python from Obj-C (ie callbacks) and uses ctypes for invoking the required bridge methods.  It is designed to look and be used more like Swift than Obj-C. 
 
 The iOS bridge is implemented in three files:
+
 1. [ENBridge](https://github.com/frmdstryr/enaml-native/blob/master/ios/demo/ENBridge.m) in Objective-C
 2. [enamlnative.ios.bridge](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/ios/bridge.py) in Python 
 3. [enamlnative.core.bridge](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/core/bridge.py) in Python 
