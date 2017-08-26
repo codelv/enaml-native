@@ -189,61 +189,7 @@ If you're about do do something that will take some time (loading a file, etc..)
 That's about it (for now). There's plenty of examples in the `enamlnative.android` package of how to use the bridge for you to look at. Feel free to create an issue with questions.
 
 
-***
 
-
-#### Details
-
-The bridge works by serializing every creation, method call, and deletion, into a msgpack message which java then handles using reflection (currently).  You can set `app.debug = True` to see all the messages being sent back and forth.  
-
-__Example 1 - Bridge serialization__
-    
-    07-17 17:27:19.047 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ======== Py --> Java ======
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('c', (1, u'android.widget.LinearLayout', [('android.content.Context', ExtType(code=1, data='\xff'))]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (1, 0, 'setOrientation', [('int', 1)]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('c', (2, u'android.support.v7.widget.Toolbar', [('android.content.Context', ExtType(code=1, data='\xff'))]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (2, 0, 'setBackgroundColor', [('android.graphics.Color', u'#004981')]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (2, 0, 'setTitle', [('java.lang.CharSequence', u'Enaml Native - Intro')]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (2, 0, 'setTitleTextColor', [('android.graphics.Color', u'#FFFFFF')]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (2, 0, 'setSubtitleTextColor', [('android.graphics.Color', u'#EEEEEE')]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (1, 0, 'addView', [('android.view.View', ExtType(code=1, data='\x02'))]))
-
-The above is a small section of the log from the demo app. 
-
-The message format depends on the command, the basic format is :
-
-    :::python
-    [
-    ('<command>',(<args...>)),
-    ('<command 2>',(<args 2...>)),
-    #: etc...
-    ]
-
-These commands then get processed by `processEvents` in `Bridge.java` which maps to either do a creation, update, or deletion of the given object (and a few others). The objects are stored using a given id in a cache and deleted when the python object get's gc'd. This id is passed back as the reference id in callbacks.
-
-#### Serialization and conversion
-There's a few things you need to know about how conversion occurs when passing back and forth across the bridge:
-
-1. First, primitives are sent directly, strings, ints, bools, etc.. 
-2. Any JavaBridgeObject is passed using a msgpack extension type and dereferenced by java
-3. Some tricks are used to minimize object creation in python and support things like implementing interfaces
-
-In java, the method invoke commands are mapped to reflection calls that must match a given signature. The unpacker does a few things to make this easy. Look at the `unpackValue` method in `Bridge.java` (it's pretty simple).
-
-1. Passing an `int` for a method argument that is an interface will create a `Proxy` implementation of that interface using the `int` as a reference object to return invocations to. This is how the `JavaCallback` works.
-2. Passing a `JavaBridgeObject` will get mapped to the `object with that id` from the cache. 
-3. Defining a signature that takes the an `android.graphics.Color` and passing a string argument 
-
-    ::python
-    backgroundColor = JavaMethod('android.graphics.Color')
-
-will get mapped to `backgroundColor(int color)` where the color is created using `Color.parseColor(arg)`.
-
-4. Defining a signature that takes an `android.R` will get parsed as an android resources string and converted as needed. (ex. `@layout/simple_spinner_dropdown_item` is mapped to `R.layout.simple_spinner_dropwdown_item`)
-
-
-
-That's all for now! Cheers!
 
 ### iOS
 
@@ -284,6 +230,68 @@ There's a few things to note here.
 
 First, it does not use the Obj-C like syntax that many other python/obj-c implementations do (pyobjc, pyobjus). It's more like Swift and it's more pythonic. 
 
-More to come!
+### Internals
+
+The bridge works by serializing every creation, method call, property assignment, and deletion, into a msgpack message which the native implementation then handles using reflection.  You can set `app.debug = True` to see all the messages being sent back and forth.  
+
+__Example 1 - Bridge serialization__
+    
+    07-17 17:27:19.047 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ======== Py --> Native ======
+    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('c', (1, u'android.widget.LinearLayout', [('android.content.Context', ExtType(code=1, data='\xff'))]))
+    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (1, 0, 'setOrientation', [('int', 1)]))
+    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('c', (2, u'android.support.v7.widget.Toolbar', [('android.content.Context', ExtType(code=1, data='\xff'))]))
+    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (2, 0, 'setBackgroundColor', [('android.graphics.Color', u'#004981')]))
+    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (2, 0, 'setTitle', [('java.lang.CharSequence', u'Enaml Native - Intro')]))
+    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (2, 0, 'setTitleTextColor', [('android.graphics.Color', u'#FFFFFF')]))
+    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (2, 0, 'setSubtitleTextColor', [('android.graphics.Color', u'#EEEEEE')]))
+    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (1, 0, 'addView', [('android.view.View', ExtType(code=1, data='\x02'))]))
+
+The above is a small section of the log from the demo app in Android. 
+
+The message format depends on the command, the basic format is :
+
+    :::python
+    [
+    ('<command>',(<args...>)),
+    ('<command 2>',(<args 2...>)),
+    #: etc...
+    ]
+
+As you can see this is a batched list of calls each with a command and required arguments for that command. These commands then get processed by `processEvents` in `Bridge.java` or `processEvents` in `ENBridge.m` serially in the order in which they're received and then mapped to either do a creation, update, or deletion of the given object (and a few others). The objects created are stored in a cache with the given id and deleted when the python object get's garbage collected. The id is passed back as the reference id in callbacks so python can create a reference to objects constructed natively.
+
+All arguments are packed in a tuple of `(type, value)` where type is simply a string that indicates the native type. Doing it this way we can properly handle conversion and do some tricks to reduce bridge load as discussed below.
+
+#### Serialization and conversion
+There's a few things you need to know about how conversion occurs when passing back and forth across the bridge:
+
+1. First, primitives are sent directly, strings, ints, bools, etc.. 
+2. Any BridgeObject is passed using a msgpack extension type and dereferenced (the data of the extension type is simply an ID of the object which must already exist) 
+3. Some other tricks are used to minimize object creation in python and support things like implementing interfaces
+
+##### Android conversion
+In java, the method invoke commands are mapped to reflection calls that must match a given signature. The unpacker does a few things to make this easy. Look at the `unpackValue` method in `Bridge.java` (it's pretty simple).
+
+1. Passing an `int` for a method argument that is an interface will create a `Proxy` implementation of that interface using the `int` as a reference object to return invocations to. This is how the `JavaCallback` works.
+2. Passing a `JavaBridgeObject` will get mapped to the `object with that id` from the cache. 
+3. Defining a signature that takes the an `android.graphics.Color` and passing a string argument 
+
+    ::python
+    backgroundColor = JavaMethod('android.graphics.Color')
+
+will get mapped to `backgroundColor(int color)` where the color is created using `Color.parseColor(arg)`.
+
+4. Defining a signature that takes an `android.R` will get parsed as an android resources string and converted as needed. (ex. `@layout/simple_spinner_dropdown_item` is mapped to `R.layout.simple_spinner_dropwdown_item`)
+
+##### iOS conversion
+In iOS some similar techniques are used. See the `convertArg` method in `ENBridge.m`.
+
+1. Passing a string for a `UIColor` argument will parse the string and create a color for it
+2. Passing an array for a `CGRect` will create a rect using the array arguments (via `CGRectMake`)
+
+More will be added as needed. You can define your own.
+
+
+
+That's all for now! Cheers!
 
 
