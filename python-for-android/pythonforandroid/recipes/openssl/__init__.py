@@ -9,8 +9,8 @@ class OpenSSLRecipe(Recipe):
     url = 'https://www.openssl.org/source/openssl-{version}.tar.gz'
 
     def should_build(self, arch):
-        return not self.has_libs(arch, 'libssl' + self.version + '.so',
-                                 'libcrypto' + self.version + '.so')
+        return not self.has_libs(arch, 'libssl.so',# + self.version + '.so',
+                                 'libcrypto.so')# + self.version + '.so')
 
     def check_symbol(self, env, sofile, symbol):
         nm = env.get('NM', 'nm')
@@ -47,17 +47,17 @@ class OpenSSLRecipe(Recipe):
             buildarch = self.select_build_arch(arch)
             shprint(perl, 'Configure', 'shared', 'no-dso', 'no-krb5', buildarch, _env=env)
             self.apply_patch('disable-sover.patch', arch.arch)
-            self.apply_patch('rename-shared-lib.patch', arch.arch)
+            #self.apply_patch('rename-shared-lib.patch', arch.arch)
 
             # check_ssl = partial(self.check_symbol, env, 'libssl' + self.version + '.so')
-            check_crypto = partial(self.check_symbol, env, 'libcrypto' + self.version + '.so')
+            check_crypto = partial(self.check_symbol, env, 'libcrypto.so')# + self.version + '.so')
             while True:
                 shprint(sh.make, 'build_libs', _env=env)
                 if all(map(check_crypto, ('SSLeay', 'MD5_Transform', 'MD4_Init'))):
                     break
                 shprint(sh.make, 'clean', _env=env)
 
-            self.install_libs(arch, 'libssl' + self.version + '.so',
-                              'libcrypto' + self.version + '.so')
+            self.install_libs(arch, 'libssl.so',# + self.version + '.so',
+                              'libcrypto.so')# + self.version + '.so')
 
 recipe = OpenSSLRecipe()

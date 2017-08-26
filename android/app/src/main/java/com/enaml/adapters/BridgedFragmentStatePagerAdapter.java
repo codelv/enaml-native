@@ -1,6 +1,7 @@
 package com.enaml.adapters;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -23,6 +24,7 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
     public final String TAG = "PagerAdapter";
 
     protected final ArrayList<Fragment> mFragments = new ArrayList<>();
+    protected final Handler mHandler = new Handler();
 
     public BridgedFragmentStatePagerAdapter() {
         this(MainActivity.mActivity.getSupportFragmentManager());

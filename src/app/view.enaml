@@ -323,14 +323,14 @@ enamldef ContentView(VBox): content_view:
                   text_size = 16
                   text_color = "#FF0000"
                 TextView:
-                  text = "This takes up three lines"
+                  text = "This takes up three lines, can be selected, and shared."
+                  text_selectable = True
                   lines = 3
                 TextView:
                   text = """This gets trunicated. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
                   max_lines = 5
-                TextView:
-                  text_selectable = True
-                  text = "You can select this text and share it with all your friends."
+                #TextView:
+                #  text << "You selected: {}".format(text_select.text_selection)
             Card:
               VBox:
                 CardTitle:
@@ -423,13 +423,11 @@ enamldef ContentView(VBox): content_view:
             VBox:
               CardTitle:
                 text = "ProgressBar"
-              ProgressBar:
-                indeterminate = True
-              ProgressBar:
-                indeterminate = True
+              ActivityIndicator:
+                pass
+              ActivityIndicator:
                 style = 'small'
-              ProgressBar:
-                indeterminate = True
+              ActivityIndicator:
                 style = 'large'
               ProgressBar:
                 progress = 32
@@ -624,8 +622,8 @@ enamldef ContentView(VBox): content_view:
 
               Conditional:
                 condition << card_conds.loading
-                ProgressBar:
-                  indeterminate = True
+                ActivityIndicator:
+                  pass
                 TextView:
                   text = "Loading..."
               Conditional:

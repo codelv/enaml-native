@@ -21,7 +21,7 @@ class ProxyActivityIndicator(ProxyView):
     """ The abstract definition of a proxy ActivityIndicator object.
 
     """
-    #: A reference to the Label declaration.
+    #: A reference to the declaration.
     declaration = ForwardTyped(lambda: ActivityIndicator)
 
     def set_style(self, style):
@@ -29,6 +29,7 @@ class ProxyActivityIndicator(ProxyView):
 
     def set_color(self, color):
         raise NotImplementedError
+
 
 class ActivityIndicator(View):
     """ A simple control for displaying an ActivityIndicator.

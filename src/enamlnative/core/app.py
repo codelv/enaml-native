@@ -293,7 +293,7 @@ class BridgedApplication(Application):
                     sig = type(result).__name__
 
                 self.send_event(
-                    bridgxe.Command.RESULT,  #: method
+                    bridge.Command.RESULT,  #: method
                     result_id,
                     bridge.msgpack_encoder(sig, result)  #: args
                 )

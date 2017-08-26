@@ -66,9 +66,7 @@ class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
         d = self.declaration
 
         #: Kinda hackish, but when we get the menu back, load it
-        app = self.get_context()
-        app.add_done_callback(self.widget.getMenu(), self.on_menu)
-
+        self.widget.getMenu().then(self.on_menu)
         self.widget.setOnMenuItemClickListener(self.widget.getId())
         self.widget.onMenuItemClick.connect(self.on_menu_item_click)
 

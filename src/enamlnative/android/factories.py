@@ -10,6 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 
+
 def activity_indicator_factory():
     from .android_activity_indicator import AndroidActivityIndicator
     return AndroidActivityIndicator

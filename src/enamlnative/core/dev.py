@@ -24,7 +24,7 @@ def get_app():
 
 class DevServerClient(Atom):
     _instance = None
-    app = ForwardInstance(get_app())
+    app = ForwardInstance(get_app)
     host = Unicode()
     port = Int(8888)
     url = Unicode('ws://192.168.21.119:8888/dev')
