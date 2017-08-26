@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 @author jrm
 
 '''
-from atom.api import Atom, Float, Value, Unicode, Typed, set_default
+from atom.api import Atom, Float, Value, Unicode, Int, Typed
 from enaml.application import ProxyResolver
 from . import factories
 from .bridge import ObjcBridgeObject, ObjcMethod
@@ -17,7 +17,7 @@ import ctypes
 from ctypes.util import find_library
 
 
-class ENBridge(Atom):
+class ENBridge(ObjcBridgeObject):
     """ Access ENBridge.m using ctypes.
 
     Based on:
@@ -27,7 +27,7 @@ class ENBridge(Atom):
     #: Objc library
     objc = Value()
 
-    #: Bridge.m
+    #: Bridge.m access via ctypes
     bridge = Value()
 
     def _default_objc(self):
@@ -46,14 +46,21 @@ class ENBridge(Atom):
         return objc.objc_msgSend(ENBridge, objc.sel_registerName('instance'))
 
     def processEvents(self, data):
-        """ Sends msgpack data to the ENBridge instance by calling the processEvents method. """
-        print("Dispatch!")
+        """ Sends msgpack data to the ENBridge instance
+            by calling the processEvents method via ctypes. """
         objc = self.objc
         bridge = self.bridge
         #: This must come after the above as it changes the arguments!
         objc.objc_msgSend.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
                                       ctypes.c_char_p, ctypes.c_int]
         objc.objc_msgSend(bridge, objc.sel_registerName('processEvents:length:'), data, len(data))
+
+    #: Add a target to a UIControl that invokes a python callback
+    addTarget = ObjcMethod('UIControl',
+                           dict(forControlEvents="UIControlEvents"),
+                           dict(andCallback="int"),
+                           dict(usingMethod="NSString"),
+                           dict(withValues="NSArray"))
 
 
 class AppDelegate(ObjcBridgeObject):
@@ -107,7 +114,7 @@ class IPhoneApplication(BridgedApplication):
 
     def _default_bridge(self):
         """ Access the bridge using ctypes. Everything else should use bridge objects. """
-        return ENBridge()
+        return ENBridge(__id__=-4)
 
     def _default_dp(self):
         #:TODO: return self.activity.getResources().getDisplayMetrics().density

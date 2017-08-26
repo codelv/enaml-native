@@ -13,6 +13,9 @@
 #include <Python/Python.h>
 #import "UIColor+HexString.h"
 
+// For easy callbacks
+#import <BlocksKit/BlocksKit.h>
+#import <BlocksKit/BlocksKit+UIKit.h>
 
 @interface ENBridge ()
 
@@ -32,6 +35,8 @@
     -(void)onResult:(NSNumber *)resuiltId withValue:(NSObject*) result;
     -(id)convertArg:(NSArray *)spec;
 
+    -(void)onValueChanged:(id)sender;
+
     + (UIColor *) colorWithHexString: (NSString *) hexString;
 
 @end
@@ -45,6 +50,7 @@
     static NSString* DELETE = @"d";
     static NSString* RESULT = @"r";
     static NSString* ERROR  = @"e";
+    static int IGNORE_RESULT = 0;
 
     static ENBridge *_instance;
 
@@ -78,6 +84,9 @@
             self.eventCallsPending = 0;
             self.eventQueue = [NSMutableArray new];
             self.taskQueue = [NSOperationQueue new];
+            
+            // Add the bridge to the objectCache
+            [self.objectCache setObject:self forKey:@(-4)];
         }
         return self;
     }
@@ -129,6 +138,9 @@
             const int* refNumber = data.bytes;
             NSNumber* objId = [NSNumber numberWithInt:*refNumber];
             return self.objectCache[objId];
+        } else if ([argType isEqualToString:@"SEL"]) {
+            SEL selector = NSSelectorFromString((NSString*)spec[1]);
+            return [NSValue valueWithPointer:selector];
         }
         return spec[1];
     }
@@ -234,18 +246,79 @@
     
     }
 
-    - (void)sendEvent:(NSDictionary *)event {
+    /**
+     * Support observing properties in python
+     */
+    - (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary<NSKeyValueChangeKey, id> *)change
+                       context:(void *)context {
+        if (context!=nil) {
+            NSNumber* resultId = (__bridge NSNumber *)context;
+            // Notify python the given object ID changed does setattr(pyobj,keyPath,newValue)
+            [self sendEvent:@[@"property",@[resultId, keyPath, change[@"new"]]]];
+        }
+    }
+
+    /**
+     * Hack for supporting changes at the moment
+     *
+    -(void)onCallback:(id)sender {
+        if ([sender isKindOfClass:UISwitch.class]) {
+            [self sendEvent:@{@"event":]((UISwitch *)sender).on;
+        }
+    }
+    */
+
+    /**
+     * Add a target for a control that invokes a python callback with the desired properties when
+     * the given control events occur;
+     */
+    - (void) addTarget:(UIControl *)control forControlEvents:(UIControlEvents) controlEvents
+       andCallback:(NSNumber*) pythonId usingMethod:(NSString*)method withValues:(NSArray*) keys {
+        
+        // Add the callback right here thanks to BlocksKit!
+        [control bk_addEventHandler:^(id sender){
+            
+            // Grab any properties we want
+            NSMutableArray* args = [NSMutableArray new];
+            for (NSString* key in keys) {
+                id value = [control valueForKey:key];
+                [args addObject:@[[[value class] description],value]];
+            }
+            
+            // Send it to python
+            [self sendEvent:@[@"event",@[
+                                        @(IGNORE_RESULT),
+                                        pythonId,
+                                        method,
+                                        args
+                                        ]]];
+            
+        } forControlEvents:UIControlEventValueChanged];
+    }
+
+
+    /**
+     * Send an event back to python (goes into a queue)
+     */
+    - (void)sendEvent:(NSArray *)event {
+        //NSLog(@"%@",event);
         self.eventCallsPending += 1;
         [self.eventQueue addObject:event];
         
-        // In 3ms dispatch
-        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC*3.0);
+        // Dispatch a little later
+        // TODO: I don't want to do this in the main thread!
+        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_USEC*100);
         dispatch_after(delay, dispatch_get_main_queue(), ^{
             self.eventCallsPending -= 1;
             if (self.eventCallsPending==0) {
                 NSError *error = nil;
                 NSData *data = [MPMessagePackWriter writeObject:self.eventQueue error:&error];
                 [self sendEventsToPython: data];
+                
+                // TODO: Need to clear it
+                //[self.eventQueue clear];
             }
         });
     }
@@ -338,6 +411,7 @@
      * with the data.
      */
     -(void)sendEventsToPython:(NSData *)data {
+        PyGILState_STATE state = PyGILState_Ensure();
         // Import the module
         PyObject* module = PyImport_ImportModule("enamlnative.ios.app");
         
@@ -351,14 +425,16 @@
         
         if (app) {
             // Send msgpack data
-            PyObject_CallMethod(app, "on_events", "s", data.bytes);
+            PyObject_CallMethod(app, "on_events", "s#", data.bytes, data.length);
         }
+        
         
         // Cleanup
         Py_XDECREF(module);
         Py_XDECREF(IPhoneApplication);
         //Py_XDECREF(instance);
         Py_XDECREF(app);
+        PyGILState_Release(state);
     }
 
 

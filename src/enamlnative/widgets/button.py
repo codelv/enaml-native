@@ -28,6 +28,7 @@ class ProxyButton(ProxyTextView):
     def set_style(self, style):
         raise NotImplementedError
 
+
 class Button(TextView):
     """ A simple control for displaying a button.
 

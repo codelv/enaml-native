@@ -10,14 +10,37 @@ Created on Aug 3, 2017
 @author: jrm
 '''
 
-from atom.api import Typed, Tuple, set_default, observe
+from atom.api import Typed, Tuple, observe
 from enamlnative.widgets.view import ProxyView
 
-from .bridge import ObjcBridgeObject, ObjcMethod, ObjcProperty
+from .bridge import ObjcBridgeObject, ObjcMethod, ObjcProperty, ObjcCallback
 from .uikit_toolkit_object import UiKitToolkitObject
 
 
-class UIView(ObjcBridgeObject):
+class NSObject(ObjcBridgeObject):
+
+    addObserver = ObjcMethod('NSObject',
+                             dict(forKeyPath="NSString"),
+                             dict(options="NSKeyValueObservingOptions"),
+                             dict(context="void*"))
+    removeObserver = ObjcMethod('NSObject', dict(forKeyPath="NSString"))
+
+    observeValueForKeyPath = ObjcCallback('NSString',
+                                          dict(ofObject="id"),
+                                          dict(change="NSDictionary"),
+                                          dict(context="void*"))
+
+    NSKeyValueObservingOptionNew = 0x01
+    NSKeyValueObservingOptionOld = 0x02
+    NSKeyValueObservingOptionInitial = 0x04
+    NSKeyValueObservingOptionPrior = 0x08
+
+
+class UIResponder(NSObject):
+    pass
+
+
+class UIView(UIResponder):
     """ From:
         https://developer.apple.com/documentation/uikit/uiview?language=objc
     """
@@ -54,6 +77,8 @@ class UIView(ObjcBridgeObject):
                                               aboveSubview='UIView',
                                               belowSubview='UIView'))
     exchangeSubviewAtIndex = ObjcMethod('NSInteger', dict(withSubviewAtIndex='NSInteger'))
+
+    #:
 
 
 class UiKitView(UiKitToolkitObject, ProxyView):

@@ -36,6 +36,11 @@ enamldef MainView(LinearLayout):
             orientation = "vertical"
             #height = parent.height*0.5
             #width = parent.width
+            Switch: sw:
+                checked = True
+            TextView:
+                text << "Switch: {}".format(sw.checked)
+
             ActivityIndicator:
                 color = "#333"
             ProgressBar:

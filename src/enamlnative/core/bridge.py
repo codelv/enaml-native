@@ -62,7 +62,7 @@ def get_app_class():
 
 
 def encode(obj):
-    """ Encode an object for proper decoding by Java
+    """ Encode an object for proper decoding by Java or ObjC
     """
     if hasattr(obj, '__nativeclass__'):
         return msgpack.ExtType(ExtType.REF, msgpack.packb(obj.__id__))
@@ -70,7 +70,7 @@ def encode(obj):
 
 
 def msgpack_encoder(sig, obj):
-    """ When passing a JavaBridgeObject encode it in a special way so
+    """ When passing a BridgeObject encode it in a special way so
         it can properly be interpreted as a reference.
 
         TODO: This should use the object hooks for doing this automatically
@@ -87,6 +87,8 @@ def dumps(data):
 
 def loads(data):
     """ Decodes and processes events received from the bridge """
+    if not data:
+        raise ValueError("Tried to load empty data!")
     return msgpack.loads(data)
 
 

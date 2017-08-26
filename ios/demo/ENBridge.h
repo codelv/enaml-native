@@ -33,6 +33,8 @@
 
 - (void) sendEventsToPython:(NSData *) data;
 
+- (void) addTarget:(UIControl *)control forControlEvents:(UIControlEvents) controlEvents
+         andCallback:(NSNumber*) pythonId usingMethod:(NSString*)method withValues:(NSArray*) keys;
 
 @end
 
