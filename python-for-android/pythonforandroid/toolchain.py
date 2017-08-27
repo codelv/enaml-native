@@ -82,7 +82,7 @@ import logging
 from pythonforandroid.recipe import (Recipe, PythonRecipe, CythonRecipe,
                                      CompiledComponentsPythonRecipe,
                                      BootstrapNDKRecipe, NDKRecipe)
-from pythonforandroid.archs import (ArchARM, ArchARMv7_a, Archx86)
+from pythonforandroid.archs import (ArchARM, ArchARMv7_a, Archx86, Archx86_64)
 from pythonforandroid.logger import (logger, info, warning, setup_color,
                                      Out_Style, Out_Fore, Err_Style, Err_Fore,
                                      info_notify, info_main, shprint, error)

@@ -68,7 +68,7 @@ class Arch(object):
         if cc is None:
             print('Searching path are: {!r}'.format(environ['PATH']))
             warning('Couldn\'t find executable for CC. This indicates a '
-                    'problem locating the {} executable in the Android '
+                    'problem locating the CC executable in the Android '
                     'NDK, not that you don\'t have a normal compiler '
                     'installed. Exiting.')
             exit(1)
@@ -152,9 +152,9 @@ class Archx86(Arch):
 
 class Archx86_64(Arch):
     arch = 'x86_64'
-    toolchain_prefix = 'x86'
+    toolchain_prefix = 'x86_64'
     command_prefix = 'x86_64-linux-android'
-    platform_dir = 'arch-x86'
+    platform_dir = 'arch-x86_64'
 
     def get_env(self, with_flags_in_cc=True):
         env = super(Archx86_64, self).get_env(with_flags_in_cc)

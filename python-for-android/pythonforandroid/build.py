@@ -450,6 +450,7 @@ class Context(object):
             ArchARM(self),
             ArchARMv7_a(self),
             Archx86(self),
+            Archx86_64(self),
             ArchAarch_64(self),
             )
 

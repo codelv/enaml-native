@@ -937,7 +937,7 @@ class CppCompiledComponentsPythonRecipe(CompiledComponentsPythonRecipe):
                             " -I{ctx.ndk_dir}/platforms/android-{ctx.ndk_platform_version}/arch-{arch_noeabi}/usr/include" \
                             " -I{ctx.ndk_dir}/sources/cxx-stl/stlport/stlport".format(**keys)
             env['LDFLAGS'] += " -L{ctx.ndk_dir}/sources/cxx-stl/stlport/libs/{arch.arch}" \
-                                            " -L{ctx.ndk_dir}/sources/python/2.7/libs/{arch.arch}" \
+                              " -L{ctx.ndk_dir}/sources/python/2.7/libs/{arch.arch}" \
                                             " -lpython2.7" \
                                             " -lstlport_shared".format(**keys)
         else:
