@@ -15,9 +15,6 @@ As is standard, let's start with a "Hello world" app.
             text = "Hello world!"
 
 
-
-### Intro
-
 This doesn't look like python? We're using enaml to define a _view_ within our app. Enaml is a subset of the python language that provides a very powerful way of building UI's. 
 
 If you're unfamiliar with enaml read the [enaml introduction](https://nucleic.github.io/enaml/docs/get_started/introduction.html) to get an idea of what it is and why it's used. Once done read about the [enaml syntax](https://nucleic.github.io/enaml/docs/get_started/anatomy.html). Enaml is at the core of enaml-native.
