@@ -366,4 +366,15 @@ class BridgedApplication(Application):
             except:
                 pass
         self.view = None
-        self.deferred_call(self.reload_view, self)
+
+        def wrapped(f):
+            def safe_reload(*args, **kwargs):
+                try:
+                    return f(*args,**kwargs)
+                except:
+                    #: Display the error
+                    self.send_event(bridge.Command.ERROR, traceback.format_exc())
+            return safe_reload
+
+
+        self.deferred_call(wrapped(self.reload_view), self)
