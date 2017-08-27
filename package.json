@@ -4,13 +4,13 @@
   "version": "1.8",
   "private": true,
   "sources": [
-    "src/app",
+    "src/apps/playground",
     "src"
   ],
   "android": {
     "ndk":"/home/jrm/Android/Crystax/crystax-ndk-10.3.2",
     "sdk":"/home/jrm/Android/Sdk",
-    "arches": ["armeabi-v7a"],
+    "arches": ["x86"],
     "dependencies": {
       "python2crystax": "2.7.10",
       "enamlnative": ">=2.1",

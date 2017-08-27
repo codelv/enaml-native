@@ -1,0 +1,932 @@
+'''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+Created on May 20, 2017
+
+@author: jrm
+'''
+import sys
+import traceback
+from enamlnative.widgets.api import *
+from enaml.core.api import Conditional, Looper
+from enamlnative.core.http import AsyncHttpClient
+from datetime import datetime
+
+enamldef HBox(LinearLayout):
+  orientation = "horizontal"
+
+enamldef VBox(LinearLayout):
+  orientation = "vertical"
+
+enamldef Card(CardView):
+  padding = (20, 20, 20, 20)
+  margins = (10, 10, 10, 10)
+  content_padding = (10,10,10,10)
+  #card_background_color = '#FF0000'
+
+enamldef CardTitle(TextView):
+  font_family = "sans-serif-condensed-light"
+  text_size = 18
+
+enamldef MenuItem(Button):
+  font_family = "sans-serif-serif-medium"
+  text_size = 16
+  style = 'borderless'
+  padding = (10,10,10,10)
+
+enamldef MenuIcon(IconButton):
+  #: This should have the fancy ripple effect on press
+  padding = (12, 12, 12 ,12)
+  style = 'borderless'
+  text_size = 48
+
+
+enamldef LeftDrawer(ScrollView):
+  attr pager
+  attr drawer
+  attr root
+  layout_gravity = 'left'
+  layout_width = '200'
+  layout_height = 'match_parent'
+  background_color = '#FFFFFF'
+  VBox:
+    Looper:
+      iterable << pager.pages + root.new_pages
+      MenuItem:
+        text = loop_item.title
+        clicked ::
+          pager.current_index = loop_index
+          drawer.opened = []
+
+enamldef RightDrawer(VBox):
+  attr pager
+  attr drawer
+  layout_gravity = 'right'
+  layout_width = '72'
+  layout_height = 'match_parent'
+  background_color = '#004981'
+
+  MenuIcon:
+    text = u"{fa-home}"
+    clicked ::
+      pager.current_index = 0
+      drawer.opened = []
+  MenuIcon:
+    text = u"{fa-globe}"
+    clicked ::
+      pager.current_index = 2
+      drawer.opened = []
+  MenuIcon:
+    text = u"{fa-terminal}"
+    clicked ::
+      pager.current_index = 1
+      drawer.opened = []
+
+enamldef Scroller(ScrollView):
+  layout_width = 'match_parent'
+  layout_height = 'match_parent'
+  background_color = '#EEEEEE'
+  #padding = (10,10,10,10)
+
+enamldef Page(Fragment):
+  attr title = u""
+  attr subtitle = u""
+
+# enamldef CustomPage(Page): page:
+#   attr new_page_title = ""
+#   attr root
+#   Scroller:
+#     Card:
+#       VBox:
+#         TextView:
+#           text = "Title"
+#         EditText:
+#           text := page.new_page_title
+#         HBox:
+#           Button:
+#             text = "Add page"
+#             clicked::
+#               pages = page.root.new_pages[:]
+#               pages.append(page.new_page_title)
+#               page.root.new_pages = pages
+#               page.parent.current_index +=1
+#           Button:
+#             text = "Remove page"
+#             enabled << page.title in page.root.new_pages
+#             clicked::
+#               pages = page.root.new_pages[:]
+#               pages.remove(page.title)
+#               page.parent.current_index -=1
+#               page.root.new_pages = pages
+
+enamldef Console(Scroller): console:
+  attr commands = []
+  attr scope = {}
+  background_color = '#FFFFFF'
+  VBox:
+    padding = (10,10,10,10)
+    TextView:
+      text = "Just to prove to you it's python, try using python in mini interpreter here."
+    GridLayout:
+      columns = 2
+      Looper:
+        iterable << console.commands
+      #: Input
+        TextView:
+          text = 'In [{}]: '.format(loop_index+1)
+          text_color = "#0000FF"
+        TextView:
+          text = "{}".format(loop_item[0])
+        #: Output
+        TextView:
+          text = 'Out [{}]: '.format(loop_index+1)
+          text_color = "#FF0000"
+        TextView:
+          text = "{}".format(loop_item[1])
+    EditText: console_input:
+      text = ""
+      #input_type = 'text_multi_line'
+      editor_actions = True
+      editor_action ::
+        action = change['value']
+        if action['key']==6: # IME_ACTION_DONE
+          cmds = console.commands[:]
+          try:
+            #: Try to eval a command
+            result = eval(console_input.text, {}, console.scope)
+          except SyntaxError:
+            #: Run a statement ?
+            try:
+              exec console_input.text in console.scope
+              result = None
+            except:
+              result = traceback.format_exc()
+          except:
+            result = traceback.format_exc()
+          cmds.append((console_input.text,result, len(cmds)))
+          console.commands = cmds
+          action['result'] = True # Tell java we handled it
+    Button:
+      text = "Clear"
+      clicked ::
+          console.commands = []
+          console.scope = {}
+
+
+enamldef WebBrowser(ScrollView): browser:
+  attr page
+  VBox:
+
+    EditText: web_url:
+      text = "github.com/frmdstryr/enaml-native"
+      input_type = 'text_uri'
+      editor_actions = True
+      editor_action ::
+        #: When done editing, load the page
+        action = change['value']
+
+        if action['key']==5: # Why 5 now?
+          url = web_url.text.lower()
+          if not (url.startswith("http://") or url.startswith("https://")):
+            url = "https://"+url
+          web_view.url = url
+
+    ProgressBar:
+      visible << web_view.loading
+      progress << web_view.progress
+    TextView:
+      visible << web_view.error
+      text_color = '#FF0000'
+      text << u"Error: {} - {}".format(web_view.error_code, web_view.error_message)
+    WebView: web_view:
+      layout_height = 'match_parent'
+      layout_width = 'match_parent'
+      #: When url updates, set the text
+      url = "https://github.com/frmdstryr/enaml-native"
+      url >> web_url.text
+      title >> page.subtitle
+
+
+enamldef IconFinder(Scroller): finder:
+  attr icons << getattr(Icon,"PACK_%s"%icon_pack.items[icon_pack.selected].replace(" ","_").upper())
+  VBox:
+    Card:
+
+      VBox:
+        CardTitle:
+          text = "Icons"
+        TextView:
+          text = "Use {icon-name} within the text. Uses android-iconify. Browse an icon pack below" \
+                 "or pick an icon from the pack here"
+        Spinner: search:
+          items << list(finder.icons)
+        HBox:
+          Looper:
+            iterable = [72, 64, 48, 32, 24, 18]
+            Icon:
+              text_size = loop_item
+              padding = (8, 0, 8, 0)
+              text << u"{%s}"%finder.icons[min(search.selected,len(finder.icons)-1)] #: TODO: Trigger on value accepted
+    Card:
+      VBox:
+        CardTitle:
+          text = "Icon packs"
+        Spinner: icon_pack:
+          items = ['Entypo','Font awesome','Ionicons', 'Material community', 'Material',
+                    'Meteocons', "Weather"]
+        #: Use one because it's way faster than a looper
+        Icon:
+          text_size = 32
+          text << u" ".join([u"{%s}"%n for n in finder.icons])
+    Spacer:
+      layout_height = '10'
+
+enamldef ContentView(VBox): content_view:
+  #: This should be read from the drawer's children...
+  attr new_pages = []
+  attr current_page << view_pager.pages[view_pager.current_index if view_pager.current_index < len(view_pager.pages) else -1] #: TODO: Make pages attribute observable...
+  Toolbar: toolbar:
+    #title << u"Enaml Native - {}".format(current_page.title)
+    #subtitle << current_page.subtitle
+    title_color = '#FFFFFF'
+    subtitle_color = '#EEEEEE'
+    background_color = '#004981'
+    content_padding = (0,0,0,0)
+    HBox:
+      layout_gravity = "left"
+      IconButton:
+        text = u"{md-menu}"
+        text_size = 24
+        text_color << toolbar.title_color
+        style = "borderless"
+        layout_width = "48"
+        layout_height = "48"
+        clicked ::
+          if not drawer_layout.opened:
+            drawer_layout.opened = [left_drawer]
+          else:
+            drawer_layout.opened = []
+      TextView:
+        text_size = 18
+        text_color = "#FFFFFF"
+        text << u"Enaml Native - {}".format(current_page.title)
+
+  DrawerLayout: drawer_layout:
+    layout_height = 'match_parent'
+    ViewPager: view_pager:
+      layout_width = 'match_parent'
+      layout_height = 'match_parent'
+      Page:
+        title = "Intro"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Intro"
+                TextView:
+                  text = "Hi!\n\n" \
+                         "This app is written in python and enaml using enaml-native. " \
+                         "It is intended to demonstrate and test all the features supported.\n\n" \
+                         "Enjoy!\n\n"
+                TextView:
+                  text = "Python: {}".format(sys.version)
+            Card:
+               VBox:
+                 CardTitle:
+                   text = "Reloaded"
+                 TextView:
+                   text = "This card was added on the fly via an app reload!"
+      Page: console:
+        title = "Console"
+        Console:
+          pass
+      Page: browser_page:
+        title = "WebView"
+        WebBrowser:
+          page = browser_page
+      Page:
+        title = "Text"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "TextView"
+                TextView:
+                  text = "Error"
+                  font_style = "italic"
+                  text_size = 16
+                  text_color = "#FF0000"
+                TextView:
+                  text = "This takes up three lines, can be selected, and shared."
+                  text_selectable = True
+                  lines = 3
+                TextView:
+                  text = """This gets trunicated. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
+                  max_lines = 5
+                #TextView:
+                #  text << "You selected: {}".format(text_select.text_selection)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Fonts"
+                Looper:
+                  iterable << ["casual", "cursive", "monospace", "sans-serif", "sans-serif-black",
+                               "sans-serif-condensed", "sans-serif-condensed-light", "sans-serif-light",
+                               "sans-serif-medium", "sans-serif-smallcaps", "sans-serif-thin",
+                               "serif", "serif-monospace"]
+                  TextView:
+                    font_family = loop_item
+                    text = loop_item
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Spacing"
+                TextView:
+                  text = "Letter spacing"
+                  letter_spacing = 2
+
+                TextView:
+                  text = """Double spaced. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
+                  line_spacing = (0, 2)
+      Page:
+        title = "Buttons"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Buttons"
+                Button:
+                  text = "Button"
+                  clicked:: tv1.count += 1
+                TextView: tv1:
+                  attr count = 0
+                  text << "Clicked {}".format(count)
+
+                Button:
+                  text = "Borderless"
+                  style = 'borderless'
+
+                Button:
+                  text = "Small"
+                  layout_height = 'wrap_content'
+                  layout_width = 'wrap_content'
+                  style = 'small'
+
+                IconButton:
+                  text = u"{entypo-home} Home"
+
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Checkboxes"
+                CheckBox: cb1:
+                  text = "CheckBox"
+                  checked = True
+                TextView:
+                  text << "Checkbox state: {}".format(cb1.checked)
+                Switch: sw1:
+                  text = "Switch"
+                  checked = True
+                TextView:
+                  text << "Switch state: {}".format(sw1.checked)
+                ToggleButton: tb1:
+                  text = "ToggleButton"
+                  checked = True
+                TextView:
+                  text << "Button state: {}".format(tb1.checked)
+
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Radio buttons"
+                RadioGroup: rg1:
+                  checked = rb1
+                  RadioButton: rb1:
+                    text = "A"
+                  RadioButton: rb2:
+                    text = "B"
+                  RadioButton: rb3:
+                    text = "C"
+                TextView:
+                  text << "Radio group state: {}".format(rg1.checked.text if rg1.checked else "Unchecked")
+      Page:
+        title = "ProgressBar"
+        Scroller:
+          Card:
+            VBox:
+              CardTitle:
+                text = "ProgressBar"
+              ActivityIndicator:
+                pass
+              ActivityIndicator:
+                style = 'small'
+              ActivityIndicator:
+                style = 'large'
+              ProgressBar:
+                progress = 32
+
+      Page:
+        title = "SeekBars"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "RatingBar"
+                RatingBar: rbar1:
+                  num_stars = 5
+                  rating = 3
+                TextView:
+                  text << "Rating {}".format(rbar1.rating)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "SeekBar"
+                SeekBar: seekbar:
+                  progress = 5
+                  max = 10
+                TextView:
+                  text << "Value {}".format(seekbar.progress)
+      Page:
+        title = "Clocks"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Timer"
+                ToggleButton:
+                  text = "START"
+                  text_on = "STOP"
+                  text_off = "START"
+                  checked:= ch1.running
+                Chronometer: ch1:
+                  running = False
+                TextView:
+                  text << "Ticks: {}".format(ch1.ticks)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "TextClock"
+                TextClock:
+                  text_size = 48
+                  font_family = 'sans-serif-condensed-light'
+            Card:
+              VBox:
+                CardTitle:
+                  text = "AnalogClock"
+                AnalogClock:
+                  pass
+      Page:
+        title = "Spinners"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Spinner"
+                Spinner: spn1:
+                  items = ["Sun", "Moon", "Stars"]
+                TextView:
+                  text << "Selected: {}".format(spn1.items[spn1.selected])
+            Card:
+              VBox:
+                CardTitle:
+                  text = "NumberPicker"
+                NumberPicker: npk1:
+                  min_value = 0
+                  max_value = 100
+                TextView:
+                  text << "Selected: {}".format(npk1.value)
+      Page:
+        title = "Fields"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "EditText"
+                TextView:
+                  text << "You typed: {}".format(et.text)
+                EditText: et:
+                  text = ""
+            Card:
+              VBox:
+                CardTitle:
+                  text = "AutoComplete"
+                TextView:
+                  text = "Try typing a US state name"
+                AutoCompleteTextView: autoet:
+                  choices = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
+                  text = ""
+                  threshold = 2
+                TextView:
+                  text << "You typed: {}".format(autoet.text)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Input types"
+                TextView:
+                  text = "Can be any of:\n{}".format('\n'.join(EditText.input_type.items))
+                Looper:
+                  iterable = EditText.input_type.items[0:5]
+                  TextView:
+                    text = "{}:".format(loop_item)
+                  EditText:
+                    input_type = loop_item
+
+      Page:
+        title = "Time Picker"
+        Scroller:
+          Card:
+            VBox:
+              CardTitle:
+                text = "Time Picker"
+              TimePicker: tp1:
+                hour = 6
+                minute = 30
+              TextView:
+                text << "Time selected: {hour}:{minute}".format(hour=tp1.hour,minute=tp1.minute)
+      Page:
+        title = "Date Picker"
+        Scroller:
+          Card:
+            VBox:
+              CardTitle:
+                text = "Date Picker"
+              DatePicker: dp1:
+                date = datetime.now()
+              TextView:
+                text << "Date selected: {month}/{day}/{year}".format(month=dp1.date.month,
+                                                                     day=dp1.date.day,
+                                                                     year=dp1.date.year)
+      Page:
+        title = "Calendar"
+        VBox:
+          background_color = '#EEEEEE'
+          Card:
+            VBox:
+              CardTitle:
+                text = "CalendarView"
+              CalendarView: cv1:
+                date = datetime.now()
+              TextView:
+                text << "Date selected: {month}/{day}/{year}".format(month=cv1.date.month,
+                                                                         day=cv1.date.day,
+                                                                       year=cv1.date.year)
+      Page:
+        title = "Loopers"
+        Scroller:
+          Card: card_looper:
+            attr items = []
+            VBox:
+              CardTitle:
+                text = "Looping items"
+              HBox:
+                Button:
+                  text = "Add item"
+                  clicked::
+                    items = card_looper.items[:]
+                    items.append(len(items))
+                    card_looper.items = items
+                Button:
+                  text = "Remove item"
+                  enabled << len(card_looper.items) > 0
+                  clicked::
+                    items = card_looper.items[:]
+                    items.pop()
+                    card_looper.items = items
+              Looper:
+                iterable << card_looper.items
+                TextView:
+                  text = "Item index is {}".format(loop_item)
+      Page:
+        title = "Conditionals"
+        VBox:
+          background_color = '#EEEEEE'
+          Card: card_conds:
+            attr loading = True
+            VBox:
+              CardTitle:
+                text = "Conditional rendering"
+              Switch:
+                text = "Simulate loading"
+                checked := card_conds.loading
+
+              Conditional:
+                condition << card_conds.loading
+                ActivityIndicator:
+                  pass
+                TextView:
+                  text = "Loading..."
+              Conditional:
+                condition << not card_conds.loading
+                TextView:
+                  text = "Loading complete!!!"
+      Page:
+        title = "Toolbars"
+        Scroller:
+          Card:
+            VBox:
+              CardTitle:
+                text = "Toolbars"
+              Toolbar:
+                title = "Toolbar"
+                background_color = '#004981'
+                margins = (0, 0, 0, 10)
+              Toolbar:
+                title = "Title"
+                subtitle = "Subtitle"
+                background_color = '#004981'
+      Page:
+        title = "Cards"
+        VBox:
+          background_color = '#EEEEEE'
+          Card:
+            VBox:
+              CardTitle:
+                text = "CardView"
+              TextView:
+                text = "This is a card"
+      Page:
+        title = "Layouts"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "LinearLayout"
+                Button:
+                  text << "Toggle orientation"
+                  clicked:: ll.orientation = 'horizontal' if ll.orientation == 'vertical' else 'vertical'
+                LinearLayout: ll:
+                  orientation << "horizontal"
+                  layout_height = 'fill_parent'
+                  layout_width = 'fill_parent'
+                  Looper:
+                    iterable = range(6)
+                    TextView:
+                      text = "{}".format(loop_index)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "GridLayout"
+                # TextView:
+                #   text = "Columns"
+                # Spinner: glsp:
+                #   items = range(1,4)
+                GridLayout: gl:
+                  #: Crashes if you go from 3 to 2 for some reason
+                  columns = 3# glsp.items[glsp.selected]
+                  layout_height = 'fill_parent'
+                  layout_width = 'fill_parent'
+                  selected = 2
+                  Looper:
+                    iterable = range(6)
+                    TextView:
+                      text = "{}".format(loop_index)
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Spacer"
+                HBox:
+                  TextView:
+                    text = "Start"
+                  Spacer:
+                    layout_width = '100' #: Percentages NOT supported yet...
+                  TextView:
+                    text = "End"
+      Page:
+        title = "Drawers"
+        VBox:
+          background_color = '#EEEEEE'
+          Card:
+            VBox:
+              CardTitle:
+                text = "DrawerLayout"
+              TextView:
+                text = "Swipe in from the left or right to open the drawers. " \
+                       "The first child is the main content. " \
+                       "Subsequent children will be either a left or right drawer " \
+                       "depending on layout_gravity. The width is set by the layout_width" \
+                       "Drawers can be opened and closed using the drawer.opened property " \
+                       "which is a list of the opened drawers. "
+              HBox:
+                Button:
+                  text = "Open left"
+                  clicked:: drawer_layout.opened = [left_drawer]
+                Button:
+                  text = "Open right"
+                  clicked:: drawer_layout.opened = [right_drawer]
+
+      Page:
+        title = "Pages"
+        VBox:
+          background_color = '#EEEEEE'
+          Card:
+            VBox:
+              CardTitle:
+                text = "ViewPager"
+              TextView:
+                text = "Pages are only rendered when the ViewPager requests them " \
+                       "(they subclass conditionals). The ViewPager will automatically " \
+                       "refresh when it's child Fragments change. " \
+                       "The pages can be access using the `pages` property of the pager " \
+                       "And the current page index can be accessed using the `current_index`." \
+                       "Swiping of pages can be enabled and disabled using the `paging_enabled`."
+              TextView:
+                text << "Page count: {}".format(len(view_pager.pages))
+              TextView:
+                text << "Current: {}".format(view_pager.current_index)
+              Switch:
+                text = "Paging enabled"
+                checked := view_pager.paging_enabled
+              HBox:
+                Button:
+                  text = "Previous page"
+                  clicked :: view_pager.current_index -=1
+                Button:
+                  text = "Next page"
+                  clicked :: view_pager.current_index +=1
+      Page:
+        title = "ScrollView"
+        VBox:
+          background_color = '#EEEEEE'
+          Card:
+            VBox:
+              CardTitle:
+                text = "ScrollView"
+              TextView:
+                text = "Place a view within a ScrollView to get native scrolling. The orientation can " \
+                       "be set to either vertical or horizontal (cannot be changed dynamically).\n" \
+                       "\nTry below:\n"
+                padding = (0, 0, 10, 0)
+
+              ScrollView:
+                orientation = 'horizontal'
+                TextView:
+                  text = """Horizontally scrolled. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
+                  lines = 2
+      Page:
+        title = "Images"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Image resources"
+                TextView:
+                  text = "Use '@<type>/<name>' for a resource"
+                ImageView:
+                  src= "@mipmap/ic_launcher"
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Image URIs"
+                TextView:
+                  text = "Use '<proto>://<path>' for a URI"
+                TextView:
+                   text = "TODO..."
+      Page:
+        title = "Icons"
+        IconFinder:
+          pass
+      Page:
+        title = "Pager Tab Strip"
+        #: Android tab's design is so STUPID
+        ViewPager: tab_pager:
+          PagerTabStrip: pager_tab_strip:
+            text_color << toolbar.title_color
+            background_color << toolbar.background_color
+            tab_indicator_color = '#97c024'
+            layout_gravity = 'bottom'
+            #tab_full_underline = True
+          Looper:
+            iterable = ['First', 'Second', 'Third']#tab_host.tabs
+            PagerFragment:
+              title = loop_item
+              VBox:
+                background_color = '#EEEEEE'
+                Card:
+                  VBox:
+                    CardTitle:
+                      text = "{} Tab".format(loop_item)
+                    TextView:
+                      text = "Add a PagerTitleStrip or PagerTabStrip to a ViewPager for tabs. " \
+                             "They can be placed at the top or bottom using layout_gravity."
+                    Spinner:
+                      items = ['top', 'bottom']
+                      selected << 0 if pager_tab_strip.layout_gravity == 'top' else 1
+                      selected::
+                        pager_tab_strip.layout_gravity = self.items[self.selected]
+      Page:
+        title = "Tabs"
+        #: Android tab's design is so STUPID
+        ViewPager:
+          TabLayout: tab_layout:
+            tab_color = '#CCCCCC'
+            tab_color_selected << toolbar.title_color
+            background_color << toolbar.background_color
+          Looper:
+            iterable << ['First', 'Second', 'Third']
+            TabFragment:
+              title = loop_item
+              VBox:
+                background_color = '#EEEEEE'
+                Card:
+                  VBox:
+                    CardTitle:
+                      text = "{} Tab".format(loop_item)
+                    TextView:
+                      text = "Add a TabLayout to a ViewPager for tabs. " \
+                             "They can be placed at the top or bottom using layout_gravity."
+                    Spinner:
+                      items = ['top', 'bottom']
+                      selected << 0 if tab_layout.layout_gravity == 'top' else 1
+                      selected :: tab_layout.layout_gravity = self.items[self.selected]
+                    TextView:
+                      text = "Tab modes"
+                    Spinner:
+                      items = ['scrollable', 'fixed']
+                      selected << 0 if tab_layout.tab_mode == 'scrollable' else 1
+                      selected :: tab_layout.tab_mode = self.items[self.selected]
+                    TextView:
+                      text = "Tab gravity"
+                    Spinner:
+                      items = ['fill', 'center']
+                      selected << 0 if tab_layout.tab_gravity == 'fill' else 1
+                      selected :: tab_layout.tab_gravity = self.items[self.selected]
+
+      Page:
+        title = "ListView"
+        ListView: list_view:
+          items = list(Icon.PACK_FONT_AWESOME)
+          divider_height = 0
+          background_color = '#EEEEEE'
+          Looper:
+            iterable = range(20) #: MUST ALWAYS be > list_view.visible_count
+            ListItem: li:
+              VBox:
+                padding = (10,5,10,5)
+                CardView:
+                  content_padding = (10,10,10,10)
+                  HBox:
+                    Icon:
+                      text_size = 32
+                      text << u"{%s}"%li.item
+                    Spacer:
+                      layout_width = '10'
+                    VBox:
+                      CardTitle:
+                        text << "Card {}".format(li.index)
+                      TextView:
+                        text << li.item
+      Page:
+        title = "Http Client"
+        Scroller:
+          VBox:
+            Card: http_card:
+              attr httpclient = AsyncHttpClient()
+              attr request
+              VBox:
+                CardTitle:
+                  text = "Http Client"
+                TextView:
+                  text = "A bridged wrapper for loopj's AsyncHttpClient "
+                EditText: http_url:
+                  text = "https://raw.githubusercontent.com/frmdstryr/enaml-native/master/package.json"
+                Button:
+                  text = "Download"
+                  clicked ::
+                    f = httpclient.fetch(http_url.text)
+                    http_card.request = f.request
+
+                Conditional:
+                  condition << request is not None
+                  ProgressBar:
+                    progress << request.response.progress
+                  TextView:
+                    text << "Status: {} Reason: ".format(
+                                  request.response.status_code,
+                                  request.response.reason,
+                            )
+                  Conditional:
+                    condition << request.response.ok
+                    TextView:
+                      text << "{}".format(request.response.content)
+
+
+    LeftDrawer: left_drawer:
+      pager = view_pager
+      drawer = drawer_layout
+      root = content_view
+    RightDrawer: right_drawer:
+      pager = view_pager
+      drawer = drawer_layout

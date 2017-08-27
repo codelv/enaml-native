@@ -35,7 +35,7 @@ class BridgedApplication(Application):
 
     #: Use dev server
     dev = Unicode()
-    _dev_client = Value()
+    _dev_session = Value()
     reload_view = Callable()
 
     #: Event loop
@@ -347,12 +347,12 @@ class BridgedApplication(Application):
         """ Start a client that attempts to connect to the dev server
             running on the host `app.dev`
         """
-        from .dev import DevServerClient
-        client = DevServerClient.initialize(host=self.dev)
-        client.start()
+        from .dev import DevServerSession
+        session = DevServerSession.initialize(host=self.dev)
+        session.start()
 
         #: Save a reference
-        self._dev_client = client
+        self._dev_session = session
 
     def reload(self):
         """ Called when the dev server wants to reload the view. """

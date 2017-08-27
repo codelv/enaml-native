@@ -261,7 +261,7 @@ class BuildPython(Command):
     def run(self, args=None):
         if args is None or not args.ios:
             self.run_android(args)
-        if args is None or not args.android and sys.platform == 'darwin':
+        if (args is None or not args.android) and sys.platform == 'darwin':
             self.run_ios(args)
 
         #: Extra cleanup
@@ -289,13 +289,14 @@ class BuildPython(Command):
             #: Clean whatever build from previous arch
             self.cmds['clean-python'].run()
 
+
             #: Add debug arg if needed
-            cfg['debug'] = '--debug ' if args.d else ''
+            cfg['debug'] = '--debug ' if (args and args.d) else ''
 
             #: Add minification
-            cfg['minify'] = '--minify ' if args.minify else ''
+            cfg['minify'] = '--minify ' if (args and args.minify) else ''
 
-            if args.d:
+            if args and args.d:
                 logger = logging.getLogger('p4a')
                 logger.level = logging.DEBUG
 
