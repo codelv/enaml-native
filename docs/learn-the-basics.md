@@ -16,7 +16,7 @@ As is standard, let's start with a "Hello world" app.
 
 
 
-#### What's going on here?
+### What's going on here?
 
 This doesn't look like python? We're using enaml to define a _view_ within our app. Enaml is a subset of the python language that provides a very powerful way of building UI's. 
 
@@ -25,11 +25,11 @@ If you're unfamiliar with enaml read the [enaml introduction](https://nucleic.gi
 First, all the enaml-native components are imported using a standard python import statement. Next the `enamldef` keyword is used to define a new component named `ContentView` that extends the `LinearLayout` component. The `enamldef` keyword has similarities to the `class` keyword in python. After that we add a `TextView` to our layout and assign the `"Hello world!"` expression to the `text` attribute of the view.  In enaml, everything on the right hand side is evaluated lazily within the context of the view state at runtime where you can reference other components and their state. 
 
 
-#### Components
+### Components
 
 Above we see our code is defining `ContentView`, a new component that is extending the `LinearLayout`. If you're familiar with Android or iOS, the `LinearLayout` (or `UIStackView`) is a widget that lays out it's children in either a single row or column, in this case the child is the `TextView`. This is a very simple component declaration, with enaml-native new components are created often. Everything you see on the screen is some sort of component. Components can be simple or complex but, like a python class, must have at least one body statement (which can just be the `pass` keyword).  
 
-#### Attributes
+### Attributes
 
 Components can be customized by setting attributes. These are like python class attributes but they use the [atom framework](https://github.com/nucleic/atom) and are often type restricted. Attributes are set to customize the underlying native widget so it is created and updated as desired. For example the text of a button or the checked state of a switch.
 
@@ -50,7 +50,7 @@ Attempting to set an attribute that has not been defined by the component will t
 
 These custom attributes can then be used like any other enaml attribute.
 
-#### References
+### References
 
 Components often need to reference other components for interactions or to update their state accordingly. References are made by adding a `<name>:` after the component.  Once defined, references can be used to access the attributes of a component.
 
@@ -69,7 +69,7 @@ Components often need to reference other components for interactions or to updat
 
 The example is pretty useless, but you get the idea. References are used very often within enaml-native apps.
 
-#### Operators
+### Operators
 
 One of the most powerful features of enaml is it's data binding operators. Enaml's data binding operators are makes enaml much nicer than working with react or react-native in many cases.  The operators are `>>`, `<<`, `:=`, `::` and `=`.
 
@@ -158,7 +158,7 @@ The `::` operator notifies the component when an event occurs, such as a button 
 
 Above we see the notify operator triggers the _event handler_ directly within the component. Any python code (except for `yield` and `return` statments can be used within the handler block. 
 
-#### Dynamic Components
+### Dynamic Components
 
 Docs coming soon!
 
