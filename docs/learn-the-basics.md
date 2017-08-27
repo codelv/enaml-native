@@ -16,7 +16,7 @@ As is standard, let's start with a "Hello world" app.
 
 
 
-### What's going on here?
+### Intro
 
 This doesn't look like python? We're using enaml to define a _view_ within our app. Enaml is a subset of the python language that provides a very powerful way of building UI's. 
 
@@ -180,7 +180,7 @@ The `:=` operator does a two way binding between the UI component and a model (o
         Switch: sw2:
           checked = True
 
-In this example, toggling either switch will cause the other to toggle as well. Both switches will always stay in sync even though only one is being applied.  Generally this operator will be used to bind to an attribute of a data model.
+In this example, toggling either switch will cause the other to toggle as well. Both switches will always stay in sync even though only one is being applied.  Generally this operator will be used to bind to an attribute of a data model as shown below.
 
     :::python
     from atom.api import Atom, Bool
@@ -211,7 +211,7 @@ The `::` operator notifies the component when an event occurs, such as a button 
 
 Above we see the notify operator triggers the _event handler_ directly within the component. Any python code (except for `yield` and `return` statments can be used within the handler block. 
 
-Certain events may contain additional data that may be needed to decide how the event should be handled. When a key is pressed, or an action selected, it may be important to know which key.  Event data is passed into your handler block via the `change` scope variable.  The change dictionary keys depend on the type of event that occurred.
+> Note: Certain events may contain additional data that may be needed to decide how the event should be handled. When a key is pressed, or an action selected, it may be important to know which key.  Event data is passed into your handler block via the `change` scope variable.  The change dictionary keys depend on the type of event that occurred.
 
 #### More about operators
 
@@ -244,6 +244,8 @@ The `Conditional` node does not have any display widget, but instead uses it's `
                 text = "Show me!"
                 
 In the above example the TextView will be shown or hidden based on the checked state or the switch. The `Condtional` inserts into or removes it's children from the parent component based on the `condition` attribute.  This is very efficient as __only__ the components within the Condtional block need to be rerendered.  
+
+> Note: The condition must be a boolean. If you're simply checking for exitance use `is not None` or wrap the expression in a `bool(expr)` call.
           
 #### Loopers
 
@@ -264,7 +266,9 @@ The `Looper` node also does not have any display widget, but instead uses it's `
                 text = "{}. {}".format(loop_index+1, loop_item)
         
                 
-In the above example three TextView components will be added to the ContentView the text being "1. one", "2. two", and "3. three" for each component respectively. Items within the loop arg given new variables `loop_item` and `loop_index` which are self explanitory. If you happen to need to loop over two or more lists you can use `attr` keywords to save references to the parent loop's item as needed.
+In the above example three TextView components will be added to the ContentView the text being "1. one", "2. two", and "3. three" for each component respectively. Items within the loop arg given new variables `loop_item` and `loop_index` which are self explanitory. Enaml's `Looper` is also very efficient in that it will only create or destroy child components that have been changed and reuses those that have not. 
+
+> Note: If you happen to need to loop over two or more lists you can use `attr` keywords to save references to the parent loop's item as needed. 
 
 #### Blocks
 
@@ -300,7 +304,7 @@ The `Block` node is a component specific to enaml-native. It's useful if you wan
 
 The block makes it easy to define "template" like components where you can easily override certain parts, maximizing code reusability. If you're familiar with templating languages like django's templates this is a similar concept.  
 
->> It's important to note here that a Block without a `block` attribute set is a placeholder and a Block with the `block` attribute set overrides the placeholder's content.
+> Note: It's important to notice here that a Block without a `block` attribute set is a placeholder and a Block with the `block` attribute set overrides the placeholder's content.
 
 ### Layouts
 
@@ -308,5 +312,7 @@ Currently layouts are done with the `LinearLayout` component. An implementation 
 
 More to come on layouts!
 
+### Summary
 
+That's the basics of enaml and enaml-native. With knowledge of all of these, you should be ready to start building your own apps!  If you have any questions create an issue or use post a question on stackoverflow to request help!
 
