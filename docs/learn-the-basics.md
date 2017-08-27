@@ -71,15 +71,13 @@ The example is pretty useless, but you get the idea. References are used very of
 
 ### Operators
 
-One of the most powerful features of enaml is it's data binding operators. Enaml's data binding operators are makes enaml much nicer than working with react or react-native in many cases.  The operators are `>>`, `<<`, `:=`, `::` and `=`.
+One of the most powerful features of enaml is it's data binding operators. Enaml's data binding operators are what makes enaml much nicer than working with react or react-native in many cases.  The operators are `>>`, `<<`, `:=`, `::` and `=`.
 
-There's a good talk by the developer of enaml [on youtube](https://www.youtube.com/watch?v=ycFEwz_hAxk&t=3s) where he describes the operators in more detail. 
-
-###### Simple = operator
+#### Simple = operator
 
 The `=` operator sets the inital state of the attribute. The attribute may later be changed by other components that interact with it.
 
-###### Subscribe << operator
+#### Subscribe << operator
 
 The `<<` operator a one way binding from a model to the UI component. This allows your UI to automatically update whenever a change occurs in your model and it automatically binds to changes in any atom objects used in the python expression. 
 
@@ -97,7 +95,7 @@ The `<<` operator a one way binding from a model to the UI component. This allow
 
 In the above example, whenever the user toggles the switch, the text updates to display the switches checked state.
 
-###### Update >> operator
+#### Update >> operator
 
 The `>>` operator is a one way binding that notifies the component when the UI component updates the attribute. This allows your UI changes to then be properly handled (ex, updating your model). 
 
@@ -114,7 +112,7 @@ The `>>` operator is a one way binding that notifies the component when the UI c
 In this example, when switch `sw1` is toggled, switch `sw2` will also be set to the same state. However if switch `sw2` is toggled, switch `sw1` will not change. 
 
 
-###### Delegate := operator
+#### Delegate := operator
 
 The `:=` operator does a two way binding between the UI component and a model (or another components's) attribute. This allows you to easily keep two attributes in sync (ex, UI attribute and model attribute or two UI attributes).
 
@@ -143,7 +141,7 @@ In this example, toggling either switch will cause the other to toggle as well. 
 
 In the above example our model's enabled state will be bound to the switch checked state. If either are changed they will both stay in sync.
 
-###### Notify :: operator
+#### Notify :: operator
 
 The `::` operator notifies the component when an event occurs, such as a button click, and allows you to handle the event as needed.
 
@@ -158,7 +156,28 @@ The `::` operator notifies the component when an event occurs, such as a button 
 
 Above we see the notify operator triggers the _event handler_ directly within the component. Any python code (except for `yield` and `return` statments can be used within the handler block. 
 
+#### More about operators
+
+There's a good talk by the developer of enaml [on youtube](https://www.youtube.com/watch?v=ycFEwz_hAxk&t=3s) where he describes the operators in more detail. 
+
+If you're familiar with react or react-native programming, these operators eliminate the need for `setState`, the "flux" pattern, and other state containers such as `Redux`. Enaml and Atom handle all of the state and changes for you.  
+
+If you're familiar with Android or iOS programming, this entirely eliminates the need to add listeners, callback functions, or use key value observers. Enaml and the native toolkit implementation(s) handles all of this seamlessly behind the scenes. See the more advanced documentation or the code for more details if you're interested.
+
 ### Dynamic Components
 
 Docs coming soon!
 
+#### Conditionals
+
+
+#### Loopers
+
+
+#### Blocks
+
+
+
+### Layouts
+
+Coming soon...
