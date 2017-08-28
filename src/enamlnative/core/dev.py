@@ -41,7 +41,7 @@ INDEX_PAGE = """<html>
 </head>
 <body>
   <div class="nav-fixed">
-    <nav role="navigation" class="blue">
+    <nav role="navigation" class="teal">
       <div class="nav-wrapper container">
         <a href="#" class="brand-logo">Enaml-Native Playground</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
@@ -63,11 +63,11 @@ enamldef ContentView(LinearLayout):
   </div> <!-- code -->
 
   <div class="fixed-action-btn">
-    <a id="run" class="btn-floating btn-large teal" href="#">
+    <a id="run" class="btn-floating btn-large blue" href="#">
        <i class="large material-icons">play_arrow</i>
      </a>
   </div>
-  <footer class="page-footer blue">
+  <footer class="page-footer teal">
     <div class="container">
       <div class="row">
         <div class="col l6 s12">
