@@ -24,7 +24,11 @@ First, all the enaml-native components are imported using a standard python impo
 
 ### Components
 
-Above we see our code is defining `ContentView`, a new component that is extending the `LinearLayout`. If you're familiar with Android or iOS, the `LinearLayout` (or `UIStackView`) is a widget that lays out it's children in either a single row or column, in this case the child is the `TextView`. This is a very simple component declaration, with enaml-native new components are created often. Everything you see on the screen is some sort of component. Components can be simple or complex but, like a python class, must have at least one body statement (which can just be the `pass` keyword).  
+With enaml-native new components are created often. Everything you see on the screen is some sort of component. Components can be simple or complex but, like a python class, must have at least one body statement (which can just be the `pass` keyword).
+
+A component is defined by extending an existing component and specifying any attributes or children the new component needs. Above the `ContentView` is a new component extends the `LinearLayout` component and includes a `TextView` child. Components are commonly used to encapsulate several views with a desired layout and the attributes required to populate the view. Doing this makes parts of your app easier to reuse and makes your code easier to read much like classes do in object-oriented programming. 
+
+Many builtin components are simply wrappers around native widgets that expose their functionality as attributes. If you're familiar with Android or iOS, the `LinearLayout` (or `UIStackView`) is a widget that lays out it's children in either a single row or column. When we use this component it's creating the native widget and any required properties or adapters for us.  It's possible to define your own components to wrap any special native widgets you may have, see the more advanced documentation for that. 
 
 ### Attributes
 
