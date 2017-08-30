@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Bool, Tuple, Float, Int, Enum, observe
+    Typed, ForwardTyped, Bool, Tuple, Float, Int, Enum, observe, set_default
 )
 
 from enaml.core.declarative import d_
@@ -28,7 +28,7 @@ class ProxyFlexbox(ProxyViewGroup):
     def set_align_content(self, alignment):
         raise NotImplementedError
 
-    def set_align_items(self, alignemnt):
+    def set_align_items(self, alignment):
         raise NotImplementedError
 
     def set_align_self(self, alignment):
@@ -70,6 +70,81 @@ class ProxyFlexbox(ProxyViewGroup):
     def set_justify_content(self, justify):
         raise NotImplementedError
 
+    def set_min_height(self, height):
+        raise NotImplementedError
+
+    def set_max_height(self, height):
+        raise NotImplementedError
+
+    def set_min_width(self, width):
+        raise NotImplementedError
+
+    def set_max_width(self, width):
+        raise NotImplementedError
+
+    def set_margin_left(self, left):
+        raise NotImplementedError
+
+    def set_margin_top(self, top):
+        raise NotImplementedError
+
+    def set_margin_bottom(self, bottom):
+        raise NotImplementedError
+
+    def set_margin_right(self, right):
+        raise NotImplementedError
+
+    def set_margin_start(self, start):
+        raise NotImplementedError
+
+    def set_margin_end(self, end):
+        raise NotImplementedError
+    
+    def set_margin(self, margin):
+        raise NotImplementedError
+
+    def set_padding_left(self, left):
+        raise NotImplementedError
+
+    def set_padding_top(self, top):
+        raise NotImplementedError
+
+    def set_padding_bottom(self, bottom):
+        raise NotImplementedError
+
+    def set_padding_right(self, right):
+        raise NotImplementedError
+
+    def set_padding_start(self, start):
+        raise NotImplementedError
+
+    def set_padding_end(self, end):
+        raise NotImplementedError
+
+    def set_padding(self, padding):
+        raise NotImplementedError
+
+    def set_border_left(self, left):
+        raise NotImplementedError
+
+    def set_border_top(self, top):
+        raise NotImplementedError
+
+    def set_border_bottom(self, bottom):
+        raise NotImplementedError
+
+    def set_border_right(self, right):
+        raise NotImplementedError
+
+    def set_border_start(self, start):
+        raise NotImplementedError
+
+    def set_border_end(self, end):
+        raise NotImplementedError
+
+    def set_border(self, border):
+        raise NotImplementedError
+
 
 class Flexbox(ViewGroup):
     """ A layout widget implementing flexbox's layout.
@@ -77,11 +152,17 @@ class Flexbox(ViewGroup):
         This uses Facebook's yoga.
 
     """
+    #: Default is to stretch so fill the parent
+    layout_width = set_default('match_parent')
+
+    #: Default is to stretch so fill the parent
+    layout_height = set_default('match_parent')
+
     #: How to align children along the cross axis of their container
     align_items = d_(Enum('stretch', 'flex_start', 'flex_end', 'center'))
 
     #: How to align children along the cross axis of their container
-    align_self = d_(Enum('stretch', 'flex_start', 'flex_end', 'center'))
+    #align_self = d_(Enum('stretch', 'flex_start', 'flex_end', 'center'))
 
     #: Control how multiple lines of content are aligned within a container which uses FlexWrap
     align_content = d_(Enum('flex_start', 'flex_end', 'center', 'space_between', 'space_around'))
@@ -89,70 +170,70 @@ class Flexbox(ViewGroup):
     #: Should the layout be a column or a row.
     flex_direction = d_(Enum('row', 'column', 'row_reversed', 'column_reversed'))
 
-    #: The FlexBasis property is an axis-independent way of providing the default size of an item
-    #: on the main axis. Setting the FlexBasis of a child is similar to setting the Width of that
-    #: child if its parent is a container with FlexDirection = row or setting the Height of a child
-    #: if its parent is a container with FlexDirection = column. The FlexBasis of an item is the d
-    #: efault size of that item, the size of the item before any FlexGrow and FlexShrink
-    #: calculations are performed.
-    flex_basis = d_(Int())
-
-    #: The FlexGrow property describes how any space within a container should be distributed
-    #: among its children along the main axis. After laying out its children, a container will
-    #: distribute any remaining space according to the FlexGrow values specified by its children.
-    flex_grow = d_(Float(strict=False))
-
-    #: The FlexShrink property describes how to shrink children along the main axis
-    #: in the case that the total size of the children overflow the size of the container
-    #: on the main axis.
-    flex_shrink = d_(Float(strict=False))
-
+    # #: The FlexBasis property is an axis-independent way of providing the default size of an item
+    # #: on the main axis. Setting the FlexBasis of a child is similar to setting the Width of that
+    # #: child if its parent is a container with FlexDirection = row or setting the Height of a child
+    # #: if its parent is a container with FlexDirection = column. The FlexBasis of an item is the d
+    # #: efault size of that item, the size of the item before any FlexGrow and FlexShrink
+    # #: calculations are performed.
+    # flex_basis = d_(Int())
+    #
+    # #: The FlexGrow property describes how any space within a container should be distributed
+    # #: among its children along the main axis. After laying out its children, a container will
+    # #: distribute any remaining space according to the FlexGrow values specified by its children.
+    # flex_grow = d_(Float(strict=False))
+    #
+    # #: The FlexShrink property describes how to shrink children along the main axis
+    # #: in the case that the total size of the children overflow the size of the container
+    # #: on the main axis.
+    # flex_shrink = d_(Float(strict=False))
+    #
     #: Wrap or nowrap
     flex_wrap = d_(Bool())
 
     #: How to align children within the main axis of a container
     justify_content = d_(Enum('flex_start', 'flex_end', 'center', 'space_between', 'space_around'))
 
-    #: The Position property tells Flexbox how you want your item to be positioned within its
-    #: parent.
-    position = d_(Enum('relative', 'absolute'))
-
-    left = d_(Int())
-    top = d_(Int())
-    right = d_(Int())
-    bottom = d_(Int())
-    start = d_(Int())
-    end = d_(Int())
-
-    min_height = d_(Int())
-    max_height = d(Int())
-
-    min_width = d_(Int())
-    max_width = d_(Int())
-
-    margin_left = d_(Int())
-    margin_top = d_(Int())
-    margin_right = d_(Int())
-    margin_bottom = d_(Int())
-    margin_start = d_(Int())
-    margin_end = d_(Int())
-    margin = d_(Int())
-
-    padding_left = d_(Int())
-    padding_top = d_(Int())
-    padding_right = d_(Int())
-    padding_bottom = d_(Int())
-    padding_start = d_(Int())
-    padding_end = d_(Int())
-    padding = d_(Int())
-
-    border_left = d_(Int())
-    border_top = d_(Int())
-    border_right = d_(Int())
-    border_bottom = d_(Int())
-    border_start = d_(Int())
-    border_end = d_(Int())
-    border = d_(Int())
+    # #: The Position property tells Flexbox how you want your item to be positioned within its
+    # #: parent.
+    # position = d_(Enum('relative', 'absolute'))
+    #
+    # left = d_(Int())
+    # top = d_(Int())
+    # right = d_(Int())
+    # bottom = d_(Int())
+    # start = d_(Int())
+    # end = d_(Int())
+    #
+    # min_height = d_(Int())
+    # max_height = d_(Int())
+    #
+    # min_width = d_(Int())
+    # max_width = d_(Int())
+    #
+    # margin_left = d_(Int())
+    # margin_top = d_(Int())
+    # margin_right = d_(Int())
+    # margin_bottom = d_(Int())
+    # margin_start = d_(Int())
+    # margin_end = d_(Int())
+    # margin = d_(Int())
+    #
+    # padding_left = d_(Int())
+    # padding_top = d_(Int())
+    # padding_right = d_(Int())
+    # padding_bottom = d_(Int())
+    # padding_start = d_(Int())
+    # padding_end = d_(Int())
+    # padding = d_(Int())
+    #
+    # border_left = d_(Int())
+    # border_top = d_(Int())
+    # border_right = d_(Int())
+    # border_bottom = d_(Int())
+    # border_start = d_(Int())
+    # border_end = d_(Int())
+    # border = d_(Int())
 
     #: A reference to the ProxyFlexbox object.
     proxy = Typed(ProxyFlexbox)

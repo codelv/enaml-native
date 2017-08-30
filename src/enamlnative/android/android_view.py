@@ -122,8 +122,8 @@ class AndroidView(AndroidWidget, ProxyView):
         """
         super(AndroidView, self).init_widget()
         d = self.declaration
-        if d.layout_direction != 'ltr':  #: Default, no need to set it
-            self.set_layout_direction(d.layout_direction)
+        #if d.layout_direction != 'ltr':  #: Default, no need to set it
+        #    self.set_layout_direction(d.layout_direction)
         if d.background_color:
             self.set_background_color(d.background_color)
         if d.top:
@@ -158,6 +158,8 @@ class AndroidView(AndroidWidget, ProxyView):
         if d.touch_events:
             self.widget.setOnTouchListener(self.widget.getId())
             self.widget.onTouch.connect(self.on_touch)
+        if d.layout:
+            self.set_layout(d.layout)
 
     def _default_layout_params(self):
         d = self.declaration
@@ -295,4 +297,7 @@ class AndroidView(AndroidWidget, ProxyView):
     def set_z(self, z):
         self.widget.setZ(z)
 
-
+    def set_layout(self, layout):
+        #: Hack for flexbox
+        from .android_flexbox import FlexboxLayoutHelper
+        FlexboxLayoutHelper.apply_layout(self)

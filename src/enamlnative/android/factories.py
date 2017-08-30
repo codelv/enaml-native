@@ -80,6 +80,11 @@ def edit_text_factory():
     return AndroidEditText
 
 
+def flexbox_factory():
+    from .android_flexbox import AndroidFlexbox
+    return AndroidFlexbox
+
+
 def fragment_factory():
     # print "Import frame layout"
     from .android_fragment import AndroidFragment
@@ -286,6 +291,7 @@ ANDROID_FACTORIES = {
     'DatePicker': date_picker_factory,
     'DrawerLayout': drawer_layout_factory,
     'EditText': edit_text_factory,
+    'Flexbox': flexbox_factory,
     'Fragment': fragment_factory,
     'FrameLayout': frame_layout_factory,
     'GridLayout': grid_layout_factory,

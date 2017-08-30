@@ -45,9 +45,14 @@ dependencies {
     //compile 'com.github.bumptech.glide:glide:4.0.0-RC1'
     //annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
 
+    // HTTP
     compile 'com.loopj.android:android-async-http:1.4.9'
 
-    // Icons
+    // Flexbox
+    //compile 'com.facebook.yoga:yoga:1.5.0'
+    compile 'com.google.android:flexbox:0.3.0'
+
+    // Icons uncomment ones that you don't want
     compile 'com.joanzapata.iconify:android-iconify-fontawesome:2.2.2' // (v4.5)
     compile 'com.joanzapata.iconify:android-iconify-entypo:2.2.2' // (v3,2015)
     compile 'com.joanzapata.iconify:android-iconify-typicons:2.2.2' // (v2.0.7)

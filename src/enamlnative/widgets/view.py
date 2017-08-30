@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Int, Enum, Float, Bool, Tuple, Unicode, Event, observe, set_default
+    Typed, ForwardTyped, Int, Dict, Float, Bool, Tuple, Unicode, Event, observe, set_default
 )
 
 from enaml.core.declarative import d_
@@ -103,6 +103,9 @@ class ProxyView(ProxyWidget):
     def set_height(self, height):
         raise NotImplementedError
 
+    def set_layout(self, layout):
+        raise NotImplementedError
+
 
 class View(Widget):
     """ View is a view group that displays
@@ -116,46 +119,45 @@ class View(Widget):
 
     background_color = d_(Unicode())
 
-    bottom = d_(Int())
-
-    camera_distance = d_(Float())
+    #
+    # camera_distance = d_(Float())
 
     clickable = d_(Bool())
     
     #: Called when view is clicked
     clicked = d_(Event(), writable=False)
 
-    clip_bounds = d_(Tuple(int, default=(0, 0, 0, 0)))
-
-    clip_to_outline = d_(Bool())
+    # clip_bounds = d_(Tuple(int, default=(0, 0, 0, 0)))
+    #
+    # clip_to_outline = d_(Bool())
 
     content_description = d_(Unicode())
 
-    content_clickable = d_(Bool())
-
-    drawing_cache_background_color = d_(Int())
-
-    drawing_cache_enabled = d_(Bool())
-
-    drawing_cache_quality = d_(Bool())
-
-    duplicate_parent_state_enabled = d_(Bool())
-
-    elevation = d_(Float())
-
-    fading_edge_length = d_(Int())
-
-    filter_touches_when_obscured = d_(Bool())
-
-    fits_system_windows = d_(Bool())
+    # content_clickable = d_(Bool())
+    #
+    # drawing_cache_background_color = d_(Int())
+    #
+    # drawing_cache_enabled = d_(Bool())
+    #
+    # drawing_cache_quality = d_(Bool())
+    #
+    # duplicate_parent_state_enabled = d_(Bool())
+    #
+    # elevation = d_(Float())
+    #
+    # fading_edge_length = d_(Int())
+    #
+    # filter_touches_when_obscured = d_(Bool())
+    #
+    # fits_system_windows = d_(Bool())
 
     focusable = d_(Bool())
 
-    focusable_in_touch_mode = d_(Bool())
-
-    hovered = d_(Bool())
-
-    important_for_accessibility = d_(Int())
+    # focusable_in_touch_mode = d_(Bool())
+    #
+    # hovered = d_(Bool())
+    #
+    # important_for_accessibility = d_(Int())
 
     keeps_screen_on = d_(Bool())
 
@@ -167,79 +169,65 @@ class View(Widget):
 
     label_for = d_(Int())
 
-    layout_width = d_(Unicode()).tag(ios=False)#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
-
-    layout_height = d_(Unicode()).tag(ios=False)#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
-
-    layout_direction = d_(Enum('ltr', 'rtl', 'inherit', 'locale'))
-
-    left = d_(Int())
+    #layout_direction = d_(Enum('ltr', 'rtl', 'inherit', 'locale'))
 
     long_clickable = d_(Bool())
 
     nested_scrolling_enabled = d_(Bool())
 
-    #: Left, top, right, bottom
-    margins = d_(Tuple(int))
-
     over_scroll_mode = d_(Int())
 
-    #: Left, top, right, bottom
-    padding = d_(Tuple(int))
 
-    padding_relative = d_(Tuple(int))
+    #padding_relative = d_(Tuple(int))
 
-    pivot_x = d_(Float())
-
-    pivot_y = d_(Float())
+    # pivot_x = d_(Float())
+    #
+    # pivot_y = d_(Float())
 
     pressed = d_(Bool())
 
-    right = d_(Int())
 
-    rotation = d_(Float())
-
-    rotation_x = d_(Float())
-
-    rotation_y = d_(Float())
-
-    save_enabled = d_(Bool())
-
-    save_from_parent_enabled = d_(Bool())
-
-    scale_x = d_(Float())
-
-    scale_y = d_(Float())
-
-    scroll_bar_default_delay_before_fade = d_(Int())
-
-    scroll_bar_fade_duration = d_(Int())
-
-    scroll_bar_size = d_(Int())
-
-    scroll_bar_style = d_(Int())
-
-    scroll_container = d_(Bool())
-
-    scroll_indicators = d_(Tuple(int))
-
-    scroll_x = d_(Int())
-
-    scroll_y = d_(Int())
-
-    scrollbar_fading_enabled = d_(Int())
+    # rotation = d_(Float())
+    #
+    # rotation_x = d_(Float())
+    #
+    # rotation_y = d_(Float())
+    #
+    # save_enabled = d_(Bool())
+    #
+    # save_from_parent_enabled = d_(Bool())
+    #
+    # scale_x = d_(Float())
+    #
+    # scale_y = d_(Float())
+    #
+    # scroll_bar_default_delay_before_fade = d_(Int())
+    #
+    # scroll_bar_fade_duration = d_(Int())
+    #
+    # scroll_bar_size = d_(Int())
+    #
+    # scroll_bar_style = d_(Int())
+    #
+    # scroll_container = d_(Bool())
+    #
+    # scroll_indicators = d_(Tuple(int))
+    #
+    # scroll_x = d_(Int())
+    #
+    # scroll_y = d_(Int())
+    #
+    # scrollbar_fading_enabled = d_(Int())
 
     selected = d_(Bool())
 
-    sound_effects_enabled = d_(Bool())
-
-    system_ui_visibility = d_(Int())
+    # sound_effects_enabled = d_(Bool())
+    #
+    # system_ui_visibility = d_(Int())
 
     text_alignment = d_(Int())
 
     text_direction = d_(Int())
-
-    top = d_(Int())
 
     #: Observe touch events
     touch_events = d_(Bool())
@@ -247,37 +235,59 @@ class View(Widget):
     #: Called when a touch event occurs
     touch_event = d_(Event(dict), writable=False)
 
-    transition_name = d_(Unicode())
+    # transition_name = d_(Unicode())
+    #
+    # translation_x = d_(Float())
+    #
+    # translation_y = d_(Float())
+    #
+    # translation_z = d_(Float())
+    #
+    # vertical_fading_edge_enabled = d_(Bool())
+    #
+    # vertical_scroll_bar_enabled = d_(Bool())
+    #
+    #vertical_scroll_bar_position = d_(Int())
+    #
+    #will_not_cache_drawing = d_(Bool())
+    #
+    #will_not_draw = d_(Bool())
 
-    translation_x = d_(Float())
+    layout_width = d_(Unicode()).tag(ios=False)#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
 
-    translation_y = d_(Float())
+    layout_height = d_(Unicode()).tag(ios=False)#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
 
-    translation_z = d_(Float())
+    #: Left, top, right, bottom
+    margins = d_(Tuple(int))
 
-    vertical_fading_edge_enabled = d_(Bool())
+    #: Left, top, right, bottom
+    padding = d_(Tuple(int))
 
-    vertical_scroll_bar_enabled = d_(Bool())
+    left = d_(Int())
 
-    vertical_scroll_bar_position = d_(Int())
+    top = d_(Int())
 
-    will_not_cache_drawing = d_(Bool())
+    right = d_(Int())
 
-    will_not_draw = d_(Bool())
+    bottom = d_(Int())
 
+    #
     x = d_(Float())
 
     y = d_(Float())
 
     z = d_(Float())
-
-    #: Width of frame
-    #: on android use layout_width instead
-    width = d_(Float()).tag(android=False)
-
-    #: Height of frame
-    #: on android use layout_width instead
-    height = d_(Float()).tag(android=False)
+    #
+    # #: Width of frame
+    # #: on android use layout_width instead
+    # width = d_(Float()).tag(android=False)
+    #
+    # #: Height of frame
+    # #: on android use layout_width instead
+    # height = d_(Float()).tag(android=False)
+    #
+    #: Holder for flexbox layout parameters
+    layout = d_(Dict())
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyView)
@@ -358,6 +368,8 @@ class View(Widget):
         'z',
         'width',
         'height',
+        'layout',
+
     )
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

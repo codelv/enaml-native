@@ -16,6 +16,7 @@ from .relative_layout import RelativeLayout
 from .frame_layout import FrameLayout
 from .drawer_layout import DrawerLayout
 from .grid_layout import GridLayout
+from .flexbox import Flexbox
 
 
 #: Views
