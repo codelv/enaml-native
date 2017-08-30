@@ -222,7 +222,23 @@ public class Bridge {
                     if (argType.equals("android.graphics.Color")) {
                         // Hack for colors
                         spec = int.class; // Umm?
-                        arg = Color.parseColor(v.asStringValue().asString());
+                        String color = v.asStringValue().asString();
+                        // Add support for #RGB and #ARGB
+                        if (color.length()==4) {
+                            // #RGB
+                            color = String.format("#%c%c%c%c%c%c",
+                                    color.charAt(1),color.charAt(1), // R
+                                    color.charAt(2),color.charAt(2), // G
+                                    color.charAt(3),color.charAt(3)); // B
+                        } else if (color.length()==5) {
+                            // #ARGB
+                            color = String.format("#%c%c%c%c%c%c%c%c",
+                                    color.charAt(1),color.charAt(1), // A
+                                    color.charAt(2),color.charAt(2), // R
+                                    color.charAt(3),color.charAt(3), // G
+                                    color.charAt(4),color.charAt(4)); // B
+                        }
+                        arg = Color.parseColor(color);
                     } else if (argType.equals("android.R")) {
                         // Hack for resources such as
                         // @drawable/icon_name
