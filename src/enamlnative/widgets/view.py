@@ -112,7 +112,7 @@ class View(Widget):
     #: Describes how the child views are positioned.
     #: Defaults to Gravity.START | Gravity.TOP.
 
-    alpha = d_(Int())
+    alpha = d_(Float(1.0,strict=False))
 
     background_color = d_(Unicode())
 

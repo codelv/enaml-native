@@ -83,8 +83,8 @@ class AndroidImageView(AndroidView, ProxyImageView):
     # --------------------------------------------------------------------------
     # ProxyImageView API
     # --------------------------------------------------------------------------
-    def set_alpha(self, alpha):
-        self.widget.setImageAlpha(alpha)
+    #def set_alpha(self, alpha):
+    #    self.widget.setImageAlpha(alpha)
 
     def set_src(self, src):
         if src.startswith("@"):

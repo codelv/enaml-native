@@ -30,6 +30,7 @@ class View(Widget):
     setLayoutParams = JavaMethod('android.view.ViewGroup.LayoutParams')
     setBackgroundColor = JavaMethod('android.graphics.Color')
     setClickable = JavaMethod('boolean')
+    setAlpha = JavaMethod('float')
     setTop = JavaMethod('int')
     setBottom = JavaMethod('int')
     setLeft = JavaMethod('int')
@@ -139,6 +140,8 @@ class AndroidView(AndroidWidget, ProxyView):
             self.set_y(d.y)
         if d.z:
             self.set_y(d.z)
+        if d.alpha != 1:
+            self.set_alpha(d.alpha)
         if d.padding:
             self.set_padding(d.padding)
         if d.margins or d.layout_width or d.layout_height:
@@ -229,6 +232,9 @@ class AndroidView(AndroidWidget, ProxyView):
     # --------------------------------------------------------------------------
     # ProxyView API
     # --------------------------------------------------------------------------
+    def set_alpha(self, alpha):
+        self.widget.setAlpha(alpha)
+
     def set_background_color(self, color):
         self.widget.setBackgroundColor(color)
         

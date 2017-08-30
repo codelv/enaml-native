@@ -42,7 +42,7 @@ INDEX_PAGE = """<html>
 <body>
   <div class="nav-fixed">
     <nav role="navigation" class="teal">
-      <div class="nav-wrapper container">
+      <div class="nav-wrapper" style="margin-left:1em;">
         <a href="#" class="brand-logo">Enaml-Native Playground</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
           <li><a href="https://www.codelv.com/projects/enaml-native/">Project</a></li>
@@ -51,7 +51,19 @@ INDEX_PAGE = """<html>
       </div>
     </nav>
   </div>
-  <div id="editor" style="height:100%;width:100%;">
+  <div class="row" style="margin-bottom:0;">
+    <div class="col l3 s12" style="padding:0; max-height:100%; overflow-y:scroll;">
+      <nav>
+        <div class="nav-wrapper grey darken-3">
+          <a href="#components" style="margin-left:1em;">Components</a>
+        </div>
+      </nav>
+      <ul id="components" data-collapsible="accordion">
+        ${components}
+      </ul>
+    </div>
+    <div class="col l9 s12" style="padding:0;">
+      <div id="editor" style="height:100%;width:100%;">
 from enaml.core.api import *
 from enamlnative.widgets.api import *
 
@@ -60,15 +72,16 @@ enamldef ContentView(LinearLayout):
     TextView:
         text = "Test!"
 
-  </div> <!-- code -->
-
+      </div> <!-- code -->
+    </div>
+  </div>
   <div class="fixed-action-btn">
     <a id="run" class="btn-floating btn-large blue" href="#">
        <i class="large material-icons">play_arrow</i>
      </a>
   </div>
   <footer class="page-footer teal">
-    <div class="container">
+    <div>
       <div class="row">
         <div class="col l6 s12">
           <h5 class="white-text">Enaml-Native Playground</h5>
@@ -85,7 +98,7 @@ enamldef ContentView(LinearLayout):
       </div>
     </div>
     <div class="footer-copyright">
-      <div class="container">
+      <div style="margin-left:1em;">
         © 2017 <a href="https://www.codelv.com">codelv.com</a>
         <a class="grey-text text-lighten-4 right" href="https://www.codelv.com/projects/enaml-native/">Python powered native apps</a>
       </div>
@@ -100,10 +113,15 @@ enamldef ContentView(LinearLayout):
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></script>
   <script type="text/javascript">
     $(document).ready(function(){
+        // Init components
+        $('#components').collapsible();
+
+        // Init editor
         var editor = ace.edit("editor");
         editor.setTheme("ace/theme/github");
         editor.getSession().setMode("ace/mode/python");
 
+        // Init app dev session
         var enaml;
         $('#run').click(function(e){
             try {
@@ -139,6 +157,25 @@ enamldef ContentView(LinearLayout):
 </body>
 </html>"""
 
+#: This is why enaml-web is awesome, doing this sucks!
+COMPONENT_FIELD_TMPL = """
+
+"""
+
+COMPONENT_TMPL = """
+<li>
+    <div class="collapsible-header">{name}</div>
+    <div class="collapsible-body" style="padding:0;">
+        <table class="bordered striped">
+          <thead>
+            <tr><td>Name</td><td>Type</td></tr>
+          </thead>
+          <tbody>
+            {items}
+          </tbody>
+        </table>
+    </div>
+</li>"""
 
 def get_app():
     from .app import BridgedApplication
@@ -222,8 +259,53 @@ class DevServerSession(Atom):
 
 
         class MainHandler(tornado.web.RequestHandler):
+
+            def get_members(self, declaration):
+                members = declaration.members().values()
+
+                #: Exclude parent class members
+                try:
+                    #: TODO: Should walk up the tree
+                    parent = declaration.__mro__[1]
+                    class_members = []
+                    if parent.__name__ != 'View':
+                        inherited = parent.members().keys()
+                        class_members = [m for m in members if m.name not in inherited]
+                        if not class_members:
+                            #: Try again
+                            parent = parent.__mro__[1]
+                            if parent.__name__ != 'View':
+                                inherited = parent.members().keys()
+                                class_members = [m for m in members if m.name not in inherited]
+
+                    #: If we got results
+                    if class_members:
+                        members = class_members
+                except:
+                    pass
+
+                return [m for m in members if not m.name.startswith("_")]
+
+
+            def render_component(self, declaration):
+                items = ["""<tr><td>{name}</td><td>{type}</td></tr>"""
+                             .format(name=m.name,type=m.__class__.__name__)
+                            for m in self.get_members(declaration)]
+                return COMPONENT_TMPL.format(name=declaration.__name__,items="".join(items))
+
             def get(self):
-                self.write(INDEX_PAGE)
+                import inspect
+                from enaml.widgets.toolkit_object import ToolkitObject
+                from enamlnative.widgets import api
+
+                #: Get all declared widgets
+                widgets = [obj for (n,obj) in inspect.getmembers(api) if inspect.isclass(obj)
+                            and issubclass(obj,ToolkitObject)]
+                #: Render to html
+                components = "\n".join([self.render_component(w) for w in widgets])
+
+                #: Just a little hackish, but hey it works
+                self.write(INDEX_PAGE.replace("${components}",components))
 
         app = tornado.web.Application([
             (r"/", MainHandler),
