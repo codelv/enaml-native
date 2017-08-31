@@ -42,7 +42,7 @@ You can observe text input changes by binding to the `text` attribute.
 
 
 
-### Toggle Switch 
+#### Toggle Switch 
 You can handle Switch, CheckBox, and ToggleButton checked changes with the `checked` attribute.
 
     :::python
@@ -64,7 +64,7 @@ You can handle Switch, CheckBox, and ToggleButton checked changes with the `chec
 
 
 
-### Button 
+#### Buttons 
 You can handle button clicks with the `clicked` event.
 
     :::python
@@ -80,7 +80,7 @@ You can handle button clicks with the `clicked` event.
 
 
 
-### Clickable 
+#### Clickable 
 Any `View` can be made clickable by setting `clickable=True` and using the `clicked` event.
 
     :::python
@@ -95,7 +95,7 @@ Any `View` can be made clickable by setting `clickable=True` and using the `clic
 
 
 
-### Width and Height 
+#### Width and Height 
 You can define size using `layout_width` and `layout_height`. Can be either an integer string `200` (in dp), `wrap_content`, or `match_parent`.
 
     :::python
