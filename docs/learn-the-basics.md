@@ -309,7 +309,14 @@ The block makes it easy to define "template" like components where you can easil
 
 ### Layouts
 
-Currently layouts are done with the `LinearLayout` component. An implementation like flexbox is planned to be added in the near future.
+There are several platform dependent layouts that can be used, however it's recommended to use `Flexbox` which supports both Android and iOS. 
+
+If you're unfamiliar with flexbox, there great examples from Google's [flexbox-layout](https://github.com/google/flexbox-layout) for Android. 
+
+
+
+
+
 
 More to come on layouts!
 
