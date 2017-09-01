@@ -14,6 +14,8 @@ Android apps are currently working, iOS implementation is in the works (see #10)
 
 See the [project site](https://www.codelv.com/projects/enaml-native/)
 
+Or post questions on [gitter](https://gitter.im/enaml-web/Lobby)
+
 ### Apps ###
 
 Apps using enaml-native can be found [here](https://www.codelv.com/projects/enaml-native/apps/).
