@@ -19,7 +19,7 @@ index 740510f..0c8e55f 100644
  if platform == 'android':
      # for android, we use SDL...
 -    libraries = ['sdl', 'log']
-+    libraries = ['log']
++    libraries = ['jnius', 'log']
      library_dirs = ['libs/' + getenv('ARCH')]
  elif platform == 'darwin':
      import subprocess

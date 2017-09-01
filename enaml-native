@@ -154,7 +154,7 @@ class CleanPython(Command):
                 else:
                     shprint(sh.python, 'p4a.py', 'clean_dists')
                     shprint(sh.python, 'p4a.py', 'clean_builds')
-        if args is None or not args.android:
+        if (args is None or not args.android) and sys.platform=='darwin':
             if args and args.a: #: Only for clean all, building takes FOREVER
                 with cd(ctx['ios']['p4i']):
                     recipes = []
@@ -285,10 +285,8 @@ class BuildPython(Command):
             )
             cfg.update(env)
 
-            #: Um, we're passing args from another command?
-            #: Clean whatever build from previous arch
-            self.cmds['clean-python'].run()
-
+            #: Get current directory where command was run
+            cfg['ndk_build_dir'] = "{}/android/app/src/main/libs".format(os.getcwd())
 
             #: Add debug arg if needed
             cfg['debug'] = '--debug ' if (args and args.d) else ''
@@ -301,6 +299,10 @@ class BuildPython(Command):
                 logger.level = logging.DEBUG
 
             with cd(ctx['android']['p4a']):
+                #: Um, we're passing args from another command?
+                #: Clean whatever build from previous arch
+                self.cmds['clean-python'].run()
+
                 shprint(sh.python, *'p4a.py apk --arch={arch} '
                           '--private=../src '
                           '--package={bundle_id} '
@@ -313,6 +315,7 @@ class BuildPython(Command):
                           '--sdk-dir={sdk} '
                           '--ndk-dir={ndk} '
                           '--ndk-platform=21 '
+                          '--ndk-build-dir={ndk_build_dir} '
                           '{debug}'
                           '{minify}'
                           '--copy-libs'.format(**cfg).split(' '))

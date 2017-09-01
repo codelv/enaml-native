@@ -1078,7 +1078,7 @@ class CythonRecipe(PythonRecipe):
         if self.ctx.python_recipe.from_crystax:
             env['LDFLAGS'] += " -L{ctx.ndk_dir}/sources/python/2.7/libs/{arch.arch}"\
                                   .format(ctx=self.ctx, arch=arch) +\
-                              " -L{ctx.root_dir}/../../android/app/src/main/libs/{arch.arch}/"\
+                              " -L{ctx.ndk_build_dir}/{arch.arch}/"\
                                   .format(ctx=self.ctx, arch=arch) +\
                               " -L{bs.build_dir}/libs/{arch.arch}"\
                                   .format(bs=self.ctx.bootstrap, arch=arch)

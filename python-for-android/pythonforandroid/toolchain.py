@@ -265,6 +265,10 @@ class ToolchainCL(object):
             help=('The version of the Android NDK. This is optional, '
                   'we try to work it out automatically from the ndk_dir.'))
         generic_parser.add_argument(
+            '--ndk-build-dir', '--ndk_build_dir', dest='ndk_build_dir', default='',
+            help=('Directory of android NDK built libraries of enaml native app excluding '
+                  'the arch (ex android/app/src/main/libs)'))
+        generic_parser.add_argument(
             '--ndk-platform', '--ndk_platform', dest='ndk_platform', default='',
             help=('The version of the Android NDK. This is optional, '
                   'we try to work it out automatically from the ndk_dir.'))
@@ -506,7 +510,9 @@ class ToolchainCL(object):
         self.ctx.symlink_java_src = args.symlink_java_src
         self.ctx.minify = args.minify
         self.ctx.optimize = args.optimize
-
+        #if not args.ndk_build_dir:
+        #    raise ValueError("--ndk-build-dir is required for enaml-native")
+        self.ctx.ndk_build_dir = args.ndk_build_dir
         self._archs = split_argument_list(args.arch)
 
         # AND: Fail nicely if the args aren't handled yet

@@ -62,8 +62,7 @@ def realpath(fname):
 
 class Python2Recipe(TargetPythonRecipe):
     version = '2.7'
-    url = ('https://github.com/crystax/android-vendor-python-{}-{}'
-       '/archive/master.tar.gz'.format(*version.split('.')))
+    url = ('https://github.com/crystax/android-vendor-python-{}-{}/archive/master.zip'.format(*version.split('.')))
     name = 'python2crystax'
 
     depends = ['hostpython2crystax']  
@@ -74,6 +73,10 @@ class Python2Recipe(TargetPythonRecipe):
     def download_if_necessary(self):
         if 'openssl' in self.ctx.recipe_build_order:
             super(Python2Recipe, self).download_if_necessary()
+
+    def prepare_build_dir(self, arch):
+        if 'openssl' in self.ctx.recipe_build_order:
+            super(Python2Recipe, self).prepare_build_dir(arch)
 
     def get_dir_name(self):
         name = super(Python2Recipe, self).get_dir_name()
