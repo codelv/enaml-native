@@ -1,0 +1,23 @@
+[
+  {
+    "name":"Python Playground", 
+    "caption":"App that lets you test out enaml-native code!", 
+    "image":"https://lh3.googleusercontent.com/iKTI1EFmz-xtDC_lVfSww33CuueBPERM5q_2w7-Oe_iLWOUkfN8o9_0EloblGbes1w=h900-rw", 
+    "os":["android"], 
+    "url":"https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground"
+  },
+  {
+    "name":"Anchored Bible", 
+    "caption":"Simple multi-lingual bible app", 
+    "image":"https://lh3.googleusercontent.com/qEQVv8oS7Evcq4gRjENy-F1OLFGmrEaJWqv6Z0RwrSgh-hjtge649fICRIo_iSpw8JQD=h900-rw", 
+    "os":["android"],
+    "url":"https://play.google.com/store/apps/details?id=com.frmdstryr.bible"
+  },
+  {
+    "name":"Enaml-Native Demo", 
+    "caption":"App demonstrating enaml-native widgets on android.", 
+    "image":"https://lh3.googleusercontent.com/a2BPJE2-WOflrEEKTgxFBp-m6Jln5NF62hc_zssHPEN1E-d6YoNRGZOr-ldNy2zSKoM=h900-rw", 
+    "os":["android"],
+    "url":"https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo"
+  }
+]
