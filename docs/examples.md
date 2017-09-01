@@ -6,6 +6,8 @@ Once downloaded, start the app, and then go to [http://your-phone-address:8888](
 
 Copy and paste the example code in and click the play button. The app reloads and there you go! You can try out any code this way as well so feel free to play around!
 
+[![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
+
 ### Basics
 
 #### Text
