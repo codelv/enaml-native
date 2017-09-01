@@ -13,6 +13,7 @@ import os
 import sys
 import json
 import shutil
+import inspect
 from atom.api import Atom, ForwardInstance, Enum, Unicode, Int, Bool
 from contextlib import contextmanager
 
@@ -64,11 +65,11 @@ INDEX_PAGE = """<html>
     </div>
     <div class="col l9 s12" style="padding:0;">
       <div id="editor" style="height:100%;width:100%;">
-from enaml.core.api import *
+from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 
 
-enamldef ContentView(LinearLayout):
+enamldef ContentView(Flexbox):
     TextView:
         text = "Test!"
 
@@ -164,18 +165,25 @@ COMPONENT_FIELD_TMPL = """
 
 COMPONENT_TMPL = """
 <li>
-    <div class="collapsible-header">{name}</div>
-    <div class="collapsible-body" style="padding:0;">
-        <table class="bordered striped">
+    <div class="collapsible-header" id="component-{id}">{name}</div>
+    <div class="collapsible-body" style="padding:0 1em;">
+        <table class="bordered striped" style="font-size: small;">
           <thead>
-            <tr><td>Name</td><td>Type</td></tr>
+            <tr><td>Attr</td><td>Info</td></tr>
           </thead>
           <tbody>
+            {info}
             {items}
           </tbody>
         </table>
     </div>
 </li>"""
+
+DROPDOWN_TMPL = """
+<a class='dropdown-button' href='#' data-activates='{id}'>{name}</a>
+<ul id='{id}' class='dropdown-content'>
+{items}
+</ul>"""
 
 def get_app():
     from .app import BridgedApplication
@@ -257,55 +265,91 @@ class DevServerSession(Atom):
             def on_close(self):
                 print("Dev server client lost!")
 
-
         class MainHandler(tornado.web.RequestHandler):
 
             def get_members(self, declaration):
                 members = declaration.members().values()
 
-                #: Exclude parent class members
                 try:
-                    #: TODO: Should walk up the tree
+                    #: Exclude parent class members
                     parent = declaration.__mro__[1]
                     class_members = []
-                    if parent.__name__ != 'View':
+                    inherited = parent.members().keys()
+                    class_members = [m for m in members if m.name not in inherited]
+
+                    #: If not a direct subclass of View, show the parent members
+                    if not class_members and parent.__name__ != 'View':
+                        #: Try again one more time
+                        parent = parent.__mro__[1]
                         inherited = parent.members().keys()
                         class_members = [m for m in members if m.name not in inherited]
-                        if not class_members:
-                            #: Try again
-                            parent = parent.__mro__[1]
-                            if parent.__name__ != 'View':
-                                inherited = parent.members().keys()
-                                class_members = [m for m in members if m.name not in inherited]
 
-                    #: If we got results
-                    if class_members:
-                        members = class_members
+                    members = class_members
                 except:
                     pass
 
                 return [m for m in members if not m.name.startswith("_")]
 
+            def render_component_types(self, declaration, member):
+                """ """
+                node_type = member.__class__.__name__.lower()
+                node_id = "{}-{}".format(declaration.__name__, member.name).lower()
+                #: Build items
+                items = []
+                if isinstance(member, Enum):
+                    items = ["<li><a href='#1'>{}</a></li>".format(it) for it in member.items]
+                #: TODO: show instance types for instances, tuples, lists, etc..
+                #elif isinstance(member, )
+
+                #: Render dropdown if needed
+                if items:
+                    return DROPDOWN_TMPL.format(id=node_id, name=node_type, items="".join(items))
+                return "{}".format(node_type)
 
             def render_component(self, declaration):
+                """ Render a row of all the attributes """
                 items = ["""<tr><td>{name}</td><td>{type}</td></tr>"""
-                             .format(name=m.name,type=m.__class__.__name__)
-                            for m in self.get_members(declaration)]
-                return COMPONENT_TMPL.format(name=declaration.__name__,items="".join(items))
+                             .format(name=m.name,type=self.render_component_types(declaration, m))
+                         for m in self.get_members(declaration)]
+
+                info = []
+                parent = declaration.__mro__[1]
+                #: Superclass
+                info.append("<tr><td>extends component</td><td><a href='#component-{id}'>{name}</a></td></td>"
+                            .format(id=parent.__name__.lower(), name=parent.__name__))
+
+                #: Source and example, only works with enamlnative builtins
+                source_path = inspect.getfile(declaration).replace(".pyo", ".py").replace(".pyc", ".py")
+                if 'enamlnative' in source_path:
+                    source_link = "https://github.com/frmdstryr/enaml-native/tree/master/src/{}".format(
+                        "enamlnative"+source_path.split("enamlnative")[1]
+                    )
+                    info.append("<tr><td>source code</td><td><a href='{}' target='_blank'>show</a></td></td>"
+                                .format(source_link))
+
+                    #: Examples link
+                    example_link = "https://www.codelv.com/projects/enaml-native/docs/components#{}" \
+                        .format(declaration.__name__.lower())
+                    info.append("<tr><td>example usage</td><td><a href='{}' target='_blank'>view</a></td></td>"
+                                .format(example_link))
+
+                return COMPONENT_TMPL.format(id=declaration.__name__.lower(),
+                                             name=declaration.__name__,
+                                             info="".join(info),
+                                             items="".join(items))
 
             def get(self):
-                import inspect
                 from enaml.widgets.toolkit_object import ToolkitObject
                 from enamlnative.widgets import api
 
                 #: Get all declared widgets
                 widgets = [obj for (n,obj) in inspect.getmembers(api) if inspect.isclass(obj)
-                            and issubclass(obj,ToolkitObject)]
+                           and issubclass(obj,ToolkitObject)]
                 #: Render to html
                 components = "\n".join([self.render_component(w) for w in widgets])
 
                 #: Just a little hackish, but hey it works
-                self.write(INDEX_PAGE.replace("${components}",components))
+                self.write(INDEX_PAGE.replace("${components}", components))
 
         app = tornado.web.Application([
             (r"/", MainHandler),
