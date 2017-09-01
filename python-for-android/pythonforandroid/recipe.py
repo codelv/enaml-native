@@ -919,6 +919,7 @@ class CompiledComponentsPythonRecipe(PythonRecipe):
         shprint(hostpython, 'setup.py', self.build_cmd, '-v', _env=env,
                 *self.setup_extra_args)
 
+
 class CppCompiledComponentsPythonRecipe(CompiledComponentsPythonRecipe):
     """ Extensions that require the cxx-stl """
     call_hostpython_via_targetpython = False
@@ -967,8 +968,6 @@ class CppCompiledComponentsPythonRecipe(CompiledComponentsPythonRecipe):
             )
 
 
-
-
 class CythonRecipe(PythonRecipe):
     pre_build_ext = False
     cythonize = True
@@ -977,7 +976,7 @@ class CythonRecipe(PythonRecipe):
     def __init__(self, *args, **kwargs):
         super(CythonRecipe, self).__init__(*args, **kwargs)
         depends = self.depends
-        depends.append(('python2','python2crystax', 'python3crystax'))
+        depends.append(('python2', 'python2crystax', 'python3crystax'))
         depends = list(set(depends))
         self.depends = depends
 
@@ -1000,7 +999,7 @@ class CythonRecipe(PythonRecipe):
                 '-c', 'import site; print("\\n".join(site.getsitepackages()))')
             site_packages_dirs = site_packages_dirs.stdout.decode('utf-8').split('\n')
             if 'PYTHONPATH' in env:
-                env['PYTHONPATH'] = env['PYTHONPATH'] + ':{}'.format(':'.join(site_packages_dirs))
+                env['PYTHONPATH'] += ':{}'.format(':'.join(site_packages_dirs))
             else:
                 env['PYTHONPATH'] = ':'.join(site_packages_dirs)
 
@@ -1036,8 +1035,7 @@ class CythonRecipe(PythonRecipe):
                     shprint(sh.find, build_lib[0], '-name', '*.o', '-exec',
                             env['STRIP'], '{}', ';', _env=env)
 
-                if ('python2crystax' in self.ctx.recipe_build_order or
-                    'python3crystax' in self.ctx.recipe_build_order):
+                if self.ctx.python_recipe.from_crystax:
                     info('Stripping object files')
                     shprint(sh.find, '.', '-iname', '*.so', '-exec',
                             '/usr/bin/echo', '{}', ';', _env=env)
@@ -1073,18 +1071,17 @@ class CythonRecipe(PythonRecipe):
 
     def get_recipe_env(self, arch, with_flags_in_cc=True):
         env = super(CythonRecipe, self).get_recipe_env(arch, with_flags_in_cc)
-        env['LDFLAGS'] = env['LDFLAGS'] + ' -L{} '.format(
-            self.ctx.get_libs_dir(arch.arch) +
-            ' -L{} '.format(self.ctx.libs_dir) +
-            ' -L{}'.format(join(self.ctx.bootstrap.build_dir, 'obj', 'local',
-                                arch.arch)))
+        env['LDFLAGS'] += ' -L{}'.format(self.ctx.get_libs_dir(arch.arch)) +\
+                          ' -L{}'.format(self.ctx.libs_dir) +\
+                          ' -L{bs.build_dir}/obj/local/{arch.arch}'\
+                              .format(bs=self.ctx.bootstrap, arch=arch)
         if self.ctx.python_recipe.from_crystax:
-            
-            env['LDFLAGS'] = (env['LDFLAGS'] +
-                              ' -L{ctx.root_dir}/../../android/app/src/main/libs/{arch.arch}/'.format(ctx=self.ctx,arch=arch) +
-                              ' -L{}'.format(join(self.ctx.bootstrap.build_dir, 'libs', arch.arch)))
-            # ' -L/home/asandy/.local/share/python-for-android/build/bootstrap_builds/sdl2/libs/armeabi '
-        if self.ctx.python_recipe.from_crystax:
+            env['LDFLAGS'] += " -L{ctx.ndk_dir}/sources/python/2.7/libs/{arch.arch}"\
+                                  .format(ctx=self.ctx, arch=arch) +\
+                              " -L{ctx.root_dir}/../../android/app/src/main/libs/{arch.arch}/"\
+                                  .format(ctx=self.ctx, arch=arch) +\
+                              " -L{bs.build_dir}/libs/{arch.arch}"\
+                                  .format(bs=self.ctx.bootstrap, arch=arch)
             env['LDSHARED'] = env['CC'] + ' -shared'
         else:
             env['LDSHARED'] = join(self.ctx.root_dir, 'tools', 'liblink.sh')
@@ -1101,13 +1098,10 @@ class CythonRecipe(PythonRecipe):
         env['LIBLINK_PATH'] = liblink_path
         ensure_dir(liblink_path)
 
-        if (self.ctx.python_recipe.from_crystax or 
-            'python2crystax' in self.ctx.recipe_build_order or 
-            'python3crystax' in self.ctx.recipe_build_order):
-            env['CFLAGS'] = '-I{} '.format(
-                join(self.ctx.ndk_dir, 'sources', 'python',
-                     self.ctx.python_recipe.version, 'include',
-                     'python')) + env['CFLAGS']
+        if self.ctx.python_recipe.from_crystax:
+            env['CFLAGS'] += ' -I{ctx.ndk_dir}/sources/python/{py_recipe.version}/include/python '\
+                                .format(ctx=self.ctx, py_recipe=self.ctx.python_recipe)
+
 
             # Temporarily hardcode the -lpython3.x as this does not
             # get applied automatically in some environments.  This
@@ -1115,11 +1109,11 @@ class CythonRecipe(PythonRecipe):
             # py3.5 references, to support other python3 or crystax
             # python versions.
             if 'python2crystax' in self.ctx.recipe_build_order:
-                env['LDFLAGS'] = env['LDFLAGS'] + ' -lpython2.7'
+                env['LDFLAGS'] += ' -lpython2.7'
             else:
                 python3_version = self.ctx.python_recipe.version
                 python3_version = '.'.join(python3_version.split('.')[:2])
-                env['LDFLAGS'] = env['LDFLAGS'] + ' -lpython{}m'.format(python3_version)
+                env['LDFLAGS'] += ' -lpython{}m'.format(python3_version)
 
         return env
 

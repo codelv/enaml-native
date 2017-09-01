@@ -129,9 +129,7 @@ class ArchARMv7_a(ArchARM):
 
     def get_env(self, with_flags_in_cc=True):
         env = super(ArchARMv7_a, self).get_env(with_flags_in_cc)
-        env['CFLAGS'] = (env['CFLAGS'] +
-                         (' -march=armv7-a -mfloat-abi=softfp '
-                          '-mfpu=vfp -mthumb'))
+        env['CFLAGS'] += ' -march=armv7-a -mfloat-abi=softfp -mfpu=vfp -mthumb'
         env['CXXFLAGS'] = env['CFLAGS']
         return env
 
@@ -144,8 +142,7 @@ class Archx86(Arch):
 
     def get_env(self, with_flags_in_cc=True):
         env = super(Archx86, self).get_env(with_flags_in_cc)
-        env['CFLAGS'] = (env['CFLAGS'] +
-                         ' -march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32')
+        env['CFLAGS'] += ' -march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32'
         env['CXXFLAGS'] = env['CFLAGS']
         return env
 
@@ -158,8 +155,7 @@ class Archx86_64(Arch):
 
     def get_env(self, with_flags_in_cc=True):
         env = super(Archx86_64, self).get_env(with_flags_in_cc)
-        env['CFLAGS'] = (env['CFLAGS'] +
-                         ' -march=x86-64 -msse4.2 -mpopcnt -m64 -mtune=intel')
+        env['CFLAGS'] += ' -march=x86-64 -msse4.2 -mpopcnt -m64 -mtune=intel'
         env['CXXFLAGS'] = env['CFLAGS']
         return env
 

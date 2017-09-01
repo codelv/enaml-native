@@ -191,6 +191,10 @@ def shprint(command, *args, **kwargs):
                 Err_Style.RESET_ALL, ' ', width=(columns - 1)))
             stdout.flush()
     except sh.ErrorReturnCode as err:
+        if kwargs.get("_env"):
+            from pprint import pformat
+            logger.info('Command Env: {}'.format(pformat(kwargs['_env'])))
+
         if need_closing_newline:
             stdout.write('{}\r{:>{width}}\r'.format(
                 Err_Style.RESET_ALL, ' ', width=(columns - 1)))
