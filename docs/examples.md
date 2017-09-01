@@ -1,6 +1,6 @@
 ### Playground
 
-The easiest way to try out these examples is by downloading the [Python Playground]() app. This app allows you to paste code into a web based editor and run it as if it were built as part of the app!
+The easiest way to try out these examples is by downloading the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground) app. This app allows you to paste code into a web based editor and run it as if it were built as part of the app!
 
 Once downloaded, start the app, and then go to [http://your-phone-address:8888](http://localhost:8888). If using a simulator run `adb forward tcp:8888 tcp:8888` and go to [http://localhost:8888](http://localhost:8888).
 
