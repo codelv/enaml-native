@@ -16,7 +16,7 @@ See the [project site](https://www.codelv.com/projects/enaml-native/)
 
 ### Apps ###
 
-[Apps using enaml-native](https://www.codelv.com/projects/enaml-native/apps/).
+Apps using enaml-native can be found [here](https://www.codelv.com/projects/enaml-native/apps/).
 
 ### Demos ###
 1. Try out the beta demo app here [on google play](https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo)
