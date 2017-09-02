@@ -481,13 +481,13 @@ class BuildAndroid(Command):
     title = set_default("build-android")
     help = set_default("Build android project")
     args = set_default([
-        ('-r', dict(action='store_true', help="Release mode")),
+        ('--release', dict(action='store_true', help="Release mode")),
     ])
 
     def run(self, args=None):
         with cd("android"):
             gradlew = sh.Command('./gradlew')
-            if args.r:
+            if args and args.release:
                 shprint(gradlew, 'assembleRelease')
             else:
                 shprint(gradlew, 'assembleDebug')
@@ -536,12 +536,9 @@ class CleanIOS(Command):
 class RunIOS(Command):
     title = set_default("run-ios")
     help = set_default("Build and run the ios project")
-    # args = set_default([
-    #     ('name',dict(help="Project name")),
-    #     ('bundle_id',dict(help="App bundleId")),
-    #     ('destination', dict(help="Project destination folder")),
-    #     #('-t --template', dict(dest='template', action='store_const',help="Project destination folder")),
-    # ])
+    args = set_default([
+        ('--release', dict(action='store_true', help="Build in Release mode")),
+    ])
 
     def run(self, args=None):
         ctx = self.ctx
@@ -550,13 +547,33 @@ class RunIOS(Command):
             shprint(sh.xcrun, 'xcodebuild',
                     '-scheme', env['project'],
                     '-workspace', '{project}.xcworkspace'.format(**env),
-                    '-configuration', 'Debug',
+                    '-configuration', 'Release' if args and args.release else 'Debug',
                     #'-destination', 'platform=iOS Simulator,name=iPhone 7 Plus,OS=10.2',
                     '-derivedDataPath',
                     'run')
             #shprint(sh.xcrun, 'simctl', 'install', 'booted',
             #        'build/Build/Products/Debug-iphonesimulator/{project}.app'.format(**env))
             shprint(sh.xcrun, 'simctl', 'launch', 'booted', ctx['bundle_id'])
+
+
+class BuildIOS(Command):
+    title = set_default("build-ios")
+    help = set_default("Build the ios project")
+    args = set_default([
+        ('--release', dict(action='store_true', help="Build in Release mode")),
+    ])
+
+    def run(self, args=None):
+        ctx = self.ctx
+        env = ctx['ios']
+        with cd('ios'):
+            shprint(sh.xcrun, 'xcodebuild',
+                    '-scheme', env['project'],
+                    '-workspace', '{project}.xcworkspace'.format(**env),
+                    '-configuration', 'Release' if args and args.release else 'Debug',
+                    #'-destination', 'platform=iOS Simulator,name=iPhone 7 Plus,OS=10.2',
+                    '-derivedDataPath',
+                    'build')
 
 
 class Server(Command):
