@@ -1,3 +1,13 @@
+### Quickstart
+
+The easiest way to try out enaml-native is by downloading the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground) app. This app allows you to paste code into a web based editor and run it as if it were built as part of the app!
+
+[![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
+
+
+Continue on below to install the dependencies for required building your own enaml-native apps.
+
+
 ### Installing
 
 enaml-native uses the same toolchains as kivy, so the same dependencies must be installed. Currently only python 2.7 is supported (same as kivy-ios).
