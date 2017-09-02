@@ -1,5 +1,3 @@
-This covers the basic project structure and the build process.
-
 ### Project structure
 
 An enaml-native app is organized similar to a react-native app.
