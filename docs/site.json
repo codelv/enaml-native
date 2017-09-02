@@ -11,7 +11,7 @@
       {"title":"Components", 
         "source": "https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/components.md"},
       {"title":"Project and Building", 
-        "source": "https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/project-and-building.md"},
+        "source": "https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/projects-and-building.md"},
       {"title":"Native Components", 
         "source": "https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/native-components.md"},
       {"title":"Bridge", 
