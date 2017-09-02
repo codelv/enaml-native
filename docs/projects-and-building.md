@@ -72,8 +72,10 @@ within will be added into your will be available on the actual app. You can add 
 Each platform config (`ios` and `android`) has `arches`, `dependencies`, and `excluded`. The rest are specfic for the platform.
 
 As you may have guessed, `arches` defines which platforms to compile python and extensions modules for and `dependencies` is 
-a list of python requirements to install ont the app. Pure python requirements are installed via pip, anything with compiled
+a list of python requirements to install on the app. Pure python requirements are installed via pip, anything with compiled
 extensions _MUST_ have a recipe for the specific platform. More on that later. 
+
+The `excluded` list is a list of [patterns](https://docs.python.org/2.7/library/glob.html) that you can use to exclude unused python modules from your app to reduce the app size.
 
 For android there's `sdk` and `ndk` which are the paths used for building you MUST update these to point to 
 wherever your's is installed. 
@@ -107,7 +109,7 @@ To cross compile python and modules for different arches you must:
 3. Run `./enaml-native build-python`
 
 This will rebuild for both Android and iOS (if applicable). 
-If you want to restrict building to only one on the other (on OSX only) pass the flag `--ios` or `--android`.
+If you want to restrict building to only one or the other (on OSX only) pass the flag `--ios` or `--android`.
 
 Python builds are done using modified versions of [python-for-android](https://github.com/kivy/python-for-android/) and [kivy-ios](https://github.com/kivy/kivy-ios/). 
 The python build process is VERY complicated and prone to errors on new installs due to the various system dependencies.  
@@ -147,32 +149,33 @@ using a fork of [python-for-android](https://github.com/frmdstryr/enaml-native/t
 
 This fork is modified as follows:
 
-- Added python2crystax support and uses the prebuilt python 2.7 from the [crystax NDK](https://www.crystax.net/)
-- Added an enaml bootstrap
-- Modified several recipies to work with enaml-native
+1. Added python2crystax support and uses the prebuilt python 2.7 from the [crystax NDK](https://www.crystax.net/)
+1. Added an enaml bootstrap
+1. Modified several recipies to work with enaml-native
 
 Building is invoked with `./enaml-native build-python` in [enaml-native](https://github.com/frmdstryr/enaml-native/blob/master/enaml-native)
 based on the config file. This calls ndk-build on the [native hooks](https://github.com/frmdstryr/enaml-native/tree/master/android/app/src/main/jni) 
 and then does a p4a's build to compile python and any recipes.  
 
 Once done all of your libraries will go to the jni libs folder `android/app/src/main/libs/<arch>`. 
-All modules here will be included in the app (see the [build.gradle](https://github.com/frmdstryr/enaml-native/blob/master/android/app/build.gradle#L24).
+All modules here will be included in the app by gradle (see [build.gradle](https://github.com/frmdstryr/enaml-native/blob/master/android/app/build.gradle#L24)).
 
 > Note: Libraries matching the pattern `lib*.so` are automatically copied during the App intall on the device. This speeds up the startup. Any modules NOT matching this need copied manually in your app's main activity.
 
 
-The entire build process is complicated and very issue prone. I'm hoping to be able to elimnate this entriely by
+The entire build process is complicated and very issue prone. I'm hoping to be able to make this easier this by
 providing a build server to compile libraries for you.
 
 > Note: If you want to add a dependency that has a compiled component it MUST have a recipe! You can create your own if one is missing
 
+These compiled modules are then imported using a custom import hook, see [import_hooks.py](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/core/import_hooks.py).
 
 ##### Bundling python for Android
 
 enaml-native hooks itself into the gradle build process to include your python source and libraries.
 This hook is in [android/app/build.grade](https://github.com/frmdstryr/enaml-native/blob/master/android/app/build.gradle).
 
-It simply runs `./enaml-native bundle-assets` which packages of your app code and site-packages into a zip 
+It simply runs `./enaml-native bundle-assets` which packages all the python and app source code into a zip 
 and copies it to `android/app/src/main/assets/python/python.zip`. 
 
 > Note: This hook does NOT include python or any extensions ONLY pure python assets! See above for building extensions.
@@ -180,12 +183,13 @@ and copies it to `android/app/src/main/assets/python/python.zip`.
 #### Adding libraries with Gradle
 
 To add custom libraries:
+
 1. Open the project in android-studio 
 2. Modify the `android/app/build.gradle` as needed.  
 3. Run gradle sync (should prompt you when you make a change) and it will collect your new libraries
 
 You can see there's a few already being used. Once a library is added with gradle you can use it via making
-a wrapper Proxy and Toolkit component (native component docs to come...) .
+a wrapper Proxy and Toolkit component (see the [native component](https://www.codelv.com/projects/enaml-native/docs/native-components) docs) .
 
 
 ### iOS specifics
@@ -212,9 +216,9 @@ using a fork of [kivy-ios](https://github.com/frmdstryr/enaml-native/tree/master
 
 This fork is __heavily__ modified as follows:
 
-- All builds were converted to create dylibs (Min iOS version is set to 8)
-- Python updated to 2.7.13
-- Added and modified several recipies to work with enaml-native
+1. All builds were converted to create dylibs (Min iOS version is set to 8)
+2. Python updated to 2.7.13
+3. Added and modified several recipies to work with enaml-native
 
 Building is invoked with `./enaml-native build-python` in [enaml-native](https://github.com/frmdstryr/enaml-native/blob/master/enaml-native)
 based on the config file. This calls `python-for-ios/toolchain.py` build internally.
@@ -223,6 +227,8 @@ The entire build process is complicated and very issue prone. I'm hoping to be a
 providing a build server to compile libraries for you.
 
 > Note: As of this writing I have NOT submitted an app to the App Store
+
+These compiled modules are then imported using a custom import hook, see [import_hooks.py](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/core/import_hooks.py).
 
 There's a few blog posts on what exactly was changed that may help you when building new recipies [on my blog](http://blog.codelv.com).
 
@@ -240,12 +246,13 @@ and copies it to `android/app/src/main/assets/python/python.zip`.
 #### Adding libraries with CocoaPods
 
 To add custom libraries:
+
 1. Modify the `ios/<app>/Podfile` as needed
 2. cd to `ios/<app>` and run `pod install` or `pod update`
 3. Rebuild your xcode project
 
 You can see there's a few already being used. Once a library is added with cocopods you can use it via making
-a wrapper Proxy and Toolkit component (native component docs to come...) .
+a wrapper Proxy and Toolkit component (see the [native component](https://www.codelv.com/projects/enaml-native/docs/native-components) docs) .
 
-
+That's all for now! Thanks for reading! Please suggest more docs if something is confusing.
 
