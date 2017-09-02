@@ -95,7 +95,7 @@ The build process depends on the platfom but from a high level the following mus
 4. Native build system builds the app and uses python via native hooks and [the bridge](https://www.codelv.com/projects/enaml-native/docs/bridge).
 
 
-### Bulding python
+### Building python
 
 The `package.json` config file defines an `arches` list for each platfom. This is the list of ABI's or target platforms to build your python and extensions for. 
 
