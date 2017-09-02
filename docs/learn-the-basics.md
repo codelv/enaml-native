@@ -2,6 +2,12 @@
 
 Enaml-native is like Enaml, but it uses native Android or iOS components instead of Qt components as building blocks. So to understand the basic structure of an enaml-native app, you need to understand some of the basic Enaml concepts, like declarative components and data binding operators.  If you already know Enaml, you still need to learn some enaml-native specifics.
 
+### Playground
+
+The easiest way to learn the enaml-native syntax is by downloading the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground) app. This app allows you to try out your code into a web based editor and run it as if it were built as part of the app!
+
+[![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
+
 
 ### Hello world
 
@@ -222,11 +228,84 @@ If you're familiar with react or react-native programming, these operators elimi
 
 If you're familiar with Android or iOS programming, this entirely eliminates the need to add listeners, callback functions, or use key value observers. Enaml and the native toolkit implementation(s) handles all of this seamlessly behind the scenes. See the more advanced documentation or the code for more details if you're interested.
 
-### Dynamic Components
+### Functions
+
+In order to better keep your component reusable you can define functions within your component that have access to the scope of the component. These are done using the `func` keyword and define just like a python's `def`. 
+
+> Note: You can still use python functions within your handlers and observers you'll just have to pass in any scope variables manually!
+
+    :::python
+    from enamlnative.core.api import *
+    from enamlnative.widgets.api import *
+
+
+    def on_click_noscope(btn,tv):
+        #: Have to pass in scope!
+        btn.count +=1
+        tv.text = "Clicked count {}!".format(btn.count)
+
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"    
+
+        func on_click():
+            #: We can access scope here without passing refs!
+            btn.count +=1
+            tv.text = "Clicked count {}!".format(btn.count)
+
+        TextView: tv:
+            text = "Text"
+
+        Button: btn:
+            attr count = 0
+            text = "func"
+            clicked :: on_click()
+
+        Button:
+            text = "def"
+            clicked :: on_click_noscope(btn,tv)
+      
+So using a `func` allows you to write cleaner code without needing to pass references around. This is very useful when adding callbacks when an async result is complete (ex an http request).
+
+Since components are like classes, you can also override a functions but there's a differnt syntax.
+
+
+    :::python
+    from enamlnative.core.api import *
+    from enamlnative.widgets.api import *
+
+    enamldef IncButton(Button):
+        text = "+"
+
+        #: Define function
+        func update_count(ref):
+            ref.count +=1
+
+    enamldef DecButton(IncButton):
+        text = "-"
+
+        #: Override function
+        update_count => (ref):
+            ref.count -=1
+
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"    
+        TextView: tv:
+            attr count = 0
+            text << "Count {}".format(self.count)
+        IncButton:
+            clicked :: update_count(tv)
+        DecButton:
+            clicked :: update_count(tv)
+
+      
+The example is pretty useless but you get the concept. Override using `<func name> => (args..)` and then the new definition.
+
+
+### Dynamic Components 
 
 Often time's you'll want to be display a component only when a certain condition is met. Additionally it's common to have to repeat a component based on a list of items. Enaml has an extremely powerful dynamic component system that allows you to do this and more. 
 
-#### Conditionals
+### Conditionals
 
 The `Conditional` node does not have any display widget, but instead uses it's `condition` attribute to decide if it's children should be rendered or not. 
 
@@ -248,7 +327,7 @@ In the above example the TextView will be shown or hidden based on the checked s
 
 > Note: The condition must be a boolean. If you're simply checking for exitance use `is not None` or wrap the expression in a `bool(expr)` call.
           
-#### Loopers
+### Loopers
 
 The `Looper` node also does not have any display widget, but instead uses it's `iterable` attribute to to generate a component for each item within the iterable list. 
 
@@ -271,7 +350,7 @@ In the above example three TextView components will be added to the ContentView 
 
 > Note: If you happen to need to loop over two or more lists you can use `attr` keywords to save references to the parent loop's item as needed. 
 
-#### Blocks
+### Blocks
 
 The `Block` node is a component specific to enaml-native. It's useful if you want to be able to define default content of a component but then later be able to override it in a subcomponent if needed. 
 
