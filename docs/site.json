@@ -10,6 +10,10 @@
         "source": "https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/examples.md"},
       {"title":"Components", 
         "source": "https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/components.md"},
+      {"title":"Project and Building", 
+        "source": "https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/project-and-building.md"}
+      {"title":"Native Components", 
+        "source": "https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/native-components.md"}
       {"title":"Bridge", 
         "source": "https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/bridge.md"},
       {"title":"Debugging", 
