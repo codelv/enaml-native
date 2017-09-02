@@ -6,31 +6,25 @@ Android apps are currently working, iOS implementation is in the works (see #10)
    
 ### Features ###
 1. Enaml's features: declarative syntax, conditional and looper rendering, automatic data binding
-2. Live app code reloading (like react-native's live reload)
+2. Web code editor via the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground)!
+3. Layouts with flexbox
+4. Live app code reloading (like react-native's live reload)
 
 ### Docs and Examples ###
 
-See the [wiki](https://github.com/frmdstryr/enaml-native/wiki)
+See the [project site](https://www.codelv.com/projects/enaml-native/)
+
+Or post questions on [gitter](https://gitter.im/enaml-web/Lobby)
 
 ### Apps ###
 
-See the wiki for [apps using enaml-native](https://github.com/frmdstryr/enaml-native/wiki/Apps).
+Apps using enaml-native can be found [here](https://www.codelv.com/projects/enaml-native/apps/).
 
 ### Demos ###
-1. Latest video here [on youtube](https://youtu.be/4bm5fb5k5mc)
-2. Live app reloading is now supported [demo](https://youtu.be/CbxVc_vNiNk)
-3. Try out the beta demo app here [on google play](https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo)
+1. Try out the beta demo app here [on google play](https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo)
+2. Try out code without installing the android SDK or NDK via the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground)!
 
-<div>
-<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-1.png" width="240" style="float: left;">
-<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-2.png" width="240" style="float: left;">
-<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-3.png" width="240" style="float: left;">
-<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-4.png" width="240" style="float: left;">
-<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-5.png" width="240" style="float: left;">
-<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-6.png" width="240" style="float: left;">
-<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-7.png" width="240" style="float: left;">
-<img src="https://raw.githubusercontent.com/frmdstryr/enaml-native/master/docs/imgs/enaml-native-android-app-8.png" width="240" style="float: left;">
-</div>
+[![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
 
 The goal of this project is to be an alternative to using [kivy](https://kivy.org/) for building mobile apps with python. 
 

@@ -1,16 +1,19 @@
 ### Playground
 
-The easiest way to try out these examples is by downloading the [Python Playground]() app. This app allows you to paste code into a web based editor and run it as if it were built as part of the app!
+The easiest way to try out these examples is by downloading the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground) app. This app allows you to paste code into a web based editor and run it as if it were built as part of the app!
 
 Once downloaded, start the app, and then go to [http://your-phone-address:8888](http://localhost:8888). If using a simulator run `adb forward tcp:8888 tcp:8888` and go to [http://localhost:8888](http://localhost:8888).
 
 Copy and paste the example code in and click the play button. The app reloads and there you go! You can try out any code this way as well so feel free to play around!
+
+[![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
 
 ### Basics
 
 #### Text
 
 Use a `TextView` to show text. You can set color, size, font, and other properties.  
+
     :::python
     from enamlnative.widgets.api import *
 
@@ -478,7 +481,174 @@ A simple app intro screen with dots for paging and next/back buttons.
 
 
 
+### Email Inbox
+
+A simple app showing usage of a toolbar, drawer, and scrollview. 
+
+[![See the demo on youtube](https://img.youtube.com/vi/73GLBTNTVIA/0.jpg)](https://youtu.be/73GLBTNTVIA)
+
+    :::python
+    """
+
+    A simple email app.
+
+    """
+
+    from atom.api import *
+    from enaml.core.api import *
+    from enamlnative.widgets.api import *
+
+    class Message(Atom):
+        name = Unicode()
+        subject = Unicode()
+        message = Unicode()
+
+    class Folder(Atom):
+        name = Unicode()
+        messages = List(Message)
+
+    class User(Atom):
+        name = Unicode()
+        email = Unicode()
+
+    class App(Atom):
+        #: Our user
+        user = Instance(User)
+
+        def _default_user(self):
+            return User(name="Me", email="user@example.com")
+
+        #: Selected folder
+        current_folder = Instance(Folder)
+
+        def _default_current_folder(self):
+            return self.folders[0]
+
+        #: Selected message
+        current_message = Instance(Message)
+
+        #: Email folders
+        folders = List(Folder,default=[
+            #: Create some dummy data
+            Folder(name="Inbox",messages=[
+                Message(name="John Doe", subject="Subject",message="This is a message") for i in range(30)    
+            ]),
+            Folder(name="Sent",messages=[
+                Message(name="Me", subject="Subject",message="This is a draft") for i in range(30)    
+            ]),
+            Folder(name="Draft",messages=[
+                Message(name="Me", subject="Subject", message="This is a draft") for i in range(30)    
+            ]),
+        ])
+
+    enamldef Drawer(ScrollView): view:
+        #: Required to set drawer to left or right
+        attr app: App
+        layout_gravity = "left"
+        layout_width = '300'
+        layout_height = 'match_parent'
+        background_color = "#fff"
+        Flexbox:
+            flex_direction = "column"
+            Flexbox:
+                padding = (10,10,10,10)
+                Icon:
+                    layout_width = "64"
+                    text = "{fa-user}"
+                    text_size = 32
+                Flexbox:
+                    flex_direction = "column"
+                    padding = (20, 0, 0, 0)
+                    TextView:
+                        text << app.user.name
+                        font_family = "sans-serif-medium"
+                    TextView:
+                        text << app.user.email
+            Flexbox:
+                layout_height="1"
+                layout_width = "match_parent"
+                background_color = "#ccc"
+            Looper:
+                iterable << app.folders
+                Flexbox:
+                    align_items = "center"
+                    padding = (10,10,10,10)
+                    clickable = True
+                    clicked :: 
+                        #: Set folder and close the drawer
+                        app.current_folder = loop_item
+                        view.parent.opened = []
+                    Icon:
+                        text = "{md-folder}"
+                        text_size = 24
+                    TextView:
+                        padding = (20, 0, 0, 0)
+                        text << loop_item.name
 
 
+    enamldef ContentView(DrawerLayout): drawer:
+        attr app = App()
+        Flexbox:
+            flex_direction = "column"
+            background_color = "#eee"
+            Toolbar:
+                layout_height = "100"
+                content_padding = (0,0,0,0)
+                background_color = "#123"
+                Flexbox:
+                    align_items = "center"
+                    IconButton:
+                        text = "{md-menu}"
+                        text_size = 24
+                        text_color = "#fff"
+                        layout_width = "50"
+                        style = "borderless"
+                        clicked ::
+                            drawer.opened =  [] if drawer.opened else [left_drawer] 
+                    TextView:
+                        text << app.current_folder.name
+                        text_color = "#fff"
+                        text_size = 24
+                        font_family = "sans-serif-medium"
 
+            ScrollView:
+                Flexbox:
+                    flex_direction = "column"
+                    Looper:
+                        iterable << app.current_folder.messages
+                        Flexbox:
+                            padding = (10,20,10,20)
+                            align_items = "center"
+                            Icon:
+                                layout = dict(flex_basis=0.3)
+                                text = "{fa-user}"
+                                text_size = 32
+                            Flexbox:
+                                padding = (10,0,0,0)
+                                layout = dict(flex_basis=0.7)
+                                flex_direction = "column"
+                                TextView:
+                                    text << loop_item.name
+                                    font_family = "sans-serif-medium"
+                                TextView:
+                                    text << loop_item.subject
+                        Flexbox:
+                            #: Add a bottom border
+                            layout_height="1"
+                            background_color = "#ccc"
+                    Button:
+                        style="borderless"
+                        text = "Load more"
+                        clicked :: 
+                            msgs = app.current_folder.messages[:]
+                            #: Add more messages
+                            msgs.extend([Message(name="Jack and Jill",subject="Hello!",message="Went up the hill again!") for i in range(10)])
+                            app.current_folder.messages = msgs
+
+        Drawer: left_drawer:
+            app << drawer.app
+        
+      
+
+More to come!
 
