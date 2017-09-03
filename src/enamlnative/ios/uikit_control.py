@@ -21,13 +21,13 @@ from .uikit_view import UIView, UiKitView
 class UIControl(UIView):
 
     #: Properties
-    enabled = ObjcProperty('boolean')
-    selected = ObjcProperty('boolean')
-    highlighted = ObjcProperty('boolean')
+    enabled = ObjcProperty('bool')
+    selected = ObjcProperty('bool')
+    highlighted = ObjcProperty('bool')
     contentVerticalAlignment = ObjcProperty('UIControlContentVerticalAlignment')
     contentHorizontalAlignment = ObjcProperty('UIControlContentHorizontalAlignment')
 
-    #setProgress = ObjcMethod('float', dict(animated='boolean'))
+    #setProgress = ObjcMethod('float', dict(animated='bool'))
     addTarget = ObjcMethod('id',
                            dict(action="SEL"),
                            dict(forControlEvents="UIControlEvents"))
@@ -82,5 +82,5 @@ class UiKitControl(UiKitView, ProxyCompoundButton):
         super(UiKitControl, self).init_widget()
 
         d = self.declaration
-        if d.checked:
-            self.set_checked(d.checked)
+        #if d.checked:
+        self.set_checked(d.checked)

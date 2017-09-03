@@ -11,7 +11,7 @@ Created on June 21, 2017
 '''
 from atom.api import Int
 from ..core.bridge import (
-    msgpack_encoder, BridgeMethod, BridgeField, BridgeCallback, BridgeObject
+    msgpack_encoder, BridgeMethod, BridgeField, BridgeCallback, BridgeObject, NestedBridgeObject
 )
 
 

@@ -189,7 +189,7 @@ class Flexbox(ViewGroup):
     # flex_shrink = d_(Float(strict=False))
     #
     #: Wrap or nowrap
-    flex_wrap = d_(Bool())
+    flex_wrap = d_(Enum('nowrap', 'wrap', 'wrap_reverse'))
 
     #: How to align children within the main axis of a container
     justify_content = d_(Enum('flex_start', 'flex_end', 'center', 'space_between', 'space_around'))

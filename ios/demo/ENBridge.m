@@ -12,10 +12,14 @@
 #import <UIKit/UIKit.h>
 #include <Python/Python.h>
 #import "UIColor+HexString.h"
+#import "UIScrollView+AutoResize.h"
 
 // For easy callbacks
 #import <BlocksKit/BlocksKit.h>
 #import <BlocksKit/BlocksKit+UIKit.h>
+
+// Add Yoga
+#import <YogaKit/UIView+Yoga.h>
 
 @interface ENBridge ()
 
@@ -36,6 +40,8 @@
     -(id)convertArg:(NSArray *)spec;
 
     -(void)onValueChanged:(id)sender;
+
+    -(NSArray *) resolveObject: (NSNumber *) objId withKey:(NSString *) key;
 
     + (UIColor *) colorWithHexString: (NSString *) hexString;
 
@@ -115,6 +121,25 @@
     }
 
     /**
+     * Return a tuple of object and key after "resolving" any nested
+     * properties.
+     */
+    -(NSArray *) resolveObject: (NSNumber *) objId withKey:(NSString *) key {
+        
+        if ([key containsString:@"."]) {
+            NSObject* obj = self.objectCache[objId];
+            NSArray *path = [key componentsSeparatedByString:@"."];
+            
+            for (NSString* key in [path subarrayWithRange:(NSRange){0,[path count]-1}]) {
+                obj = [obj valueForKey:key];
+            }
+            
+            return @[obj, [path lastObject]];
+        }
+        return @[self.objectCache[objId],key];
+    }
+
+    /**
      * Convert msgpack arg to correct format based on arg tuple from python
      */
     -(id)convertArg:(NSArray *)spec {
@@ -141,6 +166,17 @@
         } else if ([argType isEqualToString:@"SEL"]) {
             SEL selector = NSSelectorFromString((NSString*)spec[1]);
             return [NSValue valueWithPointer:selector];
+        } else if ([argType isEqualToString:@"YGValue"]) {
+            YGValue value = YGPointValue([(NSNumber*)spec[1] floatValue]);
+            return [NSValue valueWithPointer:&value];
+        } else if ([argType isEqualToString:@"UIFont"]) {
+            NSArray* args = spec[1];
+            if ([args count]==2) {
+                return [UIFont fontWithName:args[0] size:[(NSNumber *)args[1] floatValue]];
+            } else {
+                return [UIFont systemFontOfSize:[(NSNumber*)args[0] floatValue]];
+            }
+        //    return ((NSNumber *)spec[1]).boolValue;
         }
         return spec[1];
     }
@@ -166,10 +202,12 @@
      *
      */
     - (void)updateObject:(NSNumber *)objId andReturn:(NSNumber *)returnId usingMethod:(NSString *)method withArgs:(NSArray *)args {
-        NSLog(@"Updating id=%@ using method %@ with args %@",objId,method,args);
+        //NSLog(@"Updating id=%@ using method %@ with args %@",objId,method,args);
         
-        // Get the object from the cache
-        NSObject *obj = self.objectCache[objId];
+        // Get the object from the cache resolving any nested properties
+        NSArray *tmp = [self resolveObject:objId withKey:method];
+        NSArray *obj = tmp[0];
+        method = tmp[1];
         
         if (!obj) {
             NSLog(@"Warning: Null object when referencing id=%@", objId);
@@ -194,10 +232,26 @@
         // Set args
         int i = 2;
         for (NSArray* arg in args) {
-            NSObject* val = [self convertArg:arg];
-            [lambda setArgument:&val atIndex:i];
+            // Hack for BOOL, WTF
+            if ([(NSString*) arg[0] isEqualToString:@"bool"]) {
+                BOOL val = ((NSNumber*) arg[1]).boolValue;
+                [lambda setArgument:&val atIndex:i];
+            } else {
+                NSObject* val = [self convertArg:arg];
+                [lambda setArgument:&val atIndex:i];
+            }
+            
+            // Next arg
             i++;
         }
+        
+        
+        /*if ([obj isKindOfClass:UISwitch.class]) {
+            // Forcing frick
+            BOOL value = ((NSNumber*)args[0][1]).boolValue;
+            [(UISwitch *) obj setOn:value];
+            return;
+        }*/
         
         // Call it
         [lambda invoke];
@@ -215,10 +269,15 @@
      */
     - (void)updateObject:(NSNumber *)objId usingField:(NSString *)field withValue:(NSObject *)value {
         
-        NSLog(@"Setting id=%@ using field %@ with args %@",objId,field,value);
+        //NSLog(@"Setting id=%@ using field %@ with args %@",objId,field,value);
         
         // Get the object from the cache
-        NSObject *obj = self.objectCache[objId];
+        //NSObject *obj = self.objectCache[objId];
+        
+        // Get the object from the cache resolving any nested properties
+        NSArray *tmp = [self resolveObject:objId withKey:field];
+        NSArray *obj = tmp[0];
+        field = tmp[1];
         
         if (!obj) {
             NSLog(@"Warning: Null object when referencing id=%@", objId);
@@ -309,7 +368,7 @@
         
         // Dispatch a little later
         // TODO: I don't want to do this in the main thread!
-        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_USEC*100);
+        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC);
         dispatch_after(delay, dispatch_get_main_queue(), ^{
             self.eventCallsPending -= 1;
             if (self.eventCallsPending==0) {

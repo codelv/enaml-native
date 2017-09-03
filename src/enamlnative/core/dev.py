@@ -14,6 +14,7 @@ import sys
 import json
 import shutil
 import inspect
+import traceback
 from atom.api import Atom, ForwardInstance, Enum, Unicode, Int, Bool
 from contextlib import contextmanager
 
@@ -401,7 +402,23 @@ class DevServerSession(Atom):
         print("Dev server message: {}".format(msg))
         if msg['type'] == 'reload':
             #: Show loading screen
-            self.app.widget.showLoading("Reloading... Please wait.", now=True)
+            try:
+
+                self.app.widget.showLoading("Reloading... Please wait.", now=True)
+            except:
+                #: TODO: Implement for iOS...
+                traceback.print_exc()
+
+            #: On iOS we can't write in the app bundle
+            if os.environ.get('TMP'):
+                tmp_dir = os.environ['TMP']
+                #if not os.path.exists(tmp_dir):
+                #    os.makedirs(tmp_dir)
+                if tmp_dir not in sys.path:
+                    sys.path.insert(0, tmp_dir)
+
+                    import site
+                    reload(site)
 
             with cd(sys.path[0]):
                 #: Clear cache

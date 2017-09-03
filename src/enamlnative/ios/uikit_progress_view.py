@@ -23,7 +23,7 @@ class UIProgressView(UIView):
     """
     #: Properties
     progress = ObjcProperty('float')
-    setProgress = ObjcMethod('float', dict(animated='boolean'))
+    setProgress = ObjcMethod('float', dict(animated='bool'))
 
 
 class UiKitProgressView(UiKitView, ProxyProgressBar):

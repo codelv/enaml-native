@@ -22,7 +22,7 @@ class UIButton(UIControl):
     """
     __signature__ = set_default(dict(buttonWithType="UIButtonType"))
     #: Properties
-    on = ObjcProperty('boolean')
+    on = ObjcProperty('bool')
     onTintColor = ObjcProperty('UIColor')
     tintColor = ObjcProperty('UIColor')
     thumbTintColor = ObjcProperty('UIColor')

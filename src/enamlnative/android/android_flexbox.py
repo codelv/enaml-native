@@ -302,7 +302,7 @@ class AndroidFlexbox(AndroidViewGroup, ProxyFlexbox):
         d = self.declaration
         if d.flex_direction != 'row':
             self.set_flex_direction(d.flex_direction)
-        if d.flex_wrap:
+        if d.flex_wrap != 'nowrap':
             self.set_flex_wrap(d.flex_wrap)
         if d.justify_content != 'flex_start':
             self.set_justify_content(d.justify_content)
@@ -365,7 +365,7 @@ class AndroidFlexbox(AndroidViewGroup, ProxyFlexbox):
         self.widget.setFlexDirection(Flexbox.FLEX_DIRECTION[direction])
 
     def set_flex_wrap(self, wrap):
-        self.widget.setFlexWrap(1 if wrap else 0)
+        self.widget.setFlexWrap(Flexbox.FLEX_WRAP[wrap])
 
     def set_justify_content(self, justify):
         self.widget.setJustifyContent(Flexbox.JUSTIFY_CONTENT[justify])

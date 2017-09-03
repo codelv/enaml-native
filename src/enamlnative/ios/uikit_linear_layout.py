@@ -23,7 +23,7 @@ class UIStackView(UIView):
     """
     #: Properties
     axis = ObjcProperty('UILayoutConstraintAxis')
-    #setProgress = ObjcMethod('float', dict(animated='boolean'))
+    #setProgress = ObjcMethod('float', dict(animated='bool'))
     addArrangedSubview = ObjcMethod('UIView')
     insertArrangedSubview = ObjcMethod('UIView', dict(atIndex='NSInteger'))
     removeArrangedSubview = ObjcMethod('UIView')
@@ -61,54 +61,10 @@ class UiKitLinearLayout(UiKitViewGroup, ProxyLinearLayout):
         state of the widget. The child widgets will not yet be created.
 
         """
-        widget = self.widget
-        d = self.declaration
         super(UiKitLinearLayout, self).init_widget()
+        d = self.declaration
         if d.orientation != "horizontal":  #: Default is horizontal
             self.set_orientation(d.orientation)
-
-    # def init_layout(self):
-    #     """ Initialize the layout of the toolkit widget.
-    #
-    #      This method is called during the bottom-up pass. This method
-    #      should initialize the layout of the widget. The child widgets
-    #      will be fully initialized and layed out when this is called.
-    #
-    #      """
-    #     widget = self.widget
-    #     for child_widget in self.child_widgets():
-    #         widget.addArrangedSubview(child_widget)
-    #     super(UiKitLinearLayout, self).init_layout()
-    #
-    # def update_frame(self):
-    #     """ Use parent size by default"""
-    #     super(UiKitLinearLayout, self).update_frame()
-    #     if not self.frame:
-    #         self.frame = self.parent().frame
-
-    # def child_added(self, child):
-    #     """ Handle the child added event from the declaration.
-    #
-    #     This handler will unparent the child toolkit widget. Subclasses
-    #     which need more control should reimplement this method.
-    #
-    #     """
-    #     super(UiKitView, self).child_added(child)
-    #     widget = self.widget
-    #     #: TODO: Should index be cached?
-    #     for i, child_widget in enumerate(self.child_widgets()):
-    #         if child_widget == child.widget:
-    #             widget.insertArrangedSubview(child_widget, atIndex=i)
-    #
-    # def child_removed(self, child):
-    #     """ Handle the child removed event from the declaration.
-    #
-    #     The child must be both removed from the arrangement and removed normally.
-    #
-    #     """
-    #     if child.widget is not None:
-    #         self.widget.removeArrangedSubview(child.widget)
-    #     super(UiKitLinearLayout, self).child_removed(child)
 
     # --------------------------------------------------------------------------
     # ProxyLinearLayout API

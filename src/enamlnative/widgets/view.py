@@ -52,16 +52,16 @@ class ProxyView(ProxyWidget):
     def set_alpha(self, alpha):
         raise NotImplementedError
 
-    def set_top(top):
+    def set_top(self, top):
         raise NotImplementedError
 
-    def set_left(left):
+    def set_left(self, left):
         raise NotImplementedError
 
-    def set_right(right):
+    def set_right(self, right):
         raise NotImplementedError
 
-    def set_bottom(bottom):
+    def set_bottom(self, bottom):
         raise NotImplementedError
 
     def set_rotation(self,rotation):
@@ -278,13 +278,13 @@ class View(Widget):
 
     z = d_(Float())
     #
-    # #: Width of frame
-    # #: on android use layout_width instead
-    # width = d_(Float()).tag(android=False)
-    #
-    # #: Height of frame
-    # #: on android use layout_width instead
-    # height = d_(Float()).tag(android=False)
+    #: Width of frame
+    #: on android use layout_width instead
+    width = d_(Float()).tag(android=False)
+
+    #: Height of frame
+    #: on android use layout_width instead
+    height = d_(Float()).tag(android=False)
     #
     #: Holder for flexbox layout parameters
     layout = d_(Dict())

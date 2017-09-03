@@ -8,6 +8,7 @@
 #import <UIKit/UIKit.h>
 #import "ViewController.h"
 #import "ENBridge.h"
+#import <YogaKit/UIView+Yoga.h>
 
 @interface ViewController ()
 
@@ -18,14 +19,21 @@
 @implementation ViewController
 
 - (void) displayView:(UIView *)view {
-    //self.view.backgroundColor = [UIColor redColor];
-    /*UILabel *fromLabel = [[UILabel alloc]initWithFrame:CGRectMake(91, 15, 200, 20)];
-    fromLabel.text = @"CRAP";
-    fromLabel.textColor = [UIColor blackColor];
-    //fromLabel.textAlignment = NSTextAlignmentLeft;
-     */
-    //[self.view addSubview:[self.bridge getObject:@1]];
-    //[self.view addSubview:fromLabel];
+    
+    // Hide loading
+    NSArray *viewsToRemove = [self.view subviews];
+    for (UIView *v in viewsToRemove) {
+        [v removeFromSuperview];
+    }
+    
+    // Copy frame from root
+    view.frame = self.view.window.frame;
+    view.yoga.isEnabled = YES;
+    view.yoga.width = YGPointValue(self.view.frame.size.width);
+    view.yoga.height = YGPointValue(self.view.frame.size.height);
+    [view.yoga applyLayoutPreservingOrigin:YES];
+    
+    // Add new view
     [self.view addSubview:view];
 }
 

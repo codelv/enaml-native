@@ -80,6 +80,10 @@ def edit_text_factory():
     return UiKitEditText
 
 
+def flexbox_factory():
+    from .uikit_flexbox import UiKitFlexbox
+    return UiKitFlexbox
+
 def fragment_factory():
     # print "Import frame layout"
     from .uikit_fragment import UiKitFragment
@@ -286,6 +290,7 @@ IOS_FACTORIES = {
     'DatePicker': date_picker_factory,
     'DrawerLayout': drawer_layout_factory,
     'EditText': edit_text_factory,
+    'Flexbox': flexbox_factory,
     'Fragment': fragment_factory,
     'FrameLayout': frame_layout_factory,
     'GridLayout': grid_layout_factory,

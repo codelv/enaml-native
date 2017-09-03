@@ -10,7 +10,7 @@ Created on Aug 25, 2017
 @author: jrm
 '''
 
-from atom.api import Typed
+from atom.api import Typed, Bool
 from enamlnative.widgets.switch import ProxySwitch
 
 from .bridge import ObjcMethod, ObjcProperty, ObjcCallback
@@ -21,7 +21,7 @@ class UISwitch(UIControl):
     """
     """
     #: Properties
-    on = ObjcProperty('boolean')
+    on = ObjcProperty('bool')
     onTintColor = ObjcProperty('UIColor')
     tintColor = ObjcProperty('UIColor')
     thumbTintColor = ObjcProperty('UIColor')
@@ -30,10 +30,10 @@ class UISwitch(UIControl):
 
     #: Methods
     #: Works but then doesn't let you change it
-    setOn = ObjcMethod('boolean', dict(animated='boolean'))
+    setOn = ObjcMethod('bool', dict(animated='bool'))
 
     #: Callbacks
-    onValueChanged = ObjcCallback('boolean')
+    onValueChanged = ObjcCallback('bool')
 
 
 class UiKitSwitch(UiKitControl, ProxySwitch):
@@ -72,24 +72,23 @@ class UiKitSwitch(UiKitControl, ProxySwitch):
                          forControlEvents=UISwitch.UIControlEventValueChanged,
                          andCallback=self.widget.getId(),
                          usingMethod="onValueChanged",
-                         withValues=["on"]
+                         withValues=["on"]#,"selected"]
                          )
 
         self.widget.onValueChanged.connect(self.on_checked_changed)
 
-    def on_checked_changed(self, state):
-        #: Suppressing a property is pretty ugly...
-        with self.widget.get_member('on').suppressed(self.widget):
-            d = self.declaration
-            d.checked = state
-
-
+    def on_checked_changed(self, on):
+        """ See https://stackoverflow.com/questions/19628310/ """
+        #: Since iOS decides to call this like 100 times for each defer it
+        d = self.declaration
+        #with self.widget.setOn.suppressed():
+        d.checked = on
 
     # --------------------------------------------------------------------------
     # ProxySwitch API
     # --------------------------------------------------------------------------
     def set_checked(self, checked):
-        self.widget.on = checked
+        self.widget.setOn(checked, animated=True)
 
     def set_show_text(self, show):
         pass  #: Has no text

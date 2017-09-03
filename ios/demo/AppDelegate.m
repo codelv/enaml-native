@@ -97,7 +97,7 @@ ENBridge* bridge;
     putenv((char *)[python_path UTF8String]);
     
     // iOS provides a specific directory for temp files.
-    tmp_path = [NSString stringWithFormat:@"TMP=%@/tmp", resourcePath, nil];
+    tmp_path = [NSString stringWithFormat:@"TMP=%@", NSTemporaryDirectory(), nil];
     putenv((char *)[tmp_path UTF8String]);
     
     // Set library Loader path

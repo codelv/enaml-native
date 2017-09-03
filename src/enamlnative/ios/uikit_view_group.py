@@ -65,17 +65,17 @@ class UiKitViewGroup(UiKitView, ProxyViewGroup):
         #: Add all child widgets to the layout
         for child_widget in self.child_widgets():
             layout.addArrangedSubview(child_widget)
-            layout.addSubview(child_widget)
+            #layout.addSubview(child_widget)
         #super(UiKitViewGroup, self).init_layout()
 
-    def update_frame(self):
-        """ Use parent size by default"""
-        super(UiKitViewGroup, self).update_frame()
-        if not self.frame:
-            d = self.declaration
-            if d.parent and not (d.x or d.y or d.width or d.height):
-                d.width, d.height = d.parent.width, d.parent.height
-            self.frame = (d.x,d.y,d.width,d.height)
+    # def update_frame(self):
+    #     """ Use parent size by default"""
+    #     super(UiKitViewGroup, self).update_frame()
+    #     if not self.frame:
+    #         d = self.declaration
+    #         if d.parent and not (d.x or d.y or d.width or d.height):
+    #             d.width, d.height = d.parent.width, d.parent.height
+    #         self.frame = (d.x,d.y,d.width,d.height)
 
     def child_added(self, child):
         """ Handle the child added event from the declaration.
@@ -98,9 +98,10 @@ class UiKitViewGroup(UiKitView, ProxyViewGroup):
         The child must be both removed from the arrangement and removed normally.
 
         """
+        layout = self.layout
         if child.widget is not None:
-            self.layout.removeArrangedSubview(child.widget)
-            self.layout.removeSubview(child.widget)
+            layout.removeArrangedSubview(child.widget)
+            layout.removeSubview(child.widget)
         #super(UiKitViewGroup, self).child_removed(child)
 
     def destroy(self):
@@ -108,7 +109,7 @@ class UiKitViewGroup(UiKitView, ProxyViewGroup):
 
         """
         layout = self.layout
-        if self.layout is not None:
+        if layout is not None:
             layout.removeFromSuperview()
             self.layout = None
         super(UiKitViewGroup, self).destroy()

@@ -10,7 +10,7 @@ Created on Aug 3, 2017
 @author: jrm
 '''
 
-from atom.api import Typed, Tuple, observe
+from atom.api import Typed, Tuple, ForwardInstance, observe
 from enamlnative.widgets.view import ProxyView
 
 from .bridge import ObjcBridgeObject, ObjcMethod, ObjcProperty, ObjcCallback
@@ -40,25 +40,34 @@ class UIResponder(NSObject):
     pass
 
 
+def yoga_class():
+    from .uikit_flexbox import Yoga
+    return Yoga
+
 class UIView(UIResponder):
     """ From:
         https://developer.apple.com/documentation/uikit/uiview?language=objc
     """
     #__signature__ = set_default((dict(initWithFrame='CGRect'),))
 
+    yoga = ForwardInstance(yoga_class)
+
+    def _default_yoga(self):
+        return yoga_class()(self, 'yoga')
+
     #: Properties
     backgroundColor = ObjcProperty('UIColor')
-    hidden = ObjcProperty('boolean')
+    hidden = ObjcProperty('bool')
     alpha = ObjcProperty('float')
-    opaque = ObjcProperty('boolean')
+    opaque = ObjcProperty('bool')
     tintColor = ObjcProperty('UIColor')
     tintAdjustmentMode = ObjcProperty('UIViewTintAdjustmentMode')
-    clipsToBounds = ObjcProperty('boolean')
-    clearsContextBeforeDrawing = ObjcProperty('boolean')
+    clipsToBounds = ObjcProperty('bool')
+    clearsContextBeforeDrawing = ObjcProperty('bool')
     maskView = ObjcProperty('UIView')
-    userInteractionEnabled = ObjcProperty('boolean')
-    multipleTouchEnabled = ObjcProperty('boolean')
-    exclusiveTouch = ObjcProperty('boolean')
+    userInteractionEnabled = ObjcProperty('bool')
+    multipleTouchEnabled = ObjcProperty('bool')
+    exclusiveTouch = ObjcProperty('bool')
 
     frame = ObjcProperty('CGRect')
     bounds = ObjcProperty('CGRect')
@@ -66,7 +75,7 @@ class UIView(UIResponder):
     transform = ObjcProperty('CGAffineTransform')
 
     layoutMargins = ObjcProperty('UIEdgeInserts')
-    preservesSuperviewLayoutMargins = ObjcProperty('boolean')
+    preservesSuperviewLayoutMargins = ObjcProperty('bool')
 
     #: Methods
     addSubview = ObjcMethod('UIView')
@@ -103,12 +112,6 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         toolkit widget and assign it to the 'widget' attribute.
 
         """
-        #if self.parent() is None: #: Root view?
-        #    #: Testing...
-        #    self.widget = UIView(__id__=-3)
-        #else:
-        #    d = self.declaration
-        #    #frame = (d.x,d.y,200, 100)
         self.widget = UIView()#initWithFrame=frame)
 
     def init_widget(self):
@@ -119,13 +122,15 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         state of the widget. The child widgets will not yet be created.
 
         """
-        widget = self.widget
+        super(UiKitView, self).init_widget()
+        d = self.declaration
 
         self.update_frame()
 
-        d = self.declaration
         if d.background_color:
             self.set_background_color(d.background_color)
+        if d.alpha:
+            self.set_alpha(d.alpha)
 
     def init_layout(self):
         """ Initialize the layout of the toolkit widget.
@@ -138,6 +143,10 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         widget = self.widget
         for child_widget in self.child_widgets():
             widget.addSubview(child_widget)
+
+        d = self.declaration
+        if d.layout:
+            self.set_layout(d.layout)
 
     def update_frame(self):
         """ Define the view frame for this widgets"""
@@ -208,7 +217,8 @@ class UiKitView(UiKitToolkitObject, ProxyView):
     # --------------------------------------------------------------------------
     @observe('frame')
     def set_frame(self, change):
-        self.widget.frame = self.frame if self.frame else (0,0,0,0)
+        if self.frame:
+            self.widget.frame = self.frame
 
     def set_alpha(self, alpha):
         self.widget.alpha = alpha
@@ -229,22 +239,30 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         raise NotImplementedError
 
     def set_padding(self, padding):
-        raise NotImplementedError
+        yoga = self.widget.yoga
+        yoga.paddingTop = padding[0]
+        yoga.paddingRight = padding[1]
+        yoga.paddingBottom = padding[2]
+        yoga.paddingLeft = padding[3]
 
     def set_margins(self, margins):
-        raise NotImplementedError
+        yoga = self.widget.yoga
+        yoga.marginTop = margins[0]
+        yoga.marginRight = margins[1]
+        yoga.marginBottom = margins[2]
+        yoga.marginLeft = margins[3]
 
-    def set_top(top):
-        raise NotImplementedError
+    def set_top(self, top):
+        self.yoga.top = top
 
-    def set_left(left):
-        raise NotImplementedError
+    def set_left(self, left):
+        self.yoga.left = left
 
-    def set_right(right):
-        raise NotImplementedError
+    def set_right(self, right):
+        self.yoga.right = right
 
-    def set_bottom(bottom):
-        raise NotImplementedError
+    def set_bottom(self, bottom):
+        self.yoga.bottom = bottom
 
     def set_rotation(self,rotation):
         raise NotImplementedError
@@ -271,10 +289,16 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         raise NotImplementedError
 
     def set_x(self, x):
-        raise NotImplementedError
+        self.yoga.left = x
 
     def set_y(self, y):
-        raise NotImplementedError
+        self.yoga.top = y
 
     def set_z(self, z):
         raise NotImplementedError
+
+    def set_layout(self, layout):
+        from .uikit_flexbox import FlexboxLayoutHelper
+        FlexboxLayoutHelper.apply_layout(self)
+
+

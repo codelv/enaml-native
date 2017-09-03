@@ -11,7 +11,7 @@ Created on June 21, 2017
 '''
 import msgpack
 import functools
-from atom.api import Atom, Property, ForwardInstance, Dict, Unicode, Tuple, Int
+from atom.api import Atom, Property, Instance, ForwardInstance, Dict, Unicode, Tuple, Int
 from weakref import WeakValueDictionary
 from contextlib import contextmanager
 
@@ -172,7 +172,7 @@ class BridgeMethod(Property):
             Command.METHOD,  #: method
             obj.__id__,
             result.__id__ if result else 0,
-            method_name,  #: method name
+            obj.__prefix__ + method_name,  #: method name
             method_args,  #: args
             **kwargs  #: kwargs to send_event
         )
@@ -220,7 +220,7 @@ class BridgeField(Property):
         obj.__app__.send_event(
             Command.FIELD,  #: method
             obj.__id__,
-            self.name,  #: method name
+            obj.__prefix__ + self.name,  #: method name
             [msgpack_encoder(self.__signature__, arg)]  #: args
         )
 
@@ -297,6 +297,10 @@ class BridgeObject(Atom):
     #: Bridge object ID
     __id__ = Int(0, factory=_generate_id)
 
+    #: Prefix to add to all names used during method and property calls
+    #: used for nested objects
+    __prefix__ = Unicode()
+
     #: Bridge
     __app__ = ForwardInstance(get_app_class)
 
@@ -330,3 +334,33 @@ class BridgeObject(Atom):
             self.__id__,  #: id to assign in java
         )
         _cleanup_id(self)
+
+
+class NestedBridgeObject(BridgeObject):
+    """ A nested object allows you to invoke methods and set properties
+        of an object that is a property of another object using the dot notation.
+
+        Useful for setting nested properties without needing to first create a reference
+        bridge object (thus saving the time waiting for the bridge to reply) for example:
+
+            UIView view = [UIView new];
+            view.yoga.width = YES;
+
+        Would require to create a reference to the "yoga" object first but instead we just
+        add our nested object's prefix and let the bridge resolve the actual property. It works
+        like a regular BridgeObject but appends the "name'.
+
+        This object is NOT in the cache on either side of the bridge.
+
+    """
+    #: Reference to the object this is referenced under
+    __root__ = Instance(BridgeObject)
+
+    def __init__(self, root, attr, **kwargs):
+        kwargs['__id__'] = root.getId()
+        kwargs['__prefix__'] = attr + "."
+        Atom.__init__(self, **kwargs)
+
+    def __del__(self):
+        # Not necessary, it's not in the cache
+        pass
