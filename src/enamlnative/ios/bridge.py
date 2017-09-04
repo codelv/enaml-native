@@ -9,9 +9,11 @@ Created on June 21, 2017
 
 @author: jrm
 '''
-from atom.api import Int
+from atom.api import Atom, Int
+from ..core import bridge
 from ..core.bridge import (
-    msgpack_encoder, BridgeMethod, BridgeField, BridgeCallback, BridgeObject, NestedBridgeObject
+    Command, msgpack_encoder,
+    BridgeMethod, BridgeField, BridgeCallback, BridgeObject, NestedBridgeObject
 )
 
 
@@ -122,4 +124,55 @@ class ObjcBridgeObject(BridgeObject):
         """ Use the class name by default as everything should be unique. """
         return self.__class__.__name__
 
+    def __init__(self, *args, **kwargs):
+        """ Sends the event to create this View in Java """
+        __id__ = kwargs.get('__id__', None)
 
+        #: Note: We SKIP the superclass here!
+        if __id__ is not None:
+            super(Atom, self).__init__(__id__=__id__)
+        else:
+            super(Atom, self).__init__()
+
+        #: Send the event over the bridge to construct the view
+        bridge.CACHE[self.__id__] = self
+        if __id__ is None:
+            self.__app__.send_event(
+                Command.CREATE,  #: method
+                self.__id__,  #: id to assign in bridge cache
+                self.__nativeclass__,
+                *self._pack_args(**kwargs)
+            )
+
+    def _pack_args(self, *args, **kwargs):
+        """ Arguments must be packed according to the kwargs passed and
+            the signature defined.
+
+        """
+        signature = self.__signature__
+        #: No arguments expected
+        if not signature or not kwargs:
+            return ("init", [])
+
+        #: Build args, first is a string, subsequent are dictionaries
+        method_name = []
+        bridge_args = []
+        for i, sig in enumerate(signature):
+            #if i == 0:
+            #    method_name.append(":")
+            #    bridge_args.append(msgpack_encoder(sig, args[0]))
+            #    continue
+
+            #: Sig is a dict so we must pull out the matching kwarg
+            found = False
+            for k in sig:
+                if k in kwargs:
+                    method_name.append("{}:".format(k))
+                    bridge_args.append(msgpack_encoder(sig[k], kwargs[k]))
+                    found = True
+                    break
+            if not found:
+                #: If we get here something is wrong
+                raise ValueError("Unexpected or missing argument at index {}. Expected {}".format(i,sig))
+
+        return ("".join(method_name), bridge_args)

@@ -14,7 +14,7 @@ from atom.api import Typed
 
 from enamlnative.widgets.compound_button import ProxyCompoundButton
 
-from .bridge import ObjcMethod, ObjcProperty
+from .bridge import ObjcMethod, ObjcProperty, ObjcCallback
 from .uikit_view import UIView, UiKitView
 
 
@@ -30,7 +30,9 @@ class UIControl(UIView):
     #setProgress = ObjcMethod('float', dict(animated='bool'))
     addTarget = ObjcMethod('id',
                            dict(action="SEL"),
-                           dict(forControlEvents="UIControlEvents"))
+                           dict(forControlEvents="enum"))#""UIControlEvents"))
+
+    onClicked = ObjcCallback()
 
     #: UIControlEvents enum
     UIControlEventTouchDown = 1 << 0
@@ -53,6 +55,14 @@ class UIControl(UIView):
     UIControlEventApplicationReserved = 0x0F000000
     UIControlEventSystemReserved = 0xF0000000
     UIControlEventAllEvents = 0xFFFFFFFF
+
+    UIControlStateNormal = 0
+    UIControlStateHighlighted = 1 << 0
+    UIControlStateDisabled = 1 << 1
+    UIControlStateSelected = 1 << 2
+    UIControlStateFocused = 1 << 3
+    UIControlStateApplication = 0x00FF0000
+    UIControlStateReserved = 0xFF000000
 
 
 class UiKitControl(UiKitView, ProxyCompoundButton):
@@ -82,5 +92,23 @@ class UiKitControl(UiKitView, ProxyCompoundButton):
         super(UiKitControl, self).init_widget()
 
         d = self.declaration
-        #if d.checked:
-        self.set_checked(d.checked)
+        if d.clickable:
+            #: A really ugly way to add the target
+            #: would be nice if we could just pass the block pointer here :)
+            bridge = self.get_app().bridge
+            bridge.addTarget(
+                self.widget,
+                forControlEvents=UIControl.UIControlEventTouchUpInside,
+                andCallback=self.widget.getId(),
+                usingMethod="onClicked",
+                withValues=[]
+            )
+
+            self.widget.onClicked.connect(self.on_clicked)
+
+    # --------------------------------------------------------------------------
+    # Clicked API
+    # --------------------------------------------------------------------------
+    def on_clicked(self):
+        d = self.declaration
+        d.clicked()

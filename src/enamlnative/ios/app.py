@@ -57,7 +57,7 @@ class ENBridge(ObjcBridgeObject):
 
     #: Add a target to a UIControl that invokes a python callback
     addTarget = ObjcMethod('UIControl',
-                           dict(forControlEvents="UIControlEvents"),
+                           dict(forControlEvents="enum"),#""UIControlEvents"),
                            dict(andCallback="int"),
                            dict(usingMethod="NSString"),
                            dict(withValues="NSArray"))

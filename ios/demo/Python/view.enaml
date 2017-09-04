@@ -9,87 +9,50 @@ Created on June 21, 2017
 
 @author: jrm
 '''
+from enamlnative.core.api import *
 from enamlnative.widgets.api import *
-from enaml.core.api import Looper, Conditional
 
 enamldef ContentView(Flexbox):
+    flex_direction = "column"
     background_color = "#abc"
-    justify_content = "center"
-    align_items = "center"
-    Switch:
-        pass
-    #flex_direction = "row"
-    # Flexbox:
-    #     background_color = "#00F"
-    #     Switch:
-    #         #text_color = "#fff"
-    #         #text = "Test!"
-    #         pass
-    #     Switch:
-    #         pass
-    ActivityIndicator:
-        pass
+    #: TODO: Padding not working...
+    TextView:
+        text = "Switches"
+    Flexbox:
+        justify_content = "space_around"
 
-enamldef ContentViewXXX(Flexbox): root:
-    y = 20
-    width = 420
-    height = 720
-    background_color = "#EEE"
-    #flex_direction = "column"
-    #justify_content = "center"
-    #ProgressBar:
-    #    progress = 30
-    # LinearLayout:
-    #
-    #     #height = parent.height*0.5
-    #     #width = parent.width
-    #     background_color = "#123"
-    #     TextView:
-    #         text = "THIS IS NOT SHOWING"
-    #     TextView:
-    #         text = "WHER IS THIS?"
-    # ScrollView:
-    #     #width = parent.width
-    #     #height = 1720
-    #     LinearLayout:
-    #         orientation = "vertical"
-    #         #height = parent.height*0.5
-    #         #width = parent.width
-    Switch: sw:
-        checked = False
-    Switch:
-        checked := sw.checked
-    #Switch: sw2:
-    #    checked := sw.checked
-    # TextView:
-    #     text << "Switch: {}".format(sw.checked)
-    # ActivityIndicator:
-    #     color = "#333"
-    # ProgressBar:
-    #     progress = 50
-    # TextView:
-    #     text = "Loading!"
-    #     text_color = "#333"
-    # LinearLayout:
-    #     #width = root.width
-    #     #height = 100
-    #     TextView:
-    #         text = "it needs crap?"
-    #         background_color = "#fea"
-    #
-    #     TextView:
-    #         background_color = "#af2"
-    #         text = "iOS still sucks!"
-    # TextView:
-    #     text = "iOS sucks!"
-    # ScrollView:
-    #     background_color = "#ABC"
-    #     LinearLayout:
-    #         orientation = "vertical"
-    #         width = root.width
-    #         height = root.height*3
-    #         Looper:
-    #             iterable = range(100)
-    #             TextView:
-    #                 text = "Item {}".format(loop_index)
-    #                 #text_color = "#F0F"
+        Switch: sw:
+            pass
+        Switch:
+            checked := sw.checked
+        TextView:
+            text << "State: {}".format(sw.checked)
+    TextView:
+        text = "Buttons"
+    Flexbox:
+        justify_content = "space_around"
+        Button:
+            text = "Button"
+            clicked :: tv.count +=1
+        TextView: tv:
+            attr count = 0
+            text << "Clicked {}".format(self.count)
+            #flex_direction = "row"
+    TextView:
+        text = "ActivityIndicator"
+    Flexbox:
+        justify_content = "center"
+        ActivityIndicator:
+            pass
+    TextView:
+        text = "Progressbar"
+    Flexbox:
+        flex_direction = "column"
+        justify_content = "center"
+        align_items = "center"
+        ProgressBar: pb:
+            progress = 0
+        Button:
+            text = "Increment"
+            clicked :: pb.progress = (pb.progress+10)%100
+
