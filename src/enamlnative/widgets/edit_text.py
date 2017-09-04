@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Tuple, Unicode, observe, set_default
+    Typed, ForwardTyped, Tuple, Unicode, Enum, observe, set_default
 )
 
 from enaml.core.declarative import d_
@@ -26,6 +26,9 @@ class ProxyEditText(ProxyTextView):
     declaration = ForwardTyped(lambda: EditText)
 
     def set_selection(self, selection):
+        raise NotImplementedError
+
+    def set_style(self, style):
         raise NotImplementedError
 
     def set_placeholder(self, placeholder):
@@ -46,10 +49,13 @@ class EditText(TextView):
     #: Placeholder text
     placeholder = d_(Unicode())
 
+    #: Style (iOS)
+    style = d_(Enum('', 'line', 'bezel', 'rounded_rect'))
+
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyEditText)
 
-    @observe('selection', 'placeholder')
+    @observe('selection', 'placeholder', 'style')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

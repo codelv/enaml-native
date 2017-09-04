@@ -60,6 +60,9 @@ enamldef ContentView(Flexbox):
         EditText: et:
             text = ""
             placeholder = "Type something here..."
+        EditText:
+            text := et.text
+            style = "rounded_rect"
         TextView:
             text << "You typed: {}".format(et.text)
 

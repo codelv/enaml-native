@@ -34,14 +34,30 @@ class UIKeyboard(NestedBridgeObject):
     UIKeyboardTypeAlphabet = UIKeyboardTypeASCIICapable
 
 
+
 class UITextField(UIControl):
     """
     """
     #: Properties
     placeholder = ObjcProperty('NSString')
 
+    #:
+    borderStyle = ObjcProperty('enum')  # UITextBorderStyle
+
     #: Callback
     onValueChanged = ObjcCallback('NSString')
+
+    UITextBorderStyleNone = 0
+    UITextBorderStyleLine = 1
+    UITextBorderStyleBezel = 2
+    UITextBorderStyleRoundedRect = 3
+
+    STYLES = {
+        '': UITextBorderStyleNone,
+        'line': UITextBorderStyleLine,
+        'bezel': UITextBorderStyleBezel,
+        'rounded_rect': UITextBorderStyleRoundedRect
+    }
 
 
 class UiKitEditText(UiKitControl, ProxyEditText):
@@ -72,6 +88,8 @@ class UiKitEditText(UiKitControl, ProxyEditText):
             self.set_placeholder(d.placeholder)
         if d.input_type != 'text':
             self.set_input_type(d.input_type)
+        if d.style:
+            self.set_style(d.style)
 
         #: A really ugly way to add the target
         #: would be nice if we could just pass the block pointer here :)
@@ -101,6 +119,9 @@ class UiKitEditText(UiKitControl, ProxyEditText):
         """ Set keyboard type """
         #: TODO...
         raise NotImplementedError
+
+    def set_style(self, style):
+        self.widget.borderStyle = UITextField.STYLES[style]
 
     def set_placeholder(self, placeholder):
         self.widget.placeholder = placeholder
