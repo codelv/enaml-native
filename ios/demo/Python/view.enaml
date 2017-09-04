@@ -55,4 +55,11 @@ enamldef ContentView(Flexbox):
         Button:
             text = "Increment"
             clicked :: pb.progress = (pb.progress+10)%100
+    Flexbox:
+        flex_direction = "column"
+        EditText: et:
+            text = ""
+            placeholder = "Type something here..."
+        TextView:
+            text << "You typed: {}".format(et.text)
 
