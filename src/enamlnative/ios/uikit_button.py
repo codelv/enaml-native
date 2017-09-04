@@ -68,8 +68,7 @@ class UiKitButton(UiKitControl, ProxyButton):
     def init_widget(self):
         super(UiKitButton, self).init_widget()
         d = self.declaration
-        if d.text:
-            self.set_text(d.text)
+        self.init_text()
 
     # --------------------------------------------------------------------------
     # ProxyButton API

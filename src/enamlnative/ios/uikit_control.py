@@ -15,10 +15,10 @@ from atom.api import Typed
 from enamlnative.widgets.compound_button import ProxyCompoundButton
 
 from .bridge import ObjcMethod, ObjcProperty, ObjcCallback
-from .uikit_view import UIView, UiKitView
+from .uikit_text_view import UITextView, UiKitTextView
 
 
-class UIControl(UIView):
+class UIControl(UITextView):
 
     #: Properties
     enabled = ObjcProperty('bool')
@@ -65,7 +65,7 @@ class UIControl(UIView):
     UIControlStateReserved = 0xFF000000
 
 
-class UiKitControl(UiKitView, ProxyCompoundButton):
+class UiKitControl(UiKitTextView, ProxyCompoundButton):
     """ A UiKitControl helper class.
 
     """
@@ -88,6 +88,8 @@ class UiKitControl(UiKitView, ProxyCompoundButton):
         'create_widget()' method is called. This method should init the
         state of the widget. The child widgets will not yet be created.
 
+        Note: This does NOT initialize text properties by default!
+
         """
         super(UiKitControl, self).init_widget()
 
@@ -95,8 +97,7 @@ class UiKitControl(UiKitView, ProxyCompoundButton):
         if d.clickable:
             #: A really ugly way to add the target
             #: would be nice if we could just pass the block pointer here :)
-            bridge = self.get_app().bridge
-            bridge.addTarget(
+            self.get_app().bridge.addTarget(
                 self.widget,
                 forControlEvents=UIControl.UIControlEventTouchUpInside,
                 andCallback=self.widget.getId(),
@@ -112,3 +113,4 @@ class UiKitControl(UiKitView, ProxyCompoundButton):
     def on_clicked(self):
         d = self.declaration
         d.clicked()
+

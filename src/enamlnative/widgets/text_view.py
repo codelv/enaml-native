@@ -125,7 +125,7 @@ class TextView(View):
     text = d_(Unicode())
 
     #: Text alignment
-    text_alignment = d_(Unicode())
+    text_alignment = d_(Enum('', 'left', 'right', 'center', 'justified', 'natural'))
 
     #: Sets the text color for all the states (normal, selected, focused) to be this color.
     text_color = d_(Unicode())

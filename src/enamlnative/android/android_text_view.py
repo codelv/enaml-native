@@ -113,6 +113,21 @@ class TextView(View):
         'time': 24,
     }
 
+    TEXT_ALIGNMENT_INHERIT = 0
+    TEXT_ALIGNMENT_CENTER = 4
+    TEXT_ALIGNMENT_TEXT_END = 3
+    TEXT_ALIGNMENT_TEXT_START = 2
+    TEXT_ALIGNMENT_VIEW_START = 5
+
+    TEXT_ALIGNMENT = {
+        '': TEXT_ALIGNMENT_INHERIT,
+        'left': TEXT_ALIGNMENT_TEXT_START,
+        'right': TEXT_ALIGNMENT_TEXT_END,
+        'center': TEXT_ALIGNMENT_CENTER,
+        'justified': TEXT_ALIGNMENT_INHERIT,  # Not supported I guess?
+        'natural': TEXT_ALIGNMENT_VIEW_START
+    }
+
 
 class AndroidTextView(AndroidView, ProxyTextView):
     """ An Android implementation of an Enaml ProxyTextView.
@@ -223,19 +238,19 @@ class AndroidTextView(AndroidView, ProxyTextView):
         self.widget.setTextKeepState(text)#, 0, len(text))
 
     def set_text_alignment(self, alignment):
-        self.widget.setGravity(Gravity.parse(alignment))
+        self.widget.setGravity(TextView.TEXT_ALIGNMENT[alignment])
 
     def set_text_selectable(self, selectable):
         self.widget.setTextIsSelectable(selectable)
 
     def set_text_color(self, color):
-        self.widget.setTextColor(color)#Color.parseColor(color))
+        self.widget.setTextColor(color)
 
     def set_highlight_color(self, color):
-        self.widget.setHighlightColor(color)#Color.parseColor(color))
+        self.widget.setHighlightColor(color)
 
     def set_link_color(self, color):
-        self.widget.setLinkTextColor(color)#Color.parseColor(color))
+        self.widget.setLinkTextColor(color)
 
     def set_text_size(self, size):
         self.widget.setTextSize(size)

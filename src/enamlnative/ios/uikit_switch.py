@@ -71,8 +71,7 @@ class UiKitSwitch(UiKitControl, ProxySwitch):
 
         #: A really ugly way to add the target
         #: would be nice if we could just pass the block pointer here :)
-        bridge = self.get_app().bridge
-        bridge.addTarget(
+        self.get_app().bridge.addTarget(
             self.widget,
             forControlEvents=UISwitch.UIControlEventValueChanged,
             andCallback=self.widget.getId(),

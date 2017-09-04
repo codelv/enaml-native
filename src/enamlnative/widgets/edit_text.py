@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 '''
 from atom.api import (
-    Typed, ForwardTyped, Tuple, observe, set_default
+    Typed, ForwardTyped, Tuple, Unicode, observe, set_default
 )
 
 from enaml.core.declarative import d_
@@ -28,6 +28,9 @@ class ProxyEditText(ProxyTextView):
     def set_selection(self, selection):
         raise NotImplementedError
 
+    def set_placeholder(self, placeholder):
+        raise NotImplementedError
+
 
 class EditText(TextView):
     """ A simple control for displaying read-only text.
@@ -40,10 +43,13 @@ class EditText(TextView):
     #: Make editable by default
     input_type = set_default('text')
 
+    #: Placeholder text
+    placeholder = d_(Unicode())
+
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyEditText)
 
-    @observe('selection')
+    @observe('selection', 'placeholder')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 
