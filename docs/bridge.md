@@ -10,9 +10,9 @@ This uses a different approach than pyjnius which creates all of these fields fo
 
 The Android bridge is implemented in three files:
 
-1. [com.enaml.Bridge](https://github.com/frmdstryr/enaml-native/blob/master/android/app/src/main/java/com/enaml/Bridge.java) in Java
-2. [enamlnative.android.bridge](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/android/bridge.py) in Python 
-3. [enamlnative.core.bridge](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/core/bridge.py) in Python 
+1. [com.enaml.Bridge](https://github.com/codelv/enaml-native/blob/master/android/app/src/main/java/com/enaml/Bridge.java) in Java
+2. [enamlnative.android.bridge](https://github.com/codelv/enaml-native/blob/master/src/enamlnative/android/bridge.py) in Python 
+3. [enamlnative.core.bridge](https://github.com/codelv/enaml-native/blob/master/src/enamlnative/core/bridge.py) in Python 
 
 #### Usage
 
@@ -197,9 +197,9 @@ The iOS bridge implementation uses the CPython API for invoking python from Obj-
 
 The iOS bridge is implemented in three files:
 
-1. [ENBridge](https://github.com/frmdstryr/enaml-native/blob/master/ios/demo/ENBridge.m) in Objective-C
-2. [enamlnative.ios.bridge](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/ios/bridge.py) in Python 
-3. [enamlnative.core.bridge](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/core/bridge.py) in Python 
+1. [ENBridge](https://github.com/codelv/enaml-native/blob/master/ios/demo/ENBridge.m) in Objective-C
+2. [enamlnative.ios.bridge](https://github.com/codelv/enaml-native/blob/master/src/enamlnative/ios/bridge.py) in Python 
+3. [enamlnative.core.bridge](https://github.com/codelv/enaml-native/blob/master/src/enamlnative/core/bridge.py) in Python 
 
 
 #### Usage
@@ -236,15 +236,15 @@ The bridge works by serializing every creation, method call, property assignment
 
 __Example 1 - Bridge serialization__
     
-    07-17 17:27:19.047 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ======== Py --> Native ======
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('c', (1, u'android.widget.LinearLayout', [('android.content.Context', ExtType(code=1, data='\xff'))]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (1, 0, 'setOrientation', [('int', 1)]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('c', (2, u'android.support.v7.widget.Toolbar', [('android.content.Context', ExtType(code=1, data='\xff'))]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (2, 0, 'setBackgroundColor', [('android.graphics.Color', u'#004981')]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (2, 0, 'setTitle', [('java.lang.CharSequence', u'Enaml Native - Intro')]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (2, 0, 'setTitleTextColor', [('android.graphics.Color', u'#FFFFFF')]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (2, 0, 'setSubtitleTextColor', [('android.graphics.Color', u'#EEEEEE')]))
-    07-17 17:27:19.048 11491-11522/com.frmdstryr.enamlnative.demo I/pybridge: ('m', (1, 0, 'addView', [('android.view.View', ExtType(code=1, data='\x02'))]))
+    07-17 17:27:19.047 11491-11522/com.codelv.enamlnative.demo I/pybridge: ======== Py --> Native ======
+    07-17 17:27:19.048 11491-11522/com.codelv.enamlnative.demo I/pybridge: ('c', (1, u'android.widget.LinearLayout', [('android.content.Context', ExtType(code=1, data='\xff'))]))
+    07-17 17:27:19.048 11491-11522/com.codelv.enamlnative.demo I/pybridge: ('m', (1, 0, 'setOrientation', [('int', 1)]))
+    07-17 17:27:19.048 11491-11522/com.codelv.enamlnative.demo I/pybridge: ('c', (2, u'android.support.v7.widget.Toolbar', [('android.content.Context', ExtType(code=1, data='\xff'))]))
+    07-17 17:27:19.048 11491-11522/com.codelv.enamlnative.demo I/pybridge: ('m', (2, 0, 'setBackgroundColor', [('android.graphics.Color', u'#004981')]))
+    07-17 17:27:19.048 11491-11522/com.codelv.enamlnative.demo I/pybridge: ('m', (2, 0, 'setTitle', [('java.lang.CharSequence', u'Enaml Native - Intro')]))
+    07-17 17:27:19.048 11491-11522/com.codelv.enamlnative.demo I/pybridge: ('m', (2, 0, 'setTitleTextColor', [('android.graphics.Color', u'#FFFFFF')]))
+    07-17 17:27:19.048 11491-11522/com.codelv.enamlnative.demo I/pybridge: ('m', (2, 0, 'setSubtitleTextColor', [('android.graphics.Color', u'#EEEEEE')]))
+    07-17 17:27:19.048 11491-11522/com.codelv.enamlnative.demo I/pybridge: ('m', (1, 0, 'addView', [('android.view.View', ExtType(code=1, data='\x02'))]))
 
 The above is a small section of the log from the demo app in Android. 
 

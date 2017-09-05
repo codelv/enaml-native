@@ -35,5 +35,5 @@ You can use native libraries by making a simple wrapper for them.
     params.width = 20
 
 
-and using in python as any python normal object (see the [bridge](https://github.com/frmdstryr/enaml-native/wiki/Bridge) docs for more info).
+and using in python as any python normal object (see the [bridge](https://www.codelv.com/projects/enaml-native/docs/bridge) docs for more info).
 

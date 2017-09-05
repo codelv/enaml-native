@@ -82,7 +82,7 @@ wherever your's is installed.
 
 For ios there's the `project` which defines the name of the `<project>.xcworkspace` that will be built.
 
-If you're interested you can read through the [enaml-native cli](https://github.com/frmdstryr/enaml-native/blob/master/enaml-native) source which 
+If you're interested you can read through the [enaml-native cli](https://github.com/codelv/enaml-native/blob/master/enaml-native) source which 
 is what actually uses this config file.
 
 ### Build process
@@ -100,7 +100,7 @@ The build process depends on the platfom but from a high level the following mus
 The `package.json` config file defines an `arches` list for each platfom. This is the list of ABI's or target platforms to build your python and extensions for. 
 
 > This is very complicated internally and only supported by OSX and linux! 
-> Note: You can skip this by downloading and including precompiled libraries. Links to come see issue [#22](https://github.com/frmdstryr/enaml-native/issues/22)
+> Note: You can skip this by downloading and including precompiled libraries. Links to come see issue [#22](https://github.com/codelv/enaml-native/issues/22)
 
 To cross compile python and modules for different arches you must:
 
@@ -145,7 +145,7 @@ The android build process is done in two phases.
 ##### Building python and compiled extensions for Android
 
 enaml-native builds python and any dependencies that have compiled components (c, c++, cython) 
-using a fork of [python-for-android](https://github.com/frmdstryr/enaml-native/tree/master/python-for-android).
+using a fork of [python-for-android](https://github.com/codelv/enaml-native/tree/master/python-for-android).
 
 This fork is modified as follows:
 
@@ -153,12 +153,12 @@ This fork is modified as follows:
 1. Added an enaml bootstrap
 1. Modified several recipies to work with enaml-native
 
-Building is invoked with `./enaml-native build-python` in [enaml-native](https://github.com/frmdstryr/enaml-native/blob/master/enaml-native)
-based on the config file. This calls ndk-build on the [native hooks](https://github.com/frmdstryr/enaml-native/tree/master/android/app/src/main/jni) 
+Building is invoked with `./enaml-native build-python` in [enaml-native](https://github.com/codelv/enaml-native/blob/master/enaml-native)
+based on the config file. This calls ndk-build on the [native hooks](https://github.com/codelv/enaml-native/tree/master/android/app/src/main/jni) 
 and then does a p4a's build to compile python and any recipes.  
 
 Once done all of your libraries will go to the jni libs folder `android/app/src/main/libs/<arch>`. 
-All modules here will be included in the app by gradle (see [build.gradle](https://github.com/frmdstryr/enaml-native/blob/master/android/app/build.gradle#L24)).
+All modules here will be included in the app by gradle (see [build.gradle](https://github.com/codelv/enaml-native/blob/master/android/app/build.gradle#L24)).
 
 > Note: Libraries matching the pattern `lib*.so` are automatically copied during the App intall on the device. This speeds up the startup. Any modules NOT matching this need copied manually in your app's main activity.
 
@@ -168,12 +168,12 @@ providing a build server to compile libraries for you.
 
 > Note: If you want to add a dependency that has a compiled component it MUST have a recipe! You can create your own if one is missing
 
-These compiled modules are then imported using a custom import hook, see [import_hooks.py](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/core/import_hooks.py).
+These compiled modules are then imported using a custom import hook, see [import_hooks.py](https://github.com/codelv/enaml-native/blob/master/src/enamlnative/core/import_hooks.py).
 
 ##### Bundling python for Android
 
 enaml-native hooks itself into the gradle build process to include your python source and libraries.
-This hook is in [android/app/build.grade](https://github.com/frmdstryr/enaml-native/blob/master/android/app/build.gradle).
+This hook is in [android/app/build.grade](https://github.com/codelv/enaml-native/blob/master/android/app/build.gradle).
 
 It simply runs `./enaml-native bundle-assets` which packages all the python and app source code into a zip 
 and copies it to `android/app/src/main/assets/python/python.zip`. 
@@ -212,7 +212,7 @@ The iOS build process is done in two phases.
 ##### Building python and compiled extensions for iOS
 
 enaml-native builds python and any dependencies that have compiled components (c, c++, cython) 
-using a fork of [kivy-ios](https://github.com/frmdstryr/enaml-native/tree/master/python-for-ios).
+using a fork of [kivy-ios](https://github.com/codelv/enaml-native/tree/master/python-for-ios).
 
 This fork is __heavily__ modified as follows:
 
@@ -220,7 +220,7 @@ This fork is __heavily__ modified as follows:
 2. Python updated to 2.7.13
 3. Added and modified several recipies to work with enaml-native
 
-Building is invoked with `./enaml-native build-python` in [enaml-native](https://github.com/frmdstryr/enaml-native/blob/master/enaml-native)
+Building is invoked with `./enaml-native build-python` in [enaml-native](https://github.com/codelv/enaml-native/blob/master/enaml-native)
 based on the config file. This calls `python-for-ios/toolchain.py` build internally.
 
 The entire build process is complicated and very issue prone. I'm hoping to be able to elimnate this entriely by
@@ -228,14 +228,14 @@ providing a build server to compile libraries for you.
 
 > Note: As of this writing I have NOT submitted an app to the App Store
 
-These compiled modules are then imported using a custom import hook, see [import_hooks.py](https://github.com/frmdstryr/enaml-native/blob/master/src/enamlnative/core/import_hooks.py).
+These compiled modules are then imported using a custom import hook, see [import_hooks.py](https://github.com/codelv/enaml-native/blob/master/src/enamlnative/core/import_hooks.py).
 
 There's a few blog posts on what exactly was changed that may help you when building new recipies [on my blog](http://blog.codelv.com).
 
 ##### Bundling python for iOS
 
 enaml-native hooks itself into the iOS build process to include your python source and libraries.
-This hook is in [android/app/build.grade](https://github.com/frmdstryr/enaml-native/blob/master/android/app/build.gradle).
+This hook is in [android/app/build.grade](https://github.com/codelv/enaml-native/blob/master/android/app/build.gradle).
 
 It simply runs `./enaml-native bundle-assets` which packages of your app code and site-packages into a zip 
 and copies it to `android/app/src/main/assets/python/python.zip`. 

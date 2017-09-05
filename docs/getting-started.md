@@ -107,7 +107,7 @@ To build android apps, the android SDK and crystax NDK must be installed.
 
 Now finally, we can install enaml-native
 
-1. Clone this repo using `git clone https://github.com/frmdstryr/enaml-native`
+1. Clone this repo using `git clone https://github.com/codelv/enaml-native`
 
 ### Running
 
