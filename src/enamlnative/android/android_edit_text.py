@@ -22,6 +22,7 @@ class EditText(TextView):
     setSelection = JavaMethod('int', 'int')
     selectAll = JavaMethod()
     extendSelection = JavaMethod('int')
+    setHint = JavaMethod('java.lang.String')
 
 
 class AndroidEditText(AndroidTextView, ProxyEditText):
@@ -48,11 +49,16 @@ class AndroidEditText(AndroidTextView, ProxyEditText):
         d = self.declaration
         if d.selection:
             self.set_selection(d.selection)
+        if d.placeholder:
+            self.set_placeholder(d.placeholder)
 
     # --------------------------------------------------------------------------
     # ProxyEditText API
     # --------------------------------------------------------------------------
     def set_selection(self, selection):
         self.widget.setSelection(*selection)
+
+    def set_placeholder(self, placeholder):
+        self.widget.setHint(placeholder)
 
 

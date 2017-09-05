@@ -56,6 +56,10 @@ class UiKitSwitch(UiKitControl, ProxySwitch):
         """ Bind the on property to the checked state """
         super(UiKitSwitch, self).init_widget()
 
+        d = self.declaration
+        if d.checked:
+            self.set_checked(d.checked)
+
         #: Watch the on property for change
         #: So apparently UISwitch is not KVO compliant...
         # self.widget.addObserver(
@@ -67,13 +71,13 @@ class UiKitSwitch(UiKitControl, ProxySwitch):
 
         #: A really ugly way to add the target
         #: would be nice if we could just pass the block pointer here :)
-        bridge = self.get_app().bridge
-        bridge.addTarget(self.widget,
-                         forControlEvents=UISwitch.UIControlEventValueChanged,
-                         andCallback=self.widget.getId(),
-                         usingMethod="onValueChanged",
-                         withValues=["on"]#,"selected"]
-                         )
+        self.get_app().bridge.addTarget(
+            self.widget,
+            forControlEvents=UISwitch.UIControlEventValueChanged,
+            andCallback=self.widget.getId(),
+            usingMethod="onValueChanged",
+            withValues=["on"]#,"selected"]
+        )
 
         self.widget.onValueChanged.connect(self.on_checked_changed)
 
@@ -81,8 +85,8 @@ class UiKitSwitch(UiKitControl, ProxySwitch):
         """ See https://stackoverflow.com/questions/19628310/ """
         #: Since iOS decides to call this like 100 times for each defer it
         d = self.declaration
-        #with self.widget.setOn.suppressed():
-        d.checked = on
+        with self.widget.setOn.suppressed():
+            d.checked = on
 
     # --------------------------------------------------------------------------
     # ProxySwitch API

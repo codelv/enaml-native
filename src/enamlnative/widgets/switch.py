@@ -37,6 +37,7 @@ class ProxySwitch(ProxyCompoundButton):
     def set_text_on(self, text):
         raise NotImplementedError
 
+
 class Switch(CompoundButton):
     """ A simple control for displaying a Switch.
 

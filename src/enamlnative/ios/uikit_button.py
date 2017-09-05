@@ -20,7 +20,7 @@ from .uikit_control import UIControl, UiKitControl
 class UIButton(UIControl):
     """
     """
-    __signature__ = set_default(dict(buttonWithType="UIButtonType"))
+    __signature__ = set_default((dict(buttonWithType="enum"),)) #"UIButtonType"
     #: Properties
     on = ObjcProperty('bool')
     onTintColor = ObjcProperty('UIColor')
@@ -30,8 +30,9 @@ class UIButton(UIControl):
     offImage = ObjcProperty('UIImage')
 
     #: Methods
-    setTitle = ObjcMethod('NSString', dict(forState='UIControlState'))
+    setTitle = ObjcMethod('NSString', dict(forState='enum'))#''UIControlState'))
 
+    #: Type Enum
     UIButtonTypeCustom = 0
     UIButtonTypeSystem = 1
     UIButtonTypeDetailDisclosure = 2
@@ -39,14 +40,6 @@ class UIButton(UIControl):
     UIButtonTypeInfoDark = 4
     UIButtonTypeContactAdd = 5
     UIButtonTypeRoundedRect = UIButtonTypeSystem
-
-    UIControlStateNormal = 0
-    UIControlStateHighlighted = 1 << 0
-    UIControlStateDisabled = 1 << 1
-    UIControlStateSelected = 1 << 2
-    UIControlStateFocused = 1 << 3
-    UIControlStateApplication = 0x00FF0000
-    UIControlStateReserved = 0xFF000000
 
 
 class UiKitButton(UiKitControl, ProxyButton):
@@ -65,15 +58,23 @@ class UiKitButton(UiKitControl, ProxyButton):
         """
         d = self.declaration
         button_type = {
-            '': UIButton.UIButtonTypeRoundedRect,
+            '': UIButton.UIButtonTypeSystem,
             'borderless': UIButton.UIButtonTypeSystem,
-            'inset': UIButton.UIButtonTypeSystem,
-            'small': UIButton.UIButtonTypeSystem
-        }[d.styles]
+            'inset': UIButton.UIButtonTypeCustom,
+            'small': UIButton.UIButtonTypeCustom
+        }[d.style]
         self.widget = UIButton(buttonWithType=button_type)
+
+    def init_widget(self):
+        super(UiKitButton, self).init_widget()
+        d = self.declaration
+        self.init_text()
 
     # --------------------------------------------------------------------------
     # ProxyButton API
     # --------------------------------------------------------------------------
+    def set_text(self, text):
+        self.widget.setTitle(text, forState=UIButton.UIControlStateNormal)
+
     def set_style(self, style):
         pass #: Cannot be changed once set!

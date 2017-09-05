@@ -45,9 +45,11 @@ def card_view_factory():
 
 
 def checkbox_factory():
-    # print "Import checkbox"
-    from .uikit_checkbox import UiKitCheckBox
-    return UiKitCheckBox
+    # iOS doesn't have a checkbox
+    #from .uikit_checkbox import UiKitCheckBox
+    #return UiKitCheckBox
+    from .uikit_switch import UiKitSwitch
+    return UiKitSwitch
 
 
 def chronometer_factory():

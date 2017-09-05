@@ -37,6 +37,7 @@
 
     -(void)runUntilCurrent;
     -(void)onResult:(NSNumber *)resuiltId withValue:(NSObject*) result;
+    -(void)setArgs:(NSArray*)args forInvocation:(NSInvocation *) invocation;
     -(id)convertArg:(NSArray *)spec;
 
     -(void)onValueChanged:(id)sender;
@@ -116,7 +117,7 @@
         [self.objectCache setObject:controller.view forKey:@(-3)];
     }
 
-    -(id) getObject:(NSNumber *) objId{
+    -(id) getObject:(NSNumber *) objId {
         return self.objectCache[objId];
     }
 
@@ -182,12 +183,78 @@
     }
 
     /**
+     * Unpack msgpack arguments and pass them as args to an invocation object
+     * since apparently it doesn't cast anything for us...
+     */
+    -(void)setArgs:(NSArray*)args forInvocation:(NSInvocation *) invocation{
+        // Set args
+        int i = 2;
+        for (NSArray* arg in args) {
+            NSString* argType = (NSString *) arg[0];
+            // Hack for BOOL, WTF
+            if ([argType isEqualToString:@"bool"]) {
+                BOOL val = ((NSNumber*) arg[1]).boolValue;
+                [invocation setArgument:&val atIndex:i];
+            } else if ([argType isEqualToString:@"enum"]) {
+                int val = [(NSNumber *)arg[1] intValue];
+                [invocation setArgument:&val atIndex:i];
+            } else {
+                id val = [self convertArg:arg];
+                [invocation setArgument:&val atIndex:i];
+            }
+            
+            // Next arg
+            i++;
+        }
+
+    }
+
+    /**
      * Create an object over the bridge
      */
-    - (void)createObject:(NSNumber *)objId withType:(NSString *)className withArgs:(NSArray *)args {
+    - (void)createObject:(NSNumber *)objId withType:(NSString *)className usingConstructor:(NSString*) constructor withArgs:(NSArray *)args {
         NSLog(@"Creating %@ with id %@",className,objId);
-        NSObject * obj = [[NSClassFromString(className) alloc] init];//initWithFrame:CGRectMake(0, 0, 100, 100)];
+        
+        Class objClass = NSClassFromString(className);
+        id obj;
+        
+        if ([args count]==0) {
+            // Shortcut
+            obj = [objClass new];
+        } else {
+            SEL selector = NSSelectorFromString(constructor);
+            
+            // Get signature
+            NSMethodSignature *signature = [objClass methodSignatureForSelector:selector];
+            if (!signature) {
+                NSLog(@"Error: Null signature for %@!", constructor);
+            }
+            
+            // Get method
+            NSInvocation* constructor = [NSInvocation invocationWithMethodSignature:signature];
+
+            // Set target
+            [constructor setTarget:objClass];
+            [constructor setSelector:selector];
+            [self setArgs:args forInvocation:constructor];
+            
+            // Call it
+            [constructor invoke];
+            
+            // Get the object created
+            // See https://stackoverflow.com/questions/11874056/
+            void* result;
+            [constructor getReturnValue:&result];
+            
+            // Copy to obj
+            obj = (__bridge id) result;
+            NSLog(@"Created %@",obj);
+            
+        }
+        
+        // Save to cache
         [self.objectCache setObject:obj forKey:objId];
+
     }
 
     /**
@@ -214,6 +281,12 @@
             return;
         }
         
+        if ([obj isKindOfClass:[UIButton class]]) {
+            NSLog(@"%@",obj);
+            //[(UIButton*)obj setTitle:args[0][1] forState:UIControlStateNormal];
+            //return;
+        }
+        
         SEL selector = NSSelectorFromString(method);
         
         // Get signature
@@ -230,28 +303,7 @@
         [lambda setSelector:selector];
         
         // Set args
-        int i = 2;
-        for (NSArray* arg in args) {
-            // Hack for BOOL, WTF
-            if ([(NSString*) arg[0] isEqualToString:@"bool"]) {
-                BOOL val = ((NSNumber*) arg[1]).boolValue;
-                [lambda setArgument:&val atIndex:i];
-            } else {
-                NSObject* val = [self convertArg:arg];
-                [lambda setArgument:&val atIndex:i];
-            }
-            
-            // Next arg
-            i++;
-        }
-        
-        
-        /*if ([obj isKindOfClass:UISwitch.class]) {
-            // Forcing frick
-            BOOL value = ((NSNumber*)args[0][1]).boolValue;
-            [(UISwitch *) obj setOn:value];
-            return;
-        }*/
+        [self setArgs:args forInvocation:lambda];
         
         // Call it
         [lambda invoke];
@@ -262,6 +314,7 @@
             [lambda getReturnValue: &result];
             [self onResult:returnId withValue:result];
         }
+        
     }
 
     /**
@@ -354,7 +407,7 @@
                                         args
                                         ]]];
             
-        } forControlEvents:UIControlEventValueChanged];
+        } forControlEvents:controlEvents];
     }
 
 
@@ -376,8 +429,9 @@
                 NSData *data = [MPMessagePackWriter writeObject:self.eventQueue error:&error];
                 [self sendEventsToPython: data];
                 
-                // TODO: Need to clear it
-                //[self.eventQueue clear];
+                // TODO: This is async so objects can be added in between this!
+                [self.eventQueue removeAllObjects];
+                
             }
         });
     }
@@ -409,8 +463,9 @@
                 // Run on UI thread
                 [[NSOperationQueue mainQueue] addOperationWithBlock:^{
                     [self createObject: (NSNumber *) args[0]
-                              withType: (NSString*) args[1]
-                              withArgs: [args subarrayWithRange:(NSRange) {[args count]-2,2}]];
+                              withType:(NSString *) args[1]
+                              usingConstructor:(NSString *) args[2]
+                              withArgs: args[3]];
 
                 }];
                 
