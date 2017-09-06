@@ -30,7 +30,7 @@ def main():
         from enamlnative.android.app import AndroidApplication
         app = AndroidApplication('com.enaml.MainActivity')
     #app.debug = True #: Makes a lot of lag!
-    app.dev = '192.168.34.103'
+    app.dev = 'server'
     app.reload_view = reload_view
     app.deferred_call(load_view, app)
     app.deferred_call(dump_stats)

@@ -132,6 +132,17 @@ class BridgedApplication(Application):
         return False
 
     # --------------------------------------------------------------------------
+    # App API Implementation
+    # --------------------------------------------------------------------------
+    def has_permission(self, permission):
+        """ Return a future that resolves with the result of the permission """
+        raise NotImplementedError
+
+    def request_permissions(self, permissions):
+        """ Return a future that resolves with the result of the permission request"""
+        raise NotImplementedError
+
+    # --------------------------------------------------------------------------
     # EventLoop API Implementation
     # --------------------------------------------------------------------------
     def init_error_handler(self):

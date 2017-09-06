@@ -32,6 +32,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -52,6 +53,7 @@ public class Bridge {
 
     // Bridge commands
     public static final String CREATE = "c";
+    public static final String PROXY = "p";
     public static final String METHOD = "m";
     public static final String FIELD = "f";
     public static final String DELETE = "d";
@@ -86,7 +88,7 @@ public class Bridge {
     final HandlerThread mBridgeHandlerThread = new HandlerThread("bridge");
     final Handler mBridgeHandler;
     final AtomicInteger mEventCount = new AtomicInteger();
-    final int mEventDelay = 3;
+    final int mEventDelay = 1;
 
     public Bridge(Context context) {
         mContext = context;
@@ -301,11 +303,9 @@ public class Bridge {
                     ExtensionValue ev = v.asExtensionValue();
                     int extType = (int) ev.getType();
                     if (extType==TYPE_REF) {
-                        MessageUnpacker ref =  MessagePack.newDefaultUnpacker(ev.getData());
+                        MessageUnpacker ref = MessagePack.newDefaultUnpacker(ev.getData());
                         arg = mObjectCache.get(ref.unpackInt());
                     }
-
-                    break;
             }
             return new UnpackedValue(spec, arg);
         }
@@ -369,6 +369,27 @@ public class Bridge {
         } catch (AssertionError e) {
             mActivity.showErrorMessage(e.getMessage());
         } catch (IOException e) {
+            mActivity.showErrorMessage(e);
+        }
+    }
+
+    /**
+     * Create a proxy for the given interface that directs it's calls to the object
+     * with the given refId.
+     * @param objId
+     * @param interfaceName
+     * @param refId
+     */
+    public void createProxy(int objId, String interfaceName, int refId) {
+        try {
+            Class infClass = Bridge.getClass(interfaceName);
+            Object proxy = Proxy.newProxyInstance(
+                    infClass.getClassLoader(),
+                    new Class[]{infClass},
+                    new BridgeInvocationHandler(refId)
+            );
+            mObjectCache.put(objId,proxy);
+        } catch (ClassNotFoundException e) {
             mActivity.showErrorMessage(e);
         }
     }
@@ -562,7 +583,7 @@ public class Bridge {
     }
 
     /**
-     * Set the result of a future. Note, don't do this in the UI thread or we'll get a deadlock.
+     * Set the result of a future.
      * @param objId
      * @param result
      */
@@ -662,20 +683,64 @@ public class Bridge {
                     }
                     Class argClass = arg.getClass();
                     packer.packString(argClass.getCanonicalName());
+
+                    // TODO: There has to be a better way than this...
                     if (argClass == int.class || arg instanceof Integer) {
                         packer.packInt((int) arg);
-                    } else if (argClass == int.class || arg instanceof Boolean) {
+                    } else if (argClass == int[].class) {
+                        int[] argList = (int[]) arg;
+                        packer.packArrayHeader(argList.length);
+                        for (int v:argList) {
+                            packer.packInt(v);
+                        }
+                    } else if (argClass == boolean.class || arg instanceof Boolean) {
                         packer.packBoolean((boolean) arg);
+                    } else if (argClass == boolean[].class) {
+                        boolean[] argList = (boolean[]) arg;
+                        packer.packArrayHeader(argList.length);
+                        for (boolean v:argList) {
+                            packer.packBoolean(v);
+                        }
                     } else if (argClass == String.class) {
                         packer.packString((String) arg);
+                    } else if (argClass == String[].class) {
+                        String[] argList = (String[]) arg;
+                        packer.packArrayHeader(argList.length);
+                        for (String v:argList) {
+                            packer.packString(v);
+                        }
                     } else if (argClass == long.class || arg instanceof Long) {
                         packer.packLong((long) arg);
+                    } else if (argClass == long[].class) {
+                        long[] argList = (long[]) arg;
+                        packer.packArrayHeader(argList.length);
+                        for (long v:argList) {
+                            packer.packLong(v);
+                        }
                     } else if (argClass == float.class || arg instanceof Float) {
                         packer.packFloat((float) arg);
+                    } else if (argClass == float[].class) {
+                        float[] argList = (float[]) arg;
+                        packer.packArrayHeader(argList.length);
+                        for (float v:argList) {
+                            packer.packFloat(v);
+                        }
                     } else if (argClass == double.class || arg instanceof Double) {
                         packer.packDouble((double) arg);
+                    } else if (argClass == double[].class) {
+                        double[] argList = (double[]) arg;
+                        packer.packArrayHeader(argList.length);
+                        for (double v:argList) {
+                            packer.packDouble(v);
+                        }
                     } else if (argClass == short.class || arg instanceof Short) {
                         packer.packShort((short) arg);
+                    } else if (argClass == short[].class) {
+                        short[] argList = (short[]) arg;
+                        packer.packArrayHeader(argList.length);
+                        for (short v:argList) {
+                            packer.packShort(v);
+                        }
                     } else if (argClass == byte[].class) {
                         byte[] bytes = (byte[]) arg;
                         packer.packBinaryHeader(bytes.length);
@@ -806,6 +871,13 @@ public class Bridge {
                                 args[j] = v;
                             }
                             mTaskQueue.add(()->{createObject(objId, objClass, args);});
+                            break;
+
+                        case PROXY:
+                            objId = unpacker.unpackInt();
+                            objClass = unpacker.unpackString();
+                            int refId = unpacker.unpackInt();
+                            mTaskQueue.add(()->{createProxy(objId, objClass, refId);});
                             break;
 
                         case METHOD:

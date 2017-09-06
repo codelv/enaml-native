@@ -16,11 +16,14 @@ from weakref import WeakValueDictionary
 from contextlib import contextmanager
 
 CACHE = WeakValueDictionary()
+PROXY_CACHE = WeakValueDictionary()
 __global_id__ = 0
+__proxy_id__ = 0
 
 
 class Command:
     CREATE = "c"
+    PROXY = "p"
     METHOD = "m"
     FIELD = "f"
     DELETE = "d"
@@ -30,6 +33,7 @@ class Command:
 
 class ExtType:
     REF = 1
+    PROXY = 2
 
 
 def _generate_id():
@@ -230,11 +234,16 @@ class BridgeField(Property):
 
 
 class BridgeCallback(BridgeMethod):
-    """ Description of a callback method of a View (or subclass) in Objc. When called,
-        it fires the connected callback. This is triggered when it receives an event from
-        the bridge indicating the call has occurred.
+    """ Description of a callback method of a View (or subclass) in Objc or Java. When called,
+        it fires the connected callback. If no callback is connected it will try to lookup a default
+        callback implementation matching the name `_impl_<name>`. If that does not exist, it will
+        simply do nothing.
 
-        Example:
+        This is triggered when it receives an event from the bridge indicating the call has occurred.
+
+        #### Example 1
+
+            :::python
             #: Define it
             class View(BridgeObject):
                 onClick = BridgeCallback()
@@ -247,12 +256,27 @@ class BridgeCallback(BridgeMethod):
 
             #: Connect to callback
             view.onClick.connect(on_click)
+
+        #### Example 2
+
+        You can define a "default" callback implementation by implementing the method with name
+        of `_impl_<name>`. Connecting a callback will override this behavior.
+
+            :::python
+            #: Define it
+            class LocationManager(BridgeObject):
+                hashCode = BridgeCallback()
+
+                def _impl_hashCode(self):
+                    return self.__id__
+
     """
 
     def __fget__(self, obj):
         f = super(BridgeCallback, self).__fget__(obj)
         #: Add a method so it can be connected like in Qt
         f.connect = functools.partial(self.connect, obj)
+        f.disconnect = functools.partial(self.disconnect, obj)
         return f
 
     def __call__(self, obj, *args):
@@ -260,12 +284,22 @@ class BridgeCallback(BridgeMethod):
         if obj.__suppressed__.get(self.name):
             return
         callback = obj.__callbacks__.get(self.name)
+        if not callback:
+            #: Try to get the default callback
+            key = '_impl_{}'.format(self.name)
+            if hasattr(obj, key):
+                callback = getattr(obj, key)
+
         if callback:
             return callback(*args)
 
     def connect(self, obj, callback):
         """ Set the callback to be fired when the event occurs. """
         obj.__callbacks__[self.name] = callback
+
+    def disconnect(self, obj, callback):
+        """ Remove the callback to be fired when the event occurs. """
+        del obj.__callbacks__[self.name]
 
 
 class BridgeObject(Atom):

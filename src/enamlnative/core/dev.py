@@ -412,8 +412,8 @@ class DevServerSession(Atom):
             #: On iOS we can't write in the app bundle
             if os.environ.get('TMP'):
                 tmp_dir = os.environ['TMP']
-                #if not os.path.exists(tmp_dir):
-                #    os.makedirs(tmp_dir)
+                if not os.path.exists(tmp_dir):
+                    os.makedirs(tmp_dir)
                 if tmp_dir not in sys.path:
                     sys.path.insert(0, tmp_dir)
 

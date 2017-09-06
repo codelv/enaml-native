@@ -9,9 +9,10 @@ Created on June 21, 2017
 
 @author: jrm
 '''
-from atom.api import Int, set_default
+from atom.api import Atom, Int, set_default
+from ..core import bridge
 from ..core.bridge import (
-    msgpack_encoder, BridgeMethod, BridgeField, BridgeCallback, BridgeObject, encode
+    Command, msgpack_encoder, BridgeMethod, BridgeField, BridgeCallback, BridgeObject, encode
 )
 
 
@@ -38,7 +39,7 @@ class JavaMethod(BridgeMethod):
 
 
 class JavaField(BridgeField):
-    """ The superclass implementation is sufficient
+    """ The superclass implementation is sufficient but extend for possible future modification.
 
     """
 
@@ -66,4 +67,47 @@ class JavaBridgeObject(BridgeObject):
     """
     #: Java Class name
     __nativeclass__ = set_default('java.lang.Object')
+
+    #: A callback with an implementation built in
+    hashCode = JavaCallback(returns="int")
+
+    def _impl_hashCode(self):
+        #: Add a default callback for hashCode
+        return self.__id__
+
+
+class JavaProxy(JavaBridgeObject):
+    """ A bridge object that creates a Proxy for the given ref. This should NOT
+        be given any JavaMethods or JavaFields, however JavaCallbacks are fine.
+
+        These are generally throw away usages. Only save them if you need to use
+        them as a reference later (such as when removing a listener).
+
+        Parameters
+        -------------
+
+        ref: JavaBridgeObject
+            The bridge object that should receive all of the callbacks invocations.
+            If none is given it will send them to the proxy itself.
+
+
+     """
+
+    def __init__(self, ref=None, **kwargs):
+        """ Sends the event to create this View in Java """
+        super(Atom, self).__init__(**kwargs)
+
+        #:
+        ref = ref or self
+
+        #: Send the event over the bridge to construct the view
+        __id__ = kwargs.get('__id__', None)
+        bridge.CACHE[self.__id__] = self
+        if __id__ is None:
+            self.__app__.send_event(
+                Command.PROXY,  #: method
+                self.__id__,  #: id to assign in bridge cache
+                self.__nativeclass__,
+                ref.__id__, #: Reference ID
+            )
 

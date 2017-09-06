@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -51,7 +52,9 @@ public class MainActivity extends AppCompatActivity {
     boolean mLoadingDone = false;
     int mShortAnimationDuration = 300;
 
+    // Custom listeners
     AppEventListener mAppEventListener;
+    PermissionResultListener mPermissionResultListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -316,6 +319,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         void onDestroy();
+
     }
 
 
@@ -366,5 +370,33 @@ public class MainActivity extends AppCompatActivity {
             mAppEventListener.onDestroy();
         }
 
+    }
+
+    /**
+     * Set the app permission listener to use. Meant to be used from python
+     * so it can receive events from java.
+     * @param listener
+     */
+    public void setPermissionResultListener(PermissionResultListener listener) {
+        mPermissionResultListener = listener;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (mPermissionResultListener !=null) {
+            mPermissionResultListener.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    public interface PermissionResultListener{
+
+        /**
+         * Receive permission request results
+         * @param code
+         * @param permissions
+         * @param results
+         */
+        void onRequestPermissionsResult(int code, String[] permissions, int[] results);
     }
 }

@@ -1,0 +1,94 @@
+from atom.api import *
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+
+from enamlnative.android.app import AndroidApplication
+from enamlnative.android.bridge import *
+
+#: Define our class
+class LocationManager(JavaBridgeObject):
+    __nativeclass__ = set_default('android.location.LocationManager')
+    LOCATION_PERMISSION = 'android.permission.ACCESS_FINE_LOCATION'
+    
+    #: Request location updates
+    requestLocationUpdates = JavaMethod('java.lang.String', 'long', 'float',
+                                        'android.location.LocationListener')
+                                        
+    #: LocationListener API
+    onLocationChanged = JavaCallback('android.location.Location')
+    onProviderDisabled = JavaCallback('java.lang.String')
+    onProviderEnabled = JavaCallback('java.lang.String')
+    onStatusChanged = JavaCallback('java.lang.String','int','android.os.Bundle')
+    
+class Location(Atom):
+    location = Unicode()
+    status = Unicode()
+
+enamldef ContentView(Flexbox): view:
+    flex_direction = "column"
+    justify_content = "center"
+    attr app = AndroidApplication.instance()
+    attr manager: LocationManager
+    attr location: Location = Location()
+    
+    func on_check_perms(allowed):
+        #: Check if we have permission to access location, if not request it
+        if allowed:
+            status.text = "Getting service..."
+            app.get_system_service("location").then(on_loaded)
+        else:
+            status.text = "Requesting permission..."
+            app.request_permissions(
+                [LocationManager.LOCATION_PERMISSION]
+            ).then(self.on_request_results)
+            
+    func on_request_results(perms):
+        #: Check if location access was granted
+        if perms[LocationManager.LOCATION_PERMISSION]:
+            status.text = "Getting service..."
+            app.get_system_service("location").then(on_loaded)
+        else:
+            status.text = "Location permission denied!"
+            
+    func on_location_changed(loc):
+        #: Called when our location is updated!
+        #: Location is a string of the android.location.Location object
+        #: parse it to extract the values needed
+        location.location = "{}".format(loc)
+        
+    func on_status_changed(*args):
+        #: Called when location status is changed
+        location.status = "{}".format(args)
+    
+    func on_loaded(ref):
+         #: Create reference
+        lm = LocationManager(__id__=ref)
+    
+        #: Request updates from GPS
+        lm.requestLocationUpdates("gps", 1000, 0, lm.getId())
+    
+        #: Bind a listener
+        lm.onLocationChanged.connect(self.on_location_changed)
+        lm.onStatusChanged.connect(self.on_status_changed)
+        
+        #: Start waiting!
+        status.text = "Waiting for location updates..."
+        
+        #: Save a ref
+        view.manager = lm
+    
+    TextView: status:
+        text = "Stopped"
+    TextView:
+        text << "Location: {}".format(location.location)
+    TextView:
+        text << "Status: {}".format(location.status)
+    Button:
+        text << "Stop" if manager else "Start"
+        clicked ::
+            #: Get the service
+            status.text = "Checking permission..."
+            app.has_permission(LocationManager.LOCATION_PERMISSION).then(on_check_perms)
+            
+
+      

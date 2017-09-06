@@ -63,9 +63,9 @@ class AndroidToolkitObject(ProxyToolkitObject):
         from .app import AndroidApplication
         return AndroidApplication.instance()
 
-    #--------------------------------------------------------------------------
-    # ProxyToolkitObject API
-    #--------------------------------------------------------------------------
+    #: --------------------------------------------------------------------------
+    #: ProxyToolkitObject API
+    #: --------------------------------------------------------------------------
     def activate_top_down(self):
         """ Activate the proxy for the top-down pass.
 
@@ -94,9 +94,9 @@ class AndroidToolkitObject(ProxyToolkitObject):
             del self.widget
         super(AndroidToolkitObject, self).destroy()
 
-    #--------------------------------------------------------------------------
-    # Public API
-    #--------------------------------------------------------------------------
+    #: --------------------------------------------------------------------------
+    #: Public API
+    #: --------------------------------------------------------------------------
     def parent_widget(self):
         """ Get the parent toolkit widget for this object.
 
