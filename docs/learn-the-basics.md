@@ -106,7 +106,7 @@ The example is pretty useless, but you get the idea. There's also a few other us
         TextView: 
           #: Use the reference `children` to print out the repr string of each
           #: direct child of the ContentView
-          text = ",".join([c for c in parent.children])
+          text = ",".join([str(c) for c in parent.children])
 
 
 References are used very often within enaml-native apps. The scope of each reference depends on where the component is but generally they're all availble for use (with some exceptions) within the entire enamldef block.  References of one component cannot be accessed outside of that components declaration (unless an `alias` keyword is used) but that will be covered later (look in the enaml docs for the examples). 
@@ -153,32 +153,6 @@ The `>>` operator is a one way binding that notifies the component when the UI c
           
 In this example, when switch `sw1` is toggled, switch `sw2` will also be set to the same state. However if switch `sw2` is toggled, switch `sw1` will not change. 
 
-In some cases you might want to know what the previous value was before the change occured. You can use the `change` scope variable to see and react accordingly.   
-
-
-    :::python
-    from enamlnative.widgets.api import *
-    
-    enamldef ContentView(Flexbox):
-        flex_direction = "column"
-        EditText: et:
-          text >> 
-                #: When text changes
-                try:
-                    #: If an integer was typed, update the text
-                    if int(change['value']):
-                        tv.text = change['value']
-                except ValueError:
-                    pass
-        TextView: tv:
-          pass
-
-The above example with update the TextView's text attribute if the user enters an integer into the EditText's input field. Using this operator, along with the `<<` operator is very useful for doing things like to and from conversion of a value based on a unit input.  
-
-The `change` variable is a dictionary containing useful change information such as the current value `change["value"]`, the name that changed `change["name"]`, the type of change `change["type"]`, the the previous value `change["oldvalue"]`, and the object that was changed `change["object"]`.
-
-
-
 #### Delegate := operator
 
 The `:=` operator does a two way binding between the UI component and a model (or another components's) attribute. This allows you to easily keep two attributes in sync (ex, UI attribute and model attribute or two UI attributes).
@@ -222,6 +196,31 @@ The `::` operator notifies the component when an event occurs, such as a button 
               print("Button was clicked!")
 
 Above we see the notify operator triggers the _event handler_ directly within the component. Any python code (except for `yield` and `return` statments can be used within the handler block. 
+
+In some cases you might want to know what the previous value was before the change occured. You can use the `change` scope variable to see and react accordingly.   
+
+
+    :::python
+    from enamlnative.widgets.api import *
+    
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
+        EditText: et:
+          text :: 
+                #: When text changes
+                try:
+                    #: If an integer was typed, update the text
+                    if int(change['value']):
+                        tv.text = change['value']
+                except ValueError:
+                    pass
+        TextView: tv:
+          pass
+
+The above example with update the TextView's text attribute if the user enters an integer into the EditText's input field. Using this operator, along with the `<<` operator is very useful for doing things like to and from conversion of a value based on a unit input.  
+
+The `change` variable is a dictionary containing useful change information such as the current value `change["value"]`, the name that changed `change["name"]`, the type of change `change["type"]`, the the previous value `change["oldvalue"]`, and the object that was changed `change["object"]`.
+
 
 > Note: Certain events may contain additional data that may be needed to decide how the event should be handled. When a key is pressed, or an action selected, it may be important to know which key.  Event data is passed into your handler block via the `change` scope variable.  The change dictionary keys depend on the type of event that occurred.
 
@@ -342,11 +341,11 @@ The `Looper` node also does not have any display widget, but instead uses it's `
     from enaml.core.api import Looper
     from enamlnative.widgets.api import *
     
-    enamldef ContentView(Flexbox):
+    enamldef ContentView(Flexbox): view:
         flex_direction = "column"
         attr items = ["one", "two", "three"]
         Looper:
-            iterable << items
+            iterable << view.items
             #: This node is repeated for each item and given
             #: the additional scope variables `loop_index` and `loop_item`
             TextView:
@@ -364,25 +363,29 @@ The `Block` node is a component specific to enaml-native. It's useful if you wan
     :::python
     from enamlnative.core.api import Block
     from enamlnative.widgets.api import *
-    
-    enamldef Card(CardView): card:
+
+    enamldef Card(Flexbox): card:
+        flex_direction = "column"
         attr header = "Header"
         attr footer = "Footer"
         #: Alias allows accessing the `content` reference outside
         #: this component
         alias content
-        Flexbox:
-            flex_direction = "column"
-            TextView:
-                text << card.header
-            Block: content:
+        CardView:
+            Flexbox:
+                flex_direction = "column"
                 TextView:
-                    text = "Default content!"
-            TextView:
-                text << card.footer
-        
-    
+                    text << card.header
+                Block: content:
+                    TextView:
+                        text = "Default content!"
+                TextView:
+                    text << card.footer
+
+
     enamldef ContentView(Flexbox):
+        flex_direction = "column"
+        background_color = "#eee"
         #: Use our card component
         Card:
             Block:
@@ -390,6 +393,12 @@ The `Block` node is a component specific to enaml-native. It's useful if you wan
                 #: This block's children replace referenced block's content!
                 TextView:
                     text = "New card content!"
+        Card:
+            Block:
+                block << parent.content
+                #: This block's children replace referenced block's content!
+                Button:
+                    text = "Different!"
 
 The block makes it easy to define "template" like components where you can easily override certain parts, maximizing code reusability. If you're familiar with templating languages like django's templates this is a similar concept.  
 
