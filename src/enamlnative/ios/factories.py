@@ -200,8 +200,8 @@ def scroll_view_factory():
 
 
 def seek_bar_factory():
-    from .uikit_seek_bar import UiKitSeekBar
-    return UiKitSeekBar
+    from .uikit_slider import UiKitSlider
+    return UiKitSlider
 
 
 def spacer_factory():
@@ -300,6 +300,7 @@ IOS_FACTORIES = {
     'IconButton': icon_button_factory,
     'IconToggleButton': icon_toggle_button_factory,
     'ImageView': image_view_factory,
+    'Label': text_view_factory,
     'LinearLayout': linear_layout_factory,
     'ListItem': list_item_factory,
     'ListView': list_view_factory,
@@ -314,6 +315,7 @@ IOS_FACTORIES = {
     'RelativeLayout': relative_layout_factory,
     'ScrollView': scroll_view_factory,
     'SeekBar': seek_bar_factory,
+    'Slider': seek_bar_factory, # Alias
     'Spacer': spacer_factory,
     'Spinner': spinner_factory,
     'Switch': switch_factory,

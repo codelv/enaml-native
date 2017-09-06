@@ -16,6 +16,8 @@ enamldef ContentView(Flexbox):
     flex_direction = "column"
     background_color = "#abc"
     #: TODO: Padding not working...
+    #padding = (10,10,10,10)
+
     TextView:
         text = "Switches"
     Flexbox:
@@ -65,4 +67,22 @@ enamldef ContentView(Flexbox):
             style = "rounded_rect"
         TextView:
             text << "You typed: {}".format(et.text)
+    # Flexbox:
+    #     flex_direction = "column"
+    #     SeekBar:
+    #         min = 0
+    #         max = 100
+    #         progress = 10
+    Flexbox:
+        flex_direction = "column"
+        SeekBar: sb:
+            min = 0
+            progress = 30
+            max = 100
+        SeekBar:
+            min = 0
+            progress := sb.progress
+            max = 100
+        TextView:
+            text << "Slider: {}".format(sb.progress)
 
