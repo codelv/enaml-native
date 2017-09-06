@@ -28,9 +28,6 @@ class AndroidViewAnimator(AndroidFrameLayout, ProxyViewAnimator):
     #: A reference to the widget created by the proxy.
     widget = Typed(ViewAnimator)
 
-    #: Save a reference to the date changed listener
-    date_listener = Typed(OnDateChangedListener)
-
     #--------------------------------------------------------------------------
     # Initialization API
     #--------------------------------------------------------------------------
