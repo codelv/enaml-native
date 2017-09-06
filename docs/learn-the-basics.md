@@ -131,6 +131,9 @@ References are used very often within enaml-native apps. The scope of each refer
 
 By default any references defined within a component are "private" and cannot be accessed outside of the component. Sometimes you may need to make an internal component or specific attribute of a component availble to be updated outside via an attribute. An `alias` allows you do to this. 
 
+[![Enaml aliases](https://img.youtube.com/vi/54GyIv8Nklc/0.jpg)](https://youtu.be/54GyIv8Nklc)
+
+
     :::python
     from enamlnative.core.api import Block
     from enamlnative.widgets.api import *
