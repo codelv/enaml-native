@@ -705,6 +705,64 @@ There's a simple API for starting and stopping the GPS. The permissions must be 
                     view.status = "Starting..."
                     LocationManager.start(on_location_update).then(on_result)
 
+### Permissions
+
+Example demonstrates the API for checking permissions and requesting access. Note permissions not in the manifest will be denied immediately without a popup request.
+
+[![See the demo on youtube](https://img.youtube.com/vi/8QYsYSxkL2s/0.jpg)](https://youtu.be/8QYsYSxkL2s)
+
+    :::python
+    from enamlnative.core.api import *
+    from enamlnative.widgets.api import *
+
+    from enamlnative.android.app import AndroidApplication
+
+    enamldef ContentView(Flexbox): view:
+        flex_direction = "column"
+        justify_content = "center"
+        attr app = AndroidApplication.instance()
+        TextView:
+            text = "Permission:"
+        Spinner: sp:
+            items = ['android.permission.ACCESS_FINE_LOCATION',
+                     'android.permission.INTERNET',
+                     'android.permission.CAMERA']
+
+        TextView:
+            text = "Status:"
+        TextView: status:
+            text = ''
+        Button:
+            text << "Check Permission"
+            clicked ::
+                #: Get the service
+                status.text = "Checking permission..."
+
+                #: Check with AndroidApplication.instance().has_permission(<perm>)
+                #: Returns a boolean with the result
+                app.has_permission(
+                    sp.items[sp.selected]
+                #: We have to pass in our scope to lambdas
+                ).then(lambda r,s=status:setattr(s,'text',"Allowed:{}".format(r)))
+
+        Button:
+            text << "Request Permission"
+            clicked ::
+                #: Get the service
+                status.text = "Checking Location permission..."
+                #: Request with 
+                #: AndroidApplication.instance().request_permissions([<perm>,...])
+                #: Returns a dictionary with the result of each
+                app.request_permissions(
+                    [sp.items[sp.selected]]
+
+                #: We have to pass in our scope to lambdas
+                ).then(lambda r,s=status:setattr(s,'text',"Result:{}".format(r)))
+            
+            
+
+      
+
 
 
 More to come!
