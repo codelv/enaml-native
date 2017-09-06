@@ -16,7 +16,7 @@ enaml-native apps are written declaratively using [enaml](http://nucleic.github.
     :::python
     from enamlnative.widgets.api import *
 
-    enamldef ContentView(LinearLayout):
+    enamldef ContentView(Flexbox):
         TextView:
             text = "Python powered native apps!"
 
@@ -26,7 +26,7 @@ You can use native libraries by making a simple wrapper for them.
     :::python
     #: Wrapper
     class LayoutParams(JavaBridgeObject):
-        __javaclass__ = set_default('android.view.ViewGroup$LayoutParams')
+        __nativeclass__ = set_default('android.view.ViewGroup$LayoutParams')
         width = JavaField('int')
         height = JavaField('int')
 
