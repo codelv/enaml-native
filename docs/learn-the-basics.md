@@ -9,6 +9,15 @@ The easiest way to learn the enaml-native syntax is by downloading the [Python P
 [![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
 
 
+### Tutorials
+
+Heres's a short video tutorial on the enaml syntax and core api nodes to help get you started. 
+
+[![Enaml syntax basics](https://img.youtube.com/vi/nZdPm0NB8lY/0.jpg)](https://youtu.be/nZdPm0NB8lY)
+
+More on the way!
+
+
 ### Hello world
 
 As is standard, let's start with a "Hello world" app.
