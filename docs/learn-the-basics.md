@@ -317,13 +317,14 @@ The `Conditional` node does not have any display widget, but instead uses it's `
     :::python
     from enaml.core.api import Conditional
     from enamlnative.widgets.api import *
-    
+
     enamldef ContentView(Flexbox):
         flex_direction = "column"
         Switch: sw:
+            text = "Toggle condition"
             checked = False
         Conditional:
-            condtion << sw.checked
+            condition << sw.checked
             #: This will only be shown if the switch is turned on!
             TextView:
                 text = "Show me!"
