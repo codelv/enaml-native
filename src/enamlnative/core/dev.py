@@ -54,7 +54,7 @@ INDEX_PAGE = """<html>
     </nav>
   </div>
   <div class="row" style="margin-bottom:0;">
-    <div class="col l3 s12" style="padding:0; max-height:100%; overflow-y:scroll;">
+    <div class="col l3 m2 s12" style="padding:0; max-height:100%; overflow-y:scroll;">
       <nav>
         <div class="nav-wrapper grey darken-3">
           <a href="#components" style="margin-left:1em;">Components</a>
@@ -64,7 +64,7 @@ INDEX_PAGE = """<html>
         ${components}
       </ul>
     </div>
-    <div class="col l9 s12" style="padding:0;">
+    <div class="col l9 m10 s12" style="padding:0;">
       <div id="editor" style="height:100%;width:100%;">
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
