@@ -1,6 +1,6 @@
 ### Intro
 
-Enaml-native is like Enaml, but it uses native Android or iOS components instead of Qt components as building blocks. So to understand the basic structure of an enaml-native app, you need to understand some of the basic Enaml concepts, like declarative components and data binding operators.  If you already know Enaml, you still need to learn some enaml-native specifics.
+Enaml-native is like Enaml, but it uses native Android or iOS components instead of Qt components as building blocks. So to understand the basic structure of an enaml-native app, you need to understand some of the basic Enaml concepts, like declarative components and data binding operators.  If you already know Enaml, there's a few enaml-native specifics but feel free to skip ahead.
 
 ### Playground
 
@@ -232,7 +232,7 @@ If you're familiar with Android or iOS programming, this entirely eliminates the
 
 In order to better keep your component reusable you can define functions within your component that have access to the scope of the component. These are done using the `func` keyword and define just like a python's `def`. 
 
-> Note: You can still use python functions within your handlers and observers you'll just have to pass in any scope variables manually!
+> Note: You can still use python functions within your handlers and observers you'll just have to pass in any scope variables manually! Also you cannot define normal `def` functions within handlers, only `lambda` is allowed (and you must copy the scope variables needed!).
 
     :::python
     from enamlnative.core.api import *
@@ -388,16 +388,91 @@ The block makes it easy to define "template" like components where you can easil
 
 ### Layouts
 
-There are several platform dependent layouts that can be used, however it's recommended to use `Flexbox` which supports both Android and iOS. 
+There are several platform dependent layouts that can be used, however it's recommended to use `Flexbox` which supports both Android and iOS and is much more "flexible" (no pun intended). 
 
-If you're unfamiliar with flexbox, there great examples from Google's [flexbox-layout](https://github.com/google/flexbox-layout) for Android. 
+If you're unfamiliar with flexbox, there great examples all over the web so just search. 
+
+enaml-native uses Google's [flexbox-layout](https://github.com/google/flexbox-layout) for Android and Facebook's [yogakit](https://facebook.github.io/yoga/docs/api/yogakit/) for iOS. 
+
+> Note: Google's flexbox is used on Android instead of Facebook's yoga layouts (which also supports Android) because yoga currently doesn't have the proper API's that allow it to be used with the bridge (it only supports LayoutInflater). 
+
+Use the `flex_direction` attribute to layout children in a row or column. Use `justify_content` to arrange the children along the same row or column axis. Use `align_items` to arrange children within the opposite axis of the `flex_direction`. Use `align_content` to align children that have wrapped (when `flex_wrap='wrap'` in groups.  See the Flexbox component in the Playground's component list to see the appropriate values for each.
+
+[![See the demo on youtube](https://img.youtube.com/vi/UV5FdT3r8oo/0.jpg)](https://youtu.be/UV5FdT3r8oo)
+
+
+    :::python
+    from enamlnative.core.api import *
+    from enamlnative.widgets.api import *
+
+    enamldef ContentView(Flexbox): view:
+        flex_direction = "column"
+        Flexbox:
+            background_color = "#cab"
+            #: Flex direction arranges children in either a row or column 
+            flex_direction = "column"
+
+            #: flex_basis (on Android) is the percentage of the parent size to consume
+            layout = dict(flex_basis=0.25)
+
+            TextView:
+                text = "flex_direction"
+            Spinner:
+                items = list(Flexbox.flex_direction.items)
+                selected = self.items.index(view.flex_direction)
+                selected :: view.flex_direction = self.items[change['value']]
+        Flexbox:
+            background_color = "#bac"
+            flex_direction = "column"
+            #: flex_basis (on Android) is the percentage of the parent size to consume
+            layout = dict(flex_basis=0.25)
+
+            #: Flex direction arranges children in either a row or column 
+            justify_content = "center"
+
+            TextView:
+                text = "justify_content  (within column)"
+            Spinner:
+                items = list(Flexbox.justify_content.items)
+                selected = self.items.index(parent.justify_content)
+                selected :: parent.justify_content = self.items[change['value']]
+        Flexbox:
+            background_color = "#cba"
+            layout = dict(flex_basis=0.15)
+            flex_direction = "column"
+            TextView:
+                text = "align_items (within column)"
+            Spinner:
+                items = list(Flexbox.align_items.items)
+                selected = self.items.index(parent.align_items)
+                selected :: parent.align_items = self.items[change['value']]
+        Flexbox:
+            background_color = "#abc"
+            layout = dict(flex_basis=0.35)
+            flex_direction = "column"
+            Flexbox:
+                layout_height = "wrap_content"
+                TextView:
+                    text = "align_content"
+                Spinner:
+                    items = list(Flexbox.align_content.items)
+                    selected = self.items.index(align_content_example.align_content)
+                    selected :: align_content_example.align_content = self.items[change['value']]
+            Flexbox: align_content_example:
+                flex_wrap = "wrap"
+                Looper:
+                    iterable << range(10)
+                    Icon:
+                        padding = (5,5,5,5)
+                        text << "{fa-thumbs-up}" if loop_index & 1 else "{fa-thumbs-down}"
+                        text_size = 48
 
 
 
+You can also apply child specific layout parameters using the `layout = dict(**params)`. These parameters are `align_self`, `flex_basis`, `flex_grow`, `flex_shrink`. Margin and padding can be set directly as the `margins` and `padding` attributes. They should be tuples of the format `(left,top,right,bottom)`.  
 
 
-
-More to come on layouts!
+More to come on layouts, stay tuned!
 
 ### Summary
 
