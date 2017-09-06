@@ -47,12 +47,15 @@ Attempting to set an attribute that has not been defined by the component will t
     from enamlnative.widgets.api import *
     from atom.api import Unicode
     
-    enamldef Count(View):
+    enamldef ContentView(Flexbox):
         #: A new attribute with a default of 0
         attr count = 0
         
         #: A new attribute that is restricted to a given type
-        attr name: Unicode
+        attr title: Unicode
+        
+        #: A new attribute that is restricted to a given type with a default
+        attr caption: Unicode = "A caption"
 
 
 These custom attributes can then be used like any other enaml attribute.
@@ -65,7 +68,7 @@ Components often need to reference other components for interactions or to updat
     :::python
     from enamlnative.widgets.api import *
     
-    enamldef ContentView(LinearLayout):
+    enamldef ContentView(Flexbox):
         #: Define a reference variable of `echo_me`
         TextView: echo_me:
           text = "Hello"
@@ -82,7 +85,8 @@ The example is pretty useless, but you get the idea. There's also a few other us
     from enamlnative.widgets.api import *
     
     #: Define a component with the reference "view"
-    enamldef ContentView(LinearLayout): view:
+    enamldef ContentView(Flexbox): view:
+        flex_direction = "column"
         attr text = "Hello!"
         
         #: Self reference example
@@ -123,7 +127,7 @@ The `<<` operator a one way binding from a model to the UI component. This allow
     :::python
     from enamlnative.widgets.api import *
     
-    enamldef ContentView(LinearLayout):
+    enamldef ContentView(Flexbox):
         Switch: sw:
           checked = False
           
@@ -140,7 +144,7 @@ The `>>` operator is a one way binding that notifies the component when the UI c
     :::python
     from enamlnative.widgets.api import *
     
-    enamldef ContentView(LinearLayout):
+    enamldef ContentView(Flexbox):
         Switch: sw1:
           checked = False
           checked >> sw2.checked
@@ -155,7 +159,8 @@ In some cases you might want to know what the previous value was before the chan
     :::python
     from enamlnative.widgets.api import *
     
-    enamldef ContentView(LinearLayout):
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
         EditText: et:
           text >> 
                 #: When text changes
@@ -181,7 +186,7 @@ The `:=` operator does a two way binding between the UI component and a model (o
     :::python
     from enamlnative.widgets.api import *
     
-    enamldef ContentView(LinearLayout):
+    enamldef ContentView(Flexbox):
         Switch: sw1:
           checked := sw2.checked
         Switch: sw2:
@@ -196,7 +201,7 @@ In this example, toggling either switch will cause the other to toggle as well. 
     class Model(Atom):
       enabled = Bool()
     
-    enamldef ContentView(LinearLayout):
+    enamldef ContentView(Flexbox):
         attr model = Model()
         Switch:
           checked := model.enabled
@@ -210,7 +215,7 @@ The `::` operator notifies the component when an event occurs, such as a button 
     :::python
     from enamlnative.widgets.api import *
     
-    enamldef ContentView(LinearLayout):
+    enamldef ContentView(Flexbox):
         Button:
           clicked ::
               #: This block of code will execute when clicked
@@ -314,7 +319,8 @@ The `Conditional` node does not have any display widget, but instead uses it's `
     from enaml.core.api import Conditional
     from enamlnative.widgets.api import *
     
-    enamldef ContentView(LinearLayout):
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
         Switch: sw:
             checked = False
         Conditional:
@@ -336,7 +342,8 @@ The `Looper` node also does not have any display widget, but instead uses it's `
     from enaml.core.api import Looper
     from enamlnative.widgets.api import *
     
-    enamldef ContentView(LinearLayout):
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
         attr items = ["one", "two", "three"]
         Looper:
             iterable << items
@@ -364,16 +371,18 @@ The `Block` node is a component specific to enaml-native. It's useful if you wan
         #: Alias allows accessing the `content` reference outside
         #: this component
         alias content
-        TextView:
-            text << card.header
-        Block: content:
+        Flexbox:
+            flex_direction = "column"
             TextView:
-                text = "Default content!"
-        TextView:
-            text << card.footer
+                text << card.header
+            Block: content:
+                TextView:
+                    text = "Default content!"
+            TextView:
+                text << card.footer
         
     
-    enamldef ContentView(LinearLayout):
+    enamldef ContentView(Flexbox):
         #: Use our card component
         Card:
             Block:
