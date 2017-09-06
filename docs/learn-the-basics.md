@@ -190,7 +190,9 @@ The `::` operator notifies the component when an event occurs, such as a button 
     from enamlnative.widgets.api import *
     
     enamldef ContentView(Flexbox):
+        flex_direction = "column"
         Button:
+          text = "Click me"
           clicked ::
               #: This block of code will execute when clicked
               print("Button was clicked!")
