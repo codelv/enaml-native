@@ -198,6 +198,16 @@
             } else if ([argType isEqualToString:@"enum"]) {
                 int val = [(NSNumber *)arg[1] intValue];
                 [invocation setArgument:&val atIndex:i];
+            } else if ([argType isEqualToString:@"float"]) {
+                float val = [(NSNumber *)arg[1] floatValue];
+                [invocation setArgument:&val atIndex:i];
+//            } else if ([argType isEqualToString:@"int"]) {
+//                int val = [(NSNumber *)arg[1] intValue];
+//                [invocation setArgument:&val atIndex:i];
+//            } else if ([argType isEqualToString:@"long"]) {
+//                long val = [(NSNumber *)arg[1] longValue];
+//                [invocation setArgument:&val atIndex:i];
+//                
             } else {
                 id val = [self convertArg:arg];
                 [invocation setArgument:&val atIndex:i];

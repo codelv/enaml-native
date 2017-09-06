@@ -649,6 +649,63 @@ A simple app showing usage of a toolbar, drawer, and scrollview.
             app << drawer.app
         
       
+### GPS Location Updates
+
+There's a simple API for starting and stopping the GPS. The permissions must be added to the manifest.
+
+[![See the demo on youtube](https://img.youtube.com/vi/Ra_ANAxzPD8/0.jpg)](https://youtu.be/Ra_ANAxzPD8)
+
+
+    :::python
+
+
+    from enamlnative.core.api import *
+    from enamlnative.widgets.api import *
+
+    from enamlnative.android.app import AndroidApplication
+    from enamlnative.android.api import LocationManager, Location
+
+
+    enamldef ContentView(Flexbox): view:
+        flex_direction = "column"
+        justify_content = "center"
+        attr app = AndroidApplication.instance()
+        attr started = False
+        attr location: Location
+        attr status = "Press start to begin"
+        func on_location_update(location):
+            #: Called when a location updates
+            view.location = location
+
+        func on_result(allowed):
+            #: Called with result of
+            if allowed:
+                view.status = "Success! Waiting for location updates..."
+                view.started = True
+            else:
+                view.status = "Permission denied or location is off."
+
+        TextView: status:
+            text << view.status
+        Conditional:
+            condition << location is not None
+            TextView:
+                text << "Location: gps={l.lat},{l.lng} "\
+                        "acc={l.accuracy} alt={l.altitude}".format(l=location)
+        Button:
+            text << "Stop" if started else "Start"
+            clicked ::
+                #: Get the service
+                status.text = "Checking permission..."
+                if started:
+                    view.status = "Stopped"
+                    LocationManager.stop()
+                    view.started = False
+                else:
+                    view.status = "Starting..."
+                    LocationManager.start(on_location_update).then(on_result)
+
+
 
 More to come!
 
