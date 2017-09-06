@@ -16,7 +16,7 @@ As is standard, let's start with a "Hello world" app.
     :::python
     from enamlnative.widgets.api import *
 
-    enamldef ContentView(LinearLayout):
+    enamldef ContentView(Flexbox):
         TextView:
             text = "Hello world!"
 
