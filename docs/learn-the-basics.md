@@ -13,7 +13,13 @@ The easiest way to learn the enaml-native syntax is by downloading the [Python P
 
 Heres's a short video tutorial on the enaml syntax and core api nodes to help get you started. 
 
+__Enaml Syntax__
+
 [![Enaml syntax basics](https://img.youtube.com/vi/nZdPm0NB8lY/0.jpg)](https://youtu.be/nZdPm0NB8lY)
+
+__Enaml Pattern Nodes__
+
+[![Enaml pattern nodes](https://img.youtube.com/vi/4Gc3RiuPdhE/0.jpg)](https://youtu.be/4Gc3RiuPdhE)
 
 More on the way!
 
@@ -119,6 +125,74 @@ The example is pretty useless, but you get the idea. There's also a few other us
 
 
 References are used very often within enaml-native apps. The scope of each reference depends on where the component is but generally they're all availble for use (with some exceptions) within the entire enamldef block.  References of one component cannot be accessed outside of that components declaration (unless an `alias` keyword is used) but that will be covered later (look in the enaml docs for the examples). 
+
+
+### Aliases
+
+By default any references defined within a component are "private" and cannot be accessed outside of the component. Sometimes you may need to make an internal component or specific attribute of a component availble to be updated outside via an attribute. An `alias` allows you do to this. 
+
+    :::python
+    from enamlnative.core.api import Block
+    from enamlnative.widgets.api import *
+
+    enamldef SettingsItem(Flexbox):
+        layout_height = "wrap_content"
+        background_color = "#fff"
+        padding = (10,10,10,10)
+        margins = (0,10,0,10)
+
+    enamldef BoringSettingsItem(SettingsItem):
+        attr title
+        attr content
+        Flexbox:
+            flex_direction = "column"
+            TextView:
+                text << title
+            TextView:
+                text << content
+
+    enamldef FancySettingsItem(SettingsItem):
+        #: Alias to a component
+        #: allows access to any attribute
+        alias title
+        alias content
+
+        #: Alias to a single attribute of a component
+        alias direction: flex.flex_direction
+        Flexbox: flex:
+            flex_direction = "column"
+            justify_content = "space_between"
+            align_items = "center"
+            TextView: title:
+                pass
+            TextView: content:
+                pass
+
+
+    enamldef ContentView(Flexbox): view:
+        flex_direction = "column"
+        background_color = "#eee"
+        attr items = [
+            {"title":"Color","content":"Your favorite color"},
+            {"title":"Theme","content":"Background color theme"},
+        ]
+        Looper:
+            iterable = view.items
+            BoringSettingsItem:
+                title = loop_item['title']
+                content = loop_item['content']
+        Looper:
+            iterable = view.items
+            FancySettingsItem:
+                direction = "row"
+                title.text = loop_item['title']
+                title.text_size = 24
+                title.font_family = "sans-serif-light"
+                content.text = loop_item['content']
+                content.text_color = "#999"
+                
+Aliases are commonly used with `Block` pattern nodes (see below). They allow your components to be more customizable at the expense of slightly more verbose declarations.
+
 
 ### Operators
 
@@ -314,6 +388,7 @@ Since components are like classes, you can also override a functions but there's
 
       
 The example is pretty useless but you get the concept. Override using `<func name> => (args..)` and then the new definition.
+
 
 
 ### Dynamic Components 
