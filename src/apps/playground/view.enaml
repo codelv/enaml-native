@@ -12,6 +12,9 @@ Created on May 20, 2017
 from enamlnative.widgets.api import *
 from enaml.core.api import Conditional, Looper
 
-enamldef ContentView(LinearLayout):
+enamldef ContentView(Flexbox):
+  flex_direction = "column"
+
   TextView:
     text << "Go to http://<phone's wifi IP address>:8888/"
+    layout = dict(align_self = 'center')

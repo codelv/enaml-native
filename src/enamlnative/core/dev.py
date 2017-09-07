@@ -30,6 +30,16 @@ def cd(newdir):
         os.chdir(prevdir)
 
 
+DEFAULT_CODE = """
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+
+
+enamldef ContentView(Flexbox):
+    TextView:
+        text = "Hello world!"
+"""
+
 INDEX_PAGE = """<html>
 <head>
   <title>Enaml-Native Playground</title>
@@ -65,16 +75,7 @@ INDEX_PAGE = """<html>
       </ul>
     </div>
     <div class="col l9 m10 s12" style="padding:0;">
-      <div id="editor" style="height:100%;width:100%;">
-from enamlnative.core.api import *
-from enamlnative.widgets.api import *
-
-
-enamldef ContentView(Flexbox):
-    TextView:
-        text = "Test!"
-
-      </div> <!-- code -->
+      <div id="editor" style="height:100%;width:100%;">${code}</div> <!-- code -->
     </div>
   </div>
   <div class="fixed-action-btn">
@@ -185,6 +186,7 @@ DROPDOWN_TMPL = """
 <ul id='{id}' class='dropdown-content'>
 {items}
 </ul>"""
+
 
 def get_app():
     from .app import BridgedApplication
@@ -307,6 +309,20 @@ class DevServerSession(Atom):
                     return DROPDOWN_TMPL.format(id=node_id, name=node_type, items="".join(items))
                 return "{}".format(node_type)
 
+            def render_code(self):
+                """ Try to load the previous code (if we had a crash or something)
+                    I should allow saving.
+                """
+                tmp_dir = os.environ.get('TMP','')
+                view_code = os.path.join(tmp_dir,'view.enaml')
+                if os.path.exists(view_code):
+                    try:
+                        with open(view_code) as f:
+                            return f.read()
+                    except:
+                        pass
+                return DEFAULT_CODE
+
             def render_component(self, declaration):
                 """ Render a row of all the attributes """
                 items = ["""<tr><td>{name}</td><td>{type}</td></tr>"""
@@ -350,7 +366,7 @@ class DevServerSession(Atom):
                 components = "\n".join([self.render_component(w) for w in widgets])
 
                 #: Just a little hackish, but hey it works
-                self.write(INDEX_PAGE.replace("${components}", components))
+                self.write(INDEX_PAGE.replace("${components}", components).replace("${code}",self.render_code()))
 
         app = tornado.web.Application([
             (r"/", MainHandler),
@@ -403,7 +419,6 @@ class DevServerSession(Atom):
         if msg['type'] == 'reload':
             #: Show loading screen
             try:
-
                 self.app.widget.showLoading("Reloading... Please wait.", now=True)
             except:
                 #: TODO: Implement for iOS...
@@ -426,7 +441,7 @@ class DevServerSession(Atom):
                     shutil.rmtree('__enamlcache__')
                 for fn in msg['files']:
                     print("Updating {}".format(fn))
-                    with open(fn, 'w') as f:
-                        f.write(msg['files'][fn])
+                    with open(fn, 'wb') as f:
+                        f.write(msg['files'][fn].encode('utf-8'))
 
             self.app.reload()

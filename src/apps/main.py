@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Copyright (c) 2017, Jairus Martin.
 
@@ -12,7 +13,7 @@ Forked from https://github.com/joaoventura/pybridge
 @author: jrm
 '''
 import sys
-import traceback
+import os
 
 # ### Comment out to disable profiling
 # import cProfile
@@ -24,7 +25,9 @@ import traceback
 def main():
     """ Called by PyBridge.start()
     """
-    print(sys.path)
+    #: If we don't our code goes away
+    os.environ['TMP'] = os.path.join(sys.path[0], '../tmp')
+
     import enamlnative
     with enamlnative.imports():
         from enamlnative.android.app import AndroidApplication

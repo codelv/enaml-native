@@ -37,9 +37,9 @@ class Flexbox(ViewGroup):
 
     FLEX_DIRECTION = {
         'row': 0,
-        'row_reverse': 1,
+        'row_reversed': 1,
         'column': 2,
-        'column_reverse': 3
+        'column_reversed': 3
     }
 
     FLEX_WRAP = {

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Copyright (c) 2017, Jairus Martin.
 
@@ -29,7 +30,7 @@ def main():
     with enamlnative.imports():
         from enamlnative.android.app import AndroidApplication
         app = AndroidApplication('com.enaml.MainActivity')
-    #app.debug = True #: Makes a lot of lag!
+    app.debug = True #: Makes a lot of lag!
     app.dev = 'server'
     app.reload_view = reload_view
     app.deferred_call(load_view, app)
