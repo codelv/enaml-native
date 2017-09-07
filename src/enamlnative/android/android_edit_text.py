@@ -22,7 +22,7 @@ class EditText(TextView):
     setSelection = JavaMethod('int', 'int')
     selectAll = JavaMethod()
     extendSelection = JavaMethod('int')
-    setHint = JavaMethod('java.lang.String')
+    setHint = JavaMethod('java.lang.CharSequence')
 
 
 class AndroidEditText(AndroidTextView, ProxyEditText):
