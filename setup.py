@@ -15,7 +15,7 @@ from setuptools import setup, find_packages, Extension
 
 setup(
     name="enaml-native",
-    version="2.1",
+    version="2.6",
     author="frmdstryr",
     author_email="frmdstryr@gmail.com",
     license='MIT',

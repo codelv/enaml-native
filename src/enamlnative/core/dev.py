@@ -15,8 +15,13 @@ import json
 import shutil
 import inspect
 import traceback
-from atom.api import Atom, ForwardInstance, Enum, Unicode, Int, Bool
+import enamlnative
+from atom.api import Atom, Instance, ForwardInstance, Enum, Unicode, Int, Bool
 from contextlib import contextmanager
+from .bridge import Command
+
+with enamlnative.imports():
+    from .hotswap.api import Hotswapper
 
 @contextmanager
 def cd(newdir):
@@ -48,7 +53,7 @@ INDEX_PAGE = """<html>
 
   <!-- Compiled and minified CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
-  <link rel="shortcut icon" href="https://www.codelv.com/static/faveicon.png">
+  <link rel="shortcut icon" href="httpss://www.codelv.com/static/faveicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 <body>
@@ -79,9 +84,12 @@ INDEX_PAGE = """<html>
     </div>
   </div>
   <div class="fixed-action-btn">
-    <a id="run" class="btn-floating btn-large blue" href="#">
+     <a id="run" class="btn-floating btn-large blue" href="#">
        <i class="large material-icons">play_arrow</i>
      </a>
+     <ul>
+      <li><a id="hotswap" href="#" class="btn-floating red"><i class="material-icons">refresh</i></a></li>
+    </ul>
   </div>
   <footer class="page-footer teal">
     <div>
@@ -102,7 +110,7 @@ INDEX_PAGE = """<html>
     </div>
     <div class="footer-copyright">
       <div style="margin-left:1em;">
-        © 2017 <a href="https://www.codelv.com">codelv.com</a>
+        © 2017 <a href="https://www.codelv.com">www.codelv.com</a>
         <a class="grey-text text-lighten-4 right" href="https://www.codelv.com/projects/enaml-native/">Python powered native apps</a>
       </div>
     </div>
@@ -131,6 +139,19 @@ INDEX_PAGE = """<html>
                 // Trigger a reload
                 enaml.send(JSON.stringify({
                     'type':'reload',
+                    'files':{
+                        'view.enaml':editor.getValue(),
+                    }
+                }));
+            } catch (ex) {
+                console.log(ex);
+            }
+        });
+        $('#hotswap').click(function(e){
+            try {
+                // Trigger a reload
+                enaml.send(JSON.stringify({
+                    'type':'hotswap',
                     'files':{
                         'view.enaml':editor.getValue(),
                     }
@@ -199,23 +220,45 @@ class DevServerSession(Atom):
         code be pasted in. Note this should NEVER be used
         in a released app!
     """
+
+    #: Singleton Instance of this class
     _instance = None
+
+    #: Reference to the current Application
     app = ForwardInstance(get_app)
+
+    #: Host to connect to (in client mode) or if set to "server" it will enable "server" mode
     host = Unicode()
+
+    #: Port to serve on (in server mode) or port to connect to (in client mode)
     port = Int(8888)
+
+    #: URL to connect to (in client mode)
     url = Unicode('ws://192.168.21.119:8888/dev')
+
+    #: Websocket connection state
     connected = Bool()
+
+    #: Message buffer
     buf = Unicode()
+
+    #: Dev session mode
     mode = Enum('client', 'server')
 
+    #: Hotswap support class
+    hotswap = Instance(Hotswapper)
+
     def _default_url(self):
-        return 'ws://{}:{}/dev'.format(self.host,self.port)
+        """ Websocket URL to connect to and listen for reload requests """
+        return 'ws://{}:{}/dev'.format(self.host, self.port)
 
     def _default_app(self):
+        """ Application instance """
         return get_app().instance()
 
     @classmethod
-    def initialize(cls,*args, **kwargs):
+    def initialize(cls, *args, **kwargs):
+        """ Create an instance of this class. """
         try:
             return DevServerSession(*args, **kwargs)
         except ImportError:
@@ -224,9 +267,11 @@ class DevServerSession(Atom):
 
     @classmethod
     def instance(cls):
-        return DevServerSession._instance
+        """ Get the singleton instance  """
+        return cls._instance
 
     def __init__(self, *args, **kwargs):
+        """ Overridden constructor that forces only one instance to ever exist. """
         if self.instance() is not None:
             raise RuntimeError("A DevServerClient instance already exists!")
         super(DevServerSession, self).__init__(*args, **kwargs)
@@ -234,12 +279,17 @@ class DevServerSession(Atom):
 
     def _default_mode(self):
         """ If host is set to server then serve it from the app! """
-        return "server" if self.host=="server" else "client"
+        return "server" if self.host == "server" else "client"
 
     def start(self):
+        """ Start the dev session. Attempt to use tornado first, then try twisted"""
         print("Starting debug client cwd: {}".format(os.getcwd()))
         print("Sys path: {}".format(sys.path))
-        if self.mode=='client':
+
+        #: Initialize the hotswapper
+        self.hotswap = Hotswapper(debug=False)
+
+        if self.mode == 'client':
             try:
                 self.start_tornado_client()
             except ImportError:
@@ -410,6 +460,7 @@ class DevServerSession(Atom):
         raise NotImplementedError
 
     def _observe_connected(self, change):
+        """ Log connection state changes """
         print("Dev server {}".format("connected" if self.connected else "disconnected"))
 
     def handle_message(self, data):
@@ -422,26 +473,77 @@ class DevServerSession(Atom):
                 self.app.widget.showLoading("Reloading... Please wait.", now=True)
             except:
                 #: TODO: Implement for iOS...
-                traceback.print_exc()
+                pass
+            self.save_changed_files(msg)
+            self.do_reload()
+        elif msg['type'] == 'hotswap':
+            #: Show hotswap tooltip
+            try:
+                self.app.widget.showTooltip("Hot swapping...", now=True)
+            except:
+                pass
+            self.save_changed_files(msg)
+            self.do_hotswap()
 
-            #: On iOS we can't write in the app bundle
-            if os.environ.get('TMP'):
-                tmp_dir = os.environ['TMP']
-                if not os.path.exists(tmp_dir):
-                    os.makedirs(tmp_dir)
-                if tmp_dir not in sys.path:
-                    sys.path.insert(0, tmp_dir)
+    def save_changed_files(self, msg):
 
-                    import site
-                    reload(site)
+        #: On iOS we can't write in the app bundle
+        if os.environ.get('TMP'):
+            tmp_dir = os.environ['TMP']
+            if not os.path.exists(tmp_dir):
+                os.makedirs(tmp_dir)
+            if tmp_dir not in sys.path:
+                sys.path.insert(0, tmp_dir)
 
-            with cd(sys.path[0]):
-                #: Clear cache
-                if os.path.exists('__enamlcache__'):
-                    shutil.rmtree('__enamlcache__')
-                for fn in msg['files']:
-                    print("Updating {}".format(fn))
-                    with open(fn, 'wb') as f:
-                        f.write(msg['files'][fn].encode('utf-8'))
+                import site
+                reload(site)
 
-            self.app.reload()
+        with cd(sys.path[0]):
+            #: Clear cache
+            if os.path.exists('__enamlcache__'):
+                shutil.rmtree('__enamlcache__')
+            for fn in msg['files']:
+                print("Updating {}".format(fn))
+                with open(fn, 'wb') as f:
+                    f.write(msg['files'][fn].encode('utf-8'))
+
+    def do_reload(self):
+        """ Called when the dev server wants to reload the view. """
+        #: TODO: This should use the autorelaoder
+        app = self.app
+        if app.reload_view is None:
+            print("Warning: Reloading the view is not implemented. "
+                  "Please set `app.reload_view` to support this.")
+            return
+        if app.view is not None:
+            try:
+                app.view.destroy()
+            except:
+                pass
+        app.view = None
+
+        def wrapped(f):
+            def safe_reload(*args, **kwargs):
+                try:
+                    return f(*args,**kwargs)
+                except:
+                    #: Display the error
+                    self.send_event(Command.ERROR, traceback.format_exc())
+            return safe_reload
+
+        app.deferred_call(wrapped(app.reload_view), app)
+
+    def do_hotswap(self):
+        """ Attempt to hotswap the code """
+        hotswap = self.hotswap
+        app = self.app
+        try:
+            print("Attempting hotswap....")
+            with hotswap.active():
+                hotswap.update(app.view)
+        except:
+            #: Display the error
+            app.send_event(Command.ERROR, traceback.format_exc())
+
+
+

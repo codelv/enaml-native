@@ -364,28 +364,3 @@ class BridgedApplication(Application):
 
         #: Save a reference
         self._dev_session = session
-
-    def reload(self):
-        """ Called when the dev server wants to reload the view. """
-        if self.reload_view is None:
-            print("Warning: Reloading the view is not implemented. "
-                  "Please set `app.reload_view` to support this.")
-            return
-        if self.view is not None:
-            try:
-                self.view.destroy()
-            except:
-                pass
-        self.view = None
-
-        def wrapped(f):
-            def safe_reload(*args, **kwargs):
-                try:
-                    return f(*args,**kwargs)
-                except:
-                    #: Display the error
-                    self.send_event(bridge.Command.ERROR, traceback.format_exc())
-            return safe_reload
-
-
-        self.deferred_call(wrapped(self.reload_view), self)
