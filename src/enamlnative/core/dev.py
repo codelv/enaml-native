@@ -528,7 +528,7 @@ class DevServerSession(Atom):
                     return f(*args,**kwargs)
                 except:
                     #: Display the error
-                    self.send_event(Command.ERROR, traceback.format_exc())
+                    app.send_event(Command.ERROR, traceback.format_exc())
             return safe_reload
 
         app.deferred_call(wrapped(app.reload_view), app)
