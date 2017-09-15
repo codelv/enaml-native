@@ -1,3 +1,9 @@
+# ==============================================================================
+# WARNING: THIS IS OLD AND NO LONGER USED!!
+# the new `enaml-native cli` now does all this
+# kept only for reference as it's easier to see what the cli does
+# ==============================================================================
+
 ARCH=armeabi-v7a
 SDK_DIR=/home/jrm/Android/Sdk
 NDK_DIR=/home/jrm/Android/Crystax/crystax-ndk-10.3.2
