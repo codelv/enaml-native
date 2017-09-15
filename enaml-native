@@ -272,6 +272,10 @@ class BuildPython(Command):
         env = ctx['android']
         reqs = ",".join(env['dependencies'].keys())
 
+        #: Add default
+        if 'python_build_dir' not in env:
+            env['python_build_dir'] = os.path.abspath('build/python')
+
         #: Run ndk build
         #: Um, we're passing args from another command?
         self.cmds['ndk-build'].run(args)
@@ -293,6 +297,11 @@ class BuildPython(Command):
 
             #: Add minification
             cfg['minify'] = '--minify ' if (args and args.minify) else ''
+
+            #: Where should we put our built python modules and packages
+            #cfg['python_build_dir'] = os.path.abspath('build/python')
+            if not os.path.exists(cfg['python_build_dir']):
+                os.makedirs(cfg['python_build_dir'])
 
             if args and args.d:
                 logger = logging.getLogger('p4a')
@@ -329,24 +338,26 @@ class BuildPython(Command):
             for f in ['modules', 'site-packages']:
                 shprint(sh.cp,'-R',
                       expanduser('~/.local/share/python-for-android/dists/enaml-native/python/{}'.format(f)),
-                      'android/app/src/main/python/{arch}'.format(**cfg))
+                      '{python_build_dir}/{arch}'.format(**cfg))
 
-            #: Copy ca-cert
-            with cd('android/app/src/main/python/{arch}/site-packages/tornado/'.format(**cfg)):
-                shprint(sh.cp, '/etc/ssl/certs/ca-certificates.crt', '.')
+            #: Copy ca-cert (tornado only)
+            cert_path = '{python_build_dir}/{arch}/site-packages/tornado/'.format(**cfg)
+            if os.path.exists(cert_path):
+                with cd(cert_path):
+                    shprint(sh.cp, '/etc/ssl/certs/ca-certificates.crt', '.')
 
             #: Where .so files go
             dst = abspath('android/app/src/main/libs/{arch}'.format(**cfg))
 
             #: Collect all .so files and rename them
-            with cd('android/app/src/main/python/{arch}'.format(**cfg)):
-                for mod in sh.find('.','-name', '*.so').stdout.strip().split("\n"):
+            with cd('{python_build_dir}/{arch}'.format(**cfg)):
+                for mod in sh.find('.', '-name', '*.so').stdout.strip().split("\n"):
                     #: Strip ./modules or ./site-packages
                     pgk = ".".join(['lib']+mod.split("/")[2:])
                     #: Rename mod.so to pkg.mod.so and move to libs
-                    shprint(sh.mv,mod, join(dst, pgk))
+                    shprint(sh.mv, mod, join(dst, pgk))
 
-    def run_ios(self,args):
+    def run_ios(self, args):
         ctx = self.ctx
         env = ctx['ios']
         #: Replace crystax with just python on ios
@@ -367,8 +378,13 @@ class TrimAssets(Command):
         ctx = self.ctx
 
         #: Clean each arch
-        for arch in ctx['android']['arches']:
-            with cd('android/app/src/main/python/{arch}/site-packages/'.format(arch=arch)):
+        env = ctx['android']
+        #: Add default
+        if 'python_build_dir' not in env:
+            env['python_build_dir'] = os.path.abspath('build/python')
+
+        for arch in env['arches']:
+            with cd('{python_build_dir}/{arch}/site-packages/'.format(arch=arch, **env)):
                 shprint(sh.find,'.','-type','f','-name','*.py','-delete')
                 shprint(sh.find,'.','-type','f','-name','*.pyc','-delete')
                 #shprint(sh.find,'.','-type','f','-name','*.pyo','-delete') #: Use pyo
@@ -399,13 +415,18 @@ class BundleAssets(Command):
     def run(self, args=None):
         ctx = self.ctx
         env = ctx['android']
+
+        #: Add default
+        if 'python_build_dir' not in env:
+            env['python_build_dir'] = os.path.abspath('build/python')
+
         #: Clean each arch
         for arch in env['arches']:
             #: Remove old
-            cfg = dict(arch=arch,bundle_id=ctx['bundle_id'])
+            cfg = dict(arch=arch, bundle_id=ctx['bundle_id'])
             cfg.update(env)
             root = abspath(os.getcwd())
-            with cd('android/app/src/main/python/'):
+            with cd(env['python_build_dir']):
                 #: Remove old build
                 if os.path.exists('build'):
                     shprint(sh.rm, '-R', 'build')
@@ -457,12 +478,12 @@ class BundleAssets(Command):
 
         #: Now copy to android assets folder
         shprint(sh.cp,
-                'android/app/src/main/python/python.zip',
+                '{python_build_dir}/python.zip'.format(**env),
                 'android/app/src/main/assets/python/python.zip')
 
         #: And wth, just copy it to the ios folder too :)
         shprint(sh.cp,
-                'android/app/src/main/python/python.zip',
+                '{python_build_dir}/python.zip'.format(**env),
                 'ios/App/Python/python.zip')
         #: Can iOS unpack this??
 
