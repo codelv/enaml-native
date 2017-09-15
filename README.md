@@ -1,6 +1,8 @@
 # enaml-native
 Build native mobile apps in python using enaml and native widgets!  
 
+[![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
+
 The goal of this project is to be an alternative to using [kivy](https://kivy.org/) for building mobile apps with python. 
 
 I made this because wanted to have a more "React Native" like environment that: 
@@ -29,7 +31,6 @@ Apps using enaml-native can be found [here](https://www.codelv.com/projects/enam
 1. Try out the beta demo app here [on google play](https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo)
 2. Try out code without installing the android SDK or NDK via the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground)!
 
-[![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
 
 ### Thanks to ###
  
