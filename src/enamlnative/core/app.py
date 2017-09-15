@@ -45,7 +45,7 @@ class BridgedApplication(Application):
     _bridge_queue = List()
 
     #: Delay to wait before sending events (in ms)
-    _bridge_timeout = Int(3)
+    _bridge_timeout = Int(1)
 
     #: Count of pending send calls
     _bridge_pending = Int(0)
@@ -358,9 +358,12 @@ class BridgedApplication(Application):
         """ Start a client that attempts to connect to the dev server
             running on the host `app.dev`
         """
-        from .dev import DevServerSession
-        session = DevServerSession.initialize(host=self.dev)
-        session.start()
+        try:
+            from .dev import DevServerSession
+            session = DevServerSession.initialize(host=self.dev)
+            session.start()
 
-        #: Save a reference
-        self._dev_session = session
+            #: Save a reference
+            self._dev_session = session
+        except:
+            self.show_error(traceback.format_exc())
