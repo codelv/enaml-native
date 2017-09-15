@@ -365,26 +365,46 @@ Try the simple icon finder example.
                     Text:
                         text = "Use {icon-name} within the text. Uses android-iconify. Browse an icon pack below" \
                              "or pick an icon from the pack here"
-                    AutoCompleteTextView: search:
-                        choices << list(finder.icons)
-                        text << finder.icons[0]
-
-                    Flexbox:
-                        Looper:
-                            iterable = [72, 64, 48, 32, 24, 18]
-                            Icon:
-                                text_size = loop_item
-                                padding = (8, 0, 8, 0)
-                                text << u"{%s}"%search.text if search.text in finder.icons else "" #: TODO: Trigger on value accepted
-            CardView:
-              Flexbox:
-                    flex_direction = "column"
                     Text:
                       text = "Icon packs"
                     Spinner: icon_pack:
                       items = ['Entypo','Font awesome','Ionicons', 'Material community', 'Material',
                                 'Meteocons', "Weather"]
-                    #: Use one because it's way faster than a looper
+
+                    Text:
+                      text = "Icon"
+                    AutoCompleteTextView: search:
+                        choices << list(finder.icons)
+                        text << finder.icons[0]
+
+                    Flexbox: display:
+                        padding = (0, 20, 0, 20)
+                        attr text << u"{%s}"%(search.text) if search.text in finder.icons else "" 
+                        Looper:
+                            iterable = [72, 64, 48, 32, 24, 18]
+                            Icon:
+                                text_size = loop_item
+                                padding = (8, 0, 8, 0)
+                                text << display.text
+
+                    Text:
+                        text = "Manual"
+                    EditText: manual:
+                        editor_actions = True
+                        placeholder = "Put your icon code here"
+                        editor_action :: 
+                            if change['value']['key'] == 6:
+                                display.text = self.text
+                                #: Keep keyboard open
+                                change['value']['result'] = True
+                    Text:
+                        text = "Warning: it's easy to blow up with a typo here!"
+                        text_color = "#f00"
+
+
+                    #: Use one because it's way f,aster than a looper
+                    Text:
+                      text = "Icons"
                     Icon:
                       text_size = 32
                       text << u" ".join([u"{%s}"%n for n in finder.icons])
