@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 @author jrm
 
 '''
-from atom.api import Atom, Value, Subclass
+from atom.api import Atom, Value, Subclass, Callable, Unicode
 from functools import partial
 from . import bridge
 
@@ -17,6 +17,8 @@ class EventLoop(Atom):
     """ Event loop delegation api
 
     """
+    #: So users can check if needed
+    name = Unicode()
 
     #: Actual event loop object
     loop = Value()
@@ -26,11 +28,12 @@ class EventLoop(Atom):
         """ Get the first available event loop implementation
             based on which packages are installed."""
         for impl in [
-                TornadoEventLoop,
-                TwistedEventLoop,
-                BuiltinEventLoop,
-                ]:
+            TornadoEventLoop,
+            TwistedEventLoop,
+            BuiltinEventLoop,
+        ]:
             if impl.available():
+                print("Using {} event loop!".format(impl))
                 return impl()
         raise RuntimeError("No event loop implementation is available. Install tornado or twisted.")
 
@@ -101,6 +104,9 @@ class TornadoEventLoop(EventLoop):
         except ImportError:
             return False
 
+    def _default_name(self):
+        return "tornado"
+
     def _default_loop(self):
         from tornado.ioloop import IOLoop
         return IOLoop.current()
@@ -147,6 +153,13 @@ class TornadoEventLoop(EventLoop):
 
 class TwistedEventLoop(EventLoop):
     """ Eventloop using twisted's reactor """
+
+    #: Attached to all "futures" and is invoked when an exception occurs
+    _handler = Callable()
+
+    def _default_name(self):
+        return "twisted"
+
     @classmethod
     def available(cls):
         try:
@@ -160,23 +173,41 @@ class TwistedEventLoop(EventLoop):
         return reactor
 
     def start(self):
+        print("Starting reactor {}".format(self.loop))
         self.loop.run()
 
     def deferred_call(self, callback, *args, **kwargs):
-        return self.loop.callWhenRunning(callback, *args, **kwargs)
+        """ We have to wake up the reactor after every call because
+            it may calculate a long delay where it can sleep which causes events that
+            happen during this period to seem really slow as they do not get processed until
+            after the reactor "wakes up"
+        """
+        r = self.loop.callLater(0, callback, *args, **kwargs)
+        self.loop.wakeUp()
+        return r
 
     def timed_call(self, ms, callback, *args, **kwargs):
-        return self.loop.callLater(ms/1000.0, callback, *args, **kwargs)
+        """ We have to wake up the reactor after every call because
+            it may calculate a long delay where it can sleep which causes events that
+            happen during this period to seem really slow as they do not get processed until
+            after the reactor "wakes up"
+        """
+        r = self.loop.callLater(ms/1000.0, callback, *args, **kwargs)
+        self.loop.wakeUp()
+        return r
 
     def set_error_handler(self, handler):
-        #self.loop.handle_callback_exception = handler
-        raise NotImplementedError
+        self._handler = handler
 
     def create_future(self):
         from twisted.internet.defer import Deferred
         d = Deferred()
 
         bridge.tag_object_with_id(d)
+
+        #: Error handling support
+        if self._handler:
+            d.addErrback(self._handler)
 
         #: Add then method so you can easily chain callbacks
         def then(d, callback):
@@ -213,3 +244,6 @@ class BuiltinEventLoop(TornadoEventLoop):
     def _default_loop(self):
         from .eventloop.ioloop import IOLoop
         return IOLoop.current()
+
+    def set_error_handler(self, handler):
+        self.loop.set_callback_exception_handler(handler)
