@@ -303,6 +303,6 @@ You can to respond to keyboard "actions" (ie the send button pressed) by setting
 
 If you set the `result` of event value dictionary to True via `change['value']['result'] = True` it will tell the widget that the action was handled and the keyboard should NOT close  (it closes by default).  
 
-The `key` of the event value dictionary is a code that represent the key pressed. See the android docs for the keycodes.
+The `key` of the event value dictionary is a code that represent the key pressed. See the android [EditorInfo](https://developer.android.com/reference/android/view/inputmethod/EditorInfo.html) docs for the keycodes.
 
-More to come...
+More to come... 
