@@ -8,6 +8,9 @@ Copy and paste the example code in and click the play button. The app reloads an
 
 [![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
 
+> Note: This project is changing very rapidly, some of these examples will only work on the master branches version of code!
+
+
 ### Basics
 
 #### Text
