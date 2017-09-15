@@ -305,4 +305,95 @@ If you set the `result` of event value dictionary to True via `change['value']['
 
 The `key` of the event value dictionary is a code that represent the key pressed. See the android [EditorInfo](https://developer.android.com/reference/android/view/inputmethod/EditorInfo.html) docs for the keycodes.
 
+### Flexbox
+
+For flexbox usage see the layouts section in [learning the basics](https://www.codelv.com/projects/enaml-native/docs/learn-the-basics#layouts)
+
+### Fragment
+
+Fragment is a special component that subclasses the `Conditional` block and is meant for providing pages to a [ViewPager](#ViewPager). It's preferred to use the [PagerFragement](#PagerFragment) instead of using this directly however they both will work as childen of a pager. See the [ViewPager](#ViewPager) component docs for more info.
+
+### FrameLayout
+
+A wrapper for android's [FrameLayout](https://developer.android.com/reference/android/widget/FrameLayout.html). It's preferred to use Flexbox for layouts however some custom native components may subclass this.
+
+
+### GridLayout
+
+A wrapper for android's [GridLayout](https://developer.android.com/reference/android/widget/GridLayout.html). It's preferred to use Flexbox for layouts.
+
+### Icon
+
+A component for displaying icons. It extends the `TextView` component and uses [android-iconify](https://github.com/JoanZapata/android-iconify) behind the scenes. All icon packs are included by default.
+
+Icon packs
+
+1. [fontawesome // (v4.5)](http://fontawesome.io/icons/)
+2. [entypo  // (v3,2015)](http://entypo.com/)
+3. [typicons // (v2.0.7)](http://www.typicons.com/)
+4. [material // (v2.0.0)](https://material.io/icons/)
+5. [material-community // (v1.4.57)](https://materialdesignicons.com/)
+6. [meteocons // (latest)](http://www.alessioatzeni.com/meteocons/)
+7. [weathericons // (v2.0)](https://erikflowers.github.io/weather-icons/)
+8. [simplelineicons // (v1.0.0)](http://simplelineicons.com/)
+9. [ionicons // (v2.0.1)](https://ionicframework.com/docs/ionicons/)
+
+To use them simply add `{<icon_name>}` in the Icon's text attribute. You can set the text_color, text_size, font_familiy, as well or optionally can use the inline [icon options](https://github.com/JoanZapata/android-iconify#icon-options).
+
+Try the simple icon finder example.
+
+    :::python
+    from enamlnative.core.api import *
+    from enamlnative.widgets.api import *
+
+    enamldef Text(TextView):
+        #: Add Spacing
+        padding = (0, 20, 0, 0)
+
+    enamldef ContentView(ScrollView): finder:
+        attr icons << getattr(Icon,"PACK_%s"%icon_pack.items[icon_pack.selected].replace(" ","_").upper())
+        padding = (10, 10, 10, 10)
+        Flexbox:
+            flex_direction = "column"
+            CardView:
+                Flexbox:
+                    flex_direction = "column"
+                    layout_height = "wrap_content"
+                    Text:
+                        text = "Icons"
+                        text_size = 32
+                    Text:
+                        text = "Use {icon-name} within the text. Uses android-iconify. Browse an icon pack below" \
+                             "or pick an icon from the pack here"
+                    AutoCompleteTextView: search:
+                        choices << list(finder.icons)
+                        text << finder.icons[0]
+
+                    Flexbox:
+                        Looper:
+                            iterable = [72, 64, 48, 32, 24, 18]
+                            Icon:
+                                text_size = loop_item
+                                padding = (8, 0, 8, 0)
+                                text << u"{%s}"%search.text if search.text in finder.icons else "" #: TODO: Trigger on value accepted
+            CardView:
+              Flexbox:
+                    flex_direction = "column"
+                    Text:
+                      text = "Icon packs"
+                    Spinner: icon_pack:
+                      items = ['Entypo','Font awesome','Ionicons', 'Material community', 'Material',
+                                'Meteocons', "Weather"]
+                    #: Use one because it's way faster than a looper
+                    Icon:
+                      text_size = 32
+                      text << u" ".join([u"{%s}"%n for n in finder.icons])
+
+
+
+
+
+
+
+
 More to come... 
