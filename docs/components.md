@@ -311,7 +311,7 @@ For flexbox usage see the layouts section in [learning the basics](https://www.c
 
 ### Fragment
 
-Fragment is a special component that subclasses the `Conditional` block and is meant for providing pages to a [ViewPager](#ViewPager). It's preferred to use the [PagerFragement](#PagerFragment) instead of using this directly however they both will work as childen of a pager. See the [ViewPager](#ViewPager) component docs for more info.
+Fragment is a special component that subclasses the `Conditional` block and is meant for providing pages to a [ViewPager](#viewpager). It's preferred to use the [PagerFragement](#pagerfragment) instead of using this directly however they both will work as childen of a pager. See the [ViewPager](#viewpager) component docs for more info.
 
 ### FrameLayout
 
@@ -391,7 +391,9 @@ Try the simple icon finder example.
 
 
 
+### IconButton
 
+It's a button that allows Icons in the text. See the [Icon](#icon) and [Button](#button) components.
 
 
 
