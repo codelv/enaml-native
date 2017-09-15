@@ -8,8 +8,8 @@
     "src"
   ],
   "android": {
-    "ndk":"/home/jrm/Android/Crystax/crystax-ndk-10.3.2",
-    "sdk":"/home/jrm/Android/Sdk",
+    "ndk":"~/Android/Crystax/crystax-ndk-10.3.2",
+    "sdk":"~/Android/Sdk",
     "arches": ["x86", "armeabi-v7a"],
     "dependencies": {
       "python2crystax": "2.7.10",
