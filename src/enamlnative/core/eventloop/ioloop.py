@@ -155,6 +155,8 @@ class IOLoop(Atom):
 
     _current = threading.local()
 
+    _error_handler = Callable()
+
     @staticmethod
     def instance():
         """Deprecated alias for `IOLoop.current()`.
@@ -666,6 +668,10 @@ class IOLoop(Atom):
         """Avoid unhandled-exception warnings from spawned coroutines."""
         future.result()
 
+    def set_callback_exception_handler(self, handler):
+        """ Change the exception handler """
+        self._error_handler = handler
+
     def handle_callback_exception(self, callback):
         """This method is called whenever a callback run by the `IOLoop`
         throws an exception.
@@ -676,7 +682,10 @@ class IOLoop(Atom):
         The exception itself is not passed explicitly, but is available
         in `sys.exc_info`.
         """
-        app_log.error("Exception in callback %r", callback, exc_info=True)
+        if self._error_handler:
+            self._error_handler(callback)
+        else:
+            app_log.error("Exception in callback %r", callback, exc_info=True)
 
     def split_fd(self, fd):
         """Returns an (fd, obj) pair from an ``fd`` parameter.
