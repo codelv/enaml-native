@@ -326,7 +326,7 @@ A wrapper for android's [GridLayout](https://developer.android.com/reference/and
 
 A component for displaying icons. It extends the `TextView` component and uses [android-iconify](https://github.com/JoanZapata/android-iconify) behind the scenes. All icon packs are included by default.
 
-[![Icons in enaml-native](https://img.youtube.com/vi/VdEgbNL53lw/0.jpg)](https://youtu.be/VdEgbNL53lw)
+[![Icons in enaml-native](https://img.youtube.com/vi/K0hiyV6SBms/0.jpg)](https://youtu.be/K0hiyV6SBms)
 
 Icon packs
 
