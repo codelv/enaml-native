@@ -8,6 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 @author jrm
 
 '''
+import enamlnative
 from atom.api import Atom, Value, Subclass, Callable, Unicode
 from functools import partial
 from . import bridge
@@ -99,9 +100,12 @@ class TornadoEventLoop(EventLoop):
     @classmethod
     def available(cls):
         try:
-            import tornado
+            with enamlnative.imports():
+                import unicodedata #: Required by tornado for encodings
+                from tornado.ioloop import IOLoop
             return True
-        except ImportError:
+        except ImportError as e:
+            print("Tornado event loop not available {}".format(e))
             return False
 
     def _default_name(self):
@@ -163,9 +167,11 @@ class TwistedEventLoop(EventLoop):
     @classmethod
     def available(cls):
         try:
-            import twisted
+            with enamlnative.imports():
+                from twisted.internet import reactor
             return True
-        except ImportError:
+        except ImportError as e:
+            print("Twisted event loop not available {}".format(e))
             return False
 
     def _default_loop(self):
@@ -232,9 +238,12 @@ class BuiltinEventLoop(TornadoEventLoop):
     @classmethod
     def available(cls):
         try:
-            from . import eventloop
+            with enamlnative.imports():
+                from .eventloop.ioloop import IOLoop
             return True
         except ImportError:
+            print("Error: Failed to load the builtin event loop. "
+                  "This usually indicates missing or inaccessible shared libraries.")
             return False
 
     def _default_future(self):
