@@ -24,18 +24,22 @@ class EventLoop(Atom):
     #: Actual event loop object
     loop = Value()
 
+    #: Error handler fallback
+    _handler = Callable()
+
     @classmethod
     def default(cls):
         """ Get the first available event loop implementation
             based on which packages are installed."""
-        for impl in [
-            TornadoEventLoop,
-            TwistedEventLoop,
-            BuiltinEventLoop,
-        ]:
-            if impl.available():
-                print("Using {} event loop!".format(impl))
-                return impl()
+        with enamlnative.imports():
+            for impl in [
+                TornadoEventLoop,
+                TwistedEventLoop,
+                BuiltinEventLoop,
+            ]:
+                if impl.available():
+                    print("Using {} event loop!".format(impl))
+                    return impl()
         raise RuntimeError("No event loop implementation is available. Install tornado or twisted.")
 
     @classmethod
@@ -64,19 +68,26 @@ class EventLoop(Atom):
     def create_future(self):
         """ Create a future instance for this event loop.
 
-            The future returned MUST have a method named `then` that
-            takes adds callback that should be invoked when the future is complete
+            Adds a "javascript fetch" like api with "then" and "catch".
+
+            The object returned MUST have a method named `then` that
+            takes a callback that should be invoked when the future is complete
+            and returns the future object.
+
+            And the object returned MUST have a method named `catch` that
+            takes a callback that should be invoked if the future contains an exception
             and returns the future object.
 
             Likewise the future must be tagged with an id using
             `bridge.tag_object_with_id(obj)`
+            so it can be resolved by the bridge.
 
         """
         raise NotImplementedError
 
     def set_error_handler(self, handler):
         """ Set the error handler method to be the given handler. """
-        raise NotImplementedError
+        self._handler = handler
 
     def add_done_callback(self, future, callback):
         """ Add a callback will be triggered when the callback completes. """
@@ -100,9 +111,8 @@ class TornadoEventLoop(EventLoop):
     @classmethod
     def available(cls):
         try:
-            with enamlnative.imports():
-                import unicodedata #: Required by tornado for encodings
-                from tornado.ioloop import IOLoop
+            import unicodedata #: Required by tornado for encodings
+            from tornado.ioloop import IOLoop
             return True
         except ImportError as e:
             print("Tornado event loop not available {}".format(e))
@@ -122,6 +132,7 @@ class TornadoEventLoop(EventLoop):
         return self.loop.call_later(ms/1000.0, callback, *args, **kwargs)
 
     def set_error_handler(self, handler):
+        super(TornadoEventLoop, self).set_error_handler(handler)
         self.loop.handle_callback_exception = handler
 
     def _default_future(self):
@@ -135,16 +146,31 @@ class TornadoEventLoop(EventLoop):
         #: Add then method so you can easily chain callbacks
         #: Tornado returns the future not the result to callbacks
         def then(f, callback):
-            def done(f, callback):
-                callback(f.result())
-            f.add_done_callback(partial(done, callback=callback))
+            f.add_done_callback(partial(self.safe_callback, callback=callback))
             return f
         f.then = partial(then, f)
+
+        #: Add catch method so you can easily chain callbacks
+        def catch(f, callback):
+            def safe_callback(f, callback):
+                try:
+                    error = f.exception()
+                    if error is not None:
+                        callback(error)
+                except Exception as e:
+                    if self._handler:
+                        self._handler(callback)
+                    else:
+                        raise
+            f.add_done_callback(partial(safe_callback, callback=callback))
+            return f
+
+        f.catch = partial(then, f)
 
         return f
 
     def add_done_callback(self, future, callback):
-        future.add_done_callback(callback)
+        future.add_done_callback(partial(self.safe_callback, callback=callback))
         return future
 
     def set_future_result(self, future, result):
@@ -154,12 +180,18 @@ class TornadoEventLoop(EventLoop):
         from tornado.log import app_log
         app_log.error("Exception in callback %r", callback, exc_info=True)
 
+    def safe_callback(self, f, callback):
+        try:
+            return callback(f.result())
+        except Exception as e:
+            if self._handler:
+                self._handler(callback)
+            else:
+                raise
+
 
 class TwistedEventLoop(EventLoop):
     """ Eventloop using twisted's reactor """
-
-    #: Attached to all "futures" and is invoked when an exception occurs
-    _handler = Callable()
 
     def _default_name(self):
         return "twisted"
@@ -167,8 +199,7 @@ class TwistedEventLoop(EventLoop):
     @classmethod
     def available(cls):
         try:
-            with enamlnative.imports():
-                from twisted.internet import reactor
+            from twisted.internet import reactor
             return True
         except ImportError as e:
             print("Twisted event loop not available {}".format(e))
@@ -202,9 +233,6 @@ class TwistedEventLoop(EventLoop):
         self.loop.wakeUp()
         return r
 
-    def set_error_handler(self, handler):
-        self._handler = handler
-
     def create_future(self):
         from twisted.internet.defer import Deferred
         d = Deferred()
@@ -212,22 +240,48 @@ class TwistedEventLoop(EventLoop):
         bridge.tag_object_with_id(d)
 
         #: Error handling support
-        if self._handler:
-            d.addErrback(self._handler)
+        #: Doesn't seem to work
+        # if self._handler:
+        #     def safe_handler(*args, **kwargs):
+        #         try:
+        #             self._handler(*args, **kwargs)
+        #         except Exception as e:
+        #             from .app import BridgedApplication
+        #             BridgedApplication.instance().handle_error(self._handler)
+        #
+        #     d.addErrback(safe_handler)#self._handler)
 
         #: Add then method so you can easily chain callbacks
         def then(d, callback):
-            d.addBoth(callback)
+            d.addCallback(partial(self.safe_callback, callback))
             return d
+
+        def catch(d, callback):
+            d.addErrback(partial(self.safe_callback, callback))
+            return d
+
         d.then = partial(then, d)
+        d.catch = partial(catch, d)
         return d
 
     def add_done_callback(self, future, callback):
         #: Both?
-        future.addBoth(callback)
+        future.addCallback(partial(self.safe_callback, callback))
 
     def set_future_result(self, future, result):
         future.callback(result)
+
+    def log_error(self, callback):
+        print("Uncaught error during callback: {}".format(callback))
+
+    def safe_callback(self, callback, *args, **kwargs):
+        try:
+            return callback(*args, **kwargs)
+        except Exception as e:
+            if self._handler:
+                self._handler(callback)
+            else:
+                raise
 
 
 class BuiltinEventLoop(TornadoEventLoop):
@@ -238,8 +292,7 @@ class BuiltinEventLoop(TornadoEventLoop):
     @classmethod
     def available(cls):
         try:
-            with enamlnative.imports():
-                from .eventloop.ioloop import IOLoop
+            from .eventloop.ioloop import IOLoop
             return True
         except ImportError:
             print("Error: Failed to load the builtin event loop. "
@@ -255,4 +308,8 @@ class BuiltinEventLoop(TornadoEventLoop):
         return IOLoop.current()
 
     def set_error_handler(self, handler):
+        self._handler = handler
         self.loop.set_callback_exception_handler(handler)
+
+    def log_error(self, callback):
+        print("Uncaught error during callback: {}".format(callback))
