@@ -72,6 +72,14 @@ INDEX_PAGE = """<html>
     <div class="col l3 m2 s12" style="padding:0; max-height:100%; overflow-y:scroll;">
       <nav>
         <div class="nav-wrapper grey darken-3">
+          <a href="#files" style="margin-left:1em;">App</a>
+        </div>
+      </nav>
+      <ul id="files" data-collapsible="accordion">
+        ${files}
+      </ul>
+      <nav>
+        <div class="nav-wrapper grey darken-3">
           <a href="#components" style="margin-left:1em;">Components</a>
         </div>
       </nav>
@@ -134,14 +142,47 @@ INDEX_PAGE = """<html>
 
         // Init app dev session
         var enaml;
+
+        // Saved files
+        var state = {
+            currentFile: "view.enaml",
+            files: {},
+        };
+
+        $('.editor-file').click(function(e){
+            var file = $(this).attr('id');
+
+            // Save the current state
+            state.files[state.currentFile] = editor.getValue();
+
+            var updateEditor = function(text){
+                // Load the new one
+                state.currentFile = file;
+                editor.setValue(text,1);
+            };
+
+            // Try to pull from tmp first (previous updates)
+            // fallback to source code
+            fetch("tmp/"+file).then(function(r){
+                if (r.status==404) {
+                    fetch("source/"+file).then(function(r){
+                        r.text().then(updateEditor);
+                    });
+                } else {
+                    r.text().then(updateEditor);
+                }
+            });
+        });
+
         $('#run').click(function(e){
             try {
                 // Trigger a reload
+                // Update current file
+                state.files[state.currentFile] = editor.getValue();
+
                 enaml.send(JSON.stringify({
                     'type':'reload',
-                    'files':{
-                        'view.enaml':editor.getValue(),
-                    }
+                    'files':state.files
                 }));
             } catch (ex) {
                 console.log(ex);
@@ -150,11 +191,14 @@ INDEX_PAGE = """<html>
         $('#hotswap').click(function(e){
             try {
                 // Trigger a reload
+
+                // Update current file
+                state.files[state.currentFile] = editor.getValue();
+
+                // Push our changes updates
                 enaml.send(JSON.stringify({
                     'type':'hotswap',
-                    'files':{
-                        'view.enaml':editor.getValue(),
-                    }
+                    'files':state.files
                 }));
             } catch (ex) {
                 console.log(ex);
@@ -207,6 +251,16 @@ DROPDOWN_TMPL = """
 <ul id='{id}' class='dropdown-content'>
 {items}
 </ul>"""
+
+FOLDER_TMPL = """
+<li>
+    <div class="collapsible-header" id="file-{id}">{name}</div>
+    <div class="collapsible-body" style="padding:0 1em;">
+        {items}
+    </div>
+</li>
+"""
+FILE_TMPL = """<li><div class="collapsible-header editor-file" id="{id}">{name}</div></li>"""
 
 
 def get_app():
@@ -323,6 +377,32 @@ class DevServer(Atom):
             return DROPDOWN_TMPL.format(id=node_id, name=node_type, items="".join(items))
         return "{}".format(node_type)
 
+    def render_files(self, root=None):
+        """ Render the file path as accordions
+        """
+        if root is None:
+            tmp =  os.environ.get('TMP')
+            root = sys.path[1 if tmp and tmp in sys.path else 0]
+        items = []
+        for filename in os.listdir(root):
+            # for subdirname in dirnames:
+            #     path = os.path.join(dirname, subdirname)
+            #     items.append(FOLDER_TMPL.format(
+            #         name=subdirname,
+            #         id=path,
+            #         items=self.render_files(path)
+            #     ))
+            #for filename in filenames:
+            f,ext = os.path.splitext(filename)
+            if ext in ['.py', '.enaml']:
+                items.append(FILE_TMPL.format(
+                    name=filename,
+                    id=filename
+                ))
+
+        return "".join(items)
+
+
     def render_code(self):
         """ Try to load the previous code (if we had a crash or something)
             I should allow saving.
@@ -353,7 +433,7 @@ class DevServer(Atom):
         source_path = inspect.getfile(declaration).replace(".pyo", ".py").replace(".pyc", ".py")
         if 'enamlnative' in source_path:
             source_link = "https://github.com/frmdstryr/enaml-native/tree/master/src/{}".format(
-                "enamlnative"+source_path.split("enamlnative")[1]
+                source_path.split("assets/python")[1]
             )
             info.append("<tr><td>source code</td><td><a href='{}' target='_blank'>show</a></td></td>"
                         .format(source_link))
@@ -380,7 +460,13 @@ class DevServer(Atom):
         components = "\n".join([self.render_component(w) for w in widgets])
 
         #: Just a little hackish, but hey it works
-        return INDEX_PAGE.replace("${components}", components).replace("${code}",self.render_code())
+        return INDEX_PAGE.replace(
+            "${components}", components
+        ).replace(
+            "${code}",self.render_code()
+        ).replace(
+            "${files}",self.render_files()
+        )
 
     def start(self, session):
         raise NotImplementedError
@@ -424,6 +510,8 @@ class TornadoDevServer(DevServer):
         app = tornado.web.Application([
             (r"/", MainHandler),
             (r"/dev", DevWebSocketHandler),
+            (r"/tmp/(.*)", tornado.web.StaticFileHandler, {'path': os.environ.get('TMP',sys.path[0])}),
+            (r"/source/(.*)", tornado.web.StaticFileHandler, {'path': sys.path[0]}),
         ])
 
         #: Start listening
@@ -448,6 +536,7 @@ class TwistedDevServer(DevServer):
         with enamlnative.imports():
             from twisted.internet import reactor
             from twisted.web import resource
+            from twisted.web.static import File
             from twisted.web.server import Site
             from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
             from autobahn.twisted.resource import WebSocketResource
@@ -474,6 +563,8 @@ class TwistedDevServer(DevServer):
         root = resource.Resource()
         root.putChild("", MainHandler())
         root.putChild("dev", WebSocketResource(factory))
+        root.putChild("source", File(sys.path[0]))
+        root.putChild("tmp", File(os.environ.get('TMP',sys.path[0])))
         site = Site(root)
         reactor.listenTCP(session.port, site)
         print("Twisted dev server started on {}".format(session.port))
