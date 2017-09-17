@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Copyright (c) 2017, Jairus Martin.
 
@@ -291,10 +292,14 @@ class BridgedApplication(Application):
             result = handler(*[v for t, v in args])
         except bridge.BridgeReferenceError as e:
             #: Log the event, don't blow up here
-            print("Error processing event: {} - {}".format(event, e))
+            msg = "Error processing event: {} - {}".format(event, e).encode("utf-8")
+            print(msg)
+            self.show_error(msg)
         except:
             #: Log the event, blow up in user's face
-            print("Error processing event: {} - {}".format(event, traceback.format_exc()))
+            msg = "Error processing event: {} - {}".format(event, traceback.format_exc()).encode("utf-8")
+            print(msg)
+            self.show_error(msg)
             raise
         finally:
             if result_id:
@@ -318,7 +323,7 @@ class BridgedApplication(Application):
             "Exception in callback %r"%callback,
             traceback.format_exc()
         ])
-        self.send_event(bridge.Command.ERROR, msg)
+        self.show_error(msg.encode('utf-8'))
 
     # --------------------------------------------------------------------------
     # AppEventListener API Implementation
