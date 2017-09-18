@@ -418,6 +418,48 @@ Try the simple icon finder example.
 It's a button that allows Icons in the text. See the [Icon](#icon) and [Button](#button) components.
 
 
+### Toast
+
+A toast flashes a simple message to the user for a given duration. Set the `show` attribute to `True` to display it. It will automatically hide after the given duration.
+  
+    :::python
+    from enamlnative.widgets.api import *
+
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
+        Button: 
+            text = "Show toast"
+            clicked :: 
+                toast.show = True
+        TextView:
+            text << "Toast: {}".format("active" if toast.show else "hidden")        
+        Button: 
+            text = "Show custom toast"
+            clicked :: 
+                toast2.show = True
+
+        Toast: toast:
+            text = "Cheers!"
+
+        Toast: toast2:
+            #: Time in ms to flash
+            duration = 5000
+            #: Custom component
+            CardView: card:
+                background_color = "#555"
+                radius = 10
+                Flexbox:
+                    align_items = "center"
+                    padding = (20, 10, 20, 10)
+                    Icon:
+                        text_color = "#fff"
+                        text = "{fa-check}"
+                    TextView:
+                        padding = (10, 10, 10, 10)
+                        text = "PAGE ADDED"
+                        text_color = "#fff"
+
+> Note: Clicks events are NOT supported in custom Toasts on Android!
 
 
 More to come... 
