@@ -12,7 +12,8 @@ Created on June 21, 2017
 from atom.api import Atom, Int, set_default
 from ..core import bridge
 from ..core.bridge import (
-    Command, msgpack_encoder, BridgeMethod, BridgeField, BridgeCallback, BridgeObject, encode
+    Command, msgpack_encoder, BridgeMethod, BridgeStaticMethod,
+    BridgeField, BridgeCallback, BridgeObject, encode
 )
 
 
@@ -34,6 +35,25 @@ class JavaMethod(BridgeMethod):
                 msgpack_encoder(signature[i] if i+1 < len(signature) else varg, args[i])
                 for i in range(len(args))
             ])
+
+        return (self.name, [msgpack_encoder(sig, arg) for sig, arg in zip(signature, args)])
+
+
+class JavaStaticMethod(BridgeStaticMethod):
+
+    def pack_args(self, *args, **kwargs):
+        signature = self.__signature__
+
+        vargs = signature and signature[-1].endswith("...")
+        if not vargs and (len(args) != len(signature)):
+            raise ValueError("Invalid number of arguments: Given {}, expected {}"
+                             .format(args, signature))
+        if vargs:
+            varg = signature[-1].replace('...', '')
+            return (self.name, [
+                msgpack_encoder(signature[i] if i+1 < len(signature) else varg, args[i])
+                for i in range(len(args))
+                ])
 
         return (self.name, [msgpack_encoder(sig, arg) for sig, arg in zip(signature, args)])
 

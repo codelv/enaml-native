@@ -64,3 +64,4 @@ from .number_picker import NumberPicker
 from .text_clock import TextClock
 from .analog_clock import AnalogClock
 from .iconify import Icon, IconButton, IconToggleButton
+from .toast import Toast

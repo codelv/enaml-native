@@ -55,6 +55,7 @@ public class Bridge {
     public static final String CREATE = "c";
     public static final String PROXY = "p";
     public static final String METHOD = "m";
+    public static final String STATIC_METHOD = "sm";
     public static final String FIELD = "f";
     public static final String DELETE = "d";
     public static final String RESULT = "r";
@@ -395,10 +396,58 @@ public class Bridge {
     }
 
     /**
-     * Call a method on the view with the given id.
+     * Call a static method on the class with the given name.
      *
-     * Uses lambdas (via retrolambda) to have as fast as direct use performance:
-     * @see  https://github.com/Hervian/lambda-factory/
+     * @param className: Class name to invoke the method on
+     * @param resultId: Serves two purposes,
+     *                  1. ID that result should be stored as
+     *                  2. and ID of the Future in python that can be used to retrieve the result
+     * @param method: Method to invoke on the given object
+     * @param args: Args to pass to the object
+     */
+    public void invokeStatic(String className, int resultId, String method, Value[] args) {
+        try {
+            Class objClass = Bridge.getClass(className);
+
+            // Decode args
+            UnpackedValues uv = new UnpackedValues(args);
+            String key = objClass.getName() + method + uv.getName();
+
+            // Cache the lambda methods
+            if (!mMethodCache.containsKey(key)) {
+                try {
+                    mMethodCache.put(key, objClass.getMethod(method, uv.getSpec()));
+                } catch (NoSuchMethodException e) {
+                    Log.e(TAG,"Error getting method of class="+className+" method="+method, e);
+                    mActivity.showErrorMessage(e);
+                    return;
+                } catch (Exception e) {
+                    Log.e(TAG,"Error getting method of class="+className+" method="+method, e);
+                    mActivity.showErrorMessage(e);
+                    return;
+                }
+            }
+
+
+            // Get the lambda
+            Method lambda = mMethodCache.get(key);
+            Object result = lambda.invoke(objClass, uv.getArgs());
+            onResult(resultId, result);
+        } catch (IllegalAccessException e) {
+            Log.e(TAG,"Error invoking class method="+method+" of class="+className, e);
+            mActivity.showErrorMessage(e);
+        } catch (InvocationTargetException e) {
+            Log.e(TAG,"Error invoking class method="+method+" of class="+className, e);
+            mActivity.showErrorMessage(e);
+        } catch (ClassNotFoundException e) {
+            mActivity.showErrorMessage(e);
+        } catch (IOException e) {
+            mActivity.showErrorMessage(e);
+        }
+    }
+
+    /**
+     * Call a method on the view with the given id.
      *
      * @param objId: ID of object to invoke the method on
      * @param resultId: Serves two purposes,
@@ -459,11 +508,8 @@ public class Bridge {
     /**
      * Call a method on the view with the given id.
      *
-     * Uses lambdas (via retrolambda) to have as fast as direct use performance:
-     * @see  https://github.com/Hervian/lambda-factory/
-     *
      * @param objId
-     * @param method
+     * @param field
      * @param args
      */
     public void updateObjectField(int objId, String field, Value[] args) {
@@ -891,6 +937,18 @@ public class Bridge {
                                 args[j] = v;
                             }
                             mTaskQueue.add(()->{updateObject(objId, resultId, objMethod, args);});
+                            break;
+                        case STATIC_METHOD:
+                            objClass = unpacker.unpackString();
+                            resultId = unpacker.unpackInt();
+                            objMethod = unpacker.unpackString();
+                            argCount = unpacker.unpackArrayHeader();
+                            args = new Value[argCount];
+                            for (int j=0; j<argCount; j++) {
+                                Value v = unpacker.unpackValue();
+                                args[j] = v;
+                            }
+                            mTaskQueue.add(()->{invokeStatic(objClass, resultId, objMethod, args);});
                             break;
 
                         case FIELD:

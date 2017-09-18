@@ -250,6 +250,10 @@ def tab_fragment_factory():
     return AndroidTabFragment
 
 
+def toast_factory():
+    from .android_toast import AndroidToast
+    return AndroidToast
+
 def toggle_button_factory():
     # print "Import toggle button"
     from .android_toggle_button import AndroidToggleButton
@@ -321,6 +325,7 @@ ANDROID_FACTORIES = {
     'TextClock': text_clock_factory,
     'TextView': text_view_factory,
     'TimePicker': time_picker_factory,
+    'Toast': toast_factory,
     'ToggleButton': toggle_button_factory,
     'Toolbar': toolbar_factory,
     'View': view_factory,

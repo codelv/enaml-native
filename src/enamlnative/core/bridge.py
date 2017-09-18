@@ -25,6 +25,7 @@ class Command:
     CREATE = "c"
     PROXY = "p"
     METHOD = "m"
+    STATIC_METHOD = "sm"
     FIELD = "f"
     DELETE = "d"
     RESULT = "r"
@@ -177,6 +178,74 @@ class BridgeMethod(Property):
             obj.__id__,
             result.__id__ if result else 0,
             obj.__prefix__ + method_name,  #: method name
+            method_args,  #: args
+            **kwargs  #: kwargs to send_event
+        )
+        return result
+
+    def pack_args(self, obj, *args, **kwargs):
+        """ Subclasses should implement this to pack args as needed
+            for the native bridge implementation. Must return a tuple containing
+            ("methodName", [list, of, encoded, args])
+        """
+        raise NotImplementedError
+
+
+class BridgeStaticMethod(Property):
+    """ A method that is callable via the bridge.
+        When called, this serializes the call, packs the arguments,
+            and delegates handling to a bridge in native code.
+
+        Example:
+            #: Define it
+            class Toast(BridgeObject):
+                makeToast = BridgeStaticMethod(*args)
+
+            #: Use
+            result = Toast.makeToast(*args)
+
+    """
+    __slots__ = ('__signature__', '__returns__', '__cache__', '__owner__')
+
+    def __init__(self, *args, **kwargs):
+        self.__returns__ = kwargs.get('returns', None)
+        self.__signature__ = args
+        self.__owner__ = None
+        self.__cache__ = {}  # Result cache otherwise gc cleans up
+        super(BridgeStaticMethod, self).__init__()
+
+    def __get__(self, instance, owner):
+        #: Save the object this class references
+        if self.__owner__ is None:
+            self.__owner__ = owner
+        return super(BridgeStaticMethod, self).__get__(instance, owner)
+
+    def __call__(self, *args, **kwargs):
+        #: Format the args as needed
+        method_name, method_args = self.pack_args(*args, **kwargs)
+
+        app = get_app_class().instance()
+
+        #: Create a future to retrieve the result if needed
+        result = app.create_future() if self.__returns__ else None
+
+        if result:
+            #: Store in local cache or global cache (weakref) removes it
+            #: resulting in a Reference error when the result is returned
+            self.__cache__[result.__id__] = result
+
+            def resolve(r, f=result):
+                #: Remove from local cache to free future
+                del self.__cache__[f.__id__]
+
+            #: Delete from the local cache once resolved.
+            result.then(resolve)
+
+        app.send_event(
+            Command.STATIC_METHOD,  #: method
+            self.__owner__.__nativeclass__.default_value_mode[1],
+            result.__id__ if result else 0,
+            method_name,  #: method name
             method_args,  #: args
             **kwargs  #: kwargs to send_event
         )
