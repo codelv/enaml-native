@@ -33,8 +33,8 @@ class ProxyToast(ProxyToolkitObject):
     def set_show(self, show):
         raise NotImplementedError
 
-    def set_position(self, position):
-        raise NotImplementedError
+    # def set_position(self, position):
+    #     raise NotImplementedError
 
 
 
@@ -51,7 +51,8 @@ class Toast(ToolkitObject):
     duration = d_(Int(1000))
 
     #: Position
-    position = d_(Unicode())
+    #: Does not work correctly
+    #position = d_(Unicode())
 
     #: Show the notification for the given duration
     show = d_(Bool())
@@ -62,7 +63,7 @@ class Toast(ToolkitObject):
     #: --------------------------------------------------------------------------
     # Observers
     #: --------------------------------------------------------------------------
-    @observe('text', 'duration', 'postition', 'show')
+    @observe('text', 'duration', 'show')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

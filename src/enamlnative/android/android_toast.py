@@ -71,8 +71,8 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
         if not self.made_toast:
             #: Set it to LONG
             self.toast.setDuration(1)
-        if d.position:
-            self.set_position(d.position)
+        #if d.position:
+        #    self.set_position(d.position)
         if d.show:
             self.set_show(d.show)
 
