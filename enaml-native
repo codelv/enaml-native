@@ -174,7 +174,7 @@ class NdkBuild(Command):
 
     def run(self, args=None):
         ctx = self.ctx
-        ndk_build = sh.Command(join(ctx['android']['ndk'], 'ndk-build'))
+        ndk_build = sh.Command(os.path.expanduser(join(ctx['android']['ndk'], 'ndk-build')))
         arches = ctx['android']['arches']
         with cd('android/app/src/main/jni'):
 
@@ -271,10 +271,6 @@ class BuildPython(Command):
         ctx = self.ctx
         env = ctx['android']
         reqs = ",".join(env['dependencies'].keys())
-
-        #: Add default
-        if 'python_build_dir' not in env:
-            env['python_build_dir'] = os.path.abspath('build/python')
 
         #: Run ndk build
         #: Um, we're passing args from another command?
@@ -379,9 +375,6 @@ class TrimAssets(Command):
 
         #: Clean each arch
         env = ctx['android']
-        #: Add default
-        if 'python_build_dir' not in env:
-            env['python_build_dir'] = os.path.abspath('build/python')
 
         for arch in env['arches']:
             with cd('{python_build_dir}/{arch}/site-packages/'.format(arch=arch, **env)):
@@ -415,10 +408,6 @@ class BundleAssets(Command):
     def run(self, args=None):
         ctx = self.ctx
         env = ctx['android']
-
-        #: Add default
-        if 'python_build_dir' not in env:
-            env['python_build_dir'] = os.path.abspath('build/python')
 
         #: Clean each arch
         for arch in env['arches']:
@@ -808,22 +797,38 @@ class EnamlNativeCli(Atom):
     commands = List(Command)
 
     def _default_commands(self):
+        """ Build the list of CLI commands by finding subclasses of the Command class """
         return [c() for c in find_commands(Command)]
 
+    def _default_ctx(self):
+        """ Return the package config or context and normalize some of the values """
+        with open(self.package) as f:
+            ctx = json.load(f)
+
+        #: Add p4a to ctx if not in enaml-native git root
+        global p4a_root
+        global p4i_root
+        ctx['android']['p4a'] = p4a_root
+        ctx['ios']['p4i'] = p4i_root
+
+        #: Force ndk and sdk to expand user
+        for k in ['ndk','sdk']:
+            ctx['android'][k] = os.path.expanduser(ctx['android'][k])
+
+        #: Ensure build dir exists for each env
+        for env in [ctx['ios'],ctx['android']]:
+            #: Add default
+            if 'python_build_dir' not in env:
+                env['python_build_dir'] = os.path.expanduser(os.path.abspath('build/python'))
+
+        return ctx
+
     def _default_parser(self):
+        """ Generate a parser using the command list """
         parser = ArgumentParser(prog='enaml-native')
 
         #: Build commands by name
         cmds = {c.title:c for c in self.commands}
-
-        with open(self.package) as f:
-            self.ctx = json.load(f)
-
-        #: Hack.. Add p4a to ctx
-        global p4a_root
-        global p4i_root
-        self.ctx['android']['p4a'] = p4a_root
-        self.ctx['ios']['p4i'] = p4i_root
 
         #: Build parser, prepare commands
         subparsers = parser.add_subparsers()
