@@ -55,6 +55,9 @@ def chronometer_factory():
     from .android_chronometer import AndroidChronometer
     return AndroidChronometer
 
+def coordinator_layout_factory():
+    from .android_coordinator_layout import AndroidCoordinatorLayout
+    return AndroidCoordinatorLayout
 
 def compound_button_factory():
     # print "Import compound button"
@@ -215,6 +218,11 @@ def spinner_factory():
     return AndroidSpinner
 
 
+def snackbar_factory():
+    from .android_snackbar import AndroidSnackbar
+    return AndroidSnackbar
+
+
 def switch_factory():
     # print "Import switch"
     from .android_switch import AndroidSwitch
@@ -291,6 +299,7 @@ ANDROID_FACTORIES = {
     'CardView': card_view_factory,
     'CheckBox': checkbox_factory,
     'Chronometer': chronometer_factory,
+    'CoordinatorLayout': coordinator_layout_factory,
     'CompoundButton': compound_button_factory,
     'DatePicker': date_picker_factory,
     'DrawerLayout': drawer_layout_factory,
@@ -319,6 +328,7 @@ ANDROID_FACTORIES = {
     'SeekBar': seek_bar_factory,
     'Spacer': spacer_factory,
     'Spinner': spinner_factory,
+    'Snackbar': snackbar_factory,
     'Switch': switch_factory,
     'TabFragment': tab_fragment_factory,
     'TabLayout': tab_layout_factory,

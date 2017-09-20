@@ -459,7 +459,47 @@ A toast flashes a simple message to the user for a given duration. Set the `show
                         text = "PAGE ADDED"
                         text_color = "#fff"
 
-> Note: Clicks events are NOT supported in custom Toasts on Android!
+> Note: Clicks events are NOT supported in custom Toasts on Android! Use a [Snackbar](#snackbar) instead!
+
+### Snackbar
+
+A Snackbar displays a message at the bottom of the screen with an action button. Set the `action_text` to enable actions.
+
+> Note: A Snackbar MUST be a child of either a `FrameLayout` (or subclass) or a `CoordinatorLayout`. Using a `CoordinatorLayout` enables support for swiping to dismiss. 
+
+
+    :::python
+    from enamlnative.widgets.api import *
+    from enamlnative.android.app import AndroidApplication
+    
+    enamldef ContentView(CoordinatorLayout):
+        Flexbox:
+            flex_direction = "column"
+            Button: 
+                text = "Show snackbar"
+                clicked :: 
+                    sb.show = True
+            TextView:
+                text << "Snackbar state: {}".format("active" if sb.show else "hidden")
+            TextView: tv:
+                attr action = ""
+                text << "Snackbar action: {}".format(self.action)
+            Button: 
+                text = "Show snackbar with action"
+                clicked :: 
+                    sb2.show = True
+        Snackbar: sb:
+            duration = 4000
+            text = "Cheers!"
+        
+        Snackbar: sb2:
+            text = "Email deleted"
+            action_text = "Undo"
+            clicked :: print("action clicked!")
+            action :: 
+                tv.action = change['value']
+
+
 
 
 More to come... 

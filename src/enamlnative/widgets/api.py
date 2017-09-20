@@ -17,6 +17,7 @@ from .frame_layout import FrameLayout
 from .drawer_layout import DrawerLayout
 from .grid_layout import GridLayout
 from .flexbox import Flexbox
+from .coordinator_layout import CoordinatorLayout
 
 
 #: Views
@@ -65,3 +66,4 @@ from .text_clock import TextClock
 from .analog_clock import AnalogClock
 from .iconify import Icon, IconButton, IconToggleButton
 from .toast import Toast
+from .snackbar import Snackbar
