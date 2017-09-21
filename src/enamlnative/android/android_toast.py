@@ -82,6 +82,7 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
         if not self.made_toast:
             for view in self.child_widgets():
                 self.toast.setView(view)
+                break
 
     def child_added(self, child):
         """ Overwrite the view """
