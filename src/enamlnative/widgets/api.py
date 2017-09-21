@@ -67,3 +67,6 @@ from .analog_clock import AnalogClock
 from .iconify import Icon, IconButton, IconToggleButton
 from .toast import Toast
 from .snackbar import Snackbar
+
+#: Dialogs
+from .dialog import Dialog

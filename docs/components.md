@@ -208,6 +208,57 @@ A widget for picking dates including years. Observe the `date` attribute for cha
         TextView:
             text << "Date: {} ".format(dp.date)
             
+### Dialog
+
+A popup dialog that displays a view as it's content. Show it by setting `show=True` and hide by setting it to `False`. 
+
+Disable cancellation by setting `cancel_on_back` and/or `cancel_on_touch_outside` to `True`.
+
+    :::python
+    from enamlnative.widgets.api import *
+    
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
+        Button:
+            text = "Open dialog"
+            clicked :: dialog.show = True
+        #: Prevent cancelling without pressing a button
+        CheckBox:
+            text = "Cancel on touch outside"
+            checked := dialog.cancel_on_touch_outside
+        CheckBox:
+            text = "Cancel on back"
+            checked := dialog.cancel_on_back
+        TextView:
+            text << "Show: {}".format(dialog.show)
+        Dialog: dialog:
+            Flexbox:
+                flex_direction = "column"
+                justify_content = "space_between"
+                Flexbox:
+                    flex_direction = "column"
+                    padding = (20, 20, 20, 50)
+                    TextView:
+                        text = "Are you sure you want to delete?"
+                        font_family = "sans-serif-medium"
+                    TextView:
+                        text = "This operation cannot be undone."
+                Flexbox:
+                    justify_content = "space_between"
+                    Button:
+                        style = "borderless"
+                        text = "Ok"
+                        clicked :: 
+                            print("ok!")
+                            dialog.show = False
+                    Button:
+                        style = "borderless"
+                        text = "Cancel"
+                        clicked :: dialog.show = False
+
+
+> Note: This allows you to use custom views. There are also other native dialogs (alerts, pickers, etc.. ) that may better suite your needs.
+
 ### DrawerLayout
 
 A layout component that allows you to create a left and/or right drawer. The first child is the "content" and subsequent children will be drawers if they have a `layout_gravity` and `layout_width` attributes assigned. Use the `opened` attribute to open and close the drawers from code.

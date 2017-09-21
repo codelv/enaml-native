@@ -71,6 +71,11 @@ def date_picker_factory():
     return AndroidDatePicker
 
 
+def dialog_factory():
+    from .android_dialog import AndroidDialog
+    return AndroidDialog
+
+
 def drawer_layout_factory():
     # print "Import drawer layout"
     from .android_drawer_layout import AndroidDrawerLayout
@@ -302,6 +307,7 @@ ANDROID_FACTORIES = {
     'CoordinatorLayout': coordinator_layout_factory,
     'CompoundButton': compound_button_factory,
     'DatePicker': date_picker_factory,
+    'Dialog': dialog_factory,
     'DrawerLayout': drawer_layout_factory,
     'EditText': edit_text_factory,
     'Flexbox': flexbox_factory,
