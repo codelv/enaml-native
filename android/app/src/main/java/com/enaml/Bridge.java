@@ -3,6 +3,7 @@ package com.enaml;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.HandlerThread;
 import android.os.Handler;
 import android.view.KeyEvent;
@@ -11,7 +12,6 @@ import android.util.Log;
 
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
-import org.msgpack.core.MessagePacker;
 import org.msgpack.core.MessageUnpacker;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.ExtensionValue;
@@ -32,7 +32,6 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -1026,4 +1025,61 @@ public class Bridge {
         }, mEventDelay);
     }
 
+    /**
+     * Return build info
+     * @return
+     */
+    public byte[] getBuildInfo() {
+        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+        try {
+            packer.packMapHeader(20);
+            
+            packer.packString("BOARD");
+            packer.packString(Build.BOARD);
+            packer.packString("BOOTLOADER");
+            packer.packString(Build.BOOTLOADER);
+            packer.packString("BOARD");
+            packer.packString(Build.BOARD);
+            packer.packString("BOOTLOADER");
+            packer.packString(Build.BOOTLOADER);
+            packer.packString("BRAND");
+            packer.packString(Build.BRAND);
+            packer.packString("DEVICE");
+            packer.packString(Build.DEVICE);
+            packer.packString("DISPLAY");
+            packer.packString(Build.DISPLAY);
+            packer.packString("FINGERPRINT");
+            packer.packString(Build.FINGERPRINT);
+            packer.packString("HARDWARE");
+            packer.packString(Build.HARDWARE);
+            packer.packString("HOST");
+            packer.packString(Build.HOST);
+            packer.packString("ID");
+            packer.packString(Build.ID);
+            packer.packString("MANUFACTURER");
+            packer.packString(Build.MANUFACTURER);
+            packer.packString("MODEL");
+            packer.packString(Build.MODEL);
+            packer.packString("PRODUCT");
+            packer.packString(Build.PRODUCT);
+            packer.packString("SERIAL");
+            packer.packString(Build.SERIAL);
+            packer.packString("USER");
+            packer.packString(Build.USER);
+            packer.packString("SDK_INT");
+            packer.packString(""+Build.VERSION.SDK_INT);
+            packer.packString("BASE_OS");
+            packer.packString(Build.VERSION.BASE_OS);
+            packer.packString("RELEASE");
+            packer.packString(Build.VERSION.RELEASE);
+            packer.packString("CODENAME");
+            packer.packString(Build.VERSION.CODENAME);
+
+
+            return packer.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

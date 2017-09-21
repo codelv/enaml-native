@@ -9,12 +9,12 @@ The full license is in the file COPYING.txt, distributed with this software.
 
 '''
 import jnius
-import unicodedata #: Required by tornado for encodings
-from atom.api import Float, Value, Int, Unicode, Typed
+from atom.api import Float, Value, Int, Unicode, Typed, Dict
 from enaml.application import ProxyResolver
 from . import factories
 from .android_activity import Activity
 from ..core.app import BridgedApplication
+from ..core import bridge
 
 
 class AppEventListener(jnius.PythonJavaClass):
@@ -67,6 +67,13 @@ class AndroidApplication(BridgedApplication):
     #: Loaded immediately as this is used often.
     dp = Float()
 
+    #: Build info from https://developer.android.com/reference/android/os/Build.VERSION.html
+    build_info = Dict()
+
+    #: SDK version
+    #: Loaded immediately
+    api_level = Int()
+
     #: Save reference to the event listener
     listener = Typed(AppEventListener)
 
@@ -79,6 +86,11 @@ class AndroidApplication(BridgedApplication):
 
     def _default_dp(self):
         return self.activity.getResources().getDisplayMetrics().density
+
+    def _default_build_info(self):
+        info = bridge.loads(bytearray(self.activity.getBridge().getBuildInfo()))
+        self.api_level = int(info['SDK_INT'])
+        return info
 
     # --------------------------------------------------------------------------
     # AndroidApplication Constructor

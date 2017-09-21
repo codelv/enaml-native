@@ -22,6 +22,8 @@ class TimePicker(FrameLayout):
     onTimeChanged = JavaCallback('android.widget.TimePicker', 'int', 'int')
     setHour = JavaMethod('int')
     setMinute = JavaMethod('int')
+    setCurrentHour = JavaMethod('java.lang.Integer')
+    setCurrentMinute = JavaMethod('java.lang.Integer')
     setEnabled = JavaMethod('boolean')
     setIs24HourView = JavaMethod('java.lang.Boolean')
     setOnTimeChangedListener = JavaMethod('android.widget.TimePicker$OnTimeChangedListener')
@@ -71,10 +73,17 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
     # ProxyFrameLayout API
     # --------------------------------------------------------------------------
     def set_hour(self, hour):
-        self.widget.setHour(hour)
+        if self.get_context().api_level < 23:
+            self.widget.setCurrentHour(hour)
+        else:
+            self.widget.setHour(hour)
 
     def set_minute(self, minute):
-        self.widget.setMinute(minute)
+
+        if self.get_context().api_level < 23:
+            self.widget.setCurrentMinute(minute)
+        else:
+            self.widget.setMinute(minute)
 
     def set_hour_mode(self, mode):
         self.widget.setIs24HourView(mode == '24')
