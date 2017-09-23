@@ -214,7 +214,7 @@ A popup dialog that displays a view as it's content. Show it by setting `show=Tr
  
  [![Dialogs in enaml-native](https://img.youtube.com/vi/dxW2KCy67vU/0.jpg)](https://youtu.be/dxW2KCy67vU)
 
-Disable cancellation by setting `cancel_on_back` and/or `cancel_on_touch_outside` to `True`.
+Disable cancellation by setting `cancel_on_back` and/or `cancel_on_touch_outside` to `False`.
 
     :::python
     from enamlnative.widgets.api import *
