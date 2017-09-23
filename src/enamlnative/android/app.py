@@ -151,6 +151,27 @@ class AndroidApplication(BridgedApplication):
 
         return f
 
+    def show_toast(self, msg, long=True):
+        """ Show a toast message for the given duration.
+
+        Note: This is an android specific api.
+
+        Parameters
+        -----------
+        msg: str
+            Text to display in the toast message
+        long: bool
+            Display for a long or short (system defined) duration
+
+        """
+        from .android_toast import Toast
+
+        def on_toast(ref):
+            t = Toast(__id__=ref)
+            t.show()
+
+        Toast.makeText(self,msg,1 if long else 0).then(on_toast)
+
     # --------------------------------------------------------------------------
     # Bridge API Implementation
     # --------------------------------------------------------------------------
