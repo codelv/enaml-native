@@ -615,6 +615,9 @@ class Server(Command):
     #: Callable to add a callback at some later time
     call_later = Callable()
 
+    #: Changed file events
+    changes = List()
+
     def run(self, args=None):
         ctx = self.ctx
         #: Look for tornado or twisted in reqs
@@ -691,35 +694,41 @@ class Server(Command):
 
         from twisted.internet import reactor
         from twisted.web import resource
-        from twisted.web.websocket import WebSocketHandler, WebSocketSite
+        from twisted.web.static import File
+        from twisted.web.server import Site
+        from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
+        from autobahn.twisted.resource import WebSocketResource
 
-        class DevWebSocketHandler(WebSocketHandler):
-            def connectionMade(self):
-                super(DevWebSocketHandler, self).connectionMade()
-                server.on_open()
+        class DevWebSocketHandler(WebSocketServerProtocol):
+            def onConnect(self, request):
+                super(DevWebSocketHandler, self).onConnect(request)
+                server.on_open(self)
 
-            def frameReceived(self, frame):
-                server.on_message(frame)
+            def onMessage(self, payload, isBinary):
+                server.on_message(payload)
 
-            def connectionLost(self,reason=None):
-                super(DevWebSocketHandler,self).connectionLost(reason)
-                server.on_close()
+            def onClose(self, wasClean, code, reason):
+                super(DevWebSocketHandler,self).onClose(wasClean, code, reason)
+                server.on_close(self)
                 
             def write_message(self, message):
-                self.transport.write(message)
+                self.sendMessage(message, False)
 
         #: Set the call later method
         server.call_later = reactor.callLater
         server.add_callback = reactor.callFromThread
 
+        factory = WebSocketServerFactory(u"ws://0.0.0.0:{}".format(self.port))
+        factory.protocol = DevWebSocketHandler
+
         class MainHandler(resource.Resource):
             def render_GET(self, req):
-                return server.index_page
+                return str(server.index_page)
 
-        root = MainHandler()
-        site = WebSocketSite(root)
-        site.addHandler("/dev", DevWebSocketHandler)
-        reactor.listenTCP(self.port, site)
+        root = resource.Resource()
+        root.putChild("", MainHandler())
+        root.putChild("dev", WebSocketResource(factory))
+        reactor.listenTCP(self.port, Site(root))
         print("Twisted Dev server started on {}".format(self.port))
         reactor.run()
 
@@ -748,27 +757,34 @@ class Server(Command):
         """ """
         print(event)
         self._reload_count +=1
-        self.call_later(self.reload_delay, self._trigger_reload)
+        self.changes.append(event)
+        self.call_later(self.reload_delay, self._trigger_reload, event)
 
-    def _trigger_reload(self):
+    def _trigger_reload(self, event):
         self._reload_count -=1
         if self._reload_count == 0:
-            print("Triggering reload")
-            #: For now just do the view...
-            with open('app/view.enaml') as f:
-                data = f.read()
-            msg = {
-                'type':'reload',
-                'files':{
-                    'view.enaml':data,
+            files = {}
+            for event in self.changes:
+                path = os.path.relpath(event.src_path, os.getcwd())
+                if os.path.splitext(path)[-1] not in ['.py', '.enaml']:
+                    continue
+                with open(event.src_path) as f:
+                    data = f.read()
+
+                #: Add to changed files
+                files[path] = data
+
+            if files:
+                #: Send the reload request
+                msg = {
+                    'type':'reload',
+                    'files':files
                 }
-            }
-            #buf = io.BytesIO(msgpack.dumps(msg))
-            #def read_chunk():
-            #    return buf.read(1024)
-            #for chunk in iter(read_chunk,''):
-            #    print("Send message")
-            self.send_message(json.dumps(msg))
+                print("Reloading: {}".format(files.keys()))
+                self.send_message(json.dumps(msg))
+
+            #: Clear changes
+            self.changes = []
 
 
 def find_commands(cls):

@@ -297,19 +297,19 @@ class TornadoDevClient(DevClient):
         @gen.coroutine
         def run():
             try:
-                print("Dev server connecting {}...".format(self.url))
-                conn = yield websocket_connect(self.url)
-                self.connected = True
+                print("Dev client connecting {}...".format(session.url))
+                conn = yield websocket_connect(session.url)
+                session.connected = True
                 while True:
                     msg = yield conn.read_message()
                     if msg is None: break
-                    self.handle_message(msg)
-                self.connected = False
+                    session.handle_message(msg)
+                session.connected = False
             except Exception as e:
-                print("Dev server connection dropped: {}".format(e))
+                print("Dev client connection dropped: {}".format(e))
             finally:
                 #: Try again in a few seconds
-                self.app.timed_call(1000, run)
+                session.app.timed_call(1000, run)
 
         #: Start
         session.app.deferred_call(run)
@@ -320,14 +320,44 @@ class TwistedDevClient(DevClient):
     def available(cls):
         """ Return True if this dev client impl can be used. """
         try:
-            import twisted
+            from autobahn.twisted import websocket
             return True
         except ImportError:
             return False
 
     def start(self, session):
-        #: TODO...
-        raise NotImplementedError
+        from twisted.internet import reactor
+        from twisted.internet.defer import inlineCallbacks
+        from autobahn.twisted.websocket import WebSocketClientProtocol, WebSocketClientFactory
+
+        class DevClient(WebSocketClientProtocol):
+            def onConnect(self, response=None):
+                print("Dev client connected!")
+                session.connected = True
+
+            def onOpen(self):
+                pass
+
+            def onMessage(self, payload, isBinary):
+                session.handle_message(payload)
+
+            def onClose(self, wasClean, code, reason):
+                print("Dev client disconnected: {} {} {}".format(wasClean, code, reason))
+                session.connected = False
+
+                #: Try again in a few seconds
+                session.app.timed_call(1000, run)
+
+        factory = WebSocketClientFactory(session.url)
+        factory.protocol = DevClient
+
+        @inlineCallbacks
+        def run():
+            yield reactor.connectTCP(session.host, session.port, factory)
+
+        #: Start
+        session.app.deferred_call(run)
+
 
 
 class DevServer(Atom):
@@ -712,7 +742,9 @@ class DevServerSession(Atom):
 
         #: Show loading screen
         try:
-            self.app.widget.showLoading("Reloading... Please wait.", now=True)
+            self.app.widget.showLoading("Reloading... Please wait.",now=True)
+            #self.app.widget.restartPython(now=True)
+            #sys.exit(0)
         except:
             #: TODO: Implement for iOS...
             pass
@@ -781,6 +813,9 @@ class DevServerSession(Atom):
                 shutil.rmtree('__enamlcache__')
             for fn in msg['files']:
                 print("Updating {}".format(fn))
+                folder = os.path.dirname(fn)
+                if folder and not os.path.exists(folder):
+                    os.makedirs(folder)
                 with open(fn, 'wb') as f:
                     f.write(msg['files'][fn].encode('utf-8'))
 
