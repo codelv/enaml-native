@@ -210,7 +210,9 @@ A widget for picking dates including years. Observe the `date` attribute for cha
             
 ### Dialog
 
-A popup dialog that displays a view as it's content. Show it by setting `show=True` and hide by setting it to `False`. 
+A popup dialog that displays a view as it's content. Show it by setting `show=True` and hide by setting it to `False`.
+ 
+ [![Dialogs in enaml-native](https://img.youtube.com/vi/dxW2KCy67vU/0.jpg)](https://youtu.be/dxW2KCy67vU)
 
 Disable cancellation by setting `cancel_on_back` and/or `cancel_on_touch_outside` to `True`.
 
@@ -471,7 +473,9 @@ It's a button that allows Icons in the text. See the [Icon](#icon) and [Button](
 
 ### Toast
 
-A toast flashes a simple message to the user for a given duration. Set the `show` attribute to `True` to display it. It will automatically hide after the given duration. 
+A toast flashes a simple message to the user for a given duration. Set the `show` attribute to `True` to display it. It will automatically hide after the given duration.
+ 
+ [![Toast and Snackbar in enaml-native](https://img.youtube.com/vi/4zRgHin2d9s/0.jpg)](https://youtu.be/4zRgHin2d9s)
 
 You can also show a toast message from code using the `AndroidApplication.instance().show_toast(msg)` api.
   
@@ -518,6 +522,8 @@ You can also show a toast message from code using the `AndroidApplication.instan
 ### Snackbar
 
 A Snackbar displays a message at the bottom of the screen with an action button. Set the `action_text` to enable actions.
+
+[![Toast and Snackbar in enaml-native](https://img.youtube.com/vi/4zRgHin2d9s/0.jpg)](https://youtu.be/4zRgHin2d9s)
 
 > Note: A Snackbar MUST be a child of either a `FrameLayout` (or subclass) or a `CoordinatorLayout`. Using a `CoordinatorLayout` enables support for swiping to dismiss. 
 
