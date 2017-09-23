@@ -471,7 +471,9 @@ It's a button that allows Icons in the text. See the [Icon](#icon) and [Button](
 
 ### Toast
 
-A toast flashes a simple message to the user for a given duration. Set the `show` attribute to `True` to display it. It will automatically hide after the given duration.
+A toast flashes a simple message to the user for a given duration. Set the `show` attribute to `True` to display it. It will automatically hide after the given duration. 
+
+You can also show a toast message from code using the `AndroidApplication.instance().show_toast(msg)` api.
   
     :::python
     from enamlnative.widgets.api import *
@@ -511,6 +513,7 @@ A toast flashes a simple message to the user for a given duration. Set the `show
                         text_color = "#fff"
 
 > Note: Clicks events are NOT supported in custom Toasts on Android! Use a [Snackbar](#snackbar) instead!
+
 
 ### Snackbar
 
