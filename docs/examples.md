@@ -763,10 +763,11 @@ Example demonstrates the API for checking permissions and requesting access. Not
                 ).then(lambda r,s=status:setattr(s,'text',"Result:{}".format(r)))
             
             
+### Wifi Thermostat
 
-      
+> Note: Source code and play store link coming soon...
 
-
+[![See the demo on youtube](https://img.youtube.com/vi/7S8aWfzf89A/0.jpg)](https://youtu.be/7S8aWfzf89A)
 
 More to come!
 
