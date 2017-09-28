@@ -81,10 +81,15 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
             itself from the adapter it was added to.
         """
         #: Destroy fragment
-        if self.fragment:
+        fragment = self.fragment
+        if fragment:
+            #: Stop listening
+            fragment.setFragmentListener(None)
+
             #: Cleanup from fragment
             if self.adapter is not None:
                 self.adapter.removeFragment(self.fragment)
+
             del self.fragment
         super(AndroidFragment, self).destroy()
 
