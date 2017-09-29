@@ -62,11 +62,8 @@ class AndroidIconButton(AndroidButton, ProxyIconButton):
 
         """
         d = self.declaration
-        if d.style:
-            style = Button.STYLES[d.style]
-            self.widget = IconButton(self.get_context(), None, style)
-        else:
-            self.widget = IconButton(self.get_context())
+        style = Button.STYLES[d.style]
+        self.widget = IconButton(self.get_context(), None, style)
 
 
 class AndroidIconToggleButton(AndroidToggleButton, ProxyIconToggleButton):

@@ -29,14 +29,14 @@ class ExtensionImporter(object):
 
         #: Find all included extension modules
         lib_dir = os.environ['PY_LIB_DIR']
-        print("Loading {} extensions from {}".format(ext_type, lib_dir))
+        #print("Loading {} extensions from {}".format(ext_type, lib_dir))
 
         for lib in glob('{}/{}*.{}'.format(lib_dir, prefix, ext_type)):
             name = lib.split("/")[-1] # Lib filename
             mod = ".".join(name.split(".")[start:-1])  # Strip lib and so
             self.extension_modules[mod] = lib
 
-        print("Libraries found: {}".format(self.extension_modules))
+        #print("Libraries found: {}".format(self.extension_modules))
 
     def load_module(self, mod):
         """ Load the extension using the load_dynamic method. """

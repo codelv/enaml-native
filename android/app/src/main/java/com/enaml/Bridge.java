@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,17 +63,26 @@ public class Bridge {
 
     final MainActivity mActivity;
 
+    final Bridge mBridge;
+
     // Context
     final Context mContext;
 
     // Cache for constructors methods
-    final HashMap<String,Constructor> mConstructorCache = new HashMap<String, Constructor>();
+    final HashMap<Integer,Constructor> mConstructorCache = new HashMap<Integer, Constructor>();
 
     // Cache for methods
-    final HashMap<String,Method> mMethodCache = new HashMap<String, Method>();
+    final HashMap<Integer,Method> mMethodCache = new HashMap<Integer, Method>();
 
     // Cache for fields
-    final HashMap<String,Field> mFieldCache = new HashMap<String, Field>();
+    final HashMap<Integer,Field> mFieldCache = new HashMap<Integer, Field>();
+
+    // Cache for Classes
+    final HashMap<String,Class> mClassCache = new HashMap<String, Class>();
+
+    final HashMap<Integer, Class[]> mClassSpecCache = new HashMap<Integer, Class[]>();
+
+    final HashMap<Class,HashMap<Integer,Object>> mReflectionCache = new HashMap<>();
 
     // Cache for objects
     final ConcurrentHashMap<Integer,Object> mObjectCache = new ConcurrentHashMap<Integer, Object>();
@@ -83,7 +93,7 @@ public class Bridge {
     private int mResultCount = 0;
 
     // Looper thread
-    final ConcurrentLinkedQueue<Runnable> mTaskQueue = new ConcurrentLinkedQueue<>();
+    final LinkedBlockingQueue<Runnable> mTaskQueue = new LinkedBlockingQueue<>();
     final ConcurrentLinkedQueue<MessageBufferPacker> mEventList = new ConcurrentLinkedQueue<>();
     final HandlerThread mBridgeHandlerThread = new HandlerThread("bridge");
     final Handler mBridgeHandler;
@@ -91,6 +101,7 @@ public class Bridge {
     final int mEventDelay = 1;
 
     public Bridge(Context context) {
+        mBridge = this;
         mContext = context;
         mActivity = MainActivity.mActivity;
         mObjectCache.put(-1, mContext);
@@ -98,21 +109,33 @@ public class Bridge {
         mBridgeHandler = new Handler(mBridgeHandlerThread.getLooper());
     }
 
-    public static Class getClass(String name) throws ClassNotFoundException {
-        if (name.equals("NoneType")) {
-            return Void.TYPE;
-        } else if (name.equals("int")) {
-            return int.class;
-        } else if (name.equals("boolean") || name.equals("bool")) {
-            return boolean.class;
-        } else if (name.equals("float")) {
-            return float.class;
-        } else if (name.equals("long")) {
-            return long.class;
-        } else if (name.equals("double")) {
-            return double.class;
+    /**
+     * Get the class for the given name (including primitive types)
+     * @param name
+     * @return
+     * @throws ClassNotFoundException
+     */
+    public Class getClass(String name) throws ClassNotFoundException {
+        Class cls = mClassCache.get(name);
+        if (cls==null) {
+            if (name.equals("NoneType")) {
+                cls = Void.TYPE;
+            } else if (name.equals("int")) {
+                cls = int.class;
+            } else if (name.equals("boolean") || name.equals("bool")) {
+                cls = boolean.class;
+            } else if (name.equals("float")) {
+                cls = float.class;
+            } else if (name.equals("long")) {
+                cls = long.class;
+            } else if (name.equals("double")) {
+                cls = double.class;
+            } else {
+                cls = Class.forName(name);
+            }
+            mClassCache.put(name,cls);
         }
-        return Class.forName(name);
+        return cls;
     }
 
     /**
@@ -126,7 +149,6 @@ public class Bridge {
     public class UnpackedValues {
         protected final Object[] mArgs;
         protected final Class[] mSpec;
-        protected final String mName;
 
         public class UnpackedValue {
             public final Class cls;
@@ -137,49 +159,48 @@ public class Bridge {
             }
         }
 
-        public UnpackedValues(Value[] args) throws ClassNotFoundException, IOException {
+        public UnpackedValues(int cacheId, Value[] args) throws ClassNotFoundException, IOException {
             // Unpack args
             mArgs = new Object[args.length];
-            mSpec = new Class[args.length];
-            String name = new String();
+
+            Class[] spec = mClassSpecCache.get(cacheId);
+            boolean newSpec = cacheId==0 || spec==null;
+            if (newSpec) {
+                spec = new Class[args.length];
+                mClassSpecCache.put(cacheId,spec);
+            }
 
             // Decode each value
             for (int i=0; i<args.length; i++) {
                 // Every arg is a tuple of (String type ,Value arg)
                 ArrayValue argv = args[i].asArrayValue();
 
-                assert argv.size()==2: "Invalid bridge argument format. Must be (String type ,Value arg)";
-
-                // Get the argument type
-                String argType = argv.get(0).asStringValue().asString();
-
                 // Get the argument value
+                Value type = argv.get(0);
                 Value v = argv.get(1);
-
-                // For building the key
-                name += argType;
+                if (newSpec) {
+                    // Get the argument type
+                    spec[i] = mBridge.getClass(type.asStringValue().asString());
+                }
 
                 // Determine the class
-                UnpackedValue uv = unpackValue(Bridge.getClass(argType), argType, v);
-                mSpec[i] = uv.cls;
+                UnpackedValue uv = unpackValue(spec[i], type, v);
+                if (newSpec) {
+                    spec[i] = uv.cls;
+                }
                 mArgs[i] = uv.arg;
             }
 
-            // Set the name of this method
-            mName = name;
+            mSpec = spec;
         }
 
         /**
-         * Set the
-         * @param i
-         * @param argType
+         * Parse the value based on the given type
+         * @param spec
+         * @param type (may be null)
          * @param v
          */
-        protected UnpackedValue unpackValue(Class spec, String argType, Value v) throws IOException {
-            if (argType.equals("android.content.Context")) {
-                // Hack for android context
-                return new UnpackedValue(spec, mContext);
-            }
+        protected UnpackedValue unpackValue(Class spec, Value type, Value v) throws IOException {
             Object arg = null;
             switch (v.getValueType()) {
                 case NIL:
@@ -213,7 +234,7 @@ public class Bridge {
 
                 case FLOAT:
                     FloatValue fv = v.asFloatValue();
-                    if (argType.equals("float") || spec == Float.TYPE) {
+                    if (spec==float.class || spec == Float.TYPE) {
                         arg = fv.toFloat();
                     } else {
                         arg = fv.toDouble();
@@ -221,6 +242,7 @@ public class Bridge {
                     break;
 
                 case STRING:
+                    String argType = (type==null)?"":type.asStringValue().asString();
                     if (argType.equals("android.graphics.Color")) {
                         // Hack for colors
                         spec = int.class; // Umm?
@@ -261,7 +283,7 @@ public class Bridge {
                         Log.d(TAG,"Replacing resource `"+sv+"` with id "+resId);
                         spec = int.class;
                         arg = resId;
-                    } else if (argType.equals("android.graphics.Typeface")) {
+                    } else if (spec==Typeface.class) {
                         // Hack for fonts
                         arg = Typeface.create(v.asStringValue().asString(), 0);
                     } else {
@@ -281,7 +303,7 @@ public class Bridge {
                     if (spec.isInstance(Collection.class)) {
                         ArrayList list = new ArrayList<>();
                         for (int i=0; i<a.size(); i++) {
-                            UnpackedValue uv = unpackValue(Object.class, "java.lang.Object", a.get(i));
+                            UnpackedValue uv = unpackValue(Object.class, null, a.get(i));
                             list.add(uv.arg);
                         }
                         arg = list;
@@ -292,7 +314,7 @@ public class Bridge {
                                 ". Ex '[Ljava.lang.String' or `[I` ";
                         arg = Array.newInstance(arrayType, a.size());
                         for (int i = 0; i < a.size(); i++) {
-                            UnpackedValue uv = unpackValue(arrayType, arrayType.getCanonicalName(), a.get(i));
+                            UnpackedValue uv = unpackValue(arrayType, null, a.get(i));
                             Array.set(arg, i, uv.arg);
                         }
                     }
@@ -318,9 +340,18 @@ public class Bridge {
             return mSpec;
         }
 
-        public String getName() {
-            return mName;
-        }
+    }
+
+
+    /**
+     * Define the "spec" for a construtor, method, or field invocation and save it in the cache
+     * to speed up runtime operation.
+     * @param cacheId
+     * @param type
+     * @param args
+     */
+    public void defineSpec(int cacheId, String type, Value[] args) {
+
     }
 
     /**
@@ -331,19 +362,21 @@ public class Bridge {
      * @param className
      * @param objId
      */
-    public void createObject(int objId, String className, Value[] args) {
+    public void createObject(int objId, int cacheId, String className, Value[] args) {
+        //Log.d(TAG,"Create object id="+objId+" cacheId="+cacheId+" class="+className);
         try {
-            UnpackedValues uv = new UnpackedValues(args);
-            String key = className + uv.getName();
+            UnpackedValues uv = new UnpackedValues(cacheId, args);
+            //String key = className + uv.getName();
 
             // Try to pull from cache
-            if (!mConstructorCache.containsKey(key)) {
-                Class objClass = Class.forName(className);
-                mConstructorCache.put(className, objClass.getConstructor(uv.getSpec()));
+            Constructor constructor = mConstructorCache.get(cacheId);
+            if (constructor==null) {
+                Class objClass = mBridge.getClass(className);
+                constructor = objClass.getConstructor(uv.getSpec());
+                mConstructorCache.put(cacheId, constructor);
             }
 
             // Create the instance
-            Constructor constructor = mConstructorCache.get(className);
             Object obj = constructor.newInstance(uv.getArgs());
 
             assert obj!=null: "Failed to create id="+objId+" type="+className;
@@ -382,7 +415,7 @@ public class Bridge {
      */
     public void createProxy(int objId, String interfaceName, int refId) {
         try {
-            Class infClass = Bridge.getClass(interfaceName);
+            Class infClass = mBridge.getClass(interfaceName);
             Object proxy = Proxy.newProxyInstance(
                     infClass.getClassLoader(),
                     new Class[]{infClass},
@@ -404,18 +437,19 @@ public class Bridge {
      * @param method: Method to invoke on the given object
      * @param args: Args to pass to the object
      */
-    public void invokeStatic(String className, int resultId, String method, Value[] args) {
+    public void invokeStatic(String className, int resultId, int cacheId, String method, Value[] args) {
         try {
-            Class objClass = Bridge.getClass(className);
+            Class objClass = mBridge.getClass(className);
 
             // Decode args
-            UnpackedValues uv = new UnpackedValues(args);
-            String key = objClass.getName() + method + uv.getName();
+            UnpackedValues uv = new UnpackedValues(cacheId, args);
 
             // Cache the lambda methods
-            if (!mMethodCache.containsKey(key)) {
+            Method lambda = mMethodCache.get(cacheId);
+            if (lambda==null) {
                 try {
-                    mMethodCache.put(key, objClass.getMethod(method, uv.getSpec()));
+                    lambda = objClass.getMethod(method, uv.getSpec());
+                    mMethodCache.put(cacheId, lambda);
                 } catch (NoSuchMethodException e) {
                     Log.e(TAG,"Error getting method of class="+className+" method="+method, e);
                     mActivity.showErrorMessage(e);
@@ -429,7 +463,6 @@ public class Bridge {
 
 
             // Get the lambda
-            Method lambda = mMethodCache.get(key);
             Object result = lambda.invoke(objClass, uv.getArgs());
             onResult(resultId, result);
         } catch (IllegalAccessException e) {
@@ -455,8 +488,8 @@ public class Bridge {
      * @param method: Method to invoke on the given object
      * @param args: Args to pass to the object
      */
-    public void updateObject(int objId, int resultId, String method, Value[] args) {
-        //Log.d(TAG,"id="+objId+" method="+method);
+    public void updateObject(int objId, int resultId, int cacheId, String method, Value[] args) {
+        //Log.d(TAG,"Update object  obid="+objId+" method="+method);
         Object obj = mObjectCache.get(objId);
         if (obj==null) {
             mActivity.showErrorMessage(
@@ -465,16 +498,27 @@ public class Bridge {
         }
 
         try {
-            Class objClass = obj.getClass();
-
             // Decode args
-            UnpackedValues uv = new UnpackedValues(args);
-            String key = objClass.getName() + method+ uv.getName();
+            UnpackedValues uv = new UnpackedValues(cacheId, args);
+            //String key = objClass.getName() + method+ uv.getName();
+
+            Class objClass = obj.getClass();
+            HashMap<Integer,Object> reflectionCache = mReflectionCache.get(objClass);
+            if (reflectionCache==null) {
+                reflectionCache = new HashMap<>();
+                mReflectionCache.put(objClass, reflectionCache);
+
+            }
 
             // Cache the lambda methods
-            if (!mMethodCache.containsKey(key)) {
+            Method lambda = (Method) reflectionCache.get(cacheId);
+            if (lambda==null) {
                 try {
-                    mMethodCache.put(key, objClass.getMethod(method, uv.getSpec()));
+                    // Must use the declaring class method OR we get IllegalArgumentExceptions
+                    // ex. Expected receiver of type x, but got y
+                    lambda = objClass.getMethod(method, uv.getSpec());
+                    lambda.setAccessible(true);
+                    reflectionCache.put(cacheId, lambda);
                 } catch (NoSuchMethodException e) {
                     Log.e(TAG,"Error getting method id="+objId+" method="+method+" on object="+obj, e);
                     mActivity.showErrorMessage(e);
@@ -488,7 +532,6 @@ public class Bridge {
 
 
             // Get the lambda
-            Method lambda = mMethodCache.get(key);
             Object result = lambda.invoke(obj, uv.getArgs());
             onResult(resultId, result);
         } catch (IllegalAccessException e) {
@@ -511,7 +554,7 @@ public class Bridge {
      * @param field
      * @param args
      */
-    public void updateObjectField(int objId, String field, Value[] args) {
+    public void updateObjectField(int objId, int cacheId, String field, Value[] args) {
         Object obj = mObjectCache.get(objId);
         if (obj==null) {
             mActivity.showErrorMessage(
@@ -520,16 +563,27 @@ public class Bridge {
         }
 
         try {
-            Class objClass = obj.getClass();
-
             // Decode args
-            UnpackedValues uv = new UnpackedValues(args);
-            String key = objClass.getName() + field;
+            UnpackedValues uv = new UnpackedValues(cacheId, args);
+
+
+            // This is pretty stupid but we have to get the method of EACH class that uses it
+            // for some stupid reason it can't
+            Class objClass = obj.getClass();
+            HashMap<Integer,Object> reflectionCache = mReflectionCache.get(objClass);
+            if (reflectionCache==null) {
+                reflectionCache = new HashMap<>();
+                mReflectionCache.put(objClass, reflectionCache);
+
+            }
 
             // Cache the lambda methods
-            if (!mFieldCache.containsKey(key)) {
+            Field lambda = (Field) reflectionCache.get(cacheId);
+            if (lambda==null) {
                 try {
-                    mFieldCache.put(key, objClass.getField(field));
+                    lambda = objClass.getField(field);
+                    lambda.setAccessible(true);
+                    reflectionCache.put(cacheId, lambda);
                 } catch (Exception e) {
                     mActivity.showErrorMessage(e);
                     return;
@@ -537,7 +591,6 @@ public class Bridge {
             }
 
             // Get the lambda
-            Field lambda = mFieldCache.get(key);
             lambda.set(obj, uv.getArgs()[0]);
         } catch (IllegalAccessException e) {
             mActivity.showErrorMessage(e);
@@ -635,7 +688,7 @@ public class Bridge {
     public void setResult(int objId, Value result) {
         try {
             BridgeFuture<Object> future = mResultCache.get(objId);
-            UnpackedValues uv = new UnpackedValues(new Value[]{result});
+            UnpackedValues uv = new UnpackedValues(0, new Value[]{result});
             future.setResult(uv.getArgs()[0]);
         } catch (ClassNotFoundException e) {
             mActivity.showErrorMessage(e);
@@ -838,13 +891,22 @@ public class Bridge {
      * @param future: Future to wait for.
      */
     public void runUntilDone(Future future) {
+        long start = System.currentTimeMillis();
+        int i = 0;
         while (!future.isDone()) {
             // Process pending messages until done
-            // TODO: Busy loop, maybe block?
-            Runnable task = mTaskQueue.poll();
-            if (task != null) {
+            try {
+                // TODO: Busy loop, maybe block?
+                Runnable task = mTaskQueue.take();
                 task.run();
+                i++;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+
+        }
+        if (i>0) {
+            Log.i(TAG, "runUntilDone took (" + (System.currentTimeMillis() - start) + " ms) to run (" + i + ") tasks");
         }
     }
 
@@ -855,11 +917,15 @@ public class Bridge {
     public void runUntilCurrent() {
         long start = System.currentTimeMillis();
         Runnable task = mTaskQueue.poll();
+        int i = 0;
         while (task != null) {
             task.run();
             task = mTaskQueue.poll();
+            i++;
         }
-        Log.i(TAG, "Running tasks took ("+(System.currentTimeMillis()-start)+" ms)");
+        if (i>0) {
+            Log.i(TAG, "runUntilCurrent took (" + (System.currentTimeMillis() - start) + " ms) to run ("+ i + ") tasks");
+        }
     }
 
 
@@ -897,6 +963,7 @@ public class Bridge {
      */
     public void processEvents(byte[] data) {
         mBridgeHandler.post(()->{
+            long start = System.currentTimeMillis();
             MessageUnpacker unpacker = newDefaultUnpacker(data);
             try {
                 int eventCount = unpacker.unpackArrayHeader();
@@ -908,6 +975,7 @@ public class Bridge {
                     switch (eventType) {
                         case CREATE:
                             int objId = unpacker.unpackInt();
+                            int cacheId = unpacker.unpackInt();
                             String objClass = unpacker.unpackString();
                             int argCount = unpacker.unpackArrayHeader();
                             Value[] args = new Value[argCount];
@@ -915,7 +983,7 @@ public class Bridge {
                                 Value v = unpacker.unpackValue();
                                 args[j] = v;
                             }
-                            mTaskQueue.add(()->{createObject(objId, objClass, args);});
+                            mTaskQueue.add(()->{createObject(objId, cacheId, objClass, args);});
                             break;
 
                         case PROXY:
@@ -928,6 +996,7 @@ public class Bridge {
                         case METHOD:
                             objId = unpacker.unpackInt();
                             int resultId = unpacker.unpackInt();
+                            cacheId = unpacker.unpackInt();
                             String objMethod = unpacker.unpackString();
                             argCount = unpacker.unpackArrayHeader();
                             args = new Value[argCount];
@@ -935,11 +1004,12 @@ public class Bridge {
                                 Value v = unpacker.unpackValue();
                                 args[j] = v;
                             }
-                            mTaskQueue.add(()->{updateObject(objId, resultId, objMethod, args);});
+                            mTaskQueue.add(()->{updateObject(objId, resultId, cacheId, objMethod, args);});
                             break;
                         case STATIC_METHOD:
                             objClass = unpacker.unpackString();
                             resultId = unpacker.unpackInt();
+                            cacheId = unpacker.unpackInt();
                             objMethod = unpacker.unpackString();
                             argCount = unpacker.unpackArrayHeader();
                             args = new Value[argCount];
@@ -947,11 +1017,12 @@ public class Bridge {
                                 Value v = unpacker.unpackValue();
                                 args[j] = v;
                             }
-                            mTaskQueue.add(()->{invokeStatic(objClass, resultId, objMethod, args);});
+                            mTaskQueue.add(()->{invokeStatic(objClass, resultId, cacheId, objMethod, args);});
                             break;
 
                         case FIELD:
                             objId = unpacker.unpackInt();
+                            cacheId = unpacker.unpackInt();
                             String objField = unpacker.unpackString();
                             argCount = unpacker.unpackArrayHeader();
                             args = new Value[argCount];
@@ -959,7 +1030,7 @@ public class Bridge {
                                 Value v = unpacker.unpackValue();
                                 args[j] = v;
                             }
-                            mTaskQueue.add(()->{updateObjectField(objId, objField, args);});
+                            mTaskQueue.add(()->{updateObjectField(objId, cacheId, objField, args);});
                             break;
 
                         case DELETE:
@@ -989,6 +1060,7 @@ public class Bridge {
             mActivity.runOnUiThread(()->{
                 runUntilCurrent();
             });
+            Log.i(TAG, "processEvents took (" + (System.currentTimeMillis() - start) + " ms) to run");
         });
     }
 

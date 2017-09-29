@@ -42,11 +42,8 @@ class AndroidButton(AndroidTextView, ProxyButton):
 
         """
         d = self.declaration
-        if d.style:
-            style = Button.STYLES[d.style]
-            self.widget = Button(self.get_context(), None, style)
-        else:
-            self.widget = Button(self.get_context())
+        style = Button.STYLES[d.style]
+        self.widget = Button(self.get_context(), None, style)
 
     # --------------------------------------------------------------------------
     # ProxyButton API

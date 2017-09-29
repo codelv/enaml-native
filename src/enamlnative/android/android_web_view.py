@@ -90,14 +90,15 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
         if d.url:
             self.set_url(d.url)
 
-
     def destroy(self):
         """ Destroy the client
 
         """
-        super(AndroidWebView, self).destroy()
         if self.client:
+            #: Stop listening
+            self.client.setWebView(self.widget, None)
             del self.client
+        super(AndroidWebView, self).destroy()
 
     # --------------------------------------------------------------------------
     # WebViewClient API

@@ -17,8 +17,10 @@ from contextlib import contextmanager
 
 CACHE = WeakValueDictionary()
 PROXY_CACHE = WeakValueDictionary()
+CLASS_CACHE = {}
 __global_id__ = 0
 __proxy_id__ = 0
+__property_id__ = 0
 
 
 class Command:
@@ -30,6 +32,7 @@ class Command:
     DELETE = "d"
     RESULT = "r"
     ERROR = "e"
+    DEF = "def"
 
 
 class ExtType:
@@ -42,6 +45,13 @@ def _generate_id():
     global __global_id__
     __global_id__ += 1
     return __global_id__
+
+
+def _generate_property_id():
+    """ Generate an id for an object """
+    global __property_id__
+    __property_id__ += 1
+    return __property_id__
 
 
 def tag_object_with_id(obj):
@@ -130,12 +140,13 @@ class BridgeMethod(Property):
             view.addView(view2)
 
     """
-    __slots__ = ('__signature__', '__returns__', '__cache__')
+    __slots__ = ('__signature__', '__returns__', '__cache__', '__bridge_id__')
 
     def __init__(self, *args, **kwargs):
         self.__returns__ = kwargs.get('returns', None)
         self.__signature__ = args
         self.__cache__ = {}  # Result cache otherwise gc cleans up
+        self.__bridge_id__ = _generate_property_id()
         super(BridgeMethod, self).__init__(self.__fget__)
 
     @contextmanager
@@ -177,6 +188,7 @@ class BridgeMethod(Property):
             Command.METHOD,  #: method
             obj.__id__,
             result.__id__ if result else 0,
+            self.__bridge_id__,
             obj.__prefix__ + method_name,  #: method name
             method_args,  #: args
             **kwargs  #: kwargs to send_event
@@ -205,13 +217,14 @@ class BridgeStaticMethod(Property):
             result = Toast.makeToast(*args)
 
     """
-    __slots__ = ('__signature__', '__returns__', '__cache__', '__owner__')
+    __slots__ = ('__signature__', '__returns__', '__cache__', '__owner__', '__bridge_id__')
 
     def __init__(self, *args, **kwargs):
         self.__returns__ = kwargs.get('returns', None)
         self.__signature__ = args
         self.__owner__ = None
         self.__cache__ = {}  # Result cache otherwise gc cleans up
+        self.__bridge_id__ = _generate_property_id()
         super(BridgeStaticMethod, self).__init__()
 
     def __get__(self, instance, owner):
@@ -245,6 +258,7 @@ class BridgeStaticMethod(Property):
             Command.STATIC_METHOD,  #: method
             self.__owner__.__nativeclass__.default_value_mode[1],
             result.__id__ if result else 0,
+            self.__bridge_id__,
             method_name,  #: method name
             method_args,  #: args
             **kwargs  #: kwargs to send_event
@@ -274,10 +288,12 @@ class BridgeField(Property):
             view.width = 200
 
     """
-    __slots__ = ('__signature__',)
+    __slots__ = ('__signature__', '__bridge_id__', '__bridge_cached_')
 
     def __init__(self, arg):
         self.__signature__ = arg
+        self.__bridge_id__ = _generate_property_id()
+        self.__bridge_cached_ = False
         super(BridgeField, self).__init__(self.__fget__, self.__fset__)
 
     @contextmanager
@@ -293,9 +309,11 @@ class BridgeField(Property):
         obj.__app__.send_event(
             Command.FIELD,  #: method
             obj.__id__,
+            self.__bridge_id__,
             obj.__prefix__ + self.name,  #: method name
             [msgpack_encoder(self.__signature__, arg)]  #: args
         )
+        self.__bridge_cached_ = True
 
     def __fget__(self, obj):
         """ Return an object that can be used to retrieve the value. """
@@ -371,6 +389,11 @@ class BridgeCallback(BridgeMethod):
         del obj.__callbacks__[self.name]
 
 
+def tag_property(cls):
+    cls.__bridge_id__ = _generate_property_id()
+    return cls
+
+
 class BridgeObject(Atom):
     """ A proxy to a class in java. This sends the commands over
     the bridge for execution.  The object is stored in a map
@@ -383,7 +406,7 @@ class BridgeObject(Atom):
         only a reference to the object with the given id is needed.
 
     """
-    __slots__ = ('__weakref__',)
+    __slots__ = ('__weakref__', )
 
     #: Native Class name
     __nativeclass__ = Unicode()
@@ -400,6 +423,9 @@ class BridgeObject(Atom):
     #: Bridge object ID
     __id__ = Int(0, factory=_generate_id)
 
+    #: ID of this class
+    __bridge_id__ = Int()
+
     #: Prefix to add to all names used during method and property calls
     #: used for nested objects
     __prefix__ = Unicode()
@@ -409,6 +435,12 @@ class BridgeObject(Atom):
 
     def _default___app__(self):
         return get_app_class().instance()
+
+    def _default___bridge_id__(self):
+        cls = self.__class__
+        if cls not in CLASS_CACHE:
+            CLASS_CACHE[cls] = _generate_property_id()
+        return CLASS_CACHE[cls]
 
     def getId(self):
         return self.__id__
@@ -424,6 +456,7 @@ class BridgeObject(Atom):
             self.__app__.send_event(
                 Command.CREATE,  #: method
                 self.__id__,  #: id to assign in bridge cache
+                self.__bridge_id__,
                 self.__nativeclass__,
                 [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)],
             )
