@@ -233,13 +233,13 @@ class Context(object):
             try:
                 android = sh.Command(join(sdk_dir, 'tools', 'android'))
                 targets = android('list').stdout.decode('utf-8').split('\n')
-            except sh.ErrorReturnCode_2 as e:
+            except Exception as e:
                 warning("Error running 'android list': {}".format(e))
-        if not targets and exists(join(sdk_dir, 'bin', 'avdmanager')):
-            avdmanager = sh.Command(join(sdk_dir, 'bin', 'avdmanager'))
+        if not targets and exists(join(sdk_dir, 'tools', 'bin', 'avdmanager')):
+            avdmanager = sh.Command(join(sdk_dir, 'tools', 'bin', 'avdmanager'))
             targets = avdmanager('list', 'target').stdout.decode('utf-8').split('\n')
         if not targets:
-            error('Could not find `android` or `sdkmanager` binaries in '
+            error('Could not find `android` or `avdmanager` binaries in '
                   'Android SDK. Exiting.')
         apis = [s for s in targets if re.match(r'^ *API level: ', s)]
         apis = [re.findall(r'[0-9]+', s) for s in apis]
