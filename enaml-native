@@ -308,7 +308,7 @@ class BuildPython(Command):
                 #: Clean whatever build from previous arch
                 self.cmds['clean-python'].run()
 
-                shprint(sh.python, *'p4a.py apk --arch={arch} '
+                shprint(sh.python, *'p4a.py create --arch={arch} '
                           '--private=../src '
                           '--package={bundle_id} '
                           '--name=EnamlNativeApplication '
