@@ -59,7 +59,9 @@ class AndroidSwitch(AndroidCompoundButton, ProxySwitch):
     # ProxySwitch API
     # --------------------------------------------------------------------------
     def set_show_text(self, show):
-        self.widget.setShowText(show)
+        api = self.get_context().api_level
+        if api>=21:
+            self.widget.setShowText(show)
 
     def set_split_track(self, split):
         self.widget.setSplitTrack(split)
