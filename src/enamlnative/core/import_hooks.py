@@ -28,7 +28,7 @@ class ExtensionImporter(object):
         start = 0 if sys.platform == 'darwin' else 1
 
         #: Find all included extension modules
-        lib_dir = os.environ['PY_LIB_DIR']
+        lib_dir = os.environ.get('PY_LIB_DIR','.')
         #print("Loading {} extensions from {}".format(ext_type, lib_dir))
 
         for lib in glob('{}/{}*.{}'.format(lib_dir, prefix, ext_type)):
