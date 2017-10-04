@@ -494,6 +494,104 @@ A value picker from a "slot machine" style spinning list. Use the `items` proper
         TextView:
           text << "Selected: {}".format(pk2.items[pk2.value])
 
+### ProgressBar
+
+Simply set the `progress` attribute.
+
+    :::python
+    from enamlnative.widgets.api import *
+    
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
+    
+        ProgressBar: pb:
+            progress = 50
+    
+        SeekBar:
+            progress := pb.progress
+
+
+### RadioButton
+
+A `RadioButton` should be a child of a `ReadioGroup`. See [RadioGroup](#radiogroup) for usage. You can set the `text` and `checked` attributes but generally `checked` is should be used by the group.
+
+### RadioGroup
+
+A container for a set of radio buttons. Only only one may be selected at a time. The selected button (if one is selected) will be set as the `checked` attribute.
+
+    :::python
+    from enamlnative.widgets.api import *
+    
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
+    
+        RadioGroup: rg:
+            # Or set it
+            RadioButton:
+                text = "A"
+            RadioButton:
+                text = "B"
+            RadioButton:
+                text = "C"
+                checked = True
+        TextView:
+            text << "Selected: {}".format(rg.checked.text if rg.checked else "None")
+    
+        RadioGroup: rg2:
+            # Or set it
+            checked = rg2.children[0]
+            RadioButton:
+                text = "A"
+            RadioButton:
+                text = "B"
+            RadioButton:
+                text = "C"
+        TextView:
+            text << "Selected: {}".format(rg2.checked.text if rg2.checked else "None")
+
+
+### Snackbar
+
+A Snackbar displays a message at the bottom of the screen with an action button. Set the `action_text` to enable actions.
+
+[![Toast and Snackbar in enaml-native](https://img.youtube.com/vi/4zRgHin2d9s/0.jpg)](https://youtu.be/4zRgHin2d9s)
+
+> Note: A Snackbar MUST be a child of either a `FrameLayout` (or subclass) or a `CoordinatorLayout`. Using a `CoordinatorLayout` enables support for swiping to dismiss. 
+
+
+    :::python
+    from enamlnative.widgets.api import *
+    from enamlnative.android.app import AndroidApplication
+    
+    enamldef ContentView(CoordinatorLayout):
+        Flexbox:
+            flex_direction = "column"
+            Button: 
+                text = "Show snackbar"
+                clicked :: 
+                    sb.show = True
+            TextView:
+                text << "Snackbar state: {}".format("active" if sb.show else "hidden")
+            TextView: tv:
+                attr action = ""
+                text << "Snackbar action: {}".format(self.action)
+            Button: 
+                text = "Show snackbar with action"
+                clicked :: 
+                    sb2.show = True
+        Snackbar: sb:
+            duration = 4000
+            text = "Cheers!"
+        
+        Snackbar: sb2:
+            text = "Email deleted"
+            action_text = "Undo"
+            clicked :: print("action clicked!")
+            action :: 
+                tv.action = change['value']
+
+
+
 ### Toast
 
 A toast flashes a simple message to the user for a given duration. Set the `show` attribute to `True` to display it. It will automatically hide after the given duration.
@@ -540,48 +638,6 @@ You can also show a toast message from code using the `AndroidApplication.instan
                         text_color = "#fff"
 
 > Note: Clicks events are NOT supported in custom Toasts on Android! Use a [Snackbar](#snackbar) instead!
-
-
-### Snackbar
-
-A Snackbar displays a message at the bottom of the screen with an action button. Set the `action_text` to enable actions.
-
-[![Toast and Snackbar in enaml-native](https://img.youtube.com/vi/4zRgHin2d9s/0.jpg)](https://youtu.be/4zRgHin2d9s)
-
-> Note: A Snackbar MUST be a child of either a `FrameLayout` (or subclass) or a `CoordinatorLayout`. Using a `CoordinatorLayout` enables support for swiping to dismiss. 
-
-
-    :::python
-    from enamlnative.widgets.api import *
-    from enamlnative.android.app import AndroidApplication
-    
-    enamldef ContentView(CoordinatorLayout):
-        Flexbox:
-            flex_direction = "column"
-            Button: 
-                text = "Show snackbar"
-                clicked :: 
-                    sb.show = True
-            TextView:
-                text << "Snackbar state: {}".format("active" if sb.show else "hidden")
-            TextView: tv:
-                attr action = ""
-                text << "Snackbar action: {}".format(self.action)
-            Button: 
-                text = "Show snackbar with action"
-                clicked :: 
-                    sb2.show = True
-        Snackbar: sb:
-            duration = 4000
-            text = "Cheers!"
-        
-        Snackbar: sb2:
-            text = "Email deleted"
-            action_text = "Undo"
-            clicked :: print("action clicked!")
-            action :: 
-                tv.action = change['value']
-
 
 
 

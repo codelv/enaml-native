@@ -50,6 +50,11 @@ class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
         d = self.declaration
         if d.checked:
             self.set_checked(d.checked)
+        else:
+            #: Check if any of the children have "checked = True"
+            for c in d.children:
+                if c.checked:
+                    d.checked = c
 
         self.widget.setOnCheckedChangeListener(self.widget.getId())
         self.widget.onCheckedChanged.connect(self.on_checked_changed)
