@@ -516,19 +516,27 @@ class CleanAndroid(Command):
 class RunAndroid(Command):
     title = set_default("run-android")
     help = set_default("Build android project, install it, and run")
+    args = set_default([
+        ('--release', dict(action='store_true', help="Build in Release mode")),
+    ])
 
     def run(self, args=None):
         ctx = self.ctx
         bundle_id = ctx['bundle_id']
         with cd("android"):
+            release_apk = os.path.abspath(join('.','app','build','outputs','apk','app-release-unsigned.apk'))
             gradlew = sh.Command('./gradlew')
 
             #: If no devices are connected, start the simulator
             if len(sh.adb('devices').stdout.strip())==1:
                 device = sh.emulator('-list-avds').stdout.split("\n")[0]
                 shprint(sh.emulator, '-avd', device)
-
-            shprint(gradlew, 'installDebug')
+            if args and args.release:
+                shprint(gradlew, 'assembleRelease')
+                #shprint(sh.adb,'uninstall','-k','"{}"'.format(bundle_id))
+                shprint(sh.adb,'install',release_apk)
+            else:
+                shprint(gradlew, 'installDebug')
             shprint(sh.adb, 'shell', 'am', 'start', '-n',
                         '{}/com.enaml.MainActivity'.format(bundle_id))
 
