@@ -66,6 +66,7 @@ class BridgedApplication(Application):
             initialize the proxy resolver.
         """
         self.init_error_handler()
+        super(BridgedApplication, self).__init__()
 
     # --------------------------------------------------------------------------
     # Abstract API Implementation
