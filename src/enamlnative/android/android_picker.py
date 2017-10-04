@@ -11,13 +11,13 @@ Created on July 6, 2017
 '''
 from atom.api import Typed, set_default
 
-from enamlnative.widgets.number_picker import ProxyNumberPicker
+from enamlnative.widgets.picker import ProxyPicker
 
 from .android_linear_layout import AndroidLinearLayout, LinearLayout
 from .bridge import JavaCallback, JavaMethod
 
 
-class NumberPicker(LinearLayout):
+class Picker(LinearLayout):
     __nativeclass__ = set_default('android.widget.NumberPicker')
     #: TODO: How to do a list??
     #setDisplayedValues = JavaMethod('java.lang.String[]')
@@ -27,15 +27,16 @@ class NumberPicker(LinearLayout):
     setOnLongPressUpdateInterval = JavaMethod('long')
     setOnValueChangedListener = JavaMethod('android.widget.NumberPicker$OnValueChangeListener')
     onValueChange = JavaCallback('android.widget.NumberPicker', 'int', 'int')
+    setDisplayedValues = JavaMethod('[Ljava.lang.String;')
     setWrapSelectorWheel = JavaMethod('boolean')
 
 
-class AndroidNumberPicker(AndroidLinearLayout, ProxyNumberPicker):
-    """ An Android implementation of an Enaml ProxyLinearLayout.
+class AndroidPicker(AndroidLinearLayout, ProxyPicker):
+    """ An Android implementation of an Enaml ProxyPicker.
 
     """
     #: A reference to the widget created by the proxy.
-    widget = Typed(NumberPicker)
+    widget = Typed(Picker)
 
     # --------------------------------------------------------------------------
     # Initialization API
@@ -44,23 +45,25 @@ class AndroidNumberPicker(AndroidLinearLayout, ProxyNumberPicker):
         """ Create the underlying widget.
 
         """
-        self.widget = NumberPicker(self.get_context())
+        self.widget = Picker(self.get_context())
 
-    def init_layout(self):
+    def init_widget(self):
         """ Set the checked state after all children have
             been populated.
         """
-        super(AndroidNumberPicker, self).init_layout()
+        super(AndroidPicker, self).init_widget()
         d = self.declaration
-
-        if d.value:
-            self.set_value(d.value)
-        if d.max_value:
-            self.set_max_value(d.max_value)
-        if d.min_value:
-            self.set_min_value(d.min_value)
+        if d.items:
+            self.set_items(d.items)
+        else:
+            if d.max_value:
+                self.set_max_value(d.max_value)
+            if d.min_value:
+                self.set_min_value(d.min_value)
+        self.set_value(d.value)
         if d.wraps:
             self.set_wraps(d.wraps)
+
         if d.long_press_update_interval:
             self.set_long_press_update_interval(d.long_press_update_interval)
 
@@ -95,3 +98,8 @@ class AndroidNumberPicker(AndroidLinearLayout, ProxyNumberPicker):
 
     def set_wraps(self, wraps):
         self.widget.setWrapSelectorWheel(wraps)
+
+    def set_items(self, items):
+        self.widget.setMinValue(0)
+        self.widget.setDisplayedValues(items)
+        self.widget.setMaxValue(len(items)-1) # max-min + 1 wtf

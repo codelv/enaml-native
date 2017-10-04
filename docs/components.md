@@ -470,6 +470,29 @@ Try the simple icon finder example.
 
 It's a button that allows Icons in the text. See the [Icon](#icon) and [Button](#button) components.
 
+### Picker
+
+A value picker from a "slot machine" style spinning list. Use the `items` property to set the text values. And use `value` to read the selected value (or item index). 
+
+    :::python
+    from enamlnative.widgets.api import *
+    
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
+    
+        #: Numeric by default (on android)
+        Picker: pk1:
+          min_value = 0
+          max_value = 100
+          value = 20
+        TextView:
+          text << "Selected: {}".format(pk1.value)
+    
+        #: Use items for strings
+        Picker: pk2:
+          items = ["blue",'red','green','orange','yellow','white','black']
+        TextView:
+          text << "Selected: {}".format(pk2.items[pk2.value])
 
 ### Toast
 
