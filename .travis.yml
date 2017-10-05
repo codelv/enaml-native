@@ -11,17 +11,14 @@ matrix:
 
 before_install:
 
-  # Display those for debug purposes
-  - PIP_INSTALL="pip install -q"
-
   # Install enamlnative dependencies
-  - $PIP_INSTALL enaml ply msgpack-python
+  - pip install enaml ply msgpack-python
 
   # Intall test tools
-  - $PIP_INSTALL pytest pytest-cov pytest-catchlog pytest-timeout
+  - pip install pytest pytest-cov pytest-catchlog pytest-timeout
 
   # Install codecov report tools
-  - $PIP_INSTALL codecov
+  - pip install codecov
 
 install:
 
@@ -33,7 +30,6 @@ install:
 script:
   # Run the enaml test suite
   - cd $TRAVIS_BUILD_DIR
-  - export QT_API=pyqt$QT_VERSION
   - py.test tests --cov enamlnative --cov-report xml -v
 
 after_success:
