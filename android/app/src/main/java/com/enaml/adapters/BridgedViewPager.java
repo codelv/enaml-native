@@ -1,6 +1,7 @@
 package com.enaml.adapters;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.support.v4.view.ViewPager;
@@ -8,6 +9,8 @@ import android.support.v4.view.ViewPager;
 public class BridgedViewPager extends ViewPager {
 
     private boolean mEnabled = true;
+
+    protected final Handler mHandler = new Handler();
 
     public BridgedViewPager(Context context) {
         super(context);
@@ -33,5 +36,13 @@ public class BridgedViewPager extends ViewPager {
 
     public void setPagingEnabled(boolean enabled) {
         mEnabled = enabled;
+    }
+
+    /**
+     * Avoids "FragmenatManager is already executing transactions"
+     * @param item
+     */
+    public void setCurrentItem(int item) {
+        mHandler.post(()->{super.setCurrentItem(item);});
     }
 }

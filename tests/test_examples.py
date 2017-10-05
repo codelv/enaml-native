@@ -43,6 +43,7 @@ from utils import load
     (["android"], 'switch.enaml'),
     (["android"], 'tabs.enaml'),
     (["android"], 'toast.enaml'),
+    (["android"], 'view_pager.enaml'),
     (["android"], 'webview.enaml'),
 ])
 def test_examples(platforms, path):

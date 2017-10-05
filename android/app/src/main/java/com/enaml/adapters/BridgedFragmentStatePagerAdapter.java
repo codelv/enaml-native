@@ -46,7 +46,7 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
 
     /**
      * A safe notify
-     */
+
     @Override
     public void notifyDataSetChanged() {
         try{
@@ -58,6 +58,7 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
             });
         }
     }
+     */
 
     @Override
     public int getCount() {
@@ -88,13 +89,6 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
         }
     }
 
-
-//    @Override
-//    public void notifyDataSetChanged() {
-//        try {
-//            super.notifyDataSetChanged();
-//        } catch (IllegalState)
-//    }
 
     interface FragmentListener {
         View onCreateView();

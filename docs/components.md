@@ -822,6 +822,107 @@ You can also show a toast message from code using the `AndroidApplication.instan
                         text = "PAGE ADDED"
                         text_color = "#fff"
 
+> Note: Clicks events are NOT supported in custom Toasts on Android! Use a [Snackbar](#snackbar) instead!
+
+### ViewPager
+
+A viewpager lets you swipe between multiple screens. You can set the `paging_enabled` attribute to `False` to only allow changing programatically. Observe or set the `current_index` to change the page.
+ 
+To add Pages you must add a `TabFragment` or `PagerFragment` (any subclass of `Fragment`). Tabs and a pager strip can also be added.
+ 
+  
+ [![View pager and screens in enaml-native](https://img.youtube.com/vi/QjYptyQETcU/0.jpg)](https://youtu.be/QjYptyQETcU)
+
+ 
+  :::python
+  from enamlnative.core.api import *
+  from enamlnative.widgets.api import *
+  
+  enamldef Navigation(Toolbar): toolbar:
+      #: An "iOS" like navigation where the text scrolls out when the pages change
+      background_color = "#CCC"
+      attr text_color = "#039be5"
+      layout_height = "140"
+      content_padding = (4,4,4,4)
+      attr pager
+      Flexbox:
+          justify_content = "space_between"
+          align_items = "center"
+          IconButton:
+              enabled << pager.current_index>0
+              background_color << toolbar.background_color
+              text << "{md-arrow-back}" if self.enabled else ""
+              text_size = 32
+              text_color << toolbar.text_color
+              style = "borderless"
+              clicked :: pager.current_index -= 1 
+          Flexbox:
+              layout_width = "wrap_content"
+              ViewPager:
+                  current_index := pager.current_index
+                  paging_enabled = False
+                  Looper:
+                      iterable = pager.pages
+                      PagerFragment:
+                          Flexbox:
+                              justify_content = "center"
+                              align_items = "center"
+                              TextView:
+                                  text = loop_item.title
+                                  #text_color << toolbar.text_color
+                                  text_size = 18
+                                  font_family = 'sans-serif-medium'
+          IconButton:
+              enabled << pager.current_index<len(pager.pages)-1
+              text << "{md-arrow-forward}" if self.enabled else ""
+              background_color << toolbar.background_color
+              text_size = 32
+              text_color << toolbar.text_color
+              style = "borderless"
+              clicked :: pager.current_index += 1
+  
+  enamldef BottomNav(Toolbar): view:
+      attr pager 
+      background_color = "#ccc"
+      layout_height = "140"
+      attr active_color = "#039be5"
+      Flexbox:
+          justify_content = "space_between"
+          align_items = "center"
+          Looper:
+              iterable << pager.pages
+              IconButton:
+                  text = loop_item.icon
+                  text_color << view.active_color if pager.current_index == loop_index else "#777"
+                  text_size = 32
+                  style = "borderless"
+                  clicked :: pager.current_index = loop_index
+  
+  enamldef ContentView(Flexbox): view:
+      flex_direction = "column"
+      Navigation:
+          pager << screens
+      ViewPager: screens:
+          paging_enabled = True
+          PagerFragment:
+              title = "Home"
+              icon = "{md-home}"
+              TextView:
+                  text = "Python powered native apps!"
+          PagerFragment:
+              title = "Pictures"
+              icon = "{md-photo}"
+              TextView:
+                  text = "Content goes here!"
+          PagerFragment:
+              title = "Settings"
+              icon = "{md-settings}"
+              TextView:
+                  text = "A multi screen app in < 20 lines? Yep!"
+      BottomNav:
+          pager << screens
+              
+
 ### WebView
 
 A component for loading a web page. Use the `url` to set the page. You can observe `title`, `loading`, `progress`, and `error` to see the state. 
@@ -866,7 +967,6 @@ Control the page by triggering the `go_forward`, `go_back`, and `reload` events.
               url >> web_url.text
               title :: AndroidApplication.instance().show_toast(change['value'])
 
-> Note: Clicks events are NOT supported in custom Toasts on Android! Use a [Snackbar](#snackbar) instead!
 
 
 
