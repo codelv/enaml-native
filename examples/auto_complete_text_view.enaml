@@ -1,0 +1,20 @@
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+
+    TextView:
+        text = "Pet type"
+
+    AutoCompleteTextView: tv:
+        #: Autocomplete items
+        choices = ['Cat','Dog', 'Duck','Bird','Elephant', "Fish"]
+
+        #: Min letters before autocomplete
+        threshold = 1
+
+        #: Placeholder
+        placeholder = "Type an animal name"
+
+    TextView:
+        text << "Selection: {}".format(tv.text)

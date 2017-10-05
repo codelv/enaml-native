@@ -1,0 +1,10 @@
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+    align_items = "center"
+    DatePicker: dp:
+        pass
+
+    TextView:
+        text << "Date: {} ".format(dp.date)

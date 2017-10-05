@@ -1,0 +1,9 @@
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+    Spinner: sp:
+        items = ["blue",'red','green','orange','yellow','white','black']
+        selected = 3
+    TextView:
+      text << "Selected: {}".format(sp.items[sp.selected])

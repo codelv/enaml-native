@@ -1,0 +1,13 @@
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+
+    CheckBox: cb:
+        text = "CheckBox"
+        checked = True
+
+    CheckBox:
+        text = "Bound checkbox"
+        checked := cb.checked

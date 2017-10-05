@@ -1,0 +1,32 @@
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+
+    TextView: tv:
+     pass
+
+    Looper:
+        iterable = list(Button.style.items)
+        Button:
+            text = loop_item or "default"
+
+            #: Button style
+            style = loop_item
+
+            #: Listen to click events
+            clicked :: tv.text = "Style {}".format(loop_item)
+
+
+    Button:
+        text = "default"
+        text_color = "#f00"
+        font_family = "sans-serif-light"
+        text_size = 32
+        style = "borderless"
+
+    Button:
+        text = "borderless"
+        style = "borderless"
+        text_color = "#c1a"

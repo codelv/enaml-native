@@ -1,0 +1,9 @@
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+    SeekBar: seekbar:
+      progress = 12
+      max = 20
+    TextView:
+      text << "Value {}".format(seekbar.progress)

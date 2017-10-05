@@ -550,6 +550,50 @@ A container for a set of radio buttons. Only only one may be selected at a time.
             text << "Selected: {}".format(rg2.checked.text if rg2.checked else "None")
 
 
+### RatingBar
+
+A "star" rating that can be adjusted like a slider or seekbar. Set or observe the `rating` as needed. Use `is_indicator=True` to make it read only.
+ 
+ > Note: A RatingBar on Android should be a child of a LinearLayout to display properly.
+
+    :::python
+    from enamlnative.widgets.api import *
+    
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
+        LinearLayout:
+            RatingBar: rbar1:
+                num_stars = 3
+                rating = 1
+                #: Prevents moving
+                is_indicator = True
+        TextView:
+            text << "Fixed Rating {}".format(rbar1.rating)
+        LinearLayout:
+            RatingBar: rbar2:
+                rating = 5
+        TextView:
+             text << "Rating {}".format(rbar2.rating)
+
+
+### Seekbar
+
+A seekbar is like a slider or controllable progress bar that lets you select a from a continuous range of values.
+
+    :::python
+    from enamlnative.widgets.api import *
+    
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
+        SeekBar: seekbar:
+          progress = 12
+          max = 20
+        TextView:
+          text << "Value {}".format(seekbar.progress)
+
+> Note: The `min` attribute only is supported for Android api 26 and above. Simply add the min to progress value as needed.
+
+
 ### Snackbar
 
 A Snackbar displays a message at the bottom of the screen with an action button. Set the `action_text` to enable actions.
@@ -590,6 +634,46 @@ A Snackbar displays a message at the bottom of the screen with an action button.
             action :: 
                 tv.action = change['value']
 
+
+### Spacer
+
+A pretty "space" widget for adding spacing to a layout. This is not really used anymore and may be removed in the future.
+
+
+### Spinner
+
+A spinner is a dropdown menu list. Set the `items` attribute to the values to display and set or observe the `selected` index to handle changes.
+
+    :::python
+    from enamlnative.widgets.api import *
+    
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
+        Spinner: sp:
+            items = ["blue",'red','green','orange','yellow','white','black']
+        TextView:
+          text << "Selected: {}".format(sp.items[sp.selected])
+
+> Note: Currently the text attributes (ex font, color, size, etc..) cannot be changed.
+
+### Switch
+
+An "on/off" switch. It has the same api as a `CheckBox` with `text` and `checked` attributes commonly being used.
+ 
+ 
+    :::python
+    from enamlnative.widgets.api import *
+    
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
+        
+        Switch: sw:
+            text = "Switch"
+            checked = True
+   
+        Switch:
+            text = "Bound switch"
+            checked := sw.checked
 
 
 ### Toast

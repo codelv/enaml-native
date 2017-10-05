@@ -1,0 +1,42 @@
+sudo: false
+dist: trusty
+
+branches:
+  only:
+    - master
+
+matrix:
+  include:
+    - env: PYTHON=2.7
+
+before_install:
+
+  # Display those for debug purposes
+  - source activate travisci
+  - PIP_INSTALL="pip install -q"
+
+  # Install enamlnative dependencies
+  - $PIP_INSTALL enaml ply msgpack-python
+
+  # Intall test tools
+  - $PIP_INSTALL pytest pytest-cov pytest-catchlog pytest-timeout
+
+  # Install codecov report tools
+  - $PIP_INSTALL codecov
+
+install:
+
+  # Install ecpy (check that build script is not broken
+  - cd $TRAVIS_BUILD_DIR
+  - python setup.py develop
+  - cd ~
+
+script:
+  # Run the enaml test suite
+  - cd $TRAVIS_BUILD_DIR
+  - export QT_API=pyqt$QT_VERSION
+  - py.test tests --cov enamlnative --cov-report xml -v
+
+after_success:
+  - cd $TRAVIS_BUILD_DIR
+  - codecov

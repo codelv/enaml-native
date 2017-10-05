@@ -1,0 +1,40 @@
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+
+enamldef Drawer(ScrollView): view:
+    #: Must have layout_gravity AND layout_width
+    layout_gravity = 'left'
+    layout_width = '200'
+    background_color = "#fff"
+    Flexbox:
+        flex_direction = "column"
+        Looper:
+            iterable = range(20)
+            Button:
+                style = "borderless"
+                text = "{} {}".format(view.layout_gravity, loop_index)
+
+enamldef ContentView(DrawerLayout): drawer:
+    background_color = "#eee"
+    Flexbox:
+        flex_direction = "column"
+        Toolbar:
+            title = "Drawers"
+            subtitle = "Swipe to open drawers"
+            background_color = "#abc"
+        Button:
+            text = "Open left"
+            #: Set the `opened` attribute to the list of drawers
+            clicked :: drawer.opened = [left_drawer]
+        Button:
+            text = "Open right"
+            clicked :: drawer.opened = [right_drawer]
+        Button:
+            text = "Close all"
+            #: Set the `opened` attribute to an empty list to close all
+            clicked :: drawer.opened = []
+
+    Drawer: left_drawer:
+        layout_gravity = "left"
+    Drawer: right_drawer:
+        layout_gravity = "right"

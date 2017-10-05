@@ -1,0 +1,12 @@
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+
+    Switch: sw:
+        text = "Switch"
+        checked = True
+
+    Switch:
+        text = "Bound switch"
+        checked := sw.checked

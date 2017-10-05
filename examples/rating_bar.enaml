@@ -1,0 +1,17 @@
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+    LinearLayout:
+        RatingBar: rbar1:
+            num_stars = 3
+            rating = 1
+            #: Prevents moving
+            is_indicator = True
+    TextView:
+        text << "Fixed Rating {}".format(rbar1.rating)
+    LinearLayout:
+        RatingBar: rbar2:
+            rating = 5
+    TextView:
+         text << "Rating {}".format(rbar2.rating)

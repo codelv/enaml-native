@@ -1,0 +1,10 @@
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    TextView:
+        text = "Hello"
+    Spacer:
+        layout_width = "1"
+        background_color = "#ccc"
+    TextView:
+        text = "Goodbye"

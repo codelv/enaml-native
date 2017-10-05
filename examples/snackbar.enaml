@@ -1,0 +1,29 @@
+from enamlnative.widgets.api import *
+from enamlnative.android.app import AndroidApplication
+
+enamldef ContentView(CoordinatorLayout):
+    Flexbox:
+        flex_direction = "column"
+        Button:
+            text = "Show snackbar"
+            clicked ::
+                sb.show = True
+        TextView:
+            text << "Snackbar state: {}".format("active" if sb.show else "hidden")
+        TextView: tv:
+            attr action = ""
+            text << "Snackbar action: {}".format(self.action)
+        Button:
+            text = "Show snackbar with action"
+            clicked ::
+                sb2.show = True
+    Snackbar: sb:
+        duration = 4000
+        text = "Cheers!"
+
+    Snackbar: sb2:
+        text = "Email deleted"
+        action_text = "Undo"
+        clicked :: print("action clicked!")
+        action ::
+            tv.action = change['value']

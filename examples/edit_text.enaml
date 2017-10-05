@@ -1,0 +1,39 @@
+from enamlnative.widgets.api import *
+
+enamldef Text(TextView):
+    #: Add Spacing
+    padding = (0, 20, 0, 0)
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+
+    Text:
+        text = "Observe the text attribute for responding to changes"
+    EditText: et:
+        text = ""
+    EditText:
+        text := et.text
+
+    Text:
+        text = "Set placholder text"
+    EditText:
+        placeholder = "Placeholder here"
+
+    Text:
+        text = "Set input types to change keyboard and display"
+    EditText:
+        placeholder = "Input type password"
+        input_type = "text_password"
+    EditText:
+        placeholder = "Input type phone"
+        input_type = "phone"
+
+    Text:
+        text = "Respond to keyboard actions"
+    EditText: editor:
+        attr action = None
+        placeholder = "Press the keyboard send button"
+        editor_actions = True
+        editor_action :: self.action = change
+    Text:
+        text << "{}".format(editor.action)

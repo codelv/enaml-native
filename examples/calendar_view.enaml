@@ -1,0 +1,16 @@
+from datetime import datetime
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+
+    CalendarView: cv:
+        pass
+
+    CalendarView:
+        min_date = datetime(1982,3,1)
+        max_date = datetime.now()
+        date = datetime.now()
+
+    TextView:
+        text << "Date: {}".format(cv.date)

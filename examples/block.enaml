@@ -1,0 +1,38 @@
+from enamlnative.core.api import Block
+from enamlnative.widgets.api import *
+
+enamldef Card(Flexbox): card:
+    flex_direction = "column"
+    attr header = "Header"
+    attr footer = "Footer"
+    #: Alias allows accessing the `content` reference outside
+    #: this component
+    alias content
+    CardView:
+        Flexbox:
+            flex_direction = "column"
+            TextView:
+                text << card.header
+            Block: content:
+                TextView:
+                    text = "Default content!"
+            TextView:
+                text << card.footer
+
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+    background_color = "#eee"
+    #: Use our card component
+    Card:
+        Block:
+            block << parent.content
+            #: This block's children replace referenced block's content!
+            TextView:
+                text = "New card content!"
+    Card:
+        Block:
+            block << parent.content
+            #: This block's children replace referenced block's content!
+            Button:
+                text = "Different!"

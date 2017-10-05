@@ -1,0 +1,28 @@
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+
+    RadioGroup: rg:
+        # Or set it
+        RadioButton:
+            text = "A"
+        RadioButton:
+            text = "B"
+        RadioButton:
+            text = "C"
+            checked = True
+    TextView:
+        text << "Selected: {}".format(rg.checked.text if rg.checked else "None")
+
+    RadioGroup: rg2:
+        # Or set it
+        checked = rg2.children[0]
+        RadioButton:
+            text = "A"
+        RadioButton:
+            text = "B"
+        RadioButton:
+            text = "C"
+    TextView:
+        text << "Selected: {}".format(rg2.checked.text if rg2.checked else "None")

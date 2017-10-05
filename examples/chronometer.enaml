@@ -1,0 +1,11 @@
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+
+    Chronometer: cm:
+        text_size = 32
+        running = True
+
+    TextView:
+        text << "Elapsed: {} seconds".format(cm.ticks)
