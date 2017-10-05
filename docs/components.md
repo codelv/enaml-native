@@ -518,7 +518,9 @@ See the [PagerTabStrip](#pagertabstrip).
 
 ### Picker
 
-A value picker from a "slot machine" style spinning list. Use the `items` property to set the text values. And use `value` to read the selected value (or item index). 
+A value picker from a "slot machine" style spinning list. Use the `items` property to set the text values. And use `value` to read the selected value (or item index).
+ 
+ [![Pickers enaml-native](https://img.youtube.com/vi/yGHEvlg5uRo/0.jpg)](https://youtu.be/yGHEvlg5uRo)
 
     :::python
     from enamlnative.widgets.api import *
@@ -689,6 +691,10 @@ A pretty "space" widget for adding spacing to a layout. This is not really used 
 ### Spinner
 
 A spinner is a dropdown menu list. Set the `items` attribute to the values to display and set or observe the `selected` index to handle changes.
+
+ 
+ [![Spinners enaml-native](https://img.youtube.com/vi/yGHEvlg5uRo/0.jpg)](https://youtu.be/yGHEvlg5uRo)
+
 
     :::python
     from enamlnative.widgets.api import *
