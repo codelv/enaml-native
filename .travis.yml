@@ -1,5 +1,6 @@
-sudo: false
+sudo: required
 dist: trusty
+language: python
 
 branches:
   only:
@@ -13,6 +14,7 @@ before_install:
 
   # Just to be sure
   - pip install -U pip
+
   # pip is not able to install distribute: "ImportError: No module named _markerlib"
   - easy_install distribute
 
