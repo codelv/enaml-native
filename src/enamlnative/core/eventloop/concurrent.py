@@ -32,7 +32,7 @@ from .log import app_log
 from .stack_context import ExceptionStackContext, wrap
 from .util import raise_exc_info, ArgReplacer, is_finalizing
 
-from atom.api import Atom, Value, Bool, List
+from atom.api import Atom, Value, Bool, Instance, Int, Callable
 
 futures = None
 typing = None
@@ -129,7 +129,7 @@ class _TracebackLogger(Atom):
                           ''.join(self.formatted_tb).rstrip())
 
 
-class Future(Atom):
+class Future(Atom, object):
     """Placeholder for an asynchronous result.
 
     A ``Future`` encapsulates the result of an asynchronous
@@ -165,12 +165,16 @@ class Future(Atom):
        suppress the logging by ensuring that the exception is observed:
        ``f.add_done_callback(lambda f: f.exception())``.
     """
+    __slots__ = ('__weakref__', )
     _done = Bool()
     _result = Value()
     _exc_info = Value()
     _log_traceback = Bool()
     _tb_logger = Value()
-    _callbacks = List()
+    _callbacks = Instance(list, ())
+    __id__ = Int()
+    then = Callable()
+    catch = Callable()
 
     # Implement the Python 3.5 Awaitable protocol if possible
     # (we can't use return and yield together until py33).
