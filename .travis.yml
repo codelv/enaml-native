@@ -19,7 +19,7 @@ before_install:
   - easy_install distribute
 
   # Install enamlnative dependencies
-  - pip install enaml ply msgpack-python pyjnius
+  - pip install enaml ply msgpack-python Cython pyjnius
 
   # Intall test tools
   - pip install pytest pytest-cov pytest-catchlog pytest-timeout
