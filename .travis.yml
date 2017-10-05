@@ -11,6 +11,11 @@ matrix:
 
 before_install:
 
+  # Just to be sure
+  - pip install -U pip
+  # pip is not able to install distribute: "ImportError: No module named _markerlib"
+  - easy_install distribute
+
   # Install enamlnative dependencies
   - pip install enaml ply msgpack-python
 
@@ -22,7 +27,7 @@ before_install:
 
 install:
 
-  # Install ecpy (check that build script is not broken
+  # Install enamlnative (check that build script is not broken
   - cd $TRAVIS_BUILD_DIR
   - python setup.py develop
   - cd ~
