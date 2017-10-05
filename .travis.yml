@@ -12,7 +12,6 @@ matrix:
 before_install:
 
   # Display those for debug purposes
-  - source activate travisci
   - PIP_INSTALL="pip install -q"
 
   # Install enamlnative dependencies
