@@ -18,8 +18,11 @@ before_install:
   # pip is not able to install distribute: "ImportError: No module named _markerlib"
   - easy_install distribute
 
+  #: Install cython
+  - pip install Cython --install-option="--no-cython-compile"
+
   # Install enamlnative dependencies
-  - pip install enaml ply msgpack-python Cython pyjnius
+  - pip install enaml ply msgpack-python pyjnius
 
   # Intall test tools
   - pip install pytest pytest-cov pytest-catchlog pytest-timeout
