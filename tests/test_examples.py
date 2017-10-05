@@ -17,12 +17,12 @@ from utils import load
 
 @pytest.mark.parametrize("platforms, path", [
     (["android"], 'activity_indicator.enaml'),
-    (["android"], 'analog_clock.enaml'),
     (["android"], 'auto_complete_text_view.enaml'),
     (["android"], 'block.enaml'),
     (["android"], 'button.enaml'),
     (["android"], 'calendar_view.enaml'),
     (["android"], 'card_view.enaml'),
+    (["android"], 'clocks.enaml'),
     (["android"], 'checkbox.enaml'),
     (["android"], 'chronometer.enaml'),
     (["android"], 'date_picker.enaml'),
@@ -43,6 +43,7 @@ from utils import load
     (["android"], 'switch.enaml'),
     (["android"], 'tabs.enaml'),
     (["android"], 'toast.enaml'),
+    (["android"], 'webview.enaml'),
 ])
 def test_examples(platforms, path):
     app = MockApplication.instance() or MockApplication()

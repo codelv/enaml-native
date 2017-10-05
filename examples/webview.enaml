@@ -1,0 +1,32 @@
+from enamlnative.android.app import AndroidApplication
+from enamlnative.widgets.api import *
+
+enamldef ContentView(ScrollView): web_view:
+    LinearLayout:
+        orientation = "vertical"
+        EditText: web_url:
+          text = "github.com/frmdstryr/enaml-native"
+          input_type = 'text_uri'
+          editor_actions = True
+          editor_action ::
+            #: When done editing, load the page
+            action = change['value']
+            if action['key']==5: # Why 5 now?
+              url = web_url.text.lower()
+              if not (url.startswith("http://") or url.startswith("https://")):
+                url = "https://"+url
+              web_view.url = url
+        ProgressBar:
+          visible << web_view.loading
+          progress << web_view.progress
+        TextView:
+          visible << web_view.error
+          text_color = '#FF0000'
+          text << u"Error: {} - {}".format(web_view.error_code, web_view.error_message)
+        WebView: web_view:
+          layout_height = 'match_parent'
+          layout_width = 'match_parent'
+          #: When url updates, set the text
+          url = "https://github.com/frmdstryr/enaml-native"
+          url >> web_url.text
+          title :: AndroidApplication.instance().show_toast(change['value'])

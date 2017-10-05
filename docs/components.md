@@ -816,6 +816,50 @@ You can also show a toast message from code using the `AndroidApplication.instan
                         text = "PAGE ADDED"
                         text_color = "#fff"
 
+### WebView
+
+A component for loading a web page. Use the `url` to set the page. You can observe `title`, `loading`, `progress`, and `error` to see the state. 
+
+Control the page by triggering the `go_forward`, `go_back`, and `reload` events.
+
+ 
+ [![Webview in enaml-native](https://img.youtube.com/vi/L3IVK1ogMZ4/0.jpg)](https://youtu.be/L3IVK1ogMZ4)
+
+
+    :::python
+    from enamlnative.android.app import AndroidApplication
+    from enamlnative.widgets.api import *
+    
+    enamldef ContentView(ScrollView): web_view:
+        LinearLayout:
+            orientation = "vertical"
+            EditText: web_url:
+              text = "github.com/frmdstryr/enaml-native"
+              input_type = 'text_uri'
+              editor_actions = True
+              editor_action ::
+                #: When done editing, load the page
+                action = change['value']
+                if action['key']==5: # Why 5 now?
+                  url = web_url.text.lower()
+                  if not (url.startswith("http://") or url.startswith("https://")):
+                    url = "https://"+url
+                  web_view.url = url
+            ProgressBar:
+              visible << web_view.loading
+              progress << web_view.progress
+            TextView:
+              visible << web_view.error
+              text_color = '#FF0000'
+              text << u"Error: {} - {}".format(web_view.error_code, web_view.error_message)
+            WebView: web_view:
+              layout_height = 'match_parent'
+              layout_width = 'match_parent'
+              #: When url updates, set the text
+              url = "https://github.com/frmdstryr/enaml-native"
+              url >> web_url.text
+              title :: AndroidApplication.instance().show_toast(change['value'])
+
 > Note: Clicks events are NOT supported in custom Toasts on Android! Use a [Snackbar](#snackbar) instead!
 
 
