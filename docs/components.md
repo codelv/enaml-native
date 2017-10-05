@@ -470,6 +470,52 @@ Try the simple icon finder example.
 
 It's a button that allows Icons in the text. See the [Icon](#icon) and [Button](#button) components.
 
+### PagerFragment
+
+Adds a page to [ViewPager](#viewpager).
+
+### PagerTabStrip
+
+Adds a "tab strip" to a [ViewPager](#viewpager). It's similar to tabs but only displays the current, next, and previous tab. Can set the different text and indicator colors. Items are automatically added when a `PagerFragment` is added to the `ViewPager`.
+
+Set the `title` of the `PagerFragment` to define the text of the tab.
+ 
+[![Pager title strip in enaml-native](https://img.youtube.com/vi/UdAaUNUD3eY/0.jpg)](https://youtu.be/UdAaUNUD3eY)
+
+
+    :::python
+    from enamlnative.core.api import *
+    from enamlnative.widgets.api import *
+    
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
+    
+        ViewPager:
+            PagerTabStrip: pager_tab_strip:
+                text_color = '#eee'
+                inactive_alpha = 0.7
+                text_size = 16
+                tab_indicator_color = '#97c024'
+                background_color = '#3574a3'
+            Looper:
+                iterable << ['First', 'Second', 'Third']
+                PagerFragment:
+                  title = loop_item
+                  Flexbox:
+                    background_color = '#fff'
+                    flex_direction = 'column'
+                    padding = (10,10,10,10)
+                    Spinner:
+                      items = ['top', 'bottom']
+                      selected << 0 if pager_tab_strip.layout_gravity == 'top' else 1
+                      selected :: pager_tab_strip.layout_gravity = self.items[self.selected]
+
+
+### PagerTitleStrip
+
+See the [PagerTabStrip](#pagertabstrip).
+
+
 ### Picker
 
 A value picker from a "slot machine" style spinning list. Use the `items` property to set the text values. And use `value` to read the selected value (or item index). 
@@ -675,6 +721,9 @@ An "on/off" switch. It has the same api as a `CheckBox` with `text` and `checked
             text = "Bound switch"
             checked := sw.checked
 
+### TabFragment
+
+A page of a `ViewPager` that works with a `TabLayout`. See the [TabLayout](#tablayout) for usage.
 
 ### TabLayout
 
