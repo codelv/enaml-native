@@ -676,6 +676,52 @@ An "on/off" switch. It has the same api as a `CheckBox` with `text` and `checked
             checked := sw.checked
 
 
+### TabLayout
+
+Adds tabs to a [ViewPager](#viewpager). Can set the different text and indicator colors. Tabs are automatically added when a `TabFragment` is added to the `ViewPager`.
+
+Set the `title` of the `TabFragment` to define the text of the tab.
+ 
+[![Tabs in enaml-native](https://img.youtube.com/vi/hNXCHNe_Zik/0.jpg)](https://youtu.be/hNXCHNe_Zik)
+
+
+    :::python
+    from enamlnative.core.api import *
+    from enamlnative.widgets.api import *
+    
+    enamldef ContentView(Flexbox):
+        flex_direction = "column"
+    
+        ViewPager:
+            TabLayout: tab_layout:
+                tab_color = '#7fff'
+                tab_color_selected = '#fff'
+                background_color = '#3574a3'
+            Looper:
+                iterable << ['First', 'Second', 'Third']
+                TabFragment:
+                  title = loop_item
+                  Flexbox:
+                    background_color = '#fff'
+                    flex_direction = 'column'
+                    padding = (10,10,10,10)
+                    Spinner:
+                      items = ['top', 'bottom']
+                      selected << 0 if tab_layout.layout_gravity == 'top' else 1
+                      selected :: tab_layout.layout_gravity = self.items[self.selected]
+                    TextView:
+                      text = "Tab modes"
+                    Spinner:
+                      items = ['fixed','scrollable']
+                      selected << 0 if tab_layout.tab_mode == 'fixed' else 1
+                      selected :: tab_layout.tab_mode = self.items[self.selected]
+                    TextView:
+                      text = "Tab gravity"
+                    Spinner:
+                      items = ['fill', 'center']
+                      selected << 0 if tab_layout.tab_gravity == 'fill' else 1
+                      selected :: tab_layout.tab_gravity = self.items[self.selected]
+
 ### Toast
 
 A toast flashes a simple message to the user for a given duration. Set the `show` attribute to `True` to display it. It will automatically hide after the given duration.
