@@ -457,24 +457,43 @@ class BundleAssets(Command):
                 if os.path.exists('python.zip'):
                     shprint(sh.rm, 'python.zip')
 
+                #: Build tar.lz4
+                if os.path.exists('python.tar.lz4'):
+                    shprint(sh.rm, 'python.tar.lz4')
+
                 #: Zip everything and copy to assets arch to build
                 with cd('build'):
                     #shprint(sh.zip, '-r', 'android/app/src/main/assets/python/python.zip', '.')
-                    shprint(sh.zip, '-r', '../python.zip', '.')
+                    #shprint(sh.zip, '-r', '../python.zip', '.')
+
+                    #shprint(sh.bash, '-c', 'tar czf - build | lz4 -9 - python.tar.lz4')
+                    shprint(sh.tar, '-zcvf', '../python.tar.gz', '.')
 
 
-            break #: They should all be the same so stop after the first
+            break  #: They should all be the same so stop after the first
+
+        #: Now copy the tar.lz4 and rename as a special ".so" file
+        #: to trick android into extracting from the apk on install
+        #for a in env['arches']:
+        #    shprint(sh.cp,
+        #            '{python_build_dir}/python.tar.lz4'.format(**env),
+        #            'android/app/src/main/libs/{arch}/libpymodules.so'.format(arch=a))
 
         #: Now copy to android assets folder
+        #: Extracted file type
+        bundle = 'python.tar.gz'
+
+        #: Tar is about 25% smaller and significantly 4x faster at unpacking
         shprint(sh.cp,
-                '{python_build_dir}/python.zip'.format(**env),
-                'android/app/src/main/assets/python/python.zip')
+                '{python_build_dir}/{bundle}'.format(bundle=bundle,**env),
+                'android/app/src/main/assets/python/{bundle}'.format(bundle=bundle))
 
         #: And wth, just copy it to the ios folder too :)
         shprint(sh.cp,
-                '{python_build_dir}/python.zip'.format(**env),
-                'ios/App/Python/python.zip')
+                '{python_build_dir}/{bundle}'.format(bundle=bundle,**env),
+                'ios/App/Python/{bundle}'.format(bundle=bundle))
         #: Can iOS unpack this??
+
 
 class AllPython(Command):
     title = set_default("all-python")

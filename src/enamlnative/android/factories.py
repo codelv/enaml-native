@@ -149,6 +149,16 @@ def list_view_factory():
     return AndroidListView
 
 
+def map_marker_factory():
+    from .android_map_view import AndroidMapMarker
+    return AndroidMapMarker
+
+
+def map_view_factory():
+    from .android_map_view import AndroidMapView
+    return AndroidMapView
+
+
 def picker_factory():
     # print "Import view"
     from .android_picker import AndroidPicker
@@ -267,6 +277,7 @@ def toast_factory():
     from .android_toast import AndroidToast
     return AndroidToast
 
+
 def toggle_button_factory():
     # print "Import toggle button"
     from .android_toggle_button import AndroidToggleButton
@@ -321,6 +332,8 @@ ANDROID_FACTORIES = {
     'LinearLayout': linear_layout_factory,
     'ListItem': list_item_factory,
     'ListView': list_view_factory,
+    'MapMarker': map_marker_factory,
+    'MapView': map_view_factory,
     'PagerTitleStrip': pager_title_strip_factory,
     'PagerTabStrip': pager_tab_strip_factory,
     'PagerFragment': pager_fragment_factory,

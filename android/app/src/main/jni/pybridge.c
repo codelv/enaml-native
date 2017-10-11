@@ -19,8 +19,7 @@
 /*   Android log   */
 /* --------------- */
 
-static PyObject *AndroidLog(PyObject *self, PyObject *args)
-{
+static PyObject *AndroidLog(PyObject *self, PyObject *args) {
     char *str;
     if (!PyArg_ParseTuple(args, "s", &str))
         return NULL;
@@ -46,17 +45,65 @@ static struct PyModuleDef AndroidLogModule = {
 };
 
 
-PyMODINIT_FUNC PyInit_AndroidLog(void)
-{
-    return PyModule_Create(&AndroidlogModule);
+PyMODINIT_FUNC PyInit_AndroidLog(void) {
+    return PyModule_Create(&AndroidLogModule);
 }
 #else
-PyMODINIT_FUNC PyInit_AndroidLog(void)
-{
+PyMODINIT_FUNC PyInit_AndroidLog(void) {
     (void)Py_InitModule("androidlog", AndroidLogMethods);
 }
 #endif
 
+
+/* --------------------- */
+/*   Extension importer  */
+/* --------------------- */
+/*
+static PyObject *AndroidImporter_load_module(PyObject *self, PyObject *args) {
+    char *str;
+    if (!PyArg_ParseTuple(args, "s", &str))
+        return NULL;
+
+    LOG(str);
+    Py_RETURN_NONE;
+}
+
+static PyObject *AndroidImporter_find_module(PyObject *self, PyObject *args) {
+    char *str;
+    if (!PyArg_ParseTuple(args, "s", &str))
+        return NULL;
+
+    LOG(str);
+    Py_RETURN_NONE;
+}
+
+static PyMethodDef AndroidImporterMethods[] = {
+    {"load_module", AndroidImporter_load_module, METH_VARARGS, "Load an extension"},
+    {"find_module", AndroidImporter_find_module, METH_VARARGS, "Find a python extension"},
+    {NULL, NULL, 0, NULL}
+};
+
+#if PY_MAJOR_VERSION >= 3
+
+static struct PyModuleDef AndroidImporterModule = {
+    PyModuleDef_HEAD_INIT,
+    "androidimporter",        // m_name
+    "Python extension loader for android",   // m_doc
+    -1,                  // m_size
+    AndroidImporterMethods    // m_methods
+};
+
+
+PyMODINIT_FUNC PyInit_AndroidImporter(void) {
+    return PyModule_Create(&AndroidImporterModule);
+}
+#else
+PyMODINIT_FUNC PyInit_AndroidImporter(void) {
+    (void)Py_InitModule("androidimporter", AndroidImporterMethods);
+}
+#endif
+
+*/
 
 /* ------------------ */
 /*   Native methods   */
@@ -110,14 +157,14 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
 
     PyInit_AndroidLog();
 
-
     // Inject  bootstrap code to redirect python stdin/stdout
     // to the androidlog module
+    // then add the custom import hook loader
     // and run main() from bootstrap.py
     PyRun_SimpleString(
       "import sys\n" \
       "import androidlog\n" \
-      "class LogFile(object):\n" \
+      "class _AndroidLogFile(object):\n" \
       "    def __init__(self):\n" \
       "        self.buffer = ''\n" \
       "    def write(self, s):\n" \
@@ -128,7 +175,35 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
       "        self.buffer = lines[-1]\n" \
       "    def flush(self):\n" \
       "        return\n" \
-      "sys.stdout = sys.stderr = LogFile()\n" \
+      "sys.stdout = sys.stderr = _AndroidLogFile()\n" \
+      "import os\n" \
+      "import imp\n" \
+      "class _AndroidExtensionImporter(object):\n" \
+      "    extension_modules = {}\n" \
+      "    def __init__(self):\n" \
+      "        ext_type = 'dylib' if sys.platform == 'darwin' else 'so'\n" \
+      "        prefix = '' if sys.platform == 'darwin' else 'lib.'\n" \
+      "        start = 0 if sys.platform == 'darwin' else 1\n" \
+      "        lib_dir = os.environ.get('PY_LIB_DIR','.')\n" \
+      "        for lib in os.listdir(lib_dir):\n" \
+      "            lib = lib.split('/')[-1]\n"\
+      "            if lib.startswith(prefix) and lib.endswith(ext_type):\n"\
+      "                mod = '.'.join(lib.split('.')[start:-1])  # Strip lib and so\n" \
+      "                self.extension_modules[mod] = os.path.join(lib_dir, lib)\n" \
+      "    def load_module(self, mod):\n" \
+      "        try:\n" \
+      "            return sys.modules[mod]\n" \
+      "        except KeyError:\n" \
+      "            pass\n" \
+      "        lib = self.extension_modules[mod]\n" \
+      "        m = imp.load_dynamic(mod, lib)\n" \
+      "        sys.modules[mod] = m\n" \
+      "        return m\n" \
+      "    def find_module(self, mod, path=None):\n" \
+      "        if mod in self.extension_modules:\n" \
+      "            return self\n" \
+      "        return None\n" \
+      "sys.meta_path.append(_AndroidExtensionImporter()) \n" \
       "from main import main\n" \
       "main()\n" \
     );

@@ -928,18 +928,40 @@ enamldef ContentView(VBox): content_view:
                     TextView:
                       text << "{}".format(request.response.content)
       Page:
+        title = "Toast"
         Scroller:
           VBox:
             Card:
               VBox:
-                TextView:
+                CardTitle:
                   text = "Toast"
                 Button:
                   text = "Show toast"
-                  clicked :: toast.show
+                  clicked :: toast.show = True
                 Toast: toast:
                   text = "Toasty"
-
+      Page:
+        title = "Snackbar"
+        CoordinatorLayout:
+          Scroller:
+            VBox:
+              Card:
+                VBox:
+                  CardTitle:
+                    text = "Snackbar"
+                  Button:
+                    text = "Show snackbar"
+                    clicked :: snackbar.show = True
+                  Toast: toast2:
+                    text = "Undo clicked"
+          Snackbar: snackbar:
+            text = "Item deleted"
+            action_text = "Undo"
+            clicked :: toast2.show = True
+      Page:
+        title = "MapWiew"
+        MapView:
+          pass
 
 
     LeftDrawer: left_drawer:

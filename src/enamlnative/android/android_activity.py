@@ -26,6 +26,8 @@ class Activity(JavaBridgeObject):
     setContentView = JavaMethod('android.view.View')
     getWindow = JavaMethod(returns='android.view.Window')
 
+    getSupportFragmentManager = JavaMethod(returns='android.support.v4.app.FragmentManager')
+
     #: Permissions
     checkSelfPermission = JavaMethod('java.lang.String', returns='int')
     requestPermissions = JavaMethod('[Ljava.lang.String;', 'int')

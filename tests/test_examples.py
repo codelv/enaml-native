@@ -31,6 +31,7 @@ from utils import load
     (["android"], 'edit_text.enaml'),
     (["android"], 'flexbox.enaml'),
     (["android"], 'icon.enaml'),
+    (["android"], 'mapview.enaml'),
     (["android"], 'pager_tab_strip.enaml'),
     (["android"], 'picker.enaml'),
     (["android"], 'progress_bar.enaml'),
