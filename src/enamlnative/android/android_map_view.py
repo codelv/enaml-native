@@ -63,7 +63,7 @@ class GoogleMap(JavaBridgeObject):
     setTrafficEnabled = JavaMethod('boolean')
 
     setOnMarkerClickListener = JavaMethod('com.google.android.gms.maps.GoogleMap$OnMarkerClickListener')
-    onMarkerClick = JavaCallback('com.google.android.gms.maps.model.Marker')
+    onMarkerClick = JavaCallback('com.google.android.gms.maps.model.Marker', returns='boolean')
 
     setOnMarkerDragListener = JavaMethod('com.google.android.gms.maps.GoogleMap$OnMarkerDragListener')
     onMarkerDrag = JavaCallback('com.google.android.gms.maps.model.Marker')
@@ -238,6 +238,9 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
         if d.show_buildings:
             self.set_show_buildings(d.show_buildings)
 
+        self.map.onMarkerClick.connect(self.on_marker_clicked)
+        self.map.setOnMarkerClickListener(self.map.getId())
+
     # --------------------------------------------------------------------------
     # Google Maps API
     # --------------------------------------------------------------------------
@@ -293,14 +296,21 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
             pass
         else:
             super(AndroidMapView, self).child_removed(child)
+
     # --------------------------------------------------------------------------
     # GoogleMap API
     # --------------------------------------------------------------------------
-    def on_marker_clicked(self, mid):
+    def on_marker_clicked(self, marker):
         #: TODO: Get marker
-        marker = bridge.get_object_with_id(mid)
+        mid, pos = marker
+        widget = bridge.get_object_with_id(mid)
 
-
+        #: Delegate to the clicked marker
+        for c in self.children():
+            if isinstance(c, AndroidMapMarker) and c.marker == widget:
+                return c.on_click()
+                break
+        return False
 
     # --------------------------------------------------------------------------
     # ProxyMapView API
@@ -446,11 +456,6 @@ class AndroidMapMarker(AndroidToolkitObject, ProxyMapMarker):
         if d.zindex:
             self.set_zindex(d.zindex)
 
-    def on_marker(self, mid):
-        """ Convert our options into the actual marker object"""
-        self.marker = Marker(__id__=mid)
-        self.marker.setTag(mid)
-
     def destroy(self):
         """ Remove the marker if it was added to the map when destroying"""
         marker = self.marker
@@ -460,14 +465,32 @@ class AndroidMapMarker(AndroidToolkitObject, ProxyMapMarker):
                 marker.remove()
             del self.marker
         super(AndroidMapMarker, self).destroy()
+
     # --------------------------------------------------------------------------
     # Marker API
     # --------------------------------------------------------------------------
+    def on_marker(self, marker):
+        """ Convert our options into the actual marker object"""
+        mid, pos = marker
+        self.marker = Marker(__id__=mid)
+        self.marker.setTag(mid)
+
     def on_click(self):
-        pass
+        d = self.declaration
+        result = {'handled': False}
+        d.clicked(result)
+        return bool(result['handled'])
+
+    def on_drag_start(self):
+        d = self.declaration
 
     def on_drag(self, pos):
-        pass
+        d = self.declaration
+        with self.marker.position.suppressed():
+            d.position = pos
+
+    def on_drag_end(self):
+        d = self.declaration
 
     # --------------------------------------------------------------------------
     # ProxyMapMarker API

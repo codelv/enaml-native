@@ -246,7 +246,7 @@ class MapMarker(ToolkitObject):
     zindex = d_(Float(strict=False))
 
     #: Clicked
-    clicked = d_(Event(), writable=False)
+    clicked = d_(Event(dict), writable=False)
 
     #: A reference to the ProxyMapMarker object.
     proxy = Typed(ProxyMapMarker)
