@@ -2,6 +2,7 @@
 from enamlnative.android.app import AndroidApplication
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
+from enamlnative.android.api import LocationManager
 
 AndroidApplication.instance().debug = False
 
@@ -12,8 +13,7 @@ enamldef ContentView(DrawerLayout):
         Looper:
             iterable = range(100)
             MapMarker:
-                latitude = 39.95090+0.001*loop_index
-                longitude = -86.26190+0.001*loop_index
+                position = (39.95090+0.001*loop_index,-86.26190+0.001*loop_index)
                 title = "Marker {}".format(loop_index)
                 snippit = "Caption {}".format(loop_index)
                 draggable = True
@@ -25,29 +25,20 @@ enamldef ContentView(DrawerLayout):
             padding = (10,10,10,10)
             flex_direction = "column"
             TextView:
-                text = "Gestures"
-                text_size = 18
-            Switch:
-                text = "Rotate enabled"
-                checked := mapview.rotate_gestures
-            Switch:
-                text = "Zoom enabled"
-                checked := mapview.zoom_gestures
-            Switch:
-                text = "Tilt enabled"
-                checked := mapview.tilt_gestures
-            TextView:
                 text = "Options"
                 text_size = 18
             Switch:
-                text = "Show toolbar"
-                checked := mapview.show_toolbar
+                text = "Show buildings"
+                checked := mapview.show_buildings
             Switch:
-                text = "Show zoom controls"
-                checked := mapview.show_zoom_controls
+                text = "Show location"
+                checked := mapview.show_location
+            Button:
+                text = "Request permission"
+                clicked :: LocationManager.request_permission()
             Switch:
-                text = "Show compas"
-                checked := mapview.show_compass
+                text = "Show traffic"
+                checked := mapview.show_traffic
             TextView:
                 text = "Layers"
                 text_size = 18
