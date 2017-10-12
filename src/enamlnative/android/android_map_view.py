@@ -382,7 +382,8 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
     def on_info_window_closed(self, marker):
         mid, pos = marker
         m = self.markers.get(mid)
-        if m:
+        #: This can come later when it's removed so check the declaration
+        if m and m.declaration:
             m.on_info_window_closed()
 
     # --------------------------------------------------------------------------
