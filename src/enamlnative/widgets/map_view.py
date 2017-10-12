@@ -122,6 +122,9 @@ class ProxyMapMarker(ProxyToolkitObject):
     def set_snippit(self, snippit):
         raise NotImplementedError
 
+    def set_show_info(self, show):
+        raise NotImplementedError
+
     def set_visibile(self, visible):
         raise NotImplementedError
 
@@ -239,20 +242,29 @@ class MapMarker(ToolkitObject):
     #: Sets the snippit for the marker.
     snippit = d_(Unicode())
 
+    #: Show info window
+    show_info = d_(Bool())
+
     #: Sets the visibility for the marker.
     visible = d_(Bool(True))
 
     #: Sets the zIndex for the marker.
     zindex = d_(Float(strict=False))
 
-    #: Clicked
+    #: Marker clicked
+    #: event value will have a 'result' that can be set to True
+    #: to indicate the event was handled
     clicked = d_(Event(dict), writable=False)
+
+    #: Info window clicked
+    #: the event value will have an indicator of the type of click ('long', 'short')
+    info_clicked = d_(Event(dict), writable=False)
 
     #: A reference to the ProxyMapMarker object.
     proxy = Typed(ProxyMapMarker)
 
     @observe('alpha', 'anchor', 'draggable', 'flat', 'position',
-             'title', 'snippit', 'visible', 'zindex')
+             'title', 'snippit', 'visible', 'zindex', 'show_info')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

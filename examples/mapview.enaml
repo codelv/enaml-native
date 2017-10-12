@@ -1,22 +1,47 @@
-
+import random
 from enamlnative.android.app import AndroidApplication
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 from enamlnative.android.api import LocationManager
 
-AndroidApplication.instance().debug = False
+#AndroidApplication.instance().debug = True
 
-enamldef ContentView(DrawerLayout):
+enamldef ContentView(DrawerLayout): view:
+    attr num_markers = 10
+    attr markers_draggable = True
+    attr marker_rotation = 0
+    attr markers_flat = True
+    attr center = (39.95090, -86.26190)
     MapView: mapview:
         rotate_gestures = False
         show_toolbar = False
         Looper:
-            iterable = range(100)
+            iterable << range(view.num_markers)
             MapMarker:
-                position = (39.95090+0.001*loop_index,-86.26190+0.001*loop_index)
+                position = (center[0]+random.randint(0,100)/1000.0*loop_index,
+                            center[1]+random.randint(0,100)/1000.0*loop_index)
+                position ::
+                    toast.text = "Marker {} moved {}".format(loop_index,self.position)
+                    toast.show = True
                 title = "Marker {}".format(loop_index)
                 snippit = "Caption {}".format(loop_index)
-                draggable = True
+                draggable << view.markers_draggable
+                rotation << view.marker_rotation
+                flat << view.markers_flat
+
+                clicked ::
+                    #: Set the odd markers as "handled"
+                    change['value']['handled'] = False
+                    toast.text = "Clicked {}".format(loop_index)
+                    toast.show = True
+                info_clicked ::
+                    #: Set the odd markers as "handled"
+                    toast.text = "Info window {} {} clicked".format(loop_index,change['value']['click'])
+                    toast.show = True
+
+        Toast: toast:
+            text = "Marker"
+            duration = 300
     ScrollView:
         layout_gravity = "left"
         layout_width = "200"
@@ -25,7 +50,35 @@ enamldef ContentView(DrawerLayout):
             padding = (10,10,10,10)
             flex_direction = "column"
             TextView:
-                text = "Options"
+                text = "Markers"
+                text_size = 18
+            Switch:
+                text = "Draggable"
+                checked := view.markers_draggable
+            Switch:
+                text = "Flat"
+                checked := view.markers_flat
+            SeekBar:
+                max = 360
+                progress := view.marker_rotation
+            Button:
+                text = "Add marker"
+                style = "borderless"
+                clicked :: view.num_markers +=1
+            Button:
+                text = "Remove marker"
+                style = "borderless"
+                clicked :: view.num_markers = max(1,view.num_markers-1)
+            TextView:
+                text = "Selection"
+            Spinner:
+                items << ["Marker {}".format(i) for i in range(view.num_markers)]
+                selected ::
+                    w = mapview.children[change['value']]
+                    w.show_info = True
+
+            TextView:
+                text = "Maps"
                 text_size = 18
             Switch:
                 text = "Show buildings"
@@ -35,6 +88,7 @@ enamldef ContentView(DrawerLayout):
                 checked := mapview.show_location
             Button:
                 text = "Request permission"
+                style = "borderless"
                 clicked :: LocationManager.request_permission()
             Switch:
                 text = "Show traffic"

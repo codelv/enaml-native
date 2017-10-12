@@ -9,7 +9,7 @@ Created on Oct 10, 2017
 
 @author: jrm
 '''
-from atom.api import Typed, Instance, set_default
+from atom.api import Typed, Dict, set_default
 
 from enamlnative.widgets.map_view import ProxyMapView, ProxyMapMarker
 from enamlnative.core import bridge
@@ -17,7 +17,7 @@ from enamlnative.core import bridge
 from .android_toolkit_object import AndroidToolkitObject
 from .android_frame_layout import AndroidFrameLayout, FrameLayout
 from .android_fragment import FragmentTransaction, FragmentManager
-from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod, JavaCallback, JavaProxy
+from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod, JavaCallback
 from .api import LocationManager
 
 
@@ -69,6 +69,14 @@ class GoogleMap(JavaBridgeObject):
     onMarkerDrag = JavaCallback('com.google.android.gms.maps.model.Marker')
     onMarkerDragEnd = JavaCallback('com.google.android.gms.maps.model.Marker')
     onMarkerDragStart = JavaCallback('com.google.android.gms.maps.model.Marker')
+
+    setOnInfoWindowClickListener = JavaMethod('com.google.android.gms.maps.GoogleMap$OnInfoWindowClickListener')
+    onInfoWindowClick = JavaCallback('com.google.android.gms.maps.model.Marker')
+    setOnInfoWindowCloseListener = JavaMethod('com.google.android.gms.maps.GoogleMap$OnInfoWindowCloseListener')
+    onInfoWindowClose = JavaCallback('com.google.android.gms.maps.model.Marker')
+    setOnInfoWindowLongClickListener = JavaMethod('com.google.android.gms.maps.GoogleMap$OnInfoWindowLongClickListener')
+    onInfoWindowLongClick = JavaCallback('com.google.android.gms.maps.model.Marker')
+
 
 
     MAP_TYPE_HYBRID = 4
@@ -151,8 +159,21 @@ class MarkerOptions(JavaBridgeObject):
     zindex = JavaMethod('float')
 
 
-class Marker(MarkerOptions):
-    __nativeclass__ = set_default('com.google.android.gms.maps.model.MarkerOptions')
+class Marker(JavaBridgeObject):
+    __nativeclass__ = set_default('com.google.android.gms.maps.model.Marker')
+    setAlpha = JavaMethod('float')
+    setAnchor = JavaMethod('float', 'float')
+    setDraggable = JavaMethod('boolean')
+    setFlat = JavaMethod('boolean')
+    setIcon = JavaMethod('com.google.android.gms.maps.model.BitMapDescriptor')
+    setPosition = JavaMethod('com.google.android.gms.maps.model.LatLng')
+    setRotation = JavaMethod('float')
+    setSnippet = JavaMethod('java.lang.String')
+    setTitle = JavaMethod('java.lang.String')
+    setVisible = JavaMethod('boolean')
+    setZIndex = JavaMethod('float')
+    showInfoWindow = JavaMethod()
+    hideInfoWindow = JavaMethod()
     setTag = JavaMethod("java.lang.Object")
     remove = JavaMethod()
 
@@ -173,6 +194,9 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
 
     #: Map instance
     map = Typed(GoogleMap)
+
+    #: TODO: Lookup table for markers
+    markers = Dict()
 
     # --------------------------------------------------------------------------
     # Initialization API
@@ -238,8 +262,22 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
         if d.show_buildings:
             self.set_show_buildings(d.show_buildings)
 
+        #: Connect signals
         self.map.onMarkerClick.connect(self.on_marker_clicked)
         self.map.setOnMarkerClickListener(self.map.getId())
+
+        self.map.onMarkerDragStart.connect(self.on_marker_drag_start)
+        self.map.onMarkerDrag.connect(self.on_marker_drag)
+        self.map.onMarkerDragEnd.connect(self.on_marker_drag_end)
+        self.map.setOnMarkerDragListener(self.map.getId())
+
+        #: Info window
+        self.map.onInfoWindowClick.connect(self.on_info_window_clicked)
+        self.map.onInfoWindowLongClick.connect(self.on_info_window_long_clicked)
+        self.map.onInfoWindowClose.connect(self.on_info_window_closed)
+        self.map.setOnInfoWindowClickListener(self.map.getId())
+        self.map.setOnInfoWindowCloseListener(self.map.getId())
+        self.map.setOnInfoWindowLongClickListener(self.map.getId())
 
     # --------------------------------------------------------------------------
     # Google Maps API
@@ -283,34 +321,69 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
         #: Reload markers
         for child in self.children():
             if isinstance(child, AndroidMapMarker):
-                self.map.addMarker(child.marker).then(child.on_marker)
+                self.map.addMarker(child.options).then(child.on_marker)
                                    
     def child_added(self, child):
         if isinstance(child, AndroidMapMarker):
-            self.map.addMarker(child.marker).then(child.on_marker)
+            self.map.addMarker(child.options).then(child.on_marker)
         else:
             super(AndroidMapView, self).child_added(child)
     
     def child_removed(self, child):
         if isinstance(child, AndroidMapMarker):
-            pass
+            pass #: It removes itself
         else:
             super(AndroidMapView, self).child_removed(child)
 
     # --------------------------------------------------------------------------
-    # GoogleMap API
+    # Marker API
     # --------------------------------------------------------------------------
     def on_marker_clicked(self, marker):
         #: TODO: Get marker
         mid, pos = marker
-        widget = bridge.get_object_with_id(mid)
-
-        #: Delegate to the clicked marker
-        for c in self.children():
-            if isinstance(c, AndroidMapMarker) and c.marker == widget:
-                return c.on_click()
-                break
+        m = self.markers.get(mid)
+        if m:
+            return m.on_click()
         return False
+
+    def on_marker_drag(self, marker):
+        mid, pos = marker
+        m = self.markers.get(mid)
+        if m:
+            m.on_drag(pos)
+
+    def on_marker_drag_start(self, marker):
+        mid, pos = marker
+        m = self.markers.get(mid)
+        if m:
+            m.on_drag_start(pos)
+
+    def on_marker_drag_end(self, marker):
+        mid, pos = marker
+        m = self.markers.get(mid)
+        if m:
+            m.on_drag_end(pos)
+
+    # --------------------------------------------------------------------------
+    # Info window API
+    # --------------------------------------------------------------------------
+    def on_info_window_clicked(self, marker):
+        mid, pos = marker
+        m = self.markers.get(mid)
+        if m:
+            m.on_info_window_clicked('short')
+
+    def on_info_window_long_clicked(self, marker):
+        mid, pos = marker
+        m = self.markers.get(mid)
+        if m:
+            m.on_info_window_clicked('long')
+
+    def on_info_window_closed(self, marker):
+        mid, pos = marker
+        m = self.markers.get(mid)
+        if m:
+            m.on_info_window_closed()
 
     # --------------------------------------------------------------------------
     # ProxyMapView API
@@ -424,19 +497,22 @@ class AndroidMapMarker(AndroidToolkitObject, ProxyMapMarker):
     """
 
     #: Holder for the marker
-    marker = Instance(MarkerOptions)
+    options = Typed(MarkerOptions)
+
+    #: Holder for the marker
+    marker = Typed(Marker)
 
     def create_widget(self):
         """ Create the MarkerOptions for this map marker
             this later gets converted into a "Marker" instance when addMarker is called
         """
-        self.marker = MarkerOptions()
+        self.options = MarkerOptions()
 
     def init_widget(self):
         super(AndroidMapMarker, self).init_widget()
         d = self.declaration
         if d.alpha:
-            self.set_alpha(d.alpha)
+            self.options(d.alpha)
         if d.anchor:
             self.set_anchor(d.anchor)
         if d.draggable:
@@ -459,11 +535,11 @@ class AndroidMapMarker(AndroidToolkitObject, ProxyMapMarker):
     def destroy(self):
         """ Remove the marker if it was added to the map when destroying"""
         marker = self.marker
+        parent = self.parent()
         if marker:
-            if hasattr(marker, 'remove'):
-                #: If it was added to the map
-                marker.remove()
-            del self.marker
+            if parent:
+                del parent.markers[marker.__id__]
+            marker.remove()
         super(AndroidMapMarker, self).destroy()
 
     # --------------------------------------------------------------------------
@@ -473,63 +549,118 @@ class AndroidMapMarker(AndroidToolkitObject, ProxyMapMarker):
         """ Convert our options into the actual marker object"""
         mid, pos = marker
         self.marker = Marker(__id__=mid)
+        self.parent().markers[mid] = self
         self.marker.setTag(mid)
+
+        d = self.declaration
+        if d.show_info:
+            self.set_show_info(d.show_info)
+
+        #: Can free the options now
+        del self.options
 
     def on_click(self):
         d = self.declaration
         result = {'handled': False}
         d.clicked(result)
-        return bool(result['handled'])
+        r = bool(result['handled'])
+        if not r and (d.title or d.snippit):
+            #: Info window is shown by default
+            with self.marker.showInfoWindow.suppressed():
+                d.show_info = True
+        return r
 
-    def on_drag_start(self):
+    def on_drag_start(self, pos):
         d = self.declaration
+        with self.marker.setPosition.suppressed():
+            d.position = tuple(pos)
 
     def on_drag(self, pos):
         d = self.declaration
-        with self.marker.position.suppressed():
-            d.position = pos
+        with self.marker.setPosition.suppressed():
+            d.position = tuple(pos)
 
-    def on_drag_end(self):
+    def on_drag_end(self, pos):
         d = self.declaration
+        with self.marker.setPosition.suppressed():
+            d.position = tuple(pos)
+
+    def on_info_window_clicked(self, click):
+        d = self.declaration
+        d.info_clicked({'click': click})
+
+    def on_info_window_closed(self):
+        d = self.declaration
+        with self.marker.hideInfoWindow.suppressed():
+            d.show_info = False
 
     # --------------------------------------------------------------------------
     # ProxyMapMarker API
     # --------------------------------------------------------------------------
 
     def set_alpha(self, alpha):
-        self.marker.alpha(alpha)
+        if self.marker:
+            self.marker.setAlpha(alpha)
+        else:
+            self.options.alpha(alpha)
 
     def set_anchor(self, anchor):
-        self.marker.anchor(*anchor)
+        if self.marker:
+            self.marker.setAnchor(*anchor)
+        else:
+            self.options.anchor(*anchor)
 
     def set_draggable(self, draggable):
-        self.marker.draggable(draggable)
+        if self.marker:
+            self.marker.setDraggable(draggable)
+        else:
+            self.options.draggable(draggable)
 
     def set_flat(self, flat):
-        self.marker.flat(flat)
+        if self.marker:
+            self.marker.setFlat(flat)
+        else:
+            self.options.flat(flat)
 
     def set_position(self, position):
-        self.marker.position(LatLng(*position))
-
-    def set_latitude(self, lat):
-        d = self.declaration
-        self.set_position((lat, d.longitude))
-
-    def set_longitude(self, lng):
-        d = self.declaration
-        self.set_position((d.latitude, lng))
+        if self.marker:
+            self.marker.setPosition(LatLng(*position))
+        else:
+            self.options.position(LatLng(*position))
 
     def set_rotation(self, rotation):
-        self.marker.rotation(rotation)
+        if self.marker:
+            self.marker.setRotation(rotation)
+        else:
+            self.options.rotation(rotation)
 
     def set_title(self, title):
-        self.marker.title(title)
+        if self.marker:
+            self.marker.setTitle(title)
+        else:
+            self.options.title(title)
 
     def set_snippit(self, snippit):
-        self.marker.snippet(snippit)
+        if self.marker:
+            self.marker.setSnippet(snippit)
+        else:
+            self.options.snippet(snippit)
+
+    def set_show_info(self, show):
+        if self.marker:
+            if show:
+                self.marker.showInfoWindow()
+            else:
+                self.marker.hideInfoWindow()
 
     def set_visibile(self, visible):
-        self.marker.visible(visible)
+        if self.marker:
+            self.marker.setVisible(visible)
+        else:
+            self.options.visible(visible)
 
     def set_zindex(self, zindex):
-        self.marker.zindex(zindex)
+        if self.marker:
+            self.marker.setZIndex(zindex)
+        else:
+            self.options.zindex(zindex)
