@@ -11,6 +11,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
@@ -241,6 +244,31 @@ public class Bridge {
             packer.packString(object.toString());
         });
 
+
+        // TODO: These should not be here (some sort of separate project)
+        addPacker(LatLng.class,(packer, id, object)->{
+            LatLng pos = (LatLng) object;
+            packer.packArrayHeader(2);
+            // Pack a tuple of (lat,lng)
+            packer.packDouble(pos.latitude);
+            packer.packDouble(pos.longitude);
+        });
+
+        addPacker(Marker.class,(packer, id, object)->{
+            Marker marker = (Marker) object;
+            packer.packArrayHeader(2);
+            // Pack a tuple of (id, (lat,lng))
+            try {
+                packer.packInt((int) marker.getTag());
+            } catch (Exception e) {
+                packer.packInt(id);
+            }
+            packer.packArrayHeader(2);
+            LatLng pos = marker.getPosition();
+            packer.packDouble(pos.latitude);
+            packer.packDouble(pos.longitude);
+        });
+
         // Add special packer for objects...
         mGenericPackers.add(
             new BridgeGenericPacker((id, object)-> id!=IGNORE_RESULT,
@@ -251,31 +279,6 @@ public class Bridge {
                     }
                     packer.packInt(id);
         }));
-
-
-
-//        addGenericPacker(KeyEvent.class, (packer, id, object)->{
-//            packer.packString(KeyEvent.keyCodeToString((KeyEvent object).getKeyCode()));
-//        });
-        /*
-        } else if (arg instanceof View) {
-            // This only works with ids's created in python
-            packer.packInt(((View) arg).getId());
-        } else if (arg instanceof KeyEvent) {
-            KeyEvent event = (KeyEvent) arg;
-            packer.packString(KeyEvent.keyCodeToString(event.getKeyCode()));
-//                    } else if (arg instanceof MotionEvent) {
-//                        MotionEvent event = (MotionEvent) arg;
-//                        packer.packString(MotionEvent.actionToString(event.getAction()));
-        } else if (pythonObjectId!=IGNORE_RESULT && mObjectCache.get(pythonObjectId)==null) {
-            // The callback is returning a newly created object
-            mObjectCache.put(pythonObjectId, arg);
-            packer.packInt(pythonObjectId);
-        } else if (pythonObjectId!=IGNORE_RESULT && mObjectCache.get(pythonObjectId)!=null) {
-            // TODO: This is such a hack, some sort of callback registry needs implemented...
-            // If it was packable, it should already be packed
-            packer.packInt(pythonObjectId);
-        */
     }
 
     void registerBuiltinUnpackers() {

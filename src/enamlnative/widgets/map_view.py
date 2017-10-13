@@ -27,7 +27,7 @@ class LatLng(Atom):
 class Camera(Atom):
     """ A model for the map camera """
     bearing = Float()
-    target = Typed(LatLng)
+    position = Tuple(float)
     tilt = Float()
     zoom = Float()
 
@@ -66,7 +66,16 @@ class ProxyMapView(ProxyFrameLayout):
     def set_show_indoors(self, show):
         raise NotImplementedError
 
-    def set_camera(self, camera):
+    def set_camera_zoom(self, zoom):
+        raise NotImplementedError
+
+    def set_camera_position(self, position):
+        raise NotImplementedError
+
+    def set_camera_bearing(self, bearing):
+        raise NotImplementedError
+
+    def set_camera_tilt(self, tilt):
         raise NotImplementedError
 
     def set_ambient_mode(self, enabled):
@@ -146,7 +155,16 @@ class MapView(FrameLayout):
     ambient_mode = d_(Bool())
 
     #: Specifies a the initial camera position for the map.
-    camera = d_(Typed(Camera))
+    camera_position = d_(Tuple(float))
+
+    #: Map camera zoom level
+    camera_zoom = d_(Float())
+
+    #: Camera bearing
+    camera_bearing = d_(Float())
+
+    #: Camera tilt
+    camera_tilt = d_(Float())
 
     #: Map display type
     map_type = d_(Enum('normal', 'hybrid', 'satellite', 'terrain', 'none'))
@@ -201,9 +219,10 @@ class MapView(FrameLayout):
     #: A reference to the ProxyMapView object.
     proxy = Typed(ProxyMapView)
 
-    @observe('ambient_mode', 'camera', 'map_type', 'map_bounds',
+    @observe('ambient_mode', 'map_type', 'map_bounds',
              'show_compass', 'show_toolbar', 'show_zoom_controls', 'show_location',
              'show_traffic', 'show_indoors', 'show_buildings',
+             'camera_zoom', 'camera_tilt', 'camera_position', 'camera_bearing',
              'lite_mode',
              'min_zoom', 'max_zoom',
              'rotate_gestures', 'scroll_gestures','tilt_gestures', 'zoom_gestures')
@@ -227,7 +246,7 @@ class MapMarker(ToolkitObject):
     #: Sets the draggability for the marker.
     draggable = d_(Bool())
 
-    #: Sets whether this marker should be flat against the map true or a billboard facing the camera false.
+    #:  Sets whether this marker should be flat against the map true or a billboard facing the camera false.
     flat = d_(Bool(True))
 
     #: Sets the location for the marker.
@@ -263,7 +282,7 @@ class MapMarker(ToolkitObject):
     #: A reference to the ProxyMapMarker object.
     proxy = Typed(ProxyMapMarker)
 
-    @observe('alpha', 'anchor', 'draggable', 'flat', 'position',
+    @observe('alpha', 'anchor', 'draggable', 'flat', 'position', 'rotation',
              'title', 'snippit', 'visible', 'zindex', 'show_info')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

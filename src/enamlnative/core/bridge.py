@@ -84,7 +84,7 @@ def get_app_class():
 def encode(obj):
     """ Encode an object for proper decoding by Java or ObjC
     """
-    if hasattr(obj, '__nativeclass__'):
+    if hasattr(obj, '__id__'):
         return msgpack.ExtType(ExtType.REF, msgpack.packb(obj.__id__))
     return obj
 

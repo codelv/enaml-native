@@ -4,20 +4,24 @@ from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 from enamlnative.android.api import LocationManager
 
-#AndroidApplication.instance().debug = True
+AndroidApplication.instance().debug = True
 
 enamldef ContentView(DrawerLayout): view:
     attr num_markers = 10
     attr markers_draggable = True
     attr marker_rotation = 0
+    attr marker_alpha = 1
     attr markers_flat = True
     attr center = (39.95090, -86.26190)
     MapView: mapview:
         rotate_gestures = False
         show_toolbar = False
+        camera_position << view.center
+        camera_zoom = 10
         Looper:
             iterable << range(view.num_markers)
             MapMarker:
+                attr angle << view.marker_rotation
                 position = (center[0]+random.randint(0,100)/1000.0*loop_index,
                             center[1]+random.randint(0,100)/1000.0*loop_index)
                 position ::
@@ -28,7 +32,7 @@ enamldef ContentView(DrawerLayout): view:
                 draggable << view.markers_draggable
                 rotation << view.marker_rotation
                 flat << view.markers_flat
-
+                alpha << view.marker_alpha
                 clicked ::
                     #: Set the odd markers as "handled"
                     change['value']['handled'] = False
@@ -50,6 +54,15 @@ enamldef ContentView(DrawerLayout): view:
             padding = (10,10,10,10)
             flex_direction = "column"
             TextView:
+                text = "Camera"
+                text_size = 18
+            TextView:
+                text << "Zoom {}".format(mapview.camera_zoom)
+            SeekBar:
+                max = 20
+                progress << int(mapview.camera_zoom)
+                progress :: mapview.camera_zoom = float(change['value'])
+            TextView:
                 text = "Markers"
                 text_size = 18
             Switch:
@@ -58,9 +71,17 @@ enamldef ContentView(DrawerLayout): view:
             Switch:
                 text = "Flat"
                 checked := view.markers_flat
+            TextView:
+                text << "Rotation ({})".format(view.marker_rotation)
             SeekBar:
                 max = 360
                 progress := view.marker_rotation
+            TextView:
+                text << "Alpha ({})".format(view.marker_alpha)
+            SeekBar:
+                max = 100
+                progress << int(view.marker_alpha*100)
+                progress :: view.marker_alpha = change['value']/100.0
             Button:
                 text = "Add marker"
                 style = "borderless"

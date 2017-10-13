@@ -53,6 +53,8 @@ class GoogleMap(JavaBridgeObject):
                            returns='com.google.android.gms.maps.model.Marker')
     onMapReady = JavaCallback('com.google.android.gms.maps.GoogleMap')
 
+    animateCamera = JavaMethod('com.google.android.gms.maps.CameraUpdate')
+
     setLatLngBoundsForCameraTarget = JavaMethod('com.google.android.gms.maps.model.LatLngBounds')
     setMapType = JavaMethod('int')
     setMaxZoomPreference = JavaMethod('float')
@@ -92,6 +94,7 @@ class GoogleMap(JavaBridgeObject):
         'terrain': MAP_TYPE_TERRAIN,
         'hybrid': MAP_TYPE_HYBRID,
     }
+
 
 
 class MapsInitializer(JavaBridgeObject):
@@ -138,6 +141,13 @@ class CameraPosition(JavaBridgeObject):
     __signature__ = set_default(('com.google.android.gms.maps.model.LatLng',
                                  'float', 'float', 'float'))
 
+class CameraUpdate(JavaBridgeObject):
+    __nativeclass__ = set_default('com.google.android.gms.maps.CameraUpdate')
+
+class CameraUpdateFactory(JavaBridgeObject):
+    __nativeclass__ = set_default('com.google.android.gms.maps.CameraUpdateFactory')
+    newCameraPosition = JavaStaticMethod('com.google.android.gms.maps.model.CameraPosition',
+                 returns='com.google.android.gms.maps.CameraUpdate')
 
 class LatLng(JavaBridgeObject):
     __nativeclass__ = set_default('com.google.android.gms.maps.model.LatLng')
@@ -225,8 +235,8 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
         self.set_map_type(d.map_type)
         if d.ambient_mode:
             self.set_ambient_mode(d.ambient_mode)
-        if d.camera:
-            self.set_camera(d.camera)
+        if d.camera_position or d.camera_zoom or d.camera_tilt or d.camera_bearing:
+            self.update_camera()
         if d.map_bounds:
             self.set_map_bounds(d.map_bounds)
         if not d.show_compass:
@@ -440,8 +450,36 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
         if self.map:
             self.map.setBuildingsEnabled(show)
 
-    def set_camera(self, camera):
-        raise NotImplementedError
+    def update_camera(self):
+        d = self.declaration
+        if self.map:
+            #: Bit of a hack but it "should" work hahah
+            self.map.animateCamera(CameraUpdateFactory.newCameraPosition(
+                    CameraPosition(
+                        LatLng(*d.camera_position),
+                        d.camera_zoom,
+                        d.camera_tilt,
+                        d.camera_bearing
+            )))
+        else:
+            self.options.camera(CameraPosition(
+                LatLng(*d.camera_position),
+                d.camera_zoom,
+                d.camera_tilt,
+                d.camera_bearing
+            ))
+
+    def set_camera_zoom(self, zoom):
+        self.update_camera()
+
+    def set_camera_position(self, position):
+        self.update_camera()
+
+    def set_camera_bearing(self, bearing):
+        self.update_camera()
+
+    def set_camera_tilt(self, tilt):
+        self.update_camera()
 
     def set_ambient_mode(self, enabled):
         if self.map:
@@ -513,7 +551,7 @@ class AndroidMapMarker(AndroidToolkitObject, ProxyMapMarker):
         super(AndroidMapMarker, self).init_widget()
         d = self.declaration
         if d.alpha:
-            self.options(d.alpha)
+            self.set_alpha(d.alpha)
         if d.anchor:
             self.set_anchor(d.anchor)
         if d.draggable:
