@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
@@ -245,6 +246,8 @@ public class Bridge {
         });
 
 
+        // ============================ Start map specific components ============================
+
         // TODO: These should not be here (some sort of separate project)
         addPacker(LatLng.class,(packer, id, object)->{
             LatLng pos = (LatLng) object;
@@ -268,6 +271,22 @@ public class Bridge {
             packer.packDouble(pos.latitude);
             packer.packDouble(pos.longitude);
         });
+
+        addPacker(CameraPosition.class,(packer, id, object)->{
+            CameraPosition cameraPosition = (CameraPosition) object;
+            packer.packArrayHeader(4);
+            // Pack a tuple of ((lat,lng), zoom, tilt, bearing)
+            packer.packArrayHeader(2);
+            LatLng pos = cameraPosition.target;
+            packer.packDouble(pos.latitude);
+            packer.packDouble(pos.longitude);
+            packer.packFloat(cameraPosition.zoom);
+            packer.packFloat(cameraPosition.tilt);
+            packer.packFloat(cameraPosition.bearing);
+        });
+
+
+        // ============================ End map specific components ============================
 
         // Add special packer for objects...
         mGenericPackers.add(

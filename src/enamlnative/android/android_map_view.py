@@ -9,7 +9,7 @@ Created on Oct 10, 2017
 
 @author: jrm
 '''
-from atom.api import Typed, Dict, set_default
+from atom.api import Typed, Dict, Bool, set_default
 
 from enamlnative.widgets.map_view import ProxyMapView, ProxyMapMarker
 from enamlnative.core import bridge
@@ -64,6 +64,9 @@ class GoogleMap(JavaBridgeObject):
     setIndoorEnabled = JavaMethod('boolean')
     setTrafficEnabled = JavaMethod('boolean')
 
+    setOnCameraChangeListener = JavaMethod('com.google.android.gms.maps.GoogleMap$OnCameraChangeListener')
+    onCameraChange = JavaCallback('com.google.android.gms.maps.model.CameraPosition')
+
     setOnMarkerClickListener = JavaMethod('com.google.android.gms.maps.GoogleMap$OnMarkerClickListener')
     onMarkerClick = JavaCallback('com.google.android.gms.maps.model.Marker', returns='boolean')
 
@@ -79,8 +82,6 @@ class GoogleMap(JavaBridgeObject):
     setOnInfoWindowLongClickListener = JavaMethod('com.google.android.gms.maps.GoogleMap$OnInfoWindowLongClickListener')
     onInfoWindowLongClick = JavaCallback('com.google.android.gms.maps.model.Marker')
 
-
-
     MAP_TYPE_HYBRID = 4
     MAP_TYPE_NONE = 0
     MAP_TYPE_NORMAL = 1
@@ -94,7 +95,6 @@ class GoogleMap(JavaBridgeObject):
         'terrain': MAP_TYPE_TERRAIN,
         'hybrid': MAP_TYPE_HYBRID,
     }
-
 
 
 class MapsInitializer(JavaBridgeObject):
@@ -144,10 +144,12 @@ class CameraPosition(JavaBridgeObject):
 class CameraUpdate(JavaBridgeObject):
     __nativeclass__ = set_default('com.google.android.gms.maps.CameraUpdate')
 
+
 class CameraUpdateFactory(JavaBridgeObject):
     __nativeclass__ = set_default('com.google.android.gms.maps.CameraUpdateFactory')
     newCameraPosition = JavaStaticMethod('com.google.android.gms.maps.model.CameraPosition',
                  returns='com.google.android.gms.maps.CameraUpdate')
+
 
 class LatLng(JavaBridgeObject):
     __nativeclass__ = set_default('com.google.android.gms.maps.model.LatLng')
@@ -207,6 +209,9 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
 
     #: TODO: Lookup table for markers
     markers = Dict()
+
+    #: Camera updating
+    _update_blocked = Bool()
 
     # --------------------------------------------------------------------------
     # Initialization API
@@ -273,9 +278,13 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
             self.set_show_buildings(d.show_buildings)
 
         #: Connect signals
+        #: Camera
+        self.map.onCameraChange.connect(self.on_camera_changed)
+        self.map.setOnCameraChangeListener(self.map.getId())
+
+        #: Markers
         self.map.onMarkerClick.connect(self.on_marker_clicked)
         self.map.setOnMarkerClickListener(self.map.getId())
-
         self.map.onMarkerDragStart.connect(self.on_marker_drag_start)
         self.map.onMarkerDrag.connect(self.on_marker_drag)
         self.map.onMarkerDragEnd.connect(self.on_marker_drag_end)
@@ -346,10 +355,25 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
             super(AndroidMapView, self).child_removed(child)
 
     # --------------------------------------------------------------------------
+    # Camera API
+    # --------------------------------------------------------------------------
+    def on_camera_changed(self, camera):
+        pos, zoom, tilt, bearing = camera
+        d = self.declaration
+        #: Don't update
+        self._update_blocked = True
+        try:
+            d.camera_position = tuple(pos)
+            d.camera_zoom = zoom
+            d.camera_tilt = tilt
+            d.camera_bearing = bearing
+        finally:
+            self._update_blocked = False
+
+    # --------------------------------------------------------------------------
     # Marker API
     # --------------------------------------------------------------------------
     def on_marker_clicked(self, marker):
-        #: TODO: Get marker
         mid, pos = marker
         m = self.markers.get(mid)
         if m:
@@ -451,6 +475,8 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
             self.map.setBuildingsEnabled(show)
 
     def update_camera(self):
+        if self._update_blocked:
+            return
         d = self.declaration
         if self.map:
             #: Bit of a hack but it "should" work hahah

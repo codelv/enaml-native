@@ -63,6 +63,11 @@ enamldef ContentView(DrawerLayout): view:
                 progress << int(mapview.camera_zoom)
                 progress :: mapview.camera_zoom = float(change['value'])
             TextView:
+                text << "Position {}".format(mapview.camera_position)
+            Button:
+                text = "Recenter"
+                clicked :: mapview.camera_position = view.center
+            TextView:
                 text = "Markers"
                 text_size = 18
             Switch:
