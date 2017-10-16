@@ -73,13 +73,13 @@ public class PythonPackage implements EnamlPackage {
             try {
                 installTime = mActivity.getPackageManager().getPackageInfo(
                             mActivity.getPackageName(),0
-                ).firstInstallTime;
+                ).lastUpdateTime;
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
             }
 
             // If assets version changed, remove the old, and copy the new ones
-            if (true || assetExtractor.getAssetsVersion() != installTime) {
+            if (assetExtractor.getAssetsVersion() != installTime) {
                 publishProgress("Updating... Please wait.");
                 assetExtractor.removeAssets(path);
                 assetExtractor.copyAssets(path);
