@@ -44,9 +44,9 @@ class BridgedListAdapter(JavaBridgeObject):
     """ An adapter that implements a recycleview pattern.
 
     """
-    __nativeclass__ = set_default('com.enaml.adapters.BridgedListAdapter')
+    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedListAdapter')
     setListView = JavaMethod('android.widget.ListView',
-                             'com.enaml.adapters.BridgedListAdapter$BridgedListAdapterListener')
+                             'com.codelv.enamlnative.adapters.BridgedListAdapter$BridgedListAdapterListener')
     setCount = JavaMethod('int')
     setRecycleViews = JavaMethod('[Landroid.view.View;')
     clearRecycleViews = JavaMethod()

@@ -29,9 +29,9 @@ class WebView(ViewGroup):
 
 
 class BridgedWebViewClient(JavaBridgeObject):
-    __nativeclass__ = set_default('com.enaml.adapters.BridgedWebViewClient')
+    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedWebViewClient')
     setWebView = JavaMethod('android.webkit.WebView',
-                            'com.enaml.adapters.BridgedWebViewClient$WebViewListener')
+                            'com.codelv.enamlnative.adapters.BridgedWebViewClient$WebViewListener')
     setJavaScriptEnabled = JavaMethod('boolean')
     onLoadResource = JavaCallback('android.webkit.WebView', 'java.lang.String')
     onPageStarted = JavaCallback('android.webkit.WebView', 'java.lang.String',

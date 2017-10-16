@@ -1,8 +1,7 @@
-package com.enaml.adapters;
+package com.codelv.enamlnative.adapters;
 
 import android.content.Context;
 import android.os.Handler;
-import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.support.v4.view.ViewPager;
 

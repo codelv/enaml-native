@@ -1,5 +1,5 @@
 /**
-    This file defines the JNI implementation of the PyBridge class.
+    This file defines the JNI implementation of the Bridge class.
 
     It implements the native methods of the class and makes sure that
     all the prints and errors from the Python interpreter is redirected
@@ -18,92 +18,81 @@
 /* --------------- */
 /*   Android log   */
 /* --------------- */
+static JNIEnv* jenv;
+static jclass mPythonInterpreter;
+static jmethodID mPublishEvents;
 
-static PyObject *AndroidLog(PyObject *self, PyObject *args) {
-    char *str;
-    if (!PyArg_ParseTuple(args, "s", &str))
+/**
+ * Call our hook into java. From python use it via
+ *  import nativehooks
+ *  nativehooks.publish(data)
+ *
+ * This sends data to the java's PythonInterpreter.publishEvents for handling.
+ */
+static PyObject *NativeHooks_publish(PyObject *self, PyObject *args) {
+    Py_ssize_t count;
+    const char* data;
+    if (!PyArg_ParseTuple(args, "s#", &data, &count)) {
         return NULL;
+    }
+    jbyteArray buf = (*jenv)->NewByteArray(jenv, count);
+    (*jenv)->SetByteArrayRegion(jenv,buf, 0, count, data);
+    (*jenv)->CallStaticVoidMethod(jenv, mPythonInterpreter, mPublishEvents, buf);
 
+    // Cleanup
+    //(*jenv)->ReleaseByteArrayElements(jenv, buf, items, 0);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *NativeHooks_write(PyObject *self, PyObject *args) {
+    char *str;
+    if (!PyArg_ParseTuple(args, "s", &str)) {
+        return NULL;
+    }
     LOG(str);
     Py_RETURN_NONE;
 }
 
+static PyObject *NativeHooks_flush(PyObject *self, PyObject *args) {
+    Py_RETURN_NONE;
+}
 
-static PyMethodDef AndroidLogMethods[] = {
-    {"log", AndroidLog, METH_VARARGS, "Logs to Android stdout"},
+static PyMethodDef NativeHooksMethods[] = {
+    {"write", NativeHooks_write, METH_VARARGS, "Write to android log"},
+    {"flush", NativeHooks_flush, METH_VARARGS, "Required for logging"},
+    {"publish", NativeHooks_publish, METH_VARARGS, "Send events to the Java implementation"},
     {NULL, NULL, 0, NULL}
 };
 
 #if PY_MAJOR_VERSION >= 3
 
-static struct PyModuleDef AndroidLogModule = {
+static struct PyModuleDef NativeHooksModule = {
     PyModuleDef_HEAD_INIT,
-    "androidlog",        /* m_name */
-    "Log for Android",   /* m_doc */
+    "nativehooks",        /* m_name */
+    "Android native hooks",   /* m_doc */
     -1,                  /* m_size */
-    AndroidLogMethods    /* m_methods */
+    NativeHooksMethods    /* m_methods */
 };
 
-
-PyMODINIT_FUNC PyInit_AndroidLog(void) {
-    return PyModule_Create(&AndroidLogModule);
-}
-#else
-PyMODINIT_FUNC PyInit_AndroidLog(void) {
-    (void)Py_InitModule("androidlog", AndroidLogMethods);
-}
 #endif
 
-
-/* --------------------- */
-/*   Extension importer  */
-/* --------------------- */
-/*
-static PyObject *AndroidImporter_load_module(PyObject *self, PyObject *args) {
-    char *str;
-    if (!PyArg_ParseTuple(args, "s", &str))
-        return NULL;
-
-    LOG(str);
-    Py_RETURN_NONE;
-}
-
-static PyObject *AndroidImporter_find_module(PyObject *self, PyObject *args) {
-    char *str;
-    if (!PyArg_ParseTuple(args, "s", &str))
-        return NULL;
-
-    LOG(str);
-    Py_RETURN_NONE;
-}
-
-static PyMethodDef AndroidImporterMethods[] = {
-    {"load_module", AndroidImporter_load_module, METH_VARARGS, "Load an extension"},
-    {"find_module", AndroidImporter_find_module, METH_VARARGS, "Find a python extension"},
-    {NULL, NULL, 0, NULL}
-};
-
+PyMODINIT_FUNC PyInit_NativeHooks(JNIEnv *env) {
+    // Get and cache the method pointer
+    jenv = env;
+    mPythonInterpreter = (*env)->FindClass(env, "com/codelv/enamlnative/python/PythonInterpreter");
+    mPublishEvents = (*env)->GetStaticMethodID(env, mPythonInterpreter, "publishEvents", "([B)V");
 #if PY_MAJOR_VERSION >= 3
-
-static struct PyModuleDef AndroidImporterModule = {
-    PyModuleDef_HEAD_INIT,
-    "androidimporter",        // m_name
-    "Python extension loader for android",   // m_doc
-    -1,                  // m_size
-    AndroidImporterMethods    // m_methods
-};
-
-
-PyMODINIT_FUNC PyInit_AndroidImporter(void) {
-    return PyModule_Create(&AndroidImporterModule);
-}
+    PyObject* module= PyModule_Create(&NativeHooksModule);
 #else
-PyMODINIT_FUNC PyInit_AndroidImporter(void) {
-    (void)Py_InitModule("androidimporter", AndroidImporterMethods);
-}
+    PyObject* module = Py_InitModule("nativehooks", NativeHooksMethods);
 #endif
 
-*/
+    // Redirect stdout and stderr to this module
+    PySys_SetObject("stdout", module);
+    PySys_SetObject("stderr", module);
+    return module;
+}
 
 /* ------------------ */
 /*   Native methods   */
@@ -119,9 +108,8 @@ PyMODINIT_FUNC PyInit_AndroidImporter(void) {
     python files extracted from the assets folder.
 
 */
-JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
-        (JNIEnv *env, jclass jc, jstring path, jstring jni_path)
-{
+JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_start
+        (JNIEnv *env, jclass jc, jstring path, jstring jni_path){
     LOG("Initializing the Python interpreter");
 
     // Get the location of the python files
@@ -147,7 +135,7 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
 
 #if PY_MAJOR_VERSION >= 3
     // Initialize Python interpreter and logging
-    PyImport_AppendInittab("androidlog", PyInit_androidlog);
+    PyImport_AppendInittab("nativehooks", PyInit_NativeHooks);
 #endif
     Py_OptimizeFlag = 1;
     Py_Initialize();
@@ -155,28 +143,15 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
         PyEval_InitThreads();
     }
 
-    PyInit_AndroidLog();
+    PyInit_NativeHooks(env);
 
     // Inject  bootstrap code to redirect python stdin/stdout
     // to the androidlog module
     // then add the custom import hook loader
     // and run main() from bootstrap.py
-    PyRun_SimpleString(
-      "import sys\n" \
-      "import androidlog\n" \
-      "class _AndroidLogFile(object):\n" \
-      "    def __init__(self):\n" \
-      "        self.buffer = ''\n" \
-      "    def write(self, s):\n" \
-      "        s = self.buffer + s\n" \
-      "        lines = s.split(\"\\n\")\n" \
-      "        for l in lines[:-1]:\n" \
-      "            androidlog.log(l)\n" \
-      "        self.buffer = lines[-1]\n" \
-      "    def flush(self):\n" \
-      "        return\n" \
-      "sys.stdout = sys.stderr = _AndroidLogFile()\n" \
+    int result = PyRun_SimpleString(
       "import os\n" \
+      "import sys\n" \
       "import imp\n" \
       "class _AndroidExtensionImporter(object):\n" \
       "    extension_modules = {}\n" \
@@ -204,23 +179,32 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
       "            return self\n" \
       "        return None\n" \
       "sys.meta_path.append(_AndroidExtensionImporter()) \n" \
-      "from main import main\n" \
-      "main()\n" \
+      "try:\n"\
+      "    from main import main\n" \
+      "    main()\n" \
+      "except:\n"\
+      "    import traceback\n" \
+      "    traceback.print_exc()\n" \
     );
+    /*
 
+
+
+
+
+          */
     // Cleanup
     (*env)->ReleaseStringUTFChars(env, path, pypath);
     (*env)->ReleaseStringUTFChars(env, jni_path, jnipath);
 #if PY_MAJOR_VERSION >= 3
     PyMem_RawFree(wchar_paths);
 #endif
-    return 0;
+    return result;
 }
 
 
-JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_stop
-        (JNIEnv *env, jclass jc)
-{
+JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_stop
+  (JNIEnv *env, jclass jc) {
     LOG("Finalizing the Python interpreter");
     Py_Finalize();
     return 0;
@@ -228,51 +212,41 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_stop
 
 
 /**
-    This function is responsible for receiving a payload string
-    and sending it to the router function defined in the bootstrap.py
-    file.
-
-
-JNIEXPORT jstring JNICALL Java_com_jventura_pybridge_PyBridge_invoke
-        (JNIEnv *env, jclass jc, jbyteArray payload)
-{
-    LOG("Call into Python interpreter");
-
-    // Get the payload string
-    jboolean iscopy;
-    const char *payload_utf = (*env)->GetStringUTFChars(env, payload, &iscopy);
-
-    //PyGILState_STATE gstate;
-    //gstate = PyGILState_Ensure();
-
+ *  Sends a bridge encoded buffer to the android application's on_events method.
+ */
+JNIEXPORT int JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_sendEvents
+        (JNIEnv *env, jclass jc, jbyteArray payload) {
+    PyGILState_STATE state = PyGILState_Ensure();
     // Import module
-    PyObject* bootstrapModule = PyUnicode_FromString((char*)"bootstrap");
-    PyObject* bootstrap = PyImport_Import(bootstrapModule);
+    PyObject* module = PyImport_ImportModule("enamlnative.android.app");
 
-    // Get reference to the router function
-    PyObject* router = PyObject_GetAttrString(bootstrap, (char*)"router");
-    PyObject* args = PyTuple_Pack(1, payload);//PyUnicode_FromString(payload_utf));
+    // Get android app
+    PyObject* AndroidApplication = PyObject_GetAttrString(module, "AndroidApplication");
 
-    // Call function and get the resulting string
-    PyObject* response = PyObject_CallObject(router, args);
+    // Get a reference to the app instance
+    PyObject* app = PyObject_CallMethod(AndroidApplication, "instance", "");
 
-    // Store the result on a java.lang.String object
-#if PY_MAJOR_VERSION >= 3
-    jstring result = (*env)->NewStringUTF(env, PyUnicode_AsUTF8(response));
-#else
-    jstring result = (*env)->NewStringUTF(env, PyString_AsString(response));
-#endif
+    // Read array
+    jsize size = (*env)->GetArrayLength(env, payload);
+    jbyte* buf = (*env)->GetByteArrayElements(env, payload, NULL);
+
+    if (buf==NULL) {
+      PyErr_NoMemory();
+      PyGILState_Release(state);
+      return -1;
+    }
+
+    // Send the events
+    PyObject_CallMethod(app, "on_events", "s#", buf, size);
 
     // Cleanup
-    (*env)->ReleaseStringUTFChars(env, payload, payload_utf);
-    Py_DECREF(router);
-    Py_DECREF(args);
-    Py_DECREF(response);
-    Py_DECREF(bootstrapModule);
-    Py_DECREF(bootstrap);
-    // Release the thread. No Python API allowed beyond this point.
-    //PyGILState_Release(gstate);
-    LOG("DONE");
-    return result;
+    (*env)->ReleaseByteArrayElements(env, payload, buf, JNI_ABORT);
+    Py_DECREF(app);
+    Py_DECREF(AndroidApplication);
+    Py_DECREF(module);
+
+    // Release the thread. No Python API allowed beyond this point (in native code!).
+    PyGILState_Release(state);
+
+    return 0;
 }
-*/

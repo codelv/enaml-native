@@ -53,8 +53,8 @@ class Snackbar(JavaBridgeObject):
 
 
 class BridgedSnackbarCallback(JavaBridgeObject):
-    __nativeclass__ = set_default('com.enaml.adapters.BridgedSnackbarCallback')
-    setListener = JavaMethod('com.enaml.adapters.BridgedSnackbarCallback$SnackbarListener')
+    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedSnackbarCallback')
+    setListener = JavaMethod('com.codelv.enamlnative.adapters.BridgedSnackbarCallback$SnackbarListener')
 
 
 class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):

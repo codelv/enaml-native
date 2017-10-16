@@ -13,12 +13,12 @@ include $(BUILD_SHARED_LIBRARY)
 
 
 # Build libpyjnius.so
-include $(CLEAR_VARS)
-LOCAL_MODULE    := jnius
-LOCAL_SRC_FILES := pyjnius.c
-LOCAL_LDLIBS := -llog
-LOCAL_SHARED_LIBRARIES := python2.7
-include $(BUILD_SHARED_LIBRARY)
+#include $(CLEAR_VARS)
+#LOCAL_MODULE    := jnius
+#LOCAL_SRC_FILES := pyjnius.c
+#LOCAL_LDLIBS := -llog
+#LOCAL_SHARED_LIBRARIES := python2.7
+#include $(BUILD_SHARED_LIBRARY)
 
 
 # Include libpython2.7.so

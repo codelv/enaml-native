@@ -16,7 +16,7 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 class Activity(JavaBridgeObject):
     """ Access to the activity over the bridge """
-    __nativeclass__ = set_default('com.enaml.MainActivity')
+    __nativeclass__ = set_default('com.codelv.enamlnative.EnamlActivity')
     __id__ = Int(-1) #: ID of -1 is a special reference on the bridge to the activity.
 
     setView = JavaMethod('android.view.View')
@@ -27,6 +27,7 @@ class Activity(JavaBridgeObject):
     getWindow = JavaMethod(returns='android.view.Window')
 
     getSupportFragmentManager = JavaMethod(returns='android.support.v4.app.FragmentManager')
+    getBuildInfo = JavaMethod(returns='java.lang.HashMap')
 
     #: Permissions
     checkSelfPermission = JavaMethod('java.lang.String', returns='int')

@@ -30,7 +30,7 @@ def main():
 
     import enamlnative
     from enamlnative.android.app import AndroidApplication
-    app = AndroidApplication('com.enaml.MainActivity')
+    app = AndroidApplication()
     #app.debug = True #: Makes a lot of lag!
     app.dev = 'server' # "10.0.2.2" # or 'server'
     app.reload_view = reload_view

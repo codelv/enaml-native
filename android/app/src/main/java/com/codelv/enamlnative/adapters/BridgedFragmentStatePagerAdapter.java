@@ -1,4 +1,4 @@
-package com.enaml.adapters;
+package com.codelv.enamlnative.adapters;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,11 +8,9 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.enaml.MainActivity;
+import com.codelv.enamlnative.EnamlActivity;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 
 /**
  * A fragment state adapter that takes a list of fragments with unpopulated views and
@@ -27,7 +25,7 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
     protected final Handler mHandler = new Handler();
 
     public BridgedFragmentStatePagerAdapter() {
-        this(MainActivity.mActivity.getSupportFragmentManager());
+        this(EnamlActivity.mActivity.getSupportFragmentManager());
     }
 
     public BridgedFragmentStatePagerAdapter(FragmentManager fm) {

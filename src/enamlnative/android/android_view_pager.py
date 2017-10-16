@@ -22,7 +22,7 @@ from .app import AndroidApplication
 
 
 class ViewPager(ViewGroup):
-    __nativeclass__ = set_default('com.enaml.adapters.BridgedViewPager')
+    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedViewPager')
     addOnPageChangeListener = JavaMethod('android.support.v4.view.ViewPager$OnPageChangeListener')
     setCurrentItem = JavaMethod('int')
     setOffscreenPageLimit = JavaMethod('int')
@@ -58,14 +58,14 @@ class PagerTabStrip(PagerTitleStrip):
 
 
 class BridgedFragmentStatePagerAdapter(JavaBridgeObject):
-    __nativeclass__ = set_default('com.enaml.adapters.BridgedFragmentStatePagerAdapter')
+    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter')
     addFragment = JavaMethod('android.support.v4.app.Fragment')
     removeFragment = JavaMethod('android.support.v4.app.Fragment')
     setTitles = JavaMethod('[Ljava.lang.String;')
     clearTitles = JavaMethod()
     notifyDataSetChanged = JavaMethod()
     # setOnItemRequestedListener = JavaMethod(
-    #     'com.enaml.adapters.BridgedFragmentStatePagerAdapter$OnItemRequestedListener')
+    #     'com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter$OnItemRequestedListener')
     # onItemRequested = JavaCallback('int', returns='int')
 
 

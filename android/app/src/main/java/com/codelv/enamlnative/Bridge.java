@@ -1,4 +1,4 @@
-package com.enaml;
+package com.codelv.enamlnative;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -11,9 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.util.Log;
 
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
+import com.codelv.enamlnative.python.PythonInterpreter;
 
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
@@ -35,8 +33,11 @@ import java.lang.reflect.Method;
 
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -48,7 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.msgpack.core.MessagePack.newDefaultUnpacker;
 
-public class Bridge {
+public class Bridge implements PythonInterpreter.EventListener {
 
     public static final String TAG = "Bridge";
 
@@ -66,7 +67,7 @@ public class Bridge {
     public static final String RESULT = "r";
     public static final String ERROR = "e";
 
-    final MainActivity mActivity;
+    final EnamlActivity mActivity;
 
     final Bridge mBridge;
 
@@ -95,7 +96,7 @@ public class Bridge {
     // Cache for results
     final ConcurrentHashMap<Integer,BridgeFuture<Object>> mResultCache = new ConcurrentHashMap<Integer, BridgeFuture<Object>>();
 
-    final HashMap<Class, BridgePacker> mTypePackers = new HashMap<Class, BridgePacker>();
+    final HashMap<Class, Packer> mTypePackers = new HashMap<Class, Packer>();
     final ArrayList<BridgeGenericPacker> mGenericPackers = new ArrayList<BridgeGenericPacker>();
 
     // For generating IDs
@@ -109,13 +110,16 @@ public class Bridge {
     final AtomicInteger mEventCount = new AtomicInteger();
     final int mEventDelay = 1;
 
-    public Bridge(Context context) {
+    public Bridge(EnamlActivity activity) {
         mBridge = this;
-        mContext = context;
-        mActivity = MainActivity.mActivity;
+        mContext = activity;
+        mActivity = activity;
         mObjectCache.put(-1, mContext);
         mBridgeHandlerThread.start();
         mBridgeHandler = new Handler(mBridgeHandlerThread.getLooper());
+
+        // Add ourself as a listener
+        PythonInterpreter.addEventListener(this);
 
         // Register default encoders
         registerBuiltinPackers();
@@ -226,6 +230,38 @@ public class Bridge {
             packer.packString(MotionEvent.actionToString(event.getAction()));
         });
 
+        addGenericPacker(HashMap.class, (packer, id, object)->{
+            HashMap map = (HashMap) object;
+            packer.packMapHeader(map.keySet().size());
+            for (Object key: map.keySet()) {
+                Object value = map.get(key);
+                // Otherwise pack the type name and packed value
+                for (Object obj: Arrays.asList(key,value)) {
+                    Class argClass = obj.getClass();
+                    // Check based on type
+                    Packer typePacker = mTypePackers.get(argClass);
+                    if (typePacker != null) {
+                        typePacker.pack(packer, id, obj);
+                        continue;
+                    }
+
+                    // Check generics
+                    boolean packed = false;
+                    for (BridgeGenericPacker genericPacker : mGenericPackers) {
+                        if (genericPacker.canPack(id, obj)) {
+                            genericPacker.pack(packer, id, obj);
+                            packed = true;
+                            break;
+                        }
+                    }
+                    // Fallback
+                    if (!packed) {
+                        packer.packString(obj.toString());
+                    }
+                }
+            }
+        });
+
         // Any View
         addGenericPacker(View.class, (packer, id, object)-> {
             packer.packInt(((View) object).getId());
@@ -245,48 +281,6 @@ public class Bridge {
             packer.packString(object.toString());
         });
 
-
-        // ============================ Start map specific components ============================
-
-        // TODO: These should not be here (some sort of separate project)
-        addPacker(LatLng.class,(packer, id, object)->{
-            LatLng pos = (LatLng) object;
-            packer.packArrayHeader(2);
-            // Pack a tuple of (lat,lng)
-            packer.packDouble(pos.latitude);
-            packer.packDouble(pos.longitude);
-        });
-
-        addPacker(Marker.class,(packer, id, object)->{
-            Marker marker = (Marker) object;
-            packer.packArrayHeader(2);
-            // Pack a tuple of (id, (lat,lng))
-            try {
-                packer.packInt((int) marker.getTag());
-            } catch (Exception e) {
-                packer.packInt(id);
-            }
-            packer.packArrayHeader(2);
-            LatLng pos = marker.getPosition();
-            packer.packDouble(pos.latitude);
-            packer.packDouble(pos.longitude);
-        });
-
-        addPacker(CameraPosition.class,(packer, id, object)->{
-            CameraPosition cameraPosition = (CameraPosition) object;
-            packer.packArrayHeader(4);
-            // Pack a tuple of ((lat,lng), zoom, tilt, bearing)
-            packer.packArrayHeader(2);
-            LatLng pos = cameraPosition.target;
-            packer.packDouble(pos.latitude);
-            packer.packDouble(pos.longitude);
-            packer.packFloat(cameraPosition.zoom);
-            packer.packFloat(cameraPosition.tilt);
-            packer.packFloat(cameraPosition.bearing);
-        });
-
-
-        // ============================ End map specific components ============================
 
         // Add special packer for objects...
         mGenericPackers.add(
@@ -333,6 +327,7 @@ public class Bridge {
         }
         return cls;
     }
+
 
     /**
      * Unpacks encoded bridge values. Each value is a tuple of type:
@@ -984,10 +979,11 @@ public class Bridge {
                     
                     // Otherwise pack the type name and packed value
                     Class argClass = arg.getClass();
-                    packer.packString(argClass.getCanonicalName());
+                    String argName = argClass.getCanonicalName(); // How is this null
+                    packer.packString((argName==null)?"unkown":argName);
 
                     // Check based on type
-                    BridgePacker typePacker = mTypePackers.get(argClass);
+                    Packer typePacker = mTypePackers.get(argClass);
                     if (typePacker != null) {
                         typePacker.pack(packer, pythonObjectId, arg);
                         continue;
@@ -1076,6 +1072,16 @@ public class Bridge {
         if (i>0) {
             Log.i(TAG, "runUntilCurrent took (" + (System.currentTimeMillis() - start) + " ms) to run ("+ i + ") tasks");
         }
+    }
+
+
+    /**
+     * Process events from the Python interpreter
+     * @param data
+     */
+    @Override
+    public void onEvents(byte[] data) {
+        processEvents(data);
     }
 
 
@@ -1226,10 +1232,9 @@ public class Bridge {
         // Send to bridge thread for processing
         mBridgeHandler.postDelayed(() -> {
             int delays = mEventCount.decrementAndGet();
-            MainActivity.AppEventListener listener = mActivity.getAppEventListener();
 
             // If events stopped updating temporarily
-            if (listener != null && delays == 0) {
+            if (delays == 0) {
                 MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
                 try {
                     // Events can be added during packing this so pull only what's here now.
@@ -1242,67 +1247,9 @@ public class Bridge {
                 } catch (IOException e) {
                     mActivity.showErrorMessage(e);
                 }
-                listener.onEvents(packer.toByteArray());
+                PythonInterpreter.sendEvents(packer.toByteArray());
             }
         }, mEventDelay);
-    }
-
-    /**
-     * Return build info
-     * @return
-     */
-    public byte[] getBuildInfo() {
-        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
-        try {
-            packer.packMapHeader(20);
-            
-            packer.packString("BOARD");
-            packer.packString(Build.BOARD);
-            packer.packString("BOOTLOADER");
-            packer.packString(Build.BOOTLOADER);
-            packer.packString("BOARD");
-            packer.packString(Build.BOARD);
-            packer.packString("BOOTLOADER");
-            packer.packString(Build.BOOTLOADER);
-            packer.packString("BRAND");
-            packer.packString(Build.BRAND);
-            packer.packString("DEVICE");
-            packer.packString(Build.DEVICE);
-            packer.packString("DISPLAY");
-            packer.packString(Build.DISPLAY);
-            packer.packString("FINGERPRINT");
-            packer.packString(Build.FINGERPRINT);
-            packer.packString("HARDWARE");
-            packer.packString(Build.HARDWARE);
-            packer.packString("HOST");
-            packer.packString(Build.HOST);
-            packer.packString("ID");
-            packer.packString(Build.ID);
-            packer.packString("MANUFACTURER");
-            packer.packString(Build.MANUFACTURER);
-            packer.packString("MODEL");
-            packer.packString(Build.MODEL);
-            packer.packString("PRODUCT");
-            packer.packString(Build.PRODUCT);
-            packer.packString("SERIAL");
-            packer.packString(Build.SERIAL);
-            packer.packString("USER");
-            packer.packString(Build.USER);
-            packer.packString("SDK_INT");
-            packer.packString(""+Build.VERSION.SDK_INT);
-            packer.packString("BASE_OS");
-            packer.packString(Build.VERSION.BASE_OS);
-            packer.packString("RELEASE");
-            packer.packString(Build.VERSION.RELEASE);
-            packer.packString("CODENAME");
-            packer.packString(Build.VERSION.CODENAME);
-
-
-            return packer.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     /**
@@ -1311,11 +1258,11 @@ public class Bridge {
      * @param type
      * @param packer
      */
-    public void addPacker(Class type, BridgePacker packer) {
+    public void addPacker(Class type, Packer packer) {
         mTypePackers.put(type, new BridgeGenericPacker(type,packer));
     }
 
-    public void addPacker(Class[] types, BridgePacker packer) {
+    public void addPacker(Class[] types, Packer packer) {
         for (Class type:types) {
             addPacker(type, packer);
         }
@@ -1327,50 +1274,52 @@ public class Bridge {
      * @param type
      * @param packer
      */
-    public void addGenericPacker(Class type, BridgePacker packer) {
+    public void addGenericPacker(Class type, Packer packer) {
         mGenericPackers.add(new BridgeGenericPacker(type, packer));
     }
 
-    public void addGenericPacker(Class[] types, BridgePacker packer) {
+    public void addGenericPacker(Class[] types, Packer packer) {
         for (Class type:types) {
             addGenericPacker(type,packer);
         }
     }
 
-    public void addUnpacker(Class type, Value value, BridgeUnpacker unpacker) {
+    public void addUnpacker(Class type, Value value, Unpacker unpacker) {
 
     }
 
     /**
      * Encode an object for passing over the bridge
      */
-    interface BridgeUnpacker {
-        UnpackedValues.UnpackedValue unpack(int type, Value object) ;
+    public interface Unpacker {
+        Bridge.UnpackedValues.UnpackedValue unpack(int type, Value object) ;
     }
 
     /**
      * Pack an object for passing over the bridge
      */
-    interface BridgePacker {
+    public interface Packer {
         void pack(MessageBufferPacker packer, int pythonObjectId, Object object) throws IOException;
     }
-    interface BridgePackerChecker {
+
+    public interface PackerChecker {
         boolean canPack(int pythonObjectId, Object object);
     }
+
 
     /**
      * A packer that just delegates
      */
-    class BridgeGenericPacker implements BridgePacker, BridgePackerChecker {
-        final BridgePacker mDelegatePacker;
-        final BridgePackerChecker mDelegateChecker;
+    class BridgeGenericPacker implements Packer, PackerChecker {
+        final Packer mDelegatePacker;
+        final PackerChecker mDelegateChecker;
 
-        public BridgeGenericPacker(Class type, BridgePacker packer) {
+        public BridgeGenericPacker(Class type, Packer packer) {
             mDelegateChecker = (id, object) -> type.isInstance(object);
             mDelegatePacker = packer;
         }
 
-        public BridgeGenericPacker(BridgePackerChecker canPack, BridgePacker packer) {
+        public BridgeGenericPacker(PackerChecker canPack, Packer packer) {
             mDelegateChecker = canPack;
             mDelegatePacker = packer;
         }

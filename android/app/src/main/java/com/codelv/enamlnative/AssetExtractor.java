@@ -1,13 +1,15 @@
 /**
  * Utilities for extracting assets from an APK file.
  *
+ * From https://github.com/joaoventura/pybridge
+ *
  * It assumes that the assets are going to be extracted and manipulated
  * in the application data dir. By default, the extracted assets will be
  * located in the '<dataDir>/assets/' folder.
  *
  */
 
-package com.jventura.pybridge;
+package com.codelv.enamlnative;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -56,22 +58,22 @@ public class AssetExtractor {
      *
      * @param version: int
      */
-    public void setAssetsVersion(int version) {
+    public void setAssetsVersion(long version) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor = preferences.edit();
 
-        editor.putInt("assetsVersion", version);
+        editor.putLong("installTime", version);
         editor.apply();
     }
 
     /**
      * Returns the version for the extracted assets.
      *
-     * @return int
+     * @return long
      */
-    public int getAssetsVersion() {
+    public long getAssetsVersion() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        return preferences.getInt("assetsVersion", 0);
+        return preferences.getLong("installTime", 0);
     }
 
     /**
