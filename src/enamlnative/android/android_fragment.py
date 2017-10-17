@@ -20,10 +20,20 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 from .app import AndroidApplication
 
 
+class FragmentManager(JavaBridgeObject):
+    __nativeclass__ = set_default('android.support.v4.app.FragmentManager')
+    beginTransaction = JavaMethod(returns='android.support.v4.app.FragmentTransaction')
+
+class FragmentTransaction(JavaBridgeObject):
+    __nativeclass__ = set_default('android.support.v4.app.FragmentTransaction')
+    commit = JavaMethod(returns='int')
+    add = JavaMethod('int','android.support.v4.app.Fragment')
+    replace = JavaMethod('int','android.support.v4.app.Fragment')
+
 class BridgedFragment(JavaBridgeObject):
-    __nativeclass__ = set_default('com.enaml.adapters.BridgedFragmentStatePagerAdapter$BridgedFragment')
+    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter$BridgedFragment')
     setTitle = JavaMethod('java.lang.String')
-    setFragmentListener = JavaMethod('com.enaml.adapters.BridgedFragmentStatePagerAdapter$FragmentListener')
+    setFragmentListener = JavaMethod('com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter$FragmentListener')
     onCreateView = JavaCallback(returns='android.view.View')
     onDestroyView = JavaCallback()
 

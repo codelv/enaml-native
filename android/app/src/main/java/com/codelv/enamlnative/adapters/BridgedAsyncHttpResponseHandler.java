@@ -1,4 +1,4 @@
-package com.enaml.adapters;
+package com.codelv.enamlnative.adapters;
 
 import com.loopj.android.http.DataAsyncHttpResponseHandler;
 

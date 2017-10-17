@@ -29,11 +29,10 @@ def main():
     os.environ['TMP'] = os.path.join(sys.path[0], '../tmp')
 
     import enamlnative
-    with enamlnative.imports():
-        from enamlnative.android.app import AndroidApplication
-        app = AndroidApplication('com.enaml.MainActivity')
+    from enamlnative.android.app import AndroidApplication
+    app = AndroidApplication()
     #app.debug = True #: Makes a lot of lag!
-    app.dev = 'server'
+    app.dev = 'server' # "10.0.2.2" # or 'server'
     app.reload_view = reload_view
     app.deferred_call(load_view, app)
     app.deferred_call(dump_stats)
@@ -43,21 +42,19 @@ def main():
 def load_view(app):
     import enaml
     import enamlnative
-    with enamlnative.imports():
-        with enaml.imports():
-            from view import ContentView
-            app.view = ContentView()
+    with enaml.imports():
+        from view import ContentView
+        app.view = ContentView()
     app.show_view()
 
 
 def reload_view(app):
     import enaml
     import enamlnative
-    with enamlnative.imports():
-        with enaml.imports():
-            import view
-            reload(view)
-            app.view = view.ContentView()
+    with enaml.imports():
+        import view
+        reload(view)
+        app.view = view.ContentView()
     app.show_view()
 
 def dump_stats():

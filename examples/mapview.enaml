@@ -1,0 +1,128 @@
+import random
+from enamlnative.android.app import AndroidApplication
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+from enamlnative.android.api import LocationManager
+
+AndroidApplication.instance().debug = True
+
+enamldef ContentView(DrawerLayout): view:
+    attr num_markers = 10
+    attr markers_draggable = True
+    attr marker_rotation = 0
+    attr marker_alpha = 1
+    attr markers_flat = True
+    attr center = (39.95090, -86.26190)
+    MapView: mapview:
+        rotate_gestures = False
+        show_toolbar = False
+        camera_position << view.center
+        camera_zoom = 10
+        Looper:
+            iterable << range(view.num_markers)
+            MapMarker:
+                attr angle << view.marker_rotation
+                position = (center[0]+random.randint(0,100)/1000.0*loop_index,
+                            center[1]+random.randint(0,100)/1000.0*loop_index)
+                position ::
+                    toast.text = "Marker {} moved {}".format(loop_index,self.position)
+                    toast.show = True
+                title = "Marker {}".format(loop_index)
+                snippit = "Caption {}".format(loop_index)
+                draggable << view.markers_draggable
+                rotation << view.marker_rotation
+                flat << view.markers_flat
+                alpha << view.marker_alpha
+                clicked ::
+                    #: Set the odd markers as "handled"
+                    change['value']['handled'] = False
+                    toast.text = "Clicked {}".format(loop_index)
+                    toast.show = True
+                info_clicked ::
+                    #: Set the odd markers as "handled"
+                    toast.text = "Info window {} {} clicked".format(loop_index,change['value']['click'])
+                    toast.show = True
+
+        Toast: toast:
+            text = "Marker"
+            duration = 300
+    ScrollView:
+        layout_gravity = "left"
+        layout_width = "200"
+        background_color = "#fff"
+        Flexbox:
+            padding = (10,10,10,10)
+            flex_direction = "column"
+            TextView:
+                text = "Camera"
+                text_size = 18
+            TextView:
+                text << "Zoom {}".format(mapview.camera_zoom)
+            SeekBar:
+                max = 20
+                progress << int(mapview.camera_zoom)
+                progress :: mapview.camera_zoom = float(change['value'])
+            TextView:
+                text << "Position {}".format(mapview.camera_position)
+            Button:
+                text = "Recenter"
+                clicked :: mapview.camera_position = view.center
+            TextView:
+                text = "Markers"
+                text_size = 18
+            Switch:
+                text = "Draggable"
+                checked := view.markers_draggable
+            Switch:
+                text = "Flat"
+                checked := view.markers_flat
+            TextView:
+                text << "Rotation ({})".format(view.marker_rotation)
+            SeekBar:
+                max = 360
+                progress := view.marker_rotation
+            TextView:
+                text << "Alpha ({})".format(view.marker_alpha)
+            SeekBar:
+                max = 100
+                progress << int(view.marker_alpha*100)
+                progress :: view.marker_alpha = change['value']/100.0
+            Button:
+                text = "Add marker"
+                style = "borderless"
+                clicked :: view.num_markers +=1
+            Button:
+                text = "Remove marker"
+                style = "borderless"
+                clicked :: view.num_markers = max(1,view.num_markers-1)
+            TextView:
+                text = "Selection"
+            Spinner:
+                items << ["Marker {}".format(i) for i in range(view.num_markers)]
+                selected ::
+                    w = mapview.children[change['value']]
+                    w.show_info = True
+
+            TextView:
+                text = "Maps"
+                text_size = 18
+            Switch:
+                text = "Show buildings"
+                checked := mapview.show_buildings
+            Switch:
+                text = "Show location"
+                checked := mapview.show_location
+            Button:
+                text = "Request permission"
+                style = "borderless"
+                clicked :: LocationManager.request_permission()
+            Switch:
+                text = "Show traffic"
+                checked := mapview.show_traffic
+            TextView:
+                text = "Layers"
+                text_size = 18
+            Spinner:
+                items = list(MapView.map_type.items)
+                selected << self.items.index(mapview.map_type)
+                selected :: mapview.map_type = self.items[change['value']]

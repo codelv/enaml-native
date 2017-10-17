@@ -40,14 +40,14 @@ class ExtType:
     PROXY = 2
 
 
-def _generate_id():
+def generate_id():
     """ Generate an id for an object """
     global __global_id__
     __global_id__ += 1
     return __global_id__
 
 
-def _generate_property_id():
+def generate_property_id():
     """ Generate an id for an object """
     global __property_id__
     __property_id__ += 1
@@ -56,8 +56,13 @@ def _generate_property_id():
 
 def tag_object_with_id(obj):
     """ Generate and assign a id for the object"""
-    obj.__id__ = _generate_id()
+    obj.__id__ = generate_id()
     CACHE[obj.__id__] = obj
+
+
+def get_object_with_id(id):
+    """ Get the object with the given id in the cache """
+    return CACHE[id]
 
 
 def _cleanup_id(obj):
@@ -79,7 +84,7 @@ def get_app_class():
 def encode(obj):
     """ Encode an object for proper decoding by Java or ObjC
     """
-    if hasattr(obj, '__nativeclass__'):
+    if hasattr(obj, '__id__'):
         return msgpack.ExtType(ExtType.REF, msgpack.packb(obj.__id__))
     return obj
 
@@ -146,7 +151,7 @@ class BridgeMethod(Property):
         self.__returns__ = kwargs.get('returns', None)
         self.__signature__ = args
         self.__cache__ = {}  # Result cache otherwise gc cleans up
-        self.__bridge_id__ = _generate_property_id()
+        self.__bridge_id__ = generate_property_id()
         super(BridgeMethod, self).__init__(self.__fget__)
 
     @contextmanager
@@ -224,7 +229,7 @@ class BridgeStaticMethod(Property):
         self.__signature__ = args
         self.__owner__ = None
         self.__cache__ = {}  # Result cache otherwise gc cleans up
-        self.__bridge_id__ = _generate_property_id()
+        self.__bridge_id__ = generate_property_id()
         super(BridgeStaticMethod, self).__init__()
 
     def __get__(self, instance, owner):
@@ -292,7 +297,7 @@ class BridgeField(Property):
 
     def __init__(self, arg):
         self.__signature__ = arg
-        self.__bridge_id__ = _generate_property_id()
+        self.__bridge_id__ = generate_property_id()
         self.__bridge_cached_ = False
         super(BridgeField, self).__init__(self.__fget__, self.__fset__)
 
@@ -390,7 +395,7 @@ class BridgeCallback(BridgeMethod):
 
 
 def tag_property(cls):
-    cls.__bridge_id__ = _generate_property_id()
+    cls.__bridge_id__ = generate_property_id()
     return cls
 
 
@@ -421,7 +426,7 @@ class BridgeObject(Atom):
     __callbacks__ = Dict()
 
     #: Bridge object ID
-    __id__ = Int(0, factory=_generate_id)
+    __id__ = Int(0, factory=generate_id)
 
     #: ID of this class
     __bridge_id__ = Int()
@@ -439,7 +444,7 @@ class BridgeObject(Atom):
     def _default___bridge_id__(self):
         cls = self.__class__
         if cls not in CLASS_CACHE:
-            CLASS_CACHE[cls] = _generate_property_id()
+            CLASS_CACHE[cls] = generate_property_id()
         return CLASS_CACHE[cls]
 
     def getId(self):

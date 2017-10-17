@@ -13,13 +13,17 @@ from atom.api import Typed, Instance, Subclass, Bool, Float, set_default
 
 from enamlnative.widgets.view import ProxyView
 
-from .android_widget import AndroidWidget, Widget
+from .android_toolkit_object import AndroidToolkitObject
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField
 
 
-class View(Widget):
+class View(JavaBridgeObject):
     __nativeclass__ = set_default('android.view.View')
     __signature__ = set_default(('android.content.Context',))
+
+    VISIBILITY_VISIBLE = 0
+    VISIBILITY_INVISIBLE = 4
+    VISIBILITY_GONE = 8
 
     onClick = JavaCallback('android.view.View')
     onKey = JavaCallback('android.view.View', 'int', 'android.view.KeyEvent')
@@ -78,7 +82,7 @@ class MarginLayoutParams(LayoutParams):
 
 
 
-class AndroidView(AndroidWidget, ProxyView):
+class AndroidView(AndroidToolkitObject, ProxyView):
     """ An Android implementation of an Enaml ProxyView.
 
     """
@@ -124,6 +128,20 @@ class AndroidView(AndroidWidget, ProxyView):
         d = self.declaration
         #if d.layout_direction != 'ltr':  #: Default, no need to set it
         #    self.set_layout_direction(d.layout_direction)
+        if d.tool_tip:
+            self.set_tool_tip(d.tool_tip)
+        if d.status_tip:
+            self.set_status_tip(d.status_tip)
+        if not d.enabled:
+            self.set_enabled(d.enabled)
+        # Don't make toplevel widgets visible during init or they will
+        # flicker onto the screen. This applies particularly for things
+        # like status bar widgets which are created with no parent and
+        # then reparented by the status bar. Real top-level widgets must
+        # be explicitly shown by calling their .show() method after they
+        # are created.
+        if self.widget and not d.visible:
+            self.set_visible(d.visible)
         if d.background_color:
             self.set_background_color(d.background_color)
         if d.top:
@@ -160,6 +178,8 @@ class AndroidView(AndroidWidget, ProxyView):
             self.widget.onTouch.connect(self.on_touch)
         if d.layout:
             self.set_layout(d.layout)
+
+
 
     def _default_layout_params(self):
         d = self.declaration
@@ -301,3 +321,65 @@ class AndroidView(AndroidWidget, ProxyView):
         #: Hack for flexbox
         from .android_flexbox import FlexboxLayoutHelper
         FlexboxLayoutHelper.apply_layout(self)
+
+
+    def set_minimum_size(self, min_size):
+        """ Sets the minimum size of the widget.
+
+        """
+        # QWidget uses (0, 0) as the minimum size.
+        if -1 in min_size:
+            min_size = (0, 0)
+        w,h = min_size
+        self.widget.setMinimumWidth(w)
+        self.widget.setMinimumHeight(h)
+
+    def set_maximum_size(self, max_size):
+        """ Sets the maximum size of the widget.
+
+        """
+        # QWidget uses 16777215 as the max size
+        if -1 in max_size:
+            max_size = (16777215, 16777215)
+        w, h = max_size
+        self.widget.setMaximumWidth(w)
+        self.widget.setMaximumHeight(h)
+
+    def set_enabled(self, enabled):
+        """ Set the enabled state of the widget.
+
+        """
+        self.widget.setEnabled(enabled)
+
+    def set_visible(self, visible):
+        """ Set the visibility of the widget.
+
+        """
+        v = View.VISIBILITY_VISIBLE if visible else View.VISIBILITY_GONE
+        self.widget.setVisibility(v)
+
+    def set_tool_tip(self, tool_tip):
+        """ Set the tool tip for the widget.
+
+        """
+        self.widget.setToolTipText(tool_tip)
+
+    def set_status_tip(self, status_tip):
+        """ Set the status tip for the widget.
+
+        """
+        return # Not implemented on android
+
+    def ensure_visible(self):
+        """ Ensure the widget is visible.
+
+        """
+        # 0 - visible, 4 - invisible, 8 - gone
+        self.widget.setVisibility(View.VISIBILITY_VISIBLE)
+
+    def ensure_hidden(self):
+        """ Ensure the widget is hidden.
+
+        """
+        # 0 - visible, 2 - invisible, 8 - gone
+        self.widget.setVisibility(View.VISIBILITY_GONE)

@@ -8,42 +8,13 @@ The full license is in the file COPYING.txt, distributed with this software.
 @author jrm
 
 '''
-import jnius
+import nativehooks
 from atom.api import Float, Value, Int, Unicode, Typed, Dict
 from enaml.application import ProxyResolver
 from . import factories
 from .android_activity import Activity
 from ..core.app import BridgedApplication
 from ..core import bridge
-
-
-class AppEventListener(jnius.PythonJavaClass):
-    __javainterfaces__ = ['com/enaml/MainActivity$AppEventListener']
-    __javacontext__ = 'app'
-
-    def __init__(self, handler):
-        self.__handler__ = handler
-        super(AppEventListener, self).__init__()
-
-    @jnius.java_method('([B)V')
-    def onEvents(self, data):
-        self.__handler__.on_events(bytearray(data))
-
-    @jnius.java_method('()V')
-    def onResume(self):
-        self.__handler__.on_resume()
-
-    @jnius.java_method('()V')
-    def onPause(self):
-        self.__handler__.on_pause()
-
-    @jnius.java_method('()V')
-    def onStop(self):
-        self.__handler__.on_stop()
-
-    @jnius.java_method('()V')
-    def onDestroy(self):
-        self.__handler__.on_destroy()
 
 
 class AndroidApplication(BridgedApplication):
@@ -74,9 +45,6 @@ class AndroidApplication(BridgedApplication):
     #: Loaded immediately
     api_level = Int()
 
-    #: Save reference to the event listener
-    listener = Typed(AppEventListener)
-
     # --------------------------------------------------------------------------
     # Defaults
     # --------------------------------------------------------------------------
@@ -84,39 +52,15 @@ class AndroidApplication(BridgedApplication):
         """ Return a bridge object reference to the MainActivity """
         return Activity(__id__=-1)
 
-    def _default_dp(self):
-        return self.activity.getResources().getDisplayMetrics().density
-
-    def _default_build_info(self):
-        info = bridge.loads(bytearray(self.activity.getBridge().getBuildInfo()))
-        self.api_level = int(info['SDK_INT'])
-        return info
-
     # --------------------------------------------------------------------------
     # AndroidApplication Constructor
     # --------------------------------------------------------------------------
-    def __init__(self, activity):
+    def __init__(self, activity=None):
         """ Initialize a AndroidApplication. Uses jnius to retrieve
             an instance of the activity.
         """
         super(AndroidApplication, self).__init__()
-        self.activity = jnius.autoclass(activity).mActivity
         self.resolver = ProxyResolver(factories=factories.ANDROID_FACTORIES)
-
-    # --------------------------------------------------------------------------
-    # Abstract API Implementation
-    # --------------------------------------------------------------------------
-    def start(self):
-        """ Start the application's main event loop. Bind the Android app event
-            listener using jnius.
-        """
-        activity = self.activity
-
-        #: Hook for JNI using jnius
-        self.listener = AppEventListener(self)
-        activity.setAppEventListener(self.listener)
-
-        super(AndroidApplication, self).start()
 
     # --------------------------------------------------------------------------
     # App API Implementation
@@ -179,11 +123,22 @@ class AndroidApplication(BridgedApplication):
         """ Show the current `app.view`. This will fade out the previous
             with the new view.
         """
-        self.widget.setView(self.get_view())
+        if not self.build_info:
+            def on_build_info(info):
+                """ Make sure the build info is ready before we display the view """
+                self.dp = info['DISPLAY_DENSITY']
+                self.api_level = info['SDK_INT']
+                self.build_info = info
+                self.widget.setView(self.get_view())
+
+            self.widget.getBuildInfo().then(on_build_info)
+        else:
+            self.widget.setView(self.get_view())
 
     def dispatch_events(self, data):
         """ Send the data to the Native application for processing """
-        self.activity.processEvents(data)
+        nativehooks.publish(data)
+        #self.activity.processEvents(data)
 
     # --------------------------------------------------------------------------
     # Android utilities API Implementation

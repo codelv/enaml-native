@@ -1,4 +1,4 @@
-package com.enaml;
+package com.codelv.enamlnative;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -7,8 +7,11 @@ import android.os.Build;
 import android.os.HandlerThread;
 import android.os.Handler;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.util.Log;
+
+import com.codelv.enamlnative.python.PythonInterpreter;
 
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
@@ -30,8 +33,11 @@ import java.lang.reflect.Method;
 
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -43,7 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.msgpack.core.MessagePack.newDefaultUnpacker;
 
-public class Bridge {
+public class Bridge implements PythonInterpreter.EventListener {
 
     public static final String TAG = "Bridge";
 
@@ -61,7 +67,7 @@ public class Bridge {
     public static final String RESULT = "r";
     public static final String ERROR = "e";
 
-    final MainActivity mActivity;
+    final EnamlActivity mActivity;
 
     final Bridge mBridge;
 
@@ -89,6 +95,10 @@ public class Bridge {
 
     // Cache for results
     final ConcurrentHashMap<Integer,BridgeFuture<Object>> mResultCache = new ConcurrentHashMap<Integer, BridgeFuture<Object>>();
+
+    final HashMap<Class, Packer> mTypePackers = new HashMap<Class, Packer>();
+    final ArrayList<BridgeGenericPacker> mGenericPackers = new ArrayList<BridgeGenericPacker>();
+
     // For generating IDs
     private int mResultCount = 0;
 
@@ -100,14 +110,194 @@ public class Bridge {
     final AtomicInteger mEventCount = new AtomicInteger();
     final int mEventDelay = 1;
 
-    public Bridge(Context context) {
+    public Bridge(EnamlActivity activity) {
         mBridge = this;
-        mContext = context;
-        mActivity = MainActivity.mActivity;
+        mContext = activity;
+        mActivity = activity;
         mObjectCache.put(-1, mContext);
         mBridgeHandlerThread.start();
         mBridgeHandler = new Handler(mBridgeHandlerThread.getLooper());
+
+        // Add ourself as a listener
+        PythonInterpreter.addEventListener(this);
+
+        // Register default encoders
+        registerBuiltinPackers();
+        registerBuiltinUnpackers();
     }
+
+    /**
+     * Register the "Packers" that are used to pack certain objects via msgpack so python
+     * can handle them as needed.
+     */
+    void registerBuiltinPackers() {
+        addPacker(new Class[]{boolean.class, Boolean.class}, (packer, id, object)->{
+            packer.packBoolean((boolean) object);
+        });
+        addPacker(new Class[]{boolean[].class, Boolean[].class}, (packer, id, object)->{
+            boolean[] argList = (boolean[]) object;
+            packer.packArrayHeader(argList.length);
+            for (boolean v:argList) {
+                packer.packBoolean(v);
+            }
+        });
+
+        addPacker(new Class[]{String.class, CharSequence.class}, (packer, id, object)->{
+            packer.packString(object.toString());
+        });
+
+        addPacker(new Class[]{String[].class, CharSequence[].class}, (packer, id, object)->{
+            Object[] argList = (Object[]) object;
+            packer.packArrayHeader(argList.length);
+            for (Object v:argList) {
+                packer.packString(v.toString());
+            }
+        });
+
+        addPacker(new Class[]{int.class,Integer.class}, (packer, id, object)->{
+            packer.packInt((int) object);
+        });
+
+        addPacker(new Class[]{int[].class,Integer[].class}, (packer, id, object)->{
+            int[] argList = (int[]) object;
+            packer.packArrayHeader(argList.length);
+            for (int v:argList) {
+                packer.packInt(v);
+            }
+        });
+
+        addPacker(new Class[]{long.class, Long.class}, (packer, id, object)->{
+            packer.packLong((long) object);
+        });
+
+        addPacker(new Class[]{long[].class, Long[].class}, (packer, id, object)->{
+            long[] argList = (long[]) object;
+            packer.packArrayHeader(argList.length);
+            for (long v:argList) {
+                packer.packLong(v);
+            }
+        });
+
+        addPacker(new Class[]{float.class, Float.class}, (packer, id, object)->{
+            packer.packFloat((float) object);
+        });
+
+        addPacker(new Class[]{float[].class, Float[].class}, (packer, id, object)->{
+            float[] argList = (float[]) object;
+            packer.packArrayHeader(argList.length);
+            for (float v:argList) {
+                packer.packFloat(v);
+            }
+        });
+
+        addPacker(new Class[]{double.class, Double.class}, (packer, id, object)->{
+            packer.packFloat((float) object);
+        });
+
+        addPacker(new Class[]{double[].class, Double[].class}, (packer, id, object)->{
+            double[] argList = (double[]) object;
+            packer.packArrayHeader(argList.length);
+            for (double v:argList) {
+                packer.packDouble(v);
+            }
+        });
+
+        addPacker(new Class[]{short.class, Short.class}, (packer, id, object)->{
+            packer.packFloat((float) object);
+        });
+
+        addPacker(new Class[]{short[].class, Short[].class}, (packer, id, object)->{
+            short[] argList = (short[]) object;
+            packer.packArrayHeader(argList.length);
+            for (short v:argList) {
+                packer.packShort(v);
+            }
+        });
+
+        addPacker(new Class[]{byte[].class}, (packer, id, object)->{
+            byte[] bytes = (byte[]) object;
+            packer.packBinaryHeader(bytes.length);
+            packer.addPayload(bytes);
+        });
+
+        addPacker(KeyEvent.class, (packer, id, object)->{
+            KeyEvent event = (KeyEvent) object;
+            packer.packString(KeyEvent.keyCodeToString(event.getKeyCode()));
+        });
+
+        addPacker(MotionEvent.class, (packer, id, object)->{
+            MotionEvent event = (MotionEvent) object;
+            packer.packString(MotionEvent.actionToString(event.getAction()));
+        });
+
+        addGenericPacker(HashMap.class, (packer, id, object)->{
+            HashMap map = (HashMap) object;
+            packer.packMapHeader(map.keySet().size());
+            for (Object key: map.keySet()) {
+                Object value = map.get(key);
+                // Otherwise pack the type name and packed value
+                for (Object obj: Arrays.asList(key,value)) {
+                    Class argClass = obj.getClass();
+                    // Check based on type
+                    Packer typePacker = mTypePackers.get(argClass);
+                    if (typePacker != null) {
+                        typePacker.pack(packer, id, obj);
+                        continue;
+                    }
+
+                    // Check generics
+                    boolean packed = false;
+                    for (BridgeGenericPacker genericPacker : mGenericPackers) {
+                        if (genericPacker.canPack(id, obj)) {
+                            genericPacker.pack(packer, id, obj);
+                            packed = true;
+                            break;
+                        }
+                    }
+                    // Fallback
+                    if (!packed) {
+                        packer.packString(obj.toString());
+                    }
+                }
+            }
+        });
+
+        // Any View
+        addGenericPacker(View.class, (packer, id, object)-> {
+            packer.packInt(((View) object).getId());
+        });
+
+        addPacker(View[].class, (packer, id, object)-> {
+            View[] argList = (View[]) object;
+            packer.packArrayHeader(argList.length);
+            for (View v:argList) {
+                packer.packInt(((View) object).getId());
+            }
+
+        });
+
+        // Catch any String or CharSequence subclasses
+        addGenericPacker(new Class[]{String.class, CharSequence.class}, (packer, id, object)->{
+            packer.packString(object.toString());
+        });
+
+
+        // Add special packer for objects...
+        mGenericPackers.add(
+            new BridgeGenericPacker((id, object)-> id!=IGNORE_RESULT,
+                (packer, id, object)->{
+                    // The callback is returning a newly created object
+                    if (mObjectCache.get(id)==null) {
+                        mObjectCache.put(id, object);
+                    }
+                    packer.packInt(id);
+        }));
+    }
+
+    void registerBuiltinUnpackers() {
+
+    }
+
 
     /**
      * Get the class for the given name (including primitive types)
@@ -137,6 +327,7 @@ public class Bridge {
         }
         return cls;
     }
+
 
     /**
      * Unpacks encoded bridge values. Each value is a tuple of type:
@@ -698,8 +889,13 @@ public class Bridge {
     }
 
     /**
+     * This is called when a method that has been invoked needs to return a result
+     * back to python. If the result is needed (a returns="" was defined in python) it
+     * will be packed, saved if necessary, and sent back over the bridge.
+     *
      * If the pythonObjectId!=IGNORE_RESULT, this sets the result of a future in python and
      * stores the result locally within the object cache if it is not a primitive type.
+     *
      * @param pythonObjectId
      * @param result
      */
@@ -708,7 +904,7 @@ public class Bridge {
             return;
         }
 
-        if (!isPackableResult(result)) {
+        if (result!=null && !isPackableResult(result)) {
             // Store the result with the given ID, the python implementation
             // guarantees that the ID is unique and will not overwrite an existing object
             mObjectCache.put(pythonObjectId, result);
@@ -726,6 +922,7 @@ public class Bridge {
      * @return
      */
     protected boolean isPackableResult(Object result) {
+        // TODO: Reimplement this using packers...
         Class resultType = result.getClass();
         if (resultType == int.class || result instanceof Integer) {
             return true;
@@ -771,95 +968,44 @@ public class Bridge {
                 packer.packArrayHeader(args.length);
                 for (Object arg : args) {
                     packer.packArrayHeader(2);
-                    if (arg==null) {
+                    if (arg == null) {
                         // Discard this event??
-                        Log.w(TAG,"Warning: Trying to send event '"+method+"' with a null argument!");
+                        Log.w(TAG, "Warning: Trying to send event '" + method + "' with a null argument!");
                         //return null;
                         packer.packString("void");
                         packer.packNil();
                         continue;
                     }
+                    
+                    // Otherwise pack the type name and packed value
                     Class argClass = arg.getClass();
-                    packer.packString(argClass.getCanonicalName());
+                    String argName = argClass.getCanonicalName(); // How is this null
+                    packer.packString((argName==null)?"unkown":argName);
 
-                    // TODO: There has to be a better way than this...
-                    if (argClass == int.class || arg instanceof Integer) {
-                        packer.packInt((int) arg);
-                    } else if (argClass == int[].class) {
-                        int[] argList = (int[]) arg;
-                        packer.packArrayHeader(argList.length);
-                        for (int v:argList) {
-                            packer.packInt(v);
+                    // Check based on type
+                    Packer typePacker = mTypePackers.get(argClass);
+                    if (typePacker != null) {
+                        typePacker.pack(packer, pythonObjectId, arg);
+                        continue;
+                    }
+
+                    // Check generics
+                    boolean packed = false;
+                    for (BridgeGenericPacker genericPacker : mGenericPackers) {
+                        if (genericPacker.canPack(pythonObjectId, arg)) {
+                            genericPacker.pack(packer, pythonObjectId, arg);
+                            packed = true;
+                            break;
                         }
-                    } else if (argClass == boolean.class || arg instanceof Boolean) {
-                        packer.packBoolean((boolean) arg);
-                    } else if (argClass == boolean[].class) {
-                        boolean[] argList = (boolean[]) arg;
-                        packer.packArrayHeader(argList.length);
-                        for (boolean v:argList) {
-                            packer.packBoolean(v);
-                        }
-                    } else if (argClass == String.class) {
-                        packer.packString((String) arg);
-                    } else if (argClass == String[].class) {
-                        String[] argList = (String[]) arg;
-                        packer.packArrayHeader(argList.length);
-                        for (String v:argList) {
-                            packer.packString(v);
-                        }
-                    } else if (argClass == long.class || arg instanceof Long) {
-                        packer.packLong((long) arg);
-                    } else if (argClass == long[].class) {
-                        long[] argList = (long[]) arg;
-                        packer.packArrayHeader(argList.length);
-                        for (long v:argList) {
-                            packer.packLong(v);
-                        }
-                    } else if (argClass == float.class || arg instanceof Float) {
-                        packer.packFloat((float) arg);
-                    } else if (argClass == float[].class) {
-                        float[] argList = (float[]) arg;
-                        packer.packArrayHeader(argList.length);
-                        for (float v:argList) {
-                            packer.packFloat(v);
-                        }
-                    } else if (argClass == double.class || arg instanceof Double) {
-                        packer.packDouble((double) arg);
-                    } else if (argClass == double[].class) {
-                        double[] argList = (double[]) arg;
-                        packer.packArrayHeader(argList.length);
-                        for (double v:argList) {
-                            packer.packDouble(v);
-                        }
-                    } else if (argClass == short.class || arg instanceof Short) {
-                        packer.packShort((short) arg);
-                    } else if (argClass == short[].class) {
-                        short[] argList = (short[]) arg;
-                        packer.packArrayHeader(argList.length);
-                        for (short v:argList) {
-                            packer.packShort(v);
-                        }
-                    } else if (argClass == byte[].class) {
-                        byte[] bytes = (byte[]) arg;
-                        packer.packBinaryHeader(bytes.length);
-                        packer.addPayload(bytes);
-                    } else if (arg instanceof View) {
-                        // This only works with ids's created in python
-                        packer.packInt(((View) arg).getId());
-                    } else if (arg instanceof KeyEvent) {
-                        KeyEvent event = (KeyEvent) arg;
-                        packer.packString(KeyEvent.keyCodeToString(event.getKeyCode()));
-//                    } else if (arg instanceof MotionEvent) {
-//                        MotionEvent event = (MotionEvent) arg;
-//                        packer.packString(MotionEvent.actionToString(event.getAction()));
-                    } else if (pythonObjectId!=IGNORE_RESULT && method.equals("set_result")) {
-                        // If it was packable, it should already be packed
-                        packer.packInt(pythonObjectId);
-                    } else {
+                    }
+
+                    // Fallback if all else fails
+                    if (!packed) {
                         packer.packString(arg.toString());
                     }
                 }
             }
+                
             packer.close();
         } catch (IOException e) {
             mActivity.showErrorMessage(e);
@@ -896,12 +1042,12 @@ public class Bridge {
         while (!future.isDone()) {
             // Process pending messages until done
             try {
-                // TODO: Busy loop, maybe block?
                 Runnable task = mTaskQueue.take();
                 task.run();
                 i++;
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                // e.printStackTrace();
+                // Yikes! Maybe check a timeout and abort??
             }
 
         }
@@ -926,6 +1072,16 @@ public class Bridge {
         if (i>0) {
             Log.i(TAG, "runUntilCurrent took (" + (System.currentTimeMillis() - start) + " ms) to run ("+ i + ") tasks");
         }
+    }
+
+
+    /**
+     * Process events from the Python interpreter
+     * @param data
+     */
+    @Override
+    public void onEvents(byte[] data) {
+        processEvents(data);
     }
 
 
@@ -1076,10 +1232,9 @@ public class Bridge {
         // Send to bridge thread for processing
         mBridgeHandler.postDelayed(() -> {
             int delays = mEventCount.decrementAndGet();
-            MainActivity.AppEventListener listener = mActivity.getAppEventListener();
 
             // If events stopped updating temporarily
-            if (listener != null && delays == 0) {
+            if (delays == 0) {
                 MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
                 try {
                     // Events can be added during packing this so pull only what's here now.
@@ -1092,66 +1247,91 @@ public class Bridge {
                 } catch (IOException e) {
                     mActivity.showErrorMessage(e);
                 }
-                listener.onEvents(packer.toByteArray());
+                PythonInterpreter.sendEvents(packer.toByteArray());
             }
         }, mEventDelay);
     }
 
     /**
-     * Return build info
-     * @return
+     * Save a "packer" that is used based on a (arg.class==Class) lookup and is hence
+     * faster than the "GenericPacker" counterpart.
+     * @param type
+     * @param packer
      */
-    public byte[] getBuildInfo() {
-        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
-        try {
-            packer.packMapHeader(20);
-            
-            packer.packString("BOARD");
-            packer.packString(Build.BOARD);
-            packer.packString("BOOTLOADER");
-            packer.packString(Build.BOOTLOADER);
-            packer.packString("BOARD");
-            packer.packString(Build.BOARD);
-            packer.packString("BOOTLOADER");
-            packer.packString(Build.BOOTLOADER);
-            packer.packString("BRAND");
-            packer.packString(Build.BRAND);
-            packer.packString("DEVICE");
-            packer.packString(Build.DEVICE);
-            packer.packString("DISPLAY");
-            packer.packString(Build.DISPLAY);
-            packer.packString("FINGERPRINT");
-            packer.packString(Build.FINGERPRINT);
-            packer.packString("HARDWARE");
-            packer.packString(Build.HARDWARE);
-            packer.packString("HOST");
-            packer.packString(Build.HOST);
-            packer.packString("ID");
-            packer.packString(Build.ID);
-            packer.packString("MANUFACTURER");
-            packer.packString(Build.MANUFACTURER);
-            packer.packString("MODEL");
-            packer.packString(Build.MODEL);
-            packer.packString("PRODUCT");
-            packer.packString(Build.PRODUCT);
-            packer.packString("SERIAL");
-            packer.packString(Build.SERIAL);
-            packer.packString("USER");
-            packer.packString(Build.USER);
-            packer.packString("SDK_INT");
-            packer.packString(""+Build.VERSION.SDK_INT);
-            packer.packString("BASE_OS");
-            packer.packString(Build.VERSION.BASE_OS);
-            packer.packString("RELEASE");
-            packer.packString(Build.VERSION.RELEASE);
-            packer.packString("CODENAME");
-            packer.packString(Build.VERSION.CODENAME);
+    public void addPacker(Class type, Packer packer) {
+        mTypePackers.put(type, new BridgeGenericPacker(type,packer));
+    }
 
-
-            return packer.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void addPacker(Class[] types, Packer packer) {
+        for (Class type:types) {
+            addPacker(type, packer);
         }
-        return null;
+    }
+
+    /**
+     * Save a "packer" that is used based on a (arg instanceof Class) expression
+     * slower than the direct class lookup but is more generic.
+     * @param type
+     * @param packer
+     */
+    public void addGenericPacker(Class type, Packer packer) {
+        mGenericPackers.add(new BridgeGenericPacker(type, packer));
+    }
+
+    public void addGenericPacker(Class[] types, Packer packer) {
+        for (Class type:types) {
+            addGenericPacker(type,packer);
+        }
+    }
+
+    public void addUnpacker(Class type, Value value, Unpacker unpacker) {
+
+    }
+
+    /**
+     * Encode an object for passing over the bridge
+     */
+    public interface Unpacker {
+        Bridge.UnpackedValues.UnpackedValue unpack(int type, Value object) ;
+    }
+
+    /**
+     * Pack an object for passing over the bridge
+     */
+    public interface Packer {
+        void pack(MessageBufferPacker packer, int pythonObjectId, Object object) throws IOException;
+    }
+
+    public interface PackerChecker {
+        boolean canPack(int pythonObjectId, Object object);
+    }
+
+
+    /**
+     * A packer that just delegates
+     */
+    class BridgeGenericPacker implements Packer, PackerChecker {
+        final Packer mDelegatePacker;
+        final PackerChecker mDelegateChecker;
+
+        public BridgeGenericPacker(Class type, Packer packer) {
+            mDelegateChecker = (id, object) -> type.isInstance(object);
+            mDelegatePacker = packer;
+        }
+
+        public BridgeGenericPacker(PackerChecker canPack, Packer packer) {
+            mDelegateChecker = canPack;
+            mDelegatePacker = packer;
+        }
+
+        @Override
+        public boolean canPack(int pythonObjectId, Object object) {
+            return mDelegateChecker.canPack(pythonObjectId, object);
+        }
+
+        @Override
+        public void pack(MessageBufferPacker packer, int pythonObjectId, Object object) throws IOException {
+            mDelegatePacker.pack(packer,pythonObjectId, object);
+        }
     }
 }

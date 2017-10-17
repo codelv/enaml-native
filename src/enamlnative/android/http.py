@@ -27,9 +27,9 @@ class LoopjRequest(JavaBridgeObject):
 
 
 class LoopjAsyncHttpResponseHandler(JavaBridgeObject):
-    __nativeclass__ = set_default('com.enaml.adapters.BridgedAsyncHttpResponseHandler')
+    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedAsyncHttpResponseHandler')
     setAsyncHttpResponseListener = JavaMethod(
-        'com.enaml.adapters.BridgedAsyncHttpResponseHandler$AsyncHttpResponseListener', 'boolean')
+        'com.codelv.enamlnative.adapters.BridgedAsyncHttpResponseHandler$AsyncHttpResponseListener', 'boolean')
 
     #: ============================================================================
     #: AsyncHttpResponseHandler API

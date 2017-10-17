@@ -33,6 +33,7 @@ from .card_view import CardView
 from .image_view import ImageView
 from .web_view import  WebView
 from .list_view import ListView, ListItem
+from .map_view import MapView, MapMarker
 
 #: Controls
 from .button import  Button
