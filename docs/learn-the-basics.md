@@ -2,6 +2,13 @@
 
 Enaml-native is like Enaml, but it uses native Android or iOS components instead of Qt components as building blocks. So to understand the basic structure of an enaml-native app, you need to understand some of the basic Enaml concepts, like declarative components and data binding operators.  If you already know Enaml, there's a few enaml-native specifics but feel free to skip ahead.
 
+### Enaml
+
+What is enaml? Watch the excellent video below by the developer.
+
+[![Enaml introduction](https://img.youtube.com/vi/ycFEwz_hAxk/0.jpg)](https://youtu.be/ycFEwz_hAxk)
+
+
 ### Playground
 
 The easiest way to learn the enaml-native syntax is by downloading the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground) app. This app allows you to try out your code into a web based editor and run it as if it were built as part of the app!
