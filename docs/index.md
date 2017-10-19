@@ -8,6 +8,13 @@ The goal of enaml-native is to be the python version of [react-native](https://f
 
 It's a long way from being there but it's a start. It borrows many of the concepts used by react-native, such as using an async bridge and native widgets. Apps can be run and built in Android Studio or Xcode like you do with native apps. A simple `enaml-native` cli helps you create, build, and run projects. Android apps use the `gradle` build system, iOS apps use `xcode`. Python builds are done with modified versions of `python-for-android` for android and `kivy-ios`. 
 
+### Why enaml?
+
+This short video explains what enaml solves and why it's perfect for building UI's for mobile apps.
+
+[![Enaml introduction](https://img.youtube.com/vi/ycFEwz_hAxk/0.jpg)](https://youtu.be/ycFEwz_hAxk)
+
+
 
 ### Apps are declarative
 
