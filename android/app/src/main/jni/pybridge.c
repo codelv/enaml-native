@@ -40,7 +40,7 @@ static PyObject *NativeHooks_publish(PyObject *self, PyObject *args) {
     (*jenv)->CallStaticVoidMethod(jenv, mPythonInterpreter, mPublishEvents, buf);
 
     // Cleanup
-    //(*jenv)->ReleaseByteArrayElements(jenv, buf, items, 0);
+    (*jenv)->DeleteLocalRef(jenv, buf);
 
     Py_RETURN_NONE;
 }
