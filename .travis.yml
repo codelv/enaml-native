@@ -24,8 +24,11 @@ before_install:
   # Install enamlnative dependencies
   - pip install enaml ply msgpack-python pyjnius
 
+  # Install p4a dependencies
+  - pip install sh colorama appdirs six jinja2
+
   # Intall test tools
-  - pip install pytest pytest-cov pytest-catchlog pytest-timeout sh
+  - pip install pytest pytest-cov pytest-catchlog pytest-timeout
 
   # Install codecov report tools
   - pip install codecov
