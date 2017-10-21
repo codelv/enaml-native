@@ -10,7 +10,8 @@ Created on Oct 10, 2017
 @author: jrm
 '''
 from atom.api import (
-    Atom, Typed, ForwardTyped, Unicode, Enum, Bool, Float, Tuple, Event, observe, set_default
+    Atom, Typed, ForwardTyped, Unicode, Enum, Bool, Float, Tuple, Event,
+    ContainerList, observe, set_default
 )
 
 from enaml.core.declarative import d_
@@ -23,6 +24,7 @@ class LatLng(Atom):
     """ A model for the map coordinates """
     latitude = Float()
     longitude = Float()
+
 
 class Camera(Atom):
     """ A model for the map camera """
@@ -141,6 +143,82 @@ class ProxyMapMarker(ProxyToolkitObject):
         raise NotImplementedError
 
 
+class ProxyMapPolyline(ProxyToolkitObject):
+    #: A reference to the declaration.
+    declaration = ForwardTyped(lambda: MapPolyline)
+
+    def set_points(self, points):
+        raise NotImplementedError
+
+    def update_points(self, change):
+        raise NotImplementedError
+
+    def set_clickable(self, clickable):
+        raise NotImplementedError
+
+    def set_color(self, color):
+        raise NotImplementedError
+
+    def set_end_cap(self, cap):
+        raise NotImplementedError
+
+    def set_geodesic(self, geodesic):
+        raise NotImplementedError
+
+    def set_joint_type(self, joint_type):
+        raise NotImplementedError
+
+    def set_start_cap(self, cap):
+        raise NotImplementedError
+
+    def set_visible(self, visible):
+        raise NotImplementedError
+
+    def set_width(self, width):
+        raise NotImplementedError
+
+    def set_zindex(self, zindex):
+        raise NotImplementedError
+
+
+class ProxyMapPolygon(ProxyToolkitObject):
+    #: A reference to the declaration.
+    declaration = ForwardTyped(lambda: MapPolygon)
+
+    def set_points(self, points):
+        raise NotImplementedError
+
+    def update_points(self, change):
+        raise NotImplementedError
+
+    def set_clickable(self, clickable):
+        raise NotImplementedError
+
+    def set_holes(self, holes):
+        raise NotImplementedError
+
+    def set_fill_color(self, color):
+        raise NotImplementedError
+
+    def set_geodesic(self, geodesic):
+        raise NotImplementedError
+
+    def set_stroke_color(self, color):
+        raise NotImplementedError
+
+    def set_stroke_joint_type(self, joint_type):
+        raise NotImplementedError
+
+    def set_stroke_width(self, width):
+        raise NotImplementedError
+
+    def set_visible(self, visible):
+        raise NotImplementedError
+
+    def set_zindex(self, zindex):
+        raise NotImplementedError
+
+
 class MapView(FrameLayout):
     """ A map view using google maps.
 
@@ -216,6 +294,16 @@ class MapView(FrameLayout):
     #: Specifies a preferred upper bound for camera zoom.
     max_zoom = d_(Float())
 
+    #: Called when the map is clicked.
+    #: the event change['value'] will have an indicator of the type of click and position
+    clicked = d_(Event(dict), writable=False)
+
+    #: Map is currently being dragged by the user
+    dragging = d_(Bool(), writable=False)
+
+    #: Map is currently being moved due to an animation
+    animating = d_(Bool(), writable=False)
+
     #: A reference to the ProxyMapView object.
     proxy = Typed(ProxyMapView)
 
@@ -246,7 +334,8 @@ class MapMarker(ToolkitObject):
     #: Sets the draggability for the marker.
     draggable = d_(Bool())
 
-    #:  Sets whether this marker should be flat against the map true or a billboard facing the camera false.
+    #: Sets whether this marker should be flat against the map true
+    #: or a billboard facing the camera false.
     flat = d_(Bool(True))
 
     #: Sets the location for the marker.
@@ -279,6 +368,9 @@ class MapMarker(ToolkitObject):
     #: the event value will have an indicator of the type of click ('long', 'short')
     info_clicked = d_(Event(dict), writable=False)
 
+    #: Marker is currently being dragged
+    dragging = d_(Bool(), writable=False)
+
     #: A reference to the ProxyMapMarker object.
     proxy = Typed(ProxyMapMarker)
 
@@ -290,3 +382,112 @@ class MapMarker(ToolkitObject):
         """
         # The superclass implementation is sufficient.
         super(MapMarker, self)._update_proxy(change)
+
+
+class MapPolyline(ToolkitObject):
+    """ A polyline on the map. """
+
+    #: Sets the alpha (opacity) of the marker.
+    points = d_(ContainerList(tuple))
+
+    #: Specifies whether this polyline is clickable.
+    clickable = d_(Bool())
+
+    #: Sets the color of the polyline
+    color = d_(Unicode())
+
+    #: Sets the cap at the end vertex of the polyline
+    end_cap = d_(Enum('butt', 'round', 'square'))
+
+    #: Specifies whether to draw each segment of this polyline as a geodesic
+    geodesic = d_(Bool())
+
+    #: Sets the joint type for all vertices of the polyline except the start and end vertices.
+    joint_type = d_(Enum('', 'bevel', 'round'))
+
+    #: Sets the cap at the start vertex of the polyline
+    start_cap = d_(Enum('butt', 'round', 'square'))
+
+    #: Sets the visibility for the marker.
+    visible = d_(Bool(True))
+
+    #: Sets the width of the polyline in screen pixels.
+    width = d_(Float(10, strict=False))
+
+    #: Sets the zIndex for the marker.
+    zindex = d_(Float(strict=False))
+
+    #: Line clicked
+    #: event value will have a 'result' that can be set to True
+    #: to indicate the event was handled
+    clicked = d_(Event(dict), writable=False)
+
+    #: A reference to the proxy object.
+    proxy = Typed(ProxyMapPolyline)
+
+    @observe('points', 'clickable', 'color', 'end_cap', 'geodesic',
+             'joint_type', 'start_cap', 'visible', 'width', 'zindex')
+    def _update_proxy(self, change):
+        """ An observer which sends the state change to the proxy.
+
+        """
+        if change['type'] == 'container':
+            #: Only update what's needed
+            self.proxy.update_points(change)
+        else:
+            super(MapPolyline, self)._update_proxy(change)
+
+
+class MapPolygon(ToolkitObject):
+    """ A polygon on the map. """
+
+    #: Sets the alpha (opacity) of the marker.
+    points = d_(ContainerList(tuple))
+
+    #: Specifies whether this polygon is clickable.
+    clickable = d_(Bool())
+
+    #: Adds a holes to the polygon being built.
+    #: May be a list of coordinates or multiple coordinate lists
+    holes = d_(ContainerList(tuple))
+
+    #: Sets the fill color of the polygon
+    fill_color = d_(Unicode())
+
+    #: Specifies whether to draw each segment of this polyline as a geodesic
+    geodesic = d_(Bool())
+
+    #: Sets the color of the polygon
+    stroke_color = d_(Unicode())
+
+    #: Sets the joint type for all vertices of the polyline except the start and end vertices.
+    stroke_joint_type = d_(Enum('', 'bevel', 'round'))
+
+    #: Sets the width of the polyline in screen pixels.
+    stroke_width = d_(Float(10, strict=False))
+
+    #: Sets the visibility for the polygon.
+    visible = d_(Bool(True))
+
+    #: Sets the zIndex for the polygon.
+    zindex = d_(Float(strict=False))
+
+    #: Line clicked
+    #: event value will have a 'result' that can be set to True
+    #: to indicate the event was handled
+    clicked = d_(Event(dict), writable=False)
+
+    #: A reference to the proxy object.
+    proxy = Typed(ProxyMapPolygon)
+
+    @observe('points', 'clickable', 'holes', 'fill_color', 'geodesic',
+             'stroke_joint_type', 'stroke_width', 'visible', 'zindex')
+    def _update_proxy(self, change):
+        """ An observer which sends the state change to the proxy.
+
+        """
+        if change['type'] == 'container':
+            #: Only update what's needed
+            self.proxy.update_points(change)
+        else:
+            super(MapPolygon, self)._update_proxy(change)

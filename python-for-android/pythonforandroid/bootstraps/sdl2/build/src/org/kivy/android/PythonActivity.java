@@ -53,7 +53,7 @@ public class PythonActivity extends SDLActivity {
     private PowerManager.WakeLock mWakeLock = null;
 
     public String getAppRoot() {
-        String app_root =  getFilesDir().getAbsolutePath() + "/app";
+        String app_root =  getFilesDir().getAbsolutePath() + "/apps";
         return app_root;
     }
 

@@ -15,7 +15,7 @@ from atom.api import (
 
 from enaml.core.declarative import d_
 
-from .view_animator import ViewSwitcher, ProxyViewAnimator
+from .view_animator import ViewAnimator, ProxyViewAnimator
 
 
 class ProxyViewSwitcher(ProxyViewAnimator):

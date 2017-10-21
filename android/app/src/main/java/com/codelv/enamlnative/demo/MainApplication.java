@@ -26,4 +26,9 @@ public class MainApplication extends Application implements EnamlApplication {
                 new GoogleMapsPackage()
         );
     }
+
+    @Override
+    public boolean showDebugMessages() {
+        return BuildConfig.DEBUG;
+    }
 }

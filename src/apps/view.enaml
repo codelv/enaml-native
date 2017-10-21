@@ -959,6 +959,50 @@ enamldef ContentView(VBox): content_view:
             action_text = "Undo"
             clicked :: toast2.show = True
       Page:
+        title = "Dialogs"
+        Scroller:
+          VBox:
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Dialogs"
+                Button:
+                    text = "Open dialog"
+                    clicked :: dialog.show = True
+                #: Prevent cancelling without pressing a button
+                CheckBox:
+                    text = "Cancel on touch outside"
+                    checked := dialog.cancel_on_touch_outside
+                CheckBox:
+                    text = "Cancel on back"
+                    checked := dialog.cancel_on_back
+                TextView:
+                    text << "Show: {}".format(dialog.show)
+                Dialog: dialog:
+                    Flexbox:
+                        flex_direction = "column"
+                        justify_content = "space_between"
+                        Flexbox:
+                            flex_direction = "column"
+                            padding = (20, 20, 20, 50)
+                            TextView:
+                                text = "Are you sure you want to delete?"
+                                font_family = "sans-serif-medium"
+                            TextView:
+                                text = "This operation cannot be undone."
+                        Flexbox:
+                            justify_content = "space_between"
+                            Button:
+                                style = "borderless"
+                                text = "Ok"
+                                clicked ::
+                                    print("ok!")
+                                    dialog.show = False
+                            Button:
+                                style = "borderless"
+                                text = "Cancel"
+                                clicked :: dialog.show = False
+      Page:
         title = "MapWiew"
         MapView:
           pass

@@ -74,18 +74,18 @@ class Init(Command):
         os.makedirs(dest)
         with cd(args.destination):
             #: Copy everything
-            #: TODO: Should clean build first
-            for f in ['android', 'ios', 'src', 'package.json']:
+            for f in ['android', 'ios', 'src', 'packages', 'package.json']:
                 shprint(sh.cp, '-R', join(root, f), '.')
 
             #: TODO: Make a readme
 
-            #: Make simlink to enaml-native
-            shprint(sh.ln, '-s' ,join(root, 'enaml-native'), 'enaml-native')
+            #: Make simlink to enaml-native cli
+            shprint(sh.ln, '-s', join(root, 'enaml-native'), 'enaml-native')
 
             #: Patch package
             with open('package.json') as f:
-                pkg = json.load(f,object_pairs_hook=OrderedDict)
+                pkg = json.load(f, object_pairs_hook=OrderedDict)
+
             pkg['name'] = args.name
             pkg['version'] = "1.0"
             pkg['bundle_id'] = args.bundle_id
@@ -112,12 +112,24 @@ class Init(Command):
                     f.write('\n'.join(build_gradle))
 
                 with cd("src/main/"):
-                    for src in ['AndroidManifest.xml',
-                                'java/com/enaml/MainActivity.java']:
+
+                    #: Move the app and activity files to the correct folders
+                    with cd("java"):
+                        new_app_dir = args.bundle_id.replace(".", "/")
+                        if not exists(new_app_dir):
+                            os.makedirs(new_app_dir)
+                        for f in ['MainActivity.java', 'MainApplication.java']:
+                            sh.mv('com/codelv/enamlnative/demo/{}'.format(f), new_app_dir)
+
+                        #: Remove empty stuff after the move
+                        sh.find('.', '-empty', '-type', 'd', '-delete')
+
+                    #: Update manifest id
+                    for src in ['AndroidManifest.xml']:
                         with open(src) as f:
                             data = f.read()
                         with open(src, 'w') as f:
-                            f.write(data.replace("com.frmdstryr.enamlnative.demo",args.bundle_id))
+                            f.write(data.replace("com.codelv.enamlnative.demo", args.bundle_id))
 
                     with cd("res/values/"):
                         with open("strings.xml") as f:
@@ -129,7 +141,7 @@ class Init(Command):
                             ))
 
         #: Init VCS
-        shprint(sh.git,'init')
+        shprint(sh.git, 'init')
 
 
 class CleanPython(Command):
@@ -137,8 +149,8 @@ class CleanPython(Command):
     help = set_default("Remove python-for-android build and .so libs")
     args = set_default([
         ('-a', dict(action='store_true', help="Clean all")),
-        ('--ios',dict(action='store_true', help="Clean iOS only")),
-        ('--android',dict(action='store_true', help="Clean android only")),
+        ('--ios', dict(action='store_true', help="Clean iOS only")),
+        ('--android', dict(action='store_true', help="Clean android only")),
     ])
 
     def run(self, args=None):
@@ -165,7 +177,7 @@ class CleanPython(Command):
                         recipes.append(line.split(" ")[0])
                     print("Cleaning {}".format(recipes))
                     for r in recipes:
-                        shprint(sh.python,'toolchain.py','clean',r)
+                        shprint(sh.python, 'toolchain.py', 'clean', r)
 
 
 class NdkBuild(Command):
@@ -176,7 +188,13 @@ class NdkBuild(Command):
         ctx = self.ctx
         ndk_build = sh.Command(os.path.expanduser(join(ctx['android']['ndk'], 'ndk-build')))
         arches = ctx['android']['arches']
-        with cd('android/app/src/main/jni'):
+
+        jni_dir = ctx['android'].get(
+            'jni_dir',
+            "{}/packages/enaml-native/android/src/main/jni".format(os.getcwd())
+        )
+
+        with cd(jni_dir):
 
             #: Patch Applicaiton.mk to have the correct ABI's
             with open('Application.mk') as f:
@@ -286,7 +304,10 @@ class BuildPython(Command):
             cfg.update(env)
 
             #: Get current directory where command was run
-            cfg['ndk_build_dir'] = "{}/android/app/src/main/libs".format(os.getcwd())
+            cfg['ndk_build_dir'] = env.get(
+                'ndk_build_dir',
+                "{}/packages/enaml-native/android/src/main/libs".format(os.getcwd())
+            )
 
             #: Add debug arg if needed
             cfg['debug'] = '--debug ' if (args and args.d) else ''
@@ -327,14 +348,14 @@ class BuildPython(Command):
 
             #: Copy lib folder
             shprint(sh.cp,'-R',
-                  expanduser('~/.local/share/python-for-android/dists/enaml-native/libs/{arch}'.format(**cfg)),
-                  'android/app/src/main/libs')
+                    expanduser('~/.local/share/python-for-android/dists/enaml-native/libs/{arch}'.format(**cfg)),
+                    cfg['ndk_build_dir'])
 
             #: Copy modules
             for f in ['modules', 'site-packages']:
                 shprint(sh.cp,'-R',
-                      expanduser('~/.local/share/python-for-android/dists/enaml-native/python/{}'.format(f)),
-                      '{python_build_dir}/{arch}'.format(**cfg))
+                        expanduser('~/.local/share/python-for-android/dists/enaml-native/python/{}'.format(f)),
+                        '{python_build_dir}/{arch}'.format(**cfg))
 
             #: Copy ca-cert (tornado only)
             cert_path = '{python_build_dir}/{arch}/site-packages/tornado/'.format(**cfg)
@@ -343,7 +364,7 @@ class BuildPython(Command):
                     shprint(sh.cp, '/etc/ssl/certs/ca-certificates.crt', '.')
 
             #: Where .so files go
-            dst = abspath('android/app/src/main/libs/{arch}'.format(**cfg))
+            dst = abspath('{ndk_build_dir}/{arch}'.format(**cfg))
 
             #: Collect all .so files and rename them
             with cd('{python_build_dir}/{arch}'.format(**cfg)):
@@ -409,12 +430,22 @@ class BundleAssets(Command):
         ctx = self.ctx
         env = ctx['android']
 
+        #: Now copy to android assets folder
+        #: Extracted file type
+        bundle = 'python.tar.gz'
+
         #: Clean each arch
         for arch in env['arches']:
             #: Remove old
             cfg = dict(arch=arch, bundle_id=ctx['bundle_id'])
             cfg.update(env)
             root = abspath(os.getcwd())
+
+            #: Create
+            if not os.path.exists(env['python_build_dir']):
+                raise RuntimeError("Error: Python build doesn't exist. "
+                                   "You should run './enaml-native build-python' first!")
+
             with cd(env['python_build_dir']):
                 #: Remove old build
                 if os.path.exists('build'):
@@ -479,10 +510,6 @@ class BundleAssets(Command):
         #            '{python_build_dir}/python.tar.lz4'.format(**env),
         #            'android/app/src/main/libs/{arch}/libpymodules.so'.format(arch=a))
 
-        #: Now copy to android assets folder
-        #: Extracted file type
-        bundle = 'python.tar.gz'
-
         #: Tar is about 25% smaller and significantly 4x faster at unpacking
         shprint(sh.cp,
                 '{python_build_dir}/{bundle}'.format(bundle=bundle,**env),
@@ -543,7 +570,8 @@ class RunAndroid(Command):
         ctx = self.ctx
         bundle_id = ctx['bundle_id']
         with cd("android"):
-            release_apk = os.path.abspath(join('.','app','build','outputs','apk','app-release-unsigned.apk'))
+            release_apk = os.path.abspath(join('.', 'app', 'build', 'outputs', 'apk',
+                                               'app-release-unsigned.apk'))
             gradlew = sh.Command('./gradlew')
 
             #: If no devices are connected, start the simulator
@@ -557,7 +585,7 @@ class RunAndroid(Command):
             else:
                 shprint(gradlew, 'installDebug')
             shprint(sh.adb, 'shell', 'am', 'start', '-n',
-                        '{}/com.enaml.MainActivity'.format(bundle_id))
+                        '{bundle_id}/{bundle_id}.MainActivity'.format(bundle_id=bundle_id))
 
 
 class CleanIOS(Command):

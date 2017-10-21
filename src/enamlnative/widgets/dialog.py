@@ -39,6 +39,9 @@ class ProxyDialog(ProxyToolkitObject):
     def set_show(self, show):
         raise NotImplementedError
 
+    def set_style(self, style):
+        raise NotImplementedError
+
 
 class Dialog(ToolkitObject):
     """ A popup dialog that may contain a view.
@@ -62,13 +65,16 @@ class Dialog(ToolkitObject):
     #: Start the dialog and display it on screen (or hide if False)
     show = d_(Bool())
 
+    #: Dialog style using the @style format (ex. @style/Theme_Light_NoTitleBar_Fullscreen
+    style = d_(Unicode())
+
     #: A reference to the proxy object.
     proxy = Typed(ProxyDialog)
 
     #: --------------------------------------------------------------------------
     # Observers
     #: --------------------------------------------------------------------------
-    @observe('cancel_on_back', 'cancel_on_touch_outside', 'key_events', 'title', 'show')
+    @observe('cancel_on_back', 'cancel_on_touch_outside', 'key_events', 'title', 'show', 'style')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

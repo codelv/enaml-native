@@ -154,6 +154,16 @@ def map_marker_factory():
     return AndroidMapMarker
 
 
+def map_polyline_factory():
+    from .android_map_view import AndroidMapPolyline
+    return AndroidMapPolyline
+
+
+def map_polygon_factory():
+    from .android_map_view import AndroidMapPolygon
+    return AndroidMapPolygon
+
+
 def map_view_factory():
     from .android_map_view import AndroidMapView
     return AndroidMapView
@@ -333,6 +343,8 @@ ANDROID_FACTORIES = {
     'ListItem': list_item_factory,
     'ListView': list_view_factory,
     'MapMarker': map_marker_factory,
+    'MapPolyline': map_polyline_factory,
+    'MapPolygon': map_polygon_factory,
     'MapView': map_view_factory,
     'PagerTitleStrip': pager_title_strip_factory,
     'PagerTabStrip': pager_tab_strip_factory,

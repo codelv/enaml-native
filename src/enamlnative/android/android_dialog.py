@@ -18,7 +18,7 @@ from enamlnative.widgets.dialog import ProxyDialog
 class Dialog(JavaBridgeObject):
     #: Show the view for the specified duration.
     __nativeclass__ = set_default('android.app.Dialog')
-    __signature__ = set_default(('android.content.Context',))
+    __signature__ = set_default(('android.content.Context', 'android.R'))
     show = JavaMethod()
     dismiss = JavaMethod()
     setCancelable = JavaMethod('boolean')
@@ -55,7 +55,8 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
 
         """
         d = self.declaration
-        self.dialog = Dialog(self.get_context())
+        style = d.style or '@style/Theme_Dialog'
+        self.dialog = Dialog(self.get_context(), style)
 
     def init_widget(self):
         """
@@ -168,3 +169,13 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
             self.dialog.show()
         else:
             self.dialog.dismiss()
+
+    def set_style(self, style):
+        d = self.declaration
+        if d.show:
+            self.dialog.dismiss()
+
+        #: Recreate dialog with new style
+        self.create_widget()
+        self.init_widget()
+        self.init_layout()
