@@ -25,7 +25,7 @@ before_install:
   - pip install enaml ply msgpack-python pyjnius
 
   # Intall test tools
-  - pip install pytest pytest-cov pytest-catchlog pytest-timeout
+  - pip install pytest pytest-cov pytest-catchlog pytest-timeout sh
 
   # Install codecov report tools
   - pip install codecov
