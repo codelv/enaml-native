@@ -42,6 +42,7 @@ from utils import load
     (["android"], 'spacer.enaml'),
     (["android"], 'spinner.enaml'),
     (["android"], 'switch.enaml'),
+    (["android"], 'swipe_refresh.enaml'),
     (["android"], 'tabs.enaml'),
     (["android"], 'toast.enaml'),
     (["android"], 'view_pager.enaml'),

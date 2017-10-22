@@ -386,6 +386,24 @@ public class Bridge implements PythonInterpreter.EventListener {
             mSpec = spec;
         }
 
+        protected int parseColor(String color) {
+            if (color.length()==4) {
+                // #RGB
+                color = String.format("#%c%c%c%c%c%c",
+                        color.charAt(1),color.charAt(1), // R
+                        color.charAt(2),color.charAt(2), // G
+                        color.charAt(3),color.charAt(3)); // B
+            } else if (color.length()==5) {
+                // #ARGB
+                color = String.format("#%c%c%c%c%c%c%c%c",
+                        color.charAt(1),color.charAt(1), // A
+                        color.charAt(2),color.charAt(2), // R
+                        color.charAt(3),color.charAt(3), // G
+                        color.charAt(4),color.charAt(4)); // B
+            }
+            return Color.parseColor(color);
+        }
+
         /**
          * Parse the value based on the given type
          * @param spec
@@ -440,21 +458,7 @@ public class Bridge implements PythonInterpreter.EventListener {
                         spec = int.class; // Umm?
                         String color = v.asStringValue().asString();
                         // Add support for #RGB and #ARGB
-                        if (color.length()==4) {
-                            // #RGB
-                            color = String.format("#%c%c%c%c%c%c",
-                                    color.charAt(1),color.charAt(1), // R
-                                    color.charAt(2),color.charAt(2), // G
-                                    color.charAt(3),color.charAt(3)); // B
-                        } else if (color.length()==5) {
-                            // #ARGB
-                            color = String.format("#%c%c%c%c%c%c%c%c",
-                                    color.charAt(1),color.charAt(1), // A
-                                    color.charAt(2),color.charAt(2), // R
-                                    color.charAt(3),color.charAt(3), // G
-                                    color.charAt(4),color.charAt(4)); // B
-                        }
-                        arg = Color.parseColor(color);
+                        arg = parseColor(color);
                     } else if (argType.equals("android.R")) {
                         // Hack for resources such as
                         // @drawable/icon_name
@@ -494,10 +498,18 @@ public class Bridge implements PythonInterpreter.EventListener {
                     // to the reference object we want.
                     Class arrayType = spec.getComponentType();
                     if (arrayType!=null) {
-                        arg = Array.newInstance(arrayType, a.size());
-                        for (int i = 0; i < a.size(); i++) {
-                            UnpackedValue uv = unpackValue(arrayType, null, a.get(i));
-                            Array.set(arg, i, uv.arg);
+                        if (arrayType == Color.class) {
+                            spec = int[].class;
+                            arg = Array.newInstance(int.class, a.size());
+                            for (int i=0; i<a.size(); i++) {
+                                Array.set(arg, i, parseColor(a.get(i).asStringValue().asString()));
+                            }
+                        } else {
+                            arg = Array.newInstance(arrayType, a.size());
+                            for (int i = 0; i < a.size(); i++) {
+                                UnpackedValue uv = unpackValue(arrayType, null, a.get(i));
+                                Array.set(arg, i, uv.arg);
+                            }
                         }
                     } else {
                         ArrayList list = new ArrayList<>();
@@ -530,7 +542,6 @@ public class Bridge implements PythonInterpreter.EventListener {
         }
 
     }
-
 
     /**
      * Define the "spec" for a construtor, method, or field invocation and save it in the cache

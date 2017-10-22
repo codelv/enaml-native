@@ -26,7 +26,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:layout_marginTop="200dp"
-                android:text="Loading... Please wait."
+                android:text="Starting... Please wait."
                 android:textAlignment="center"/>
 
             <ProgressBar

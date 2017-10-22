@@ -1,0 +1,35 @@
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+from enamlnative.core.http import AsyncHttpClient
+
+enamldef ContentView(Flexbox): view:
+    flex_direction = "column"
+    attr httpclient = AsyncHttpClient()
+    attr request
+    SwipeRefreshLayout:
+        trigger_distance = 10
+        indicator_color = "#0F0"
+        indicator_background_color = "#EEE"
+        refreshed::
+            f = httpclient.fetch(http_url.text)
+            view.request = f.request
+        ScrollView:
+            Flexbox:
+                flex_direction = "column"
+                EditText: http_url:
+                    text = "http://worldclockapi.com/api/json/est/now"
+                TextView:
+                    text = "Swipe to refresh"
+                Conditional:
+                    condition << request is not None
+                    ProgressBar:
+                        progress << request.response.progress
+                    TextView:
+                        text << "Status: {} Reason: ".format(
+                                  request.response.status_code,
+                                  request.response.reason,
+                            )
+                    Conditional:
+                        condition << request.response.ok
+                        TextView:
+                          text << "{}".format(request.response.content)

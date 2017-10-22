@@ -254,9 +254,13 @@ def snackbar_factory():
 
 
 def switch_factory():
-    # print "Import switch"
     from .android_switch import AndroidSwitch
     return AndroidSwitch
+
+
+def swipe_refresh_layout_factory():
+    from .android_swipe_refresh_layout import AndroidSwipeRefreshLayout
+    return AndroidSwipeRefreshLayout
 
 
 def text_clock_factory():
@@ -367,6 +371,7 @@ ANDROID_FACTORIES = {
     'Spinner': spinner_factory,
     'Snackbar': snackbar_factory,
     'Switch': switch_factory,
+    'SwipeRefreshLayout': swipe_refresh_layout_factory,
     'TabFragment': tab_fragment_factory,
     'TabLayout': tab_layout_factory,
     'TextClock': text_clock_factory,

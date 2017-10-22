@@ -18,7 +18,7 @@ from .drawer_layout import DrawerLayout
 from .grid_layout import GridLayout
 from .flexbox import Flexbox
 from .coordinator_layout import CoordinatorLayout
-
+from .swipe_refresh_layout import SwipeRefreshLayout
 
 #: Views
 from .view import View
