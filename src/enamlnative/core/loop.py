@@ -239,29 +239,16 @@ class TwistedEventLoop(EventLoop):
 
         bridge.tag_object_with_id(d)
 
-        #: Error handling support
-        #: Doesn't seem to work
-        # if self._handler:
-        #     def safe_handler(*args, **kwargs):
-        #         try:
-        #             self._handler(*args, **kwargs)
-        #         except Exception as e:
-        #             from .app import BridgedApplication
-        #             BridgedApplication.instance().handle_error(self._handler)
-        #
-        #     d.addErrback(safe_handler)#self._handler)
-
         #: Add then method so you can easily chain callbacks
-        def then(d, callback):
-            d.addCallback(partial(self.safe_callback, callback))
-            return d
-
         def catch(d, callback):
             d.addErrback(partial(self.safe_callback, callback))
             return d
 
-        d.then = partial(then, d)
+        #: Add custom API methods
+        d.then = partial(self.add_done_callback, d)
         d.catch = partial(catch, d)
+        d.set_result = partial(self.set_future_result, d)
+
         return d
 
     def add_done_callback(self, future, callback):
@@ -274,9 +261,13 @@ class TwistedEventLoop(EventLoop):
     def log_error(self, callback):
         print("Uncaught error during callback: {}".format(callback))
 
-    def safe_callback(self, callback, *args, **kwargs):
+    def safe_callback(self, callback, result):
+        """ Twisted passes the callback return value to the next callback. We
+            want the same API as tornado, hence we wrap it.
+        """
         try:
-            return callback(*args, **kwargs)
+            callback(result)
+            return result
         except Exception as e:
             if self._handler:
                 self._handler(callback)
