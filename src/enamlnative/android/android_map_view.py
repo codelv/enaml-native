@@ -9,10 +9,10 @@ Created on Oct 10, 2017
 
 @author: jrm
 '''
-from atom.api import Typed, Instance, Dict, Bool, List, set_default
+from atom.api import Typed, Instance, Dict, Bool, set_default
 
 from enamlnative.widgets.map_view import (
-    ProxyMapView, ProxyMapMarker, ProxyMapPolyline, ProxyMapPolygon
+    ProxyMapView, ProxyMapMarker, ProxyMapCircle, ProxyMapPolyline, ProxyMapPolygon
 )
 from enamlnative.core import bridge
 
@@ -169,6 +169,10 @@ class GoogleMap(JavaBridgeObject):
         'com.google.android.gms.maps.GoogleMap$OnPolygonClickListener')
     onPolygonClick = JavaCallback('com.google.android.gms.maps.model.Polygon')
 
+    setOnCircleClickListener = JavaMethod(
+        'com.google.android.gms.maps.GoogleMap$OnCircleClickListener')
+    onCircleClick = JavaCallback('com.google.android.gms.maps.model.Circle')
+
     MAP_TYPE_HYBRID = 4
     MAP_TYPE_NONE = 0
     MAP_TYPE_NORMAL = 1
@@ -249,9 +253,11 @@ class MapItemBase(JavaBridgeObject):
     setZIndex = JavaMethod('float')
     remove = JavaMethod()
 
+
 class MapItemOptionsBase(JavaBridgeObject):
     visible = JavaMethod('boolean')
     zindex = JavaMethod('float')
+
 
 class MarkerOptions(MapItemOptionsBase):
     __nativeclass__ = set_default('com.google.android.gms.maps.model.MarkerOptions')
@@ -279,6 +285,26 @@ class Marker(MapItemBase):
     setTitle = JavaMethod('java.lang.String')
     showInfoWindow = JavaMethod()
     hideInfoWindow = JavaMethod()
+
+
+class CircleOptions(MapItemOptionsBase):
+    __nativeclass__ = set_default('com.google.android.gms.maps.model.CircleOptions')
+    radius = JavaMethod('double')
+    clickable = JavaMethod('boolean')
+    center = JavaMethod('com.google.android.gms.maps.model.LatLng')
+    fillColor = JavaMethod('android.graphics.Color')
+    strokeColor = JavaMethod('android.graphics.Color')
+    strokeWidth = JavaMethod('float')
+
+
+class Circle(MapItemBase):
+    __nativeclass__ = set_default('com.google.android.gms.maps.model.Circle')
+    setClickable = JavaMethod('boolean')
+    setCenter = JavaMethod('com.google.android.gms.maps.model.LatLng')
+    setRadius = JavaMethod('double')
+    setFillColor = JavaMethod('android.graphics.Color')
+    setStrokeColor = JavaMethod('android.graphics.Color')
+    setStrokeWidth = JavaMethod('float')
 
 
 class PolylineOptions(MapItemOptionsBase):
@@ -501,6 +527,11 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
         mapview.setOnPolygonClickListener(mid)
         mapview.setOnPolylineClickListener(mid)
 
+        #: Circle
+        mapview.onCircleClick.connect(self.on_circle_clicked)
+        mapview.setOnCircleClickListener(mid)
+
+
     def init_info_window_adapter(self):
         """ Initialize the info window adapter. Should only be done if one of the
             markers defines a custom view.
@@ -553,20 +584,12 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
 
         #: Reload markers
         for child in self.children():
-            if isinstance(child, AndroidMapMarker):
-                self.map.addMarker(child.options).then(child.on_marker)
-            elif isinstance(child, AndroidMapPolyline):
-                self.map.addPolyline(child.options).then(child.on_marker)
-            elif isinstance(child, AndroidMapPolygon):
-                self.map.addPolygon(child.options).then(child.on_marker)
+            if isinstance(child, AndroidMapItemBase):
+                child.add_to_map(self.map)
 
     def child_added(self, child):
-        if isinstance(child, AndroidMapMarker):
-            self.map.addMarker(child.options).then(child.on_marker)
-        elif isinstance(child, AndroidMapPolyline):
-            self.map.addPolyline(child.options).then(child.on_marker)
-        elif isinstance(child, AndroidMapPolygon):
-            self.map.addPolygon(child.options).then(child.on_marker)
+        if isinstance(child, AndroidMapItemBase):
+            child.add_to_map(self.map)
         else:
             super(AndroidMapView, self).child_added(child)
 
@@ -687,6 +710,14 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
     # --------------------------------------------------------------------------
     def on_poly_clicked(self, poly):
         m = self.markers.get(poly)
+        if m:
+            m.on_click()
+
+    # --------------------------------------------------------------------------
+    # Circle API
+    # --------------------------------------------------------------------------
+    def on_circle_clicked(self, circle):
+        m = self.markers.get(circle)
         if m:
             m.on_click()
 
@@ -845,6 +876,10 @@ class AndroidMapItemBase(AndroidToolkitObject):
         if d.zindex:
             self.set_zindex(d.zindex)
 
+    def add_to_map(self):
+        """ Add this item to the map """
+        raise NotImplementedError
+
     def destroy(self):
         """ Remove the marker if it was added to the map when destroying"""
         marker = self.marker
@@ -898,6 +933,9 @@ class AndroidMapMarker(AndroidMapItemBase, ProxyMapMarker):
             self.set_title(d.title)
         if d.snippit:
             self.set_snippit(d.snippit)
+
+    def add_to_map(self, mapview):
+        mapview.addMarker(self.options).then(self.on_marker)
 
     def child_added(self, child):
         """ If a child is added we have to make sure the map adapter exists """
@@ -1045,6 +1083,98 @@ class AndroidMapMarker(AndroidMapItemBase, ProxyMapMarker):
         pass
 
 
+class AndroidMapCircle(AndroidMapItemBase, ProxyMapCircle):
+    """ An Android implementation of an Enaml ProxyMapCircle.
+
+    """
+
+    def create_widget(self):
+        """ Create the CircleOptions for this map item
+            this later gets converted into a "Circle" instance when addCircle is called
+        """
+        self.options = CircleOptions()
+
+    def add_to_map(self, mapview):
+        mapview.addCircle(self.options).then(self.on_marker)
+
+    def init_widget(self):
+        super(AndroidMapCircle, self).init_widget()
+        d = self.declaration
+        if d.radius:
+            self.set_radius(d.radius)
+        #if d.clickable: doesn't work
+        #    self.set_clickable(d.clickable)
+        if d.position:
+            self.set_position(d.position)
+        if d.fill_color:
+            self.set_fill_color(d.fill_color)
+        if d.stroke_color:
+            self.set_stroke_color(d.stroke_color)
+        if d.stroke_width != 10:
+            self.set_stroke_width(d.stroke_width)
+
+    # --------------------------------------------------------------------------
+    # Marker API
+    # --------------------------------------------------------------------------
+    def on_marker(self, mid):
+        """ Convert our options into the actual circle object"""
+        self.marker = Circle(__id__=mid)
+        self.parent().markers[mid] = self
+
+        #: Required so the packer can pass the id
+        self.marker.setTag(mid)
+
+        d = self.declaration
+        if d.clickable:
+            self.set_clickable(d.clickable)
+
+        #: Can free the options now
+        del self.options
+
+    def on_click(self):
+        d = self.declaration
+        d.clicked()
+
+    # --------------------------------------------------------------------------
+    # ProxyMapCircle API
+    # --------------------------------------------------------------------------
+    def set_clickable(self, clickable):
+        if self.marker:
+            self.marker.setClickable(clickable)
+        else:
+            self.options.clickable(clickable)
+
+    def set_position(self, position):
+        if self.marker:
+            self.marker.setCenter(LatLng(*position))
+        else:
+            self.options.center(LatLng(*position))
+
+    def set_radius(self, radius):
+        if self.marker:
+            self.marker.setRadius(radius)
+        else:
+            self.options.radius(radius)
+
+    def set_fill_color(self, color):
+        if self.marker:
+            self.marker.setFillColor(color)
+        else:
+            self.options.fillColor(color)
+
+    def set_stroke_color(self, color):
+        if self.marker:
+            self.marker.setStrokeColor(color)
+        else:
+            self.options.strokeColor(color)
+
+    def set_stroke_width(self, width):
+        if self.marker:
+            self.marker.setStrokeWidth(width)
+        else:
+            self.options.strokeWidth(width)
+
+
 class AndroidMapPolyline(AndroidMapItemBase, ProxyMapPolyline):
     """ An Android implementation of an Enaml ProxyMapPolyline.
 
@@ -1061,12 +1191,15 @@ class AndroidMapPolyline(AndroidMapItemBase, ProxyMapPolyline):
         #: List to hold our points
         self.points = LatLngList()
 
+    def add_to_map(self, mapview):
+        mapview.addPolyline(self.options).then(self.on_marker)
+
     def init_widget(self):
         super(AndroidMapPolyline, self).init_widget()
         d = self.declaration
         self.set_points(d.points)
-        if d.clickable:
-            self.set_clickable(d.clickable)
+        #if d.clickable:
+        #    self.set_clickable(d.clickable)
         if d.color:
             self.set_color(d.color)
         if d.end_cap != 'butt':
@@ -1089,6 +1222,10 @@ class AndroidMapPolyline(AndroidMapItemBase, ProxyMapPolyline):
         self.marker = Polyline(__id__=mid)
         self.parent().markers[mid] = self
         self.marker.setTag(mid)
+
+        d = self.declaration
+        if d.clickable:
+            self.set_clickable(d.clickable)
 
         #: Can free the options now
         del self.options
@@ -1179,12 +1316,15 @@ class AndroidMapPolygon(AndroidMapItemBase, ProxyMapPolygon):
         self.options = PolygonOptions()
         self.points = LatLngList()
 
+    def add_to_map(self, mapview):
+        mapview.addPolygon(self.options).then(self.on_marker)
+
     def init_widget(self):
         super(AndroidMapPolygon, self).init_widget()
         d = self.declaration
         self.set_points(d.points)
-        if d.clickable:
-            self.set_clickable(d.clickable)
+        #if d.clickable:
+        #    self.set_clickable(d.clickable)
         if d.fill_color:
             self.set_fill_color(d.fill_color)
         if d.geodesic:
@@ -1205,6 +1345,10 @@ class AndroidMapPolygon(AndroidMapItemBase, ProxyMapPolygon):
         self.marker = Polygon(__id__=mid)
         self.parent().markers[mid] = self
         self.marker.setTag(mid)
+
+        d = self.declaration
+        if d.clickable:
+            self.set_clickable(d.clickable)
 
         #: Can free the options now
         del self.options

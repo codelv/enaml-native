@@ -146,6 +146,35 @@ class ProxyMapMarker(ProxyToolkitObject):
         raise NotImplementedError
 
 
+class ProxyMapCircle(ProxyToolkitObject):
+    #: A reference to the MapCircle declaration.
+    declaration = ForwardTyped(lambda: MapCircle)
+
+    def set_position(self, position):
+        raise NotImplementedError
+
+    def set_radius(self, radius):
+        raise NotImplementedError
+
+    def set_clickable(self, clickable):
+        raise NotImplementedError
+
+    def set_fill_color(self, color):
+        raise NotImplementedError
+
+    def set_stroke_color(self, color):
+        raise NotImplementedError
+
+    def set_stroke_width(self, width):
+        raise NotImplementedError
+
+    def set_visible(self, visible):
+        raise NotImplementedError
+
+    def set_zindex(self, zindex):
+        raise NotImplementedError
+
+
 class ProxyMapPolyline(ProxyToolkitObject):
     #: A reference to the declaration.
     declaration = ForwardTyped(lambda: MapPolyline)
@@ -390,6 +419,51 @@ class MapMarker(ToolkitObject):
         """
         # The superclass implementation is sufficient.
         super(MapMarker, self)._update_proxy(change)
+
+
+class MapCircle(ToolkitObject):
+    """ A circle on the map. """
+
+    #: Sets if it is clickable.
+    clickable = d_(Bool())
+
+    #: Circle clicked
+    #: event value will have a 'result' that can be set to True
+    #: to indicate the event was handled
+    clicked = d_(Event(dict), writable=False)
+
+    #: Sets the center for the circle.
+    position = d_(Tuple(float))
+
+    #: Sets the radius in meters.
+    radius = d_(Float(0, strict=False))
+
+    #: Sets the color of the polygon
+    fill_color = d_(Unicode())
+
+    #: Sets the color of the polygon
+    stroke_color = d_(Unicode())
+
+    #: Sets the width of the polyline in screen pixels.
+    stroke_width = d_(Float(10, strict=False))
+
+    #: Sets the visibility for the marker.
+    visible = d_(Bool(True))
+
+    #: Sets the zIndex for the marker.
+    zindex = d_(Float(strict=False))
+
+    #: A reference to the ProxyMapCircle object.
+    proxy = Typed(ProxyMapCircle)
+
+    @observe('clickable', 'position', 'radius', 'fill_color', 'stroke_color', 'stroke_width',
+             'visible', 'zindex')
+    def _update_proxy(self, change):
+        """ An observer which sends the state change to the proxy.
+
+        """
+        # The superclass implementation is sufficient.
+        super(MapCircle, self)._update_proxy(change)
 
 
 class MapPolyline(ToolkitObject):

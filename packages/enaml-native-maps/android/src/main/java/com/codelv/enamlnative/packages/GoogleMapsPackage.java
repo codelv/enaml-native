@@ -4,8 +4,11 @@ import com.codelv.enamlnative.EnamlActivity;
 import com.codelv.enamlnative.EnamlPackage;
 import com.codelv.enamlnative.Bridge;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.Polyline;
 
 /**
  * Created by jrm on 10/15/17.
@@ -42,12 +45,30 @@ public class GoogleMapsPackage implements EnamlPackage {
             try {
                 packer.packInt((int) marker.getTag());
             } catch (Exception e) {
-                packer.packInt(id);
+                packer.packInt(id); // Required for factory return values
             }
             packer.packArrayHeader(2);
             LatLng pos = marker.getPosition();
             packer.packDouble(pos.latitude);
             packer.packDouble(pos.longitude);
+        });
+
+        bridge.addPacker(new Class[]{Circle.class, Polygon.class, Polyline.class},(packer, id, object)-> {
+            Class type = object.getClass();
+            int objId = id;
+
+            try {
+                if (type == Circle.class) {
+                    objId = (int) ((Circle) object).getTag();
+                } else if (type == Polygon.class) {
+                    objId = (int) ((Polygon) object).getTag();
+                } else if (type == Polyline.class) {
+                    objId = (int) ((Polyline) object).getTag();
+                }
+                packer.packInt(objId);
+            } catch (Exception e) {
+                packer.packInt(id); // Required for factory return values
+            }
         });
 
         bridge.addPacker(CameraPosition.class,(packer, id, object)->{

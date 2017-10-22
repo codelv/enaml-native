@@ -154,6 +154,11 @@ def map_marker_factory():
     return AndroidMapMarker
 
 
+def map_circle_factory():
+    from .android_map_view import AndroidMapCircle
+    return AndroidMapCircle
+
+
 def map_polyline_factory():
     from .android_map_view import AndroidMapPolyline
     return AndroidMapPolyline
@@ -343,6 +348,7 @@ ANDROID_FACTORIES = {
     'ListItem': list_item_factory,
     'ListView': list_view_factory,
     'MapMarker': map_marker_factory,
+    'MapCircle': map_circle_factory,
     'MapPolyline': map_polyline_factory,
     'MapPolygon': map_polygon_factory,
     'MapView': map_view_factory,

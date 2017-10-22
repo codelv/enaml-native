@@ -4,9 +4,6 @@ from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 from enamlnative.android.api import LocationManager
 
-AndroidApplication.instance().debug = False
-
-
 enamldef ContentView(DrawerLayout): view:
     attr num_markers = 10
     attr markers_draggable = True
@@ -77,11 +74,20 @@ enamldef ContentView(DrawerLayout): view:
         MapPolygon:
             points << view.points[:3]
             fill_color = "#300F"
-            stroke_color = "#90F"
+            stroke_color = "#900F"
+            clickable = True
             clicked ::
                 toast.text = "Polygon clicked"
                 toast.show = True
-
+        MapCircle:
+            position << view.center
+            radius = 3000
+            fill_color = "#30FF"
+            stroke_color = "#90FF"
+            clickable = True
+            clicked ::
+                toast.text = "Circle clicked"
+                toast.show = True
         Toast: toast:
             text = "Marker"
             duration = 300
