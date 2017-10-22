@@ -511,6 +511,9 @@ class BundleAssets(Command):
         #            'android/app/src/main/libs/{arch}/libpymodules.so'.format(arch=a))
 
         #: Tar is about 25% smaller and significantly 4x faster at unpacking
+        if not exists('android/app/src/main/assets/python/'):
+            os.makedirs('android/app/src/main/assets/python/')
+
         shprint(sh.cp,
                 '{python_build_dir}/{bundle}'.format(bundle=bundle,**env),
                 'android/app/src/main/assets/python/{bundle}'.format(bundle=bundle))
