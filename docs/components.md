@@ -216,6 +216,8 @@ A popup dialog that displays a view as it's content. Show it by setting `show=Tr
 
 Disable cancellation by setting `cancel_on_back` and/or `cancel_on_touch_outside` to `False`.
 
+The `style` can also be set to make it fullscreen using the `@style/<resource>` syntax.
+
     :::python
     from enamlnative.widgets.api import *
     

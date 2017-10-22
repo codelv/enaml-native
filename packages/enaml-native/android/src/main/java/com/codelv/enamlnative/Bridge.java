@@ -466,15 +466,22 @@ public class Bridge implements PythonInterpreter.EventListener {
                         // @layout/etc
                         // Strip off the @ and split by path
                         String sv = v.asStringValue().asString();
-                        String[] res = sv.substring(1).split("/");
-                        assert res.length == 2: "Resources must match @<type>/<name>, got '"+sv+"'!";
-                        int resId = mActivity.getResources().getIdentifier(
-                                res[1], res[0], "android"
-                        );
-                        if (resId==0) {
+                        int resId = 0;
+                        if (sv.startsWith("@")) {
+                            // The: package.name:type/field syntax
+                            String[] res = sv.substring(1).split("/");
+                            assert res.length == 2: "Resources must match @<type>/<name>, got '"+sv+"'!";
                             resId = mActivity.getResources().getIdentifier(
-                                    res[1], res[0], mActivity.getPackageName()
+                                    res[1], res[0], "android"
                             );
+                            if (resId==0) {
+                                resId = mActivity.getResources().getIdentifier(
+                                        res[1], res[0], mActivity.getPackageName()
+                                );
+                            }
+                        } else {
+                            // The: package.name:type/field syntax
+                            resId = mActivity.getResources().getIdentifier(sv,null,null);
                         }
                         Log.d(TAG,"Replacing resource `"+sv+"` with id "+resId);
                         spec = int.class;

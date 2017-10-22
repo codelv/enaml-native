@@ -55,8 +55,7 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
 
         """
         d = self.declaration
-        style = d.style or '@style/Theme_Dialog'
-        self.dialog = Dialog(self.get_context(), style)
+        self.dialog = Dialog(self.get_context(), d.style)
 
     def init_widget(self):
         """
