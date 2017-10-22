@@ -470,6 +470,230 @@ Try the simple icon finder example.
 
 It's a button that allows Icons in the text. See the [Icon](#icon) and [Button](#button) components.
 
+
+### IconToggleButton
+
+It's a toggle button that allows Icons in the text. See the [Icon](#icon) and [ToggleButton](#togglebutton) components.
+
+### MapView
+
+A `GoogleMap` component. All of the `Map<Item>` components can be added as children. 
+
+Map click events can be handled with the `clicked` event which passes a `change['value']` dict containing the `position` and `click` type. 
+
+The camera position, zoom, tilt and bearing can be set or observed. See [Android camera position](https://developers.google.com/maps/documentation/android-api/views#the_camera_position) 
+for mored etails.
+
+    :::python
+    import random
+    from enamlnative.android.app import AndroidApplication
+    from enamlnative.core.api import *
+    from enamlnative.widgets.api import *
+    from enamlnative.android.api import LocationManager
+    
+    enamldef ContentView(DrawerLayout): view:
+        attr num_markers = 10
+        attr markers_draggable = True
+        attr marker_rotation = 0
+        attr marker_alpha = 1
+        attr markers_flat = True
+        attr center = (39.95090, -86.26190)
+        attr points << [(center[0]+random.randint(0,100)/1000.0*i,
+                                center[1]+random.randint(0,100)/1000.0*i) for i in range(view.num_markers)]
+        MapView: mapview:
+            rotate_gestures = False
+            show_toolbar = False
+            camera_position << view.center
+            camera_zoom = 10
+            clicked::
+                if change['value']['click']=='long':
+                    pts = view.points[:]
+                    pts.append(change['value']['position'])
+                    view.points = pts
+            Looper:
+                iterable << view.points
+                MapMarker:
+                    attr angle << view.marker_rotation
+                    position = loop_item
+                    position ::
+                        toast.text = "Marker {} moved {}".format(loop_index,self.position)
+                        toast.show = True
+                    dragging::
+                        if not change['value']:
+                            #: Dragging stopped
+                            #: Update point
+                            pts = view.points[:]
+                            pts[loop_index] = self.position
+                            view.points = pts
+                        
+                    title = "Marker {}".format(loop_index)
+                    snippit = "Caption {}".format(loop_index)
+                    draggable << view.markers_draggable
+                    rotation << view.marker_rotation
+                    flat << view.markers_flat
+                    alpha << view.marker_alpha
+                    clicked :: 
+                        #: Set the odd markers as "handled"
+                        change['value']['handled'] = False
+                        toast.text = "Clicked {}".format(loop_index)
+                        toast.show = True
+                    info_clicked :: 
+                        #: Set the odd markers as "handled"
+                        toast.text = "Info window {} {} clicked".format(loop_index,change['value']['click'])
+                        toast.show = True
+                    custom_info_window_mode = 'content'
+                    Conditional:
+                        condition = bool(loop_index & 1)
+                        Flexbox:
+                            align_items = 'center'
+                            Icon:
+                                text = "{fa-cog}"
+                                padding = (0,10,10,10)
+                            TextView:
+                                text = "Item: {}".format(loop_index)
+            MapPolyline:
+                points << view.points
+                color = "#90F0"
+                clickable = True
+                clicked :: 
+                    toast.text = "Polyline clicked"
+                    toast.show = True
+            MapPolygon:
+                points << view.points[:3]
+                fill_color = "#300F"
+                stroke_color = "#900F"
+                clickable = True
+                clicked :: 
+                    toast.text = "Polygon clicked"
+                    toast.show = True
+            MapCircle:
+                position << view.center
+                radius = 3000
+                fill_color = "#30FF"
+                stroke_color = "#90FF"
+                clickable = True
+                clicked ::
+                    toast.text = "Circle clicked"
+                    toast.show = True
+            Toast: toast:
+                text = "Marker"
+                duration = 300
+        ScrollView:
+            layout_gravity = "left"
+            layout_width = "200"
+            background_color = "#fff"
+            Flexbox:
+                padding = (10,10,10,10)
+                flex_direction = "column"
+                TextView:
+                    text = "Camera"
+                    text_size = 18
+                TextView:
+                    text << "Zoom {}".format(mapview.camera_zoom)
+                SeekBar:
+                    max = 20
+                    progress << int(mapview.camera_zoom)
+                    progress :: mapview.camera_zoom = float(change['value'])
+                TextView:
+                    text << "Position {}".format(mapview.camera_position)
+                Button:
+                    text = "Recenter"
+                    clicked :: mapview.camera_position = view.center
+                TextView:
+                    text = "Markers"
+                    text_size = 18
+                Switch:
+                    text = "Draggable"
+                    checked := view.markers_draggable
+                Switch:
+                    text = "Flat"
+                    checked := view.markers_flat
+                TextView:
+                    text << "Rotation ({})".format(view.marker_rotation)
+                SeekBar:
+                    max = 360
+                    progress := view.marker_rotation
+                TextView:
+                    text << "Alpha ({})".format(view.marker_alpha)
+                SeekBar:
+                    max = 100
+                    progress << int(view.marker_alpha*100)
+                    progress :: view.marker_alpha = change['value']/100.0
+                Button:
+                    text = "Add marker"
+                    style = "borderless"
+                    clicked :: view.num_markers +=1
+                Button:
+                    text = "Remove marker"
+                    style = "borderless"
+                    clicked :: view.num_markers = max(1,view.num_markers-1)
+                TextView:
+                    text = "Selection"
+                Spinner:
+                    items << ["Marker {}".format(i) for i in range(view.num_markers)]
+                    selected :: 
+                        w = mapview.children[change['value']]
+                        w.show_info = True
+                            
+                TextView:
+                    text = "Maps"
+                    text_size = 18
+                Switch:
+                    text = "Show buildings"
+                    checked := mapview.show_buildings
+                Switch:
+                    text = "Show location"
+                    checked := mapview.show_location
+                Button:
+                    text = "Request permission"
+                    style = "borderless"
+                    clicked :: LocationManager.request_permission()
+                Switch:
+                    text = "Show traffic"
+                    checked := mapview.show_traffic
+                TextView:
+                    text = "Layers"
+                    text_size = 18
+                Spinner:
+                    items = list(MapView.map_type.items)
+                    selected << self.items.index(mapview.map_type)
+                    selected :: mapview.map_type = self.items[change['value']]
+
+### MapMarker
+
+A marker that can be added to a map at a given `position` (tuple of `(lat,lng)`). Set the `title` and `snippit` text for the info window. 
+
+The `dragging` attribute can be observed to tell if it started or stopped dragging. Set `draggable=True` to enable dragging.
+ 
+ A child view can be used to populate the info window. Info windows can be `long` or `short` clicked and handeld with `info_clicked` events.
+
+See the [MapView](#mapview) example for usage.
+
+### MapCircle
+
+A circle that can be added to a map. Set the `position` and `radius` to define the size and location. Styles can be set via `fill_color` and `stroke_color`.
+
+It can be made clickable by setting `clickable=True` and handling `clicked` events. 
+
+See the [MapView](#mapview) example for usage.
+
+### MapPolyline
+
+A polyline that can be added to a map. Set the `points` to a list of `(lat,lng)` coordinates. Styles can be set via `color` and `width`.
+
+It can be made clickable by setting `clickable=True` and handling `clicked` events. 
+
+See the [MapView](#mapview) example for usage.
+
+### MapPolygon
+
+A polygon that can be added to a map. Set the `points` to a list of `(lat,lng)` coordinates. Styles can be set via `fill_color`, `stroke_color`, and `stroke_width`.
+
+It can be made clickable by setting `clickable=True` and handling `clicked` events. 
+
+See the [MapView](#mapview) example for usage.
+
+
 ### PagerFragment
 
 Adds a page to [ViewPager](#viewpager).
@@ -726,6 +950,46 @@ An "on/off" switch. It has the same api as a `CheckBox` with `text` and `checked
         Switch:
             text = "Bound switch"
             checked := sw.checked
+
+### SwipeRefreshLayout
+
+A layout that lets you swipe down to trigger a refresh. Use the `refreshed` event to handle reload. The following example also shows the http usage.
+
+    :::python
+    from enamlnative.widgets.api import *
+    from enamlnative.core.http import AsyncHttpClient
+    
+    enamldef ContentView(Flexbox): view:
+        flex_direction = "column"
+        attr httpclient = AsyncHttpClient()
+        attr request
+        SwipeRefreshLayout:
+            trigger_distance = 10
+            indicator_color = "#0F0"
+            indicator_background_color = "#EEE"
+            refreshed::
+                f = httpclient.fetch(http_url.text)
+                view.request = f.request
+            ScrollView:
+                Flexbox:
+                    flex_direction = "column"
+                    EditText: http_url:
+                        text = "http://worldclockapi.com/api/json/est/now"
+                    TextView:
+                        text = "Swipe to refresh"
+                    Conditional:
+                        condition << request is not None
+                        ProgressBar:
+                            progress << request.response.progress
+                        TextView:
+                            text << "Status: {} Reason: ".format(
+                                      request.response.status_code,
+                                      request.response.reason,
+                                )
+                        Conditional:
+                            condition << request.response.ok
+                            TextView:
+                              text << "{}".format(request.response.content)
 
 ### TabFragment
 
