@@ -142,6 +142,9 @@ class ProxyMapMarker(ProxyToolkitObject):
     def set_zindex(self, zindex):
         raise NotImplementedError
 
+    def set_custom_info_window_mode(self, mode):
+        raise NotImplementedError
+
 
 class ProxyMapPolyline(ProxyToolkitObject):
     #: A reference to the declaration.
@@ -353,6 +356,11 @@ class MapMarker(ToolkitObject):
     #: Show info window
     show_info = d_(Bool())
 
+    #: If marker has child widgets this will set how the contents should be rendered.
+    #: if set to 'content' it uses the built-in popup window with custom content
+    #: if set to 'custom' the child view is rendered as the info window itself
+    custom_info_window_mode = d_(Enum('content', 'custom'))
+
     #: Sets the visibility for the marker.
     visible = d_(Bool(True))
 
@@ -375,7 +383,7 @@ class MapMarker(ToolkitObject):
     proxy = Typed(ProxyMapMarker)
 
     @observe('alpha', 'anchor', 'draggable', 'flat', 'position', 'rotation',
-             'title', 'snippit', 'visible', 'zindex', 'show_info')
+             'title', 'snippit', 'visible', 'zindex', 'show_info', 'custom_info_window_mode')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

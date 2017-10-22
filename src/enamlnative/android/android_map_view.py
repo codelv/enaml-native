@@ -19,7 +19,7 @@ from enamlnative.core import bridge
 from .android_toolkit_object import AndroidToolkitObject
 from .android_frame_layout import AndroidFrameLayout, FrameLayout
 from .android_fragment import FragmentTransaction, FragmentManager
-from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod, JavaCallback
+from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod, JavaCallback, JavaProxy
 from .api import LocationManager
 
 
@@ -136,6 +136,7 @@ class GoogleMap(JavaBridgeObject):
     onMarkerDragEnd = JavaCallback('com.google.android.gms.maps.model.Marker')
     onMarkerDragStart = JavaCallback('com.google.android.gms.maps.model.Marker')
 
+    #: Info windows
     setOnInfoWindowClickListener = JavaMethod(
         'com.google.android.gms.maps.GoogleMap$OnInfoWindowClickListener')
     onInfoWindowClick = JavaCallback('com.google.android.gms.maps.model.Marker')
@@ -145,7 +146,16 @@ class GoogleMap(JavaBridgeObject):
     setOnInfoWindowLongClickListener = JavaMethod(
         'com.google.android.gms.maps.GoogleMap$OnInfoWindowLongClickListener')
     onInfoWindowLongClick = JavaCallback('com.google.android.gms.maps.model.Marker')
+    setInfoWindowAdapter = JavaMethod('com.google.android.gms.maps.GoogleMap$InfoWindowAdapter')
 
+    class InfoWindowAdapter(JavaProxy):
+        __nativeclass__ = set_default('com.google.android.gms.maps.GoogleMap$InfoWindowAdapter')
+        getInfoContents = JavaCallback('com.google.android.gms.maps.model.Marker',
+                                       returns='android.view.View')
+        getInfoWindow = JavaCallback('com.google.android.gms.maps.model.Marker',
+                                       returns='android.view.View')
+
+    #: Map clicks
     setOnMapClickListener = JavaMethod('com.google.android.gms.maps.GoogleMap$OnMapClickListener')
     onMapClick = JavaCallback('com.google.android.gms.maps.model.LatLng')
     setOnMapLongClickListener = JavaMethod(
@@ -373,6 +383,9 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
     #: Camera updating
     _update_blocked = Bool()
 
+    #: Info window adapter
+    adapter = Typed(GoogleMap.InfoWindowAdapter)
+
     # --------------------------------------------------------------------------
     # Initialization API
     # --------------------------------------------------------------------------
@@ -487,6 +500,17 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
         mapview.onPolylineClick.connect(self.on_poly_clicked)
         mapview.setOnPolygonClickListener(mid)
         mapview.setOnPolylineClickListener(mid)
+
+    def init_info_window_adapter(self):
+        """ Initialize the info window adapter. Should only be done if one of the
+            markers defines a custom view.
+        """
+        if self.adapter:
+            return  #: Already initialized
+        self.adapter = GoogleMap.InfoWindowAdapter()
+        self.adapter.getInfoContents.connect(self.on_info_window_contents_requested)
+        self.adapter.getInfoWindow.connect(self.on_info_window_requested)
+        self.map.setInfoWindowAdapter(self.adapter)
 
     # --------------------------------------------------------------------------
     # Google Maps API
@@ -627,6 +651,18 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
     # --------------------------------------------------------------------------
     # Info window API
     # --------------------------------------------------------------------------
+    def on_info_window_requested(self, marker):
+        mid, pos = marker
+        m = self.markers.get(mid)
+        if m:
+            return m.on_info_window_requested()
+
+    def on_info_window_contents_requested(self, marker):
+        mid, pos = marker
+        m = self.markers.get(mid)
+        if m:
+            return m.on_info_window_contents_requested()
+
     def on_info_window_clicked(self, marker):
         mid, pos = marker
         m = self.markers.get(mid)
@@ -795,8 +831,10 @@ class AndroidMapView(AndroidFrameLayout, ProxyMapView):
 
 
 class AndroidMapItemBase(AndroidToolkitObject):
+    #: Options for map item constructor
     options = Instance(MapItemOptionsBase)
 
+    #: Actual map intem created
     marker = Instance(MapItemBase)
 
     def init_widget(self):
@@ -861,6 +899,13 @@ class AndroidMapMarker(AndroidMapItemBase, ProxyMapMarker):
         if d.snippit:
             self.set_snippit(d.snippit)
 
+    def child_added(self, child):
+        """ If a child is added we have to make sure the map adapter exists """
+        if child.widget:
+            #: TODO: Should we keep count and remove the adapter if not all markers request it?
+            self.parent().init_info_window_adapter()
+        super(AndroidMapMarker, self).child_added(child)
+
     # --------------------------------------------------------------------------
     # Marker API
     # --------------------------------------------------------------------------
@@ -868,8 +913,17 @@ class AndroidMapMarker(AndroidMapItemBase, ProxyMapMarker):
         """ Convert our options into the actual marker object"""
         mid, pos = marker
         self.marker = Marker(__id__=mid)
-        self.parent().markers[mid] = self
+        mapview = self.parent()
+        #: Save ref
+        mapview.markers[mid] = self
+
+        #: Required so the packer can pass the id
         self.marker.setTag(mid)
+
+        #: If we have a child widget we must configure the map to use the custom adapter
+        for w in self.child_widgets():
+            mapview.init_info_window_adapter()
+            break
 
         d = self.declaration
         if d.show_info:
@@ -915,10 +969,23 @@ class AndroidMapMarker(AndroidMapItemBase, ProxyMapMarker):
         with self.marker.hideInfoWindow.suppressed():
             d.show_info = False
 
+    def on_info_window_requested(self):
+        #: Use default window, subclasses can override if necessary
+        d = self.declaration
+        if d.custom_info_window_mode == 'custom':
+            for w in self.child_widgets():
+                return w
+        return None
+
+    def on_info_window_contents_requested(self):
+        #: Return the first child widget as the view for the content
+        for w in self.child_widgets():
+            return w
+        return None
+
     # --------------------------------------------------------------------------
     # ProxyMapMarker API
     # --------------------------------------------------------------------------
-
     def set_alpha(self, alpha):
         if self.marker:
             self.marker.setAlpha(alpha)
@@ -973,6 +1040,9 @@ class AndroidMapMarker(AndroidMapItemBase, ProxyMapMarker):
                 self.marker.showInfoWindow()
             else:
                 self.marker.hideInfoWindow()
+
+    def set_custom_info_window_mode(self, mode):
+        pass
 
 
 class AndroidMapPolyline(AndroidMapItemBase, ProxyMapPolyline):

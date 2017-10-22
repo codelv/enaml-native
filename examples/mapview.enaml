@@ -4,7 +4,8 @@ from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 from enamlnative.android.api import LocationManager
 
-AndroidApplication.instance().debug = True
+AndroidApplication.instance().debug = False
+
 
 enamldef ContentView(DrawerLayout): view:
     attr num_markers = 10
@@ -13,20 +14,34 @@ enamldef ContentView(DrawerLayout): view:
     attr marker_alpha = 1
     attr markers_flat = True
     attr center = (39.95090, -86.26190)
+    attr points << [(center[0]+random.randint(0,100)/1000.0*i,
+                            center[1]+random.randint(0,100)/1000.0*i) for i in range(view.num_markers)]
     MapView: mapview:
         rotate_gestures = False
         show_toolbar = False
         camera_position << view.center
         camera_zoom = 10
+        clicked::
+            if change['value']['click']=='long':
+                pts = view.points[:]
+                pts.append(change['value']['position'])
+                view.points = pts
         Looper:
-            iterable << range(view.num_markers)
+            iterable << view.points
             MapMarker:
                 attr angle << view.marker_rotation
-                position = (center[0]+random.randint(0,100)/1000.0*loop_index,
-                            center[1]+random.randint(0,100)/1000.0*loop_index)
+                position = loop_item
                 position ::
                     toast.text = "Marker {} moved {}".format(loop_index,self.position)
                     toast.show = True
+                dragging::
+                    if not change['value']:
+                        #: Dragging stopped
+                        #: Update point
+                        pts = view.points[:]
+                        pts[loop_index] = self.position
+                        view.points = pts
+
                 title = "Marker {}".format(loop_index)
                 snippit = "Caption {}".format(loop_index)
                 draggable << view.markers_draggable
@@ -42,6 +57,30 @@ enamldef ContentView(DrawerLayout): view:
                     #: Set the odd markers as "handled"
                     toast.text = "Info window {} {} clicked".format(loop_index,change['value']['click'])
                     toast.show = True
+                custom_info_window_mode = 'content'
+                Conditional:
+                    condition = bool(loop_index & 1)
+                    Flexbox:
+                        align_items = 'center'
+                        Icon:
+                            text = "{fa-cog}"
+                            padding = (0,10,10,10)
+                        TextView:
+                            text = "Item: {}".format(loop_index)
+        MapPolyline:
+            points << view.points
+            color = "#90F0"
+            clickable = True
+            clicked ::
+                toast.text = "Polyline clicked"
+                toast.show = True
+        MapPolygon:
+            points << view.points[:3]
+            fill_color = "#300F"
+            stroke_color = "#90F"
+            clicked ::
+                toast.text = "Polygon clicked"
+                toast.show = True
 
         Toast: toast:
             text = "Marker"
