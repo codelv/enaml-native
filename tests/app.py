@@ -37,6 +37,9 @@ class TestBridge(Atom):
     def process_events(self, data):
         self.app.set_future_result(self.data, data)
 
+    def addTarget(self, *args, **kwargs):
+        """ For iOS tests... """
+        pass
 
 class MockApplication(BridgedApplication):
     started = Float()
@@ -145,7 +148,6 @@ class MockApplication(BridgedApplication):
         self.start()
         if self.error:
             raise self.error
-
 
 
 

@@ -64,8 +64,8 @@ class UiKitActivityIndicator(UiKitView, ProxyActivityIndicator):
     # ProxyActivityIndicator API
     # --------------------------------------------------------------------------
     def set_style(self, style):
-        raise NotImplementedError
-        self.widget.activityIndicatorViewStyle = style
+        pass
+        #self.widget.activityIndicatorViewStyle = style
 
     def set_color(self, color):
         self.widget.color = color

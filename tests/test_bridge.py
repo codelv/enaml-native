@@ -15,6 +15,7 @@ import pytest
 from app import MockApplication
 from utils import load
 
+
 def test_serialization():
     app = MockApplication.instance() or MockApplication()
 
@@ -24,17 +25,33 @@ def test_serialization():
         from enamlnative.widgets.api import *
 
         enamldef ContentView(Flexbox):
+            flex_direction = "column"
             Looper:
-                iterable = range(1000)
-                TextView:
-                    padding = (10, 10, 10, 10)
-                    text = "hello"
-                    text_size = 32
-                    font_family = "sans-serif"
+                iterable = range(5000)
+                Flexbox:
+                    align_items = "center"
+                    TextView:
+                        padding = (10, 10, 10, 10)
+                        text = "hello"
+                        text_size = 32
+                        font_family = "sans-serif"
+                    Button:
+                        text = "Something"
+                        style = "borderless"
+                    Switch:
+                        checked = True
+                    Flexbox:
+                        flex_direction = "column"
+                        justify_content = "flex_end"
+                        Picker:
+                            items = [str(i) for i in range(100)]
+                        ActivityIndicator:
+                            pass
 
         """)
 
     app.view = ContentView()
+    app.reset('android')
     app.run()
 
 

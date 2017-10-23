@@ -113,12 +113,12 @@ class UiKitEditText(UiKitControl, ProxyEditText):
     # ProxyEditText API
     # --------------------------------------------------------------------------
     def set_selection(self, selection):
-        raise NotImplementedError
+        pass
 
     def set_input_type(self, input_type):
         """ Set keyboard type """
         #: TODO...
-        raise NotImplementedError
+        pass
 
     def set_style(self, style):
         self.widget.borderStyle = UITextField.STYLES[style]
