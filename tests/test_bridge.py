@@ -17,7 +17,7 @@ from utils import load
 
 
 def test_serialization():
-    app = MockApplication.instance() or MockApplication()
+    app = MockApplication.instance('android')
 
     with enaml.imports():
         ContentView = load("""
@@ -51,7 +51,6 @@ def test_serialization():
         """)
 
     app.view = ContentView()
-    app.reset('android')
     app.run()
 
 

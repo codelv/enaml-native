@@ -64,6 +64,15 @@ class MockApplication(BridgedApplication):
     def _default_done(self):
         return self.create_future()
 
+    @classmethod
+    def instance(cls, platform=None):
+        from enaml.application import Application
+        Application._instance = None
+        app = cls()
+        if platform:
+            app.reset(platform)
+        return app
+
     def __init__(self, platform="ios"):
         self.resolver = ProxyResolver()
         self.reset(platform) # Default
@@ -81,12 +90,20 @@ class MockApplication(BridgedApplication):
             from enamlnative.core.loop import TornadoEventLoop
             self.loop = TornadoEventLoop()
 
+        #: Clear it again
+        from enaml.application import Application
+        Application._instance = None
 
         #: Update resolver
         if platform=='ios':
+            from enamlnative.ios.app import IPhoneApplication
+
+            app = IPhoneApplication()
             from enamlnative.ios.factories import IOS_FACTORIES
             self.resolver.factories = IOS_FACTORIES
         else:
+            from enamlnative.android.app import AndroidApplication
+            app = AndroidApplication()
             from enamlnative.android.factories import ANDROID_FACTORIES
             self.resolver.factories = ANDROID_FACTORIES
 
@@ -94,7 +111,7 @@ class MockApplication(BridgedApplication):
         self.error = None
         self.done = self._default_done()
         self.bridge.reset(platform)
-
+        return app
 
     def start(self):
         if self.profile:

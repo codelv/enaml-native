@@ -49,8 +49,6 @@ from utils import load
     (["android"], 'webview.enaml'),
 ])
 def test_examples(platforms, path):
-    app = MockApplication.instance() or MockApplication()
-
     #: Load
     dir_path = os.path.abspath(os.path.split(os.path.dirname(__file__))[0])
     enaml_file = os.path.join(dir_path, 'examples', os.path.normpath(path))
@@ -61,14 +59,19 @@ def test_examples(platforms, path):
 
     #: Run for each platform
     for platform in platforms:
-        app.reset(platform)
+        app = MockApplication.instance(platform)
         app.view = ContentView()
         app.run()
 
 
+def test_demo_app():
+    with enaml.imports():
+        with open('src/apps/view.enaml','rb') as f:
+            ContentView = load(f.read())
 
-
-
+        app = MockApplication.instance('android')
+        app.view = ContentView()
+        app.run()
 
 
 
