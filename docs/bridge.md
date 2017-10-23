@@ -10,7 +10,7 @@ This uses a different approach than pyjnius which creates all of these fields fo
 
 The Android bridge is implemented in three files:
 
-1. [com.enaml.Bridge](https://github.com/codelv/enaml-native/blob/master/android/app/src/main/java/com/enaml/Bridge.java) in Java
+1. [com.codelv.enamlnative.Bridge](https://github.com/codelv/enaml-native/blob/master/packages/enaml-native/android/src/main/java/com/codelv/enamlnative/Bridge.java) in Java
 2. [enamlnative.android.bridge](https://github.com/codelv/enaml-native/blob/master/src/enamlnative/android/bridge.py) in Python 
 3. [enamlnative.core.bridge](https://github.com/codelv/enaml-native/blob/master/src/enamlnative/core/bridge.py) in Python 
 

@@ -8,6 +8,7 @@ The project directory consists of the basic structure:
     android/      #: Android project using gradle
     ios/          #: iOS xcode project with cocoapods
     src/          #: Python source for your app 
+    packages/     #: Enaml-native packages
     package.json  #: Project config
     enaml-native  #: Symlink to cloned enaml-native cli
 
@@ -20,7 +21,7 @@ The `package.json` file is your project config. If you open it you see the follo
     :::json
     {
       "name": "Enaml-Native Demo",
-      "bundle_id":"com.frmdstryr.enamlnative.demo",
+      "bundle_id":"com.codelv.enamlnative.demo",
       "version": "1.8",
       "private": true,
       "sources": [
@@ -154,11 +155,11 @@ This fork is modified as follows:
 1. Modified several recipies to work with enaml-native
 
 Building is invoked with `./enaml-native build-python` in [enaml-native](https://github.com/codelv/enaml-native/blob/master/enaml-native)
-based on the config file. This calls ndk-build on the [native hooks](https://github.com/codelv/enaml-native/tree/master/android/app/src/main/jni) 
+based on the config file. This calls ndk-build on the [native hooks](https://github.com/codelv/enaml-native/blob/master/packages/enaml-native/android/src/main/jni) 
 and then does a p4a's build to compile python and any recipes.  
 
-Once done all of your libraries will go to the jni libs folder `android/app/src/main/libs/<arch>`. 
-All modules here will be included in the app by gradle (see [build.gradle](https://github.com/codelv/enaml-native/blob/master/android/app/build.gradle#L24)).
+Once done all of your libraries will go to the jni libs folder `packages/enaml-native/android/src/main/libs/<arch>`. 
+All modules here will be included in the app by gradle (see [build.gradle](https://github.com/codelv/enaml-native/blob/master/packages/enaml-native/android/build.gradle#L24)).
 
 > Note: Libraries matching the pattern `lib*.so` are automatically copied during the App intall on the device. This speeds up the startup. Any modules NOT matching this need copied manually in your app's main activity.
 
@@ -173,7 +174,7 @@ These compiled modules are then imported using a custom import hook, see [import
 ##### Bundling python for Android
 
 enaml-native hooks itself into the gradle build process to include your python source and libraries.
-This hook is in [android/app/build.grade](https://github.com/codelv/enaml-native/blob/master/android/app/build.gradle).
+This hook is in [packages/enaml-native/build.grade](https://github.com/codelv/enaml-native/blob/master/packages/enaml-native/android/build.gradle).
 
 It simply runs `./enaml-native bundle-assets` which packages all the python and app source code into a zip 
 and copies it to `android/app/src/main/assets/python/python.zip`. 
@@ -231,16 +232,6 @@ providing a build server to compile libraries for you.
 These compiled modules are then imported using a custom import hook, see [import_hooks.py](https://github.com/codelv/enaml-native/blob/master/src/enamlnative/core/import_hooks.py).
 
 There's a few blog posts on what exactly was changed that may help you when building new recipies [on my blog](http://blog.codelv.com).
-
-##### Bundling python for iOS
-
-enaml-native hooks itself into the iOS build process to include your python source and libraries.
-This hook is in [android/app/build.grade](https://github.com/codelv/enaml-native/blob/master/android/app/build.gradle).
-
-It simply runs `./enaml-native bundle-assets` which packages of your app code and site-packages into a zip 
-and copies it to `android/app/src/main/assets/python/python.zip`. 
-
-> Note: This hook does NOT include python or any extensions ONLY pure python assets! See above for building extensions.
 
 
 #### Adding libraries with CocoaPods
