@@ -1,17 +1,16 @@
-from os.path import join, dirname, isdir, exists, isfile, split, realpath, basename
-import importlib
-import zipfile
+import sh
 import glob
+import shutil
+import zipfile
+import fnmatch
+import hashlib
+import importlib
+import pkg_resources
+from sys import stdout
 from shutil import rmtree
 from six import PY2, with_metaclass
-
-import hashlib
-
-import sh
-import shutil
-import fnmatch
 from os import listdir, unlink, environ, mkdir, curdir, walk
-from sys import stdout
+from os.path import join, dirname, isdir, exists, isfile, split, realpath, basename
 try:
     from urlparse import urlparse
 except ImportError:
@@ -102,6 +101,10 @@ class Recipe(with_metaclass(RecipeMeta)):
     at build time, you must create a recipe.'''
 
     archs = ['armeabi']  # Not currently implemented properly
+
+    from_pip = False
+    '''Recipe is installed from a pip and loaded with an entry point. This is set
+    automatically and should not be modified in user code.'''
 
     @property
     def version(self):
@@ -617,6 +620,43 @@ class Recipe(with_metaclass(RecipeMeta)):
                         yield name
 
     @classmethod
+    def get_pip_installed_recipe(cls, name, ctx):
+        """Attempts to get the recipe installed via pip.
+
+        Requires the use of the "p4a_recipe" entry point. This
+        entry point must set a function that returns a tuple of (recipe, __file__)
+
+        Example
+        --------
+
+        #: In myrecipe.py
+
+            from pythonforandroid.recipe import CythonRecipe
+
+            class MyRecipe(CythonRecipe):
+                version = "1.0"
+                name = "my-recipe"
+                # etc ...
+
+            def get_recipe():
+                return (MyRecipe(), __file__)
+
+        #: setup.py
+
+            setup(
+              #...
+              entry_points = {
+                'p4a_recipe': ['my_recipe = myrecipe:get_recipe'],
+              },
+            )
+
+        """
+        for ep in pkg_resources.iter_entry_points(group="p4a_recipe"):
+            if ep.name.replace("-", "_") == name.replace("-", "_"):
+                get_recipe = ep.load()
+                return get_recipe()
+
+    @classmethod
     def get_recipe(cls, name, ctx):
         '''Returns the Recipe with the given name, if it exists.'''
         if not hasattr(cls, "recipes"):
@@ -631,13 +671,20 @@ class Recipe(with_metaclass(RecipeMeta)):
                 break
             recipe_file = None
 
-        if not recipe_file:
+        # Try to get it from an extension point first because
+        # these are explicitly installed by the user
+        pip_recipe = cls.get_pip_installed_recipe(name, ctx)
+        if pip_recipe:
+            recipe, recipe_file = pip_recipe
+            recipe.from_pip = True
+        elif recipe_file:
+            mod = import_recipe('pythonforandroid.recipes.{}'.format(name), recipe_file)
+            recipe = mod.recipe
+        else:
             raise IOError('Recipe does not exist: {}'.format(name))
 
-        mod = import_recipe('pythonforandroid.recipes.{}'.format(name), recipe_file)
         if len(logger.handlers) > 1:
             logger.removeHandler(logger.handlers[1])
-        recipe = mod.recipe
         recipe.recipe_dir = dirname(recipe_file)
         recipe.ctx = ctx
         cls.recipes[name] = recipe
