@@ -18,6 +18,8 @@ Android apps are currently working and have a lot of components. iOS works, but 
 
 See the [project site](https://www.codelv.com/projects/enaml-native/). There's also some short tutorials and examples on [youtube](https://www.youtube.com/playlist?list=PLXUaMWWFaOjT2WdIrJdTYjEMJmrjuvVz0).
 
+> Need help? Try the gitter group https://gitter.im/enaml-native/Lobby
+
 ### Features ###
 1. Enaml's features: declarative syntax, conditional and looper rendering, automatic data binding
 2. Web code editor via the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground)!
