@@ -5,6 +5,9 @@
 #
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
+import os
+import sh
+from contextlib import contextmanager
 from enaml.core.enaml_compiler import EnamlCompiler
 from enaml.core.parser import parse
 from textwrap import dedent
@@ -38,4 +41,28 @@ def compile_source(source, item, filename='<test>'):
     return namespace[item]
 
 
+@contextmanager
+def cd(newdir):
+    prevdir = os.getcwd()
+    print("[DEBUG]:   -> running cd {}".format(newdir))
+    os.chdir(os.path.expanduser(newdir))
+    try:
+        yield
+    finally:
+        print("[DEBUG]:   -> running cd {}".format(prevdir))
+        os.chdir(prevdir)
 
+
+@contextmanager
+def source_activated(venv, command):
+    print("[DEBUG]: Activating {} for command {}".format(venv, command))
+
+    def cmd(*args):
+        #: Make a wrapper to a that runs it in the venv
+        return sh.bash('-c', 'source {venv}/bin/activate && {cmd} {args}'.format(
+            venv=venv, cmd=command, args=" ".join(args)
+        ))
+
+    yield cmd
+
+    print("[DEBUG]: Deactivating {} for {}".format(venv, command))

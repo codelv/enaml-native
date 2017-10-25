@@ -175,7 +175,7 @@ def build_dist_from_args(ctx, dist, args):
         error('virtualenv does not support nesting, and you are running')
         error('python-for-android in one. Please run p4a outside of a')
         error('virtualenv instead.')
-        exit(1)
+        #exit(1)  #: Dilligaf man, deal with it
 
     info('The selected bootstrap is {}'.format(bs.name))
     info_main('# Creating dist with {} bootstrap'.format(bs.name))

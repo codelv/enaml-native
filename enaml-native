@@ -9,6 +9,7 @@ import fnmatch
 import logging
 import getpass
 import textwrap
+import pkg_resources
 from glob import glob
 from os.path import join, exists, abspath, expanduser, realpath, dirname
 from argparse import ArgumentParser, Namespace
@@ -19,12 +20,12 @@ from collections import OrderedDict
 @contextmanager
 def cd(newdir):
     prevdir = os.getcwd()
+    print("[DEBUG]:   -> running cd {}".format(newdir))
     os.chdir(os.path.expanduser(newdir))
     try:
-        print("Entering into {}".format(newdir))
         yield
-        print("Returning to {}".format(prevdir))
     finally:
+        print("[DEBUG]:   -> running  cd {}".format(prevdir))
         os.chdir(prevdir)
 
 
@@ -53,7 +54,6 @@ class Init(Command):
         ('name',dict(help="Project name")),
         ('bundle_id',dict(help="App bundleId")),
         ('destination', dict(help="Project destination folder")),
-        #('-t --template', dict(dest='template', action='store_const',help="Project destination folder")),
     ])
 
     def run(self, args):
@@ -139,8 +139,22 @@ class Init(Command):
                                 '<string name="app_name">{}</string>'.format(args.name)
                             ))
 
+            #: Update view.enaml
+
+
+
             #: Init VCS
             shprint(sh.git, 'init')
+
+            #: Create VENV
+            try:
+                shprint(sh.virtualenv, 'venv')
+                print("Installing enaml-native cli...")
+                en = dirname(realpath(__file__))
+                shprint(sh.bash, '-c', 'source venv/bin/activate && pip install {en}'.format(en=en))
+                print("Now activate the venv using 'source venv/bin/activate' ")
+            except:
+                print("Warning: Failed to create a venv, you must now do it yourself!")
 
 
 class CleanPython(Command):
@@ -601,8 +615,14 @@ class InitPackage(Command):
                     data_files=find_data_files("{name}",['android','ios','src']),
                     install_requires=['enaml-native-cli'],
                     classifiers=["Framework :: enaml-native"],
+                    entry_points={{
+                        'enaml_native_package': [
+                            '{pkg} = {pkg}.package:get_package'
+                        ]
+                    }},
                 )
-                """.format(name=args.name, user=getpass.getuser()).lstrip()))
+                """.format(name=args.name, pkg=args.name.replace("-", "_"),
+                           user=getpass.getuser()).lstrip()))
 
             #: Create folders
             os.makedirs('src')  #: Python source here
@@ -633,33 +653,22 @@ class InitPackage(Command):
                     """.format(name=args.name, user=getpass.getuser())).lstrip())
 
             os.makedirs('android')  #: Android here
-            os.makedirs('android/recipes/')  #: Put p4a recipes here
-            with cd('android/recipes'):
-                with open('README.md','w') as f:
-                    f.write(textwrap.dedent("""
-                       # Android recipes
-
-                       Put any custom python-for-android recipes in this directory.
-
-                       They will be coped to `enaml-native/python-for-android/pythonforandroid/recipes` before building.
-
-                    """))
-
             os.makedirs('ios')  #: IOS here
-            os.makedirs('ios/recipes/')  #: Put p4i recipes here
-            with cd('ios/recipes/'):
-                with open('README.md','w') as f:
-                    f.write(textwrap.dedent("""
-                       # iOS recipes
-
-                       Put any custom python-for-ios recipes in this directory.
-
-                       They will be coped to `enaml-native/python-for-ios/recipes` before building.
-
-                    """))
-
             #: Init git
             sh.git('init')
+
+
+class ListPackages(Command):
+    title = set_default("list")
+    help = set_default("List installed packages")
+
+    def run(self, args):
+        with cd('packages'):
+            try:
+                print(sh.pipdeptree())
+            except:
+                print("Warning: pipdeptree is not installed, falling pack on pip!")
+                print(sh.pip('list', '-l'))
 
 
 class Install(Command):
@@ -667,14 +676,17 @@ class Install(Command):
     help = set_default("Install and link an enaml-native package")
     args = set_default([
         ('name', dict(help="Package name")),
-        ('--save', dict(action='store_true', help="Add to requirements")),
+        ('--save', dict(action='store_true', help="Add to app dependencies")),
         ('--nolink', dict(action='store_true', help="Skip linking")),
     ])
 
     def run(self, args):
         print("Installing {}...".format(args.name))
         #: Install enaml-native package with pip
-        sh.pip('install', args.name, '-target', './packages')
+        #: TODO: Check that we're in a virtualenv!
+        if not hasattr(sys, 'real_prefix'):
+            print("Warning: It's highly recommended to use enaml-native in a virtual env!")
+        sh.pip('install', args.name)
 
         if not args.nolink:
             self.cmds['link'].run(args)
@@ -682,9 +694,9 @@ class Install(Command):
         if args.save:
             ctx = self.ctx
             #: TODO: Get version?
-            ctx['android']['requirements'][args.name] = ""
+            ctx['android']['dependencies'][args.name] = ""
             #: Dump before openting
-            pkg = json.dumps(ctx)
+            pkg = json.dumps(ctx, indent=4)
             with open('package.json', 'w') as f:
                 f.write(pkg)
 
@@ -700,7 +712,26 @@ class Uninstall(Command):
 
     def run(self, args=None):
         print("Unistalling {}...".format(args.name))
-        raise NotImplementedError
+        print("Installing {}...".format(args.name))
+
+        if not hasattr(sys, 'real_prefix'):
+            print("Warning: It's highly recommended to use enaml-native in a virtual env!")
+
+        #: Install enaml-native package with pip
+        sh.pip('uninstall', args.name)
+
+        if not args.nolink:
+            self.cmds['unlink'].run(args)
+
+        if args.save:
+            ctx = self.ctx
+            #: TODO: Get version?
+            if args.name in ctx['android']['dependencies']:
+                del ctx['android']['dependencies'][args.name]
+            #: Dump before openting
+            pkg = json.dumps(ctx, indent=4)
+            with open('package.json', 'w') as f:
+                f.write(pkg)
 
 
 class Link(Command):
@@ -1247,11 +1278,30 @@ class EnamlNativeCli(Atom):
     commands = List(Command)
 
     def _default_commands(self):
-        """ Build the list of CLI commands by finding subclasses of the Command class """
-        return [c() for c in find_commands(Command)]
+        """ Build the list of CLI commands by finding subclasses of the Command class
+
+        Also allows commands to be installed using the "enaml_native_command" entry point.
+
+        This entry point should return a Command subclass
+
+        """
+        commands = [c() for c in find_commands(Command)]
+
+        #: Get commands installed via entry points
+        for ep in pkg_resources.iter_entry_points(group="enaml_native_command"):
+            c = ep.load()
+            if not issubclass(c, Command):
+                print("Warning: entry point {} did not return a valid enaml cli command! "
+                      "This command will be ignored!".format(ep.name))
+            commands.append(c())
+
+        return commands
 
     def _default_ctx(self):
         """ Return the package config or context and normalize some of the values """
+        if not exists(self.package):
+            raise EnvironmentError("{} does not exist. "
+                                   "Are you in the project folder?".format(self.package))
         with open(self.package) as f:
             ctx = json.load(f)
 
