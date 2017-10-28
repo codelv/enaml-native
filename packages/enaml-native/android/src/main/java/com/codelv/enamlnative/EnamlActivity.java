@@ -59,12 +59,7 @@ public class EnamlActivity extends AppCompatActivity {
         }
 
 
-        // Show loading screen
-        setContentView(R.layout.activity_main);
-
-        // Save views for animation when loading is complete
-        mContentView = (FrameLayout) findViewById(R.id.contentView);
-        mLoadingView = findViewById(R.id.loadingView);
+        prepareLoadingScreen();
 
         // Now initialize everything
         for (EnamlPackage pkg: getPackages()) {
@@ -78,6 +73,17 @@ public class EnamlActivity extends AppCompatActivity {
         return mEnamlPackages;
     }
 
+    /**
+     * Show the loading screen. Can be overridden if necessary.
+     */
+    protected void prepareLoadingScreen() {
+        // Show loading screen
+        setContentView(R.layout.activity_main);
+
+        // Save views for animation when loading is complete
+        mContentView = (FrameLayout) findViewById(R.id.contentView);
+        mLoadingView = findViewById(R.id.loadingView);
+    }
 
     /**
      * Set the bridge implementation
@@ -149,7 +155,6 @@ public class EnamlActivity extends AppCompatActivity {
             mContentView.removeView(mPythonView);
             mContentView.forceLayout();
             mLoadingView.setVisibility(View.VISIBLE);
-            //animateView(mLoadingView,mContentView);
         }
         mPythonView = view;
         mContentView.addView(view);
@@ -282,7 +287,8 @@ public class EnamlActivity extends AppCompatActivity {
     }
 
     /**
-     * Return build info
+     * Return build info. Called from python at startup to get info like screen density
+     * and API version.
      * @return
      */
     public HashMap<String,Object> getBuildInfo() {
@@ -322,15 +328,16 @@ public class EnamlActivity extends AppCompatActivity {
         mProfilers.put(tag, System.currentTimeMillis());
     }
 
+    public void stopTrace(String tag) {
+        Log.i(TAG, "[Trace][" + tag + "] Ended " + (System.currentTimeMillis() - mProfilers.get(tag)) + " (ms)");
+    }
+
+
     /**
      * Reset stats on the bridge
      */
     public void resetBridgeStats() {
        mBridge.resetStats();
-    }
-
-    public void stopTrace(String tag) {
-        Log.i(TAG, "[Trace][" + tag + "] Ended " + (System.currentTimeMillis() - mProfilers.get(tag)) + " (ms)");
     }
 
 
