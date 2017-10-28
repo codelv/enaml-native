@@ -10,13 +10,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.util.Log;
-
-import com.codelv.enamlnative.BuildConfig;
-import com.codelv.enamlnative.R;
-
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -119,7 +114,6 @@ public class EnamlActivity extends AppCompatActivity {
         textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
         textView.setTextColor(Color.RED);
         textView.setText(message);
-
 
         // Hide progress bar
         View progressBar = findViewById(R.id.progressBar);
@@ -319,7 +313,6 @@ public class EnamlActivity extends AppCompatActivity {
         }};
         return result;
     }
-
 
     /**
      * Utility for measuring how long tasks take.
