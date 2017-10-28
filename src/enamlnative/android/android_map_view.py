@@ -19,6 +19,7 @@ from enamlnative.core import bridge
 from .android_toolkit_object import AndroidToolkitObject
 from .android_frame_layout import AndroidFrameLayout, FrameLayout
 from .android_fragment import FragmentTransaction, FragmentManager
+from .android_utils import ArrayList
 from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod, JavaCallback, JavaProxy
 from .api import LocationManager
 
@@ -45,14 +46,6 @@ class ConnectionResult:
     SIGN_IN_FAILED = 17
     SIGN_IN_REQUIRED = 4
     TIMEOUT = 14
-
-class ArrayList(JavaBridgeObject):
-    __nativeclass__ = set_default('java.util.ArrayList')
-    add = JavaMethod('int', 'java.lang.Object')
-    addAll = JavaMethod('java.util.Collection')
-    remove = JavaMethod('int')
-    removeAll = JavaMethod('java.util.Collection')
-    clear = JavaMethod()
 
 
 class LatLngList(ArrayList):

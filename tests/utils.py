@@ -66,3 +66,5 @@ def source_activated(venv, command):
     yield cmd
 
     print("[DEBUG]: Deactivating {} for {}".format(venv, command))
+
+

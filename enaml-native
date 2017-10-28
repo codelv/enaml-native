@@ -60,7 +60,7 @@ class Init(Command):
         #: Append project name
         dest = join(abspath(args.destination), args.name.replace(" ", ""))
         assert not exists(dest), "Error: Destination folder already exists! ({})".format(dest)
-        root = dirname(realpath(__file__))
+        root = abspath(dirname(realpath(__file__)))
 
         #: Clean root android project
         with cd(root):
@@ -74,9 +74,22 @@ class Init(Command):
                 shprint(sh.cp, '-R', join(root, f), '.')
 
             #: TODO: Make a readme
+            with open('README.md', 'w') as f:
+                f.write(textwrap.dedent("""
+                # {name}
+                
+                Activate the `enaml-native` virtual environment (`source venv/bin/activate`) 
+                to add and remove p4a and enaml-native packages.
+                
+                The `android/` folder can be opened in Android Studio.
+                The `ios/` workspace can be opened in XCode.
+                The `src/` is where your python/enaml code goes.
+                
+                Cheers!
+                """))
 
             #: Make simlink to enaml-native cli
-            shprint(sh.ln, '-s', join(root, 'enaml-native'), 'enaml-native')
+            #shprint(sh.ln, '-s', join(root, 'enaml-native'), 'enaml-native')
 
             #: Patch package
             with open('package.json') as f:
@@ -147,14 +160,24 @@ class Init(Command):
             shprint(sh.git, 'init')
 
             #: Create VENV
-            try:
-                shprint(sh.virtualenv, 'venv')
-                print("Installing enaml-native cli...")
-                en = dirname(realpath(__file__))
-                shprint(sh.bash, '-c', 'source venv/bin/activate && pip install {en}'.format(en=en))
-                print("Now activate the venv using 'source venv/bin/activate' ")
-            except:
-                print("Warning: Failed to create a venv, you must now do it yourself!")
+            shprint(sh.virtualenv, 'venv')
+            print("Installing the enaml-native cli...")
+            shprint(sh.bash, '-c', 'source venv/bin/activate && '
+                                   'pip install {cli}'.format(cli=root))
+            print("Installing p4a requirements")
+            shprint(sh.bash, '-c', 'source venv/bin/activate && '
+                                   'pip install p4a-nucleic p4a-msgpack')
+
+            print("==============================================================")
+            print(sh.bash('-c', 'source venv/bin/activate && '
+                                   'enaml-native --help'))
+
+        print("==============================================================")
+        print("Project created successfully!")
+        print("Now go to the project root `cd {}`".format(dest))
+        print("Then activate the venv using `source venv/bin/activate`")
+        print("Use the `enaml-native` command to build and run your project ")
+        print("==============================================================")
 
 
 class CleanPython(Command):
@@ -433,10 +456,10 @@ class BundleAssets(Command):
     """ This is used by the gradle build to pack python into a zip.
     """
     title = set_default("bundle-assets")
-    help = set_default("Creates a python.zip bundle of all py files")
+    help = set_default("Creates a python bundle of all .py and .enaml files")
     args = set_default([
-        ('-p', dict(action='store_true', help="Create bundle by pulling from device "
-                                             "(recommended for release, includes generated cache files)")),
+        ('-p', dict(action='store_true', help="Create bundle by pulling from device")),
+        ('--release', dict(action='store_true', help="Create a release bundle")),
     ])
 
     def run(self, args=None):
@@ -588,6 +611,7 @@ class InitPackage(Command):
                     matches = dict()
                     excluded_types = ['.pyc', '.enamlc']
                     excluded_dirs = ['build']
+                    dest = os.path.join('packages',dest) #: goes into venv/packages/<name>
                     for folder in folders:
                         for dirpath, dirnames, files in os.walk(folder):
                             #: Skip build folders and exclude hidden dirs
@@ -645,7 +669,6 @@ class InitPackage(Command):
                         license='MIT',
                         url="",
                         description="{name} package for enaml-native",
-                        long_description=open("README.md").read(),
                         packages=find_packages('.'),
                         #package_dir={{'': '*'}},
                         install_requires=['enaml-native'],
@@ -1359,7 +1382,7 @@ class EnamlNativeCli(Atom):
 def configure_path():
     #: Hack to configure the path correctly when running from source or pip installed versions
     for root in [dirname(realpath(__file__)),
-                 join(sys.prefix, 'enaml-native-cli')]:
+                 join(sys.prefix, 'packages', 'enaml-native-cli')]:
         if exists(join(root, 'python-for-android')):
             #: TODO: This is terrible...
             global p4a_root

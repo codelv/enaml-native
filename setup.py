@@ -16,6 +16,9 @@ from setuptools import setup, find_packages
 
 def find_data_files(dest, *folders):
     matches = {}
+    #: Want to install outside the venv volder in the packages folder
+    dest = os.path.join('packages', dest)
+
     excluded_types = ['.pyc', '.enamlc', '*.apk', '*.iml']
     excluded_dirs = ['android/build']
     for folder in folders:
@@ -47,16 +50,11 @@ setup(
     long_description=open("README.md").read(),
     data_files=find_data_files('enaml-native-cli', 'android', 'docs', 'examples', 'ios',
                                'python-for-android', 'python-for-ios', 'tests', 'src'),
-    install_requires=['atom', 'appdirs', 'colorama>=0.3.3', 'sh>=1.10,<1.12.5', 'jinja2',
-                      'six', 'pipdeptree'],
+    install_requires=[
+        'atom', 'appdirs', 'colorama>=0.3.3', 'sh>=1.10,<1.12.5', 'jinja2', 'six', 'pipdeptree',
+        #: Required p4a recipes
+        #'p4a-nucleic', 'p4a-msgpack'
+    ],
     setup_requires=['virtualenv'],
-    #: TODO: Automatically add enamlnative recipe to p4a
-    # entry_points={
-    #     'enaml_native_package': [
-    #         'enaml_native = ',
-    #     ],
-    #     'p4a_recipe':[
-    #         'enamlnative = '
-    #     ]
-    # },
+    test_requires=['requests', 'py.test']
 )

@@ -110,6 +110,12 @@ public class Bridge implements PythonInterpreter.EventListener {
     final Handler mBridgeHandler;
     final AtomicInteger mEventCount = new AtomicInteger();
     final int mEventDelay = 1;
+    //final MessageBufferPacker mEventPacker = MessagePack.newDefaultBufferPacker();
+
+    // Benchmarking stuff
+    long mTotalTime = 0;
+    long mTotalTasks = 0;
+
 
     public Bridge(EnamlActivity activity) {
         mBridge = this;
@@ -118,7 +124,6 @@ public class Bridge implements PythonInterpreter.EventListener {
         mObjectCache.put(-1, mContext);
         mBridgeHandlerThread.start();
         mBridgeHandler = new Handler(mBridgeHandlerThread.getLooper());
-
         // Add ourself as a listener
         PythonInterpreter.addEventListener(this);
 
@@ -126,6 +131,8 @@ public class Bridge implements PythonInterpreter.EventListener {
         registerBuiltinPackers();
         registerBuiltinUnpackers();
     }
+
+
 
     /**
      * Register the "Packers" that are used to pack certain objects via msgpack so python
@@ -338,6 +345,10 @@ public class Bridge implements PythonInterpreter.EventListener {
      * References are passed as ids/integers
      *
      */
+    interface DeferredRef {
+        public Object resolve();
+    }
+
     public class UnpackedValues {
         protected final Object[] mArgs;
         protected final Class[] mSpec;
@@ -348,6 +359,58 @@ public class Bridge implements PythonInterpreter.EventListener {
             public UnpackedValue(Class cls, Object arg) {
                 this.cls = cls;
                 this.arg = arg;
+            }
+        }
+
+        public class UnpackedRef implements DeferredRef {
+            public final int mId;
+            public UnpackedRef(int id) {
+                mId = id;
+            }
+
+            @Override
+            public Object resolve() {
+                return mObjectCache.get(mId);
+            }
+        }
+
+        /***
+         * A wrapper for objects that resolve at runtime
+         */
+        public class UnpackedObjectRef implements DeferredRef  {
+            public final Object mObj;
+            public UnpackedObjectRef(Object obj) {
+                mObj = obj;
+            }
+            public Object resolve() {
+                return mObj;
+            }
+        }
+
+        /***
+         * An array that resolves it's references at runtime
+         * TODO: This is is extremely inefficient!
+         */
+        public class UnpackedArrayRef extends ArrayList<DeferredRef> implements DeferredRef {
+            final Class mArrayType;
+            public UnpackedArrayRef(Class arrayType) {
+                mArrayType = arrayType;
+            }
+
+            public Object resolve() {
+                if (mArrayType!=null) {
+                    Object arg = Array.newInstance(mArrayType, size());
+                    for (int i = 0; i < size(); i++) {
+                        Array.set(arg, i, get(i).resolve());
+                    }
+                    return arg;
+                }
+
+                ArrayList list = new ArrayList<>();
+                for (int i=0; i<size(); i++) {
+                    list.add(get(i).resolve());
+                }
+                return list;
             }
         }
 
@@ -488,7 +551,7 @@ public class Bridge implements PythonInterpreter.EventListener {
                         arg = resId;
                     } else if (spec==Typeface.class) {
                         // Hack for fonts
-                        arg = Typeface.create(v.asStringValue().asString(), 0);
+                        arg = Typeface.create(v.asStringValue().asString(), Typeface.NORMAL);
                     } else {
                         arg = v.asStringValue().asString();
                     }
@@ -504,45 +567,56 @@ public class Bridge implements PythonInterpreter.EventListener {
                     // Assumes the first element in the array is a pointer
                     // to the reference object we want.
                     Class arrayType = spec.getComponentType();
-                    if (arrayType!=null) {
-                        if (arrayType == Color.class) {
-                            spec = int[].class;
-                            arg = Array.newInstance(int.class, a.size());
-                            for (int i=0; i<a.size(); i++) {
-                                Array.set(arg, i, parseColor(a.get(i).asStringValue().asString()));
-                            }
-                        } else {
-                            arg = Array.newInstance(arrayType, a.size());
-                            for (int i = 0; i < a.size(); i++) {
-                                UnpackedValue uv = unpackValue(arrayType, null, a.get(i));
-                                Array.set(arg, i, uv.arg);
-                            }
+
+                    if (arrayType == Color.class) {
+                        spec = int[].class;
+                        int[] colors = new int[a.size()];
+                        for (int i = 0; i < a.size(); i++) {
+                            colors[i] = parseColor(a.get(i).asStringValue().asString());
                         }
+                        arg = colors;
                     } else {
-                        ArrayList list = new ArrayList<>();
-                        for (int i=0; i<a.size(); i++) {
-                            UnpackedValue uv = unpackValue(Object.class, null, a.get(i));
-                            list.add(uv.arg);
+                        arg = new UnpackedArrayRef(arrayType);
+                        for (int i = 0; i < a.size(); i++) {
+                            UnpackedValue uv = unpackValue(arrayType, null, a.get(i));
+                            // Wrap the object if we have to
+                            ((UnpackedArrayRef) arg).add((uv.arg instanceof DeferredRef)?
+                                    (DeferredRef) uv.arg:
+                                    new UnpackedObjectRef(uv.arg));
                         }
-                        arg = list;
                     }
+
                     break;
 
                 case EXTENSION:
-                    // Currenly only extension is JavaBridgeObjects
+                    // Currently only extension is JavaBridgeObjects
                     ExtensionValue ev = v.asExtensionValue();
                     int extType = (int) ev.getType();
                     if (extType==TYPE_REF) {
                         MessageUnpacker ref = MessagePack.newDefaultUnpacker(ev.getData());
-                        arg = mObjectCache.get(ref.unpackInt());
+                        int objId = ref.unpackInt();
+                        // Use a ref if we have to
+                        arg = mObjectCache.get(objId );
+                        if (arg == null) {
+                            arg = new UnpackedRef(objId );
+                        }
                     }
             }
             return new UnpackedValue(spec, arg);
         }
 
         public Object[] getArgs() {
+            // Resolve any references unknown at unpack time
+            int i = 0;
+            for (Object arg:mArgs) {
+                if (arg instanceof DeferredRef) {
+                    mArgs[i] = ((DeferredRef) arg).resolve();
+                }
+                i += 1;
+            }
             return mArgs;
         }
+
 
         public Class[] getSpec() {
             return mSpec;
@@ -569,11 +643,9 @@ public class Bridge implements PythonInterpreter.EventListener {
      * @param className
      * @param objId
      */
-    public void createObject(int objId, int cacheId, String className, Value[] args) {
+    public void createObject(int objId, int cacheId, String className, UnpackedValues uv) {
         //Log.d(TAG,"Create object id="+objId+" cacheId="+cacheId+" class="+className);
         try {
-            UnpackedValues uv = new UnpackedValues(cacheId, args);
-            //String key = className + uv.getName();
 
             // Try to pull from cache
             Constructor constructor = mConstructorCache.get(cacheId);
@@ -608,8 +680,6 @@ public class Bridge implements PythonInterpreter.EventListener {
             mActivity.showErrorMessage(e);
         } catch (AssertionError e) {
             mActivity.showErrorMessage(e.getMessage());
-        } catch (IOException e) {
-            mActivity.showErrorMessage(e);
         }
     }
 
@@ -642,14 +712,11 @@ public class Bridge implements PythonInterpreter.EventListener {
      *                  1. ID that result should be stored as
      *                  2. and ID of the Future in python that can be used to retrieve the result
      * @param method: Method to invoke on the given object
-     * @param args: Args to pass to the object
+     * @param uv: Decoded arguments to pass to the method
      */
-    public void invokeStatic(String className, int resultId, int cacheId, String method, Value[] args) {
+    public void invokeStatic(String className, int resultId, int cacheId, String method, UnpackedValues uv) {
         try {
             Class objClass = mBridge.getClass(className);
-
-            // Decode args
-            UnpackedValues uv = new UnpackedValues(cacheId, args);
 
             // Cache the lambda methods
             Method lambda = mMethodCache.get(cacheId);
@@ -680,8 +747,6 @@ public class Bridge implements PythonInterpreter.EventListener {
             mActivity.showErrorMessage(e);
         } catch (ClassNotFoundException e) {
             mActivity.showErrorMessage(e);
-        } catch (IOException e) {
-            mActivity.showErrorMessage(e);
         }
     }
 
@@ -693,9 +758,9 @@ public class Bridge implements PythonInterpreter.EventListener {
      *                  1. ID that result should be stored as
      *                  2. and ID of the Future in python that can be used to retrieve the result
      * @param method: Method to invoke on the given object
-     * @param args: Args to pass to the object
+     * @param uv: Decoded arguments to pass to the method
      */
-    public void updateObject(int objId, int resultId, int cacheId, String method, Value[] args) {
+    public void updateObject(int objId, int resultId, int cacheId, String method, UnpackedValues uv) {
         //Log.d(TAG,"Update object  obid="+objId+" method="+method);
         Object obj = mObjectCache.get(objId);
         if (obj==null) {
@@ -706,7 +771,7 @@ public class Bridge implements PythonInterpreter.EventListener {
 
         try {
             // Decode args
-            UnpackedValues uv = new UnpackedValues(cacheId, args);
+
             //String key = objClass.getName() + method+ uv.getName();
 
             Class objClass = obj.getClass();
@@ -745,11 +810,7 @@ public class Bridge implements PythonInterpreter.EventListener {
             Log.e(TAG,"Error invoking obj="+ obj +" id="+objId+" method="+method, e);
             mActivity.showErrorMessage(e);
         } catch (InvocationTargetException e) {
-            Log.e(TAG,"Error invoking obj="+ obj +" id="+objId+" method="+method, e);
-            mActivity.showErrorMessage(e);
-        } catch (ClassNotFoundException e) {
-            mActivity.showErrorMessage(e);
-        } catch (IOException e) {
+            Log.e(TAG, "Error invoking obj=" + obj + " id=" + objId + " method=" + method, e);
             mActivity.showErrorMessage(e);
         }
     }
@@ -759,9 +820,9 @@ public class Bridge implements PythonInterpreter.EventListener {
      *
      * @param objId
      * @param field
-     * @param args
+     * @param uv
      */
-    public void updateObjectField(int objId, int cacheId, String field, Value[] args) {
+    public void updateObjectField(int objId, int cacheId, String field, UnpackedValues uv) {
         Object obj = mObjectCache.get(objId);
         if (obj==null) {
             mActivity.showErrorMessage(
@@ -770,10 +831,6 @@ public class Bridge implements PythonInterpreter.EventListener {
         }
 
         try {
-            // Decode args
-            UnpackedValues uv = new UnpackedValues(cacheId, args);
-
-
             // This is pretty stupid but we have to get the method of EACH class that uses it
             // for some stupid reason it can't
             Class objClass = obj.getClass();
@@ -800,10 +857,6 @@ public class Bridge implements PythonInterpreter.EventListener {
             // Get the lambda
             lambda.set(obj, uv.getArgs()[0]);
         } catch (IllegalAccessException e) {
-            mActivity.showErrorMessage(e);
-        } catch (ClassNotFoundException e ) {
-            mActivity.showErrorMessage(e);
-        } catch (IOException e) {
             mActivity.showErrorMessage(e);
         }
     }
@@ -920,15 +973,15 @@ public class Bridge implements PythonInterpreter.EventListener {
             return;
         }
 
-        if (result!=null && !isPackableResult(result)) {
-            // Store the result with the given ID, the python implementation
-            // guarantees that the ID is unique and will not overwrite an existing object
-            mObjectCache.put(pythonObjectId, result);
-        }
-
-        // Send the result to python
-        // TODO: This should use the EventLoop implementation, currently assumes a tornado Future
-        onEvent(IGNORE_RESULT, pythonObjectId, "set_result", new Object[]{result});
+        // Let the bridge do the rest
+        mBridgeHandler.post(()-> {
+            if (result!=null && !isPackableResult(result)) {
+                // Store the result with the given ID, the python implementation
+                // guarantees that the ID is unique and will not overwrite an existing object
+                mObjectCache.put(pythonObjectId, result);
+            }
+            onEvent(IGNORE_RESULT, pythonObjectId, "set_result", new Object[]{result});
+        });
     }
 
     /**
@@ -1053,7 +1106,7 @@ public class Bridge implements PythonInterpreter.EventListener {
      * @param future: Future to wait for.
      */
     public void runUntilDone(Future future) {
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
         int i = 0;
         while (!future.isDone()) {
             // Process pending messages until done
@@ -1068,7 +1121,15 @@ public class Bridge implements PythonInterpreter.EventListener {
 
         }
         if (i>0) {
-            Log.i(TAG, "runUntilDone took (" + (System.currentTimeMillis() - start) + " ms) to run (" + i + ") tasks");
+            long dt = (System.nanoTime() - start)/1000;
+            mTotalTime += dt;
+            mTotalTasks += i;
+            if (mActivity.showDebugMessages()) {
+                Log.i(TAG, "[Stats][UI][delta][runUntilDone] (" +
+                        (dt/1000) + " ms) to run (" + i + ") tasks ("+dt/i+" us/task)");
+                Log.i(TAG, "[Stats][UI][totals] (" + mTotalTime/1000 + " ms) to run (" +
+                        mTotalTasks + ") tasks ("+ mTotalTime/mTotalTasks+" us/task avg)");
+            }
         }
     }
 
@@ -1077,7 +1138,7 @@ public class Bridge implements PythonInterpreter.EventListener {
      * This MUST only be called in the UI thread.
      */
     public void runUntilCurrent() {
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
         Runnable task = mTaskQueue.poll();
         int i = 0;
         while (task != null) {
@@ -1086,10 +1147,25 @@ public class Bridge implements PythonInterpreter.EventListener {
             i++;
         }
         if (i>0) {
-            Log.i(TAG, "runUntilCurrent took (" + (System.currentTimeMillis() - start) + " ms) to run ("+ i + ") tasks");
+            long dt = (System.nanoTime() - start)/1000;
+            mTotalTime += dt;
+            mTotalTasks += i;
+            if (mActivity.showDebugMessages()) {
+                Log.i(TAG, "[Stats][UI][delta][runUntilCurrent] (" +
+                        dt/1000 + " ms) to run (" + i + ") tasks ("+dt/i+" us/task)");
+                Log.i(TAG, "[Stats][UI][totals] (" + (mTotalTime/1000) + " ms) to run (" +
+                        mTotalTasks + ") tasks ("+mTotalTime/mTotalTasks+" us/task avg)");
+            }
         }
     }
 
+    /**
+     * Reset the bridge stats
+     */
+    public void resetStats() {
+        mTotalTime = 0;
+        mTotalTasks = 0;
+    }
 
     /**
      * Process events from the Python interpreter
@@ -1155,7 +1231,8 @@ public class Bridge implements PythonInterpreter.EventListener {
                                 Value v = unpacker.unpackValue();
                                 args[j] = v;
                             }
-                            mTaskQueue.add(()->{createObject(objId, cacheId, objClass, args);});
+                            UnpackedValues uv = new UnpackedValues(cacheId, args);
+                            mTaskQueue.add(()->{createObject(objId, cacheId, objClass, uv);});
                             break;
 
                         case PROXY:
@@ -1176,7 +1253,8 @@ public class Bridge implements PythonInterpreter.EventListener {
                                 Value v = unpacker.unpackValue();
                                 args[j] = v;
                             }
-                            mTaskQueue.add(()->{updateObject(objId, resultId, cacheId, objMethod, args);});
+                            uv = new UnpackedValues(cacheId, args);
+                            mTaskQueue.add(()->{updateObject(objId, resultId, cacheId, objMethod, uv);});
                             break;
                         case STATIC_METHOD:
                             objClass = unpacker.unpackString();
@@ -1189,7 +1267,8 @@ public class Bridge implements PythonInterpreter.EventListener {
                                 Value v = unpacker.unpackValue();
                                 args[j] = v;
                             }
-                            mTaskQueue.add(()->{invokeStatic(objClass, resultId, cacheId, objMethod, args);});
+                            uv = new UnpackedValues(cacheId, args);
+                            mTaskQueue.add(()->{invokeStatic(objClass, resultId, cacheId, objMethod, uv);});
                             break;
 
                         case FIELD:
@@ -1202,7 +1281,8 @@ public class Bridge implements PythonInterpreter.EventListener {
                                 Value v = unpacker.unpackValue();
                                 args[j] = v;
                             }
-                            mTaskQueue.add(()->{updateObjectField(objId, cacheId, objField, args);});
+                            uv = new UnpackedValues(cacheId, args);
+                            mTaskQueue.add(()->{updateObjectField(objId, cacheId, objField, uv);});
                             break;
 
                         case DELETE:
@@ -1226,13 +1306,19 @@ public class Bridge implements PythonInterpreter.EventListener {
                 mActivity.runOnUiThread(()->{
                     mActivity.showErrorMessage(e);
                 });
+            } catch (ClassNotFoundException e) {
+                mActivity.runOnUiThread(()->{
+                    mActivity.showErrorMessage(e);
+                });
             }
 
             // Process requested tasks
             mActivity.runOnUiThread(()->{
                 runUntilCurrent();
             });
-            Log.i(TAG, "processEvents took (" + (System.currentTimeMillis() - start) + " ms) to run");
+            if (mActivity.showDebugMessages()) {
+                Log.i(TAG, "processEvents took (" + (System.currentTimeMillis() - start) + " ms) to run");
+            }
         });
     }
 

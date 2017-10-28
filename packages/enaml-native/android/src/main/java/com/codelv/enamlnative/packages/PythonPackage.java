@@ -10,6 +10,10 @@ import com.codelv.enamlnative.EnamlActivity;
 import com.codelv.enamlnative.EnamlPackage;
 import com.codelv.enamlnative.python.PythonInterpreter;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 
 /**
  * Created by jrm on 10/15/17.
@@ -23,6 +27,7 @@ public class PythonPackage implements EnamlPackage {
 
     EnamlActivity mActivity;
     PythonTask mPython;
+    boolean mDestroyRequested = false;
 
     public void onCreate(EnamlActivity activity) {
         mActivity = activity;
@@ -52,7 +57,7 @@ public class PythonPackage implements EnamlPackage {
 
     @Override
     public void onDestroy() {
-
+        mDestroyRequested = true;
     }
 
     /**
@@ -112,6 +117,43 @@ public class PythonPackage implements EnamlPackage {
          */
         protected void onPostExecute(String pythonPath) {
             Log.i(TAG, "Python thread complete!");
+            if (!mDestroyRequested && mActivity.showDebugMessages()) {
+                mActivity.showErrorMessage(
+                        "Unexpected python interpreter exit\n" +
+                        "Check the logcat output for errors!\n" +
+                        "This may indicate a build issue leading to missing or \n" +
+                        "inaccessible python or shared libraries.\n" +
+                        "Log output:\n\n"+ getErrorMessage()
+                );
+            }
+        }
+
+        /**
+         * Read the logcat output and display the error
+         * @thanks to https://stackoverflow.com/questions/27957300/read-logcat-programmatically-for-an-application
+         * @return
+         */
+        protected String getErrorMessage() {
+            StringBuilder builder = new StringBuilder();
+            String processId = Integer.toString(android.os.Process.myPid());
+            try {
+                String[] command = new String[] { "logcat", "-d", "-v", "brief" };
+
+                Process process = Runtime.getRuntime().exec(command);
+
+                BufferedReader bufferedReader = new BufferedReader(
+                        new InputStreamReader(process.getInputStream()));
+
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    if (line.contains(processId)) {
+                        builder.append(line+"\n");
+                    }
+                }
+                return builder.toString();
+            } catch (IOException ex) {
+                return "";
+            }
         }
 
         /**

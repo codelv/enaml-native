@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.util.Log;
 
@@ -41,6 +42,9 @@ public class EnamlActivity extends AppCompatActivity {
     int mShortAnimationDuration = 300;
     final List<EnamlPackage> mEnamlPackages = new ArrayList<EnamlPackage>();
     PermissionResultListener mPermissionResultListener;
+
+    final HashMap<String, Long> mProfilers = new HashMap<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,11 +94,19 @@ public class EnamlActivity extends AppCompatActivity {
 
 
     /**
+     * Should debug messages be used.
+     * @return
+     */
+    public boolean showDebugMessages() {
+        return ((EnamlApplication)getApplication()).showDebugMessages();
+    }
+
+    /**
      * Set error message text in loading view.
      * @param message: Message to display
      */
     public void showErrorMessage(String message) {
-        if (!((EnamlApplication)getApplication()).showDebugMessages()) {
+        if (!showDebugMessages()) {
             // Crash on release
             throw new RuntimeException(message);
         }
@@ -102,10 +114,12 @@ public class EnamlActivity extends AppCompatActivity {
 
         // Move to top of screen
         TextView textView = (TextView) findViewById(R.id.textView);
+        textView.setHorizontallyScrolling(true);
         ((ViewGroup.MarginLayoutParams) textView.getLayoutParams()).setMargins(10, 10, 10, 10);
         textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
         textView.setTextColor(Color.RED);
         textView.setText(message);
+
 
         // Hide progress bar
         View progressBar = findViewById(R.id.progressBar);
@@ -305,4 +319,26 @@ public class EnamlActivity extends AppCompatActivity {
         }};
         return result;
     }
+
+
+    /**
+     * Utility for measuring how long tasks take.
+     */
+    public void startTrace(String tag) {
+        Log.i(TAG, "[Trace][" + tag + "] Started ");
+        mProfilers.put(tag, System.currentTimeMillis());
+    }
+
+    /**
+     * Reset stats on the bridge
+     */
+    public void resetBridgeStats() {
+       mBridge.resetStats();
+    }
+
+    public void stopTrace(String tag) {
+        Log.i(TAG, "[Trace][" + tag + "] Ended " + (System.currentTimeMillis() - mProfilers.get(tag)) + " (ms)");
+    }
+
+
 }
