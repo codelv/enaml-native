@@ -111,8 +111,8 @@ class BarChart(ChartView):
 
 
 class BarEntry(Entry):
-    __nativeclass__ = set_default('com.github.mikephil.charting.data.BubbleEntry')
-    __signature__ = set_default(('float', '[F'))
+    __nativeclass__ = set_default('com.github.mikephil.charting.data.BarEntry')
+    __signature__ = set_default(('float', 'float'))
 
 
 class BarDataSet(DataSet):
@@ -164,7 +164,7 @@ class PieDataSet(DataSet):
 
 class PieData(ChartData):
     __nativeclass__ = set_default('com.github.mikephil.charting.data.PieData')
-    __signature__ = set_default(('java.util.List',))
+    __signature__ = set_default(('com.github.mikephil.charting.interfaces.datasets.IPieDataSet',))
 
 
 #: =================================================================
@@ -428,7 +428,9 @@ class AndroidPieChart(AndroidChartView, ProxyPieChart):
         data_set.data_set = PieDataSet(data_set.data, d.text)
 
     def refresh_data_set(self):
-        self.chart_data = PieData([bridge.encode(c.data_set) for c in self.data_sets()])
+        for c in self.data_sets():
+            self.chart_data = PieData(c.data_set)
+            break
         super(AndroidPieChart, self).refresh_data_set()
 
 
