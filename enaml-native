@@ -853,7 +853,7 @@ class Link(Command):
                 new_settings.append("") # Blank line
                 new_settings.append("include ':{name}'".format(name=pkg))
                 new_settings.append("project(':{name}').projectDir = "
-                                    "new File(rootProject.projectDir, '../packages/{name}/android')"
+                                    "new File(rootProject.projectDir, '../venv/packages/{name}/android')"
                                     .format(name=pkg))
 
                 with open('android/settings.gradle', 'w') as f:
