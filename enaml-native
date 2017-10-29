@@ -1,4 +1,4 @@
-#!/home/jrm/Workspace/enaml-native/apps/HelloWorld/venv/bin/python
+#!/usr/bin/env python2
 import sh
 import os
 import re
