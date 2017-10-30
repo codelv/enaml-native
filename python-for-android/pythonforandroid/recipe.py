@@ -1,4 +1,5 @@
 import sh
+import sys
 import glob
 import shutil
 import zipfile
@@ -273,6 +274,8 @@ class Recipe(with_metaclass(RecipeMeta)):
     def name(self):
         '''The name of the recipe, the same as the folder containing it.'''
         modname = self.__class__.__module__
+        if self.from_pip:
+            return modname.split(".")[-2]
         return modname.split(".", 2)[-1]
 
     # @property
@@ -1042,8 +1045,15 @@ class CythonRecipe(PythonRecipe):
 
         if self.ctx.python_recipe.from_crystax:
             command = sh.Command('python{}'.format(self.ctx.python_recipe.version))
-            site_packages_dirs = command(
-                '-c', 'import site; print("\\n".join(site.getsitepackages()))')
+
+            if hasattr(sys, 'real_prefix'):
+                #: If within a virtualenv
+                #: See https://github.com/pypa/virtualenv/issues/355
+                site_packages_dirs = command(
+                    '-c', 'from distutils.sysconfig import get_python_lib; print(get_python_lib())')
+            else:
+                site_packages_dirs = command(
+                    '-c', 'import site; print("\\n".join(site.getsitepackages()))')
             site_packages_dirs = site_packages_dirs.stdout.decode('utf-8').split('\n')
             if 'PYTHONPATH' in env:
                 env['PYTHONPATH'] += ':{}'.format(':'.join(site_packages_dirs))

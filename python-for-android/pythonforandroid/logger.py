@@ -193,6 +193,7 @@ def shprint(command, *args, **kwargs):
     except sh.ErrorReturnCode as err:
         if kwargs.get("_env"):
             from pprint import pformat
+            logger.info('Command Cwd: {}'.format(os.path.abspath(os.getcwd())))
             logger.info('Command Env: {}'.format(pformat(kwargs['_env'])))
 
         if need_closing_newline:

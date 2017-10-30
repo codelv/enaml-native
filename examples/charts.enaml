@@ -1,0 +1,70 @@
+import random
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+from enamlnative.android.app import AndroidApplication
+
+AndroidApplication.instance().debug = False
+
+enamldef ChartPage(Flexbox): view:
+    flex_direction = "column"
+    padding = (10,10,10,10)
+    attr title = ""
+    Toolbar:
+        title = view.title
+        layout_height = "80"
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+    ViewPager:
+        PagerFragment:
+            ChartPage:
+                title = "Bars"
+                BarChart:
+                    Looper:
+                        iterable << [(i,random.randint(i,100)/2.0) for i in range(10)]
+                        DataSet:
+                            data = [loop_item]
+                            text = "User {}".format(loop_index)
+                            color = "#35f1{}0".format(loop_index)
+        PagerFragment:
+            ChartPage:
+                title = "Stacked bars"
+                BarChart:
+                    DataSet:
+                        data = [(i,random.randint(i,100)/2.0) for i in range(10)]
+                        text = "Users"
+                    DataSet:
+                        data = [(i,random.randint(i,100)/2.0) for i in range(10)]
+                        text = "Awesome Users"
+                        color = "#0FF"
+        PagerFragment:
+            ChartPage:
+                title = "Line chart"
+                LineChart:
+                    DataSet:
+                        data = [(i,random.randint(0,i+1)/2.0) for i in range(100)]
+                        text = "Old Sales"
+                        color = "#0F0"
+                    DataSet:
+                        data = [(i,random.randint(0,2*i+1)) for i in range(100)]
+                        text = "New Sales"
+                        color = "#0FF"
+        PagerFragment:
+            ChartPage:
+                title = "Scatter plot"
+                ScatterChart:
+                    DataSet:
+                        data = [(i,random.randint(i,i+50)/2.0) for i in range(100)]
+                        text = "Old Sales"
+                        color = "#F00"
+                    DataSet:
+                        data = [(i,random.randint(i,i+100)) for i in range(100)]
+                        text = "New Sales"
+                        color = "#00F"
+        PagerFragment:
+            ChartPage:
+                PieChart:
+                    DataSet:
+                        data = [(0.1,"Car"), (0.3,"Truck"), (0.1,"Boat"), (0.5,"Motorcycle"),]
+                        text = "Awesomeness"
+                        #color = "#F00"

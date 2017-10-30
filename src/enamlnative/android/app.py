@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 @author jrm
 
 '''
-import nativehooks
+import nativehooks #: Created by the ndk-build in pybridge.c
 from atom.api import Float, Value, Int, Unicode, Typed, Dict
 from enaml.application import ProxyResolver
 from . import factories
@@ -129,16 +129,19 @@ class AndroidApplication(BridgedApplication):
                 self.dp = info['DISPLAY_DENSITY']
                 self.api_level = info['SDK_INT']
                 self.build_info = info
-                self.widget.setView(self.get_view())
+                self._show_view()
 
             self.widget.getBuildInfo().then(on_build_info)
         else:
-            self.widget.setView(self.get_view())
+            self._show_view()
+
+    def _show_view(self):
+        """ Show the view """
+        self.widget.setView(self.get_view())
 
     def dispatch_events(self, data):
         """ Send the data to the Native application for processing """
         nativehooks.publish(data)
-        #self.activity.processEvents(data)
 
     # --------------------------------------------------------------------------
     # Android utilities API Implementation
@@ -160,3 +163,13 @@ class AndroidApplication(BridgedApplication):
             wrap the class with the appropriate object.
         """
         return self.widget.getSystemService(service)
+
+    # --------------------------------------------------------------------------
+    # Plugin API Implementation
+    # --------------------------------------------------------------------------
+    def load_plugin_factories(self):
+        """ Add any plugin toolkit widgets to the ANDROID_FACTORIES """
+        for plugin in self.get_plugins(group='enaml-native-android-factories'):
+            get_factories = plugin.load()
+            PLUGIN_FACTORIES = get_factories()
+            factories.ANDROID_FACTORIES.update(PLUGIN_FACTORIES)

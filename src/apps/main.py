@@ -45,16 +45,23 @@ def load_view(app):
     with enaml.imports():
         from view import ContentView
         app.view = ContentView()
+    #: Time how long it takes
     app.show_view()
 
 
 def reload_view(app):
     import enaml
     import enamlnative
+
+    #: For Debug purposes only!
+    app.widget.resetBridgeStats()
+
     with enaml.imports():
         import view
         reload(view)
         app.view = view.ContentView()
+
+    #: Time how long it takes
     app.show_view()
 
 def dump_stats():

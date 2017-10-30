@@ -9,6 +9,7 @@ import fnmatch
 import logging
 import getpass
 import textwrap
+import pkg_resources
 from glob import glob
 from os.path import join, exists, abspath, expanduser, realpath, dirname
 from argparse import ArgumentParser, Namespace
@@ -16,15 +17,20 @@ from atom.api import Atom, Value, Callable, Dict, List, Unicode, Float, Int, Ins
 from contextlib import contextmanager
 from collections import OrderedDict
 
+try:
+    from ConfigParser import ConfigParser
+except:
+    from configparser import ConfigParser
+
 @contextmanager
 def cd(newdir):
     prevdir = os.getcwd()
+    print("[DEBUG]:   -> running cd {}".format(newdir))
     os.chdir(os.path.expanduser(newdir))
     try:
-        print("Entering into {}".format(newdir))
         yield
-        print("Returning to {}".format(prevdir))
     finally:
+        print("[DEBUG]:   -> running  cd {}".format(prevdir))
         os.chdir(prevdir)
 
 
@@ -53,14 +59,13 @@ class Init(Command):
         ('name',dict(help="Project name")),
         ('bundle_id',dict(help="App bundleId")),
         ('destination', dict(help="Project destination folder")),
-        #('-t --template', dict(dest='template', action='store_const',help="Project destination folder")),
     ])
 
     def run(self, args):
         #: Append project name
         dest = join(abspath(args.destination), args.name.replace(" ", ""))
         assert not exists(dest), "Error: Destination folder already exists! ({})".format(dest)
-        root = dirname(realpath(__file__))
+        root = abspath(dirname(realpath(__file__)))
 
         #: Clean root android project
         with cd(root):
@@ -74,9 +79,22 @@ class Init(Command):
                 shprint(sh.cp, '-R', join(root, f), '.')
 
             #: TODO: Make a readme
+            with open('README.md', 'w') as f:
+                f.write(textwrap.dedent("""
+                # {name}
+                
+                Activate the `enaml-native` virtual environment (`source venv/bin/activate`) 
+                to add and remove p4a and enaml-native packages.
+                
+                The `android/` folder can be opened in Android Studio.
+                The `ios/` workspace can be opened in XCode.
+                The `src/` is where your python/enaml code goes.
+                
+                Cheers!
+                """))
 
             #: Make simlink to enaml-native cli
-            shprint(sh.ln, '-s', join(root, 'enaml-native'), 'enaml-native')
+            #shprint(sh.ln, '-s', join(root, 'enaml-native'), 'enaml-native')
 
             #: Patch package
             with open('package.json') as f:
@@ -139,8 +157,32 @@ class Init(Command):
                                 '<string name="app_name">{}</string>'.format(args.name)
                             ))
 
+            #: Update view.enaml
+
+
+
             #: Init VCS
             shprint(sh.git, 'init')
+
+            #: Create VENV
+            shprint(sh.virtualenv, 'venv')
+            print("Installing the enaml-native cli...")
+            shprint(sh.bash, '-c', 'source venv/bin/activate && '
+                                   'pip install {cli}'.format(cli=root))
+            print("Installing p4a requirements")
+            shprint(sh.bash, '-c', 'source venv/bin/activate && '
+                                   'pip install p4a-nucleic p4a-msgpack')
+
+            print("==============================================================")
+            print(sh.bash('-c', 'source venv/bin/activate && '
+                                'enaml-native --help'))
+
+        print("==============================================================")
+        print("Project created successfully!")
+        print("Now go to the project root `cd {}`".format(dest))
+        print("Then activate the venv using `source venv/bin/activate`")
+        print("Use the `enaml-native` command to build and run your project ")
+        print("==============================================================")
 
 
 class CleanPython(Command):
@@ -229,25 +271,25 @@ class CrossCompile(Command):
                 crosscompile.recipes.python.Recipe,
             ],
             platforms=[
-                    # Platform(name='macOS',arches=[
-                    #     Arch(name='macosx.x86_64'),
-                    # ]),
-                    Platform(name='iOS',arches=[
-                        Arch(name='iphonesimulator.x86_64'),
-                        Arch(name='iphonesimulator.i386'),
-                        Arch(name='iphoneos.armv7'),
-                        Arch(name='iphoneos.armv7s'),
-                        Arch(name='iphoneos.armv64'),
-                    ]),
-                    # Platform(name='tvOS',arches=[
-                    #     Arch(name='appletvsimulator.x86_64'),
-                    #     Arch(name='appletvos.arm64'),
-                    # ]),
-                    # Platform(name='watchOS',arches=[
-                    #     Arch(name='watchsimulator.i386'),
-                    #     Arch(name='watchos.armv7k'),
-                    # ]),
-                ],
+                # Platform(name='macOS',arches=[
+                #     Arch(name='macosx.x86_64'),
+                # ]),
+                Platform(name='iOS',arches=[
+                    Arch(name='iphonesimulator.x86_64'),
+                    Arch(name='iphonesimulator.i386'),
+                    Arch(name='iphoneos.armv7'),
+                    Arch(name='iphoneos.armv7s'),
+                    Arch(name='iphoneos.armv64'),
+                ]),
+                # Platform(name='tvOS',arches=[
+                #     Arch(name='appletvsimulator.x86_64'),
+                #     Arch(name='appletvos.arm64'),
+                # ]),
+                # Platform(name='watchOS',arches=[
+                #     Arch(name='watchsimulator.i386'),
+                #     Arch(name='watchos.armv7k'),
+                # ]),
+            ],
 
         )
         b.build()
@@ -296,9 +338,9 @@ class BuildPython(Command):
         #: Build for each arch
         for arch in env['arches']:
             cfg = dict(
-               arch=arch,
-               reqs=reqs,
-               bundle_id=ctx['bundle_id']
+                arch=arch,
+                reqs=reqs,
+                bundle_id=ctx['bundle_id']
             )
             cfg.update(env)
 
@@ -329,21 +371,21 @@ class BuildPython(Command):
                 self.cmds['clean-python'].run()
 
                 shprint(sh.python, *'p4a.py create --arch={arch} '
-                          '--private=../src '
-                          '--package={bundle_id} '
-                          '--name=EnamlNativeApplication '
-                          '--dist-name=enaml-native '
-                          '--version=0.1 '
-                          '--requirements={reqs} '
-                          '--android-api=25 '
-                          '--bootstrap=enaml '
-                          '--sdk-dir={sdk} '
-                          '--ndk-dir={ndk} '
-                          '--ndk-platform=21 '
-                          '--ndk-build-dir={ndk_build_dir} '
-                          '{debug}'
-                          '{minify}'
-                          '--copy-libs'.format(**cfg).split(' '))
+                                    '--private=../src '
+                                    '--package={bundle_id} '
+                                    '--name=EnamlNativeApplication '
+                                    '--dist-name=enaml-native '
+                                    '--version=0.1 '
+                                    '--requirements={reqs} '
+                                    '--android-api=25 '
+                                    '--bootstrap=enaml '
+                                    '--sdk-dir={sdk} '
+                                    '--ndk-dir={ndk} '
+                                    '--ndk-platform=21 '
+                                    '--ndk-build-dir={ndk_build_dir} '
+                                    '{debug}'
+                                    '{minify}'
+                                    '--copy-libs'.format(**cfg).split(' '))
 
             #: Copy lib folder
             shprint(sh.cp,'-R',
@@ -355,6 +397,26 @@ class BuildPython(Command):
                 shprint(sh.cp,'-R',
                         expanduser('~/.local/share/python-for-android/dists/enaml-native/python/{}'.format(f)),
                         '{python_build_dir}/{arch}'.format(**cfg))
+
+            #: Collect all entry_points.txt and merge them into entry_points.json
+            #: This allows use to use wnetry points in the app by reading from the file
+            with cd('{python_build_dir}/{arch}/site-packages/'.format(**cfg)):
+                entry_points = {}
+                try:
+                    for ep in glob("*/entry_points.txt"):
+                        config = ConfigParser()
+                        config.read(ep)
+                        for section in config.sections():
+                            if section not in entry_points:
+                                entry_points[section] = {}
+                            for opt in config.options(section):
+                                entry_points[section][opt] = config.get(section, opt)
+
+                    if entry_points:
+                        with open('entry_points.json','w') as f:
+                            f.write(json.dumps(entry_points, indent=2))
+                except:
+                    print("Failed to convert entry points")
 
             #: Copy ca-cert (tornado only)
             cert_path = '{python_build_dir}/{arch}/site-packages/tornado/'.format(**cfg)
@@ -402,13 +464,13 @@ class TrimAssets(Command):
                 shprint(sh.find,'.','-type','f','-name','*.pyc','-delete')
                 #shprint(sh.find,'.','-type','f','-name','*.pyo','-delete') #: Use pyo
                 for p in [
-                            'enaml/qt',
-                            'tornado/test',
-                            '*.egg-info',
-                            '*.dist-info',
-                            'tests',
-                            'usr',
-                          ]:
+                    'enaml/qt',
+                    'tornado/test',
+                    '*.egg-info',
+                    '*.dist-info',
+                    'tests',
+                    'usr',
+                ]:
                     try:
                         sh.rm('-R', *glob(p))
                     except:
@@ -419,10 +481,10 @@ class BundleAssets(Command):
     """ This is used by the gradle build to pack python into a zip.
     """
     title = set_default("bundle-assets")
-    help = set_default("Creates a python.zip bundle of all py files")
+    help = set_default("Creates a python bundle of all .py and .enaml files")
     args = set_default([
-        ('-p', dict(action='store_true', help="Create bundle by pulling from device "
-                                             "(recommended for release, includes generated cache files)")),
+        ('-p', dict(action='store_true', help="Create bundle by pulling from device")),
+        ('--release', dict(action='store_true', help="Create a release bundle")),
     ])
 
     def run(self, args=None):
@@ -472,7 +534,6 @@ class BundleAssets(Command):
                         shprint(sh.cp, '-R', '.', '../../build/')
 
                     #: Copy sources from app source
-                    #: TODO, or just let gradle?
                     for src in ctx['sources']:
                         shprint(sh.cp, '-R', join(root, src, '.'), 'build')
 
@@ -574,6 +635,7 @@ class InitPackage(Command):
                     matches = dict()
                     excluded_types = ['.pyc', '.enamlc']
                     excluded_dirs = ['build']
+                    dest = os.path.join('packages',dest) #: goes into venv/packages/<name>
                     for folder in folders:
                         for dirpath, dirnames, files in os.walk(folder):
                             #: Skip build folders and exclude hidden dirs
@@ -601,8 +663,14 @@ class InitPackage(Command):
                     data_files=find_data_files("{name}",['android','ios','src']),
                     install_requires=['enaml-native-cli'],
                     classifiers=["Framework :: enaml-native"],
+                    entry_points={{
+                        'enaml_native_package': [
+                            '{pkg} = {pkg}.package:get_package'
+                        ]
+                    }},
                 )
-                """.format(name=args.name, user=getpass.getuser()).lstrip()))
+                """.format(name=args.name, pkg=args.name.replace("-", "_"),
+                           user=getpass.getuser()).lstrip()))
 
             #: Create folders
             os.makedirs('src')  #: Python source here
@@ -625,7 +693,6 @@ class InitPackage(Command):
                         license='MIT',
                         url="",
                         description="{name} package for enaml-native",
-                        long_description=open("README.md").read(),
                         packages=find_packages('.'),
                         #package_dir={{'': '*'}},
                         install_requires=['enaml-native'],
@@ -633,33 +700,22 @@ class InitPackage(Command):
                     """.format(name=args.name, user=getpass.getuser())).lstrip())
 
             os.makedirs('android')  #: Android here
-            os.makedirs('android/recipes/')  #: Put p4a recipes here
-            with cd('android/recipes'):
-                with open('README.md','w') as f:
-                    f.write(textwrap.dedent("""
-                       # Android recipes
-
-                       Put any custom python-for-android recipes in this directory.
-
-                       They will be coped to `enaml-native/python-for-android/pythonforandroid/recipes` before building.
-
-                    """))
-
             os.makedirs('ios')  #: IOS here
-            os.makedirs('ios/recipes/')  #: Put p4i recipes here
-            with cd('ios/recipes/'):
-                with open('README.md','w') as f:
-                    f.write(textwrap.dedent("""
-                       # iOS recipes
-
-                       Put any custom python-for-ios recipes in this directory.
-
-                       They will be coped to `enaml-native/python-for-ios/recipes` before building.
-
-                    """))
-
             #: Init git
             sh.git('init')
+
+
+class ListPackages(Command):
+    title = set_default("list")
+    help = set_default("List installed packages")
+
+    def run(self, args):
+        with cd('packages'):
+            try:
+                print(sh.pipdeptree())
+            except:
+                print("Warning: pipdeptree is not installed, falling pack on pip!")
+                print(sh.pip('list', '-l'))
 
 
 class Install(Command):
@@ -667,24 +723,31 @@ class Install(Command):
     help = set_default("Install and link an enaml-native package")
     args = set_default([
         ('name', dict(help="Package name")),
-        ('--save', dict(action='store_true', help="Add to requirements")),
+        ('--save', dict(action='store_true', help="Add to app dependencies")),
         ('--nolink', dict(action='store_true', help="Skip linking")),
     ])
 
     def run(self, args):
         print("Installing {}...".format(args.name))
         #: Install enaml-native package with pip
-        sh.pip('install', args.name, '-target', './packages')
+        #: TODO: Check that we're in a virtualenv!
+        if not hasattr(sys, 'real_prefix'):
+            print("Warning: It's highly recommended to use enaml-native in a virtual env!")
+
+        shprint(sh.pip, 'install', args.name)
 
         if not args.nolink:
-            self.cmds['link'].run(args)
+            if args.name.startswith("http") or args.name.startswith("git"):
+                self.cmds['link'].run()
+            else:
+                self.cmds['link'].run(args)
 
         if args.save:
             ctx = self.ctx
             #: TODO: Get version?
-            ctx['android']['requirements'][args.name] = ""
+            ctx['android']['dependencies'][args.name] = ""
             #: Dump before openting
-            pkg = json.dumps(ctx)
+            pkg = json.dumps(ctx, indent=4)
             with open('package.json', 'w') as f:
                 f.write(pkg)
 
@@ -698,27 +761,52 @@ class Uninstall(Command):
         ('--nolink', dict(action='store_true', help="Skip unlinking")),
     ])
 
-    def run(self, args=None):
+    def run(self, args):
         print("Unistalling {}...".format(args.name))
-        raise NotImplementedError
+
+        if not hasattr(sys, 'real_prefix'):
+            print("Warning: It's highly recommended to use enaml-native in a virtual env!")
+
+        #: Unlink first
+        if not args.nolink:
+            self.cmds['unlink'].run(args)
+
+        #: Install enaml-native package with pip
+        shprint(sh.pip, 'uninstall', '--yes', args.name)
+
+        if args.save:
+            ctx = self.ctx
+            #: TODO: Get version?
+            if args.name in ctx['android']['dependencies']:
+                del ctx['android']['dependencies'][args.name]
+            #: Dump before openting
+            pkg = json.dumps(ctx, indent=4)
+            with open('package.json', 'w') as f:
+                f.write(pkg)
 
 
 class Link(Command):
     title = set_default("link")
     help = set_default("Link an enaml-native package (updates android and ios projects)")
     args = set_default([
-        ('name', dict(help="Package name", nargs='?')),
+        ('name', dict(help="Package name (optional) If not set links all projects.", nargs='?')),
     ])
 
+    #: Where "enaml native packages" are installed
+    package_dir = 'venv/packages'
+
     def run(self, args=None):
-        package_dir = 'packages'
+        print("Linking {}".format(args.name if args else "all packages..."))
+
         if args and args.name:
-            self.link(package_dir, args.name)
+            self.link(self.package_dir, args.name)
         else:
             #: Link everything
-            for pkg in os.listdir(package_dir):
-                if not os.path.isfile(pkg):
-                    self.link(package_dir, pkg)
+            for pkg in os.listdir(self.package_dir):
+                if pkg == 'enaml-native-cli':
+                    continue
+                elif not os.path.isfile(pkg):
+                    self.link(self.package_dir, pkg)
 
     def link(self, path, pkg):
         """ Link the package in the current directory.
@@ -731,6 +819,46 @@ class Link(Command):
             self.link_ios(path, pkg)
         else:
             print("iOS project does not need linked for {}".format(pkg))
+
+    @staticmethod
+    def is_settings_linked(source, pkg):
+        """ Returns true if the "include ':<project>'" line exists in the file """
+        for line in source.split("\n"):
+            if re.search(r"include\s*['\"]:{}['\"]".format(pkg), line):
+                return True
+        return False
+
+    @staticmethod
+    def is_build_linked(source, pkg):
+        """ Returns true if the "compile project(':<project>')"
+            line exists exists in the file """
+        for line in source.split("\n"):
+            if re.search(r"compile\s+project\(['\"]:{}['\"]\)".format(pkg), line):
+                return True
+        return False
+
+    @staticmethod
+    def find_packages(path):
+        """ Find all java files matching the "*Package.java" pattern within
+            the given enaml package directory relative to the java source path."""
+        matches = []
+        root = join(path, 'android', 'src', 'main', 'java')
+        for folder, dirnames, filenames in os.walk(root):
+            for filename in fnmatch.filter(filenames, '*Package.java'):
+                #: Open and make sure it's an EnamlPackage somewhere
+                with open(join(folder, filename)) as f:
+                    if "implements EnamlPackage" in f.read():
+                        package = os.path.relpath(folder, root)
+                        matches.append(os.path.join(package, filename))
+        return matches
+
+    @staticmethod
+    def is_app_linked(source, pkg, java_package):
+        """ Returns true if the compile project line exists exists in the file """
+        for line in source.split("\n"):
+            if java_package in line:
+                return True
+        return False
 
     def link_android(self, path, pkg):
         """ Link's the android project to this library.
@@ -752,32 +880,170 @@ class Link(Command):
 
         bundle_id = self.ctx['bundle_id']
 
-        def is_settings_linked(source, pkg):
-            """ Returns true if the "include ':<project>'" line exists in the file """
-            for line in source.split("\n"):
-                if re.match(r"include\s*['\"]:{}['\"]".format(pkg), line):
-                    return True
-            return False
+        #: Check if it's already linked
+        with open('android/settings.gradle') as f:
+            settings_gradle = f.read()
+        with open('android/app/build.gradle') as f:
+            build_gradle = f.read()
 
-        def is_build_linked(source, pkg):
-            """ Returns true if the "compile project(':<project>')"
-                line exists exists in the file """
-            for line in source.split("\n"):
-                if re.match(r"compile project\(['\"]:{}['\"]\)".format(pkg), line):
-                    return True
-            return False
+        #: Find the MainApplication.java
+        main_app_java_path = 'android/app/src/main/java/{}/MainApplication.java'.format(
+            bundle_id.replace(".", "/"))
+        with open(main_app_java_path) as f:
+            main_application_java = f.read()
 
-        def find_packages(path):
-            """ Find everything matching the "*Package.java" """
-            matches = []
-            for root, dirnames, filenames in os.walk(join(path, 'android', 'src', 'main', 'java')):
-                for filename in fnmatch.filter(filenames, '*Package.java'):
-                    matches.append(os.path.join(root, filename))
-            return matches
+        try:
+            #: Now link all the EnamlPackages we can find in the new "package"
+            new_packages = Link.find_packages(join(path, pkg))
+            if not new_packages:
+                print("\t[Android] {} No EnamlPackages found to link!".format(pkg))
+                return
 
-        def is_app_linked(source, pkg, java_package):
-            """ Returns true if the compile project line exists exists in the file """
-            return False
+            #: Link settings.gradle
+            if not Link.is_settings_linked(settings_gradle, pkg):
+                #: Add two statements
+                new_settings = settings_gradle.split("\n")
+                new_settings.append("") # Blank line
+                new_settings.append("include ':{name}'".format(name=pkg))
+                new_settings.append("project(':{name}').projectDir = "
+                                    "new File(rootProject.projectDir, '../{path}/{name}/android')"
+                                    .format(name=pkg, path=self.package_dir))
+
+                with open('android/settings.gradle', 'w') as f:
+                    f.write("\n".join(new_settings))
+                print("\t[Android] {} linked in settings.gradle!".format(pkg))
+            else:
+                print("\t[Android] {} was already linked in settings.gradle!".format(pkg))
+
+            #: Link app/build.gradle
+            if not Link.is_build_linked(build_gradle, pkg):
+                #: Add two statements
+                new_build = build_gradle.split("\n")
+
+                #: Find correct line number
+                found = False
+                for i, line in enumerate(new_build):
+                    if re.match(r"dependencies\s*{", line):
+                        found = True
+                        continue
+                    if found and "}" in line:
+                        #: Hackish way to find line of the closing bracket after
+                        #: the dependencies { block is found
+                        break
+                if not found:
+                    raise ValueError("Unable to find dependencies in android/app/build.gradle!")
+
+                #: Insert before the closing bracket
+                new_build.insert(i, "    compile project(':{name}')".format(name=pkg))
+
+                with open('android/app/build.gradle', 'w') as f:
+                    f.write("\n".join(new_build))
+                print("\t[Android] {} linked in app/build.gradle!".format(pkg))
+            else:
+                print("\t[Android] {} was already linked in app/build.gradle!".format(pkg))
+
+            new_app_java = []
+            for package in new_packages:
+                #: Add our import statement
+                javacls = os.path.splitext(package)[0].replace("/", ".")
+
+                if not Link.is_app_linked(main_application_java, pkg, javacls):
+                    #: Reuse previous if avialable
+                    new_app_java = new_app_java or main_application_java.split("\n")
+
+                    #: Find last import statement
+                    j = 0
+                    for i, line in enumerate(new_app_java):
+                        if fnmatch.fnmatch(line, "import *;"):
+                            j = i
+
+                    new_app_java.insert(j+1, "import {};".format(javacls))
+
+                    #: Add the package statement
+                    j = 0
+                    for i, line in enumerate(new_app_java):
+                        if fnmatch.fnmatch(line.strip(), "new *Package()"):
+                            j = i
+                    if j == 0:
+                        raise ValueError("Could not find the correct spot to add package {}"
+                                         .format(javacls))
+                    else:
+                        #: Get indent and add to previous line
+                        #: Add comma to previous line
+                        new_app_java[j] = new_app_java[j]+ ","
+
+                        #: Insert new line
+                        new_app_java.insert(j+1, "                new {}()"
+                                            .format(javacls.split(".")[-1]))
+
+                else:
+                    print("\t[Android] {} was already linked in {}!".format(pkg, main_app_java_path))
+
+            if new_app_java:
+                with open(main_app_java_path, 'w') as f:
+                    f.write("\n".join(new_app_java))
+
+            print("\t[Android] {} linked successfully!".format(pkg))
+        except Exception as e:
+            print("\t[Android] {} Failed to link. Reverting due to error: {}".format(pkg, e))
+
+            #: Undo any changes
+            with open('android/settings.gradle', 'w') as f:
+                f.write(settings_gradle)
+            with open('android/app/build.gradle', 'w') as f:
+                f.write(build_gradle)
+            with open(main_app_java_path, 'w') as f:
+                f.write(main_application_java)
+
+            #: Now blow up
+            raise
+
+    def link_ios(self, path, pkg):
+        print("\t[iOS] Link TODO:...")
+
+
+class Unlink(Command):
+    title = set_default("unlink")
+    help = set_default("Unlink an enaml-native package")
+    args = set_default([
+        ('name', dict(help="Package name")),
+    ])
+
+    def run(self, args=None):
+        """ The name IS required here. """
+        print("Unlinking {}...".format(args.name))
+        self.unlink(Link.package_dir, args.name)
+
+    def unlink(self, path, pkg):
+        """ Unlink the package in the current directory.
+        """
+        if exists(join(path, pkg, 'android', 'build.gradle')):
+            self.unlink_android(path, pkg)
+        else:
+            print("Android project does not need unlinked for {}".format(pkg))
+        if exists(join(path, pkg, 'ios', 'Podfile')):
+            self.link_ios(path, pkg)
+        else:
+            print("iOS project does not need unlinked for {}".format(pkg))
+
+    def unlink_android(self, path, pkg):
+        """ Unlink's the android project to this library.
+
+            1. In the app's android/settings.gradle, it removes the following lines (if they exist):
+                    include ':<project-name>'
+                    project(':<project-name>').projectDir = new File(rootProject.projectDir, '../venv/packages/<project-name>/android')
+
+            2. In the app's android/app/build.gradle, it removes the following line (if present)
+                    compile project(':<project-name>')
+
+            3. In the app's android/app/src/main/java/<bundle/id>/MainApplication.java, it removes:
+                    import <package>.<Name>Package;
+                     new <Name>Package(), 
+                     
+                  If no comma exists it will remove the comma from the previous line.
+                    
+        """
+        bundle_id = self.ctx['bundle_id']
 
         #: Check if it's already linked
         with open('android/settings.gradle') as f:
@@ -792,87 +1058,88 @@ class Link(Command):
             main_application_java = f.read()
 
         try:
-            #: Link settings.gradle
-            if not is_settings_linked(settings_gradle, pkg):
-                #: Add two statements
-                new_settings = settings_gradle.split("\n")
-                new_settings.append("") # Blank line
-                new_settings.append("include ':{name}'".format(name=pkg))
-                new_settings.append("project(':{name}').projectDir = "
-                                    "new File(rootProject.projectDir, '../packages/{name}/android')"
-                                    .format(name=pkg))
+            #: Now link all the EnamlPackages we can find in the new "package"
+            new_packages = Link.find_packages(join(path, pkg))
+            if not new_packages:
+                print("\t[Android] {} No EnamlPackages found to unlink!".format(pkg))
+                return
+
+            #: Unlink settings.gradle
+            if Link.is_settings_linked(settings_gradle, pkg):
+                #: Remove the two statements
+                new_settings = [
+                    line for line in settings_gradle.split("\n")
+                    if line.strip() not in [
+                        "include ':{name}'".format(name=pkg),
+                        "project(':{name}').projectDir = "
+                        "new File(rootProject.projectDir, '../{path}/{name}/android')"
+                            .format(name=pkg, path=Link.package_dir)
+                    ]
+                ]
 
                 with open('android/settings.gradle', 'w') as f:
                     f.write("\n".join(new_settings))
-                print("settings.gradle linked!")
+                print("\t[Android] {} unlinked settings.gradle!".format(pkg))
             else:
-                print("settings.gradle was already linked!")
+                print("\t[Android] {} was not linked in settings.gradle!".format(pkg))
 
-            #: Link app/build.gradle
-            if not is_build_linked(build_gradle, pkg):
+            #: Unlink app/build.gradle
+            if Link.is_build_linked(build_gradle, pkg):
                 #: Add two statements
-                new_build = build_gradle.split("\n")
-
-                #: Find correct line number
-                found = False
-                for i, line in enumerate(new_build):
-                    if re.match(r"dependencies\s*{", line):
-                        found = True
-                        break
-                if not found:
-                    raise ValueError("Unable to find dependencies in android/app/build.gradle!")
-
-                #: TODO: Should insert at the end!
-                new_build.insert(i, "")  # Blank line
-                new_build.insert(i+1, "    compile project(':{name}')".format(name=pkg))
+                new_build = [
+                    line for line in build_gradle.split("\n")
+                    if line.strip() not in ["compile project(':{name}')".format(name=pkg)]
+                ]
 
                 with open('android/app/build.gradle', 'w') as f:
                     f.write("\n".join(new_build))
-                print("app/build.gradle linked!")
-            else:
-                print("app/build.gradle was already linked!")
 
-            new_packages = find_packages(join(path, pkg))
+                print("\t[Android] {} unlinked in app/build.gradle!".format(pkg))
+            else:
+                print("\t[Android] {} was not linked in app/build.gradle!".format(pkg))
+
             new_app_java = []
             for package in new_packages:
-                if not is_app_linked(main_application_java, pkg, package):
+                #: Add our import statement
+                javacls = os.path.splitext(package)[0].replace("/", ".")
+
+                if Link.is_app_linked(main_application_java, pkg, javacls):
                     #: Reuse previous if avialable
                     new_app_java = new_app_java or main_application_java.split("\n")
 
-                    #: Find last import statement
+                    new_app_java = [
+                        line for line in new_app_java
+                        if line.strip() not in [
+                            "import {};".format(javacls),
+                            "new {}()".format(javacls.split(".")[-1]),
+                            "new {}(),".format(javacls.split(".")[-1]),
+                        ]
+                    ]
+
+                    #: Now find the last package and remove the comma if it exists
+                    found = False
                     j = 0
                     for i, line in enumerate(new_app_java):
-                        if fnmatch.fnmatch(line, "import *;"):
+                        if fnmatch.fnmatch(line.strip(), "new *Package()"):
+                            found = True
+                        elif fnmatch.fnmatch(line.strip(), "new *Package(),"):
                             j = i
 
-                    #: Add our import statement
-                    javacls = os.path.splitext(package)[0].replace("/", ".")
-                    new_app_java.insert(j+1, "import {};".format(javacls))
+                    if not found:  #: We removed the last package so add a comma
+                        #: This kills any whitespace...
+                        new_app_java[j] = new_app_java[j][:new_app_java[j].rfind(',')]
 
-                    #: Add the package statement
-                    j = 0
-                    for i, line in enumerate(new_app_java):
-                        if fnmatch.fnmatch(line,"new *Package()"):
-                            j = i
-                    if j == 0:
-                        raise ValueError("Could not find the correct spot to add package {}"
-                                         .format(javacls))
-                    else:
-                        #: Get indent and add to previous line
-                        #: Add comma to previous line
-                        new_app_java[j] = new_app_java[j]+ ","
-
-                        #: Insert new line
-                        new_app_java.insert(j+1, "                new {}()"
-                                            .format(javacls.split(".")[-1]))
+                else:
+                    print("\t[Android] {} was not linked in {}!".format(pkg, main_app_java_path))
 
             if new_app_java:
-                with open(main_application_java, 'w') as f:
+                with open(main_app_java_path, 'w') as f:
                     f.write("\n".join(new_app_java))
 
-            print("[Android] Linked {} successfully!".format(pkg))
+            print("\t[Android] {} unlinked successfully!".format(pkg))
+
         except Exception as e:
-            print("[Android] Failed to link {}. Reverting due to error: {}".format(pkg, e))
+            print("\t[Android] {} Failed to unlink. Reverting due to error: {}".format(pkg, e))
 
             #: Undo any changes
             with open('android/settings.gradle', 'w') as f:
@@ -885,20 +1152,7 @@ class Link(Command):
             #: Now blow up
             raise
 
-    def link_ios(self, path):
-        raise NotImplementedError
 
-
-class Unlink(Command):
-    title = set_default("unlink")
-    help = set_default("Unlink an enaml-native package")
-    args = set_default([
-        ('name', dict(help="Package name")),
-    ])
-
-    def run(self, args=None):
-        print("Unlinking {}...".format(args.name))
-        raise NotImplementedError
 
 
 class AllPython(Command):
@@ -964,7 +1218,7 @@ class RunAndroid(Command):
             else:
                 shprint(gradlew, 'installDebug')
             shprint(sh.adb, 'shell', 'am', 'start', '-n',
-                        '{bundle_id}/{bundle_id}.MainActivity'.format(bundle_id=bundle_id))
+                    '{bundle_id}/{bundle_id}.MainActivity'.format(bundle_id=bundle_id))
 
 
 class CleanIOS(Command):
@@ -1144,7 +1398,7 @@ class Server(Command):
             def onClose(self, wasClean, code, reason):
                 super(DevWebSocketHandler,self).onClose(wasClean, code, reason)
                 server.on_close(self)
-                
+
             def write_message(self, message):
                 self.sendMessage(message, False)
 
@@ -1176,7 +1430,7 @@ class Server(Command):
 
     def on_message(self, msg):
         print(msg)
-        
+
     def send_message(self, msg):
         """ Send a message to the client """
         if self.handler is None:
@@ -1247,11 +1501,30 @@ class EnamlNativeCli(Atom):
     commands = List(Command)
 
     def _default_commands(self):
-        """ Build the list of CLI commands by finding subclasses of the Command class """
-        return [c() for c in find_commands(Command)]
+        """ Build the list of CLI commands by finding subclasses of the Command class
+
+        Also allows commands to be installed using the "enaml_native_command" entry point.
+
+        This entry point should return a Command subclass
+
+        """
+        commands = [c() for c in find_commands(Command)]
+
+        #: Get commands installed via entry points
+        for ep in pkg_resources.iter_entry_points(group="enaml_native_command"):
+            c = ep.load()
+            if not issubclass(c, Command):
+                print("Warning: entry point {} did not return a valid enaml cli command! "
+                      "This command will be ignored!".format(ep.name))
+            commands.append(c())
+
+        return commands
 
     def _default_ctx(self):
         """ Return the package config or context and normalize some of the values """
+        if not exists(self.package):
+            raise EnvironmentError("{} does not exist. "
+                                   "Are you in the project folder?".format(self.package))
         with open(self.package) as f:
             ctx = json.load(f)
 
@@ -1309,7 +1582,7 @@ class EnamlNativeCli(Atom):
 def configure_path():
     #: Hack to configure the path correctly when running from source or pip installed versions
     for root in [dirname(realpath(__file__)),
-                 join(sys.prefix, 'enaml-native-cli')]:
+                 join(sys.prefix, 'packages', 'enaml-native-cli')]:
         if exists(join(root, 'python-for-android')):
             #: TODO: This is terrible...
             global p4a_root
@@ -1320,6 +1593,7 @@ def configure_path():
             sys.path.append(p4a_root)
             return
     raise ValueError("Could not find the python-for-android directory")
+
 
 def main():
     configure_path()

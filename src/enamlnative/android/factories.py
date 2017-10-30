@@ -26,6 +26,11 @@ def auto_complete_text_view_factory():
     return AndroidAutoCompleteTextView
 
 
+def bar_chart_factory():
+    from .android_chart_view import AndroidBarChart
+    return AndroidBarChart
+
+
 def button_factory():
     # print "Import button"
     from .android_button import AndroidButton
@@ -55,9 +60,11 @@ def chronometer_factory():
     from .android_chronometer import AndroidChronometer
     return AndroidChronometer
 
+
 def coordinator_layout_factory():
     from .android_coordinator_layout import AndroidCoordinatorLayout
     return AndroidCoordinatorLayout
+
 
 def compound_button_factory():
     # print "Import compound button"
@@ -65,8 +72,12 @@ def compound_button_factory():
     return AndroidCompoundButton
 
 
+def data_set_factory():
+    from .android_chart_view import AndroidDataSet
+    return AndroidDataSet
+
+
 def date_picker_factory():
-    # print "Import date picker"
     from .android_date_picker import AndroidDatePicker
     return AndroidDatePicker
 
@@ -137,6 +148,11 @@ def linear_layout_factory():
     return AndroidLinearLayout
 
 
+def line_chart_factory():
+    from .android_chart_view import AndroidLineChart
+    return AndroidLineChart
+
+
 def list_item_factory():
     # print "Import linear layout"
     from .android_list_view import AndroidListItem
@@ -195,6 +211,11 @@ def pager_fragment_factory():
     return AndroidPagerFragment
 
 
+def pie_chart_factory():
+    from .android_chart_view import AndroidPieChart
+    return AndroidPieChart
+
+
 def progress_bar_factory():
     # print "Import progress bar"
     from .android_progress_bar import AndroidProgressBar
@@ -229,6 +250,11 @@ def scroll_view_factory():
     # print "Import scroll view"
     from .android_scroll_view import AndroidScrollView
     return AndroidScrollView
+
+
+def scatter_chart_factory():
+    from .android_chart_view import AndroidScatterChart
+    return AndroidScatterChart
 
 
 def seek_bar_factory():
@@ -329,6 +355,7 @@ ANDROID_FACTORIES = {
     'ActivityIndicator': activity_indicator_factory,
     'AnalogClock': analog_clock_factory,
     'AutoCompleteTextView': auto_complete_text_view_factory,
+    'BarChart': bar_chart_factory,
     'Button': button_factory,
     'CalendarView': calendar_view_factory,
     'CardView': card_view_factory,
@@ -339,6 +366,7 @@ ANDROID_FACTORIES = {
     'DatePicker': date_picker_factory,
     'Dialog': dialog_factory,
     'DrawerLayout': drawer_layout_factory,
+    'DataSet': data_set_factory,
     'EditText': edit_text_factory,
     'Flexbox': flexbox_factory,
     'Fragment': fragment_factory,
@@ -351,6 +379,7 @@ ANDROID_FACTORIES = {
     'LinearLayout': linear_layout_factory,
     'ListItem': list_item_factory,
     'ListView': list_view_factory,
+    'LineChart': line_chart_factory,
     'MapMarker': map_marker_factory,
     'MapCircle': map_circle_factory,
     'MapPolyline': map_polyline_factory,
@@ -360,11 +389,13 @@ ANDROID_FACTORIES = {
     'PagerTabStrip': pager_tab_strip_factory,
     'PagerFragment': pager_fragment_factory,
     'Picker': picker_factory,
+    'PieChart': pie_chart_factory,
     'ProgressBar': progress_bar_factory,
     'RadioButton': radio_button_factory,
     'RadioGroup': radio_group_factory,
     'RatingBar': rating_bar_factory,
     'RelativeLayout': relative_layout_factory,
+    'ScatterChart': scatter_chart_factory,
     'ScrollView': scroll_view_factory,
     'SeekBar': seek_bar_factory,
     'Spacer': spacer_factory,

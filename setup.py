@@ -9,20 +9,52 @@ Created on July 10, 2017
 
 @author: jrm
 '''
+import os
+import fnmatch
+from setuptools import setup, find_packages
 
-import sys
-from setuptools import setup, find_packages, Extension
+
+def find_data_files(dest, *folders):
+    matches = {}
+    #: Want to install outside the venv volder in the packages folder
+    dest = os.path.join('packages', dest)
+
+    excluded_types = ['.pyc', '.enamlc', '*.apk', '*.iml']
+    excluded_dirs = ['android/build']
+    for folder in folders:
+        for dirpath, dirnames, files in os.walk(folder):
+            #: Skip build folders and exclude hidden dirs
+            if ([d for d in dirpath.split("/") if d.startswith(".")] or
+                    [pattern for pattern in excluded_dirs if fnmatch.fnmatch(dirpath,pattern)]):
+                continue
+            k = os.path.join(dest,dirpath)
+            if k not in matches:
+                matches[k] = []
+            for f in fnmatch.filter(files, '*'):
+                if [p for p in excluded_types if f.endswith(p)]:
+                    continue
+                m = os.path.join(dirpath, f)
+                matches[k].append(m)
+    return matches.items()
+
 
 setup(
-    name="enaml-native",
-    version="2.9.24",
+    name="enaml-native-cli",
+    version="1.0",
     author="frmdstryr",
     author_email="frmdstryr@gmail.com",
     license='MIT',
-    url='https://github.com/frmdstryr/enaml-native/archive/master.zip',
+    url='https://github.com/frmdstryr/enaml-native/s',
     description="Build native mobile apps in python",
+    scripts=['enaml-native'],
     long_description=open("README.md").read(),
-    packages=find_packages('src/'),
-    package_dir={'': 'src'},
-    install_requires=['enaml', 'msgpack-python'],
+    data_files=find_data_files('enaml-native-cli', 'android', 'docs', 'examples', 'ios',
+                               'python-for-android', 'python-for-ios', 'tests', 'src'),
+    install_requires=[
+        'atom', 'appdirs', 'colorama>=0.3.3', 'sh>=1.10,<1.12.5', 'jinja2', 'six', 'pipdeptree',
+        #: Required p4a recipes
+        #'p4a-nucleic', 'p4a-msgpack'
+    ],
+    setup_requires=['virtualenv'],
+    test_requires=['requests', 'py.test']
 )

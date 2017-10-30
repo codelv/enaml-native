@@ -6,7 +6,7 @@ android {
     buildToolsVersion '26.0.2'
 
     defaultConfig {
-        applicationId "com.frmdstryr.enamlnative.demo"
+        applicationId "com.codelv.enamlnative.demo"
         minSdkVersion 19
         targetSdkVersion 25
         versionCode 12
@@ -44,5 +44,6 @@ dependencies {
     compile project(':enaml-native')
     compile project(':enaml-native-icons')
     compile project(':enaml-native-maps')
+    compile project(':enaml-native-charts')
 }
 

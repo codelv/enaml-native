@@ -13,10 +13,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.util.Log;
 
-import com.codelv.enamlnative.BuildConfig;
-import com.codelv.enamlnative.R;
-
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -42,6 +38,9 @@ public class EnamlActivity extends AppCompatActivity {
     final List<EnamlPackage> mEnamlPackages = new ArrayList<EnamlPackage>();
     PermissionResultListener mPermissionResultListener;
 
+    final HashMap<String, Long> mProfilers = new HashMap<>();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,12 +59,7 @@ public class EnamlActivity extends AppCompatActivity {
         }
 
 
-        // Show loading screen
-        setContentView(R.layout.activity_main);
-
-        // Save views for animation when loading is complete
-        mContentView = (FrameLayout) findViewById(R.id.contentView);
-        mLoadingView = findViewById(R.id.loadingView);
+        prepareLoadingScreen();
 
         // Now initialize everything
         for (EnamlPackage pkg: getPackages()) {
@@ -79,6 +73,17 @@ public class EnamlActivity extends AppCompatActivity {
         return mEnamlPackages;
     }
 
+    /**
+     * Show the loading screen. Can be overridden if necessary.
+     */
+    protected void prepareLoadingScreen() {
+        // Show loading screen
+        setContentView(R.layout.activity_main);
+
+        // Save views for animation when loading is complete
+        mContentView = (FrameLayout) findViewById(R.id.contentView);
+        mLoadingView = findViewById(R.id.loadingView);
+    }
 
     /**
      * Set the bridge implementation
@@ -90,11 +95,19 @@ public class EnamlActivity extends AppCompatActivity {
 
 
     /**
+     * Should debug messages be used.
+     * @return
+     */
+    public boolean showDebugMessages() {
+        return ((EnamlApplication)getApplication()).showDebugMessages();
+    }
+
+    /**
      * Set error message text in loading view.
      * @param message: Message to display
      */
     public void showErrorMessage(String message) {
-        if (!((EnamlApplication)getApplication()).showDebugMessages()) {
+        if (!showDebugMessages()) {
             // Crash on release
             throw new RuntimeException(message);
         }
@@ -102,6 +115,7 @@ public class EnamlActivity extends AppCompatActivity {
 
         // Move to top of screen
         TextView textView = (TextView) findViewById(R.id.textView);
+        textView.setHorizontallyScrolling(true);
         ((ViewGroup.MarginLayoutParams) textView.getLayoutParams()).setMargins(10, 10, 10, 10);
         textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
         textView.setTextColor(Color.RED);
@@ -141,7 +155,6 @@ public class EnamlActivity extends AppCompatActivity {
             mContentView.removeView(mPythonView);
             mContentView.forceLayout();
             mLoadingView.setVisibility(View.VISIBLE);
-            //animateView(mLoadingView,mContentView);
         }
         mPythonView = view;
         mContentView.addView(view);
@@ -274,7 +287,8 @@ public class EnamlActivity extends AppCompatActivity {
     }
 
     /**
-     * Return build info
+     * Return build info. Called from python at startup to get info like screen density
+     * and API version.
      * @return
      */
     public HashMap<String,Object> getBuildInfo() {
@@ -305,4 +319,26 @@ public class EnamlActivity extends AppCompatActivity {
         }};
         return result;
     }
+
+    /**
+     * Utility for measuring how long tasks take.
+     */
+    public void startTrace(String tag) {
+        Log.i(TAG, "[Trace][" + tag + "] Started ");
+        mProfilers.put(tag, System.currentTimeMillis());
+    }
+
+    public void stopTrace(String tag) {
+        Log.i(TAG, "[Trace][" + tag + "] Ended " + (System.currentTimeMillis() - mProfilers.get(tag)) + " (ms)");
+    }
+
+
+    /**
+     * Reset stats on the bridge
+     */
+    public void resetBridgeStats() {
+       mBridge.resetStats();
+    }
+
+
 }
