@@ -17,6 +17,11 @@ from atom.api import Atom, Value, Callable, Dict, List, Unicode, Float, Int, Ins
 from contextlib import contextmanager
 from collections import OrderedDict
 
+try:
+    from ConfigParser import ConfigParser
+except:
+    from configparser import ConfigParser
+
 @contextmanager
 def cd(newdir):
     prevdir = os.getcwd()
@@ -393,6 +398,26 @@ class BuildPython(Command):
                         expanduser('~/.local/share/python-for-android/dists/enaml-native/python/{}'.format(f)),
                         '{python_build_dir}/{arch}'.format(**cfg))
 
+            #: Collect all entry_points.txt and merge them into entry_points.json
+            #: This allows use to use wnetry points in the app by reading from the file
+            with cd('{python_build_dir}/{arch}/site-packages/'.format(**cfg)):
+                entry_points = {}
+                try:
+                    for ep in glob("*/entry_points.txt"):
+                        config = ConfigParser()
+                        config.read(ep)
+                        for section in config.sections():
+                            if section not in entry_points:
+                                entry_points[section] = {}
+                            for opt in config.options(section):
+                                entry_points[section][opt] = config.get(section, opt)
+
+                    if entry_points:
+                        with open('entry_points.json','w') as f:
+                            f.write(json.dumps(entry_points, indent=2))
+                except:
+                    print("Failed to convert entry points")
+
             #: Copy ca-cert (tornado only)
             cert_path = '{python_build_dir}/{arch}/site-packages/tornado/'.format(**cfg)
             if os.path.exists(cert_path):
@@ -509,7 +534,6 @@ class BundleAssets(Command):
                         shprint(sh.cp, '-R', '.', '../../build/')
 
                     #: Copy sources from app source
-                    #: TODO, or just let gradle?
                     for src in ctx['sources']:
                         shprint(sh.cp, '-R', join(root, src, '.'), 'build')
 
