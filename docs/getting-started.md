@@ -110,9 +110,17 @@ To create a new project use the cli to init a new project.
     enaml-native init HelloWorld com.example.helloworld apps/
 
 
-Now cd to the destination folder and build the python and ndk libraries.
+Now cd to the destination folder, activate the virtual env, and build the python and ndk libraries.
 
     :::bash
+    
+    #: Go into project folder
+    cd apps/HelloWorld
+    
+    #: Activate the venv
+    source venv/bin/activate
+    
+    #: Build python and ndk libraries
     enaml-native build-python 
 
 
