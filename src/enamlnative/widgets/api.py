@@ -33,8 +33,8 @@ from .card_view import CardView
 from .image_view import ImageView
 from .web_view import  WebView
 from .list_view import ListView, ListItem
-from .map_view import MapView, MapMarker, MapCircle, MapPolyline, MapPolygon
-from .chart_view import DataSet, LineChart, BarChart, ScatterChart, PieChart
+#from .map_view import MapView, MapMarker, MapCircle, MapPolyline, MapPolygon
+#from .chart_view import DataSet, LineChart, BarChart, ScatterChart, PieChart
 
 #: Controls
 from .button import  Button

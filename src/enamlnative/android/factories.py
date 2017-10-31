@@ -165,31 +165,6 @@ def list_view_factory():
     return AndroidListView
 
 
-def map_marker_factory():
-    from .android_map_view import AndroidMapMarker
-    return AndroidMapMarker
-
-
-def map_circle_factory():
-    from .android_map_view import AndroidMapCircle
-    return AndroidMapCircle
-
-
-def map_polyline_factory():
-    from .android_map_view import AndroidMapPolyline
-    return AndroidMapPolyline
-
-
-def map_polygon_factory():
-    from .android_map_view import AndroidMapPolygon
-    return AndroidMapPolygon
-
-
-def map_view_factory():
-    from .android_map_view import AndroidMapView
-    return AndroidMapView
-
-
 def picker_factory():
     # print "Import view"
     from .android_picker import AndroidPicker
@@ -209,11 +184,6 @@ def pager_tab_strip_factory():
 def pager_fragment_factory():
     from .android_fragment import AndroidPagerFragment
     return AndroidPagerFragment
-
-
-def pie_chart_factory():
-    from .android_chart_view import AndroidPieChart
-    return AndroidPieChart
 
 
 def progress_bar_factory():
@@ -250,11 +220,6 @@ def scroll_view_factory():
     # print "Import scroll view"
     from .android_scroll_view import AndroidScrollView
     return AndroidScrollView
-
-
-def scatter_chart_factory():
-    from .android_chart_view import AndroidScatterChart
-    return AndroidScatterChart
 
 
 def seek_bar_factory():
@@ -355,7 +320,6 @@ ANDROID_FACTORIES = {
     'ActivityIndicator': activity_indicator_factory,
     'AnalogClock': analog_clock_factory,
     'AutoCompleteTextView': auto_complete_text_view_factory,
-    'BarChart': bar_chart_factory,
     'Button': button_factory,
     'CalendarView': calendar_view_factory,
     'CardView': card_view_factory,
@@ -379,23 +343,15 @@ ANDROID_FACTORIES = {
     'LinearLayout': linear_layout_factory,
     'ListItem': list_item_factory,
     'ListView': list_view_factory,
-    'LineChart': line_chart_factory,
-    'MapMarker': map_marker_factory,
-    'MapCircle': map_circle_factory,
-    'MapPolyline': map_polyline_factory,
-    'MapPolygon': map_polygon_factory,
-    'MapView': map_view_factory,
     'PagerTitleStrip': pager_title_strip_factory,
     'PagerTabStrip': pager_tab_strip_factory,
     'PagerFragment': pager_fragment_factory,
     'Picker': picker_factory,
-    'PieChart': pie_chart_factory,
     'ProgressBar': progress_bar_factory,
     'RadioButton': radio_button_factory,
     'RadioGroup': radio_group_factory,
     'RatingBar': rating_bar_factory,
     'RelativeLayout': relative_layout_factory,
-    'ScatterChart': scatter_chart_factory,
     'ScrollView': scroll_view_factory,
     'SeekBar': seek_bar_factory,
     'Spacer': spacer_factory,

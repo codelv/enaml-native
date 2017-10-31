@@ -15,11 +15,11 @@ from setuptools import setup, find_packages, Extension
 
 setup(
     name="enaml-native",
-    version="2.10.23",
-    author="frmdstryr",
+    version="2.10.30",
+    author="CodeLV",
     author_email="frmdstryr@gmail.com",
     license='MIT',
-    url='https://github.com/frmdstryr/enaml-native/',
+    url='https://github.com/codelv/enaml-native/',
     description="Build native mobile apps in python",
     long_description=open("README.md").read(),
     packages=find_packages(),
