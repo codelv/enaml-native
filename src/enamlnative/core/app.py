@@ -65,8 +65,10 @@ class BridgedApplication(Application):
         """ Initialize the event loop error handler.  Subclasses must properly
             initialize the proxy resolver.
         """
-        self.init_error_handler()
         super(BridgedApplication, self).__init__()
+        self.init_error_handler()
+        self.load_plugin_widgets()
+        self.load_plugin_factories()
 
     # --------------------------------------------------------------------------
     # Abstract API Implementation
@@ -373,3 +375,55 @@ class BridgedApplication(Application):
             self._dev_session = session
         except:
             self.show_error(traceback.format_exc())
+
+    # --------------------------------------------------------------------------
+    # Plugin implementation
+    # --------------------------------------------------------------------------
+    def get_plugins(self, group):
+        """ TODO: Not yet implemented... Was going to use entry points but
+            that requires a ton of stuff which will be extremely slow.
+        """
+        return []
+
+    def load_plugin_widgets(self):
+        """ Pull widgets added via plugins using the `enaml-native-widgets` entry point.
+
+        The entry point function must return a dictionary of Widget declarations to add to the
+        core api.
+
+        Example
+        ---------
+
+        def install():
+            from charts.widgets.chart_view import BarChart, LineChart
+            return {
+                'BarChart': BarChart,
+                'LineCart': LineChart,
+            }
+
+        """
+        from enamlnative.widgets import api
+        for plugin in self.get_plugins(group='enaml-native-widgets'):
+            get_widgets = plugin.load()
+            for name, widget in iter(get_widgets()):
+                #: Update the core api with these widgets
+                setattr(api, name, widget)
+
+    def load_plugin_factories(self):
+        """ Pull widgets added via plugins using the `enaml-native-ios-factories` or
+            `enaml-native-android-factories` entry points.
+
+        The entry point function must return a dictionary of Widget declarations to add to the
+        factories for this platform.
+
+        Example
+        ---------
+
+        def install():
+            return {
+                'MyWidget':my_widget_factory,
+                # etc...
+            }
+
+        """
+        raise NotImplementedError

@@ -303,7 +303,8 @@ class TornadoDevClient(DevClient):
                 while True:
                     msg = yield conn.read_message()
                     if msg is None: break
-                    session.handle_message(msg)
+                    r = session.handle_message(msg)
+                    conn.write_message(json.dumps(r))
                 session.connected = False
             except Exception as e:
                 print("Dev client connection dropped: {}".format(e))
@@ -339,7 +340,8 @@ class TwistedDevClient(DevClient):
                 pass
 
             def onMessage(self, payload, isBinary):
-                session.handle_message(payload)
+                r = session.handle_message(payload)
+                self.sendMessage(json.dumps(r))
 
             def onClose(self, wasClean, code, reason):
                 print("Dev client disconnected: {} {} {}".format(wasClean, code, reason))
@@ -527,7 +529,8 @@ class TornadoDevServer(DevServer):
 
             def on_message(self, message):
                 #: Delegate
-                session.handle_message(message)
+                r = session.handle_message(message)
+                self.write_message(json.dumps(r))
 
             def on_close(self):
                 print("Dev server client lost!")
@@ -536,6 +539,11 @@ class TornadoDevServer(DevServer):
             def get(self):
                 #: Delegate
                 self.write(server.render_editor())
+
+            def post(self):
+                #: Allow posting events
+                r = session.handle_message(self.request.body)
+                self.write(json.dumps(r))
 
         app = tornado.web.Application([
             (r"/", MainHandler),
@@ -579,7 +587,8 @@ class TwistedDevServer(DevServer):
                 print("WebSocket connection open.")
 
             def onMessage(self, payload, isBinary):
-                session.handle_message(payload)
+                r = session.handle_message(payload)
+                self.sendMessage(json.dumps(r))
 
             def onClose(self, wasClean, code, reason):
                 print("WebSocket connection closed: {}".format(reason))
@@ -587,6 +596,11 @@ class TwistedDevServer(DevServer):
         class MainHandler(resource.Resource):
             def render_GET(self, req):
                 return server.render_editor()
+
+            def render_POST(self, req):
+                #: Allow posting events
+                r = session.handle_message(req.content.getvalue())
+                return json.dumps(r)
 
         factory = WebSocketServerFactory(u"ws://0.0.0.0:{}".format(session.port))
         factory.protocol = DevWebSocketHandler
@@ -728,9 +742,12 @@ class DevServerSession(Atom):
         handler_name = 'do_{}'.format(msg['type'])
         if hasattr(self, handler_name):
             handler = getattr(self, handler_name)
-            handler(msg)
+            result = handler(msg)
+            return {'ok': True, 'result': result}
         else:
-            print("Warning: Unhandled message: {}".format(msg))
+            err = "Warning: Unhandled message: {}".format(msg)
+            print(err)
+            return {'ok': False, 'message': err}
 
     #: ========================================================================================
     #: Message handling API

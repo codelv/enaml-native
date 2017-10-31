@@ -19,6 +19,11 @@ class Activity(JavaBridgeObject):
     __nativeclass__ = set_default('com.codelv.enamlnative.EnamlActivity')
     __id__ = Int(-1) #: ID of -1 is a special reference on the bridge to the activity.
 
+    #: Tracing methods
+    startTrace = JavaMethod('java.lang.String')
+    stopTrace = JavaMethod('java.lang.String')
+    resetBridgeStats = JavaMethod()
+
     setView = JavaMethod('android.view.View')
     showLoading = JavaMethod('java.lang.String')
     setActionBar = JavaMethod('android.widget.Toolbar')

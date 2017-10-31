@@ -135,6 +135,9 @@ class MockApplication(BridgedApplication):
         print("Dispatch {} kbytes".format(len(data)/1000))
         self.bridge.process_events(data)
 
+    def load_plugin_factories(self):
+        pass
+
     def stop(self):
         """ Stop the profiler, print some info and the profiler stats"""
         if self.profile:

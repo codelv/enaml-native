@@ -23,6 +23,7 @@ from utils import load
     (["android"], 'calendar_view.enaml'),
     (["android"], 'card_view.enaml'),
     (["android"], 'clocks.enaml'),
+    (["android"], 'charts.enaml'),
     (["android"], 'checkbox.enaml'),
     (["android"], 'chronometer.enaml'),
     (["android"], 'date_picker.enaml'),

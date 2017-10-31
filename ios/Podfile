@@ -1,7 +1,0 @@
-target 'demo' do
-  use_frameworks!
-  pod "MPMessagePack", :git => 'https://github.com/gabriel/MPMessagePack.git'
-
-  pod "BlocksKit"
-  pod 'YogaKit', '~> 1.6'
-end

@@ -26,6 +26,11 @@ def auto_complete_text_view_factory():
     return AndroidAutoCompleteTextView
 
 
+def bar_chart_factory():
+    from .android_chart_view import AndroidBarChart
+    return AndroidBarChart
+
+
 def button_factory():
     # print "Import button"
     from .android_button import AndroidButton
@@ -55,9 +60,11 @@ def chronometer_factory():
     from .android_chronometer import AndroidChronometer
     return AndroidChronometer
 
+
 def coordinator_layout_factory():
     from .android_coordinator_layout import AndroidCoordinatorLayout
     return AndroidCoordinatorLayout
+
 
 def compound_button_factory():
     # print "Import compound button"
@@ -65,8 +72,12 @@ def compound_button_factory():
     return AndroidCompoundButton
 
 
+def data_set_factory():
+    from .android_chart_view import AndroidDataSet
+    return AndroidDataSet
+
+
 def date_picker_factory():
-    # print "Import date picker"
     from .android_date_picker import AndroidDatePicker
     return AndroidDatePicker
 
@@ -137,6 +148,11 @@ def linear_layout_factory():
     return AndroidLinearLayout
 
 
+def line_chart_factory():
+    from .android_chart_view import AndroidLineChart
+    return AndroidLineChart
+
+
 def list_item_factory():
     # print "Import linear layout"
     from .android_list_view import AndroidListItem
@@ -147,31 +163,6 @@ def list_view_factory():
     # print "Import linear layout"
     from .android_list_view import AndroidListView
     return AndroidListView
-
-
-def map_marker_factory():
-    from .android_map_view import AndroidMapMarker
-    return AndroidMapMarker
-
-
-def map_circle_factory():
-    from .android_map_view import AndroidMapCircle
-    return AndroidMapCircle
-
-
-def map_polyline_factory():
-    from .android_map_view import AndroidMapPolyline
-    return AndroidMapPolyline
-
-
-def map_polygon_factory():
-    from .android_map_view import AndroidMapPolygon
-    return AndroidMapPolygon
-
-
-def map_view_factory():
-    from .android_map_view import AndroidMapView
-    return AndroidMapView
 
 
 def picker_factory():
@@ -339,6 +330,7 @@ ANDROID_FACTORIES = {
     'DatePicker': date_picker_factory,
     'Dialog': dialog_factory,
     'DrawerLayout': drawer_layout_factory,
+    'DataSet': data_set_factory,
     'EditText': edit_text_factory,
     'Flexbox': flexbox_factory,
     'Fragment': fragment_factory,
@@ -351,11 +343,6 @@ ANDROID_FACTORIES = {
     'LinearLayout': linear_layout_factory,
     'ListItem': list_item_factory,
     'ListView': list_view_factory,
-    'MapMarker': map_marker_factory,
-    'MapCircle': map_circle_factory,
-    'MapPolyline': map_polyline_factory,
-    'MapPolygon': map_polygon_factory,
-    'MapView': map_view_factory,
     'PagerTitleStrip': pager_title_strip_factory,
     'PagerTabStrip': pager_tab_strip_factory,
     'PagerFragment': pager_fragment_factory,

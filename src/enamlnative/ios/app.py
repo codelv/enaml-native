@@ -8,13 +8,14 @@ The full license is in the file COPYING.txt, distributed with this software.
 @author jrm
 
 '''
+import ctypes
+from ctypes.util import find_library
 from atom.api import Atom, Float, Value, Unicode, Int, Typed
 from enaml.application import ProxyResolver
 from . import factories
 from .bridge import ObjcBridgeObject, ObjcMethod
 from ..core.app import BridgedApplication
-import ctypes
-from ctypes.util import find_library
+
 
 
 class ENBridge(ObjcBridgeObject):
@@ -157,3 +158,13 @@ class IPhoneApplication(BridgedApplication):
                 window.clearFlags(Window.FLAG_KEEP_SCREEN_ON)
 
         self.widget.getWindow().then(set_screen_on)
+
+    # --------------------------------------------------------------------------
+    # Plugin API Implementation
+    # --------------------------------------------------------------------------
+    def load_plugin_factories(self):
+        """ Add any plugin toolkit widgets to the ANDROID_FACTORIES """
+        for plugin in self.get_plugins(group='enaml-native-ios-factories'):
+            get_factories = plugin.load()
+            PLUGIN_FACTORIES = get_factories()
+            factories.IOS_FACTORIES.update(PLUGIN_FACTORIES)

@@ -1,6 +1,6 @@
 {
   "name": "Enaml-Native Demo",
-  "bundle_id":"com.frmdstryr.enamlnative.demo",
+  "bundle_id":"com.codelv.enamlnative.demo",
   "version": "1.8",
   "private": true,
   "sources": [
@@ -13,7 +13,7 @@
     "arches": ["x86", "armeabi-v7a"],
     "dependencies": {
       "python2crystax": "2.7.10",
-      "enamlnative": ">=2.1",
+      "enaml-native": ">=2.1",
       "tornado": ">=4.0",
       "singledispatch":">=0",
       "backports_abc":">=0",

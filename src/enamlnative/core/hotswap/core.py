@@ -61,6 +61,9 @@ def update_atom_members(old, new):
 
         try:
             #: Update any changed members
+            #: TODO: We have to somehow know if this was changed by the user or the code!
+            #: and ONLY update if it's due to the code changing! Without this, the entire concept
+            #: is broken and useless...
             setattr(old, key, getattr(new, key))
         except (AttributeError, TypeError):
             pass  # skip non-writable attributes
