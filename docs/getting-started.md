@@ -14,12 +14,9 @@ enaml-native uses the same toolchains as kivy, so the same dependencies must be 
 
 ### Overview
 1. Install the [system](#system-dependencies) dependencies
-2. Install the [python](#python-dependencies) requirements
-3. Install the [app](#app-dependencies) SDKs and tools (Android and/or iOS dependencies)
-4. Install [enaml-native](#installing-enaml-native)
-5. [Run](#running) an enaml-native project
-6. Create a [new project](#creating-a-new-project)
-7. Use the [dev server](#using-dev-server) for live reloading of code
+2. Install the [app](#app-dependencies) SDKs and tools (Android and/or iOS dependencies)
+3. Install [enaml-native](#installing-enaml-native)
+4. Create a [new project](#creating-and-run-a-new-project)
 
 
 Instructions for each are below. Please feel free to suggest changes or ask for help if you run into issues.
@@ -62,21 +59,6 @@ Install the following dependencies
     brew link libtool
 
 
-### Python dependencies
-
-Now install the python dependencies
-
-
-    pip install atom
-    pip install appdirs
-    pip install colorama>=0.3.3
-    pip install cython
-    pip install sh>=1.10,<1.12.5
-    pip install jinja2
-    pip install six
-
-
-If pip does not work, use `sudo apt install python-pip` on ubuntu or `brew install python` on osx
 
 ### App dependencies
 
@@ -105,50 +87,65 @@ To build android apps, the android SDK and crystax NDK must be installed.
 
 ### Installing enaml-native
 
-Now finally, we can install enaml-native
-
-1. Clone this repo using `git clone https://github.com/codelv/enaml-native`
-
-### Running
-
-1. Go to the to the enaml-native project folder
-2. Open `package.json` and update the `sdk` and `ndk` paths as needed (android only)
-2. Run `./enaml-native build-python`
-3. Now open the `android` folder in android and press play or run `./enaml-native run-android`  or open `App.xcodeproj` under the `ios` folder with xcode and press play or run `./enaml-native run-ios`
-4. Hopefully it works! If not please submit an issue.
+You can now use the [enaml-native-cli](https://github.com/codelv/enaml-native-cli) instead of
+installing from source. Simply use:
 
 
-### Create a new project
+    pip install --user enaml-native-cli
+    
 
-Finally, you can create your own project.
+Which installs all the python requirements for you.
 
-1. Change to the cloned enaml-native project folder (or any enaml-native project)
-2. Run `./enaml-native init <ProjectName> <bundleId> <Destination>`
-3. Change to the destination folder
-4. Modify your app code in `src`
-5. Run the project as shown in [running](#running)
+If pip does not work, use `sudo apt install python-pip` on ubuntu or `brew install python` on osx
+ 
 
+### Create and run a new project
 
-### Using the dev server
+To create a new project use the cli to init a new project.
 
-_Note: This may change in the future_
+```bash
 
-enaml-native ships with a dev server for reloading code on the fly without needing to rebuild the app. See the demo here [live reloading](https://youtu.be/CbxVc_vNiNk). This is similar to [hot reloading](https://facebook.github.io/react-native/blog/2016/03/24/introducing-hot-reloading.html) in react-native. It saves a lot of time when trying to build a UI as you can quickly try out code. It typically takes about 1-3 seconds for a reload vs about 10-15 for an app build and install, so you save 5x-10x per change (which adds up quickly).
+# Format enaml-native init <ProjectName> <bundleId> <Destination>
+eanml-native init HelloWorld com.example.helloworld apps/
 
-The dev server watches your source files and notifies the app when they changed. The app then updates the files on the device with the changes, and invokes the reload method and recreates the UI. Currently only the view file is reloaded. Full reloading (anything except native libraries) will be added sometime in the future.
+```
 
-#### Enabling reloading
+Now cd to the destination folder and build the python and ndk libraries.
 
-1. Set `app.dev="<dev_server_ip>"` in your `main.py` where `dev_server_ip` is the ip of your computer
-2. Define a `def reload_view(app)` function and set `app.reload_view = reload_view`. This just typically imports your enaml views, reloads them (using pythons `reload` function), and reassigns `app.view`
-3. Rebuild the app
-4. Make sure your device is on the same LAN network or can access the dev server (you can test it in the browser)
+```bash
 
-#### Starting the dev server
+enaml-native build-python 
 
-1. cd to the project folder
-2. Run `./enaml-native start`
+```
 
-#### Using
+Next, on android, we have to do a gradle sync by building the android project. 
 
-Make a change to your source code, and wala, the app reloads!
+```bash
+
+enaml-native build-android 
+
+```
+
+We must install the native python libraries and modules by running build python again.
+
+```bash
+
+enaml-native build-python 
+
+```
+
+Now either start the emulator or plug in a phone and we can run with
+ 
+ ```bash
+ 
+ enaml-native run-android 
+ 
+ ```
+
+Your app's code resides in the `src` directory. Any files here get installed on the app.
+
+The `view.enaml` contains the UI that is shown, and `main.py` is the startup script. 
+
+Next [learn the basics](https://www.codelv.com/projects/enaml-native/docs/learn-the-basics)
+
+> Note: iOS support is not yet fully implemented.
