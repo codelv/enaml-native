@@ -23,7 +23,7 @@ from utils import load
     (["android"], 'calendar_view.enaml'),
     (["android"], 'card_view.enaml'),
     (["android"], 'clocks.enaml'),
-    (["android"], 'charts.enaml'),
+    #(["android"], 'charts.enaml'), # now requires enaml-native-charts
     (["android"], 'checkbox.enaml'),
     (["android"], 'chronometer.enaml'),
     (["android"], 'date_picker.enaml'),
@@ -32,7 +32,7 @@ from utils import load
     (["android", "ios"], 'edit_text.enaml'),
     (["android"], 'flexbox.enaml'),
     (["android"], 'icon.enaml'),
-    (["android"], 'mapview.enaml'),
+    #(["android"], 'mapview.enaml'),# now requires enaml-native-maps
     (["android"], 'pager_tab_strip.enaml'),
     (["android"], 'picker.enaml'),
     (["android", "ios"], 'progress_bar.enaml'),
