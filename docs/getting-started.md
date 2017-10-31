@@ -90,7 +90,8 @@ To build android apps, the android SDK and crystax NDK must be installed.
 You can now use the [enaml-native-cli](https://github.com/codelv/enaml-native-cli) instead of
 installing from source. Simply use:
 
-
+  
+    :::sh
     pip install --user enaml-native-cli
     
 
@@ -103,44 +104,37 @@ If pip does not work, use `sudo apt install python-pip` on ubuntu or `brew insta
 
 To create a new project use the cli to init a new project.
 
-```bash
+    :::bash
+    
+    # Format enaml-native init <ProjectName> <bundleId> <Destination>
+    enaml-native init HelloWorld com.example.helloworld apps/
 
-# Format enaml-native init <ProjectName> <bundleId> <Destination>
-eanml-native init HelloWorld com.example.helloworld apps/
-
-```
 
 Now cd to the destination folder and build the python and ndk libraries.
 
-```bash
+    :::bash
+    enaml-native build-python 
 
-enaml-native build-python 
-
-```
 
 Next, on android, we have to do a gradle sync by building the android project. 
 
-```bash
+    :::bash
+    enaml-native build-android 
 
-enaml-native build-android 
-
-```
 
 We must install the native python libraries and modules by running build python again.
 
-```bash
+    :::bash
+    
+    enaml-native build-python 
 
-enaml-native build-python 
-
-```
 
 Now either start the emulator or plug in a phone and we can run with
  
- ```bash
+    :::bash
+     
+    enaml-native run-android 
  
- enaml-native run-android 
- 
- ```
 
 Your app's code resides in the `src` directory. Any files here get installed on the app.
 
