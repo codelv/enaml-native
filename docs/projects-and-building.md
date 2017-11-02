@@ -147,6 +147,111 @@ The `--release` flag tells it to do a release build (it's debug by default).
 
 For help see the documentation for each platform, enaml-native does nothing special here.
 
+#### Reducing app size
+
+Since apps must include both the python interpreter (as native libraries) and all the python
+and app sources, the installed apps can get large if care is not taken to remove unused modules.
+
+> Note: Future changes try to reduce app size automatically by using cx_Freeze's module finder 
+and running code "minification" on python builds! 
+
+If your app uses the [twisted](https://twistedmatrix.com/) even loop, for example, the twisted 
+package alone is a whopping **7.3MB** (and that's even excluding tests!). Most android and ios 
+apps aren't even that big as is! So how do we reduce it?
+
+##### Excluding unused packages and modules
+
+As mentioned earlier the `excluded` list in the `package.json` can be used to remove unnecessary
+packages and files from the python build (located under `build/python/python.tar.gz` in your app
+directory). To find out which packages are using a lot of space use the following command:
+
+    :::bash
+    du -h build/python/build
+    
+    #: Or for big hitters
+    du -h build/python/build | grep M
+      
+This will list all the folders and the size of all the contents in a "human readable" size format.
+  
+  
+    $ du -h build/python/build | grep M
+    1.1M    build/python/build/enaml/widgets
+    3.2M    build/python/build/enaml
+    1.5M    build/python/build/setuptools
+    2.7M    build/python/build/enamlnative
+    1.7M    build/python/build/encodings
+    1.1M    build/python/build/twisted/words
+    1.2M    build/python/build/twisted/python
+    1.1M    build/python/build/twisted/web
+    2.2M    build/python/build/twisted/internet
+    1.4M    build/python/build/twisted/conch
+    13M     build/python/build/twisted
+    32M     build/python/build
+
+
+Wow, this app's unoptimized python sources is 32MB uncompressed (4.6MB gzippped), yikes! 
+The app with no optimisations is ~45MB installed. We can see, enaml, enamlnative, and twisted are 
+all big. Lets reduce see if we can reduce that.
+
+ 
+    :::json
+    "android": {
+      # etc...
+      "excluded": [
+         "setuptools",
+          "pkg_resources",
+          "exampleproj",
+          "sqlite3",
+          "unittest",
+          "xml",
+          "hotshot",
+          "email",
+          "home",
+          "enaml/workbench*",
+          "enaml/stdlib*",
+          "enaml/applib*",
+          "enaml/scintilla*",
+          "enaml/widgets/[!_tw]*.pyo",
+          "enamlnative/ios*",
+          "enamlnative/core/eventloop*",
+          "enamlnative/core/hotswap*",
+          "twisted/internet/iocpreactor*",
+          "twisted/conch*",
+          "twisted/words*",
+          "twisted/trial*",
+          "twisted/mail*",
+          "incremental/test*",
+          "multiprocessing"
+      ]
+      # etc..
+    } 
+
+In `package.json` we add a bunch of excludes to the list, then run `enaml-native run-android` again 
+to make sure the app still works correctly. This reduces the app size by about 10MB, to about 36MB
+of usage but improvements can still be made.  Twisted is just a huge project (and this app also
+includes the `enaml-native-charts` which adds about 4-5MB!).
+
+You can also use the apk analyzer in android-studio which nicely graphs which files are using space
+within an apk (it even shows within the python.tar.gz!) so use that as well!
+
+
+##### Building for separate arches or excluding unused arches
+
+Another way to significantly reduce app apk size is by building apps for a specific arch. 
+
+    :::json
+        "arches": [
+            "x86", # Remove this line and run `enaml-native build-python`
+            "armeabi-v7a"
+        ], 
+
+For example, dropping the `x86` arch (which is typically only used for emulators and some tablets) 
+cuts the size of the stock  `HelloWorld` apk down by about ~30% (9.7MB to 6.6MB) and the installed
+app size by about 10%!
+
+> Note: As time goes on, more optimizations will be found and added. The installed optimized app size is 
+still slightly larger than a react-native app (by 20-30%).  
+
 
 ### Enaml-native packages
 
@@ -174,7 +279,7 @@ Using these packages will allow any user to create, maintain, and share their ow
 pluggable libraries as needed. There is no need to have your code merged in by some "core" group
 of maintainers.
 
-### Concept 
+#### Concept 
 
 The concept of the package is pretty simple. 
 
@@ -192,7 +297,7 @@ A package is simply a directory with the following subdirectories and files.
     android/          #: Android library using gradle (if applicable)
     ios/              #: iOS xcode library using cocoapods (if applicable)
     src/              #: Python source for your app 
-    src/setup.py      #: Setupfile for your package's source 
+    src/setup.py      #: Setupfile for your package's source (this is what is installed on the app)
     setup.py          #: Pip setup file for the enaml-native package
     
 
