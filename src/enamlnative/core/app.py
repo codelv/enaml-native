@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,12 +8,31 @@ The full license is in the file COPYING.txt, distributed with this software.
 
 @author jrm
 
-'''
+"""
+import json
 import traceback
-from atom.api import Callable, List, Instance, Value, Int, Unicode, Bool
+from atom.api import Atom, Callable, List, Instance, Value, Int, Unicode, Bool, Dict
 from enaml.application import Application
 from . import bridge
 from .loop import EventLoop
+
+
+class Plugin(Atom):
+    """ Simplified way to load a plugin from an entry_point line. 
+        The enaml-native and p4a build process removes pkg_resources 
+        and all package related metadata this simply imports from an
+        entry point string in the format "package.path.module:attr"
+    """
+    name = Unicode()
+    source = Unicode()
+
+    def load(self):
+        """ Load the object defined by the plugin entry point """
+        print("[DEBUG] Loading plugin {} from {}".format(self.name, self.source))
+        import pydoc
+        path, attr = self.source.split(":")
+        module = pydoc.locate(path)
+        return getattr(module, attr)
 
 
 class BridgedApplication(Application):
@@ -51,12 +70,32 @@ class BridgedApplication(Application):
     #: Count of pending send calls
     _bridge_pending = Int(0)
 
+    #: Entry points to load plugins
+    plugins = Dict()
+
     # --------------------------------------------------------------------------
     # Defaults
     # --------------------------------------------------------------------------
     def _default_loop(self):
         """ Get the event loop based on what libraries are available. """
         return EventLoop.default()
+
+    def _default_plugins(self):
+        """ Get entry points to load any plugins installed. 
+            The build process should create an "entry_points.json" file
+            with all of the data from the installed entry points.
+        """
+        plugins = {}
+        try:
+            with open('entry_points.json') as f:
+                entry_points = json.load(f)
+            for ep, obj in entry_points.items():
+                plugins[ep] = []
+                for name, src in obj.items():
+                    plugins[ep].append(Plugin(name=name, source=src))
+        except Exception as e:
+            print("Failed to load entry points {}".format(e))
+        return plugins
 
     # --------------------------------------------------------------------------
     # BridgedApplication Constructor
@@ -380,10 +419,10 @@ class BridgedApplication(Application):
     # Plugin implementation
     # --------------------------------------------------------------------------
     def get_plugins(self, group):
-        """ TODO: Not yet implemented... Was going to use entry points but
-            that requires a ton of stuff which will be extremely slow.
+        """ Was going to use entry points but that requires a ton of stuff which 
+        will be extremely slow.
         """
-        return []
+        return self.plugins.get(group, [])
 
     def load_plugin_widgets(self):
         """ Pull widgets added via plugins using the `enaml-native-widgets` entry point.
@@ -403,7 +442,7 @@ class BridgedApplication(Application):
 
         """
         from enamlnative.widgets import api
-        for plugin in self.get_plugins(group='enaml-native-widgets'):
+        for plugin in self.get_plugins(group='enaml_native_widgets'):
             get_widgets = plugin.load()
             for name, widget in iter(get_widgets()):
                 #: Update the core api with these widgets

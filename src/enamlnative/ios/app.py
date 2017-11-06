@@ -164,7 +164,7 @@ class IPhoneApplication(BridgedApplication):
     # --------------------------------------------------------------------------
     def load_plugin_factories(self):
         """ Add any plugin toolkit widgets to the ANDROID_FACTORIES """
-        for plugin in self.get_plugins(group='enaml-native-ios-factories'):
+        for plugin in self.get_plugins(group='enaml_native_ios_factories'):
             get_factories = plugin.load()
             PLUGIN_FACTORIES = get_factories()
             factories.IOS_FACTORIES.update(PLUGIN_FACTORIES)

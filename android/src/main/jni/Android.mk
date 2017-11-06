@@ -1,5 +1,8 @@
 LOCAL_PATH := $(call my-dir)
-CRYSTAX_PATH := $(HOME)/Android/Crystax/crystax-ndk-10.3.2
+#: Set by build script to <app>/build/python/
+#: If unchanged it assumes enaml-native is installed
+#: under venv/packages/enaml-native/
+PYTHON_PATH := ../../../../../../../build/python
 
 
 # Build libpybridge.so
@@ -16,6 +19,6 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := python2.7
-LOCAL_SRC_FILES := $(CRYSTAX_PATH)/sources/python/2.7/libs/$(TARGET_ARCH_ABI)/libpython2.7.so
-LOCAL_EXPORT_CFLAGS := -I $(CRYSTAX_PATH)/sources/python/2.7/include/python/
+LOCAL_SRC_FILES := $(PYTHON_PATH)/$(TARGET_ARCH_ABI)/modules/libpython2.7.so
+LOCAL_EXPORT_CFLAGS := -I $(PYTHON_PATH)/$(TARGET_ARCH_ABI)/include/python2.7
 include $(PREBUILT_SHARED_LIBRARY)

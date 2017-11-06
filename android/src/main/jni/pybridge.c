@@ -91,7 +91,7 @@ PyMODINIT_FUNC PyInit_NativeHooks(JNIEnv *env) {
     // Redirect stdout and stderr to this module
     PySys_SetObject("stdout", module);
     PySys_SetObject("stderr", module);
-    return module;
+    //return module;
 }
 
 /* ------------------ */
@@ -130,7 +130,8 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
     wchar_t *wchar_paths = Py_DecodeLocale(paths, NULL);
     Py_SetPath(wchar_paths);
 #else
-    Py_SetPath(paths);
+    //PySys_SetPath(paths);
+    Py_SetPath(paths); // works with crystax NOT normal python...
 #endif
 
 #if PY_MAJOR_VERSION >= 3

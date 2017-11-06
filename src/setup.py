@@ -11,11 +11,11 @@ Created on July 10, 2017
 '''
 
 import sys
-from setuptools import setup, find_packages, Extension
+from setuptools import setup, find_packages
 
 setup(
     name="enaml-native",
-    version="2.10.30",
+    version="2.11.6",
     author="CodeLV",
     author_email="frmdstryr@gmail.com",
     license='MIT',

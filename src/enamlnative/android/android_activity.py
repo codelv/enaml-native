@@ -40,10 +40,16 @@ class Activity(JavaBridgeObject):
     onRequestPermissionsResult = JavaCallback('int', '[Ljava.lang.String;', '[Lint;')
 
     #: Method added so we can listen externally
-    setPermissionResultListener = JavaMethod('com.enaml.MainActivity$PermissionResultListener')
+    setPermissionResultListener = JavaMethod('com.codelv.enamlnative.EnamlActivity$PermissionResultListener')
 
     PERMISSION_GRANTED = 0
     PERMISSION_DENIED = -1
+
+    #: Activity results
+    addActivityResultListener = JavaMethod('com.codelv.enamlnative.EnamlActivity$ActivityResultListener')
+    removeActivityResultListener = JavaMethod('com.codelv.enamlnative.EnamlActivity$ActivityResultListener')
+    onActivityResult = JavaCallback('int', 'int', 'android.content.Intent', returns='boolean')
+
 
     #: Get system services
     getSystemService = JavaMethod('java.lang.String', returns='java.lang.Object')

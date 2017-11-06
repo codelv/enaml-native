@@ -544,7 +544,7 @@ class Callback(YieldPoint):
        Use `Futures <.Future>` instead.
     """
     key = Value()
-    runner = Value(Runner)
+    runner = Value()
 
     def __init__(self, key):
         super(Callback, self).__init__(key=key)
@@ -566,7 +566,7 @@ class Wait(YieldPoint):
     .. deprecated:: 4.0
        Use `Futures <.Future>` instead.
     """
-    runner = Value(Runner)
+    runner = Value()
 
     def start(self, runner):
         self.runner = runner
@@ -590,7 +590,7 @@ class WaitAll(YieldPoint):
        Use `Futures <.Future>` instead.
     """
     keys = List()
-    runner = Value(Runner)
+    runner = Value()
 
     def __init__(self, keys):
         super(Callback, self).__init__(keys=keys)
@@ -639,7 +639,7 @@ class YieldFuture(YieldPoint):
     future = Value(Future)
     io_loop = Value(IOLoop)
     result_fn = Callable()
-    runner = Value(Runner)
+    runner = Value()
 
     def __init__(self, future):
         """Adapts a `.Future` to the `YieldPoint` interface.
@@ -980,20 +980,20 @@ _null_future = Future()
 _null_future.set_result(None)
 
 moment = Future()
-moment.__doc__ = \
-    """A special object which may be yielded to allow the IOLoop to run for
-one iteration.
-
-This is not needed in normal use but it can be helpful in long-running
-coroutines that are likely to yield Futures that are ready instantly.
-
-Usage: ``yield gen.moment``
-
-.. versionadded:: 4.0
-
-.. deprecated:: 4.5
-   ``yield None`` is now equivalent to ``yield gen.moment``.
-"""
+# moment.__doc__ = \
+#     """A special object which may be yielded to allow the IOLoop to run for
+# one iteration.
+#
+# This is not needed in normal use but it can be helpful in long-running
+# coroutines that are likely to yield Futures that are ready instantly.
+#
+# Usage: ``yield gen.moment``
+#
+# .. versionadded:: 4.0
+#
+# .. deprecated:: 4.5
+#    ``yield None`` is now equivalent to ``yield gen.moment``.
+#"""
 moment.set_result(None)
 
 

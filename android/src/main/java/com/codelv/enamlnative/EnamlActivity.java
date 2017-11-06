@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.graphics.Color;
 import android.os.Build;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ public class EnamlActivity extends AppCompatActivity {
     int mShortAnimationDuration = 300;
     final List<EnamlPackage> mEnamlPackages = new ArrayList<EnamlPackage>();
     PermissionResultListener mPermissionResultListener;
+    final List<ActivityResultListener> mActivityResultListeners = new ArrayList<ActivityResultListener>();
 
     final HashMap<String, Long> mProfilers = new HashMap<>();
 
@@ -284,6 +286,50 @@ public class EnamlActivity extends AppCompatActivity {
          * @param results
          */
         void onRequestPermissionsResult(int code, String[] permissions, int[] results);
+    }
+
+    /**
+     * Add an app activity result listener to use. Meant to be used from python
+     * so it can receive events from java.
+     * @param listener
+     */
+    public void addActivityResultListener(ActivityResultListener listener) {
+        mActivityResultListeners.add(listener);
+    }
+
+    public void removeActivityResultListener(ActivityResultListener listener) {
+        mActivityResultListeners.remove(listener);
+    }
+
+    /**
+     * Let Packages and python handle activity results and break execution
+     * if needed.
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        boolean handled = false;
+        for (ActivityResultListener listener: mActivityResultListeners) {
+            if (listener.onActivityResult(requestCode, resultCode, data)) {
+                handled = true; // But still execute the rest
+            }
+        }
+        if (!handled) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    public interface ActivityResultListener{
+
+        /**
+         * Receive activity request results from Intents
+         * @param requestCode
+         * @param resultCode
+         * @param data
+         */
+        boolean onActivityResult(int requestCode, int resultCode, Intent data);
     }
 
     /**

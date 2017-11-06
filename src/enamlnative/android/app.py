@@ -169,7 +169,7 @@ class AndroidApplication(BridgedApplication):
     # --------------------------------------------------------------------------
     def load_plugin_factories(self):
         """ Add any plugin toolkit widgets to the ANDROID_FACTORIES """
-        for plugin in self.get_plugins(group='enaml-native-android-factories'):
+        for plugin in self.get_plugins(group='enaml_native_android_factories'):
             get_factories = plugin.load()
             PLUGIN_FACTORIES = get_factories()
             factories.ANDROID_FACTORIES.update(PLUGIN_FACTORIES)
