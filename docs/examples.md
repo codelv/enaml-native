@@ -769,5 +769,37 @@ Example demonstrates the API for checking permissions and requesting access. Not
 
 [![See the demo on youtube](https://img.youtube.com/vi/7S8aWfzf89A/0.jpg)](https://youtu.be/7S8aWfzf89A)
 
+
+### Barcode and QRCode scanning
+
+Scan barcodes using the zxing library. 
+
+> Note: Requires the [enaml-native-barcode](https://github.com/codelv/enaml-native-barcode) package
+
+[![See the demo on youtube](https://img.youtube.com/vi/lYF8XioDd78/0.jpg)](https://youtu.be/lYF8XioDd78)
+
+
+    :::python
+    from enamlnative.core.api import *
+    from enamlnative.widgets.api import *
+    from zxing.widgets.barcode import BarcodeView, BarcodeFinderView
+    from enamlnative.android.app import AndroidApplication
+    
+    app = AndroidApplication.instance()
+    
+    enamldef ContentView(Flexbox): view:
+        flex_direction = "column"
+        BarcodeFinderView:
+            #: Request permission
+            active = True
+            mode = 'single'
+            #: Set clickable
+            clickable = True
+            clicked :: self.scanning = not self.scanning
+            scanned :: app.show_toast("{}".format(change['value']))
+
+
+
+
 More to come!
 
