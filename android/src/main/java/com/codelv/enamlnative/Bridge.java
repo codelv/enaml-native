@@ -973,15 +973,17 @@ public class Bridge implements PythonInterpreter.EventListener {
             return;
         }
 
-        // Let the bridge do the rest
-        mBridgeHandler.post(()-> {
-            if (result!=null && !isPackableResult(result)) {
-                // Store the result with the given ID, the python implementation
-                // guarantees that the ID is unique and will not overwrite an existing object
-                mObjectCache.put(pythonObjectId, result);
-            }
-            onEvent(IGNORE_RESULT, pythonObjectId, "set_result", new Object[]{result});
-        });
+        // Let the bridge do the rest /
+        //mBridgeHandler.post(()-> {
+        // Unpacking in the bridge thread messes up maps
+        // as some object packing is required to be done on the UI thread
+        if (result!=null && !isPackableResult(result)) {
+            // Store the result with the given ID, the python implementation
+            // guarantees that the ID is unique and will not overwrite an existing object
+            mObjectCache.put(pythonObjectId, result);
+        }
+        onEvent(IGNORE_RESULT, pythonObjectId, "set_result", new Object[]{result});
+        //});
     }
 
     /**
