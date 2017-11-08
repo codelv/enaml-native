@@ -11,8 +11,10 @@ I made this because wanted to have a more "React Native" like environment that:
 2. Uses native widgets (Android / iOS)
 3. Can be run from Android Studio / XCode (ie no bootstraps)
 4. Uses enaml's models, and declarative and dynamic widget framework instead of kvlang
+5. Versioned "packages" and "recipes" than can be installed/updated/removed to make repeatable builds
 
-Android apps are currently working and have a lot of components. iOS works, but is limited to only a few components at the moment (implementation is in the works see #10).
+> Android apps are currently working and have a lot of components. 
+iOS is currently broken, and is limited to only a few components at the moment
 
 ### Docs and Examples ###
 
@@ -20,11 +22,19 @@ See the [project site](https://www.codelv.com/projects/enaml-native/). There's a
 
 > Need help? Try the gitter group https://gitter.im/enaml-native/Lobby
 
+Also see the other projects:
+
+- GoogleMap support via [enaml-native-maps](https://github.com/codelv/enaml-native-maps)
+- MPAndroidChart graphing via [enaml-native-charts](https://github.com/codelv/enaml-native-charts)
+- ZXing barcode scanning via [enaml-native-barcode](https://github.com/codelv/enaml-native-barcode)
+- Iconfiy icons via [enaml-native-icons](https://github.com/codelv/enaml-native-icons)
+
+
 ### Features ###
 1. Enaml's features: declarative syntax, conditional and looper rendering, automatic data binding
-2. Web code editor via the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground)!
-3. Layouts with flexbox
-4. Live app code reloading (like react-native's live reload)
+2. Layouts with flexbox
+3. Live app code reloading (like react-native's live reload)
+4. Versioned package management and native library linking (like https://github.com/rnpm/rnpm)
 
 ### Apps ###
 
