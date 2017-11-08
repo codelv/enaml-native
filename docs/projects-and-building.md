@@ -132,9 +132,45 @@ and prone to errors on new installs due to the various system dependencies.
 
 > Note: These modified projects are now included in the [enaml-native-cli](https://github.com/codelv/enaml-native-cli).
 
-I've been thinking about making a server to do this for you or perhaps creating a VM 
-or docker image that is pre-configured.
 
+#### Debugging build failures
+
+If the build fails for whatever reason you can get the full log by adding the `-d` flag like
+
+`enaml-native build-python -d`
+
+
+This will print the entire p4a build in debug mode. See the p4a docs. You can check the following
+locations to ensure the build is working in each stage.
+
+            
+1. Make sure the download is correct in
+    `~/.local/share/python-for-android/packages/<recipe-name>`
+
+2. Make sure the patches applied and build is correct under
+    `~/.local/share/python-for-android/build/other_builds/<recipe-name>`
+
+3. Make sure everything was installed to
+    `~/.local/share/python-for-android/dists/enaml-native/python`
+    
+4. Finally make sure everything was copied to:
+    Python sources:
+    `<app dir>/build/python/<arch>/site-packages/`
+    
+    Native libraries:
+    `<app dir>/build/python/<arch>/modules/`
+    
+5. Lastly make sure enaml-native is copying everything during the build-android command to the 
+   actual android project.
+   
+    Python sources:
+   `<app dir>/android/app/src/main/assets/python/`
+    
+    Native libraries:
+    `<app dir>/venv/packages/enaml-native/android/src/main/lib/<arch>/`
+            
+For more detailed debugging see what the actual [build command](https://github.com/codelv/enaml-native-cli/blob/master/enaml-native#L433) 
+from the cli is doing.
 
 ### Release your app
 
@@ -246,7 +282,7 @@ Another way to significantly reduce app apk size is by building apps for a speci
         ], 
 
 For example, dropping the `x86` arch (which is typically only used for emulators and some tablets) 
-cuts the size of the stock  `HelloWorld` apk down by about ~30% (9.7MB to 6.6MB) and the installed
+tcuts the size of the stock  `HelloWorld` apk down by about ~30% (9.7MB to 6.6MB) and the installed
 app size by about 10%!
 
 > Note: As time goes on, more optimizations will be found and added. The installed optimized app size is 

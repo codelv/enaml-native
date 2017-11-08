@@ -22,19 +22,29 @@ See the [project site](https://www.codelv.com/projects/enaml-native/). There's a
 
 > Need help? Try the gitter group https://gitter.im/enaml-native/Lobby
 
-Also see the other projects:
+### Add-on Packages ###
+
+Enaml-native was redesigned so separate "packages" can be created and installed to add new 
+native widgets and other apis. Similar to the [kivy-garden](https://github.com/kivy-garden/) but
+it borrows the concepts of the [react-native package manager](https://github.com/rnpm/rnpm).
+
+Packages can be created using the `enaml-native init-package <your-package-name>` command. Once
+made they can be installed with `pip` or the `enaml-native install` command (recommended).
+
+#### Packages ####
 
 - GoogleMap support via [enaml-native-maps](https://github.com/codelv/enaml-native-maps)
 - MPAndroidChart graphing via [enaml-native-charts](https://github.com/codelv/enaml-native-charts)
 - ZXing barcode scanning via [enaml-native-barcode](https://github.com/codelv/enaml-native-barcode)
 - Iconfiy icons via [enaml-native-icons](https://github.com/codelv/enaml-native-icons)
 
+Created a package? Send a PR and add it here!
 
 ### Features ###
 1. Enaml's features: declarative syntax, conditional and looper rendering, automatic data binding
 2. Layouts with flexbox
 3. Live app code reloading (like react-native's live reload)
-4. Versioned package management and native library linking (like https://github.com/rnpm/rnpm)
+4. Versioned package management and native library linking
 
 ### Apps ###
 
