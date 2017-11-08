@@ -38,12 +38,12 @@ The `package.json` file is your project config. If you open it you see the follo
         "sdk":"~Android/Sdk",
         "arches": ["x86"],
         "dependencies": {
-          "python2crystax": "2.7.10",
-          "enaml-native": ">=2.1",
+          "python2crystax": "",
+          "enaml-native": "",
           "tornado": ">=4.0",
-          "singledispatch":">=0",
-          "backports_abc":">=0",
-          "ply": "==3.10"
+          "singledispatch":"",
+          "backports_abc":"",
+          "ply": ""
         },
         "excluded":[]
       },
@@ -83,6 +83,11 @@ As you may have guessed, `arches` defines which platforms to compile python and 
 for and `dependencies` is a list of python requirements to install on the app. Pure python 
 requirements are installed via pip, anything with compiled extensions _MUST_ have a recipe for 
 the specific platform. More on that later. 
+
+> Note: As of cli v1.3, the dependency key and value simply are joined together using 
+`"{}{}".format(k, v)` and sent to p4a as build requirements. So any `recipe` dependencies 
+should NOT have a version (as it uses whatever recipe version is installed in the apps venv)! 
+Pip dependencies can include versions. 
 
 The `excluded` list is a list of [patterns](https://docs.python.org/2.7/library/glob.html) 
 that you can use to exclude unused python modules from your app to reduce the app size.
