@@ -50,6 +50,12 @@ class Activity(JavaBridgeObject):
     removeActivityResultListener = JavaMethod('com.codelv.enamlnative.EnamlActivity$ActivityResultListener')
     onActivityResult = JavaCallback('int', 'int', 'android.content.Intent', returns='boolean')
 
+    #: Activity lifecycle listener
+    addActivityLifecycleListener = JavaMethod('com.codelv.enamlnative.EnamlActivity$ActivityLifecycleListener')
+    removeActivityLifecycleListener = JavaMethod('com.codelv.enamlnative.EnamlActivity$ActivityLifecycleListener')
+    #: Called with the lifecycle state like 'pause', 'resume', etc...
+    onActivityLifecycleChanged = JavaCallback('java.lang.String')
+
 
     #: Get system services
     getSystemService = JavaMethod('java.lang.String', returns='java.lang.Object')

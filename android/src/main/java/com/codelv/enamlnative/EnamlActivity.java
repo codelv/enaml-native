@@ -39,6 +39,7 @@ public class EnamlActivity extends AppCompatActivity {
     final List<EnamlPackage> mEnamlPackages = new ArrayList<EnamlPackage>();
     PermissionResultListener mPermissionResultListener;
     final List<ActivityResultListener> mActivityResultListeners = new ArrayList<ActivityResultListener>();
+    final List<ActivityLifecycleListener> mActivityLifecycleListeners = new ArrayList<ActivityLifecycleListener>();
 
     final HashMap<String, Long> mProfilers = new HashMap<>();
 
@@ -68,6 +69,10 @@ public class EnamlActivity extends AppCompatActivity {
             pkg.onStart();
         }
 
+        // Now notify any listeners
+        for (ActivityLifecycleListener listener:mActivityLifecycleListeners) {
+            listener.onActivityLifecycleChanged("created");
+        }
 
     }
 
@@ -228,6 +233,11 @@ public class EnamlActivity extends AppCompatActivity {
         for (EnamlPackage pkg: getPackages()) {
             pkg.onResume();
         }
+
+        // Now notify any listeners
+        for (ActivityLifecycleListener listener:mActivityLifecycleListeners) {
+            listener.onActivityLifecycleChanged("resumed");
+        }
     }
 
     @Override
@@ -236,6 +246,11 @@ public class EnamlActivity extends AppCompatActivity {
         // Initialize the packages
         for (EnamlPackage pkg: getPackages()) {
             pkg.onStop();
+        }
+
+        // Now notify any listeners
+        for (ActivityLifecycleListener listener:mActivityLifecycleListeners) {
+            listener.onActivityLifecycleChanged("paused");
         }
 
     }
@@ -247,6 +262,11 @@ public class EnamlActivity extends AppCompatActivity {
         for (EnamlPackage pkg: getPackages()) {
             pkg.onStop();
         }
+
+        // Now notify any listeners
+        for (ActivityLifecycleListener listener:mActivityLifecycleListeners) {
+            listener.onActivityLifecycleChanged("stopped");
+        }
     }
 
     @Override
@@ -256,6 +276,11 @@ public class EnamlActivity extends AppCompatActivity {
         // Initialize the packages
         for (EnamlPackage pkg: getPackages()) {
             pkg.onDestroy();
+        }
+
+        // Now notify any listeners
+        for (ActivityLifecycleListener listener:mActivityLifecycleListeners) {
+            listener.onActivityLifecycleChanged("destroyed");
         }
 
     }
@@ -331,6 +356,29 @@ public class EnamlActivity extends AppCompatActivity {
          */
         boolean onActivityResult(int requestCode, int resultCode, Intent data);
     }
+
+    /**
+     * Add an app activity lifecycle listener to use. Meant to be used from python
+     * so it can receive events from java when the app state changes.
+     * @param listener
+     */
+    public void addActivityLifecycleListener(ActivityLifecycleListener listener) {
+        mActivityLifecycleListeners.add(listener);
+    }
+
+    public void removeActivityLifecycleListener(ActivityLifecycleListener listener) {
+        mActivityLifecycleListeners.remove(listener);
+    }
+
+    public interface ActivityLifecycleListener{
+
+        /**
+         * Receive activity lifecycle changes
+         * @param state
+         */
+        void onActivityLifecycleChanged(String state);
+    }
+
 
     /**
      * Return build info. Called from python at startup to get info like screen density

@@ -62,6 +62,10 @@ class AndroidApplication(BridgedApplication):
         super(AndroidApplication, self).__init__()
         self.resolver = ProxyResolver(factories=factories.ANDROID_FACTORIES)
 
+        #: Add a ActivityLifecycleListener to update the application state
+        self.widget.addActivityLifecycleListener(self.widget.getId())
+        self.widget.onActivityLifecycleChanged.connect(self.on_activity_lifecycle_changed)
+
     # --------------------------------------------------------------------------
     # App API Implementation
     # --------------------------------------------------------------------------
@@ -114,7 +118,15 @@ class AndroidApplication(BridgedApplication):
             t = Toast(__id__=ref)
             t.show()
 
-        Toast.makeText(self,msg,1 if long else 0).then(on_toast)
+        Toast.makeText(self, msg, 1 if long else 0).then(on_toast)
+
+    def on_activity_lifecycle_changed(self, state):
+        """ Update the state when the android app is paused, resumed, etc..
+        
+            Widgets can observe this value for changes if they need to react
+            to app lifecycle changes.
+        """
+        self.state = state
 
     # --------------------------------------------------------------------------
     # Bridge API Implementation

@@ -11,7 +11,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 """
 import json
 import traceback
-from atom.api import Atom, Callable, List, Instance, Value, Int, Unicode, Bool, Dict
+from atom.api import Atom, Enum, Callable, List, Instance, Value, Int, Unicode, Bool, Dict
 from enaml.application import Application
 from . import bridge
 from .loop import EventLoop
@@ -46,6 +46,9 @@ class BridgedApplication(Application):
 
     #: Keep screen on by setting the WindowManager flag
     keep_screen_on = Bool()
+
+    #: Application lifecycle state must be set by the implementation
+    state = Enum('created', 'paused', 'resumed', 'stopped', 'destroyed')
 
     #: View to display within the activity
     view = Value()
