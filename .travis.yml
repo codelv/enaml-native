@@ -22,7 +22,7 @@ before_install:
   - pip install Cython --install-option="--no-cython-compile"
 
   # Install enamlnative dependencies
-  - pip install enaml ply msgpack-python pyjnius
+  - pip install enaml==0.9.8 ply msgpack-python pyjnius
 
   # Install p4a dependencies
   - pip install sh colorama appdirs six jinja2
