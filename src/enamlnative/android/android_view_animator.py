@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 import jnius
 from atom.api import Typed, set_default
 
@@ -28,11 +28,11 @@ class AndroidViewAnimator(AndroidFrameLayout, ProxyViewAnimator):
     #: A reference to the widget created by the proxy.
     widget = Typed(ViewAnimator)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
+        """ Create the underlying widget.
 
         """
         self.widget = ViewAnimator(self.get_context())
@@ -48,9 +48,9 @@ class AndroidViewAnimator(AndroidFrameLayout, ProxyViewAnimator):
         if d.displayed_child:
             self.set_displayed_child(d.displayed_child)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyViewAnimator API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_animate_first_view(self, enabled):
         self.widget.setAnimateFirstView(enabled)
 

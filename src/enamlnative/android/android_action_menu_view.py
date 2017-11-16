@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on July 7, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Atom, Typed, set_default
 
 from enamlnative.widgets.action_menu_view import ProxyActionMenuView
@@ -49,9 +49,9 @@ class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
     #: A reference to the widget created by the proxy.
     widget = Typed(ActionMenuView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -77,16 +77,16 @@ class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
         Menu(menu)
         pass
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnMenuItemClickListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_menu_item_click(self, item):
 
         return False
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyActionMenuView API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_opened(self, opened):
         if opened:
            self.widget.showOverflowMenu()

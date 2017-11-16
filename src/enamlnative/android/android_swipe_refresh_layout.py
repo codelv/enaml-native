@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Oct 22, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.swipe_refresh_layout import ProxySwipeRefreshLayout
@@ -18,11 +18,13 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class SwipeRefreshLayout(ViewGroup):
-    __nativeclass__ = set_default('android.support.v4.widget.SwipeRefreshLayout')
+    __nativeclass__ = set_default(
+        'android.support.v4.widget.SwipeRefreshLayout')
     setDistanceToTriggerSync = JavaMethod('int')
     setRefreshing = JavaMethod('boolean')
     setEnabled = JavaMethod('boolean')
-    setProgressBackgroundColorSchemeColor = JavaMethod('android.graphics.Color')
+    setProgressBackgroundColorSchemeColor = JavaMethod(
+        'android.graphics.Color')
     setColorSchemeColors = JavaMethod('[Landroid.graphics.Color;')
 
     setOnRefreshListener = JavaMethod(
@@ -37,9 +39,9 @@ class AndroidSwipeRefreshLayout(AndroidViewGroup, ProxySwipeRefreshLayout):
     #: A reference to the widget created by the proxy.
     widget = Typed(SwipeRefreshLayout)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -63,18 +65,18 @@ class AndroidSwipeRefreshLayout(AndroidViewGroup, ProxySwipeRefreshLayout):
         self.widget.onRefresh.connect(self.on_refresh)
         self.widget.setOnRefreshListener(self.widget.getId())
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnRefreshListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_refresh(self):
         d = self.declaration
         d.refreshed()
         #: Stop the refresh indicator
         self.widget.setRefreshing(False)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxySwipeRefreshLayout API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_indicator_background_color(self, color):
         self.widget.setProgressBackgroundColorSchemeColor(color)
 

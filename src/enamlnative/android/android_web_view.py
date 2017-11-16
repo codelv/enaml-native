@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on July 7, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.web_view import ProxyWebView
@@ -29,9 +29,11 @@ class WebView(ViewGroup):
 
 
 class BridgedWebViewClient(JavaBridgeObject):
-    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedWebViewClient')
-    setWebView = JavaMethod('android.webkit.WebView',
-                            'com.codelv.enamlnative.adapters.BridgedWebViewClient$WebViewListener')
+    __nativeclass__ = set_default(
+        'com.codelv.enamlnative.adapters.BridgedWebViewClient')
+    setWebView = JavaMethod(
+        'android.webkit.WebView',
+        'com.codelv.enamlnative.adapters.BridgedWebViewClient$WebViewListener')
     setJavaScriptEnabled = JavaMethod('boolean')
     onLoadResource = JavaCallback('android.webkit.WebView', 'java.lang.String')
     onPageStarted = JavaCallback('android.webkit.WebView', 'java.lang.String',
@@ -42,7 +44,8 @@ class BridgedWebViewClient(JavaBridgeObject):
                                    'java.lang.String', 'java.lang.String')
 
     onProgressChanged = JavaCallback('android.webkit.WebView', 'int')
-    onReceivedTitle = JavaCallback('android.webkit.WebView', 'java.lang.String')
+    onReceivedTitle = JavaCallback('android.webkit.WebView',
+                                   'java.lang.String')
 
 
 class AndroidWebView(AndroidViewGroup, ProxyWebView):
@@ -55,9 +58,9 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
     #: A client for listening to web view events
     client = Typed(BridgedWebViewClient)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -100,9 +103,9 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
             del self.client
         super(AndroidWebView, self).destroy()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # WebViewClient API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_load_resource(self, view, url):
         pass
 
@@ -135,9 +138,9 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
     def on_scale_changed(self, view, old, new):
         pass
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyWebView API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_url(self, url):
         self.widget.loadUrl(url)
 

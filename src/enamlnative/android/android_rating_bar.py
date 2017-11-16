@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on June 7, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.rating_bar import ProxyRatingBar
@@ -22,10 +22,12 @@ class RatingBar(ProgressBar):
     setIsIndicator = JavaMethod('boolean')
     setMax = JavaMethod('int')
     setNumStars = JavaMethod('int')
-    setOnRatingBarChangeListener = JavaMethod('android.widget.RatingBar$OnRatingBarChangeListener')
+    setOnRatingBarChangeListener = JavaMethod(
+        'android.widget.RatingBar$OnRatingBarChangeListener')
     setRating = JavaMethod('float')
     setStepSize = JavaMethod('float')
-    onRatingChanged = JavaCallback('android.widget.RatingBar', 'float', 'boolean')
+    onRatingChanged = JavaCallback('android.widget.RatingBar', 'float',
+                                   'boolean')
 
 
 class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
@@ -35,9 +37,9 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
     #: A reference to the widget created by the proxy.
     widget = Typed(RatingBar)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -63,19 +65,17 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
         self.widget.setOnRatingBarChangeListener(self.widget.getId())
         self.widget.onRatingChanged.connect(self.on_rating_changed)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnRatingBarChangeListener API
-    # --------------------------------------------------------------------------
-
+    # -------------------------------------------------------------------------
     def on_rating_changed(self, bar, rating, user):
         d = self.declaration
         with self.widget.setRating.suppressed():
             d.rating = rating
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyRatingBar API
-    # --------------------------------------------------------------------------
-
+    # -------------------------------------------------------------------------
     def set_is_indicator(self, indicator):
         self.widget.setIsIndicator(indicator)
 

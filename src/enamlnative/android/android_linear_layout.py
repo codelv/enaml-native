@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.linear_layout import ProxyLinearLayout
@@ -38,9 +38,9 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
 
     layout_param_type = set_default(LinearLayoutLayoutParams)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -57,9 +57,9 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
         if d.gravity:
             self.set_gravity(d.gravity)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyLinearLayout API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_orientation(self, orientation):
         """ Set the text in the widget.
 
@@ -67,5 +67,4 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
         self.widget.setOrientation(0 if orientation == 'horizontal' else 1)
 
     def set_gravity(self, gravity):
-        #g = getattr(Gravity,gravity.upper())
         self.widget.setGravity(gravity)

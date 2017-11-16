@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Int, Dict, Float, Bool, Tuple, Unicode, Event, observe, set_default
 )
@@ -247,15 +247,17 @@ class View(Widget):
     #
     # vertical_scroll_bar_enabled = d_(Bool())
     #
-    #vertical_scroll_bar_position = d_(Int())
+    # vertical_scroll_bar_position = d_(Int())
     #
-    #will_not_cache_drawing = d_(Bool())
+    # will_not_cache_drawing = d_(Bool())
     #
-    #will_not_draw = d_(Bool())
+    # will_not_draw = d_(Bool())
 
-    layout_width = d_(Unicode()).tag(ios=False)#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
+    # Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
+    layout_width = d_(Unicode()).tag(ios=False)
 
-    layout_height = d_(Unicode()).tag(ios=False)#Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
+    # Enum('', 'fill_parent', 'match_parent', 'wrap_content'))
+    layout_height = d_(Unicode()).tag(ios=False)
 
     #: Left, top, right, bottom
     margins = d_(Tuple(int))
@@ -292,9 +294,9 @@ class View(Widget):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyView)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe(
         'alpha',
         'background_color',

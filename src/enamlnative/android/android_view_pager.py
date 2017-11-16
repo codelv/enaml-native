@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, Int, List, set_default
 
 from enamlnative.widgets.view_pager import (
@@ -22,8 +22,10 @@ from .app import AndroidApplication
 
 
 class ViewPager(ViewGroup):
-    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedViewPager')
-    addOnPageChangeListener = JavaMethod('android.support.v4.view.ViewPager$OnPageChangeListener')
+    __nativeclass__ = set_default(
+        'com.codelv.enamlnative.adapters.BridgedViewPager')
+    addOnPageChangeListener = JavaMethod(
+        'android.support.v4.view.ViewPager$OnPageChangeListener')
     setCurrentItem = JavaMethod('int')
     setOffscreenPageLimit = JavaMethod('int')
     setPageMargin = JavaMethod('int')
@@ -35,7 +37,8 @@ class ViewPager(ViewGroup):
 
 
 class ViewPagerLayoutParams(LayoutParams):
-    __nativeclass__ = set_default('android.support.v4.view.ViewPager$LayoutParams')
+    __nativeclass__ = set_default(
+        'android.support.v4.view.ViewPager$LayoutParams')
     gravity = JavaField('int')
     isDecor = JavaField('boolean')
 
@@ -58,15 +61,13 @@ class PagerTabStrip(PagerTitleStrip):
 
 
 class BridgedFragmentStatePagerAdapter(JavaBridgeObject):
-    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter')
+    __nativeclass__ = set_default(
+        'com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter')
     addFragment = JavaMethod('android.support.v4.app.Fragment')
     removeFragment = JavaMethod('android.support.v4.app.Fragment')
     setTitles = JavaMethod('[Ljava.lang.String;')
     clearTitles = JavaMethod()
     notifyDataSetChanged = JavaMethod()
-    # setOnItemRequestedListener = JavaMethod(
-    #     'com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter$OnItemRequestedListener')
-    # onItemRequested = JavaCallback('int', returns='int')
 
 
 class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
@@ -91,9 +92,9 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         for p in self.declaration.pages:
             yield p.proxy
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -132,13 +133,15 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         """ When a child is added, schedule a data changed notification """
         super(AndroidViewPager, self).child_added(child)
         self._notify_count += 1
-        AndroidApplication.instance().timed_call(self._notify_delay, self._notify_change)
+        AndroidApplication.instance().timed_call(
+            self._notify_delay, self._notify_change)
 
     def child_removed(self, child):
         """ When a child is removed, schedule a data changed notification """
         super(AndroidViewPager, self).child_removed(child)
         self._notify_count += 1
-        AndroidApplication.instance().timed_call(self._notify_delay, self._notify_change)
+        AndroidApplication.instance().timed_call(
+            self._notify_delay, self._notify_change)
 
     def destroy(self):
         """ Properly destroy adapter """
@@ -153,7 +156,8 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         if self._notify_count == 0:
             #: Tell the UI we made changes
             self.adapter.notifyDataSetChanged(now=True)
-            AndroidApplication.instance().timed_call(500, self._queue_pending_calls)
+            AndroidApplication.instance().timed_call(
+                500, self._queue_pending_calls)
 
     def _queue_pending_calls(self):
         #: Now wait for current page to load, then invoke any pending calls
@@ -170,18 +174,18 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
                 call()
             self._pending_calls = []
 
-    # # --------------------------------------------------------------------------
-    # # OnItemRequestedListener API
-    # # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # OnItemRequestedListener API
+    # -------------------------------------------------------------------------
     # def on_item_requested(self, position):
     #     print "on_item_requested"
     #     for i, c in enumerate(self.children()):
     #         if i == position:
     #             return c.widget
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnPageChangeListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_page_scroll_state_changed(self, state):
         pass
     
@@ -193,19 +197,21 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         with self.widget.setCurrentItem.suppressed():
             d.current_index = position
     
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyViewPager API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_current_index(self, index):
         """ We can only set the index once the page has been created.
-            otherwise we get `FragmentManager is already executing transactions`
-            errors in Java. To avoid this, we only call this once has been loaded.
+        otherwise we get `FragmentManager is already executing transactions`
+        errors in Java. To avoid this, we only call this once has been loaded.
+        
         """
         # d = self.declaration
         # #: We have to wait for the current_index to be ready before we can
         # #: change pages
         if self._notify_count > 0:
-            self._pending_calls.append(lambda index=index:self.widget.setCurrentItem(index))
+            self._pending_calls.append(
+                lambda index=index: self.widget.setCurrentItem(index))
         else:
             self.widget.setCurrentItem(index)
 
@@ -246,9 +252,9 @@ class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):
         layout_params.isDecor = True
         return layout_params
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -272,9 +278,9 @@ class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):
         if d.inactive_alpha:
             self.set_inactive_alpha(d.inactive_alpha)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyPagerTitleStrip API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # def set_titles(self, titles):
     #     parent = self.parent()
     #     adapter = parent.adapter
@@ -302,9 +308,9 @@ class AndroidPagerTabStrip(AndroidPagerTitleStrip, ProxyPagerTabStrip):
     #: A reference to the widget created by the proxy.
     widget = Typed(PagerTabStrip)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -322,9 +328,9 @@ class AndroidPagerTabStrip(AndroidPagerTitleStrip, ProxyPagerTabStrip):
         if d.tab_indicator_color:
             self.set_tab_indicator_color(d.tab_indicator_color)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyPagerTabStrip API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_tab_indicator_color(self, alpha):
         self.widget.setTabIndicatorColor(alpha)
 

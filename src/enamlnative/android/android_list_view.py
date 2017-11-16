@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, Property, set_default, observe
 
 from enamlnative.widgets.list_view import ProxyListView, ProxyListItem
@@ -35,18 +35,21 @@ class ListView(AbsListView):
     smoothScrollToPosition = JavaMethod('int')
 
     # OnScrollListener API
-    setOnScrollListener = JavaMethod('android.widget.AbsListView$OnScrollListener')
-    onScroll = JavaCallback('android.widget.AbsListView','int','int','int')
-    onScrollStateChanged = JavaCallback('android.widget.AbsListView','int')
+    setOnScrollListener = JavaMethod(
+        'android.widget.AbsListView$OnScrollListener')
+    onScroll = JavaCallback('android.widget.AbsListView', 'int', 'int', 'int')
+    onScrollStateChanged = JavaCallback('android.widget.AbsListView', 'int')
 
 
 class BridgedListAdapter(JavaBridgeObject):
     """ An adapter that implements a recycleview pattern.
 
     """
-    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedListAdapter')
+    __nativeclass__ = set_default(
+        'com.codelv.enamlnative.adapters.BridgedListAdapter')
     setListView = JavaMethod('android.widget.ListView',
-                             'com.codelv.enamlnative.adapters.BridgedListAdapter$BridgedListAdapterListener')
+                             'com.codelv.enamlnative.adapters.'
+                             'BridgedListAdapter$BridgedListAdapterListener')
     setCount = JavaMethod('int')
     setRecycleViews = JavaMethod('[Landroid.view.View;')
     clearRecycleViews = JavaMethod()
@@ -74,11 +77,11 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
     list_items = Property(lambda self:self._get_list_items(),
                           cached=True)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = ListView(self.get_context())
@@ -126,8 +129,10 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
         #: I'm sure this will make someone upset haha
         self.adapter.setListView(self.widget, self.adapter.getId())
         self.adapter.onRecycleView.connect(self.on_recycle_view)
-        self.adapter.onVisibleCountChanged.connect(self.on_visible_count_changed)
-        self.adapter.onScrollStateChanged.connect(self.on_scroll_state_changed)
+        self.adapter.onVisibleCountChanged.connect(
+            self.on_visible_count_changed)
+        self.adapter.onScrollStateChanged.connect(
+            self.on_scroll_state_changed)
 
         if d.items:
             self.set_items(d.items)
@@ -137,9 +142,9 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
         if d.selected >= 0:
             self.set_selected(d.selected)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # BridgedListAdapterListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_recycle_view(self, index, position):
         """ Update the item the view at the given index should display
         """
@@ -152,21 +157,22 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
     def on_scroll_state_changed(self, view, state):
         pass
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ListAdapter API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     #def on_view_requested(self, index, convert, parent):
     #    return self.declaration.items[index] # Should be a view right?
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyListView API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     #@observe('declaration.visible_count')
     def refresh_views(self, change=None):
         """ Set the views that the adapter will cycle through. """
         if self.adapter:
             self.adapter.clearRecycleViews()
-            self.adapter.setRecycleViews([encode(li.get_view()) for li in self.list_items])
+            self.adapter.setRecycleViews(
+                [encode(li.get_view()) for li in self.list_items])
 
     def set_items(self, items):
         self.adapter.setCount(len(items))
@@ -189,9 +195,9 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
 
 class AndroidListItem(AndroidToolkitObject, ProxyListItem):
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ The list item has no widget, it's a placeholder. """
         pass
@@ -203,9 +209,9 @@ class AndroidListItem(AndroidToolkitObject, ProxyListItem):
         """ The list item has no widget, it's a placeholder. """
         pass
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ListAdapter API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def recycle_view(self, position):
         """ Tell the view to render the item at the given position """
         d = self.declaration

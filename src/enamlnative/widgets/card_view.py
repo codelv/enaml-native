@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Unicode, Int, Bool, Float, Tuple, observe
 )
@@ -58,13 +58,15 @@ class CardView(FrameLayout):
     #: Sets the padding between the Card's edges and the children of CardView.
     content_padding = d_(Tuple(int))
 
-    #: On pre-Lollipop platforms, CardView does not clip the bounds of the Card for the rounded corners.
+    #: On pre-Lollipop platforms, CardView does not clip the bounds
+    #: of the Card for the rounded corners.
     prevent_corner_overlap = d_(Bool())
 
     #: Updates the corner radius of the CardView.
     radius = d_(Float(-1))
 
-    #: CardView adds additional padding to draw shadows on platforms before Lollipop.
+    #: CardView adds additional padding to draw shadows on platforms
+    #: before Lollipop.
     use_compat_padding = d_(Bool())
 
     #: A reference to the ProxyCardView object.

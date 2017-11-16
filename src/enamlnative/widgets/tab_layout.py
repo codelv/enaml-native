@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Unicode, Int, Enum, observe, set_default
 )
@@ -83,14 +83,14 @@ class TabLayout(FrameLayout):
     tab_color_selected = d_(Unicode())
 
     #: Currently selected tab title
-    current_tab = d_(ForwardTyped(lambda:TabFragment))
+    current_tab = d_(ForwardTyped(lambda: TabFragment))
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyTabLayout)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('tabs', 'tab_mode', 'tab_gravity', 'current_tab',
              'tab_indicator_color_selected', 'tab_indicator_height',
              'tab_color', 'tab_color_selected')

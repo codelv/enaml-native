@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.text_clock import ProxyTextClock
@@ -31,9 +31,9 @@ class AndroidTextClock(AndroidTextView, ProxyTextClock):
     #: A reference to the widget created by the proxy.
     widget = Typed(TextClock)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -53,9 +53,9 @@ class AndroidTextClock(AndroidTextView, ProxyTextClock):
         if d.time_zone:
             self.set_time_zone(d.time_zone)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyTextClock API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_format_12_hour(self, clock_format):
         self.widget.setFormat12Hour(clock_format)
 

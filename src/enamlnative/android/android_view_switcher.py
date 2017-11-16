@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 import jnius
 from atom.api import Typed
 
@@ -16,7 +16,6 @@ from enamlnative.widgets.view_animator import ProxyViewAnimator
 
 from .android_frame_layout import AndroidFrameLayout
 
-ViewAnimator = jnius.autoclass('android.widget.ViewAnimator')
 
 
 class AndroidViewAnimator(AndroidFrameLayout, ProxyViewAnimator):

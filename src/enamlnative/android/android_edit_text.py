@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.edit_text import ProxyEditText
@@ -32,9 +32,9 @@ class AndroidEditText(AndroidTextView, ProxyEditText):
     #: A reference to the widget created by the proxy.
     widget = Typed(EditText)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -52,9 +52,9 @@ class AndroidEditText(AndroidTextView, ProxyEditText):
         if d.placeholder:
             self.set_placeholder(d.placeholder)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyEditText API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_selection(self, selection):
         self.widget.setSelection(*selection)
 

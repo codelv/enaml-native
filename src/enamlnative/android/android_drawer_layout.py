@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, List, set_default
 
 from enamlnative.widgets.drawer_layout import ProxyDrawerLayout
@@ -21,7 +21,8 @@ class DrawerLayout(ViewGroup):
     __nativeclass__ = set_default('android.support.v4.widget.DrawerLayout')
     openDrawer = JavaMethod('android.view.View')
     closeDrawer = JavaMethod('android.view.View')
-    addDrawerListener = JavaMethod('android.support.v4.widget.DrawerLayout$DrawerListener')
+    addDrawerListener = JavaMethod(
+        'android.support.v4.widget.DrawerLayout$DrawerListener')
     onDrawerClosed = JavaCallback('android.view.View')
     onDrawerOpened = JavaCallback('android.view.View')
     onDrawerSlide = JavaCallback('android.view.View', 'float')
@@ -43,7 +44,8 @@ class DrawerLayout(ViewGroup):
 
 class DrawerLayoutParams(MarginLayoutParams):
     """ Update the child widget with the given params """
-    __nativeclass__ = set_default('android.support.v4.widget.DrawerLayout$LayoutParams')
+    __nativeclass__ = set_default(
+        'android.support.v4.widget.DrawerLayout$LayoutParams')
     gravity = JavaField('int')
 
 
@@ -57,9 +59,9 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     #: Drawer state
     drawer_state = List()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -110,15 +112,16 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
             if i != 0:
                 yield c
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # DrawerListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_drawer_closed(self, view):
         d = self.declaration
         with self.widget.openDrawer.suppressed():
             with self.widget.closeDrawer.suppressed():
                 #: Remove view from state
-                d.opened = [v for v in d.opened if v.proxy.widget.getId() != view]
+                d.opened = [v for v in d.opened
+                                if v.proxy.widget.getId() != view]
 
     def on_drawer_opened(self, view):
         d = self.declaration
@@ -136,9 +139,9 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     def on_drawer_state_changed(self, state):
         pass
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyDrawerLayout API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_opened(self, opened):
         """ Opened is a tuple of the drawer sides that are open
 

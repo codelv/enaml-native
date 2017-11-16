@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Int, Unicode, Enum, Event, observe, set_default
 )
@@ -34,7 +34,7 @@ class ProxyViewGroup(ProxyView):
 
 class ViewGroup(View):
     """ ViewGroup is a view group that displays
-        child views in relative positions.
+    child views in relative positions.
 
     """
     #: Describes how the child views are positioned.
@@ -42,7 +42,8 @@ class ViewGroup(View):
     layout_mode = d_(Int())
 
     #: Layout gravity
-    layout_gravity = d_(Enum('',
+    layout_gravity = d_(Enum(
+        '',
         'top', 'left', 'right',
         'bottom','center',
         'end','start', 'no_gravity',
@@ -51,9 +52,9 @@ class ViewGroup(View):
     #: A reference to the ProxyViewGroup object.
     proxy = Typed(ProxyViewGroup)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('layout_mode', 'layout_gravity')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

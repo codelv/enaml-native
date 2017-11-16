@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 3, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Typed
 from enamlnative.widgets.activity_indicator import ProxyActivityIndicator
@@ -33,9 +33,9 @@ class UiKitActivityIndicator(UiKitView, ProxyActivityIndicator):
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UIActivityIndicatorView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
         """
@@ -60,9 +60,9 @@ class UiKitActivityIndicator(UiKitView, ProxyActivityIndicator):
         #: Why would you want to stop an activity indicator?
         self.widget.startAnimating()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyActivityIndicator API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_style(self, style):
         pass
         #self.widget.activityIndicatorViewStyle = style

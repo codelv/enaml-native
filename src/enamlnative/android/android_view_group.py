@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.view_group import ProxyViewGroup
@@ -45,11 +45,11 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
     #: A reference to the widget created by the proxy.
     widget = Typed(ViewGroup)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = ViewGroup(self.get_context())
@@ -109,5 +109,5 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
     # ProxyViewGroup API
     # --------------------------------------------------------------------------
     def set_layout_gravity(self, gravity):
-        g = getattr(Gravity, gravity.upper()) #3 if c.declaration.layout_gravity == 'left' else 5
+        g = getattr(Gravity, gravity.upper())
         self.layout_params.gravity = g

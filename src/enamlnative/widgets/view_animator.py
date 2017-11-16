@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Int, Unicode, Bool, observe
 )
@@ -42,7 +42,8 @@ class ViewAnimator(FrameLayout):
     """ A simple control for a ViewAnimator.
 
     """
-    #: Indicates whether the current View should be animated the first time the ViewAnimator is displayed.
+    #: Indicates whether the current View should be animated the first time
+    #: the ViewAnimator is displayed.
     animate_first_view = d_(Bool(True))
 
     #: Sets which child view will be displayed.
@@ -57,10 +58,11 @@ class ViewAnimator(FrameLayout):
     #: A reference to the ProxyViewAnimator object.
     proxy = Typed(ProxyViewAnimator)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
-    @observe('animate_first_view', 'displayed_child', 'in_animation', 'out_animation')
+    # -------------------------------------------------------------------------
+    @observe('animate_first_view', 'displayed_child', 'in_animation',
+             'out_animation')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

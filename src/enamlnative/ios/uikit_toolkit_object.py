@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed
 from enaml.widgets.toolkit_object import ProxyToolkitObject
 
@@ -23,9 +23,9 @@ class UiKitToolkitObject(ProxyToolkitObject):
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(ObjcBridgeObject)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
 
@@ -63,9 +63,9 @@ class UiKitToolkitObject(ProxyToolkitObject):
         from .app import IPhoneApplication
         return IPhoneApplication.instance()
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyToolkitObject API
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def activate_top_down(self):
         """ Activate the proxy for the top-down pass.
 
@@ -91,9 +91,9 @@ class UiKitToolkitObject(ProxyToolkitObject):
             del self.widget
         super(UiKitToolkitObject, self).destroy()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Public API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def parent_widget(self):
         """ Get the parent toolkit widget for this object.
 

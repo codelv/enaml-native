@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Sept 5, 2017
 
 @author: jrm
-'''
+"""
 import re
 from atom.api import Atom, List, Float, Unicode, set_default
 
@@ -35,12 +35,15 @@ class Location(Atom):
         """ Parse source into the fields """
         src = self.source
         m = re.search(
-            r'Location\[gps (-?\d+\.?\d*),(-?\d+\.?\d*) acc=(\d+\.?\d*) et=(.+) alt=(\d+\.?\d*) ',
+            r'Location\[gps (-?\d+\.?\d*),(-?\d+\.?\d*)'
+            r' acc=(\d+\.?\d*) et=(.+) alt=(\d+\.?\d*) ',
             src
         )
         if m:
             lat, lng, acc, et, alt = m.groups()
-            self.lat, self.lng, self.accuracy, self.altitude = float(lat), float(lng), float(acc), float(alt)
+            self.lat, self.lng, self.accuracy, self.altitude = (
+                float(lat), float(lng), float(acc), float(alt)
+            )
             self.time = et
 
 
@@ -69,17 +72,17 @@ class LocationManager(JavaBridgeObject):
     class LocationListener(JavaProxy):
         __nativeclass__ = set_default('android.location.LocationListener')
 
-    #: ========================================================================================
-    #: LocationListener API
-    #: ========================================================================================
+    # -------------------------------------------------------------------------
+    # LocationListener API
+    # -------------------------------------------------------------------------
     onLocationChanged = JavaCallback('android.location.Location')
     onProviderDisabled = JavaCallback('java.lang.String')
     onProviderEnabled = JavaCallback('java.lang.String')
-    onStatusChanged = JavaCallback('java.lang.String', 'int', 'android.os.Bundle')
+    onStatusChanged = JavaCallback('java.lang.String', 'int',
+                                   'android.os.Bundle')
 
     #: Active listeners
     listeners = List(LocationListener)
-
 
     @classmethod
     def instance(cls):
@@ -104,7 +107,9 @@ class LocationManager(JavaBridgeObject):
 
     @classmethod
     def get(cls):
-        """ Acquires the LocationManager service async. """
+        """ Acquires the LocationManager service async. 
+        
+        """
 
         app = AndroidApplication.instance()
         f = app.create_future()
@@ -127,18 +132,20 @@ class LocationManager(JavaBridgeObject):
 
     def __init__(self,*args, **kwargs):
         if LocationManager._instance is not None:
-            raise RuntimeError("Only one instance of LocationManager can exist! "
-                               "Use LocationManager.instance() instead!")
+            raise RuntimeError(
+                "Only one instance of LocationManager can exist! "
+                "Use LocationManager.instance() instead!")
         super(LocationManager, self).__init__(*args, **kwargs)
         LocationManager._instance = self
 
     @classmethod
     def start(cls, callback, provider='gps', min_time=1000, min_distance=0):
         """ Convenience method that checks and requests permission if necessary
-            and if successful calls the callback with a populated `Location` instance on updates.
+        and if successful calls the callback with a populated `Location` 
+        instance on updates.
 
-            Note you must have the permissions in your manifest or requests will be denied
-            immediately.
+        Note you must have the permissions in your manifest or requests 
+        will be denied immediately.
 
         """
         app = AndroidApplication.instance()
@@ -157,7 +164,8 @@ class LocationManager(JavaBridgeObject):
             listener = LocationManager.LocationListener(lm)
             lm.listeners.append(listener)
 
-            lm.requestLocationUpdates(provider, min_time, min_distance, listener)
+            lm.requestLocationUpdates(provider, min_time, min_distance,
+                                      listener)
             app.set_future_result(f, True)
 
         def on_perm_request_result(allowed):
@@ -172,15 +180,17 @@ class LocationManager(JavaBridgeObject):
             if allowed:
                 LocationManager.get().then(on_success)
             else:
-                LocationManager.request_permission(fine=provider == 'gps').then(on_perm_request_result)
+                LocationManager.request_permission(
+                    fine=provider == 'gps').then(on_perm_request_result)
 
         #: Check permission
-        LocationManager.check_permission(fine=provider == 'gps').then(on_perm_check)
+        LocationManager.check_permission(
+            fine=provider == 'gps').then(on_perm_check)
 
         return f
 
     @classmethod
-    def stop(self):
+    def stop(cls):
         """ Stops location updates if currently updating.
 
         """
@@ -193,21 +203,25 @@ class LocationManager(JavaBridgeObject):
 
     @classmethod
     def check_permission(cls, fine=True):
-        """ Returns a future that returns a boolean indicating if permission is currently
-            granted or denied. If permission is denied, you can request using
-            `LocationManager.request_permission()` below.
+        """ Returns a future that returns a boolean indicating if permission 
+        is currently granted or denied. If permission is denied, you can 
+        request using `LocationManager.request_permission()` below.
 
         """
         app = AndroidApplication.instance()
-        permission = cls.ACCESS_FINE_PERMISSION if fine else cls.ACCESS_COARSE_PERMISSION
+        permission = (cls.ACCESS_FINE_PERMISSION
+                      if fine else cls.ACCESS_COARSE_PERMISSION)
         return app.has_permission(permission)
 
     @classmethod
     def request_permission(cls, fine=True):
-        """ Requests permission and returns an async result that returns a boolean
-            indicating if the permission was granted or denied. """
+        """ Requests permission and returns an async result that returns 
+        a boolean indicating if the permission was granted or denied. 
+        
+        """
         app = AndroidApplication.instance()
-        permission = cls.ACCESS_FINE_PERMISSION if fine else cls.ACCESS_COARSE_PERMISSION
+        permission = (cls.ACCESS_FINE_PERMISSION
+                      if fine else cls.ACCESS_COARSE_PERMISSION)
         f = app.create_future()
 
         def on_result(perms):

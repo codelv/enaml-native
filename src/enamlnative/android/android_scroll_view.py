@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Instance, set_default
 
 from enamlnative.widgets.scroll_view import ProxyScrollView
@@ -38,9 +38,9 @@ class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
     #: A reference to the widget created by the proxy.
     widget = Instance(ScrollView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -51,12 +51,13 @@ class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
         else:
             self.widget = HorizontalScrollView(self.get_context())
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyScrollView API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_orientation(self, orientation):
         #: Cannot be changed once set
-        raise NotImplementedError("ScrollView orientation cannot be changed dynamically.")
+        raise NotImplementedError(
+            "ScrollView orientation cannot be changed dynamically.")
 
     def set_scroll_by(self, delta):
         self.widget.smoothScrollBy(*delta)
@@ -65,7 +66,9 @@ class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
         if point in ('top', 'bottom'):
             #: FOCUS_UP or FOCUS_DOWN
             #: TODO: This does not work!
-            self.widget.fullScroll(ScrollView.FOCUS_UP if point == 'top' else ScrollView.FOCUS_DOWN)
+            self.widget.fullScroll(
+                ScrollView.FOCUS_UP
+                if point == 'top' else ScrollView.FOCUS_DOWN)
         else:
             self.widget.smoothScrollTo(*point)
 

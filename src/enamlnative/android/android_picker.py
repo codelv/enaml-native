@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on July 6, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.picker import ProxyPicker
@@ -25,7 +25,8 @@ class Picker(LinearLayout):
     setMinValue = JavaMethod('int')
     setValue = JavaMethod('int')
     setOnLongPressUpdateInterval = JavaMethod('long')
-    setOnValueChangedListener = JavaMethod('android.widget.NumberPicker$OnValueChangeListener')
+    setOnValueChangedListener = JavaMethod(
+        'android.widget.NumberPicker$OnValueChangeListener')
     onValueChange = JavaCallback('android.widget.NumberPicker', 'int', 'int')
     setDisplayedValues = JavaMethod('[Ljava.lang.String;')
     setWrapSelectorWheel = JavaMethod('boolean')
@@ -38,9 +39,9 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
     #: A reference to the widget created by the proxy.
     widget = Typed(Picker)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -49,7 +50,8 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
 
     def init_widget(self):
         """ Set the checked state after all children have
-            been populated.
+        been populated.
+        
         """
         super(AndroidPicker, self).init_widget()
         d = self.declaration
@@ -70,20 +72,21 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
         self.widget.setOnValueChangedListener(self.widget.getId())
         self.widget.onValueChange.connect(self.on_value_change)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnValueChangeListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_value_change(self, picker, old, new):
         """ Set the checked property based on the checked state
-            of all the children
+        of all the children
+            
         """
         d = self.declaration
         with self.widget.setValue.suppressed():
             d.value = new
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyNumberPicker API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_max_value(self, value):
         self.widget.setMaxValue(value)
 
@@ -102,4 +105,4 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
     def set_items(self, items):
         self.widget.setMinValue(0)
         self.widget.setDisplayedValues(items)
-        self.widget.setMaxValue(len(items)-1) # max-min + 1 wtf
+        self.widget.setMaxValue(len(items)-1)  # max-min + 1 wtf

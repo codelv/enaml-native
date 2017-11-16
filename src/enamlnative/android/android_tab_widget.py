@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 25, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.tab_widget import ProxyTabWidget
@@ -31,9 +31,9 @@ class AndroidTabWidget(AndroidLinearLayout, ProxyTabWidget):
     #: A reference to the widget created by the proxy.
     widget = Typed(TabWidget)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -50,9 +50,9 @@ class AndroidTabWidget(AndroidLinearLayout, ProxyTabWidget):
         self.set_enabled(d.enabled)
         self.set_strip_enabled(d.strip_enabled)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyTabWidget API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_strip_enabled(self, enabled):
         self.widget.setStripEnabled(enabled)
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -11,7 +11,7 @@ Created on May 20, 2017
 Forked from https://github.com/joaoventura/pybridge
 @author joaoventura
 @author: jrm
-'''
+"""
 import sys
 import traceback
 
@@ -29,7 +29,7 @@ def main():
     import enamlnative
     with enamlnative.imports():
         from enamlnative.android.app import AndroidApplication
-        app = AndroidApplication('com.enaml.MainActivity')
+        app = AndroidApplication('com.codelv.enamlnative.EnamlActivity')
     app.debug = True #: Makes a lot of lag!
     app.dev = 'server'
     app.reload_view = reload_view

@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on June 21, 2017
 
 @author: jrm
-'''
+"""
 import msgpack
 import functools
 from atom.api import Atom, Property, Instance, ForwardInstance, Dict, Unicode, Tuple, Int
@@ -120,29 +120,30 @@ def get_handler(ptr, method):
     """ Dereference the pointer and return the handler method. """
     obj = CACHE.get(ptr, None)
     if obj is None:
-        raise BridgeReferenceError("Reference id={} never existed or has already been destroyed"
-                       .format(ptr))
+        raise BridgeReferenceError(
+            "Reference id={} never existed or has already been destroyed"
+            .format(ptr))
     elif not hasattr(obj, method):
-        raise NotImplementedError("{}.{} is not implemented.".format(obj, method))
+        raise NotImplementedError("{}.{} is not implemented.".format(obj,
+                                                                     method))
     return obj, getattr(obj, method)
 
 
 class BridgeMethod(Property):
     """ A method that is callable via the bridge.
-        When called, this serializes the call, packs the arguments,
-            and delegates handling to a bridge in native code.
+    When called, this serializes the call, packs the arguments,
+    and delegates handling to a bridge in native code.
 
-        Example:
-            #: Define it
-            class View(BridgeObject):
-                addView = BridgeMethod('android.view.View')
+    #: Define it
+    class View(BridgeObject):
+        addView = BridgeMethod('android.view.View')
 
-            #: Create instance
-            view = View()
-            view2 = View()
+    #: Create instance
+    view = View()
+    view2 = View()
 
-            #: Use it
-            view.addView(view2)
+    #: Use it
+    view.addView(view2)
 
     """
     __slots__ = ('__signature__', '__returns__', '__cache__', '__bridge_id__')
@@ -202,27 +203,28 @@ class BridgeMethod(Property):
 
     def pack_args(self, obj, *args, **kwargs):
         """ Subclasses should implement this to pack args as needed
-            for the native bridge implementation. Must return a tuple containing
-            ("methodName", [list, of, encoded, args])
+        for the native bridge implementation. Must return a tuple containing
+        ("methodName", [list, of, encoded, args])
+        
         """
         raise NotImplementedError
 
 
 class BridgeStaticMethod(Property):
     """ A method that is callable via the bridge.
-        When called, this serializes the call, packs the arguments,
-            and delegates handling to a bridge in native code.
+    When called, this serializes the call, packs the arguments,
+    and delegates handling to a bridge in native code.
 
-        Example:
-            #: Define it
-            class Toast(BridgeObject):
-                makeToast = BridgeStaticMethod(*args)
+    #: Define it
+    class Toast(BridgeObject):
+        makeToast = BridgeStaticMethod(*args)
 
-            #: Use
-            result = Toast.makeToast(*args)
+    #: Use
+    result = Toast.makeToast(*args)
 
     """
-    __slots__ = ('__signature__', '__returns__', '__cache__', '__owner__', '__bridge_id__')
+    __slots__ = ('__signature__', '__returns__', '__cache__', '__owner__',
+                 '__bridge_id__')
 
     def __init__(self, *args, **kwargs):
         self.__returns__ = kwargs.get('returns', None)
@@ -272,25 +274,26 @@ class BridgeStaticMethod(Property):
 
     def pack_args(self, obj, *args, **kwargs):
         """ Subclasses should implement this to pack args as needed
-            for the native bridge implementation. Must return a tuple containing
-            ("methodName", [list, of, encoded, args])
+        for the native bridge implementation. Must return a tuple containing
+        ("methodName", [list, of, encoded, args])
+        
         """
         raise NotImplementedError
 
 
 class BridgeField(Property):
-    """ Allows you to set fields or properties over the bridge using normal python syntax.
+    """ Allows you to set fields or properties over the bridge using normal 
+    python syntax.
 
-        Example:
-            #: Define it
-            class View(BridgeObject):
-                width = BridgeField('int')
+    #: Define it
+    class View(BridgeObject):
+        width = BridgeField('int')
 
-            #: Create instance
-            view = View()
+    #: Create instance
+    view = View()
 
-            #: Set field
-            view.width = 200
+    #: Set field
+    view.width = 200
 
     """
     __slots__ = ('__signature__', '__bridge_id__', '__bridge_cached_')
@@ -326,41 +329,40 @@ class BridgeField(Property):
 
 
 class BridgeCallback(BridgeMethod):
-    """ Description of a callback method of a View (or subclass) in Objc or Java. When called,
-        it fires the connected callback. If no callback is connected it will try to lookup a default
-        callback implementation matching the name `_impl_<name>`. If that does not exist, it will
-        simply do nothing.
+    """ Description of a callback method of a View (or subclass) in 
+    Objc or Java. When called,it fires the connected callback. If no callback 
+    is connected it will try to lookup a default callback implementation 
+    matching the name `_impl_<name>`. If that does not exist, it will simply 
+    do nothing.
 
-        This is triggered when it receives an event from the bridge indicating the call has occurred.
+    This is triggered when it receives an event from the bridge indicating the 
+    call has occurred.
 
-        #### Example 1
 
-            :::python
-            #: Define it
-            class View(BridgeObject):
-                onClick = BridgeCallback()
+        #: Define it
+        class View(BridgeObject):
+            onClick = BridgeCallback()
 
-            #: Create instance
-            view = View()
+        #: Create instance
+        view = View()
 
-            def on_click():
-                print("Clicked!")
+        def on_click():
+            print("Clicked!")
 
-            #: Connect to callback
-            view.onClick.connect(on_click)
+        #: Connect to callback
+        view.onClick.connect(on_click)
 
-        #### Example 2
 
-        You can define a "default" callback implementation by implementing the method with name
-        of `_impl_<name>`. Connecting a callback will override this behavior.
+    You can define a "default" callback implementation by implementing the 
+    method with name of `_impl_<name>`. Connecting a callback will override 
+    this behavior.
 
-            :::python
-            #: Define it
-            class LocationManager(BridgeObject):
-                hashCode = BridgeCallback()
+    #: Define it
+    class LocationManager(BridgeObject):
+        hashCode = BridgeCallback()
 
-                def _impl_hashCode(self):
-                    return self.__id__
+        def _impl_hashCode(self):
+            return self.__id__
 
     """
 
@@ -403,6 +405,7 @@ class BridgeObject(Atom):
     """ A proxy to a class in java. This sends the commands over
     the bridge for execution.  The object is stored in a map
     with the given id and is valid until this object is deleted.
+    
     Parameters
     ----------
     __id__: Int
@@ -463,12 +466,13 @@ class BridgeObject(Atom):
                 self.__id__,  #: id to assign in bridge cache
                 self.__bridge_id__,
                 self.__nativeclass__,
-                [msgpack_encoder(sig, arg) for sig, arg in zip(self.__signature__, args)],
+                [msgpack_encoder(sig, arg)
+                 for sig, arg in zip(self.__signature__, args)],
             )
 
     def __del__(self):
         """ Destroy this object and send a command to destroy the actual object
-            reference the bridge implementation holds (allowing it to be released).
+        reference the bridge implementation holds (allowing it to be released).
         """
         self.__app__.send_event(
             Command.DELETE,  #: method
@@ -479,19 +483,21 @@ class BridgeObject(Atom):
 
 class NestedBridgeObject(BridgeObject):
     """ A nested object allows you to invoke methods and set properties
-        of an object that is a property of another object using the dot notation.
+    of an object that is a property of another object using the dot notation.
 
-        Useful for setting nested properties without needing to first create a reference
-        bridge object (thus saving the time waiting for the bridge to reply) for example:
+    Useful for setting nested properties without needing to first create a 
+    reference bridge object (thus saving the time waiting for the bridge to 
+    reply) for example:
 
-            UIView view = [UIView new];
-            view.yoga.width = YES;
+        UIView view = [UIView new];
+                view.yoga.width = YES;
 
-        Would require to create a reference to the "yoga" object first but instead we just
-        add our nested object's prefix and let the bridge resolve the actual property. It works
-        like a regular BridgeObject but appends the "name'.
+    Would require to create a reference to the "yoga" object first but instead 
+    we just add our nested object's prefix and let the bridge resolve the 
+    actual property. It works like a regular BridgeObject but appends the 
+    "name'.
 
-        This object is NOT in the cache on either side of the bridge.
+    This object is NOT in the cache on either side of the bridge.
 
     """
     #: Reference to the object this is referenced under

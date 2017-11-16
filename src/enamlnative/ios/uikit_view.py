@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 3, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Typed, Tuple, ForwardInstance, observe
 from enamlnative.widgets.view import ProxyView
@@ -85,7 +85,8 @@ class UIView(UIResponder):
     insertSubview = ObjcMethod('UIView', dict(atIndex='NSInteger',
                                               aboveSubview='UIView',
                                               belowSubview='UIView'))
-    exchangeSubviewAtIndex = ObjcMethod('NSInteger', dict(withSubviewAtIndex='NSInteger'))
+    exchangeSubviewAtIndex = ObjcMethod('NSInteger',
+                                        dict(withSubviewAtIndex='NSInteger'))
 
     #:
 
@@ -101,9 +102,9 @@ class UiKitView(UiKitToolkitObject, ProxyView):
     #: Frame in (x,y,width,height)
     frame = Tuple()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
 
@@ -161,9 +162,9 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         from .app import IPhoneApplication
         return IPhoneApplication.instance()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyToolkitObject API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def child_added(self, child):
         """ Handle the child added event from the declaration.
@@ -212,9 +213,9 @@ class UiKitView(UiKitToolkitObject, ProxyView):
             widget.removeFromSuperview()
         super(UiKitView, self).destroy()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyView API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('frame')
     def set_frame(self, change):
         if self.frame:

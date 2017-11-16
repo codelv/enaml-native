@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 26, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Enum, Unicode, observe
 )
@@ -45,9 +45,9 @@ class ActivityIndicator(View):
     #: A reference to the ProxyActivityIndicator object.
     proxy = Typed(ProxyActivityIndicator)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('style', 'color')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

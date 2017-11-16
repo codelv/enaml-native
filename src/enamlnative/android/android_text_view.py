@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.text_view import ProxyTextView
@@ -18,19 +18,57 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class Gravity:
-    bottom = 50  # Push object to the bottom of its container, not changing its size.
-    center = 11  # Place the object in the center of its container in both the vertical and horizontal axis, not changing its size.
-    center_horizontal = 1  # Place object in the horizontal center of its container, not changing its size.
-    center_vertical = 10  # Place object in the vertical center of its container, not changing its size.
-    clip_horizontal = 8  # Additional option that can be set to have the left and/or right edges of the child clipped to its container's bounds. The clip will be based on the horizontal gravity: a left gravity will clip the right edge, a right gravity will clip the left edge, and neither will clip both edges.
-    clip_vertical = 80  # Additional option that can be set to have the top and/or bottom edges of the child clipped to its container's bounds. The clip will be based on the vertical gravity: a top gravity will clip the bottom edge, a bottom gravity will clip the top edge, and neither will clip both edges.
-    end = 800005  # Push object to the end of its container, not changing its size.
-    fill = 77  # Grow the horizontal and vertical size of the object if needed so it completely fills its container.
-    fill_horizontal = 7 # Grow the horizontal size of the object if needed so it completely fills its container.
-    fill_vertical = 70 # Grow the vertical size of the object if needed so it completely fills its container.
-    left = 3 # Push object to the left of its container, not changing its size.
-    right = 5 # Push object to the right of its container, not changing its size.
-    start = 800003 # Push object to the beginning of its container, not changing its size.
+    # Push object to the bottom of its container, not changing its size.
+    bottom = 50
+
+    # Place the object in the center of its container in both the
+    # vertical and horizontal axis, not changing its size.
+    center = 11
+
+    # Place object in the horizontal center of its container,
+    # not changing its size.
+    center_horizontal = 1
+
+    # Place object in the vertical center of its container,
+    # not changing its size.
+    center_vertical = 10
+
+    # Additional option that can be set to have the left and/or right edges
+    # of the child clipped to its container's bounds. The clip will be based
+    # on the horizontal gravity: a left gravity will clip the right edge,
+    # a right gravity will clip the left edge, and neither will clip
+    # both edges.
+    clip_horizontal = 8
+
+    # Additional option that can be set to have the top and/or bottom edges
+    # of the child clipped to its container's bounds. The clip will be based
+    # on the vertical gravity: a top gravity will clip the bottom edge, a
+    # bottom gravity will clip the top edge, and neither will clip both edges.
+    clip_vertical = 80
+
+    # Push object to the end of its container, not changing its size.
+    end = 800005
+
+    # Grow the horizontal and vertical size of the object
+    # if needed so it completely fills its container.
+    fill = 77
+
+    # Grow the horizontal size of the object if needed so it completely
+    # fills its container.
+    fill_horizontal = 7
+
+    # Grow the vertical size of the object if needed so it completely
+    # fills its container.
+    fill_vertical = 70
+
+    # Push object to the left of its container, not changing its size.
+    left = 3
+    right = 5
+
+    # Push object to the right of its container, not changing its size.
+    start = 800003
+
+    # Push object to the beginning of its container, not changing its size.
     top = 30
 
     @staticmethod
@@ -58,18 +96,21 @@ class TextView(View):
     setLineSpacing = JavaMethod('float', 'float')
     setLetterSpacing = JavaMethod('float')
     setMaxLines = JavaMethod('int')
-    setOnEditorActionListener = JavaMethod('android.widget.TextView$OnEditorActionListener')
+    setOnEditorActionListener = JavaMethod(
+        'android.widget.TextView$OnEditorActionListener')
     setInputType = JavaMethod('int')
     addTextChangedListener = JavaMethod('android.text.TextWatcher')
     removeTextChangedListener = JavaMethod('android.text.TextWatcher')
 
     #: TextWatcher API
     afterTextChanged = JavaCallback('android.text.Editable')
-    beforeTextChanged = JavaCallback('java.lang.CharSequence', 'int', 'int', 'int')
+    beforeTextChanged = JavaCallback('java.lang.CharSequence', 'int', 'int',
+                                     'int')
     onTextChanged = JavaCallback('java.lang.CharSequence', 'int', 'int', 'int')
 
     #: EditorAction API
-    onEditorAction = JavaCallback('android.view.TextView', 'int', 'android.view.KeyEvent', returns='boolean')
+    onEditorAction = JavaCallback('android.view.TextView', 'int',
+                                  'android.view.KeyEvent', returns='boolean')
 
     FONT_STYLES = {
         'bold': 1,
@@ -124,7 +165,7 @@ class TextView(View):
         'left': TEXT_ALIGNMENT_TEXT_START,
         'right': TEXT_ALIGNMENT_TEXT_END,
         'center': TEXT_ALIGNMENT_CENTER,
-        'justified': TEXT_ALIGNMENT_INHERIT,  # Not supported I guess?
+        'justified': TEXT_ALIGNMENT_INHERIT,
         'natural': TEXT_ALIGNMENT_VIEW_START
     }
 
@@ -136,11 +177,11 @@ class AndroidTextView(AndroidView, ProxyTextView):
     #: A reference to the widget created by the proxy.
     widget = Typed(TextView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = TextView(self.get_context())
@@ -188,26 +229,26 @@ class AndroidTextView(AndroidView, ProxyTextView):
             self.widget.setOnEditorActionListener(self.widget.getId())
             self.widget.onEditorAction.connect(self.on_editor_action)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # TextWatcher API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_text_changed(self, text, start, before, count):
         d = self.declaration
         with self.widget.setTextKeepState.suppressed():
             d.text = text
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnEditorAction API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_editor_action(self, view, key, key_event):
         d = self.declaration
         r = {'key': key, 'result': False}
         d.editor_action(r)
-        return not not r['result'] # Apparently not not is faster than bool
+        return not not r['result']  # Apparently not not is faster than bool
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyTextView API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_all_caps(self, enabled):
         self.widget.setAllCaps(enabled)
 
@@ -225,7 +266,7 @@ class AndroidTextView(AndroidView, ProxyTextView):
         font_style = TextView.FONT_STYLES[d.font_style or 'normal']
         #style = getattr(Typeface, d.font_style.upper() or 'NORMAL')
         #tf = Typeface.create(d.font_family or None, style)
-        self.widget.setTypeface(d.font_family, font_style)#, d.font_style)
+        self.widget.setTypeface(d.font_family, font_style)  #, d.font_style)
 
     def set_input_type(self, input_type):
         it = TextView.INPUT_TYPES[input_type]
@@ -235,7 +276,7 @@ class AndroidTextView(AndroidView, ProxyTextView):
         """ Set the text in the widget.
 
         """
-        self.widget.setTextKeepState(text)#, 0, len(text))
+        self.widget.setTextKeepState(text)  #, 0, len(text))
 
     def set_text_alignment(self, alignment):
         self.widget.setGravity(TextView.TEXT_ALIGNMENT[alignment])

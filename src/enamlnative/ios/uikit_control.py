@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 25, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Typed
 
@@ -24,8 +24,10 @@ class UIControl(UITextView):
     enabled = ObjcProperty('bool')
     selected = ObjcProperty('bool')
     highlighted = ObjcProperty('bool')
-    contentVerticalAlignment = ObjcProperty('UIControlContentVerticalAlignment')
-    contentHorizontalAlignment = ObjcProperty('UIControlContentHorizontalAlignment')
+    contentVerticalAlignment = ObjcProperty(
+        'UIControlContentVerticalAlignment')
+    contentHorizontalAlignment = ObjcProperty(
+        'UIControlContentHorizontalAlignment')
 
     #setProgress = ObjcMethod('float', dict(animated='bool'))
     addTarget = ObjcMethod('id',
@@ -73,11 +75,12 @@ class UiKitControl(UiKitTextView, ProxyCompoundButton):
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UIControl)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
+        
         """
         self.widget = UIControl()
 
@@ -107,9 +110,9 @@ class UiKitControl(UiKitTextView, ProxyCompoundButton):
 
             self.widget.onClicked.connect(self.on_clicked)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Clicked API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_clicked(self):
         d = self.declaration
         d.clicked()

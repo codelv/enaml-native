@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on June 7, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.switch import ProxySwitch
@@ -32,9 +32,9 @@ class AndroidSwitch(AndroidCompoundButton, ProxySwitch):
     #: A reference to the widget created by the proxy.
     widget = Typed(Switch)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -55,12 +55,12 @@ class AndroidSwitch(AndroidCompoundButton, ProxySwitch):
         if d.text_on:
             self.set_text_on(d.text_on)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxySwitch API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_show_text(self, show):
         api = self.get_context().api_level
-        if api>=21:
+        if api >= 21:
             self.widget.setShowText(show)
 
     def set_split_track(self, split):

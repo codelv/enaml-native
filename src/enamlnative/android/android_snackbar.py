@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Sept 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, Bool, set_default
 from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod, JavaCallback, JavaProxy
 from enamlnative.widgets.snackbar import ProxySnackbar
@@ -25,9 +25,11 @@ class Snackbar(JavaBridgeObject):
     dismiss = JavaMethod()
     setDuration = JavaMethod('int')
     setText = JavaMethod('java.lang.CharSequence')
-    setAction = JavaMethod('java.lang.CharSequence', 'android.view.View$OnClickListener')
+    setAction = JavaMethod('java.lang.CharSequence',
+                           'android.view.View$OnClickListener')
     setActionTextColor = JavaMethod('android.graphics.Color')
-    addCallback = JavaMethod('android.support.design.widget.BaseTransientBottomBar$BaseCallback')#'android.support.design.widget.Snackbar$Callback')
+    addCallback = JavaMethod(
+        'android.support.design.widget.BaseTransientBottomBar$BaseCallback')
 
 
 
@@ -53,8 +55,11 @@ class Snackbar(JavaBridgeObject):
 
 
 class BridgedSnackbarCallback(JavaBridgeObject):
-    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedSnackbarCallback')
-    setListener = JavaMethod('com.codelv.enamlnative.adapters.BridgedSnackbarCallback$SnackbarListener')
+    __nativeclass__ = set_default(
+        'com.codelv.enamlnative.adapters.BridgedSnackbarCallback')
+    setListener = JavaMethod(
+        'com.codelv.enamlnative.adapters.BridgedSnackbarCallback'
+        '$SnackbarListener')
 
 
 class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
@@ -70,16 +75,18 @@ class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
     def create_widget(self):
         """ Create the underlying widget.
 
-            A toast is not a subclass of view, hence we don't set name as widget
-            or children will try to use it as their parent (which crashes).
+        A toast is not a subclass of view, hence we don't set name as widget
+        or children will try to use it as their parent (which crashes).
 
         """
         d = self.declaration
-        Snackbar.make(self.parent_widget(), d.text, 0 if d.duration else -2).then(self.on_widget_created)
+        Snackbar.make(self.parent_widget(), d.text,
+                      0 if d.duration else -2).then(self.on_widget_created)
 
     def init_widget(self):
-        """ Our widget may not exist yet so we have to diverge from the normal way
-            of doing initialization. See `update_widget`
+        """ Our widget may not exist yet so we have to diverge from the normal 
+        way of doing initialization. See `update_widget`
+        
         """
         if not self.widget:
             return
@@ -108,7 +115,10 @@ class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
             self.set_show(d.show)
 
     def on_widget_created(self, ref):
-        """ Using Snackbar.make returns async so we have to initialize it later. """
+        """ Using Snackbar.make returns async so we have to 
+        initialize it later. 
+        
+        """
         d = self.declaration
         self.widget = Snackbar(__id__=ref)
         self.init_widget()
@@ -134,12 +144,13 @@ class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
         d.clicked()
 
     def _refresh_show(self, dt):
-        """ While the `show` is true, keep calling .show() until the duration `dt` expires.
+        """ While the `show` is true, keep calling .show() until the 
+        duration `dt` expires.
 
-            Parameters
-            ------------
-            dt: int
-                Time left to keep showing
+        Parameters
+        ------------
+        dt: int
+            Time left to keep showing
 
         """
         d = self.declaration
@@ -154,9 +165,9 @@ class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
             app = self.get_context()
             app.timed_call(t, self._refresh_show, dt-t)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxySnackbar API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_text(self, text):
         self.widget.setText(text)
 
@@ -169,8 +180,10 @@ class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
 
     def set_duration(self, duration):
         """ Android for whatever stupid reason doesn't let you set the time
-            it only allows 1-long or 0-short. So we have to repeatedly call show
-            until the duration expires, hence this method does nothing see `set_show`.
+        it only allows 1-long or 0-short. So we have to repeatedly call show
+        until the duration expires, hence this method does nothing see 
+        `set_show`.
+        
         """
         if duration == 0:
             self.widget.setDuration(-2) #: Infinite

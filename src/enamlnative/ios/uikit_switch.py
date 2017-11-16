@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 25, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Typed, Bool
 from enamlnative.widgets.switch import ProxySwitch
@@ -44,9 +44,9 @@ class UiKitSwitch(UiKitControl, ProxySwitch):
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UISwitch)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
         """
@@ -88,9 +88,9 @@ class UiKitSwitch(UiKitControl, ProxySwitch):
         with self.widget.setOn.suppressed():
             d.checked = on
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxySwitch API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_checked(self, checked):
         self.widget.setOn(checked, animated=True)
 

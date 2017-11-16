@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Unicode, List, Float, Int, Bool, observe, set_default
 )
@@ -91,7 +91,8 @@ class ProxyPagerFragment(ProxyFragment):
 
 
 class ViewPager(ViewGroup):
-    """ Layout manager that allows the user to flip left and right through pages of data.
+    """ Layout manager that allows the user to flip left and right through 
+    pages of data.
 
     """
     #: Set the currently selected page.
@@ -108,15 +109,17 @@ class ViewPager(ViewGroup):
     page_margin = d_(Int(-1))
 
     #: Read only list of pages
-    pages = property(lambda self: [c for c in self._children if isinstance(c, Fragment)])
+    pages = property(lambda self: [c for c in self._children
+                                   if isinstance(c, Fragment)])
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyViewPager)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
-    @observe('current_index', 'offscreen_page_limit', 'page_margin', 'paging_enabled')
+    # -------------------------------------------------------------------------
+    @observe('current_index', 'offscreen_page_limit', 'page_margin',
+             'paging_enabled')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 
@@ -147,9 +150,9 @@ class PagerTitleStrip(ViewGroup):
     #: Spacing pixels
     text_spacing = d_(Int())
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('text_color', 'text_size', 'text_spacing')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
@@ -168,9 +171,9 @@ class PagerTabStrip(PagerTitleStrip):
     #: in the current tab indicator color.
     tab_full_underline = d_(Bool())
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('tab_indicator_color', 'tab_full_underline')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
@@ -181,7 +184,8 @@ class PagerTabStrip(PagerTitleStrip):
 
 
 class PagerFragment(Fragment):
-    """ A Fragment that sets page content and provides a title for tabs and title sliders.
+    """ A Fragment that sets page content and provides a title for tabs 
+    and title sliders.
 
     """
     #: Set the title for the title or tab pager
@@ -190,9 +194,9 @@ class PagerFragment(Fragment):
     #: Set the icon or drawable resource for the title or tab pager
     icon = d_(Unicode())
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('title', 'icon')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

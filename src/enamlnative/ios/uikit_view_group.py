@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 3, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Instance, observe
 from enamlnative.widgets.view_group import ProxyViewGroup
@@ -24,9 +24,9 @@ class UiKitViewGroup(UiKitView, ProxyViewGroup):
     #: A reference to the toolkit widget created by the proxy.
     layout = Instance(UIView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
 
@@ -95,7 +95,8 @@ class UiKitViewGroup(UiKitView, ProxyViewGroup):
     def child_removed(self, child):
         """ Handle the child removed event from the declaration.
 
-        The child must be both removed from the arrangement and removed normally.
+        The child must be both removed from the arrangement and removed 
+        normally.
 
         """
         layout = self.layout
@@ -114,9 +115,9 @@ class UiKitViewGroup(UiKitView, ProxyViewGroup):
             self.layout = None
         super(UiKitViewGroup, self).destroy()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyViewGroup API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('frame')
     def set_frame(self, change):
         if self.frame:

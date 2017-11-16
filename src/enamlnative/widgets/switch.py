@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on June 7, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Unicode, Bool, observe
 )
@@ -57,9 +57,9 @@ class Switch(CompoundButton):
     #: A reference to the ProxySwitch object.
     proxy = Typed(ProxySwitch)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('show_text', 'split_track', 'text_off', 'text_on')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on July 6, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, List, Int, Bool, observe
 )
@@ -67,7 +67,8 @@ class Picker(LinearLayout):
     #: when the up and down buttons are long pressed respectively.
     long_press_update_interval = d_(Int())
 
-    #: Sets whether the selector wheel shown during flinging/scrolling should wrap around
+    #: Sets whether the selector wheel shown during flinging/scrolling
+    #: should wrap around
     wraps = d_(Bool(True))
 
     #: A reference to the proxy object.
@@ -76,7 +77,8 @@ class Picker(LinearLayout):
     # --------------------------------------------------------------------------
     # Observers
     # --------------------------------------------------------------------------
-    @observe('max_value', 'min_value', 'value', 'items', 'long_press_update_interval', 'wraps')
+    @observe('max_value', 'min_value', 'value', 'items',
+             'long_press_update_interval', 'wraps')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

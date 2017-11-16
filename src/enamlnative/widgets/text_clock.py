@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Unicode, observe
 )
@@ -40,10 +40,12 @@ class TextClock(TextView):
 
     """
 
-    #: Specifies the formatting pattern used to display the date and/or time in 12-hour mode.
+    #: Specifies the formatting pattern used to display the date and/or time
+    #: in 12-hour mode.
     format_12_hour = d_(Unicode())
 
-    #: Specifies the formatting pattern used to display the date and/or time in 24-hour mode.
+    #: Specifies the formatting pattern used to display the date and/or time
+    #: in 24-hour mode.
     format_24_hour = d_(Unicode())
 
     #: Sets the specified time zone to use in this clock.

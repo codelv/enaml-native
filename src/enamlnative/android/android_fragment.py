@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, Value, set_default
 
 from enamlnative.widgets.fragment import ProxyFragment
@@ -22,7 +22,9 @@ from .app import AndroidApplication
 
 class FragmentManager(JavaBridgeObject):
     __nativeclass__ = set_default('android.support.v4.app.FragmentManager')
-    beginTransaction = JavaMethod(returns='android.support.v4.app.FragmentTransaction')
+    beginTransaction = JavaMethod(
+        returns='android.support.v4.app.FragmentTransaction')
+
 
 class FragmentTransaction(JavaBridgeObject):
     __nativeclass__ = set_default('android.support.v4.app.FragmentTransaction')
@@ -30,10 +32,15 @@ class FragmentTransaction(JavaBridgeObject):
     add = JavaMethod('int','android.support.v4.app.Fragment')
     replace = JavaMethod('int','android.support.v4.app.Fragment')
 
+
 class BridgedFragment(JavaBridgeObject):
-    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter$BridgedFragment')
+    __nativeclass__ = set_default(
+        'com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter'
+        '$BridgedFragment')
     setTitle = JavaMethod('java.lang.String')
-    setFragmentListener = JavaMethod('com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter$FragmentListener')
+    setFragmentListener = JavaMethod(
+        'com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter'
+        '$FragmentListener')
     onCreateView = JavaCallback(returns='android.view.View')
     onDestroyView = JavaCallback()
 
@@ -54,11 +61,11 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
     def _default_ready(self):
         return AndroidApplication.instance().create_future()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.fragment = BridgedFragment()
@@ -88,7 +95,8 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
 
     def destroy(self):
         """ Custom destructor that deletes the fragment and removes
-            itself from the adapter it was added to.
+        itself from the adapter it was added to.
+        
         """
         #: Destroy fragment
         fragment = self.fragment
@@ -103,9 +111,9 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
             del self.fragment
         super(AndroidFragment, self).destroy()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # FragmentListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_create_view(self):
         """ Trigger the click
 
@@ -125,9 +133,9 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
         #: Clear the ready state again!
         self.ready = self._default_ready()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyFragment API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def get_view(self):
         d = self.declaration
         for view in d.items:
@@ -153,9 +161,9 @@ class AndroidPagerFragment(AndroidFragment, ProxyPagerFragment):
         if d.icon:
             self.set_icon(d.icon)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyPagerTabStrip API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_title(self, title):
         self.fragment.setTitle(title)
 

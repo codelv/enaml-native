@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.toolbar import ProxyToolbar
@@ -24,8 +24,10 @@ class Toolbar(ViewGroup):
     setSubtitleTextColor = JavaMethod('android.graphics.Color')
     setTitleMargin = JavaMethod('int', 'int', 'int', 'int')
     setTitleTextColor = JavaMethod('android.graphics.Color')
-    setNavigationOnClickListener = JavaMethod('android.view.View$OnClickListener')
-    setOnMenuItemClickListener = JavaMethod('android.widget.Toolbar$OnMenuItemClickListener')
+    setNavigationOnClickListener = JavaMethod(
+        'android.view.View$OnClickListener')
+    setOnMenuItemClickListener = JavaMethod(
+        'android.widget.Toolbar$OnMenuItemClickListener')
     setContentInsetsAbsolute = JavaMethod('int', 'int')
     setContentInsetsRelative = JavaMethod('int', 'int')
     onNavigationClick = JavaCallback('android.view.View')
@@ -33,7 +35,8 @@ class Toolbar(ViewGroup):
 
 
 class ToolbarLayoutParams(MarginLayoutParams):
-    __nativeclass__ = set_default('android.support.v7.widget.Toolbar$LayoutParams')
+    __nativeclass__ = set_default(
+        'android.support.v7.widget.Toolbar$LayoutParams')
     gravity = JavaField('int')
 
 
@@ -44,9 +47,9 @@ class AndroidToolbar(AndroidViewGroup, ProxyToolbar):
     #: A reference to the widget created by the proxy.
     widget = Typed(Toolbar)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -84,15 +87,14 @@ class AndroidToolbar(AndroidViewGroup, ProxyToolbar):
     #     activity = self.get_context().widget
     #     activity.setSupportActionBar(self.widget)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyToolbar API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_content_padding(self, padding):
         # Left right
         self.widget.setContentInsetsAbsolute(padding[0], padding[2])
         # Start, end
         self.widget.setContentInsetsRelative(padding[1], padding[3])
-
 
     def set_title(self, text):
         self.widget.setTitle(text)

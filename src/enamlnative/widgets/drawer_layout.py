@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, List, Unicode, Float, Int, Bool, Enum, observe
 )
@@ -76,7 +76,8 @@ class DrawerLayout(ViewGroup):
     #: Set lock mode
     lock_mode = d_(Enum('unlocked', 'locked_closed', 'locked_open'))
 
-    #: Set a color to use for the scrim that obscures primary content while a drawer is open.
+    #: Set a color to use for the scrim that obscures primary content
+    #: while a drawer is open.
     scrim_color = d_(Unicode())
 
     #: Statusbar background color
@@ -85,9 +86,9 @@ class DrawerLayout(ViewGroup):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyDrawerLayout)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('opened', 'drawer_width', 'title', 'title_gravity',
              'drawer_elevation', 'drawer_lock_mode', 'scrim_color',
              'status_bar_background_color')

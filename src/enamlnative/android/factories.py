@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 
 
 def activity_indicator_factory():
@@ -26,37 +26,27 @@ def auto_complete_text_view_factory():
     return AndroidAutoCompleteTextView
 
 
-def bar_chart_factory():
-    from .android_chart_view import AndroidBarChart
-    return AndroidBarChart
-
-
 def button_factory():
-    # print "Import button"
     from .android_button import AndroidButton
     return AndroidButton
 
 
 def calendar_view_factory():
-    # print "Import calendar view"
     from .android_calendar_view import AndroidCalendarView
     return AndroidCalendarView
 
 
 def card_view_factory():
-    # print "Import card view"
     from .android_card_view import AndroidCardView
     return AndroidCardView
 
 
 def checkbox_factory():
-    # print "Import checkbox"
     from .android_checkbox import AndroidCheckBox
     return AndroidCheckBox
 
 
 def chronometer_factory():
-    # print "Import chronometer"
     from .android_chronometer import AndroidChronometer
     return AndroidChronometer
 
@@ -67,14 +57,8 @@ def coordinator_layout_factory():
 
 
 def compound_button_factory():
-    # print "Import compound button"
     from .android_compound_button import AndroidCompoundButton
     return AndroidCompoundButton
-
-
-def data_set_factory():
-    from .android_chart_view import AndroidDataSet
-    return AndroidDataSet
 
 
 def date_picker_factory():
@@ -88,13 +72,11 @@ def dialog_factory():
 
 
 def drawer_layout_factory():
-    # print "Import drawer layout"
     from .android_drawer_layout import AndroidDrawerLayout
     return AndroidDrawerLayout
 
 
 def edit_text_factory():
-    # print "Import edit text"
     from .android_edit_text import AndroidEditText
     return AndroidEditText
 
@@ -105,19 +87,16 @@ def flexbox_factory():
 
 
 def fragment_factory():
-    # print "Import frame layout"
     from .android_fragment import AndroidFragment
     return AndroidFragment
 
 
 def frame_layout_factory():
-    # print "Import frame layout"
     from .android_frame_layout import AndroidFrameLayout
     return AndroidFrameLayout
 
 
 def grid_layout_factory():
-    # print "Import grid layout"
     from .android_grid_layout import AndroidGridLayout
     return AndroidGridLayout
 
@@ -143,30 +122,21 @@ def image_view_factory():
 
 
 def linear_layout_factory():
-    # print "Import linear layout"
     from .android_linear_layout import AndroidLinearLayout
     return AndroidLinearLayout
 
 
-def line_chart_factory():
-    from .android_chart_view import AndroidLineChart
-    return AndroidLineChart
-
-
 def list_item_factory():
-    # print "Import linear layout"
     from .android_list_view import AndroidListItem
     return AndroidListItem
 
 
 def list_view_factory():
-    # print "Import linear layout"
     from .android_list_view import AndroidListView
     return AndroidListView
 
 
 def picker_factory():
-    # print "Import view"
     from .android_picker import AndroidPicker
     return AndroidPicker
 
@@ -187,37 +157,31 @@ def pager_fragment_factory():
 
 
 def progress_bar_factory():
-    # print "Import progress bar"
     from .android_progress_bar import AndroidProgressBar
     return AndroidProgressBar
 
 
 def radio_button_factory():
-    # print "Import radio button"
     from .android_radio_button import AndroidRadioButton
     return AndroidRadioButton
 
 
 def radio_group_factory():
-    # print "Import radio group"
     from .android_radio_group import AndroidRadioGroup
     return AndroidRadioGroup
 
 
 def rating_bar_factory():
-    # print "Import rating bar"
     from .android_rating_bar import AndroidRatingBar
     return AndroidRatingBar
 
 
 def relative_layout_factory():
-    # print "Import relative layout"
     from .android_relative_layout import AndroidRelativeLayout
     return AndroidRelativeLayout
 
 
 def scroll_view_factory():
-    # print "Import scroll view"
     from .android_scroll_view import AndroidScrollView
     return AndroidScrollView
 
@@ -228,13 +192,11 @@ def seek_bar_factory():
 
 
 def spacer_factory():
-    # print "Import switch"
     from .android_spacer import AndroidSpacer
     return AndroidSpacer
 
 
 def spinner_factory():
-    # print "Import spinner"
     from .android_spinner import AndroidSpinner
     return AndroidSpinner
 
@@ -260,25 +222,21 @@ def text_clock_factory():
 
 
 def text_view_factory():
-    # print "Import text view"
     from .android_text_view import AndroidTextView
     return AndroidTextView
 
 
 def time_picker_factory():
-    # print "Import time picker"
     from .android_time_picker import AndroidTimePicker
     return AndroidTimePicker
 
 
 def tab_layout_factory():
-    # print "Import tab host"
     from .android_tab_layout import AndroidTabLayout
     return AndroidTabLayout
 
 
 def tab_fragment_factory():
-    # print "Import tab host"
     from .android_tab_layout import AndroidTabFragment
     return AndroidTabFragment
 
@@ -289,7 +247,6 @@ def toast_factory():
 
 
 def toggle_button_factory():
-    # print "Import toggle button"
     from .android_toggle_button import AndroidToggleButton
     return AndroidToggleButton
 
@@ -300,13 +257,11 @@ def toolbar_factory():
 
 
 def view_factory():
-    # print "Import view"
     from .android_view import AndroidView
     return AndroidView
 
 
 def view_pager_factory():
-    # print "Import view pager"
     from .android_view_pager import AndroidViewPager
     return AndroidViewPager
 
@@ -330,7 +285,6 @@ ANDROID_FACTORIES = {
     'DatePicker': date_picker_factory,
     'Dialog': dialog_factory,
     'DrawerLayout': drawer_layout_factory,
-    'DataSet': data_set_factory,
     'EditText': edit_text_factory,
     'Flexbox': flexbox_factory,
     'Fragment': fragment_factory,

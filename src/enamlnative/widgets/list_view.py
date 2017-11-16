@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Value, Bool, Int, List, observe
 )
@@ -63,7 +63,8 @@ class ListView(ViewGroup):
     #: Current index within the list
     current_index = d_(Int(), writable=False)
 
-    #: Sets the height of the divider that will be drawn between each item in the list.
+    #: Sets the height of the divider that will be drawn between each item
+    #:  in the list.
     divider_height = d_(Int(-1))
 
     #: Enables or disables the drawing of the divider for header views.
@@ -72,7 +73,8 @@ class ListView(ViewGroup):
     #: Enables or disables the drawing of the divider for footer views.
     footer_dividers = d_(Bool())
 
-    #: Indicates that the views created by the ListAdapter can contain focusable items.
+    #: Indicates that the views created by the ListAdapter can contain
+    #: focusable items.
     items_can_focus = d_(Bool())
 
     #: Sets the currently selected item.
@@ -81,9 +83,9 @@ class ListView(ViewGroup):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyListView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('items', 'divider_height', 'header_dividers', 'footer_dividers',
              'items_can_focus',  'selected')
     def _update_proxy(self, change):

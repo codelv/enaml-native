@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Unicode, Int, Event, Bool, observe, set_default
 )
@@ -91,9 +91,9 @@ class WebView(ViewGroup):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyWebView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('javascript_enabled', 'url', 'reload',
              'go_forward', 'go_back', 'zoom_in', 'zoom_out')
     def _update_proxy(self, change):

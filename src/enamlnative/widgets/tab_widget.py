@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Int, Bool, Enum, observe
 )
@@ -34,6 +34,7 @@ class ProxyTabWidget(ProxyLinearLayout):
     def set_strip_enabled(self, enabled):
         raise NotImplementedError
 
+
 class TabWidget(LinearLayout):
     """ A tab
 
@@ -50,10 +51,10 @@ class TabWidget(LinearLayout):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyTabWidget)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    #--------------------------------------------------------------------------
-    @observe('enabled','current_tab','strip_enabled')
+    # -------------------------------------------------------------------------
+    @observe('enabled', 'current_tab', 'strip_enabled')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

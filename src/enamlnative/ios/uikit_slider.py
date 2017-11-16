@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 25, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Typed, Bool
 from enamlnative.widgets.seek_bar import ProxySeekBar
@@ -47,11 +47,12 @@ class UiKitSlider(UiKitControl, ProxySeekBar):
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UISlider)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
+        
         """
         self.widget = UISlider()
 
@@ -90,9 +91,9 @@ class UiKitSlider(UiKitControl, ProxySeekBar):
         with self.widget.setValue.suppressed():
             d.progress = int(value)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxySlider API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_progress(self, progress):
         self.widget.setValue(float(progress), animated=True)
 

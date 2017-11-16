@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 3, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Typed, set_default
 from enamlnative.widgets.progress_bar import ProxyProgressBar
@@ -34,9 +34,9 @@ class UiKitProgressView(UiKitView, ProxyProgressBar):
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UIProgressView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
         """
@@ -56,9 +56,8 @@ class UiKitProgressView(UiKitView, ProxyProgressBar):
         if d.progress:
             self.set_progress(d.progress)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyProgressBar API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_progress(self, progress):
         self.widget.progress = progress/100.0
-        #, animated=True)

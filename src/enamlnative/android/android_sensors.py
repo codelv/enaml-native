@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Sept 24, 2017
 
 @author: jrm
-'''
+"""
 import re
 from atom.api import Atom, List, Float, Unicode, set_default
 
@@ -23,26 +23,7 @@ class SensorAccessDenied(RuntimeError):
 
 class Sensor(Atom):
     """ A helper class for parsing locations from a string """
-    lat = Float()
-    lng = Float()
-    accuracy = Float()
-    altitude = Float()
-    time = Unicode()
-
-    source = Unicode()
-
-    def _observe_source(self, change):
-        """ Parse source into the fields """
-        src = self.source
-        m = re.search(
-            r'Sensor\[gps (-?\d+\.?\d*),(-?\d+\.?\d*) acc=(\d+\.?\d*) et=(.+) alt=(\d+\.?\d*) ',
-            src
-        )
-        if m:
-            lat, lng, acc, et, alt = m.groups()
-            self.lat, self.lng, self.accuracy, self.altitude = float(lat), float(lng), float(acc), float(alt)
-            self.time = et
-
+    pass
 
 class SensorManager(JavaBridgeObject):
     _instance = None
@@ -69,9 +50,6 @@ class SensorManager(JavaBridgeObject):
     class SensorListener(JavaProxy):
         __nativeclass__ = set_default('android.location.SensorListener')
 
-    #: ========================================================================================
-    #: SensorListener API
-    #: ========================================================================================
     onSensorChanged = JavaCallback('android.location.Sensor')
     onProviderDisabled = JavaCallback('java.lang.String')
     onProviderEnabled = JavaCallback('java.lang.String')
@@ -135,10 +113,11 @@ class SensorManager(JavaBridgeObject):
     @classmethod
     def start(cls, callback, provider='gps', min_time=1000, min_distance=0):
         """ Convenience method that checks and requests permission if necessary
-            and if successful calls the callback with a populated `Sensor` instance on updates.
+        and if successful calls the callback with a populated `Sensor` 
+        instance on updates.
 
-            Note you must have the permissions in your manifest or requests will be denied
-            immediately.
+        Note you must have the permissions in your manifest or requests 
+        will be denied immediately.
 
         """
         app = AndroidApplication.instance()
@@ -172,10 +151,12 @@ class SensorManager(JavaBridgeObject):
             if allowed:
                 SensorManager.get().then(on_success)
             else:
-                SensorManager.request_permission(fine=provider == 'gps').then(on_perm_request_result)
+                SensorManager.request_permission(
+                    fine=provider == 'gps').then(on_perm_request_result)
 
         #: Check permission
-        SensorManager.check_permission(fine=provider == 'gps').then(on_perm_check)
+        SensorManager.check_permission(
+            fine=provider == 'gps').then(on_perm_check)
 
         return f
 
@@ -193,21 +174,25 @@ class SensorManager(JavaBridgeObject):
 
     @classmethod
     def check_permission(cls, fine=True):
-        """ Returns a future that returns a boolean indicating if permission is currently
-            granted or denied. If permission is denied, you can request using
-            `SensorManager.request_permission()` below.
+        """ Returns a future that returns a boolean indicating if permission 
+        is currently granted or denied. If permission is denied, you can 
+        request using`SensorManager.request_permission()` below.
 
         """
         app = AndroidApplication.instance()
-        permission = cls.ACCESS_FINE_PERMISSION if fine else cls.ACCESS_COARSE_PERMISSION
+        permission = (cls.ACCESS_FINE_PERMISSION
+                      if fine else cls.ACCESS_COARSE_PERMISSION)
         return app.has_permission(permission)
 
     @classmethod
     def request_permission(cls, fine=True):
-        """ Requests permission and returns an async result that returns a boolean
-            indicating if the permission was granted or denied. """
+        """ Requests permission and returns an async result that returns a 
+        boolean indicating if the permission was granted or denied. 
+        
+        """
         app = AndroidApplication.instance()
-        permission = cls.ACCESS_FINE_PERMISSION if fine else cls.ACCESS_COARSE_PERMISSION
+        permission = (cls.ACCESS_FINE_PERMISSION
+                      if fine else cls.ACCESS_COARSE_PERMISSION)
         f = app.create_future()
 
         def on_result(perms):

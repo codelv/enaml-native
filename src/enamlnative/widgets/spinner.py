@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Unicode, List, Int, Enum, observe
 )
@@ -73,10 +73,12 @@ class Spinner(ViewGroup):
                       'clip_vertical', 'end', 'fill_horizontal',
                       'fill_vertical', 'left', 'right' 'start', 'top'))
 
-    #: Set a horizontal offset in pixels for the spinner's popup window of choices.
+    #: Set a horizontal offset in pixels for the spinner's popup window
+    #: of choices.
     drop_down_horizontal_offset = d_(Int())
 
-    #: Set a vertical offset in pixels for the spinner's popup window of choices.
+    #: Set a vertical offset in pixels for the spinner's popup window
+    #: of choices.
     drop_down_vertical_offset = d_(Int())
 
     #: Set the width of the spinner's popup window of choices in pixels.
@@ -85,11 +87,12 @@ class Spinner(ViewGroup):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxySpinner)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('mode', 'prompt', 'selected', 'items', 'gravity',
-            'drop_down_horizontal_offset', 'drop_down_vertical_offset', 'drop_down_width')
+            'drop_down_horizontal_offset', 'drop_down_vertical_offset',
+             'drop_down_width')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 3, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Atom, Typed, Instance, set_default
 from enamlnative.core.layout import FlexParams
@@ -364,7 +364,6 @@ class UIFlexbox(UIView):
     __nativeclass__ = set_default("UIView")
 
 
-
 class UiKitFlexbox(UiKitView, ProxyFlexbox):
     """ An UiKit implementation of an Enaml ProxyToolkitObject.
 
@@ -373,9 +372,9 @@ class UiKitFlexbox(UiKitView, ProxyFlexbox):
     #: A reference to the toolkit layout created by the proxy.
     widget = Typed(UIFlexbox)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         self.widget = UIFlexbox()
 
@@ -417,9 +416,9 @@ class UiKitFlexbox(UiKitView, ProxyFlexbox):
         if self.parent() is None:
             self.widget.yoga.applyLayoutPreservingOrigin(True)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyFlexbox API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_align_content(self, alignment):
         self.widget.yoga.alignContent = Yoga.ALIGN_CONTENT[alignment]
 

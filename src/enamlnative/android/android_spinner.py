@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, List, set_default
 
 from enamlnative.widgets.spinner import ProxySpinner
@@ -44,9 +44,9 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
     #: Reference to adapter
     adapter = Typed(ArrayAdapter)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying label widget.
 
@@ -72,7 +72,8 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
             self.set_gravity(d.gravity)
 
         #: Create the adapter simple_spinner_item = 0x01090008
-        self.adapter = ArrayAdapter(self.get_context(), '@layout/simple_spinner_dropdown_item')
+        self.adapter = ArrayAdapter(self.get_context(),
+                                    '@layout/simple_spinner_dropdown_item')
         if d.items:
             self.set_items(d.items)
         self.widget.setAdapter(self.adapter)
@@ -85,9 +86,9 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
         self.widget.onItemSelected.connect(self.on_item_selected)
         self.widget.onNothingSelected.connect(self.on_nothing_selected)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnSelectionListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_item_selected(self, parent, view, position, id):
         d = self.declaration
         with self.widget.setSelection.suppressed():
@@ -96,9 +97,9 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
     def on_nothing_selected(self, parent):
         pass
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxySpinner API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_prompt(self, prompt):
         self.widget.setPrompt(prompt)
 

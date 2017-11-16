@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,15 +8,13 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.chronometer import ProxyChronometer
 
 from .android_text_view import AndroidTextView, TextView
 from .bridge import JavaCallback, JavaMethod
-
-#SystemClock = jnius.autoclass('android.os.SystemClock')
 
 
 class Chronometer(TextView):
@@ -25,7 +23,8 @@ class Chronometer(TextView):
     setBase = JavaMethod('long')
     setCountDown = JavaMethod('boolean')
     setFormat = JavaMethod('java.lang.String')
-    setOnChronometerTickListener = JavaMethod('android.widget.Chronometer$OnChronometerTickListener')
+    setOnChronometerTickListener = JavaMethod(
+        'android.widget.Chronometer$OnChronometerTickListener')
     onChronometerTick = JavaCallback('android.widget.Chronometer')
     start = JavaMethod()
     stop = JavaMethod()
@@ -38,9 +37,9 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
     #: A reference to the widget created by the proxy.
     widget = Typed(Chronometer)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -66,17 +65,17 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
         if d.running:
             self.set_running(d.running)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnChronometerTickListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_chronometer_tick(self, view):
         d = self.declaration
         #d.text = self.widget.getText()
         d.ticks += 1
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyChronometer API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_base(self, base):
         self.widget.setBase(base)  # or SystemClock.elapsedRealtime())
 

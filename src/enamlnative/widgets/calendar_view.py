@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Range, Instance, observe, set_default
 )
@@ -40,7 +40,7 @@ class ProxyCalendarView(ProxyFrameLayout):
 
 class CalendarView(FrameLayout):
     """ CalendarView is a view group that displays
-        child views in relative positions.
+    child views in relative positions.
 
     """
     #: Selected date
@@ -58,9 +58,9 @@ class CalendarView(FrameLayout):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyCalendarView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('date', 'max_date', 'min_date', 'first_day_of_week')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

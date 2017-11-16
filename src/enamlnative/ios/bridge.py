@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on June 21, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Atom, Int
 from ..core import bridge
 from ..core.bridge import (
@@ -18,49 +18,47 @@ from ..core.bridge import (
 
 
 class ObjcMethod(BridgeMethod):
-    """ Description of a method of a View (or subclass) in Objc. When called, this
-        serializes the call, packs the arguments, and delegates handling to a bridge in Objc.
+    """ Description of a method of a View (or subclass) in Objc. When called, 
+    this serializes the call, packs the arguments, and delegates handling to a 
+    bridge in Objc.
 
-        To keep method calling similar to Swift instead of defining a method matching the
-        signature with underscores like pyobjc and pyobjus the signature should be
-        defined as follows:
+    To keep method calling similar to Swift instead of defining a method 
+    matching the signature with underscores like pyobjc and pyobjus the 
+    signature should be defined as follows:
 
-        1. The first argument, if any, should be a string.
-        2. Subsequent arguments should each be a dictionary of the available
-           `subnames` and their types.
+    1. The first argument, if any, should be a string.
+    2. Subsequent arguments should each be a dictionary of the available
+       `subnames` and their types.
 
-        For instance:
+    For instance:
 
-            UIView `insertSubview` has the following signatures:
+        UIView `insertSubview` has the following signatures:
 
-                - (void)insertSubview:(UIView *)view
-                        atIndex:(NSInteger)index;
+            - (void)insertSubview:(UIView *)view
+                    atIndex:(NSInteger)index;
 
-                - (void)insertSubview:(UIView *)view
-                        aboveSubview:(UIView *)siblingSubview;
+            - (void)insertSubview:(UIView *)view
+                    aboveSubview:(UIView *)siblingSubview;
 
-                - (void)insertSubview:(UIView *)view
-                        belowSubview:(UIView *)siblingSubview;
+            - (void)insertSubview:(UIView *)view
+                    belowSubview:(UIView *)siblingSubview;
 
-            This is defined in python like:
+        This is defined in python like:
 
-                insertSubview = ObjcMethod('UIView',
-                                            dict(atIndex='NSInteger',
-                                                 aboveSubview='UIView',
-                                                 belowSubview='UIView'))
+            insertSubview = ObjcMethod('UIView',
+                                        dict(atIndex='NSInteger',
+                                             aboveSubview='UIView',
+                                             belowSubview='UIView'))
 
-            Doing it this way it can be called like Swift, using kwargs
+    Doing it this way it can be called like Swift, using kwargs
 
-                view.insertSubview(subview, atIndex=3)
-                view.insertSubview(subview, aboveSubview=above_view)
-
-
-
+        view.insertSubview(subview, atIndex=3)
+        view.insertSubview(subview, aboveSubview=above_view)
 
     """
     def pack_args(self, obj, *args, **kwargs):
         """ Arguments must be packed according to the kwargs passed and
-            the signature defined.
+        the signature defined.
 
         """
         signature = self.__signature__
@@ -87,7 +85,8 @@ class ObjcMethod(BridgeMethod):
                     break
             if not found:
                 #: If we get here something is wrong
-                raise ValueError("Unexpected or missing argument at index {}. Expected {}".format(i,sig))
+                raise ValueError("Unexpected or missing argument at index {}. "
+                                 "Expected {}".format(i, sig))
 
         return ("".join(method_name), bridge_args)
 
@@ -99,9 +98,10 @@ class ObjcProperty(BridgeField):
 
 
 class ObjcCallback(BridgeCallback, ObjcMethod):
-    """ Description of a callback method of a View (or subclass) in Objc. When called,
-        it fires the connected callback. This is triggered when it receives an event from
-        the bridge indicating the call has occured.
+    """ Description of a callback method of a View (or subclass) in Objc. 
+    When called, it fires the connected callback. This is triggered when it 
+    receives an event from the bridge indicating the call has occured.
+    
     """
     def pack_args(self, obj, *args, **kwargs):
         return ObjcMethod.pack_args(self, obj, *args, **kwargs)
@@ -109,8 +109,9 @@ class ObjcCallback(BridgeCallback, ObjcMethod):
 
 class ObjcBridgeObject(BridgeObject):
     """ A proxy to a class in java. This sends the commands over
-        the bridge for execution.  The object is stored in a map
-        with the given id and is valid until this object is deleted.
+    the bridge for execution.  The object is stored in a map
+    with the given id and is valid until this object is deleted.
+    
     Parameters
     ----------
     __id__: Int
@@ -146,7 +147,7 @@ class ObjcBridgeObject(BridgeObject):
 
     def _pack_args(self, *args, **kwargs):
         """ Arguments must be packed according to the kwargs passed and
-            the signature defined.
+        the signature defined.
 
         """
         signature = self.__signature__
@@ -173,6 +174,7 @@ class ObjcBridgeObject(BridgeObject):
                     break
             if not found:
                 #: If we get here something is wrong
-                raise ValueError("Unexpected or missing argument at index {}. Expected {}".format(i,sig))
+                raise ValueError("Unexpected or missing argument at index {}. "
+                                 "Expected {}".format(i, sig))
 
         return ("".join(method_name), bridge_args)

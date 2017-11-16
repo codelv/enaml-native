@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on June 7, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Float, Int, Bool, observe, set_default
 )
@@ -46,9 +46,9 @@ class SeekBar(ProgressBar):
     #: A reference to the SeekBar object.
     proxy = Typed(ProxySeekBar)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('key_progress_increment', 'split_track')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

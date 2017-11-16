@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 26, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, Bool, set_default
 from enamlnative.widgets.progress_bar import ProxyProgressBar
 
@@ -18,7 +18,8 @@ from .bridge import JavaMethod
 
 class ProgressBar(View):
     __nativeclass__ = set_default('android.widget.ProgressBar')
-    __signature__ = set_default(('android.content.Context', 'android.util.AttributeSet', 'int'))
+    __signature__ = set_default(('android.content.Context',
+                                 'android.util.AttributeSet', 'int'))
     setIndeterminate = JavaMethod('boolean')
     setMax = JavaMethod('int')
     setMin = JavaMethod('int')
@@ -52,9 +53,9 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
     #: Set to True to make the progress bar an activity indicator
     indeterminate = Bool()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -87,9 +88,9 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
             if d.secondary_progress:
                 self.set_secondary_progress(d.secondary_progress)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyProgressBar API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_progress(self, progress):
         self.widget.setProgress(progress)
 

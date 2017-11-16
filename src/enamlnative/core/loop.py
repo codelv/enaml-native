@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -7,7 +7,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 
 @author jrm
 
-'''
+"""
 import enamlnative
 from atom.api import Atom, Value, Subclass, Callable, Unicode
 from functools import partial
@@ -30,7 +30,9 @@ class EventLoop(Atom):
     @classmethod
     def default(cls):
         """ Get the first available event loop implementation
-            based on which packages are installed."""
+        based on which packages are installed.
+        
+        """
         with enamlnative.imports():
             for impl in [
                 TornadoEventLoop,
@@ -40,14 +42,17 @@ class EventLoop(Atom):
                 if impl.available():
                     print("Using {} event loop!".format(impl))
                     return impl()
-        raise RuntimeError("No event loop implementation is available. Install tornado or twisted.")
+        raise RuntimeError("No event loop implementation is available. "
+                           "Install tornado or twisted.")
 
     @classmethod
     def available(cls):
         """ Test if the event loop implementation is available.
-        Return
+        
+        Returns
         ---------
             bool: The event loop can be used.
+            
         """
         raise NotImplementedError
 
@@ -58,29 +63,34 @@ class EventLoop(Atom):
         self.loop.stop()
 
     def deferred_call(self, callback, *args, **kwargs):
-        """ Schedule the given callback to be invoked at the next available time. """
+        """ Schedule the given callback to be invoked at the next 
+        available time.
+         
+        """
         raise NotImplementedError
 
     def timed_call(self, ms, callback, *args, **kwargs):
-        """ Schedule the given callback to be invoked at a time `ms` later. """
+        """ Schedule the given callback to be invoked at a time `ms` later. 
+        
+        """
         raise NotImplementedError
 
     def create_future(self):
         """ Create a future instance for this event loop.
 
-            Adds a "javascript fetch" like api with "then" and "catch".
+        Adds a "javascript fetch" like api with "then" and "catch".
 
-            The object returned MUST have a method named `then` that
-            takes a callback that should be invoked when the future is complete
-            and returns the future object.
+        The object returned MUST have a method named `then` that
+        takes a callback that should be invoked when the future is complete
+        and returns the future object.
 
-            And the object returned MUST have a method named `catch` that
-            takes a callback that should be invoked if the future contains an exception
-            and returns the future object.
+        And the object returned MUST have a method named `catch` that
+        takes a callback that should be invoked if the future contains an 
+        exception and returns the future object.
 
-            Likewise the future must be tagged with an id using
-            `bridge.tag_object_with_id(obj)`
-            so it can be resolved by the bridge.
+        Likewise the future must be tagged with an id using
+        `bridge.tag_object_with_id(obj)`
+        so it can be resolved by the bridge.
 
         """
         raise NotImplementedError
@@ -170,7 +180,8 @@ class TornadoEventLoop(EventLoop):
         return f
 
     def add_done_callback(self, future, callback):
-        future.add_done_callback(partial(self.safe_callback, callback=callback))
+        future.add_done_callback(partial(self.safe_callback,
+                                         callback=callback))
         return future
 
     def set_future_result(self, future, result):
@@ -214,10 +225,11 @@ class TwistedEventLoop(EventLoop):
         self.loop.run()
 
     def deferred_call(self, callback, *args, **kwargs):
-        """ We have to wake up the reactor after every call because
-            it may calculate a long delay where it can sleep which causes events that
-            happen during this period to seem really slow as they do not get processed until
-            after the reactor "wakes up"
+        """ We have to wake up the reactor after every call because it may 
+        calculate a long delay where it can sleep which causes events that 
+        happen during this period to seem really slow as they do not get 
+        processed until after the reactor "wakes up"
+        
         """
         r = self.loop.callLater(0, callback, *args, **kwargs)
         self.loop.wakeUp()
@@ -225,9 +237,10 @@ class TwistedEventLoop(EventLoop):
 
     def timed_call(self, ms, callback, *args, **kwargs):
         """ We have to wake up the reactor after every call because
-            it may calculate a long delay where it can sleep which causes events that
-            happen during this period to seem really slow as they do not get processed until
-            after the reactor "wakes up"
+        it may calculate a long delay where it can sleep which causes events 
+        that happen during this period to seem really slow as they do not get 
+        processed until after the reactor "wakes up"
+        
         """
         r = self.loop.callLater(ms/1000.0, callback, *args, **kwargs)
         self.loop.wakeUp()
@@ -262,8 +275,9 @@ class TwistedEventLoop(EventLoop):
         print("Uncaught error during callback: {}".format(callback))
 
     def safe_callback(self, callback, result):
-        """ Twisted passes the callback return value to the next callback. We
-            want the same API as tornado, hence we wrap it.
+        """ Twisted passes the callback return value to the next callback. 
+        We want the same API as tornado, hence we wrap it.
+        
         """
         try:
             callback(result)
@@ -277,8 +291,9 @@ class TwistedEventLoop(EventLoop):
 
 class BuiltinEventLoop(TornadoEventLoop):
     """ Use the built in event loop. It's a stripped down version of tornado,
-        It's currently slightly slower than tornado at the moment so use
-        tornado if possible.
+    It's currently slightly slower than tornado at the moment so use tornado 
+    if possible.
+    
     """
     @classmethod
     def available(cls):
@@ -287,7 +302,8 @@ class BuiltinEventLoop(TornadoEventLoop):
             return True
         except ImportError:
             print("Error: Failed to load the builtin event loop. "
-                  "This usually indicates missing or inaccessible shared libraries.")
+                  "This usually indicates missing or inaccessible "
+                  "shared libraries.")
             return False
 
     def _default_future(self):

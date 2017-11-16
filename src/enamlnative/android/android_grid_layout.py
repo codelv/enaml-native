@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.grid_layout import ProxyGridLayout
@@ -35,9 +35,9 @@ class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
     #: A reference to the widget created by the proxy.
     widget = Typed(GridLayout)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -63,9 +63,9 @@ class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
         if d.use_default_margins:
             self.set_use_default_margins(d.use_default_margins)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyGridLayout API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_orientation(self, orientation):
         self.widget.setOrientation(0 if orientation == 'horizontal' else 1)
 

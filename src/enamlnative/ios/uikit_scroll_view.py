@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 3, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Typed
 from enamlnative.widgets.scroll_view import ProxyScrollView
@@ -41,9 +41,9 @@ class UiKitScrollView(UiKitView, ProxyScrollView):
     #: A reference to the toolkit layout created by the proxy.
     widget = Typed(UIScrollView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the widget
 
@@ -67,16 +67,17 @@ class UiKitScrollView(UiKitView, ProxyScrollView):
 
         self.widget.fitToContents()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyScrollView API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # def set_frame(self, change):
     #     super(UiKitScrollView, self).set_frame(change)
     #     d = self.declaration
     #     self.widget.contentSize = (d.width, d.height)
 
     def set_orientation(self, orientation):
-        #: TODO: Cannot enforce direction that I'm aware of (but can lock direction)
+        #: TODO: Cannot enforce direction that I'm aware of
+        #: (but can lock direction)
         pass
 
     def set_scroll_by(self, delta):

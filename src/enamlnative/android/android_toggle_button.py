@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on June 7, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.toggle_button import ProxyToggleButton
@@ -30,11 +30,11 @@ class AndroidToggleButton(AndroidCompoundButton, ProxyToggleButton):
     #: A reference to the widget created by the proxy.
     widget = Typed(ToggleButton)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlyings widget.
+        """ Create the underlying widget.
 
         """
         self.widget = ToggleButton(self.get_context())
@@ -50,9 +50,9 @@ class AndroidToggleButton(AndroidCompoundButton, ProxyToggleButton):
         if d.text_on:
             self.set_text_on(d.text_on)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyToggleButton API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_text_off(self, text):
         self.widget.setTextOff(text)
 

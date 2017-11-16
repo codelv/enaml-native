@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.relative_layout import ProxyRelativeLayout
@@ -31,9 +31,9 @@ class AndroidRelativeLayout(AndroidViewGroup, ProxyRelativeLayout):
     #: A reference to the widget created by the proxy.
     widget = Typed(RelativeLayout)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -53,9 +53,9 @@ class AndroidRelativeLayout(AndroidViewGroup, ProxyRelativeLayout):
         if d.vertical_gravity:
             self.set_vertical_gravity(d.vertical_gravity)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyRelativeLayout API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_gravity(self, gravity):
         self.widget.setGravity(gravity)
 

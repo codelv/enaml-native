@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Sept 21, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 from enamlnative.android.bridge import JavaBridgeObject, JavaMethod, JavaCallback
 from enamlnative.android.android_toolkit_object import AndroidToolkitObject
@@ -26,13 +26,16 @@ class Dialog(JavaBridgeObject):
     setContentView = JavaMethod('android.view.View')
     setTitle = JavaMethod('java.lang.CharSequence')
 
-    setOnDismissListener = JavaMethod('android.content.DialogInterface$OnDismissListener')
+    setOnDismissListener = JavaMethod(
+        'android.content.DialogInterface$OnDismissListener')
     onDismiss = JavaCallback('android.app.Dialog')
 
-    setOnCancelListener = JavaMethod('android.content.DialogInterface$OnCancelListener')
+    setOnCancelListener = JavaMethod(
+        'android.content.DialogInterface$OnCancelListener')
     onCancel = JavaCallback('android.app.Dialog')
 
-    setOnKeyListener = JavaMethod('android.content.DialogInterface$OnKeyListener')
+    setOnKeyListener = JavaMethod(
+        'android.content.DialogInterface$OnKeyListener')
     onKey = JavaCallback('android.app.Dialog', 'int', 'android.view.KeyEvent')
 
 
@@ -44,14 +47,14 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
     #: A reference to the widget created by the proxy.
     dialog = Typed(Dialog)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
-            A dialog is not a subclass of view, hence we don't set name as widget
-            or children will try to use it as their parent.
+        A dialog is not a subclass of view, hence we don't set name as widget
+        or children will try to use it as their parent.
 
         """
         d = self.declaration
@@ -82,7 +85,9 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
         self.dialog.onCancel.connect(self.on_cancel)
 
     def init_layout(self):
-        """ If a view is given show it """
+        """ If a view is given show it 
+        
+        """
         super(AndroidDialog, self).init_layout()
 
         #: Set the content
@@ -102,18 +107,22 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
             self.dialog.setContentView(view)
             
     def destroy(self):
-        """ A reimplemented destructor that cancels the dialog before destroying. """
+        """ A reimplemented destructor that cancels 
+        the dialog before destroying. 
+        
+        """
         dialog = self.dialog
         if dialog:
-            #: Clear the dismiss listener (or we get an error during the callback)
+            #: Clear the dismiss listener
+            #: (or we get an error during the callback)
             dialog.setOnDismissListener(None)
             dialog.dismiss()
             del self.dialog
         super(AndroidDialog, self).destroy()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Dialog API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_cancel(self, dialog):
         d = self.declaration
         with self.dialog.show.suppressed():
@@ -124,9 +133,9 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
         with self.dialog.show.suppressed():
             d.show = False
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnKeyListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_key(self, dialog, key, event):
         """ Trigger the key event
 
@@ -145,9 +154,9 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
         d.key_event(r)
         return r['result']
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyDialog API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_title(self, title):
         self.dialog.setTitle(title)
 

@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 25, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Typed, set_default
 from enamlnative.widgets.button import ProxyButton
@@ -20,7 +20,7 @@ from .uikit_control import UIControl, UiKitControl
 class UIButton(UIControl):
     """
     """
-    __signature__ = set_default((dict(buttonWithType="enum"),)) #"UIButtonType"
+    __signature__ = set_default((dict(buttonWithType="enum"),))
     #: Properties
     on = ObjcProperty('bool')
     onTintColor = ObjcProperty('UIColor')
@@ -30,7 +30,7 @@ class UIButton(UIControl):
     offImage = ObjcProperty('UIImage')
 
     #: Methods
-    setTitle = ObjcMethod('NSString', dict(forState='enum'))#''UIControlState'))
+    setTitle = ObjcMethod('NSString', dict(forState='enum'))
 
     #: Type Enum
     UIButtonTypeCustom = 0
@@ -50,9 +50,9 @@ class UiKitButton(UiKitControl, ProxyButton):
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UIButton)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
         """
@@ -70,9 +70,9 @@ class UiKitButton(UiKitControl, ProxyButton):
         d = self.declaration
         self.init_text()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyButton API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_text(self, text):
         self.widget.setTitle(text, forState=UIButton.UIControlStateNormal)
 

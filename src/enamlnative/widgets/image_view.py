@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Int, Unicode, Bool, Event, observe, set_default
 )
@@ -40,7 +40,8 @@ class ImageView(View):
 
     """
 
-    # #: Set the offset of the widget's text baseline from the widget's top boundary.
+    #: Set the offset of the widget's text baseline from the widget's
+    #: top boundary.
     # baseline = d_(Int(-1))
     #
     # baseline_align_bottom = d_(Bool())
@@ -59,9 +60,9 @@ class ImageView(View):
     #: A reference to the ProxyImageView object.
     proxy = Typed(ProxyImageView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('src', 'max_height', 'max_width')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

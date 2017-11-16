@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 3, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Typed, set_default
 from enamlnative.widgets.linear_layout import ProxyLinearLayout
@@ -19,7 +19,8 @@ from .uikit_view_group import UIView, UiKitViewGroup
 
 class UIStackView(UIView):
     """ From:
-        https://developer.apple.com/documentation/uikit/uistackview?language=objc
+    https://developer.apple.com/documentation/uikit/uistackview?language=objc
+    
     """
     #: Properties
     axis = ObjcProperty('UILayoutConstraintAxis')
@@ -40,9 +41,9 @@ class UiKitLinearLayout(UiKitViewGroup, ProxyLinearLayout):
     #: A reference to the toolkit layout created by the proxy.
     layout = Typed(UIStackView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_layout(self):
         """ Create the layout widget for arranging child proxy objects.
 
@@ -66,9 +67,9 @@ class UiKitLinearLayout(UiKitViewGroup, ProxyLinearLayout):
         if d.orientation != "horizontal":  #: Default is horizontal
             self.set_orientation(d.orientation)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyLinearLayout API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_orientation(self, orientation):
         if orientation == 'horizontal':
             self.layout.axis = UIStackView.UILayoutConstraintAxisHorizontal

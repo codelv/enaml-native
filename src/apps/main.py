@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -11,7 +11,7 @@ Created on May 20, 2017
 Forked from https://github.com/joaoventura/pybridge
 @author joaoventura
 @author: jrm
-'''
+"""
 import sys
 import os
 

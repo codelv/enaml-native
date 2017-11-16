@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Atom, Typed, set_default
 
 from enaml.widgets.toolkit_object import ProxyToolkitObject
@@ -29,8 +29,10 @@ class Flexbox(ViewGroup):
     setAlignContent = JavaMethod('int')
     setFlexLines = JavaMethod('java.util.List')
     setDividerDrawable = JavaMethod('android.graphics.drawable.Drawable')
-    setDividerDrawableHorizontal = JavaMethod('android.graphics.drawable.Drawable')
-    setDividerDrawableVertical = JavaMethod('android.graphics.drawable.Drawable')
+    setDividerDrawableHorizontal = JavaMethod(
+        'android.graphics.drawable.Drawable')
+    setDividerDrawableVertical = JavaMethod(
+        'android.graphics.drawable.Drawable')
     setShowDivider = JavaMethod('int')
     setShowDividerVertical = JavaMethod('int')
     setShowDividerHorizontal = JavaMethod('int')
@@ -91,11 +93,12 @@ class Flexbox(ViewGroup):
     }
 
 
-
-
 class FlexboxLayoutParams(MarginLayoutParams):
-    """ Update the child widget with the given params """
-    __nativeclass__ = set_default('com.google.android.flexbox.FlexboxLayout$LayoutParams')
+    """ Update the child widget with the given params 
+    
+    """
+    __nativeclass__ = set_default(
+        'com.google.android.flexbox.FlexboxLayout$LayoutParams')
 
     setWidth = JavaMethod('int')
     setHeight = JavaMethod('int')
@@ -285,9 +288,10 @@ class AndroidFlexbox(AndroidViewGroup, ProxyFlexbox):
 
     #: Update default
     layout_param_type = set_default(FlexboxLayoutParams)
-    # --------------------------------------------------------------------------
+
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -351,10 +355,9 @@ class AndroidFlexbox(AndroidViewGroup, ProxyFlexbox):
     #         if child_widget == child.widget:
     #             widget.addView(child_widget, i)
 
-
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyFlexbox API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_align_content(self, alignment):
         self.widget.setAlignContent(Flexbox.ALIGN_CONTENT[alignment])
 

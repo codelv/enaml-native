@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -12,7 +12,7 @@ Created Sept 7, 2017
 
 @author jrm
 
-'''
+"""
 """IPython extension to reload modules before executing user code.
 
 ``autoreload`` reloads modules automatically before entering the execution of

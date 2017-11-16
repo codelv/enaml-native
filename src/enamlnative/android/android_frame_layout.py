@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.frame_layout import ProxyFrameLayout
@@ -24,7 +24,9 @@ class FrameLayout(ViewGroup):
 
 
 class FrameLayoutParams(MarginLayoutParams):
-    """ Update the child widget with the given params """
+    """ Update the child widget with the given params 
+    
+    """
     __nativeclass__ = set_default('android.widget.FrameLayout$LayoutParams')
     gravity = JavaField('int')
 
@@ -36,9 +38,9 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
     #: A reference to the widget created by the proxy.
     widget = Typed(FrameLayout)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -56,9 +58,9 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
         if d.measure_all_children:
             self.set_measure_all_children(d.measure_all_children)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyFrameLayout API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_foreground_gravity(self, gravity):
         self.widget.setForegroundGravity(gravity)
 

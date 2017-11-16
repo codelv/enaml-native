@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Int, Instance, Range, Bool, observe
 )
@@ -46,12 +46,12 @@ class DatePicker(FrameLayout):
     #: Update the current year.
     date = d_(Instance(datetime, factory=datetime.now))
 
-    #: Sets the minimal date supported by this DatePicker
-    #: in milliseconds since January 1, 1970 00:00:00 in getDefault() time zone.
+    #: Sets the minimal date supported by this DatePicker in milliseconds
+    #: since January 1, 1970 00:00:00 in getDefault() time zone.
     min_date = d_(Instance(datetime))
 
-    #: Sets the maximal date supported by this DatePicker
-    #: in milliseconds since January 1, 1970 00:00:00 in getDefault() time zone.
+    #: Sets the maximal date supported by this DatePicker in milliseconds
+    #: since January 1, 1970 00:00:00 in getDefault() time zone.
     max_date = d_(Instance(datetime))
 
     #: Sets the first day of week.
@@ -60,9 +60,9 @@ class DatePicker(FrameLayout):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyDatePicker)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('date', 'min_date', 'max_date', 'first_day_of_week')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

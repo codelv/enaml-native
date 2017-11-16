@@ -11,7 +11,8 @@ The full license is in the file COPYING.txt, distributed with this software.
 """
 import json
 import traceback
-from atom.api import Atom, Enum, Callable, List, Instance, Value, Int, Unicode, Bool, Dict
+from atom.api import (Atom, Enum, Callable, List, Instance, Value,
+                      Int, Unicode, Bool, Dict)
 from enaml.application import Application
 from . import bridge
 from .loop import EventLoop
@@ -19,16 +20,18 @@ from .loop import EventLoop
 
 class Plugin(Atom):
     """ Simplified way to load a plugin from an entry_point line. 
-        The enaml-native and p4a build process removes pkg_resources 
-        and all package related metadata this simply imports from an
-        entry point string in the format "package.path.module:attr"
+    The enaml-native and p4a build process removes pkg_resources 
+    and all package related metadata this simply imports from an
+    entry point string in the format "package.path.module:attr"
+    
     """
     name = Unicode()
     source = Unicode()
 
     def load(self):
         """ Load the object defined by the plugin entry point """
-        print("[DEBUG] Loading plugin {} from {}".format(self.name, self.source))
+        print("[DEBUG] Loading plugin {} from {}".format(self.name,
+                                                         self.source))
         import pydoc
         path, attr = self.source.split(":")
         module = pydoc.locate(path)
@@ -38,8 +41,9 @@ class Plugin(Atom):
 class BridgedApplication(Application):
     """ An abstract implementation of an Enaml application.
 
-    This serves as a base class for both Android and iOS applications and provides support for
-    the python event loop, the development server and the bridge.
+    This serves as a base class for both Android and iOS applications and 
+    provides support for the python event loop, the development server 
+    and the bridge.
 
     """
     __id__ = Int(-1)
@@ -76,17 +80,18 @@ class BridgedApplication(Application):
     #: Entry points to load plugins
     plugins = Dict()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Defaults
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def _default_loop(self):
         """ Get the event loop based on what libraries are available. """
         return EventLoop.default()
 
     def _default_plugins(self):
         """ Get entry points to load any plugins installed. 
-            The build process should create an "entry_points.json" file
-            with all of the data from the installed entry points.
+        The build process should create an "entry_points.json" file
+        with all of the data from the installed entry points.
+        
         """
         plugins = {}
         try:
@@ -100,24 +105,26 @@ class BridgedApplication(Application):
             print("Failed to load entry points {}".format(e))
         return plugins
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # BridgedApplication Constructor
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __init__(self):
         """ Initialize the event loop error handler.  Subclasses must properly
-            initialize the proxy resolver.
+        initialize the proxy resolver.
+        
         """
         super(BridgedApplication, self).__init__()
         self.init_error_handler()
         self.load_plugin_widgets()
         self.load_plugin_factories()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Abstract API Implementation
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def start(self):
         """ Start the application's main event loop
-            using either twisted or tornado.
+        using either twisted or tornado.
+        
         """
         if self.dev:
             self.start_dev_session()
@@ -177,20 +184,23 @@ class BridgedApplication(Application):
         """
         return False
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # App API Implementation
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def has_permission(self, permission):
         """ Return a future that resolves with the result of the permission """
         raise NotImplementedError
 
     def request_permissions(self, permissions):
-        """ Return a future that resolves with the result of the permission request"""
+        """ Return a future that resolves with the result of the 
+        permission request
+        
+        """
         raise NotImplementedError
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # EventLoop API Implementation
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def init_error_handler(self):
         """ When an error occurs, set the error view in the App
 
@@ -203,14 +213,16 @@ class BridgedApplication(Application):
 
     def add_done_callback(self, future, callback):
         """ Add a callback on a future object put here so it can be
-            implemented with different event loops.
+        implemented with different event loops.
 
         Parameters
         -----------
             future: Future or Deferred
                 Future implementation for the current EventLoop
+                
             callback: callable
                 Callback to invoke when the future is done
+                
         """
         if future is None:
             raise bridge.BridgeReferenceError(
@@ -225,23 +237,26 @@ class BridgedApplication(Application):
         -----------
             future: Future or Deferred
                 Future implementation for the current EventLoop
+                
             result: object
                 Result to set
         """
         return self.loop.set_future_result(future, result)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Bridge API Implementation
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def show_view(self):
         """ Show the current `app.view`. This will fade out the previous
-            with the new view.
+        with the new view.
+            
         """
         raise NotImplementedError
 
     def get_view(self):
         """ Get the root view to display. Make sure it is
-            properly initialized.
+        properly initialized.
+        
         """
         view = self.view
         if not view.is_initialized:
@@ -257,8 +272,8 @@ class BridgedApplication(Application):
         self.send_event(bridge.Command.ERROR, msg)
 
     def send_event(self, name, *args, **kwargs):
-        """ Send an event to Java.
-            This call is queued and batched.
+        """ Send an event to the native handler. This call is queued and 
+        batched.
 
         Parameters
         ----------
@@ -288,13 +303,14 @@ class BridgedApplication(Application):
         self._bridge_send(now=True)
 
     def _bridge_send(self, now=False):
-        """  Send the events over the bridge to be processed by Java
+        """  Send the events over the bridge to be processed by the native
+        handler.
 
         Parameters
         ----------
         now: boolean
-            Send all pending events now instead of waiting for deferred calls to finish.
-            Use this when you want to update the screen
+            Send all pending events now instead of waiting for deferred calls 
+            to finish. Use this when you want to update the screen
 
         """
         self._bridge_pending -= 1
@@ -309,7 +325,9 @@ class BridgedApplication(Application):
             self._bridge_queue = []
 
     def dispatch_events(self, data):
-        """ Send events to the bridge using the system specific implementation."""
+        """ Send events to the bridge using the system specific implementation.
+        
+        """
         raise NotImplementedError
 
     def process_events(self, data):
@@ -326,8 +344,9 @@ class BridgedApplication(Application):
 
     def handle_event(self, event):
         """ When we get an 'event' type from the bridge
-            handle it by invoking the handler and if needed
-            sending back the result.
+        handle it by invoking the handler and if needed
+        sending back the result.
+        
         """
         result_id, ptr, method, args = event[1]
         obj = None
@@ -337,12 +356,14 @@ class BridgedApplication(Application):
             result = handler(*[v for t, v in args])
         except bridge.BridgeReferenceError as e:
             #: Log the event, don't blow up here
-            msg = "Error processing event: {} - {}".format(event, e).encode("utf-8")
+            msg = "Error processing event: {} - {}".format(
+                  event, e).encode("utf-8")
             print(msg)
             self.show_error(msg)
         except:
             #: Log the event, blow up in user's face
-            msg = "Error processing event: {} - {}".format(event, traceback.format_exc()).encode("utf-8")
+            msg = "Error processing event: {} - {}".format(
+                  event, traceback.format_exc()).encode("utf-8")
             print(msg)
             self.show_error(msg)
             raise
@@ -361,7 +382,8 @@ class BridgedApplication(Application):
 
     def handle_error(self, callback):
         """ Called when an error occurs in an event loop callback.
-            By default, sets the error view.
+        By default, sets the error view.
+        
         """
         self.loop.log_error(callback)
         msg = "\n".join([
@@ -370,12 +392,13 @@ class BridgedApplication(Application):
         ])
         self.show_error(msg.encode('utf-8'))
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # AppEventListener API Implementation
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_events(self, data):
-        """ Called when the bridge sends an event. For instance the return result
-            of a method call or a callback from a widget event.
+        """ Called when the bridge sends an event. For instance the return 
+        result of a method call or a callback from a widget event.
+        
         """
         #: Pass to event loop thread
         self.deferred_call(self.process_events, data)
@@ -401,12 +424,13 @@ class BridgedApplication(Application):
         """
         self.deferred_call(self.stop)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Dev Session Implementation
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def start_dev_session(self):
         """ Start a client that attempts to connect to the dev server
-            running on the host `app.dev`
+        running on the host `app.dev`
+        
         """
         try:
             from .dev import DevServerSession
@@ -418,23 +442,20 @@ class BridgedApplication(Application):
         except:
             self.show_error(traceback.format_exc())
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Plugin implementation
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def get_plugins(self, group):
-        """ Was going to use entry points but that requires a ton of stuff which 
-        will be extremely slow.
+        """ Was going to use entry points but that requires a ton of stuff 
+        which will be extremely slow.
+        
         """
         return self.plugins.get(group, [])
 
     def load_plugin_widgets(self):
-        """ Pull widgets added via plugins using the `enaml-native-widgets` entry point.
-
-        The entry point function must return a dictionary of Widget declarations to add to the
-        core api.
-
-        Example
-        ---------
+        """ Pull widgets added via plugins using the `enaml_native_widgets` 
+        entry point. The entry point function must return a dictionary of 
+        Widget declarations to add to the core api.
 
         def install():
             from charts.widgets.chart_view import BarChart, LineChart
@@ -452,14 +473,10 @@ class BridgedApplication(Application):
                 setattr(api, name, widget)
 
     def load_plugin_factories(self):
-        """ Pull widgets added via plugins using the `enaml-native-ios-factories` or
-            `enaml-native-android-factories` entry points.
-
-        The entry point function must return a dictionary of Widget declarations to add to the
-        factories for this platform.
-
-        Example
-        ---------
+        """ Pull widgets added via plugins using the 
+        `enaml_native_ios_factories` or `enaml_native_android_factories` 
+        entry points. The entry point function must return a dictionary of 
+        Widget declarations to add to the factories for this platform.
 
         def install():
             return {

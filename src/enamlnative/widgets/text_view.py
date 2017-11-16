@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Unicode, Tuple, Enum, Event, Float, Int, Bool, observe
 )
@@ -79,7 +79,8 @@ class TextView(View):
 
     """
 
-    #: Sets the properties of this field to transform input to ALL CAPS display.
+    #: Sets the properties of this field to transform input to
+    #: ALL CAPS display.
     all_caps = d_(Bool())
 
     #: Sets the autolink mask of the text.
@@ -98,12 +99,14 @@ class TextView(View):
     font_style = d_(Enum('normal', 'bold', 'italic', 'bold_italic'))
 
     #: Input type
-    #: https://developer.android.com/reference/android/widget/TextView.html#attr_android:inputType
+    #: https://developer.android.com/reference/android/widget/TextView.html
+    #: #attr_android:inputType
     input_type = d_(Enum('', 'date', 'datetime', 'number',
                          'number_decimal', 'number_password',
                          'number_signed', 'phone', 'text',
                          'text_auto_complete', 'text_auto_correct',
-                         'text_cap_characters', 'text_cap_sentences', 'text_cap_words',
+                         'text_cap_characters', 'text_cap_sentences',
+                         'text_cap_words',
                          'text_email_address', 'text_email_subject',
                          'text_filter', 'text_ime_multi_line',
                          'text_long_message', 'text_multi_line',
@@ -125,12 +128,15 @@ class TextView(View):
     text = d_(Unicode())
 
     #: Text alignment
-    text_alignment = d_(Enum('', 'left', 'right', 'center', 'justified', 'natural'))
+    text_alignment = d_(Enum('', 'left', 'right', 'center', 'justified',
+                             'natural'))
 
-    #: Sets the text color for all the states (normal, selected, focused) to be this color.
+    #: Sets the text color for all the states (normal, selected, focused)
+    #: to be this color.
     text_color = d_(Unicode())
 
-    #: Set the default text size to the given value, interpreted as "scaled pixel" units.
+    #: Set the default text size to the given value, interpreted as
+    #: "scaled pixel" units.
     text_size = d_(Float(strict=False))
 
     #: Set text s
@@ -151,9 +157,9 @@ class TextView(View):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyTextView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('all_caps', 'auto_link_mask', 'input_type',
              'font_family', 'font_style', 'text_selectable',
              'text', 'text_color', 'text_size', 'text_alignment',

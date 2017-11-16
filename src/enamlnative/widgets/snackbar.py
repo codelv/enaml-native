@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Sept 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Unicode, Int, Bool, Event, observe
 )
@@ -69,9 +69,9 @@ class Snackbar(ToolkitObject):
     #: A reference to the proxy object.
     proxy = Typed(ProxySnackbar)
 
-    #: --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    #: --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('text', 'duration', 'action_text', 'action_text_color', 'show')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on June 7, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.card_view import ProxyCardView
@@ -39,9 +39,9 @@ class AndroidCardView(AndroidFrameLayout, ProxyCardView):
     #: A reference to the widget created by the proxy.
     widget = Typed(CardView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -68,9 +68,9 @@ class AndroidCardView(AndroidFrameLayout, ProxyCardView):
         if d.use_compat_padding:
             self.set_use_compat_padding(d.use_compat_padding)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyCardView API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_card_background_color(self, color):
         self.widget.setCardBackgroundColor(color)#Color.parseColor(color))
 

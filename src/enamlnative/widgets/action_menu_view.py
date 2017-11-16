@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on June 10, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Unicode, Event, observe
 )
@@ -51,9 +51,9 @@ class ActionMenuView(LinearLayout):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyActionMenuView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @observe('show', 'hide', 'overflow_icon')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

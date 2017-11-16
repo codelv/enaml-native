@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.auto_complete_text_view import ProxyAutoCompleteTextView
@@ -37,9 +37,9 @@ class AndroidAutoCompleteTextView(AndroidEditText, ProxyAutoCompleteTextView):
     #: An adapter to hold the choices
     adapter = Typed(ArrayAdapter)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -59,7 +59,8 @@ class AndroidAutoCompleteTextView(AndroidEditText, ProxyAutoCompleteTextView):
         if d.drop_down_height:
             self.set_drop_down_height(d.drop_down_height)
 
-        self.adapter = ArrayAdapter(self.get_context(), '@layout/simple_list_item_1')
+        self.adapter = ArrayAdapter(self.get_context(),
+                                    '@layout/simple_list_item_1')
 
         if d.choices:
             self.set_choices(d.choices)
@@ -72,9 +73,9 @@ class AndroidAutoCompleteTextView(AndroidEditText, ProxyAutoCompleteTextView):
         if self.adapter:
             del self.adapter
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyAutoCompleteTextView API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_choices(self, choices):
         self.adapter.clear()
         self.adapter.addAll(choices)

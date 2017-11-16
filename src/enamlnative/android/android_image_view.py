@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on July 6, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.image_view import ProxyImageView
@@ -26,7 +26,7 @@ class ImageView(View):
     setImageIcon = JavaMethod('android.graphics.drawable.Icon')
     setImageLevel = JavaMethod('int')
     seImageMatrix = JavaMethod('android.graphics.Matrix')
-    setImageResource = JavaMethod('android.R')  # int, uses resource lookup hack to make it faster
+    setImageResource = JavaMethod('android.R')
     setImageUri = JavaMethod('android.net.Uri')
     setMaxHeight = JavaMethod('int')
     setMaxWidth = JavaMethod('int')
@@ -40,8 +40,10 @@ class Drawable(JavaBridgeObject):
 
 class Icon(JavaBridgeObject):
     __nativeclass__ = set_default('android.graphics.drawable.Icon')
-    createWithFilePath = JavaMethod('java.lang.String', returns='android.graphics.drawable.Icon')
-    createWithContentUri = JavaMethod('java.lang.String', returns='android.graphics.drawable.Icon')
+    createWithFilePath = JavaMethod('java.lang.String',
+                                    returns='android.graphics.drawable.Icon')
+    createWithContentUri = JavaMethod('java.lang.String',
+                                      returns='android.graphics.drawable.Icon')
 
 
 class AndroidImageView(AndroidView, ProxyImageView):
@@ -51,11 +53,11 @@ class AndroidImageView(AndroidView, ProxyImageView):
     #: A reference to the widget created by the proxy.
     widget = Typed(ImageView)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
+        """ Create the underlying widget.
 
         """
         self.widget = ImageView(self.get_context())
@@ -74,18 +76,15 @@ class AndroidImageView(AndroidView, ProxyImageView):
             self.set_max_width(d.max_width)
         self.set_src(d.src)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnDrawableLoaded API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_drawable_loaded(self, d):
         self.widget.setImageDrawable(d)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyImageView API
-    # --------------------------------------------------------------------------
-    #def set_alpha(self, alpha):
-    #    self.widget.setImageAlpha(alpha)
-
+    # -------------------------------------------------------------------------
     def set_src(self, src):
         if src.startswith("@"):
             self.widget.setImageResource(src)

@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 3, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Typed, set_default
 from enamlnative.widgets.text_view import ProxyTextView
@@ -18,7 +18,8 @@ from .uikit_view import NSObject, UIView, UiKitView
 
 class UIFont(NSObject):
     __signature__ = set_default((dict(fontWithName="NSString",
-                                      systemFontOfSize="NSInteger"), dict(size="NSInteger")))
+                                      systemFontOfSize="NSInteger"),
+                                 dict(size="NSInteger")))
 
 
 class UITextView(UIView):
@@ -46,10 +47,6 @@ class UITextView(UIView):
 
 
 class UILabel(UITextView):
-    """ From:
-        https://developer.apple.com/documentation/uikit/uiview?language=objc
-    """
-
     numberOfLines = ObjcProperty('NSInteger')
 
 
@@ -61,9 +58,9 @@ class UiKitTextView(UiKitView, ProxyTextView):
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UILabel)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
         """
@@ -88,16 +85,18 @@ class UiKitTextView(UiKitView, ProxyTextView):
         if hasattr(d, 'max_lines') and d.max_lines:
             self.set_max_lines(d.max_lines)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyTextView API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def refresh_font(self):
         d = self.declaration
         font_size = float(d.text_size or 17)  # Default is 17
         if d.font_family:
-            self.widget.setFont((d.font_family, font_size)) #UIFont(fontWithName=d.font_family, size=font_size)
+            self.widget.setFont((d.font_family, font_size))
+            #UIFont(fontWithName=d.font_family, size=font_size)
         else:
-            self.widget.setFont((font_size,))#UIFont(systemFontOfSize=font_size)
+            self.widget.setFont((font_size,))
+            #UIFont(systemFontOfSize=font_size)
 
     def set_text(self, text):
         self.widget.text = text

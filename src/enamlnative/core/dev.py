@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 
 @author jrm
 
-'''
+"""
 import os
 import sys
 import json
@@ -49,10 +49,12 @@ INDEX_PAGE = """<html>
 <head>
   <title>Enaml-Native Playground</title>
   <!--Import Google Icon Font-->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" 
+    rel="stylesheet">
 
   <!-- Compiled and minified CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+  <link rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
   <link rel="shortcut icon" href="https://www.codelv.com/static/faveicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
@@ -250,7 +252,8 @@ DROPDOWN_TMPL = """
 <a class='dropdown-button' href='#' data-activates='{id}'>{name}</a>
 <ul id='{id}' class='dropdown-content'>
 {items}
-</ul>"""
+</ul>
+"""
 
 FOLDER_TMPL = """
 <li>
@@ -260,7 +263,11 @@ FOLDER_TMPL = """
     </div>
 </li>
 """
-FILE_TMPL = """<li><div class="collapsible-header editor-file" id="{id}">{name}</div></li>"""
+FILE_TMPL = """
+<li>
+    <div class="collapsible-header editor-file" id="{id}">{name}</div>
+</li>
+"""
 
 
 def get_app():
@@ -329,7 +336,9 @@ class TwistedDevClient(DevClient):
     def start(self, session):
         from twisted.internet import reactor
         from twisted.internet.defer import inlineCallbacks
-        from autobahn.twisted.websocket import WebSocketClientProtocol, WebSocketClientFactory
+        from autobahn.twisted.websocket import (
+            WebSocketClientProtocol, WebSocketClientFactory
+        )
 
         class DevClient(WebSocketClientProtocol):
             def onConnect(self, response=None):
@@ -344,7 +353,8 @@ class TwistedDevClient(DevClient):
                 self.sendMessage(json.dumps(r))
 
             def onClose(self, wasClean, code, reason):
-                print("Dev client disconnected: {} {} {}".format(wasClean, code, reason))
+                print("Dev client disconnected: {} {} {}".format(
+                    wasClean, code, reason))
                 session.connected = False
 
                 #: Try again in a few seconds
@@ -359,7 +369,6 @@ class TwistedDevClient(DevClient):
 
         #: Start
         session.app.deferred_call(run)
-
 
 
 class DevServer(Atom):
@@ -400,13 +409,15 @@ class DevServer(Atom):
         #: Build items
         items = []
         if isinstance(member, Enum):
-            items = ["<li><a href='#1'>{}</a></li>".format(it) for it in member.items]
+            items = ["<li><a href='#1'>{}</a></li>".format(it)
+                     for it in member.items]
         #: TODO: show instance types for instances, tuples, lists, etc..
         #elif isinstance(member, )
 
         #: Render dropdown if needed
         if items:
-            return DROPDOWN_TMPL.format(id=node_id, name=node_type, items="".join(items))
+            return DROPDOWN_TMPL.format(id=node_id, name=node_type,
+                                        items="".join(items))
         return "{}".format(node_type)
 
     def render_files(self, root=None):
@@ -434,7 +445,6 @@ class DevServer(Atom):
 
         return "".join(items)
 
-
     def render_code(self):
         """ Try to load the previous code (if we had a crash or something)
             I should allow saving.
@@ -452,28 +462,35 @@ class DevServer(Atom):
     def render_component(self, declaration):
         """ Render a row of all the attributes """
         items = ["""<tr><td>{name}</td><td>{type}</td></tr>"""
-                     .format(name=m.name,type=self.render_component_types(declaration, m))
+                 .format(name=m.name,
+                         type=self.render_component_types(declaration, m))
                  for m in self.get_component_members(declaration)]
 
         info = []
         parent = declaration.__mro__[1]
         #: Superclass
-        info.append("<tr><td>extends component</td><td><a href='#component-{id}'>{name}</a></td></td>"
+        info.append("<tr><td>extends component</td>"
+                    "<td><a href='#component-{id}'>{name}</a></td></td>"
                     .format(id=parent.__name__.lower(), name=parent.__name__))
 
         #: Source and example, only works with enamlnative builtins
-        source_path = inspect.getfile(declaration).replace(".pyo", ".py").replace(".pyc", ".py")
+        source_path = inspect.getfile(declaration).replace(
+                        ".pyo", ".py").replace(".pyc", ".py")
         if 'enamlnative' in source_path:
-            source_link = "https://github.com/frmdstryr/enaml-native/tree/master/src/{}".format(
+            source_link = "https://github.com/frmdstryr/" \
+                          "enaml-native/tree/master/src/{}".format(
                 source_path.split("assets/python")[1]
             )
-            info.append("<tr><td>source code</td><td><a href='{}' target='_blank'>show</a></td></td>"
+            info.append("<tr><td>source code</td>"
+                        "<td><a href='{}' target='_blank'>show</a></td></td>"
                         .format(source_link))
 
             #: Examples link
-            example_link = "https://www.codelv.com/projects/enaml-native/docs/components#{}" \
+            example_link = "https://www.codelv.com/projects/" \
+                           "enaml-native/docs/components#{}" \
                 .format(declaration.__name__.lower())
-            info.append("<tr><td>example usage</td><td><a href='{}' target='_blank'>view</a></td></td>"
+            info.append("<tr><td>example usage</td>"
+                        "<td><a href='{}' target='_blank'>view</a></td></td>"
                         .format(example_link))
 
         return COMPONENT_TMPL.format(id=declaration.__name__.lower(),
@@ -486,8 +503,9 @@ class DevServer(Atom):
         from enamlnative.widgets import api
 
         #: Get all declared widgets
-        widgets = [obj for (n,obj) in inspect.getmembers(api) if inspect.isclass(obj)
-                   and issubclass(obj,ToolkitObject)]
+        widgets = [obj for (n, obj) in inspect.getmembers(api)
+                   if inspect.isclass(obj)
+                   and issubclass(obj, ToolkitObject)]
         #: Render to html
         components = "\n".join([self.render_component(w) for w in widgets])
 
@@ -495,9 +513,9 @@ class DevServer(Atom):
         return INDEX_PAGE.replace(
             "${components}", components
         ).replace(
-            "${code}",self.render_code()
+            "${code}", self.render_code()
         ).replace(
-            "${files}",self.render_files()
+            "${files}", self.render_files()
         )
 
     def start(self, session):
@@ -548,8 +566,10 @@ class TornadoDevServer(DevServer):
         app = tornado.web.Application([
             (r"/", MainHandler),
             (r"/dev", DevWebSocketHandler),
-            (r"/tmp/(.*)", tornado.web.StaticFileHandler, {'path': os.environ.get('TMP',sys.path[0])}),
-            (r"/source/(.*)", tornado.web.StaticFileHandler, {'path': sys.path[0]}),
+            (r"/tmp/(.*)", tornado.web.StaticFileHandler, {
+                'path': os.environ.get('TMP', sys.path[0])}),
+            (r"/source/(.*)", tornado.web.StaticFileHandler, {
+                'path': sys.path[0]}),
         ])
 
         #: Start listening
@@ -576,7 +596,9 @@ class TwistedDevServer(DevServer):
             from twisted.web import resource
             from twisted.web.static import File
             from twisted.web.server import Site
-            from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
+            from autobahn.twisted.websocket import (
+                WebSocketServerFactory, WebSocketServerProtocol
+            )
             from autobahn.twisted.resource import WebSocketResource
 
         class DevWebSocketHandler(WebSocketServerProtocol):
@@ -602,7 +624,8 @@ class TwistedDevServer(DevServer):
                 r = session.handle_message(req.content.getvalue())
                 return json.dumps(r)
 
-        factory = WebSocketServerFactory(u"ws://0.0.0.0:{}".format(session.port))
+        factory = WebSocketServerFactory(
+            u"ws://0.0.0.0:{}".format(session.port))
         factory.protocol = DevWebSocketHandler
         root = resource.Resource()
         root.putChild("", MainHandler())
@@ -627,7 +650,8 @@ class DevServerSession(Atom):
     #: Reference to the current Application
     app = ForwardInstance(get_app)
 
-    #: Host to connect to (in client mode) or if set to "server" it will enable "server" mode
+    #: Host to connect to (in client mode) or
+    #: if set to "server" it will enable "server" mode
     host = Unicode()
 
     #: Port to serve on (in server mode) or port to connect to (in client mode)
@@ -662,9 +686,9 @@ class DevServerSession(Atom):
     ])
     client = Instance(DevClient)
 
-    #: ========================================================================================
-    #: Initialization
-    #: ========================================================================================
+    # -------------------------------------------------------------------------
+    # Initialization
+    # -------------------------------------------------------------------------
     @classmethod
     def initialize(cls, *args, **kwargs):
         """ Create an instance of this class. """
@@ -680,14 +704,19 @@ class DevServerSession(Atom):
         return cls._instance
 
     def __init__(self, *args, **kwargs):
-        """ Overridden constructor that forces only one instance to ever exist. """
+        """ Overridden constructor that forces only one instance to ever exist. 
+        
+        """
         if self.instance() is not None:
             raise RuntimeError("A DevServerClient instance already exists!")
         super(DevServerSession, self).__init__(*args, **kwargs)
         DevServerSession._instance = self
 
     def start(self):
-        """ Start the dev session. Attempt to use tornado first, then try twisted"""
+        """ Start the dev session. Attempt to use tornado first, then try 
+        twisted
+        
+        """
         print("Starting debug client cwd: {}".format(os.getcwd()))
         print("Sys path: {}".format(sys.path))
 
@@ -699,9 +728,9 @@ class DevServerSession(Atom):
         else:
             self.client.start(self)
 
-    #: ========================================================================================
-    #: Defaults
-    #: ========================================================================================
+    # -------------------------------------------------------------------------
+    # Defaults
+    # -------------------------------------------------------------------------
     def _default_mode(self):
         """ If host is set to server then serve it from the app! """
         return "server" if self.host == "server" else "client"
@@ -718,23 +747,26 @@ class DevServerSession(Atom):
         for Server in self.servers:
             if Server.available():
                 return Server()
-        raise NotImplementedError("No dev servers are available! "
-                                  "Include tornado or twisted in your requirements!")
+        raise NotImplementedError(
+            "No dev servers are available! "
+            "Include tornado or twisted in your requirements!")
 
     def _default_client(self):
         for Client in self.clients:
             if Client.available():
                 return Client()
-        raise NotImplementedError("No dev clients are available! "
-                                  "Include tornado or twisted in your requirements!")
+        raise NotImplementedError(
+            "No dev clients are available! "
+            "Include tornado or twisted in your requirements!")
 
     def _observe_connected(self, change):
         """ Log connection state changes """
-        print("Dev server {}".format("connected" if self.connected else "disconnected"))
+        print("Dev server {}".format("connected"
+                                     if self.connected else "disconnected"))
 
-    #: ========================================================================================
-    #: Dev Session API
-    #: ========================================================================================
+    # -------------------------------------------------------------------------
+    # Dev Session API
+    # -------------------------------------------------------------------------
     def handle_message(self, data):
         """ When we get a message """
         msg = json.loads(data)
@@ -749,9 +781,9 @@ class DevServerSession(Atom):
             print(err)
             return {'ok': False, 'message': err}
 
-    #: ========================================================================================
-    #: Message handling API
-    #: ========================================================================================
+    # -------------------------------------------------------------------------
+    # Message handling API
+    # -------------------------------------------------------------------------
     def do_reload(self, msg):
         """ Called when the dev server wants to reload the view. """
         #: TODO: This should use the autorelaoder
@@ -759,7 +791,7 @@ class DevServerSession(Atom):
 
         #: Show loading screen
         try:
-            self.app.widget.showLoading("Reloading... Please wait.",now=True)
+            self.app.widget.showLoading("Reloading... Please wait.", now=True)
             #self.app.widget.restartPython(now=True)
             #sys.exit(0)
         except:
@@ -809,9 +841,9 @@ class DevServerSession(Atom):
             #: Display the error
             app.send_event(Command.ERROR, traceback.format_exc())
 
-    #: ========================================================================================
-    #: Utility methods
-    #: ========================================================================================
+    # -------------------------------------------------------------------------
+    # Utility methods
+    # -------------------------------------------------------------------------
     def save_changed_files(self, msg):
         #: On iOS we can't write in the app bundle
         if os.environ.get('TMP'):
@@ -835,6 +867,3 @@ class DevServerSession(Atom):
                     os.makedirs(folder)
                 with open(fn, 'wb') as f:
                     f.write(msg['files'][fn].encode('utf-8'))
-
-
-

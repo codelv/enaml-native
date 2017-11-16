@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on July 18, 2017
 
 @author: jrm
-'''
+"""
 
 import time
 from atom.api import (Atom, Callable, Dict, List, ForwardInstance, Int,
@@ -18,22 +18,26 @@ from .app import AndroidApplication
 
 
 class LoopjRequest(JavaBridgeObject):
-    """ Since this is passed with every request, use this for listening for events
+    """ Since this is passed with every request, use this for listening for 
+    events
+    
     """
     __nativeclass__ = set_default('com.loopj.android.http.RequestParams')
 
     #: Java methods
-    put = JavaMethod('java.lang.String', 'java.lang.String')  #: Need overloading....
+    put = JavaMethod('java.lang.String', 'java.lang.String')
 
 
 class LoopjAsyncHttpResponseHandler(JavaBridgeObject):
-    __nativeclass__ = set_default('com.codelv.enamlnative.adapters.BridgedAsyncHttpResponseHandler')
+    __nativeclass__ = set_default(
+        'com.codelv.enamlnative.adapters.BridgedAsyncHttpResponseHandler')
     setAsyncHttpResponseListener = JavaMethod(
-        'com.codelv.enamlnative.adapters.BridgedAsyncHttpResponseHandler$AsyncHttpResponseListener', 'boolean')
+        'com.codelv.enamlnative.adapters.BridgedAsyncHttpResponseHandler'
+        '$AsyncHttpResponseListener', 'boolean')
 
-    #: ============================================================================
-    #: AsyncHttpResponseHandler API
-    #: ============================================================================
+    # -------------------------------------------------------------------------
+    # AsyncHttpResponseHandler API
+    # -------------------------------------------------------------------------
     onStart = JavaCallback()
     onProgress = JavaCallback('int', 'int')
     onProgressData = JavaCallback('[B')
@@ -41,7 +45,8 @@ class LoopjAsyncHttpResponseHandler(JavaBridgeObject):
     onRetry = JavaCallback('int')
     onCancel = JavaCallback()
     onSuccess = JavaCallback('int', '[com.loopj.android.http.Header;', '[B')
-    onFailure = JavaCallback('int', '[com.loopj.android.http.Header;', '[B', 'java.lang.Throwable')
+    onFailure = JavaCallback('int', '[com.loopj.android.http.Header;', '[B',
+                             'java.lang.Throwable')
 
 
 class LoopjAsyncHttpClient(JavaBridgeObject):
@@ -64,7 +69,8 @@ class LoopjAsyncHttpClient(JavaBridgeObject):
     def __init__(self, *args, **kwargs):
         """ Implement a singleton pattern """
         if LoopjAsyncHttpClient.instance() is not None:
-            raise RuntimeError("Only one instance of AsyncHttpClient should be used!")
+            raise RuntimeError(
+                "Only one instance of AsyncHttpClient should be used!")
         super(LoopjAsyncHttpClient, self).__init__(*args, **kwargs)
         LoopjAsyncHttpClient._instance = self
 
@@ -113,7 +119,9 @@ class HttpRequest(Atom):
 
     def _default_handler(self):
         handler = LoopjAsyncHttpResponseHandler()
-        handler.setAsyncHttpResponseListener(handler.getId(), self.streaming_callback is not None)
+        handler.setAsyncHttpResponseListener(
+            handler.getId(),
+            self.streaming_callback is not None)
         handler.onStart.connect(self.on_start)
         handler.onCancel.connect(self.on_cancel)
         handler.onFailure.connect(self.on_failure)
@@ -135,28 +143,32 @@ class HttpRequest(Atom):
         self.retries = retry
 
     def on_success(self, status, headers, data):
-        self.response.status_code = status
-        self.response.headers = headers.split("\n")
+        r = self.response
+        r.status_code = status
+        r.headers = headers.split("\n")
         if data:
-            self.response.content = data
-        self.response.ok = True
+            r.content = data
+        r.ok = True
 
     def on_failure(self, status, headers, data, error):
-        self.response.status_code = status
-        self.response.headers = headers.split("\n")
-        self.response.reason = error
+        r = self.response
+        r.status_code = status
+        r.headers = headers.split("\n")
+        r.reason = error
         if data:
-            self.response.content = data
-        self.response.ok = False
+            r.content = data
+        r.ok = False
 
     def on_finish(self):
-        self.response.time = time.time()
+        r = self.response
+        r.time = time.time()
         if self.callback:
-            self.callback(self.response)
+            self.callback(r)
 
     def on_progress(self, written, total):
-        self.response.content_length = total
-        self.response.progress = int(100*written/total)
+        r = self.response
+        r.content_length = total
+        r.progress = int(100*written/total)
 
     def on_progress_data(self, data):
         if self.streaming_callback:

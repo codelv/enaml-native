@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -7,7 +7,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 
 @author jrm
 
-'''
+"""
 import nativehooks #: Created by the ndk-build in pybridge.c
 from atom.api import Float, Value, Int, Unicode, Typed, Dict
 from enaml.application import ProxyResolver
@@ -20,12 +20,12 @@ from ..core import bridge
 class AndroidApplication(BridgedApplication):
     """ An Android implementation of an Enaml Native BridgedApplication.
 
-    A AndroidApplication uses the native Android widget toolkit to implement an Enaml UI that
-    runs in the local process.
+    A AndroidApplication uses the native Android widget toolkit to implement 
+    an Enaml UI that runs in the local process.
 
     """
 
-    #: Attributes so it can be seralized over the bridge as a reference
+    #: Attributes so it can be serialized over the bridge as a reference
     __nativeclass__ = Unicode('android.content.Context')
 
     #: Bridge widget
@@ -38,39 +38,46 @@ class AndroidApplication(BridgedApplication):
     #: Loaded immediately as this is used often.
     dp = Float()
 
-    #: Build info from https://developer.android.com/reference/android/os/Build.VERSION.html
+    #: Build info from
+    #: https://developer.android.com/reference/android/os/Build.VERSION.html
     build_info = Dict()
 
     #: SDK version
     #: Loaded immediately
     api_level = Int()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Defaults
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def _default_widget(self):
-        """ Return a bridge object reference to the MainActivity """
+        """ Return a bridge object reference to the MainActivity
+         
+         """
         return Activity(__id__=-1)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # AndroidApplication Constructor
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __init__(self, activity=None):
         """ Initialize a AndroidApplication. Uses jnius to retrieve
             an instance of the activity.
+            
         """
         super(AndroidApplication, self).__init__()
         self.resolver = ProxyResolver(factories=factories.ANDROID_FACTORIES)
 
         #: Add a ActivityLifecycleListener to update the application state
         self.widget.addActivityLifecycleListener(self.widget.getId())
-        self.widget.onActivityLifecycleChanged.connect(self.on_activity_lifecycle_changed)
+        self.widget.onActivityLifecycleChanged.connect(
+            self.on_activity_lifecycle_changed)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # App API Implementation
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def has_permission(self, permission):
-        """ Return a future that resolves with the result of the permission """
+        """ Return a future that resolves with the result of the permission 
+        
+        """
         f = self.create_future()
 
         def on_result(allowed):
@@ -82,14 +89,18 @@ class AndroidApplication(BridgedApplication):
         return f
 
     def request_permissions(self, permissions):
-        """ Return a future that resolves with the results of the permission requests"""
+        """ Return a future that resolves with the results 
+        of the permission requests
+        
+        """
         f = self.create_future()
 
         def on_results(code, perms, results):
             if code != 0xC0DE:
                 return
             #: Check permissions
-            results = {p: r == Activity.PERMISSION_GRANTED for (p, r) in zip(perms, results)}
+            results = {p: r == Activity.PERMISSION_GRANTED
+                       for (p, r) in zip(perms, results)}
             self.set_future_result(f, results)
 
         #: Setup our listener, and request the permission
@@ -101,8 +112,7 @@ class AndroidApplication(BridgedApplication):
 
     def show_toast(self, msg, long=True):
         """ Show a toast message for the given duration.
-
-        Note: This is an android specific api.
+        This is an android specific api.
 
         Parameters
         -----------
@@ -123,8 +133,9 @@ class AndroidApplication(BridgedApplication):
     def on_activity_lifecycle_changed(self, state):
         """ Update the state when the android app is paused, resumed, etc..
         
-            Widgets can observe this value for changes if they need to react
-            to app lifecycle changes.
+        Widgets can observe this value for changes if they need to react
+        to app lifecycle changes.
+        
         """
         self.state = state
 
@@ -134,10 +145,14 @@ class AndroidApplication(BridgedApplication):
     def show_view(self):
         """ Show the current `app.view`. This will fade out the previous
             with the new view.
+            
         """
         if not self.build_info:
             def on_build_info(info):
-                """ Make sure the build info is ready before we display the view """
+                """ Make sure the build info is ready before we 
+                display the view 
+                
+                """
                 self.dp = info['DISPLAY_DENSITY']
                 self.api_level = info['SDK_INT']
                 self.build_info = info
@@ -155,11 +170,13 @@ class AndroidApplication(BridgedApplication):
         """ Send the data to the Native application for processing """
         nativehooks.publish(data)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Android utilities API Implementation
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def _observe_keep_screen_on(self, change):
-        """ Sets or clears the flag to keep the screen on. """
+        """ Sets or clears the flag to keep the screen on. 
+        
+        """
         def set_screen_on(window):
             from .android_window import Window
             window = Window(__id__=window)
@@ -172,15 +189,18 @@ class AndroidApplication(BridgedApplication):
 
     def get_system_service(self, service):
         """ Wrapper for getSystemService. You MUST
-            wrap the class with the appropriate object.
+        wrap the class with the appropriate object.
+        
         """
         return self.widget.getSystemService(service)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Plugin API Implementation
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def load_plugin_factories(self):
-        """ Add any plugin toolkit widgets to the ANDROID_FACTORIES """
+        """ Add any plugin toolkit widgets to the ANDROID_FACTORIES 
+        
+        """
         for plugin in self.get_plugins(group='enaml_native_android_factories'):
             get_factories = plugin.load()
             PLUGIN_FACTORIES = get_factories()

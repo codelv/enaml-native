@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import List, Typed, set_default
 
 from enamlnative.widgets.tab_layout import ProxyTabLayout, ProxyTabFragment
@@ -30,16 +30,20 @@ class TabLayout(FrameLayout):
     setSelectedTabIndicatorHeight = JavaMethod('int')
     setTabGravity = JavaMethod('int')
     setTabMode = JavaMethod('int')
-    setTabTextColors = JavaMethod('android.graphics.Color', 'android.graphics.Color')
+    setTabTextColors = JavaMethod('android.graphics.Color',
+                                  'android.graphics.Color')
 
     setCurrentTab = JavaMethod('int')
     setCurrentTabByTag = JavaMethod('java.lang.String')
     addOnTabSelectedListener = JavaMethod(
             'android.support.design.widget.TabLayout$OnTabSelectedListener')
 
-    onTabReselected = JavaCallback('android.support.design.widget.TabLayout$Tab')
-    onTabSelected = JavaCallback('android.support.design.widget.TabLayout$Tab')
-    onTabUnselected = JavaCallback('android.support.design.widget.TabLayout$Tab')
+    onTabReselected = JavaCallback(
+        'android.support.design.widget.TabLayout$Tab')
+    onTabSelected = JavaCallback(
+        'android.support.design.widget.TabLayout$Tab')
+    onTabUnselected = JavaCallback(
+        'android.support.design.widget.TabLayout$Tab')
 
     MODE_FIXED = 1
     MODE_SCROLLABLE = 0
@@ -48,13 +52,13 @@ class TabLayout(FrameLayout):
 
 
 class Tab(JavaBridgeObject):
-    __nativeclass__ = set_default('android.support.design.widget.TabLayout$Tab')
+    __nativeclass__ = set_default(
+        'android.support.design.widget.TabLayout$Tab')
     setText = JavaMethod('java.lang.CharSequence')
     setIcon = JavaMethod('android.graphics.drawable.Drawable')
     # setContent = JavaMethod('int')
     # setIndicator = JavaMethod('java.lang.CharSequence')
     #
-    # createTabContent = JavaCallback('java.lang.String', returns='android.view.View')
 
 
 class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
@@ -87,9 +91,9 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
         layout_params.isDecor = True
         return layout_params
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -107,7 +111,8 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
         if d.tab_gravity != 'fill':  #: Default
             self.set_tab_gravity(d.tab_gravity)
         if d.tab_indicator_color_selected:
-            self.set_tab_indicator_color_selected(d.tab_indicator_color_selected)
+            self.set_tab_indicator_color_selected(
+                d.tab_indicator_color_selected)
         if d.tab_indicator_height:
             self.set_tab_indicator_height(d.tab_indicator_height)
         if d.tab_color or d.tab_color_selected:
@@ -126,7 +131,8 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
         d = self.declaration
         parent = self.parent()
         #for page in parent.declaration.pages:
-        #    self.widget.newTab().then(lambda tab,page=page: self.on_new_tab(tab,page))
+        #    self.widget.newTab().then(lambda tab,page=page:
+        # self.on_new_tab(tab,page))
 
     # --------------------------------------------------------------------------
     # OnTabSelectedListener API
@@ -152,7 +158,9 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
         #d.current_tab = title
 
     def destroy(self):
-        """ Destroy all tabs when destroyed """
+        """ Destroy all tabs when destroyed 
+        
+        """
         super(AndroidTabLayout, self).destroy()
         if self.tabs:
             del self.tabs
@@ -164,11 +172,13 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
         raise NotImplementedError
 
     def set_tab_mode(self, mode):
-        m = TabLayout.MODE_FIXED if mode == 'fixed' else TabLayout.MODE_SCROLLABLE
+        m = (TabLayout.MODE_FIXED
+             if mode == 'fixed' else TabLayout.MODE_SCROLLABLE)
         self.widget.setTabMode(m)
 
     def set_tab_gravity(self, gravity):
-        g = TabLayout.GRAVITY_CENTER if gravity == 'center' else TabLayout.GRAVITY_FILL
+        g = (TabLayout.GRAVITY_CENTER
+             if gravity == 'center' else TabLayout.GRAVITY_FILL)
         self.widget.setTabGravity(g)
 
     def set_tab_indicator_color_selected(self, color):
@@ -192,4 +202,6 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
 
 
 class AndroidTabFragment(AndroidPagerFragment, ProxyTabFragment):
-    """ This is just an alias for future expansion. """
+    """ This is just an alias for future expansion. 
+    
+    """

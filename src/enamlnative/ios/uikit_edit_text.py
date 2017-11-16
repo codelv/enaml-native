@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Aug 25, 2017
 
 @author: jrm
-'''
+"""
 
 from atom.api import Typed
 from enamlnative.widgets.edit_text import ProxyEditText
@@ -68,9 +68,9 @@ class UiKitEditText(UiKitControl, ProxyEditText):
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UITextField)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the toolkit widget for the proxy object.
         """
@@ -109,9 +109,9 @@ class UiKitEditText(UiKitControl, ProxyEditText):
         with self.widget.get_member('text').suppressed(self.widget):
             d.text = text
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyEditText API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_selection(self, selection):
         pass
 

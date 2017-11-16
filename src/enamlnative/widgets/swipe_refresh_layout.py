@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on Oct 22, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import (
     Typed, ForwardTyped, Unicode, Bool, Int, Event, observe
 )
@@ -37,6 +37,7 @@ class ProxySwipeRefreshLayout(ProxyViewGroup):
     def set_refreshed(self, refresh):
         raise NotImplementedError
 
+
 class SwipeRefreshLayout(ViewGroup):
     """ SwipeRefreshLayout is a view group that displays
         child views in relative positions.
@@ -60,11 +61,11 @@ class SwipeRefreshLayout(ViewGroup):
     #: A reference to the proxy object.
     proxy = Typed(ProxySwipeRefreshLayout)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Observers
-    # --------------------------------------------------------------------------
-    @observe('enabled', 'indicator_color', 'indicator_background_color', 'trigger_distance'
-             'refeshed')
+    # -------------------------------------------------------------------------
+    @observe('enabled', 'indicator_color', 'indicator_background_color',
+             'trigger_distance', 'refeshed')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

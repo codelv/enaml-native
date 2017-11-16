@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, set_default
 
 from enamlnative.widgets.iconify import ProxyIcon, ProxyIconButton, ProxyIconToggleButton
@@ -37,9 +37,9 @@ class AndroidIcon(AndroidTextView, ProxyIcon):
     #: A reference to the widget created by the proxy.
     widget = Typed(Icon)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -54,9 +54,9 @@ class AndroidIconButton(AndroidButton, ProxyIconButton):
     #: A reference to the widget created by the proxy.
     widget = Typed(IconButton)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 
@@ -73,9 +73,9 @@ class AndroidIconToggleButton(AndroidToggleButton, ProxyIconToggleButton):
     #: A reference to the widget created by the proxy.
     widget = Typed(IconToggleButton)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying widget.
 

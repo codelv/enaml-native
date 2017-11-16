@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on June 21, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Atom, Int, set_default
 from ..core import bridge
 from ..core.bridge import (
@@ -18,8 +18,10 @@ from ..core.bridge import (
 
 
 class JavaMethod(BridgeMethod):
-    """ Description of a method of a View (or subclass) in Java. When called, this
-        serializes call, packs the arguments, and delegates handling to a bridge in Java.
+    """ Description of a method of a View (or subclass) in Java. When called, 
+    this serializes call, packs the arguments, and delegates handling to a 
+    bridge in Java.
+    
     """
 
     def pack_args(self, obj, *args, **kwargs):
@@ -27,16 +29,19 @@ class JavaMethod(BridgeMethod):
 
         vargs = signature and signature[-1].endswith("...")
         if not vargs and (len(args) != len(signature)):
-            raise ValueError("Invalid number of arguments: Given {}, expected {}"
-                             .format(args, signature))
+            raise ValueError(
+                "Invalid number of arguments: Given {}, expected {}"
+                .format(args, signature))
         if vargs:
             varg = signature[-1].replace('...', '')
             return (self.name, [
-                msgpack_encoder(signature[i] if i+1 < len(signature) else varg, args[i])
+                msgpack_encoder(
+                    signature[i] if i+1 < len(signature) else varg, args[i])
                 for i in range(len(args))
             ])
 
-        return (self.name, [msgpack_encoder(sig, arg) for sig, arg in zip(signature, args)])
+        return (self.name, [msgpack_encoder(sig, arg)
+                            for sig, arg in zip(signature, args)])
 
 
 class JavaStaticMethod(BridgeStaticMethod):
@@ -46,28 +51,33 @@ class JavaStaticMethod(BridgeStaticMethod):
 
         vargs = signature and signature[-1].endswith("...")
         if not vargs and (len(args) != len(signature)):
-            raise ValueError("Invalid number of arguments: Given {}, expected {}"
-                             .format(args, signature))
+            raise ValueError(
+                "Invalid number of arguments: Given {}, expected {}"
+                .format(args, signature))
         if vargs:
             varg = signature[-1].replace('...', '')
             return (self.name, [
-                msgpack_encoder(signature[i] if i+1 < len(signature) else varg, args[i])
+                msgpack_encoder(signature[i]
+                                if i+1 < len(signature) else varg, args[i])
                 for i in range(len(args))
                 ])
 
-        return (self.name, [msgpack_encoder(sig, arg) for sig, arg in zip(signature, args)])
+        return (self.name, [msgpack_encoder(sig, arg)
+                            for sig, arg in zip(signature, args)])
 
 
 class JavaField(BridgeField):
-    """ The superclass implementation is sufficient but extend for possible future modification.
+    """ The superclass implementation is sufficient but extend for possible 
+    future modification.
 
     """
 
 
 class JavaCallback(BridgeCallback, JavaMethod):
-    """ Description of a callback method of a View (or subclass) in Java. When called,
-        it fires the connected callback. This is triggered when it receives an event from
-        the bridge indicating the call has occured.
+    """ Description of a callback method of a View (or subclass) in Java. 
+    When called, it fires the connected callback. This is triggered when 
+    it receives an event from the bridge indicating the call has occured.
+    
     """
     def pack_args(self, obj, *args, **kwargs):
         return JavaMethod.pack_args(self, obj, *args, **kwargs)
@@ -75,8 +85,9 @@ class JavaCallback(BridgeCallback, JavaMethod):
 
 class JavaBridgeObject(BridgeObject):
     """ A proxy to a class in java. This sends the commands over
-        the bridge for execution.  The object is stored in a map
-        with the given id and is valid until this object is deleted.
+    the bridge for execution.  The object is stored in a map
+    with the given id and is valid until this object is deleted.
+    
     Parameters
     ----------
     __id__: Int
@@ -100,15 +111,16 @@ class JavaProxy(JavaBridgeObject):
     """ A bridge object that creates a Proxy for the given ref. This should NOT
         be given any JavaMethods or JavaFields, however JavaCallbacks are fine.
 
-        These are generally throw away usages. Only save them if you need to use
-        them as a reference later (such as when removing a listener).
+        These are generally throw away usages. Only save them if you need to 
+        use them as a reference later (such as when removing a listener).
 
         Parameters
         -------------
 
         ref: JavaBridgeObject
-            The bridge object that should receive all of the callbacks invocations.
-            If none is given it will send them to the proxy itself.
+            The bridge object that should receive all of the callbacks 
+            invocations. If none is given it will send them to the proxy 
+            itself.
 
 
      """

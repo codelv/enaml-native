@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,7 +8,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 Created on May 20, 2017
 
 @author: jrm
-'''
+"""
 from atom.api import Typed, Instance, Subclass, Bool, Float, set_default
 
 from enamlnative.widgets.view import ProxyView
@@ -81,7 +81,6 @@ class MarginLayoutParams(LayoutParams):
     setLayoutDirection = JavaMethod('int')
 
 
-
 class AndroidView(AndroidToolkitObject, ProxyView):
     """ An Android implementation of an Enaml ProxyView.
 
@@ -107,13 +106,10 @@ class AndroidView(AndroidToolkitObject, ProxyView):
 
     def _default_dp(self):
         return self.get_context().dp
-    #     if 'dp' not in CACHE:
-    #         CACHE['dp'] = 1.0#self.get_context().getResources().getDisplayMetrics().density
-    #     return CACHE['dp']
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Initialization API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def create_widget(self):
         """ Create the underlying label widget.
 
@@ -179,8 +175,6 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         if d.layout:
             self.set_layout(d.layout)
 
-
-
     def _default_layout_params(self):
         d = self.declaration
         LayoutParamsFactory = self.layout_param_type
@@ -200,9 +194,9 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         if self._destroy_layout_params:
             del self.layout_params
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnClickListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_click(self, view):
         """ Trigger the click
 
@@ -210,9 +204,9 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         d = self.declaration
         d.clicked()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnKeyListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_key(self, view, key, event):
         """ Trigger the key event
 
@@ -231,9 +225,9 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         d.key_event(r)
         return r['result']
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # OnTouchListener API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def on_touch(self, view, event):
         """ Trigger the touch event
 
@@ -251,9 +245,9 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         return r['result']
 
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ProxyView API
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def set_alpha(self, alpha):
         self.widget.setAlpha(alpha)
 
@@ -321,7 +315,6 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         #: Hack for flexbox
         from .android_flexbox import FlexboxLayoutHelper
         FlexboxLayoutHelper.apply_layout(self)
-
 
     def set_minimum_size(self, min_size):
         """ Sets the minimum size of the widget.
