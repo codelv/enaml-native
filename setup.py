@@ -20,13 +20,13 @@ def find_data_files(dest, *folders):
     dest = os.path.join('packages', dest)
 
     excluded_types = ['.pyc', '.enamlc', '.apk', '.iml', '.tar.gz',
-                      '.so', '.gif', '.svg']
+                      '.so', '.gif', '.svg', 'local.properties']
     excluded_dirs = ['android/build', 'android/captures', 'android/assets',
                      'docs/imgs']
     for folder in folders:
         if not os.path.isdir(folder):
             k = os.path.join(dest, dirpath)
-            matches[k].append(os.path.join(dest,folder))
+            matches[k].append(os.path.join(dest, folder))
             continue
         for dirpath, dirnames, files in os.walk(folder):
             #: Skip build folders and exclude hidden dirs
