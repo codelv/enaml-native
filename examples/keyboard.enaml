@@ -1,0 +1,14 @@
+
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+from enamlnative.android.api import InputMethodManager
+
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+    Button:
+        text = "Click to toggle the keyboard"
+        clicked :: InputMethodManager.toggle_keyboard()
+    Button:
+        text = "Click to hide the keyboard"
+        clicked :: InputMethodManager.hide_keyboard()

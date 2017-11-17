@@ -10,3 +10,4 @@ Created on July 24, 2017
 @author: jrm
 """
 from .android_location import LocationManager, Location
+from .android_utils import InputMethodManager

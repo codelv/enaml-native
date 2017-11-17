@@ -43,6 +43,8 @@ class View(JavaBridgeObject):
     setLayoutParams = JavaMethod('android.view.ViewGroup$LayoutParams')
     setPadding = JavaMethod('int', 'int', 'int', 'int')
 
+    getWindowToken = JavaMethod(returns='android.os.IBinder')
+
     setX = JavaMethod('int')
     setY = JavaMethod('int')
     setZ = JavaMethod('int')

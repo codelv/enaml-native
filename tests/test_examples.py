@@ -32,6 +32,7 @@ from utils import load
     (["android", "ios"], 'edit_text.enaml'),
     (["android"], 'flexbox.enaml'),
     (["android"], 'icon.enaml'),
+    (["android"], 'keyboard.enaml'),
     #(["android"], 'mapview.enaml'),# now requires enaml-native-maps
     (["android"], 'pager_tab_strip.enaml'),
     (["android"], 'picker.enaml'),
