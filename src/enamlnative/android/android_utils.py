@@ -27,14 +27,21 @@ class InputMethodManager(JavaBridgeObject):
     __nativeclass__ = set_default(
         'android.view.inputmethod.InputMethodManager')
 
-    toggleSoftInput = JavaMethod('int', 'int')
-    hideSoftInputFromWindow = JavaMethod('android.os.IBinder', 'int')
+    toggleSoftInput = JavaMethod('int', 'int', returns='boolean')
+    hideSoftInputFromWindow = JavaMethod('android.os.IBinder', 'int',
+                                         returns='boolean')
 
     HIDE_IMPLICIT_ONLY = 1
+    SHOW_FORCED = 2
 
     @classmethod
-    def toggle_keyboard(cls):
+    def toggle_keyboard(cls, flag=HIDE_IMPLICIT_ONLY):
         """ Toggle the keyboard on and off
+         
+        Parameters
+        ----------
+            flag: int
+                Flag to send to toggleSoftInput
          
         Returns
         --------
@@ -48,7 +55,7 @@ class InputMethodManager(JavaBridgeObject):
 
         def on_ready(__id__):
             ims = InputMethodManager(__id__=__id__)
-            ims.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
+            ims.toggleSoftInput(flag, 0)
             f.set_result(True)
 
         activity.getSystemService(activity.INPUT_METHOD_SERVICE).then(on_ready)
@@ -56,12 +63,12 @@ class InputMethodManager(JavaBridgeObject):
 
     @classmethod
     def hide_keyboard(cls):
-        """ Toggle the keyboard on and off
+        """ Hide keyboard if it's open
          
         Returns
         --------
             result: future
-                Resolves when the toggle is complete
+                Resolves when the hide is complete
         
         """
         app = AndroidApplication.instance()
@@ -73,8 +80,8 @@ class InputMethodManager(JavaBridgeObject):
             view = app.view.proxy.widget
 
             def on_token(__id__):
-                ims.hideSoftInputFromWindow(JavaBridgeObject(__id__=__id__), 0)
-                f.set_result(True)
+                ims.hideSoftInputFromWindow(
+                    JavaBridgeObject(__id__=__id__), 0).then(f.set_result)
             view.getWindowToken().then(on_token)
 
         activity.getSystemService(activity.INPUT_METHOD_SERVICE).then(on_ready)
