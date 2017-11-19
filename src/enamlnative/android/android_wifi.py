@@ -11,10 +11,25 @@ Created on Nov 18, 2017
 """
 from atom.api import List, set_default
 
-from .bridge import JavaBridgeObject, JavaMethod
+from .bridge import JavaBridgeObject, JavaMethod, JavaField
 from .android_activity import Activity
 from .android_content import BroadcastReceiver, IntentFilter
 from .app import AndroidApplication
+
+
+class WifiConfiguration(JavaBridgeObject):
+    __nativeclass__ = set_default('android.net.wifi.WifiConfiguration')
+    BSSID = JavaField('java.lang.String')
+    FQDN = JavaField('java.lang.String')
+    SSID = JavaField('java.lang.String')
+    hiddenSSID = JavaField('boolean')
+    networkId = JavaField('int')
+    preSharedKey = JavaField('java.lang.String')
+    status = JavaField('int')
+
+    STATUS_CURRENT = 0x0
+    STATUS_DISABLED = 0x1
+    STATUS_ENABLED = 0x2
 
 
 class WifiManager(JavaBridgeObject):
@@ -67,6 +82,12 @@ class WifiManager(JavaBridgeObject):
     reassociate = JavaMethod(returns='boolean')
     reconnect = JavaMethod(returns='boolean')
     removeNetwork = JavaMethod('int', returns='boolean')
+    addNetwork = JavaMethod('android.net.wifi.WifiConfiguration',
+                            returns='int')
+    enableNetwork = JavaMethod('int', 'boolean')
+    disconnect = JavaMethod(returns='boolean')
+    getConnectionInfo = JavaMethod(returns='android.net.wifi.WifiInfo')
+    getDhcpInfo = JavaMethod(returns='android.net.DhcpInfo')
 
     #: List of receivers
     _receivers = List(BroadcastReceiver)
@@ -141,6 +162,7 @@ class WifiManager(JavaBridgeObject):
         def on_permission_result(result):
             if not result:
                 f.set_result(None)
+                return
 
             def on_ready(m):
                 m.isWifiEnabled().then(f.set_result)
@@ -148,9 +170,9 @@ class WifiManager(JavaBridgeObject):
             WifiManager.get().then(on_ready)
 
         #: Check permission
-        app.has_permission(
-            WifiManager.PERMISSION_ACCESS_WIFI_STATE).then(
-            on_permission_result)
+        cls.request_permission([
+            WifiManager.PERMISSION_ACCESS_WIFI_STATE
+        ]).then(on_permission_result)
         return f
 
     @classmethod
@@ -166,10 +188,11 @@ class WifiManager(JavaBridgeObject):
         app = AndroidApplication.instance()
         f = app.create_future()
 
-        def on_permission_result(allowed):
-            if not allowed:
+        def on_permission_result(result):
+            if not result:
                 #: Permission denied
                 f.set_result(None)
+                return
 
             def on_ready(m):
                 m.setWifiEnabled(state).then(f.set_result)
@@ -177,11 +200,10 @@ class WifiManager(JavaBridgeObject):
             WifiManager.get().then(on_ready)
 
         #: Check permission
-        app.has_permission(
-            WifiManager.PERMISSION_CHANGE_WIFI_STATE).then(
-            on_permission_result)
+        cls.request_permission([
+            WifiManager.PERMISSION_CHANGE_WIFI_STATE
+        ]).then(on_permission_result)
         return f
-
 
     @classmethod
     def get_networks(cls):
@@ -200,6 +222,9 @@ class WifiManager(JavaBridgeObject):
         f = app.create_future()
 
         def on_permission_result(result):
+            if not result:
+                f.set_result(None)
+                return
 
             def on_ready(mgr):
                 #: Register a receiver so we know when the scan
@@ -249,14 +274,183 @@ class WifiManager(JavaBridgeObject):
             WifiManager.get().then(on_ready)
 
         #: Request permissions
-        cls.request_permission().then(on_permission_result)
+        cls.request_permission(
+            WifiManager.PERMISSIONS_REQUIRED).then(on_permission_result)
 
         return f
 
     @classmethod
-    def request_permission(cls):
+    def disconnect(cls):
+        """ Disconnect from the current network (if connected).
+         
+         Returns
+         --------
+             result: future
+                 A future that resolves to true if the disconnect was 
+                 successful. Will be set to None if the change network 
+                 permission is denied.
+ 
+         """
+        app = AndroidApplication.instance()
+        f = app.create_future()
+
+        def on_permission_result(result):
+            if not result:
+                f.set_result(None)
+                return
+
+            def on_ready(mgr):
+                mgr.disconnect().then(f.set_result)
+
+            #: Get the service
+            WifiManager.get().then(on_ready)
+
+        #: Request permissions
+        cls.request_permission([
+            WifiManager.PERMISSION_CHANGE_WIFI_STATE
+        ]).then(on_permission_result)
+
+        return f
+
+    @classmethod
+    def connect(cls, ssid, key=None, **kwargs):
+        """ Connect to the given ssid using the key (if given).
+        
+        Returns
+        --------
+            result: future
+                A future that resolves with the result of the connect
+
+        """
+        app = AndroidApplication.instance()
+        f = app.create_future()
+
+        config = WifiConfiguration()
+        config.SSID = '"{}"'.format(ssid)
+        if key is not None:
+            config.preSharedKey = '"{}"'.format(key)
+
+        #: Set any other parameters
+        for k, v in kwargs.items():
+            setattr(config, k, v)
+
+        def on_permission_result(result):
+            if not result:
+                f.set_result(None)
+                return
+
+            def on_ready(mgr):
+
+                def on_disconnect(result):
+                    if not result:
+                        f.set_result(None)
+                        return  #: Done
+                    mgr.setWifiEnabled(True).then(on_wifi_enabled)
+
+                def on_wifi_enabled(enabled):
+                    if not enabled:
+                        #: Access denied or failed to enable
+                        f.set_result(None)
+                        return
+                    mgr.addNetwork(config).then(on_network_added)
+
+                def on_network_added(net_id):
+                    if net_id == -1:
+                        f.set_result(False)
+                        print("Invalid network configuration id {}".format(net_id))
+                        return
+                    mgr.enableNetwork(net_id, True).then(on_network_enabled)
+
+                def on_network_enabled(result):
+                    if not result:
+                        #: TODO: Should probably say
+                        #: which state it failed at...
+                        f.set_result(None)
+                        return
+                    mgr.reconnect().then(f.set_result)
+
+                #: Enable if needed
+                mgr.disconnect().then(on_disconnect)
+
+            #: Get the service
+            WifiManager.get().then(on_ready)
+
+        #: Request permissions
+        cls.request_permission(
+            WifiManager.PERMISSIONS_REQUIRED).then(on_permission_result)
+
+        return f
+
+    @classmethod
+    def get_connection_info(cls):
+        """ Get info about current wifi connection (if any). Returns
+        info such as the IP address, BSSID, link speed, signal, etc.. 
+         
+         Returns
+         --------
+             result: future
+                 A future that resolves with a dict of the connection info
+                 or None if an error occured (ie permission denied).s
+ 
+         """
+        app = AndroidApplication.instance()
+        f = app.create_future()
+
+        def on_permission_result(result):
+            if not result:
+                f.set_result(None)
+                return
+
+            def on_ready(mgr):
+                mgr.getConnectionInfo().then(f.set_result)
+
+            #: Get the service
+            WifiManager.get().then(on_ready)
+
+        #: Request permissions
+        cls.request_permission([
+            WifiManager.PERMISSION_ACCESS_WIFI_STATE
+        ]).then(on_permission_result)
+
+        return f
+
+    @classmethod
+    def get_dhcp_info(cls):
+        """ Get info about current DHCP configuration such as DNS servers,
+        IP address, and lease duration.
+         
+        Returns
+        --------
+             result: future
+                 A future that resolves with a dict of the DHCP info
+                 or None if an error occured (ie permission denied).s
+ 
+        """
+        app = AndroidApplication.instance()
+        f = app.create_future()
+
+        def on_permission_result(result):
+            if not result:
+                f.set_result(None)
+                return
+
+            def on_ready(mgr):
+                mgr.getDhcpInfo().then(f.set_result)
+
+            #: Get the service
+            WifiManager.get().then(on_ready)
+
+        #: Request permissions
+        cls.request_permission([
+            WifiManager.PERMISSION_ACCESS_WIFI_STATE
+        ]).then(on_permission_result)
+
+        return f
+
+    @classmethod
+    def request_permission(cls, permissions):
         """ Requests permission and returns an future result that returns a 
-        boolean indicating if the permission was granted or denied.
+        boolean indicating if all the given permission were granted or denied.
          
         """
         app = AndroidApplication.instance()
@@ -264,12 +458,11 @@ class WifiManager(JavaBridgeObject):
 
         def on_result(perms):
             allowed = True
-            for p in perms:
-                allowed = allowed and perms[p]
-            app.set_future_result(f, allowed)
+            for p in permissions:
+                allowed = allowed and perms.get(p, False)
+            f.set_result(allowed)
 
-        app.request_permissions(
-            [WifiManager.PERMISSION_ACCESS_FINE_LOCATION]).then(on_result)
+        app.request_permissions(permissions).then(on_result)
 
         return f
 

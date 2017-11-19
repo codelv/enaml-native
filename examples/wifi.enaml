@@ -1,0 +1,111 @@
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+from enamlnative.android.api import WifiManager
+
+
+enamldef ContentView(Flexbox): view:
+    flex_direction = "column"
+    attr networks = []
+    attr scanning = False
+    attr wifi_enabled = False
+    attr wifi_info = None
+    attr dhcp_info = None
+    activated ::
+        WifiManager.is_wifi_enabled().then(
+            lambda r,view=view:setattr(view,'wifi_enabled',r))
+
+    func start_scan():
+        view.scanning = True
+        WifiManager.get_networks().then(on_scan_complete)
+
+    func on_scan_complete(results):
+        view.scanning = False
+        view.networks = results
+
+    func on_connect(result):
+        dialog.show = False
+
+    Toolbar:
+        layout_height = "100"
+        background_color = "#bca"
+        Flexbox:
+            justify_content = "space_between"
+            Button:
+                style = "borderless"
+                text = "Scan"
+                clicked  :: start_scan()
+            Button:
+                style = "borderless"
+                text = "Conn"
+                clicked  ::
+                    WifiManager.get_connection_info().then(
+                        lambda r,view=view: setattr(view,'wifi_info',r))
+            Button:
+                style = "borderless"
+                text = "DHCP"
+                clicked  ::
+                    WifiManager.get_dhcp_info().then(
+                        lambda r,view=view: setattr(view,'dhcp_info',r))
+            Button:
+                style = "borderless"
+                text << "Disable" if wifi_enabled else "Enable"
+                clicked  ::
+                    WifiManager.set_wifi_enabled(not wifi_enabled).then(
+                        lambda r,view=view:setattr(view,'wifi_enabled',
+                        (not view.wifi_enabled) if r==True else view.wifi_enabled))
+    Flexbox:
+        flex_direction = 'column'
+        ScrollView:
+            Flexbox:
+                flex_direction = 'column'
+                TextView:
+                    text << "Connection info:\n{}".format(view.wifi_info)
+                TextView:
+                    text << "DHCP info:\n{}".format(view.dhcp_info)
+                TextView:
+                    text = "Scan Results:"
+                Conditional:
+                    condition << scanning
+                    ActivityIndicator:
+                        pass
+                Looper:
+                    iterable << networks if networks is not None else []
+                    Flexbox:
+                        attr connecting = False
+                        attr connected = False
+                        clickable = True
+                        clicked ::
+                            dialog.ssid = loop_item['ssid']
+                            dialog.show = True
+                        TextView:
+                            padding = (10, 20, 10, 20)
+                            text = "{}".format(loop_item)
+        Dialog: dialog:
+            attr ssid = ""
+            Flexbox:
+                padding = (20, 20, 20, 5)
+                flex_direction = "column"
+                justify_content = "space_between"
+                attr show_password = False
+                TextView:
+                    text << ssid
+                EditText: pwd:
+                    placeholder = "Key"
+                    input_type << "text" if show_password else "text_password"
+                CheckBox:
+                    text = "Show password"
+                    checked := show_password
+                Flexbox:
+                    justify_content = "flex_end"
+                    Button:
+                        style = "borderless"
+                        text = "Cancel"
+                        clicked :: dialog.show = False
+                    Button:
+                        style = "borderless"
+                        text = "Connect"
+                        clicked ::
+                            WifiManager.connect(ssid=ssid,
+                                                key=pwd.text).then(on_connect)
+
+

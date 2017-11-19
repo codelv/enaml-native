@@ -3,10 +3,13 @@ package com.codelv.enamlnative;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.DhcpInfo;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.os.HandlerThread;
 import android.os.Handler;
+import android.text.format.Formatter;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -281,6 +284,62 @@ public class Bridge implements PythonInterpreter.EventListener {
             packer.packArrayHeader(argList.length);
             for (View v:argList) {
                 packer.packInt(((View) object).getId());
+            }
+
+        });
+
+        // Unpack Wifi objects
+        addPacker(DhcpInfo.class, (packer, id, object)-> {
+            DhcpInfo info = (DhcpInfo) object;
+            packer.packMapHeader(7);
+            packer.packString("dns1");
+            packer.packString(Formatter.formatIpAddress(info.dns1));
+            packer.packString("dns2");
+            packer.packString(Formatter.formatIpAddress(info.dns2));
+            packer.packString("gateway");
+            packer.packString(Formatter.formatIpAddress(info.gateway));
+            packer.packString("ip_address");
+            packer.packString(Formatter.formatIpAddress(info.ipAddress));
+            packer.packString("lease_duration");
+            packer.packInt(info.leaseDuration);
+            packer.packString("netmask");
+            packer.packString(Formatter.formatIpAddress(info.netmask));
+            packer.packString("server_address");
+            packer.packString(Formatter.formatIpAddress(info.serverAddress));
+        });
+
+        addPacker(WifiInfo.class, (packer, id, object)-> {
+            WifiInfo info = (WifiInfo) object;
+            int count = 9;
+            if (Build.VERSION.SDK_INT >= 21) {
+                count += 1;
+            }
+            packer.packMapHeader(count);
+
+            packer.packString("mac");
+            packer.packString(info.getMacAddress());
+            packer.packString("bssid");
+            packer.packString(info.getBSSID());
+            packer.packString("ssid");
+            packer.packString(info.getSSID());
+            packer.packString("rssi");
+            packer.packInt(info.getRssi());
+
+            packer.packString("network_id");
+            packer.packInt(info.getNetworkId());
+            packer.packString("link_speed");
+            packer.packInt(info.getLinkSpeed());
+            packer.packString("ip_address");
+            packer.packString(Formatter.formatIpAddress(info.getIpAddress()));
+            packer.packString("ssid_hidden");
+            packer.packBoolean(info.getHiddenSSID());
+
+            packer.packString("state");
+            packer.packString(info.getSupplicantState().toString());
+
+            if (Build.VERSION.SDK_INT >= 21) {
+                packer.packString("frequency");
+                packer.packInt(info.getFrequency());
             }
 
         });

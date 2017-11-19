@@ -9,7 +9,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 
 """
 import nativehooks #: Created by the ndk-build in pybridge.c
-from atom.api import Float, Value, Int, Unicode, Typed, Dict
+from atom.api import Float, Value, Int, List, Unicode, Typed, Dict
 from enaml.application import ProxyResolver
 from . import factories
 from .android_activity import Activity
@@ -46,6 +46,12 @@ class AndroidApplication(BridgedApplication):
     #: Loaded immediately
     api_level = Int()
 
+    #: Permission code increments on each request
+    _permission_code = Int()
+
+    #: Pending permission request listeners
+    _permission_requests = Dict()
+
     # -------------------------------------------------------------------------
     # Defaults
     # -------------------------------------------------------------------------
@@ -80,6 +86,11 @@ class AndroidApplication(BridgedApplication):
         """
         f = self.create_future()
 
+        #: Old versions of android did permissions at install time
+        if self.api_level < 24:
+            f.set_result(True)
+            return f
+
         def on_result(allowed):
             result = allowed == Activity.PERMISSION_GRANTED
             self.set_future_result(f, result)
@@ -95,18 +106,30 @@ class AndroidApplication(BridgedApplication):
         """
         f = self.create_future()
 
-        def on_results(code, perms, results):
-            if code != 0xC0DE:
-                return
-            #: Check permissions
-            results = {p: r == Activity.PERMISSION_GRANTED
-                       for (p, r) in zip(perms, results)}
-            self.set_future_result(f, results)
+        #: Old versions of android did permissions at install time
+        if self.api_level < 24:
+            f.set_result({p: True for p in permissions})
+            return f
 
-        #: Setup our listener, and request the permission
-        self.widget.setPermissionResultListener(self.widget.getId())
-        self.widget.onRequestPermissionsResult.connect(on_results)
-        self.widget.requestPermissions(permissions, 0xC0DE)
+        w = self.widget
+        request_code = self._permission_code
+        self._permission_code += 1  #: So next call has a unique code
+
+        #: On first request, setup our listener, and request the permission
+        if request_code == 0:
+            w.setPermissionResultListener(w.getId())
+            w.onRequestPermissionsResult.connect(self._on_permission_result)
+
+        def on_results(code, perms, results):
+            #: Check permissions
+            f.set_result({p: r == Activity.PERMISSION_GRANTED
+                          for (p, r) in zip(perms, results)})
+
+        #: Save a reference
+        self._permission_requests[request_code] = on_results
+
+        #: Send out the request
+        self.widget.requestPermissions(permissions, request_code)
 
         return f
 
@@ -173,6 +196,19 @@ class AndroidApplication(BridgedApplication):
     # -------------------------------------------------------------------------
     # Android utilities API Implementation
     # -------------------------------------------------------------------------
+    def _on_permission_result(self, code, perms, results):
+        """ Handles a permission request result by passing it to the
+         handler with the given code.
+         
+        """
+        #: Get the handler for this request
+        handler = self._permission_requests.get(code, None)
+        if handler is not None:
+            del self._permission_requests[code]
+
+            #: Invoke that handler with the permission request response
+            handler(code, perms, results)
+
     def _observe_keep_screen_on(self, change):
         """ Sets or clears the flag to keep the screen on. 
         
