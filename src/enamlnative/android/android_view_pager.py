@@ -34,6 +34,49 @@ class ViewPager(ViewGroup):
     onPageScrolled = JavaCallback('int', 'float', 'int')
     onPageSelected = JavaCallback('int')
     setPagingEnabled = JavaMethod('boolean')
+    setPageTransformer = JavaMethod(
+        'boolean', 'android.support.v4.view.ViewPager$PageTransformer')
+
+
+#: Create builtin ones
+#: See https://github.com/geftimov/android-viewpager-transformers/wiki
+bundle_id = 'com.eftimoff.viewpagertransformers'
+TRANSFORMERS = {k: '{}.{}'.format(bundle_id, v) for k, v in [
+    ('accordion', 'AccordionTransformer'),
+    ('bg_to_fg', 'BackgroundToForegroundTransformer'),
+    ('cube_in', 'CubeInTransformer'),
+    ('cube_out', 'CubeOutTransformer'),
+    ('default', 'DefaultTransformer'),
+    ('depth_page', 'DepthPageTransformer'),
+    ('draw_from_back', 'DrawFromBackTransformer'),
+    ('flip_horizontal', 'FlipHorizontalTransformer'),
+    ('flip_vertical', 'FlipVerticalTransformer'),
+    ('fg_to_bg', 'ForegroundToBackgroundTransformer'),
+    ('parallax_page', 'ParallaxPageTransformer'),
+    ('rotate_down', 'RotateDownTransformer'),
+    ('rotate_up', 'RotateUpTransformer'),
+    ('stack', 'StackTransformer'),
+    ('tablet', 'TabletTransformer'),
+    ('zoom_in', 'ZoomInTransformer'),
+    ('zoom_out', 'ZoomOutTransformer'),
+    ('zoom_out_slide', 'ZoomOutSlideTransformer'),
+]}
+
+
+class PageTransformer(JavaBridgeObject):
+    """ A PageTransformer factory """
+    __cache__ = {}
+
+    @classmethod
+    def from_name(cls, class_name):
+        if class_name not in PageTransformer.__cache__:
+            #: Try to get the builtin ones using a short name
+            class_name = TRANSFORMERS.get(class_name, class_name)
+
+            class Transformer(cls):
+                __nativeclass__ = set_default(class_name)
+            PageTransformer.__cache__[class_name] = Transformer
+        return PageTransformer.__cache__[class_name]()
 
 
 class ViewPagerLayoutParams(LayoutParams):
@@ -113,6 +156,8 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
             self.set_page_margin(d.page_margin)
         if not d.paging_enabled:
             self.set_paging_enabled(d.paging_enabled)
+        if d.transition != 'default':
+            self.set_transition(d.transition)
 
         #: Create adapter
         self.adapter = BridgedFragmentStatePagerAdapter()
@@ -223,6 +268,10 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
 
     def set_paging_enabled(self, enabled):
         self.widget.setPagingEnabled(enabled)
+
+    def set_transition(self, transition):
+        self.widget.setPageTransformer(True,
+                                       PageTransformer.from_name(transition))
 
 
 class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):

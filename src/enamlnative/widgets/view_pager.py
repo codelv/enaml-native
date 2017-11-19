@@ -10,7 +10,8 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Unicode, List, Float, Int, Bool, observe, set_default
+    Typed, ForwardTyped, Unicode, List, Float, Int, Bool,
+    Enum, observe, set_default
 )
 
 from enaml.core.declarative import d_
@@ -36,6 +37,9 @@ class ProxyViewPager(ProxyViewGroup):
         raise NotImplementedError
 
     def set_paging_enabled(self, enabled):
+        raise NotImplementedError
+
+    def set_transition(self, transition):
         raise NotImplementedError
 
 
@@ -112,6 +116,15 @@ class ViewPager(ViewGroup):
     pages = property(lambda self: [c for c in self._children
                                    if isinstance(c, Fragment)])
 
+    #: Transition
+    transition = d_(Enum('default', 'accordion', 'bg_to_fg', 'fg_to_bg',
+                         'cube_in', 'cube_out', 'draw_from_back',
+                         'flip_horizontal', 'flip_vertical',
+                         'depth_page', 'parallax_page',
+                         'rotate_down', 'rotate_up',
+                         'stack', 'tablet',
+                         'zoom_in', 'zoom_out', 'zoom_out_slide'))
+
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyViewPager)
 
@@ -119,7 +132,7 @@ class ViewPager(ViewGroup):
     # Observers
     # -------------------------------------------------------------------------
     @observe('current_index', 'offscreen_page_limit', 'page_margin',
-             'paging_enabled')
+             'paging_enabled', 'transition')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

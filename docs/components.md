@@ -381,6 +381,8 @@ A wrapper for android's [GridLayout](https://developer.android.com/reference/and
 
 A component for displaying icons. It extends the `TextView` component and uses [android-iconify](https://github.com/JoanZapata/android-iconify) behind the scenes. All icon packs are included by default.
 
+> Note: Icons now require the [enaml-native-icons](https://github.com/codelv/enaml-native-icons) package
+
 [![Icons in enaml-native](https://img.youtube.com/vi/K0hiyV6SBms/0.jpg)](https://youtu.be/K0hiyV6SBms)
 
 Icon packs
@@ -480,6 +482,8 @@ It's a toggle button that allows Icons in the text. See the [Icon](#icon) and [T
 ### MapView
 
 A `GoogleMap` component. All of the `Map<Item>` components can be added as children. 
+
+> Note: This has moved to the [enaml-native-maps](https://github.com/codelv/enaml-native-maps) package
 
 Map click events can be handled with the `clicked` event which passes a `change['value']` dict containing the `position` and `click` type. 
 
@@ -1095,6 +1099,9 @@ You can also show a toast message from code using the `AndroidApplication.instan
 A viewpager lets you swipe between multiple screens. You can set the `paging_enabled` attribute to `False` to only allow changing programatically. Observe or set the `current_index` to change the page.
  
 To add Pages you must add a `TabFragment` or `PagerFragment` (any subclass of `Fragment`). Tabs and a pager strip can also be added.
+
+> Note: Pages can now use a different `transition`. 
+See [android-viewpager-transformers](https://github.com/geftimov/android-viewpager-transformers/wiki)
  
   
  [![View pager and screens in enaml-native](https://img.youtube.com/vi/QjYptyQETcU/0.jpg)](https://youtu.be/QjYptyQETcU)

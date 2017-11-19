@@ -68,6 +68,9 @@ dependencies {
     //compile 'com.facebook.yoga:yoga:1.5.0'
     compile 'com.google.android:flexbox:0.3.0'
 
+    // Transforms
+    compile 'com.eftimoff:android-viewpager-transformers:1.0.1@aar'
+
 }
 
 afterEvaluate {

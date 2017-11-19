@@ -1,6 +1,15 @@
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 
+from enamlnative.android.android_view_pager import AndroidViewPager, PageTransformer
+
+def set_transition(self, transition):
+    assert False
+    self.widget.setPageTransformer(True,
+                                   PageTransformer.from_name(transition))
+
+AndroidViewPager.set_transition = set_transition
+
 enamldef Navigation(Toolbar): toolbar:
     #: An "iOS" like navigation where the text scrolls out when the pages change
     background_color = "#CCC"
@@ -67,20 +76,45 @@ enamldef ContentView(Flexbox): view:
         pager << screens
     ViewPager: screens:
         paging_enabled = True
+        transition = "fg_to_bg"
         PagerFragment:
             title = "Home"
             icon = "{md-home}"
-            TextView:
-                text = "Python powered native apps!"
+            Flexbox:
+                background_color = "#cab"
+                flex_direction = "column"
+                Spinner:
+                    items = list(ViewPager.transition.items)
+                    selected << self.items.index(screens.transition)
+                    selected ::
+                        screens.transition = self.items[self.selected]
+                TextView:
+                    text = "Python powered native apps!"
         PagerFragment:
             title = "Pictures"
             icon = "{md-photo}"
-            TextView:
-                text = "Content goes here!"
+            Flexbox:
+                background_color = "#abc"
+                flex_direction = "column"
+                Spinner:
+                    items = list(ViewPager.transition.items)
+                    selected << self.items.index(screens.transition)
+                    selected ::
+                        screens.transition = self.items[self.selected]
+                TextView:
+                    text = "Content goes here!"
         PagerFragment:
             title = "Settings"
             icon = "{md-settings}"
-            TextView:
-                text = "A multi screen app in < 20 lines? Yep!"
+            Flexbox:
+                background_color = "#bac"
+                flex_direction = "column"
+                Spinner:
+                    items = list(ViewPager.transition.items)
+                    selected << self.items.index(screens.transition)
+                    selected ::
+                        screens.transition = self.items[self.selected]
+                TextView:
+                    text = "A multi screen app in < 20 lines? Yep!"
     BottomNav:
         pager << screens
