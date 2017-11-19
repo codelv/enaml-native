@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.graphics.Color;
 import android.os.Build;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ public class EnamlActivity extends AppCompatActivity {
     final List<ActivityLifecycleListener> mActivityLifecycleListeners = new ArrayList<ActivityLifecycleListener>();
 
     final HashMap<String, Long> mProfilers = new HashMap<>();
+    final Handler mHandler = new Handler();
 
 
     @Override
@@ -120,23 +122,26 @@ public class EnamlActivity extends AppCompatActivity {
         }
         Log.e(TAG,message);
 
-        // Move to top of screen
-        TextView textView = (TextView) findViewById(R.id.textView);
-        textView.setHorizontallyScrolling(true);
-        ((ViewGroup.MarginLayoutParams) textView.getLayoutParams()).setMargins(10, 10, 10, 10);
-        textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
-        textView.setTextColor(Color.RED);
-        textView.setText(message);
+        // Push to end of handler stack as this can occur during the view change animation
+        mHandler.post(()->{
+            // Move to top of screen
+            TextView textView = (TextView) findViewById(R.id.textView);
+            textView.setHorizontallyScrolling(true);
+            ((ViewGroup.MarginLayoutParams) textView.getLayoutParams()).setMargins(10, 10, 10, 10);
+            textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+            textView.setTextColor(Color.RED);
+            textView.setText(message);
 
-        // Hide progress bar
-        View progressBar = findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.INVISIBLE);
+            // Hide progress bar
+            View progressBar = findViewById(R.id.progressBar);
+            progressBar.setVisibility(View.INVISIBLE);
 
-        // If error occured after view was loaded, animate the error back in
-        if (mLoadingDone) {
-            // Swap the views back
-            animateView(mLoadingView, mPythonView);
-        }
+            // If error occured after view was loaded, animate the error back in
+            if (mLoadingDone) {
+                // Swap the views back
+                animateView(mLoadingView, mPythonView);
+            }
+        });
     }
 
     /**
