@@ -11,3 +11,4 @@ Created on July 24, 2017
 """
 from .android_location import LocationManager, Location
 from .android_utils import InputMethodManager
+from .android_wifi import WifiManager

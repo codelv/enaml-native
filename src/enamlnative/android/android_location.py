@@ -18,7 +18,7 @@ from .app import AndroidApplication
 
 
 class LocationAccessDenied(RuntimeError):
-    """ User denied acccess or it's disabled by the system """
+    """ User denied access or it's disabled by the system """
 
 
 class Location(Atom):

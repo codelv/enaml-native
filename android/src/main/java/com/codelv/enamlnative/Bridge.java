@@ -3,6 +3,7 @@ package com.codelv.enamlnative;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.wifi.ScanResult;
 import android.os.Build;
 import android.os.HandlerThread;
 import android.os.Handler;
@@ -284,6 +285,48 @@ public class Bridge implements PythonInterpreter.EventListener {
 
         });
 
+        // Convert
+        mGenericPackers.add(new BridgeGenericPacker((id, object)-> {
+            if (object instanceof List) {
+                List objects = (List) object;
+
+                // TODO: Should reuse existing packers for lists
+                return objects.isEmpty() || objects.get(0).getClass()==ScanResult.class;
+            }
+            return false;
+        }, (packer, id, object)->{
+            List<ScanResult> results = (List<ScanResult>) object;
+            packer.packArrayHeader(results.size());
+            for (ScanResult result:results) {
+                int count = 7;
+                if (Build.VERSION.SDK_INT>=23 ) {
+                    count = 9;
+                }
+                packer.packMapHeader(count);
+                packer.packString("mac");
+                packer.packString(result.BSSID);
+                packer.packString("ssid");
+                packer.packString(result.SSID);
+                packer.packString("capabilities");
+                packer.packString(result.capabilities);
+                packer.packString("channel_width");
+                packer.packInt(result.channelWidth);
+                packer.packString("frequency");
+                packer.packInt(result.frequency);
+                packer.packString("rssi");
+                packer.packInt(result.level);
+                packer.packString("timestamp");
+                packer.packLong(result.timestamp);
+
+                if (Build.VERSION.SDK_INT >= 23) {
+                    packer.packString("venue_name");
+                    packer.packString(result.venueName.toString());
+                    packer.packString("operator_name");
+                    packer.packString(result.operatorFriendlyName.toString());
+                }
+            }
+        }));
+
         // Catch any String or CharSequence subclasses
         addGenericPacker(new Class[]{String.class, CharSequence.class}, (packer, id, object)->{
             packer.packString(object.toString());
@@ -292,14 +335,14 @@ public class Bridge implements PythonInterpreter.EventListener {
 
         // Add special packer for objects...
         mGenericPackers.add(
-            new BridgeGenericPacker((id, object)-> id!=IGNORE_RESULT,
-                (packer, id, object)->{
-                    // The callback is returning a newly created object
-                    if (mObjectCache.get(id)==null) {
-                        mObjectCache.put(id, object);
-                    }
-                    packer.packInt(id);
-        }));
+                new BridgeGenericPacker((id, object)-> id!=IGNORE_RESULT,
+                        (packer, id, object)->{
+                            // The callback is returning a newly created object
+                            if (mObjectCache.get(id)==null) {
+                                mObjectCache.put(id, object);
+                            }
+                            packer.packInt(id);
+                        }));
     }
 
     void registerBuiltinUnpackers() {
@@ -1047,7 +1090,7 @@ public class Bridge implements PythonInterpreter.EventListener {
                         packer.packNil();
                         continue;
                     }
-                    
+
                     // Otherwise pack the type name and packed value
                     Class argClass = arg.getClass();
                     String argName = argClass.getCanonicalName(); // How is this null
@@ -1076,7 +1119,7 @@ public class Bridge implements PythonInterpreter.EventListener {
                     }
                 }
             }
-                
+
             packer.close();
         } catch (IOException e) {
             mActivity.showErrorMessage(e);

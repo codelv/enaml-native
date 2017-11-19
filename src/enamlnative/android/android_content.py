@@ -159,5 +159,19 @@ class Intent(JavaBridgeObject):
 
 
 class IntentFilter(JavaBridgeObject):
-    __nativeclass__ = set_default('android.content.Intent')
+    __nativeclass__ = set_default('android.content.IntentFilter')
+    __signature__ = set_default(('java.lang.String',))
+
+
+class BroadcastReceiver(JavaBridgeObject):
+    """ A BroadcastReceiver that delegates to a listener """
+    __nativeclass__ = set_default(
+        'com.codelv.enamlnative.adapters.BridgeBroadcastReceiver')
+
+    setReceiver = JavaMethod(
+        'com.codelv.enamlnative.adapters.BridgeBroadcastReceiver$Receiver')
+
+    #: Delegate receiver callback
+    onReceive = JavaCallback('android.content.Context',
+                             'android.content.Intent')
 

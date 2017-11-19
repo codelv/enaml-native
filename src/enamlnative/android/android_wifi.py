@@ -5,51 +5,87 @@ Distributed under the terms of the MIT License.
 
 The full license is in the file COPYING.txt, distributed with this software.
 
-Created on Nov 16, 2017
+Created on Nov 18, 2017
 
 @author: jrm
 """
-import re
-from atom.api import Atom, List, Float, Unicode, set_default
+from atom.api import List, set_default
 
-from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaProxy
+from .bridge import JavaBridgeObject, JavaMethod
 from .android_activity import Activity
+from .android_content import BroadcastReceiver, IntentFilter
 from .app import AndroidApplication
 
 
-
-
 class WifiManager(JavaBridgeObject):
+    """ Access android's WifiManager. Use the static class methods.
+    
+    To Get networks use: 
+        
+        WifiManager.get_networks().then(on_results)
+        
+    It will request and enable if wifi allowed. Returns None if access is 
+    denied otherwise the list of networks.
+    
+    To check if wifi is enabled use:
+    
+        WifiManager.is_wifi_enabled().then(on_result)
+    
+    Returns None if access is denied otherwise the result
+    
+    
+    To set wifi enabled use:
+        
+        WifiManager.set_wifi_enabled(state=True).then(on_result)
+        
+    Returns None if access is denied otherwise the result
+    
+    """
     _instance = None
     __nativeclass__ = set_default('android.new.wifi.WifiManager')
 
-    ACCESS_FINE_PERMISSION = 'android.permission.ACCESS_FINE_LOCATION'
-    ACCESS_COARSE_PERMISSION = 'android.permission.ACCESS_COARSE_LOCATION'
-    ACCESS_WIFI_STATE_PERMISSION = 'android.permission.ACCESS_WIFI_STATE'
-    CHANGE_WIFI_STATE_PERMISSION = 'android.permission.CHANGE_WIFI_STATE'
+    PERMISSION_ACCESS_FINE_LOCATION = 'android.permission.' \
+                                        'ACCESS_FINE_LOCATION'
+    PERMISSION_ACCESS_COARSE_LOCATION = 'android.permission.' \
+                                        'ACCESS_COARSE_LOCATION'
+    PERMISSION_ACCESS_WIFI_STATE = 'android.permission.ACCESS_WIFI_STATE'
+    PERMISSION_CHANGE_WIFI_STATE = 'android.permission.CHANGE_WIFI_STATE'
 
-    SCAN_RESULTS_AVAILABLE_ACTION = ''
+    PERMISSIONS_REQUIRED = [
+        #PERMISSION_ACCESS_FINE_LOCATION,
+        PERMISSION_ACCESS_COARSE_LOCATION,
+        PERMISSION_ACCESS_WIFI_STATE,
+        PERMISSION_CHANGE_WIFI_STATE
+    ]
 
-    getScanResults = JavaMethod()
-    setWifiEnabled = JavaMethod('boolean')
+    SCAN_RESULTS_AVAILABLE_ACTION = 'android.net.wifi.SCAN_RESULTS'
+
+    getScanResults = JavaMethod(returns='java.util.List')
+    setWifiEnabled = JavaMethod('boolean', returns='boolean')
     isWifiEnabled = JavaMethod(returns='boolean')
-    startScan = JavaMethod()
+    startScan = JavaMethod(returns='boolean')
+    reassociate = JavaMethod(returns='boolean')
+    reconnect = JavaMethod(returns='boolean')
+    removeNetwork = JavaMethod('int', returns='boolean')
+
+    #: List of receivers
+    _receivers = List(BroadcastReceiver)
 
     @classmethod
     def instance(cls):
         """ Get an instance of this service if it was already requested.
 
-        You should request it first using `LocationManager.request()`
+        You should request it first using `WifiManager.get()`
 
         __Example__
 
             :::python
 
-            def on_manager(lm):
+            def on_manager(m):
                 #: Do stuff with it
-                assert lm == LocationManager.instance()
+                assert m == WifiManager.instance()
 
-            LocationManager.get().then(on_manager)
+            WifiManager.get().then(on_manager)
 
 
         """
@@ -86,93 +122,162 @@ class WifiManager(JavaBridgeObject):
         super(WifiManager, self).__init__(*args, **kwargs)
         WifiManager._instance = self
 
+    # -------------------------------------------------------------------------
+    # Public api
+    # -------------------------------------------------------------------------
     @classmethod
-    def start(cls, callback, provider='gps', min_time=1000, min_distance=0):
-        """ Convenience method that checks and requests permission if necessary
-            and if successful calls the callback with a populated `Location` instance on updates.
-
-            Note you must have the permissions in your manifest or requests will be denied
-            immediately.
+    def is_wifi_enabled(cls):
+        """ Check if wifi is currently enabled.
+        
+        Returns
+        --------
+            result: future
+              A future that resolves with the value.
 
         """
         app = AndroidApplication.instance()
         f = app.create_future()
 
-        def on_location(loc):
-            #: Invoke the callback with the parsed location
-            callback(Location(source=loc))
+        def on_permission_result(result):
+            if not result:
+                f.set_result(None)
 
-        def on_success(lm):
-            #: When we have finally have permission
-            lm.onLocationChanged.connect(on_location)
+            def on_ready(m):
+                m.isWifiEnabled().then(f.set_result)
 
-            #: Save a reference to our listener
-            #: because we may want to stop updates
-            listener = LocationManager.LocationListener(lm)
-            lm.listeners.append(listener)
-
-            lm.requestLocationUpdates(provider, min_time, min_distance, listener)
-            app.set_future_result(f, True)
-
-        def on_perm_request_result(allowed):
-            #: When our permission request is accepted or decliend.
-            if allowed:
-                LocationManager.get().then(on_success)
-            else:
-                #: Access denied
-                app.set_future_result(f, False)
-
-        def on_perm_check(allowed):
-            if allowed:
-                LocationManager.get().then(on_success)
-            else:
-                LocationManager.request_permission(fine=provider == 'gps').then(on_perm_request_result)
+            WifiManager.get().then(on_ready)
 
         #: Check permission
-        LocationManager.check_permission(fine=provider == 'gps').then(on_perm_check)
+        app.has_permission(
+            WifiManager.PERMISSION_ACCESS_WIFI_STATE).then(
+            on_permission_result)
+        return f
+
+    @classmethod
+    def set_wifi_enabled(cls, state=True):
+        """ Set the wifi enabled state.
+        
+        Returns
+        --------
+            result: future
+              A future that resolves with whether the operation succeeded.
+
+        """
+        app = AndroidApplication.instance()
+        f = app.create_future()
+
+        def on_permission_result(allowed):
+            if not allowed:
+                #: Permission denied
+                f.set_result(None)
+
+            def on_ready(m):
+                m.setWifiEnabled(state).then(f.set_result)
+
+            WifiManager.get().then(on_ready)
+
+        #: Check permission
+        app.has_permission(
+            WifiManager.PERMISSION_CHANGE_WIFI_STATE).then(
+            on_permission_result)
+        return f
+
+
+    @classmethod
+    def get_networks(cls):
+        """ Get the wifi networks currently available. 
+        
+        Returns
+        --------
+            result: future
+                A future that resolves with the list of networks available
+                or None if wifi could not be enabled (permission denied,
+                etc...)
+
+        """
+        app = AndroidApplication.instance()
+        activity = app.widget
+        f = app.create_future()
+
+        def on_permission_result(result):
+
+            def on_ready(mgr):
+                #: Register a receiver so we know when the scan
+                #: is complete
+                receiver = BroadcastReceiver()
+                receiver.setReceiver(receiver.getId())
+
+                def on_scan_complete(context, intent):
+                    #: Finally, pull the scan results
+                    mgr.getScanResults().then(f.set_result)
+
+                    #: Cleanup receiver
+                    mgr._receivers.remove(receiver)
+                    activity.unregisterReceiver(receiver)
+
+                def on_wifi_enabled(enabled):
+                    if not enabled:
+                        #: Access denied or failed to enable
+                        f.set_result(None)
+
+                        #: Cleanup receiver
+                        mgr._receivers.remove(receiver)
+                        activity.unregisterReceiver(receiver)
+                        return
+
+                    #: Hook up a callback that's fired when the scan
+                    #: results are ready
+                    receiver.onReceive.connect(on_scan_complete)
+
+                    #: Save a reference as this must stay alive
+                    mgr._receivers.append(receiver)
+
+                    #: Register the receiver
+                    intent_filter = IntentFilter(
+                            WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+                    activity.registerReceiver(receiver,
+                                              intent_filter)
+
+                    #: Trigger a scan (which "should" eventually
+                    #: call the on on_scan_complete)
+                    mgr.startScan()
+
+                #: Enable if needed
+                mgr.setWifiEnabled(True).then(on_wifi_enabled)
+
+            #: Get the service
+            WifiManager.get().then(on_ready)
+
+        #: Request permissions
+        cls.request_permission().then(on_permission_result)
 
         return f
 
     @classmethod
-    def stop(self):
-        """ Stops location updates if currently updating.
-
-        """
-        manager = LocationManager.instance()
-        if manager:
-            for l in manager.listeners:
-                manager.removeUpdates(l)
-            manager.listeners = []
-
-
-    @classmethod
-    def check_permission(cls, fine=True):
-        """ Returns a future that returns a boolean indicating if permission is currently
-            granted or denied. If permission is denied, you can request using
-            `LocationManager.request_permission()` below.
-
+    def request_permission(cls):
+        """ Requests permission and returns an future result that returns a 
+        boolean indicating if the permission was granted or denied.
+         
         """
         app = AndroidApplication.instance()
-        permission = cls.ACCESS_FINE_PERMISSION if fine else cls.ACCESS_COARSE_PERMISSION
-        return app.has_permission(permission)
-
-    @classmethod
-    def request_permission(cls, fine=True):
-        """ Requests permission and returns an async result that returns a boolean
-            indicating if the permission was granted or denied. """
-        app = AndroidApplication.instance()
-        permission = cls.ACCESS_FINE_PERMISSION if fine else cls.ACCESS_COARSE_PERMISSION
         f = app.create_future()
 
         def on_result(perms):
-            app.set_future_result(f, perms[permission])
+            allowed = True
+            for p in perms:
+                allowed = allowed and perms[p]
+            app.set_future_result(f, allowed)
 
-        app.request_permissions([permission]).then(on_result)
+        app.request_permissions(
+            [WifiManager.PERMISSION_ACCESS_FINE_LOCATION]).then(on_result)
 
         return f
 
     def __del__(self):
-        """ Remove any listeners before destroying """
-        self.stop()
-        super(LocationManager, self).__del__()
+        """ Remove any receivers before destroying """
+        app = AndroidApplication.instance()
+        activity = app.widget
+        for r in self._receivers:
+            activity.unregisterReceiver(r)
+        super(WifiManager, self).__del__()
 
