@@ -1,14 +1,6 @@
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 
-from enamlnative.android.android_view_pager import AndroidViewPager, PageTransformer
-
-def set_transition(self, transition):
-    assert False
-    self.widget.setPageTransformer(True,
-                                   PageTransformer.from_name(transition))
-
-AndroidViewPager.set_transition = set_transition
 
 enamldef Navigation(Toolbar): toolbar:
     #: An "iOS" like navigation where the text scrolls out when the pages change

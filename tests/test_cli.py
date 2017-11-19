@@ -21,7 +21,7 @@ def test_init_build():
     if 'TRAVIS' in os.environ:
         return  #: Doesn't work on travis
     try:
-        enamlnative = sh.Command('./enaml-native')
+        enamlnative = sh.Command('enaml-native')
         bundle_id = 'com.mycompany.myapp'
         print(enamlnative('init', 'MyApp', bundle_id, 'tmp/test_cli/'))
         with cd('tmp/test_cli/MyApp'):
