@@ -87,7 +87,7 @@ class AndroidApplication(BridgedApplication):
         f = self.create_future()
 
         #: Old versions of android did permissions at install time
-        if self.api_level < 24:
+        if self.api_level < 23:
             f.set_result(True)
             return f
 
@@ -107,7 +107,7 @@ class AndroidApplication(BridgedApplication):
         f = self.create_future()
 
         #: Old versions of android did permissions at install time
-        if self.api_level < 24:
+        if self.api_level < 23:
             f.set_result({p: True for p in permissions})
             return f
 
