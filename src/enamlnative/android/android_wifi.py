@@ -60,7 +60,7 @@ class WifiManager(JavaBridgeObject):
     __nativeclass__ = set_default('android.new.wifi.WifiManager')
 
     PERMISSION_ACCESS_FINE_LOCATION = 'android.permission.' \
-                                        'ACCESS_FINE_LOCATION'
+                                      'ACCESS_FINE_LOCATION'
     PERMISSION_ACCESS_COARSE_LOCATION = 'android.permission.' \
                                         'ACCESS_COARSE_LOCATION'
     PERMISSION_ACCESS_WIFI_STATE = 'android.permission.ACCESS_WIFI_STATE'
@@ -84,8 +84,8 @@ class WifiManager(JavaBridgeObject):
     removeNetwork = JavaMethod('int', returns='boolean')
     addNetwork = JavaMethod('android.net.wifi.WifiConfiguration',
                             returns='int')
-    enableNetwork = JavaMethod('int', 'boolean')
-    disconnect = JavaMethod(returns='boolean')
+    enableNetwork = JavaMethod('int', 'boolean', returns='boolean')
+    _disconnect = JavaMethod(returns='boolean')
     getConnectionInfo = JavaMethod(returns='android.net.wifi.WifiInfo')
     getDhcpInfo = JavaMethod(returns='android.net.DhcpInfo')
 
@@ -141,6 +141,10 @@ class WifiManager(JavaBridgeObject):
             raise RuntimeError("Only one instance of WifiManager can exist! "
                                "Use WifiManager.instance() instead!")
         super(WifiManager, self).__init__(*args, **kwargs)
+
+        #: Change the name of the _disconnect JavaMethod
+        WifiManager._disconnect.set_name('disconnect')
+
         WifiManager._instance = self
 
     # -------------------------------------------------------------------------
@@ -259,7 +263,7 @@ class WifiManager(JavaBridgeObject):
 
                     #: Register the receiver
                     intent_filter = IntentFilter(
-                            WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+                        WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
                     activity.registerReceiver(receiver,
                                               intent_filter)
 
@@ -290,7 +294,7 @@ class WifiManager(JavaBridgeObject):
                  successful. Will be set to None if the change network 
                  permission is denied.
  
-         """
+        """
         app = AndroidApplication.instance()
         f = app.create_future()
 
@@ -357,7 +361,8 @@ class WifiManager(JavaBridgeObject):
                 def on_network_added(net_id):
                     if net_id == -1:
                         f.set_result(False)
-                        print("Invalid network configuration id {}".format(net_id))
+                        print("Warning: Invalid network "
+                              "configuration id {}".format(net_id))
                         return
                     mgr.enableNetwork(net_id, True).then(on_network_enabled)
 
@@ -367,10 +372,11 @@ class WifiManager(JavaBridgeObject):
                         #: which state it failed at...
                         f.set_result(None)
                         return
+
                     mgr.reconnect().then(f.set_result)
 
                 #: Enable if needed
-                mgr.disconnect().then(on_disconnect)
+                mgr._disconnect().then(on_disconnect)
 
             #: Get the service
             WifiManager.get().then(on_ready)
@@ -378,7 +384,6 @@ class WifiManager(JavaBridgeObject):
         #: Request permissions
         cls.request_permission(
             WifiManager.PERMISSIONS_REQUIRED).then(on_permission_result)
-
         return f
 
     @classmethod
