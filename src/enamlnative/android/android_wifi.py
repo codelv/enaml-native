@@ -395,7 +395,7 @@ class WifiManager(JavaBridgeObject):
          --------
              result: future
                  A future that resolves with a dict of the connection info
-                 or None if an error occured (ie permission denied).s
+                 or None if an error occurred (ie permission denied).s
  
          """
         app = AndroidApplication.instance()

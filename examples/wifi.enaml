@@ -91,7 +91,8 @@ enamldef ContentView(Flexbox): view:
                     text << ssid
                 EditText: pwd:
                     placeholder = "Key"
-                    input_type << "text" if show_password else "text_password"
+                    input_type << ("text_visible_password"
+                                    if show_password else "text_password")
                 CheckBox:
                     text = "Show password"
                     checked := show_password

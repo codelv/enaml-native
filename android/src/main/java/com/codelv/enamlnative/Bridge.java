@@ -310,6 +310,13 @@ public class Bridge implements PythonInterpreter.EventListener {
 
         addPacker(WifiInfo.class, (packer, id, object)-> {
             WifiInfo info = (WifiInfo) object;
+
+            // If not connected return null instead of all the dummy values
+            if (info.getNetworkId()==-1) {
+                packer.packNil();
+                return;
+            }
+
             int count = 9;
             if (Build.VERSION.SDK_INT >= 21) {
                 count += 1;
