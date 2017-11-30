@@ -13,11 +13,18 @@ Created on July 18, 2017
 import time
 from atom.api import (Atom, Callable, Dict, List, ForwardInstance, Int,
                       Float, Bool, Unicode, Instance, set_default)
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, encode
 from .app import AndroidApplication
+from httplib import responses
 
 
-class LoopjRequest(JavaBridgeObject):
+class LoopjHeader(JavaBridgeObject):
+    __nativeclass__ = set_default(
+        'cz.msebera.android.httpclient.message.BasicHeader')
+    __signature__ = set_default(('java.lang.String', 'java.lang.String'))
+
+
+class LoopjRequestParams(JavaBridgeObject):
     """ Since this is passed with every request, use this for listening for 
     events
     
@@ -74,14 +81,42 @@ class LoopjAsyncHttpClient(JavaBridgeObject):
         super(LoopjAsyncHttpClient, self).__init__(*args, **kwargs)
         LoopjAsyncHttpClient._instance = self
 
-    get = JavaMethod('java.lang.String',
+    setBasicAuth = JavaMethod('java.lang.String', 'java.lang.String')
+    setTimeout = JavaMethod('int')
+    setConnectTimeout = JavaMethod('int')
+    setUserAgent = JavaMethod('java.lang.String')
+
+    get = JavaMethod('android.content.Context', 'java.lang.String',
+                     '[Lcz.msebera.android.httpclient.Header;',
                      'com.loopj.android.http.RequestParams',
                      'com.loopj.android.http.ResponseHandlerInterface')
-    post = JavaMethod('java.lang.String',
+    post = JavaMethod('android.content.Context', 'java.lang.String',
+                      '[Lcz.msebera.android.httpclient.Header;',
+                      'com.loopj.android.http.RequestParams',
+                      'com.loopj.android.http.ResponseHandlerInterface')
+    put = JavaMethod('android.content.Context', 'java.lang.String',
+                     '[Lcz.msebera.android.httpclient.Header;',
+                     'com.loopj.android.http.RequestParams',
+                     'com.loopj.android.http.ResponseHandlerInterface')
+    delete = JavaMethod('android.content.Context', 'java.lang.String',
+                        '[Lcz.msebera.android.httpclient.Header;',
+                        'com.loopj.android.http.RequestParams',
+                        'com.loopj.android.http.ResponseHandlerInterface')
+    head = JavaMethod('android.content.Context', 'java.lang.String',
+                      '[Lcz.msebera.android.httpclient.Header;',
                       'com.loopj.android.http.RequestParams',
                       'com.loopj.android.http.ResponseHandlerInterface')
 
-    #setCookieStore = JavaMethod('')
+
+
+class HttpError(Exception):
+    def __init__(self, code, message=None, response=None):
+        self.code = code
+        self.message = message or responses.get(code, "Unknown")
+        self.response = response
+
+    def __str__(self):
+        return "HTTP %d: %s" %(self.code, self.message)
 
 
 class HttpRequest(Atom):
@@ -92,13 +127,19 @@ class HttpRequest(Atom):
     method = Unicode()
 
     #: Request headers
-    headers = List()
+    headers = Dict()
 
     #: Retry count
     retries = Int()
 
+    #: Request parameter data
+    data = Dict()
+
     #: Response created
-    response = ForwardInstance(lambda:HttpResponse)
+    response = ForwardInstance(lambda: HttpResponse)
+
+    #: The actual LoopjRequest object
+    params = Instance(LoopjRequestParams)
 
     #: Response handler
     handler = Instance(LoopjAsyncHttpResponseHandler)
@@ -110,11 +151,11 @@ class HttpRequest(Atom):
     streaming_callback = Callable()
 
     #: Start time
-    time = Float()
+    start_time = Float()
 
     def __init__(self, *args, **kwargs):
         super(HttpRequest, self).__init__(*args, **kwargs)
-        self.time = time.time()
+        self.start_time = time.time()
         self.response = HttpResponse(request=self)
 
     def _default_handler(self):
@@ -133,6 +174,18 @@ class HttpRequest(Atom):
 
         return handler
 
+    def _default_params(self):
+        """ RequestParams to send with the request.
+        """
+        #: Create the RequestParams
+        params = LoopjRequestParams()
+
+        #: Update body
+        for k, v in self.data.items():
+            params.put(k, v)
+
+        return params
+
     def on_start(self):
         pass
 
@@ -144,31 +197,35 @@ class HttpRequest(Atom):
 
     def on_success(self, status, headers, data):
         r = self.response
-        r.status_code = status
+        r.code = status
         r.headers = headers.split("\n")
         if data:
-            r.content = data
+            r.body = data
+        r.progress = 100
         r.ok = True
 
     def on_failure(self, status, headers, data, error):
         r = self.response
-        r.status_code = status
+        r.code = status
         r.headers = headers.split("\n")
-        r.reason = error
+        if error:
+            r.reason = error
+        r.error = HttpError(status, error, r)
         if data:
-            r.content = data
+            r.body = data
         r.ok = False
 
     def on_finish(self):
         r = self.response
-        r.time = time.time()
+        r.request_time = time.time() - self.start_time
         if self.callback:
             self.callback(r)
 
     def on_progress(self, written, total):
         r = self.response
         r.content_length = total
-        r.progress = int(100*written/total)
+        if total:
+            r.progress = int(100*written/total)
 
     def on_progress_data(self, data):
         if self.streaming_callback:
@@ -176,29 +233,36 @@ class HttpRequest(Atom):
 
 
 class HttpResponse(Atom):
+    """ The response object returned to an AsyncHttpClient fetch callback.
+    It is based on the the tornado HttpResponse object.
+    
+    """
 
     #: Request that created this response
     request = Instance(HttpRequest)
 
-    #: Response headers
+    #: Numeric HTTP status code
+    code = Int()
+
+    #: Reason phrase for the status code
+    reason = Unicode()
+
+    #: Response headers list of strings
     headers = List()
 
     #: Result success
     ok = Bool()
 
     #: Response body
-    #: if a streaming_callback is given to the request
-    #: then this is NOT used
-    content = Unicode()
+    #: Note: if a streaming_callback is given to the request
+    #: then this is NOT used and will be empty
+    body = Unicode()
 
     #: Size
     content_length = Int()
 
-    #: Result
-    status_code = Int()
-
     #: Error message
-    reason = Unicode()
+    error = Instance(HttpError)
 
     #: Response headers
     headers = List()
@@ -207,21 +271,27 @@ class HttpResponse(Atom):
     progress = Int()
 
     #: Done time
-    time = Float()
+    request_time = Float()
 
 
 class AsyncHttpClient(Atom):
-    """ This is the API you should actually use
+    """ An AsyncHttpClient that lets you fetch using a format similar to 
+    tornado's AsyncHTTPClient but using the Android native Loopj library. 
+    
+    This is done instead of using a python library so it handles all
+    SSL stuff for us. Otherwise we have to compile and link all the SSL
+    libraries with python which makes the app huge (at least 5Mb in ssl 
+    libs alone) and the build process even more complicated.
 
     """
-    #: App event loop
-    app = Instance(AndroidApplication, factory=AndroidApplication.instance)
-
     #: Client config
     config = Dict()
 
+    #: The client that actually does the request
     client = Instance(LoopjAsyncHttpClient)
 
+    #: Pending requests
+    #: these must be held so the bridge doesn't destroy them later
     requests = List()
 
     def _default_client(self):
@@ -229,38 +299,61 @@ class AsyncHttpClient(Atom):
         return LoopjAsyncHttpClient.instance() or LoopjAsyncHttpClient()
 
     def fetch(self, url, callback=None, raise_error=True, **kwargs):
-        """  Fetch
+        """  Fetch the given url and fire the callback when ready. Optionally
+        pass a `streaming_callback` to handle data from large requests.
+        
+        Parameters
+        ----------
+            url: string
+                The url to access.
+            callback: callable
+                The callback to invoke when the request completes. You can
+                also use the return value.
+            kwargs: 
+                The arguments to pass to the `HttpRequest` object. See it
+                for which values are valid.
+        
+        Returns
+        --------
+            result: Future
+                A future that resolves with the `HttpResponse` object when
+                the request is complete.
 
         """
-        future = self.app.create_future()
+        app = AndroidApplication.instance()
+        f = app.create_future()
 
         #: Get the method to use
         method = getattr(self.client, kwargs.get('method', 'get').lower())
 
-        #: Create the RequestParams
-        params = LoopjRequest()
+        #: Create the request object
         request = HttpRequest(url=url, **kwargs)
 
         #: Set callback for when response is in
         if callback is not None:
-            future.then(callback)
+            f.then(callback)
 
         def handle_response(response):
             """ Callback when the request is complete. """
             self.requests.remove(response.request)
-            self.app.set_future_result(future, response)
+            f.set_result(response)
 
         request.callback = handle_response
 
-        #: This is a bit confusing
-        #: pass the url, request params, and the id to use as a listener
-        #: to the LoopjAsyncHttpClient get or post command.
-        method(url, params, request.handler)
+        #: Create a header object and hold onto it until the request fires
+        headers = [LoopjHeader(k, v) for k, v in request.headers.items()]
 
-        #: Save a reference (is this needed?)
+        #: Send the request
+        method(app, request.url, [encode(h) for h in headers],
+               request.params, request.handler)
+
+        #: Save a reference
         self.requests.append(request)
-        future.request = request
-        return future
+
+        #: Save it on the future so it can be accessed and observed
+        #: from a view if needed
+        f.request = request
+        return f
 
     def close(self):
         pass
