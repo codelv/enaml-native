@@ -28,6 +28,9 @@ class ProxyWebView(ProxyViewGroup):
     def set_url(self, url):
         raise NotImplementedError
 
+    def set_source(self, source):
+        raise NotImplementedError
+
     def do_reload(self):
         raise NotImplementedError
 
@@ -70,8 +73,11 @@ class WebView(ViewGroup):
     #: State
     loading = d_(Bool(), writable=False)
 
-    #: Loads the given URL.
+    #: Loads the URL (if given)
     url = d_(Unicode())
+
+    #: Loads the source (if given)
+    source = d_(Unicode())
 
     #: Reloads the current URL.
     reload = d_(Event())
@@ -94,7 +100,7 @@ class WebView(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('javascript_enabled', 'url', 'reload',
+    @observe('javascript_enabled', 'url', 'reload', 'source',
              'go_forward', 'go_back', 'zoom_in', 'zoom_out')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.

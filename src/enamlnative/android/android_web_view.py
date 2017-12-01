@@ -20,6 +20,8 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 class WebView(ViewGroup):
     __nativeclass__ = set_default('android.webkit.WebView')
     loadUrl = JavaMethod('java.lang.String')
+    loadData = JavaMethod('java.lang.String', 'java.lang.String',
+                          'java.lang.String')
     setWebViewClient = JavaMethod('android.webkit.WebViewClient')
     reload = JavaMethod()
     goBack = JavaMethod()
@@ -90,7 +92,9 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
         if d.javascript_enabled:
             self.set_javascript_enabled(d.javascript_enabled)
 
-        if d.url:
+        if d.source:
+            self.set_source(d.source)
+        elif d.url:
             self.set_url(d.url)
 
     def destroy(self):
@@ -143,6 +147,13 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
     # -------------------------------------------------------------------------
     def set_url(self, url):
         self.widget.loadUrl(url)
+
+    def set_source(self, source):
+        """ Set the raw HTML of this page to load. For loading from
+        a file or http resource use the `url` instead.
+        
+        """
+        self.widget.loadData(source, 'text/html', None)
 
     def set_javascript_enabled(self, enabled):
         self.client.setJavaScriptEnabled(enabled)
