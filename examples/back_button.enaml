@@ -1,0 +1,26 @@
+""" Demonstrates handling the back button on Android
+
+"""
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+from enamlnative.android.app import AndroidApplication
+
+app = AndroidApplication.instance()
+
+enamldef ContentView(Flexbox): view:
+    flex_direction = "column"
+    attr handled = True
+
+    func on_back_pressed(change):
+        lbl.text = str(change)
+        #: Don't actually go back
+        change['value']['handled'] = view.handled
+
+    activated::
+        app.observe('back_pressed',on_back_pressed)
+
+    TextView: lbl:
+        text = "Press the back button"
+    CheckBox:
+        text = "Prevent default"
+        checked := view.handled

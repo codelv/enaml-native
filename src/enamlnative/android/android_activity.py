@@ -69,3 +69,11 @@ class Activity(Context):
     #: Called with the lifecycle state like 'pause', 'resume', etc...
     onActivityLifecycleChanged = JavaCallback('java.lang.String')
 
+    #: Back pressed listener
+    addBackPressedListener = JavaMethod(
+        'com.codelv.enamlnative.EnamlActivity$BackPressedListener')
+    removeBackPressedListener = JavaMethod(
+        'com.codelv.enamlnative.EnamlActivity$BackPressedListener')
+
+    #: Called with the lifecycle state like 'pause', 'resume', etc...
+    onBackPressed = JavaCallback(returns='boolean')

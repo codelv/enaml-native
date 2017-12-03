@@ -9,7 +9,7 @@ The full license is in the file COPYING.txt, distributed with this software.
 
 """
 import nativehooks #: Created by the ndk-build in pybridge.c
-from atom.api import Float, Value, Int, List, Unicode, Typed, Dict
+from atom.api import Float, Value, Int, List, Unicode, Typed, Dict, Event
 from enaml.application import ProxyResolver
 from . import factories
 from .android_activity import Activity
@@ -46,6 +46,10 @@ class AndroidApplication(BridgedApplication):
     #: Loaded immediately
     api_level = Int()
 
+    #: Triggered when the back button is pressed. This can be observed
+    #: to handle back presses.
+    back_pressed = Event(dict)
+
     #: Permission code increments on each request
     _permission_code = Int()
 
@@ -76,6 +80,10 @@ class AndroidApplication(BridgedApplication):
         self.widget.addActivityLifecycleListener(self.widget.getId())
         self.widget.onActivityLifecycleChanged.connect(
             self.on_activity_lifecycle_changed)
+
+        #: Add BackPressedListener to trigger the event
+        self.widget.addBackPressedListener(self.widget.getId())
+        self.widget.onBackPressed.connect(self.on_back_pressed)
 
     # -------------------------------------------------------------------------
     # App API Implementation
@@ -161,6 +169,22 @@ class AndroidApplication(BridgedApplication):
         
         """
         self.state = state
+
+    def on_back_pressed(self):
+        """ Fire the `back_pressed` event with a dictionary with a 'handled'
+        key when the back hardware button is pressed
+        
+        If 'handled' is set to any value that evaluates to True the
+        default event implementation will be ignored.
+        
+        """
+        try:
+            event = {'handled': False}
+            self.back_pressed(event)
+            return bool(event.get('handled', False))
+        except Exception as e:
+            #: Must return a boolean or we will cause android to abort
+            return False
 
     # --------------------------------------------------------------------------
     # Bridge API Implementation

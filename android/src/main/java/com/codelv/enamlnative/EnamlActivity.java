@@ -41,6 +41,7 @@ public class EnamlActivity extends AppCompatActivity {
     PermissionResultListener mPermissionResultListener;
     final List<ActivityResultListener> mActivityResultListeners = new ArrayList<ActivityResultListener>();
     final List<ActivityLifecycleListener> mActivityLifecycleListeners = new ArrayList<ActivityLifecycleListener>();
+    final List<BackPressedListener> mBackPressedListeners = new ArrayList<BackPressedListener>();
 
     final HashMap<String, Long> mProfilers = new HashMap<>();
     final Handler mHandler = new Handler();
@@ -260,6 +261,21 @@ public class EnamlActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Dispatch the back pressed event to all listeners. If any of them
+     * return true then skip the default handler.
+     */
+    @Override
+    public void onBackPressed(){
+        boolean handled = false;
+        for (BackPressedListener listener: mBackPressedListeners) {
+            handled = handled || listener.onBackPressed();
+        }
+        if (!handled) {
+            super.onBackPressed();
+        }
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -384,6 +400,29 @@ public class EnamlActivity extends AppCompatActivity {
         void onActivityLifecycleChanged(String state);
     }
 
+
+    /**
+     * Add a back press listener to use. Meant to be used from python
+     * so it can receive events from java when the back button is pressed.
+     * @param listener
+     */
+    public void addBackPressedListener(BackPressedListener listener) {
+        mBackPressedListeners.add(listener);
+    }
+
+    public void removeBackPressedListener(BackPressedListener listener) {
+        mBackPressedListeners.remove(listener);
+    }
+
+    public interface BackPressedListener {
+        /**
+         * Called when the back button is pressed. All listeners will be called. If
+         * one of them return true the default handler will NOT be invoked.
+         *
+         * Handlers must be fast or they will block the UI.
+         */
+        boolean onBackPressed();
+    }
 
     /**
      * Return build info. Called from python at startup to get info like screen density
