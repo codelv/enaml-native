@@ -1,6 +1,5 @@
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
-from enamlnative.core.http import AsyncHttpClient
 
 enamldef ContentView(Flexbox): view:
     flex_direction = "column"
