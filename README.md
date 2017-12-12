@@ -11,7 +11,7 @@ I made this because wanted to have a more "React Native" like environment that:
 2. Uses native widgets (Android / iOS)
 3. Can be run from Android Studio / XCode (ie no bootstraps)
 4. Uses enaml's models, and declarative and dynamic widget framework instead of kvlang
-5. Versioned "packages" and "recipes" than can be installed/updated/removed to make repeatable builds
+5. Uses versioned "packages" and "recipes" than can be installed/updated/removed to make repeatable builds (like rnpm)
 
 > Android apps are currently working and have a lot of components. 
 iOS is currently broken, and is limited to only a few components at the moment
@@ -45,6 +45,7 @@ Created a package? Send a PR and add it here!
 2. Layouts with flexbox
 3. Live app code reloading (like react-native's live reload)
 4. Versioned package management and native library linking
+5. Remote debugging with your favorite IDE (like react-native's remote debugger)
 
 ### Apps ###
 
