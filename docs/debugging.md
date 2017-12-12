@@ -1,8 +1,9 @@
 
 ### Remote debugging
-~~Currently there is no `live` debugger where you can breakpoint and step through code like in react-native. There are a few helpful things you can do to make life easier though.~~
 
 You can now enable and use remote debugging in enaml-native apps!  This allows you to run python locally on your system but still control the android phone/app over the bridge.  You can then use an IDE with a debugger like [PyDev](http://www.pydev.org/) or [PyCharm](https://www.jetbrains.com/pycharm/) (or android studio with the Python plugins) to breakpoint and step through code.
+
+[![Remote debugging in enaml native](https://img.youtube.com/vi/XpCKBH5sGcM/0.jpg)](https://youtu.be/XpCKBH5sGcM)
 
 #### Installing
 
