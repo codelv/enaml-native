@@ -14,7 +14,7 @@ import sys
 import traceback
 from enamlnative.widgets.api import *
 from enaml.core.api import Conditional, Looper
-from enamlnative.core.http import AsyncHttpClient
+from enamlnative.core.api import AsyncHttpClient
 from datetime import datetime
 
 enamldef HBox(LinearLayout):

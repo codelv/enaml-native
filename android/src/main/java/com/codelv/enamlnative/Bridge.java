@@ -16,6 +16,7 @@ import android.view.View;
 import android.util.Log;
 
 import com.codelv.enamlnative.python.PythonInterpreter;
+import com.codelv.enamlnative.python.RemotePythonInterpreter;
 
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
@@ -1460,7 +1461,11 @@ public class Bridge implements PythonInterpreter.EventListener {
                 } catch (IOException e) {
                     mActivity.showErrorMessage(e);
                 }
-                PythonInterpreter.sendEvents(packer.toByteArray());
+                if (BuildConfig.DEV_REMOTE_DEBUG) {
+                    RemotePythonInterpreter.sendEvents(packer.toByteArray());
+                } else {
+                    PythonInterpreter.sendEvents(packer.toByteArray());
+                }
             }
         }, mEventDelay);
     }

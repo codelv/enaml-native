@@ -15,7 +15,8 @@ from atom.api import (Atom, Callable, Dict, List, ForwardInstance, Int,
                       Float, Bool, Unicode, Instance, set_default)
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, encode
 from .app import AndroidApplication
-from httplib import responses
+from ..core.http import (HttpRequest, HttpError, HttpResponse,
+                         AbstractAsyncHttpClient)
 
 
 class LoopjHeader(JavaBridgeObject):
@@ -108,53 +109,15 @@ class LoopjAsyncHttpClient(JavaBridgeObject):
                       'com.loopj.android.http.ResponseHandlerInterface')
 
 
-
-class HttpError(Exception):
-    def __init__(self, code, message=None, response=None):
-        self.code = code
-        self.message = message or responses.get(code, "Unknown")
-        self.response = response
-
-    def __str__(self):
-        return "HTTP %d: %s" %(self.code, self.message)
-
-
-class HttpRequest(Atom):
-    #: Request url
-    url = Unicode()
-
-    #: Request method
-    method = Unicode()
-
-    #: Request headers
-    headers = Dict()
-
-    #: Retry count
-    retries = Int()
-
-    #: Request parameter data
-    data = Dict()
-
-    #: Response created
-    response = ForwardInstance(lambda: HttpResponse)
-
+class AndroidHttpRequest(HttpRequest):
     #: The actual LoopjRequest object
     params = Instance(LoopjRequestParams)
 
     #: Response handler
     handler = Instance(LoopjAsyncHttpResponseHandler)
 
-    #: Called when complete
-    callback = Callable()
-
-    #: Streaming callback
-    streaming_callback = Callable()
-
-    #: Start time
-    start_time = Float()
-
     def __init__(self, *args, **kwargs):
-        super(HttpRequest, self).__init__(*args, **kwargs)
+        super(AndroidHttpRequest, self).__init__(*args, **kwargs)
         self.start_time = time.time()
         self.response = HttpResponse(request=self)
 
@@ -232,49 +195,7 @@ class HttpRequest(Atom):
             self.streaming_callback(data)
 
 
-class HttpResponse(Atom):
-    """ The response object returned to an AsyncHttpClient fetch callback.
-    It is based on the the tornado HttpResponse object.
-    
-    """
-
-    #: Request that created this response
-    request = Instance(HttpRequest)
-
-    #: Numeric HTTP status code
-    code = Int()
-
-    #: Reason phrase for the status code
-    reason = Unicode()
-
-    #: Response headers list of strings
-    headers = List()
-
-    #: Result success
-    ok = Bool()
-
-    #: Response body
-    #: Note: if a streaming_callback is given to the request
-    #: then this is NOT used and will be empty
-    body = Unicode()
-
-    #: Size
-    content_length = Int()
-
-    #: Error message
-    error = Instance(HttpError)
-
-    #: Response headers
-    headers = List()
-
-    #: Progress
-    progress = Int()
-
-    #: Done time
-    request_time = Float()
-
-
-class AsyncHttpClient(Atom):
+class AsyncHttpClient(AbstractAsyncHttpClient):
     """ An AsyncHttpClient that lets you fetch using a format similar to 
     tornado's AsyncHTTPClient but using the Android native Loopj library. 
     

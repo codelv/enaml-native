@@ -108,12 +108,14 @@ class BridgedApplication(Application):
     # -------------------------------------------------------------------------
     # BridgedApplication Constructor
     # -------------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """ Initialize the event loop error handler.  Subclasses must properly
         initialize the proxy resolver.
         
         """
-        super(BridgedApplication, self).__init__()
+        super(BridgedApplication, self).__init__(*args, **kwargs)
+        if self.dev:
+            self.start_dev_session()
         self.init_error_handler()
         self.load_plugin_widgets()
         self.load_plugin_factories()
@@ -126,9 +128,6 @@ class BridgedApplication(Application):
         using either twisted or tornado.
         
         """
-        if self.dev:
-            self.start_dev_session()
-
         self.loop.start()
 
     def stop(self):

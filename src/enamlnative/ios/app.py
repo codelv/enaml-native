@@ -130,11 +130,11 @@ class IPhoneApplication(BridgedApplication):
     # -------------------------------------------------------------------------
     # IPhoneApplication Constructor
     # -------------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """ Initialize a IPhoneApplication.
         
         """
-        super(IPhoneApplication, self).__init__()
+        super(IPhoneApplication, self).__init__(*args, **kwargs)
         self.resolver = ProxyResolver(factories=factories.IOS_FACTORIES)
 
     # -------------------------------------------------------------------------

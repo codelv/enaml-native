@@ -3,12 +3,13 @@ package com.codelv.enamlnative.packages;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.codelv.enamlnative.AssetExtractor;
+import com.codelv.enamlnative.BuildConfig;
 import com.codelv.enamlnative.EnamlActivity;
 import com.codelv.enamlnative.EnamlPackage;
 import com.codelv.enamlnative.python.PythonInterpreter;
+import com.codelv.enamlnative.python.RemotePythonInterpreter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -100,12 +101,18 @@ public class PythonPackage implements EnamlPackage {
             // Get the extracted assets directory
             String pythonPath = assetExtractor.getAssetsDataDir() + path;
             String nativePath = mActivity.getApplicationInfo().nativeLibraryDir;
+
             // Initialize python
             // Note: This must be NOT done in the UI thread!
-            int result = PythonInterpreter.start(pythonPath, nativePath);
-            Log.i(TAG, "Python main() finished with code: "+result);
-            // Done
-            PythonInterpreter.stop();
+            if (BuildConfig.DEV_REMOTE_DEBUG) {
+                int result = RemotePythonInterpreter.start(pythonPath, nativePath);
+                Log.i(TAG, "Python main() finished with code: "+result);
+                PythonInterpreter.stop();
+            } else {
+                int result = PythonInterpreter.start(pythonPath, nativePath);
+                Log.i(TAG, "Python main() finished with code: "+result);
+                PythonInterpreter.stop();
+            }
 
             return pythonPath;
         }

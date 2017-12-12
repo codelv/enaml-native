@@ -68,14 +68,18 @@ class AndroidApplication(BridgedApplication):
     # -------------------------------------------------------------------------
     # AndroidApplication Constructor
     # -------------------------------------------------------------------------
-    def __init__(self, activity=None):
+    def __init__(self, *args, **kwargs):
         """ Initialize a AndroidApplication. Uses jnius to retrieve
             an instance of the activity.
             
         """
-        super(AndroidApplication, self).__init__()
+        super(AndroidApplication, self).__init__(*args, **kwargs)
         self.resolver = ProxyResolver(factories=factories.ANDROID_FACTORIES)
 
+    def init_widget(self):
+        """ Initialize on the first call
+        
+        """
         #: Add a ActivityLifecycleListener to update the application state
         self.widget.addActivityLifecycleListener(self.widget.getId())
         self.widget.onActivityLifecycleChanged.connect(
@@ -205,6 +209,7 @@ class AndroidApplication(BridgedApplication):
                 self.build_info = info
                 self._show_view()
 
+            self.init_widget()
             self.widget.getBuildInfo().then(on_build_info)
         else:
             self._show_view()
