@@ -28,6 +28,7 @@ class Activity(Context):
     startTrace = JavaMethod('java.lang.String')
     stopTrace = JavaMethod('java.lang.String')
     resetBridgeStats = JavaMethod()
+    resetBridgeCache = JavaMethod()
 
     setView = JavaMethod('android.view.View')
     showLoading = JavaMethod('java.lang.String')

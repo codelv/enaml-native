@@ -39,11 +39,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -129,8 +126,13 @@ public class Bridge implements PythonInterpreter.EventListener {
         mObjectCache.put(-1, mContext);
         mBridgeHandlerThread.start();
         mBridgeHandler = new Handler(mBridgeHandlerThread.getLooper());
-        // Add ourself as a listener
-        PythonInterpreter.addEventListener(this);
+
+        // Add this as a listener
+        if (BuildConfig.DEV_REMOTE_DEBUG) {
+            RemotePythonInterpreter.addEventListener(this);
+        } else {
+            PythonInterpreter.addEventListener(this);
+        }
 
         // Register default encoders
         registerBuiltinPackers();
@@ -1058,6 +1060,10 @@ public class Bridge implements PythonInterpreter.EventListener {
     public void setResult(int objId, Value result) {
         try {
             BridgeFuture<Object> future = mResultCache.get(objId);
+            if (future==null) {
+                mActivity.showErrorMessage("Attempt to set the result that was destroyed");
+                return;
+            }
             UnpackedValues uv = new UnpackedValues(0, new Value[]{result});
             future.setResult(uv.getArgs()[0]);
         } catch (ClassNotFoundException e) {
@@ -1277,6 +1283,25 @@ public class Bridge implements PythonInterpreter.EventListener {
     public void resetStats() {
         mTotalTime = 0;
         mTotalTasks = 0;
+    }
+
+    /**
+     * Clear all cached objects with id > 0
+     */
+    public void clearCache() {
+        // Clear object cache
+        mResultCache.clear();
+        for (int id: mObjectCache.keySet()) {
+            if (id>0) {
+                deleteObject(id);
+            }
+        }
+
+        // Clear reflection cache
+        mConstructorCache.clear();
+        mFieldCache.clear();
+        mMethodCache.clear();
+        mReflectionCache.clear();
     }
 
     /**

@@ -478,5 +478,11 @@ public class EnamlActivity extends AppCompatActivity {
        mBridge.resetStats();
     }
 
+    /**
+     * Reset cached objects on the bridge
+     */
+    public void resetBridgeCache() {
+        mBridge.clearCache();
+    }
 
 }
