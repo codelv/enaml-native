@@ -96,7 +96,8 @@ class MediaType(JavaBridgeObject):
 
 class RequestBody(JavaBridgeObject):
     __nativeclass__ = set_default('okhttp3.RequestBody')
-    create = JavaStaticMethod('okhttp3.MediaType', '[B',
+    create = JavaStaticMethod('okhttp3.MediaType', 'java.lang.String',
+                              # TODO: Should support '[B',
                               returns='okhttp3.RequestBody')
 
 
@@ -153,9 +154,9 @@ class AndroidHttpRequest(HttpRequest):
         if body:
             #: Create the request body
             media_type = MediaType(
-                __id__=MediaType.create(self.content_type))
+                __id__=MediaType.parse(self.content_type))
             request_body = RequestBody(
-                __id__=RequestBody.create(media_type, body.__id__))
+                __id__=RequestBody.create(media_type, body))
             #: Set the request method
             builder.method(self.method, request_body)
         elif self.method in ['get', 'delete', 'head']:
@@ -214,7 +215,8 @@ class AndroidHttpRequest(HttpRequest):
     def on_success(self, status, headers, data):
         r = self.response
         r.code = status
-        r.headers = headers
+        if headers:
+            r.headers = headers
         if data:
             r.body = data
         r.progress = 100
@@ -223,7 +225,8 @@ class AndroidHttpRequest(HttpRequest):
     def on_failure(self, status, headers, data, error):
         r = self.response
         r.code = status
-        r.headers = headers
+        if headers:
+            r.headers = headers
         if error:
             r.reason = error
         r.error = HttpError(status, error, r)
