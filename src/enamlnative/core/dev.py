@@ -325,6 +325,11 @@ class TornadoDevClient(DevClient):
                 #: Create local references
                 mode = session.mode
                 process_events = session.app.process_events
+                app = session.app
+
+                #: Start remote debugger
+                if mode == 'remote':
+                    app.load_view(app)
 
                 while True:
                     msg = yield conn.read_message()
@@ -720,7 +725,7 @@ class DevServerSession(Atom):
     server = Instance(DevServer)
 
     #: Delegate dev client
-    clients= List(Subclass(DevClient), default=[
+    clients = List(Subclass(DevClient), default=[
         TornadoDevClient,
         TwistedDevClient,
     ])
@@ -850,9 +855,9 @@ class DevServerSession(Atom):
             pass
         self.save_changed_files(msg)
 
-        if app.reload_view is None:
+        if app.load_view is None:
             print("Warning: Reloading the view is not implemented. "
-                  "Please set `app.reload_view` to support this.")
+                  "Please set `app.load_view` to support this.")
             return
         if app.view is not None:
             try:
@@ -871,7 +876,7 @@ class DevServerSession(Atom):
                     app.send_event(Command.ERROR, traceback.format_exc())
             return safe_reload
 
-        app.deferred_call(wrapped(app.reload_view), app)
+        app.deferred_call(wrapped(app.load_view), app)
 
     def do_hotswap(self, msg):
         """ Attempt to hotswap the code """

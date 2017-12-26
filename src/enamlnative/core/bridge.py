@@ -408,10 +408,17 @@ class BridgeObject(Atom):
     
     Parameters
     ----------
-    __id__: Int
-        If an __id__ keyward argument is passed during creation,
-        this will assume the object was already created and
-        only a reference to the object with the given id is needed.
+    __id__: Int, Future, or None
+        If an __id__ keyword argument is passed during creation, then
+            
+            If the __id__ is an int, this will assume the object was already 
+            created and only a reference to the object with the given id is 
+            needed.
+            
+            If the __id__ is a Future (as specified by the app event loop),  
+            then the __id__ of he future will be used. When the future 
+            completes this object will then be put into the cache. This allows
+            passing results directly instead of using the `.then()` method.
 
     """
     __slots__ = ('__weakref__', )
@@ -454,12 +461,37 @@ class BridgeObject(Atom):
         return self.__id__
 
     def __init__(self, *args, **kwargs):
-        """ Sends the event to create this View in Java """
-        super(BridgeObject, self).__init__(**kwargs)
+        """ Sends the event to create this object in Java. """
 
         #: Send the event over the bridge to construct the view
-        __id__ = kwargs.get('__id__', None)
-        CACHE[self.__id__] = self
+        __id__ = kwargs.pop('__id__', None)
+        cache = True
+        if __id__ is not None:
+            if isinstance(__id__, int):
+                kwargs['__id__'] = __id__
+            elif isinstance(__id__, self.__app__.loop.future):
+                #: If a future is given don't store this object in the cache
+                #: until after the future completes
+                f = __id__
+                f.then(lambda *args, **kwargs: CACHE.update({f.__id__: self}))
+
+                #: The future is used to return the result
+                kwargs['__id__'] = f.__id__
+
+                #: Save it into the cache when the result from the future
+                #: arrives over the bridge.
+                cache = False
+            else:
+                raise TypeError("Invalid __id__ reference, expected an int or"
+                                "a future/deferred object, got: "
+                                "{}".format(__id__))
+
+        #: Construct the object
+        super(BridgeObject, self).__init__(**kwargs)
+
+        if cache:
+            CACHE[self.__id__] = self
+
         if __id__ is None:
             self.__app__.send_event(
                 Command.CREATE,  #: method

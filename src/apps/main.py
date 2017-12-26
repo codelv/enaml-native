@@ -29,24 +29,21 @@ def main():
     #: If we don't our code goes away
     os.environ['TMP'] = os.path.join(sys.path[0], '../tmp')
 
-    import enamlnative
     from enamlnative.android.app import AndroidApplication
     app = AndroidApplication(
         debug=True,
         dev='remote',  # "10.0.2.2" # or 'server'
-        reload_view=load_view
+        load_view=load_view
     )
-    app.deferred_call(load_view, app)
     app.start()
 
 
 def load_view(app, should_reload=False):
     import enaml
-    import enamlnative
 
-    if should_reload:
-        #: For Debug purposes only!
-        app.widget.resetBridgeStats()
+    #: For debug purposes only!
+    app.widget.resetBridgeStats()
+    app.widget.resetBridgeCache()
 
     with enaml.imports():
         import view

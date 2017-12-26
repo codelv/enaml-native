@@ -12,8 +12,8 @@ Forked from https://github.com/joaoventura/pybridge
 @author joaoventura
 @author: jrm
 """
+import os
 import sys
-import traceback
 
 # ### Comment out to disable profiling
 # import cProfile
@@ -25,37 +25,32 @@ import traceback
 def main():
     """ Called by PyBridge.start()
     """
-    print(sys.path)
-    import enamlnative
-    with enamlnative.imports():
-        from enamlnative.android.app import AndroidApplication
-        app = AndroidApplication('com.codelv.enamlnative.EnamlActivity')
-    app.debug = True #: Makes a lot of lag!
-    app.dev = 'server'
-    app.reload_view = reload_view
-    app.deferred_call(load_view, app)
+
+    #: If we set the TMP env variable the dev reloader will save file
+    #: and load changes in this directory instead of overwriting the
+    #: ones installed with the app.
+    os.environ['TMP'] = os.path.join(sys.path[0], '../tmp')
+
+    from enamlnative.android.app import AndroidApplication
+
+    app = AndroidApplication(
+        debug=True,  #: Makes a lot of lag!
+        dev='server',
+        load_view=load_view,
+    )
     app.start()
 
 
-def load_view(app):
+def load_view(app, should_reload=False):
     import enaml
-    import enamlnative
-    with enamlnative.imports():
-        with enaml.imports():
-            from view import ContentView
-            app.view = ContentView()
-    app.show_view()
-
-
-def reload_view(app):
-    import enaml
-    import enamlnative
-    with enamlnative.imports():
-        with enaml.imports():
-            import view
+    with enaml.imports():
+        import view
+        if should_reload:
             reload(view)
-            app.view = view.ContentView()
+        app.view = view.ContentView()
     app.show_view()
+
+
 
 
 

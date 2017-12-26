@@ -57,13 +57,15 @@ class BridgedApplication(Application):
     #: View to display within the activity
     view = Value()
 
+    #: Factory to create and show the view. It takes the app as the first arg
+    load_view = Callable()
+
     #: If true, debug bridge statements
     debug = Bool()
 
     #: Use dev server
     dev = Unicode()
     _dev_session = Value()
-    reload_view = Callable()
 
     #: Event loop
     loop = Instance(EventLoop)
@@ -128,6 +130,10 @@ class BridgedApplication(Application):
         using either twisted or tornado.
         
         """
+        #: Schedule a load view
+        if self.dev != "remote":
+            self.deferred_call(self.load_view, self)
+
         self.loop.start()
 
     def stop(self):

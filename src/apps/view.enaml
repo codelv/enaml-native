@@ -907,7 +907,7 @@ enamldef ContentView(VBox): content_view:
                 TextView:
                   text = "A bridged wrapper for loopj's AsyncHttpClient "
                 EditText: http_url:
-                  text = "https://raw.githubusercontent.com/frmdstryr/enaml-native/master/package.json"
+                  text = "https://raw.githubusercontent.com/codelv/enaml-native/master/README.md"
                 Button:
                   text = "Download"
                   clicked ::
@@ -920,13 +920,13 @@ enamldef ContentView(VBox): content_view:
                     progress << request.response.progress
                   TextView:
                     text << "Status: {} Reason: ".format(
-                                  request.response.status_code,
+                                  request.response.code,
                                   request.response.reason,
                             )
                   Conditional:
                     condition << request.response.ok
                     TextView:
-                      text << "{}".format(request.response.content)
+                      text << "{}".format(request.response.body)
       Page:
         title = "Toast"
         Scroller:

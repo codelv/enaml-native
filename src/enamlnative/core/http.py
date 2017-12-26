@@ -5,14 +5,14 @@ Distributed under the terms of the MIT License.
 
 The full license is in the file LICENSE, distributed with this software.
 
-Created on Dec 9, 2017
-
 @author jrm
 
 """
+import time
 from httplib import responses
 from atom.api import (Atom, List, Bool, Unicode, Dict, Int, ForwardInstance,
-                      Instance, Float, Callable)
+                      Instance, Float, Callable, Subclass)
+from .app import BridgedApplication
 
 
 class HttpError(Exception):
@@ -34,7 +34,7 @@ class HttpRequest(Atom):
     url = Unicode()
 
     #: Request method
-    method = Unicode()
+    method = Unicode('get')
 
     #: Request headers
     headers = Dict()
@@ -44,6 +44,12 @@ class HttpRequest(Atom):
 
     #: Request parameter data
     data = Dict()
+
+    #: Content type
+    content_type = Unicode("application/x-www-urlencoded")
+
+    #: Raw request body
+    body = Unicode()
 
     #: Response created
     response = ForwardInstance(lambda: HttpResponse)
@@ -56,6 +62,21 @@ class HttpRequest(Atom):
 
     #: Start time
     start_time = Float()
+
+    def __init__(self, *args, **kwargs):
+        """ Build the request as configured.
+        
+        """
+        super(HttpRequest, self).__init__(*args, **kwargs)
+        self.start_time = time.time()
+        self.response = HttpResponse(request=self)
+        self.init_request()
+
+    def init_request(self):
+        """ Initialize the request using whatever native means necessary 
+        
+        """
+        raise NotImplementedError
 
 
 class HttpResponse(Atom):
@@ -74,7 +95,7 @@ class HttpResponse(Atom):
     reason = Unicode()
 
     #: Response headers list of strings
-    headers = List()
+    headers = Dict()
 
     #: Result success
     ok = Bool()
@@ -89,9 +110,6 @@ class HttpResponse(Atom):
 
     #: Error message
     error = Instance(HttpError)
-
-    #: Response headers
-    headers = List()
 
     #: Progress
     progress = Int()
@@ -110,6 +128,12 @@ class AbstractAsyncHttpClient(Atom):
     libs alone) and the build process even more complicated.
 
     """
+
+    #: Factory used to build the request
+    request_factory = Subclass(HttpRequest)
+
+    #: Pending requests
+    requests = List(HttpRequest)
 
     def fetch(self, url, callback=None, raise_error=True, **kwargs):
         """  Fetch the given url and fire the callback when ready. Optionally
@@ -133,6 +157,40 @@ class AbstractAsyncHttpClient(Atom):
                 the request is complete.
 
         """
+        app = BridgedApplication.instance()
+        f = app.create_future()
+
+        #: Set callback for when response is in
+        if callback is not None:
+            f.then(callback)
+
+        def handle_response(response):
+            """ Callback when the request is complete. """
+            self.requests.remove(response.request)
+            f.set_result(response)
+
+        #: Create and dispatch the request object
+        request = self.request_factory(url=url,
+                                       callback=handle_response,
+                                       **kwargs)
+
+        #: Save a reference
+        #: This gets removed in the handle response
+        self.requests.append(request)
+
+        #: Run the request
+        self._fetch(request)
+
+        #: Save it on the future so it can be accessed and observed
+        #: from a view if needed
+        f.request = request
+        return f
+
+    def _fetch(self, request):
+        """ Actually do the request. Subclasses shall override this
+        to implement it using the native API's.
+        
+        """
         raise NotImplementedError
 
 
@@ -147,8 +205,40 @@ class AbstractWebsocketClient(Atom):
 
     """
 
+    @classmethod
+    def connect(cls, url):
+        """ Start a connection and return an instance 
+        
+        Parameters
+        ----------
+            url: string
+                The url to connect to.
+        
+        Returns
+        -------
+            result: Future : AsyncWebsocketClient
+                A future that resolves with the AsyncWebsocketClient connection 
+                instance when the connection succeeds or fails.
+        
+        """
+        raise NotImplementedError
+
     def write_message(self, message, binary=False):
         """ Sends a message to the WebSocket server. """
+        raise NotImplementedError
+
+    def close(self, code=None, reason=None):
+        """ Close the websocket with the given code and reason """
+        raise NotImplementedError
+
+    def on_open(self):
+        """ Called when a connection has opened """
+        pass
 
     def on_message(self, message, is_binary):
-        """ """
+        """ Called when a message is received """
+        raise NotImplementedError
+
+    def on_close(self, code=None, reason=None):
+        """ Called when the connection is closed"""
+        pass

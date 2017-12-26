@@ -13,34 +13,17 @@ Created on July 18, 2017
 import time
 from atom.api import (Atom, Callable, Dict, List, ForwardInstance, Int,
                       Float, Bool, Unicode, Instance, set_default)
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, encode
-from .app import AndroidApplication
-from ..core.http import (HttpRequest, HttpError, HttpResponse,
-                         AbstractAsyncHttpClient)
+from .bridge import (JavaBridgeObject, JavaMethod, JavaCallback,
+                     JavaStaticMethod)
+from ..core.http import (HttpRequest, HttpError, AbstractAsyncHttpClient,
+                         AbstractWebsocketClient)
 
 
-class LoopjHeader(JavaBridgeObject):
+class BridgedAsyncHttpCallback(JavaBridgeObject):
     __nativeclass__ = set_default(
-        'cz.msebera.android.httpclient.message.BasicHeader')
-    __signature__ = set_default(('java.lang.String', 'java.lang.String'))
-
-
-class LoopjRequestParams(JavaBridgeObject):
-    """ Since this is passed with every request, use this for listening for 
-    events
-    
-    """
-    __nativeclass__ = set_default('com.loopj.android.http.RequestParams')
-
-    #: Java methods
-    put = JavaMethod('java.lang.String', 'java.lang.String')
-
-
-class LoopjAsyncHttpResponseHandler(JavaBridgeObject):
-    __nativeclass__ = set_default(
-        'com.codelv.enamlnative.adapters.BridgedAsyncHttpResponseHandler')
+        'com.codelv.enamlnative.adapters.BridgedAsyncHttpCallback')
     setAsyncHttpResponseListener = JavaMethod(
-        'com.codelv.enamlnative.adapters.BridgedAsyncHttpResponseHandler'
+        'com.codelv.enamlnative.adapters.BridgedAsyncHttpCallback'
         '$AsyncHttpResponseListener', 'boolean')
 
     # -------------------------------------------------------------------------
@@ -52,77 +35,141 @@ class LoopjAsyncHttpResponseHandler(JavaBridgeObject):
     onFinish = JavaCallback()
     onRetry = JavaCallback('int')
     onCancel = JavaCallback()
-    onSuccess = JavaCallback('int', '[com.loopj.android.http.Header;', '[B')
-    onFailure = JavaCallback('int', '[com.loopj.android.http.Header;', '[B',
+    onSuccess = JavaCallback('int', 'java.lang.String', '[B')
+    onFailure = JavaCallback('int', 'java.lang.String', '[B',
                              'java.lang.Throwable')
 
 
-class LoopjAsyncHttpClient(JavaBridgeObject):
-    """ Uses https://loopj.com/android-async-http/
+class Call(JavaBridgeObject):
+    __nativeclass__ = set_default('okhttp3.Call')
+    cancel = JavaMethod()
+    clone = JavaMethod()
+    enqueue = JavaMethod('okhttp3.Callback')
+    execute = JavaMethod(returns='okhttp3.Response')
+    request = JavaMethod('okhttp3.Request')
 
-    Example
-    -----------
-    client = AsyncHttpClient()
-    client.get(url,client.getId())
 
+class Interceptor(JavaBridgeObject):
+    __nativeclass__ = set_default('okhttp3.Interceptor')
+
+
+class OkHttpClient(JavaBridgeObject):
+    """ OkHttp performs best when you create a single OkHttpClient instance 
+    and reuse it for all of your HTTP calls. This is because each client holds 
+    its own connection pool and thread pools. Reusing connections and threads 
+    reduces latency and saves memory. Conversely, creating a client for each 
+    request wastes resources on idle pools.
     """
-    #: It's recommended to use this statically, so make a singleton
+    #: Shared instance
     _instance = None
-    __nativeclass__ = set_default('com.loopj.android.http.AsyncHttpClient')
+
+    __nativeclass__ = set_default('okhttp3.OkHttpClient')
+
+    newCall = JavaMethod('okhttp3.Request', returns='okhttp3.Call')
+    newWebSocket = JavaMethod('okhttp3.Request', 'okhttp3.WebSocketListener',
+                              returns='okhttp3.WebSocket')
+
+    class Builder(JavaBridgeObject):
+        __nativeclass__ = set_default('okhttp3.OkHttpClient$Builder')
+        addNetworkInterceptor = JavaMethod('okhttp3.Interceptor')
+        build = JavaMethod(returns='okhttp3.OkHttpClient')
 
     @classmethod
     def instance(cls):
+        if cls._instance is None:
+            OkHttpClient()
         return cls._instance
 
     def __init__(self, *args, **kwargs):
         """ Implement a singleton pattern """
-        if LoopjAsyncHttpClient.instance() is not None:
+        if OkHttpClient._instance is not None:
             raise RuntimeError(
-                "Only one instance of AsyncHttpClient should be used!")
-        super(LoopjAsyncHttpClient, self).__init__(*args, **kwargs)
-        LoopjAsyncHttpClient._instance = self
+                "Only one instance of OkHttpClient should be used!")
+        super(OkHttpClient, self).__init__(*args, **kwargs)
+        OkHttpClient._instance = self
 
-    setBasicAuth = JavaMethod('java.lang.String', 'java.lang.String')
-    setTimeout = JavaMethod('int')
-    setConnectTimeout = JavaMethod('int')
-    setUserAgent = JavaMethod('java.lang.String')
 
-    get = JavaMethod('android.content.Context', 'java.lang.String',
-                     '[Lcz.msebera.android.httpclient.Header;',
-                     'com.loopj.android.http.RequestParams',
-                     'com.loopj.android.http.ResponseHandlerInterface')
-    post = JavaMethod('android.content.Context', 'java.lang.String',
-                      '[Lcz.msebera.android.httpclient.Header;',
-                      'com.loopj.android.http.RequestParams',
-                      'com.loopj.android.http.ResponseHandlerInterface')
-    put = JavaMethod('android.content.Context', 'java.lang.String',
-                     '[Lcz.msebera.android.httpclient.Header;',
-                     'com.loopj.android.http.RequestParams',
-                     'com.loopj.android.http.ResponseHandlerInterface')
-    delete = JavaMethod('android.content.Context', 'java.lang.String',
-                        '[Lcz.msebera.android.httpclient.Header;',
-                        'com.loopj.android.http.RequestParams',
-                        'com.loopj.android.http.ResponseHandlerInterface')
-    head = JavaMethod('android.content.Context', 'java.lang.String',
-                      '[Lcz.msebera.android.httpclient.Header;',
-                      'com.loopj.android.http.RequestParams',
-                      'com.loopj.android.http.ResponseHandlerInterface')
+class MediaType(JavaBridgeObject):
+    __nativeclass__ = set_default('okhttp3.MediaType')
+    parse = JavaStaticMethod('java.lang.String', returns='okhttp3.MediaType')
+
+
+class RequestBody(JavaBridgeObject):
+    __nativeclass__ = set_default('okhttp3.RequestBody')
+    create = JavaStaticMethod('okhttp3.MediaType', '[B',
+                              returns='okhttp3.RequestBody')
+
+
+class Request(JavaBridgeObject):
+    __nativeclass__ = set_default('okhttp3.Request')
+
+    class Builder(JavaBridgeObject):
+        __nativeclass__ = set_default('okhttp3.Request$Builder')
+        url = JavaMethod('java.lang.String')
+        addHeader = JavaMethod('java.lang.String', 'java.lang.String')
+        method = JavaMethod('java.lang.String', 'okhttp3.RequestBody')
+        get = JavaMethod()
+        put = JavaMethod()
+        delete = JavaMethod()
+        build = JavaMethod(returns='okhttp3.Request')
+
+
+class WebSocketListener(JavaBridgeObject):
+    __nativeclass__ = set_default(
+        'com.codelv.enamlnative.adapters.BridgedWebsocketListener')
+
+    onClosed = JavaCallback('WebSocket webSocket', 'int code', 'String reason')
+    onClosing = JavaCallback('WebSocket webSocket, int code, String reason')
+    onFailure = JavaCallback('WebSocket webSocket, Throwable t, Response response')
+    onMessage = JavaCallback('WebSocket webSocket', 'bytes or string')
+    onOpen = JavaCallback('WebSocket webSocket', 'Response response')
 
 
 class AndroidHttpRequest(HttpRequest):
-    #: The actual LoopjRequest object
-    params = Instance(LoopjRequestParams)
 
-    #: Response handler
-    handler = Instance(LoopjAsyncHttpResponseHandler)
+    #: okhttp3.Call that can be used to cancel the request
+    call = Instance(Call)
 
-    def __init__(self, *args, **kwargs):
-        super(AndroidHttpRequest, self).__init__(*args, **kwargs)
-        self.start_time = time.time()
-        self.response = HttpResponse(request=self)
+    #: okhttp3.Request
+    request = Instance(Request)
+
+    #: Handles the async callbacks
+    handler = Instance(BridgedAsyncHttpCallback)
+
+    def init_request(self):
+        """ Init the native request using the okhttp3.Request.Builder """
+
+        #: Build the request
+        builder = Request.Builder()
+        builder.url(self.url)
+
+        #: Set any headers
+        for k, v in self.headers.items():
+            builder.addHeader(k, v)
+
+        #: Get the body or generate from the data given
+        body = self.body
+
+        if body:
+            #: Create the request body
+            media_type = MediaType(
+                __id__=MediaType.create(self.content_type))
+            request_body = RequestBody(
+                __id__=RequestBody.create(media_type, body.__id__))
+            #: Set the request method
+            builder.method(self.method, request_body)
+        elif self.method in ['get', 'delete', 'head']:
+            #: Set the method
+            getattr(builder, self.method)()
+        else:
+            raise ValueError("Cannot do a '{}' request "
+                             "without a body".format(self.method))
+
+        #: Save the okhttp request
+        self.request = Request(__id__=builder.build())
 
     def _default_handler(self):
-        handler = LoopjAsyncHttpResponseHandler()
+        handler = BridgedAsyncHttpCallback()
         handler.setAsyncHttpResponseListener(
             handler.getId(),
             self.streaming_callback is not None)
@@ -137,17 +184,23 @@ class AndroidHttpRequest(HttpRequest):
 
         return handler
 
-    def _default_params(self):
-        """ RequestParams to send with the request.
+    def _default_body(self):
+        """ If the body is not passed in by the user try to create one
+        using the given data parameters. 
         """
-        #: Create the RequestParams
-        params = LoopjRequestParams()
-
-        #: Update body
-        for k, v in self.data.items():
-            params.put(k, v)
-
-        return params
+        if not self.data:
+            return ""
+        if self.content_type == 'application/json':
+            import json
+            return json.dumps(self.data)
+        elif self.content_type == 'application/x-www-form-urlencoded':
+            import urllib
+            return urllib.urlencode(self.data)
+        else:
+            raise NotImplementedError(
+                "You must manually encode the request "
+                "body for '{}'".format(self.content_type)
+            )
 
     def on_start(self):
         pass
@@ -161,7 +214,7 @@ class AndroidHttpRequest(HttpRequest):
     def on_success(self, status, headers, data):
         r = self.response
         r.code = status
-        r.headers = headers.split("\n")
+        r.headers = headers
         if data:
             r.body = data
         r.progress = 100
@@ -170,7 +223,7 @@ class AndroidHttpRequest(HttpRequest):
     def on_failure(self, status, headers, data, error):
         r = self.response
         r.code = status
-        r.headers = headers.split("\n")
+        r.headers = headers
         if error:
             r.reason = error
         r.error = HttpError(status, error, r)
@@ -179,6 +232,7 @@ class AndroidHttpRequest(HttpRequest):
         r.ok = False
 
     def on_finish(self):
+        """ Called regardless of success or failure """
         r = self.response
         r.request_time = time.time() - self.start_time
         if self.callback:
@@ -205,77 +259,24 @@ class AsyncHttpClient(AbstractAsyncHttpClient):
     libs alone) and the build process even more complicated.
 
     """
-    #: Client config
-    config = Dict()
 
     #: The client that actually does the request
-    client = Instance(LoopjAsyncHttpClient)
+    client = Instance(OkHttpClient)
 
-    #: Pending requests
-    #: these must be held so the bridge doesn't destroy them later
-    requests = List()
+    #: Set this as the request factory
+    request_factory = set_default(AndroidHttpRequest)
 
     def _default_client(self):
         #: Get existing or create a new client
-        return LoopjAsyncHttpClient.instance() or LoopjAsyncHttpClient()
+        return OkHttpClient.instance()
 
-    def fetch(self, url, callback=None, raise_error=True, **kwargs):
-        """  Fetch the given url and fire the callback when ready. Optionally
-        pass a `streaming_callback` to handle data from large requests.
-        
-        Parameters
-        ----------
-            url: string
-                The url to access.
-            callback: callable
-                The callback to invoke when the request completes. You can
-                also use the return value.
-            kwargs: 
-                The arguments to pass to the `HttpRequest` object. See it
-                for which values are valid.
-        
-        Returns
-        --------
-            result: Future
-                A future that resolves with the `HttpResponse` object when
-                the request is complete.
+    def _fetch(self, request):
+        """ Fetch using the OkHttpClient """
+        client = self.client
 
-        """
-        app = AndroidApplication.instance()
-        f = app.create_future()
+        #: Dispatch the async call
+        call = Call(__id__=client.newCall(request.request))
+        call.enqueue(request.handler)
 
-        #: Get the method to use
-        method = getattr(self.client, kwargs.get('method', 'get').lower())
-
-        #: Create the request object
-        request = HttpRequest(url=url, **kwargs)
-
-        #: Set callback for when response is in
-        if callback is not None:
-            f.then(callback)
-
-        def handle_response(response):
-            """ Callback when the request is complete. """
-            self.requests.remove(response.request)
-            f.set_result(response)
-
-        request.callback = handle_response
-
-        #: Create a header object and hold onto it until the request fires
-        headers = [LoopjHeader(k, v) for k, v in request.headers.items()]
-
-        #: Send the request
-        method(app, request.url, [encode(h) for h in headers],
-               request.params, request.handler)
-
-        #: Save a reference
-        self.requests.append(request)
-
-        #: Save it on the future so it can be accessed and observed
-        #: from a view if needed
-        f.request = request
-        return f
-
-    def close(self):
-        pass
-
+        #: Save the call reference
+        request.call = call
