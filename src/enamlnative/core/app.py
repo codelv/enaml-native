@@ -130,8 +130,9 @@ class BridgedApplication(Application):
         using either twisted or tornado.
         
         """
-        #: Schedule a load view
-        if self.dev != "remote":
+        #: Schedule a load view if given and remote debugging is not active
+        #: the remote debugging init call this after dev connection is ready
+        if self.load_view and self.dev != "remote":
             self.deferred_call(self.load_view, self)
 
         self.loop.start()

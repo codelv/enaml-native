@@ -41,6 +41,7 @@ class TestBridge(Atom):
         """ For iOS tests... """
         pass
 
+
 class MockApplication(BridgedApplication):
     started = Float()
     stopped = Float()
@@ -80,13 +81,13 @@ class MockApplication(BridgedApplication):
         super(MockApplication, self).__init__()
 
     def reset(self, platform, eventloop='builtin'):
-        if eventloop=='builtin':
+        if eventloop == 'builtin':
             from enamlnative.core.loop import BuiltinEventLoop
             self.loop = BuiltinEventLoop()
-        elif eventloop=='twisted':
+        elif eventloop == 'twisted':
             from enamlnative.core.loop import TwistedEventLoop
             self.loop = TwistedEventLoop()
-        elif eventloop=='tornado':
+        elif eventloop == 'tornado':
             from enamlnative.core.loop import TornadoEventLoop
             self.loop = TornadoEventLoop()
 
@@ -95,7 +96,7 @@ class MockApplication(BridgedApplication):
         Application._instance = None
 
         #: Update resolver
-        if platform=='ios':
+        if platform == 'ios':
             from enamlnative.ios.app import IPhoneApplication
 
             app = IPhoneApplication()
