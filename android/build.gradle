@@ -28,7 +28,7 @@ android {
         debug {
 
             // Set dev remote to true to use the remote debugger (running python remotely)
-            // must run `enaml-native start` then run your app locally
+            // must run `enaml-native start --remote-debug` then run your app locally
             buildConfigField "boolean", "DEV_REMOTE_DEBUG", "false"
 
             // Put your system ip here
