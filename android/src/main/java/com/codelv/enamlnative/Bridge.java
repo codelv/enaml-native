@@ -40,6 +40,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -245,8 +246,8 @@ public class Bridge implements PythonInterpreter.EventListener {
             packer.packString(MotionEvent.actionToString(event.getAction()));
         });
 
-        addGenericPacker(HashMap.class, (packer, id, object)->{
-            HashMap map = (HashMap) object;
+        addGenericPacker(Map.class, (packer, id, object)->{
+            Map map = (Map) object;
             packer.packMapHeader(map.keySet().size());
             for (Object key: map.keySet()) {
                 Object value = map.get(key);
