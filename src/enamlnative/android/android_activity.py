@@ -3,7 +3,7 @@ Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
-The full license is in the file COPYING.txt, distributed with this software.
+The full license is in the file LICENSE, distributed with this software.
 
 Created on July 24, 2017
 
@@ -28,6 +28,7 @@ class Activity(Context):
     startTrace = JavaMethod('java.lang.String')
     stopTrace = JavaMethod('java.lang.String')
     resetBridgeStats = JavaMethod()
+    resetBridgeCache = JavaMethod()
 
     setView = JavaMethod('android.view.View')
     showLoading = JavaMethod('java.lang.String')

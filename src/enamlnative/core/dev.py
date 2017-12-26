@@ -4,7 +4,7 @@ Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
-The full license is in the file COPYING.txt, distributed with this software.
+The full license is in the file LICENSE, distributed with this software.
 
 @author jrm
 
@@ -16,7 +16,9 @@ import shutil
 import inspect
 import traceback
 import enamlnative
-from atom.api import Atom, Instance, List, Subclass, ForwardInstance, Enum, Unicode, Int, Bool
+from atom.api import (
+    Atom, Instance, List, Subclass, ForwardInstance, Enum, Unicode, Int, Bool
+)
 from contextlib import contextmanager
 from .bridge import Command
 
@@ -278,6 +280,12 @@ def get_app():
 class DevClient(Atom):
     """ Abstract dev client. Override `start` to implement """
 
+    #: Current websocket connection
+    connection = Instance(object)
+
+    #: Mode of operation
+    mode = Enum('client', 'remote')
+
     @classmethod
     def available(cls):
         """ Return True if this dev client impl can be used. """
@@ -286,8 +294,13 @@ class DevClient(Atom):
     def start(self, session):
         raise NotImplementedError
 
+    def write_message(self, data, binary=False):
+        """ Write a message to the client """
+        raise NotImplementedError
+
 
 class TornadoDevClient(DevClient):
+
     @classmethod
     def available(cls):
         """ Return True if this dev client impl can be used. """
@@ -307,11 +320,26 @@ class TornadoDevClient(DevClient):
                 print("Dev client connecting {}...".format(session.url))
                 conn = yield websocket_connect(session.url)
                 session.connected = True
+                self.connection = conn
+
+                #: Create local references
+                mode = session.mode
+                process_events = session.app.process_events
+                app = session.app
+
+                #: Start remote debugger
+                if mode == 'remote':
+                    app.load_view(app)
+
                 while True:
                     msg = yield conn.read_message()
-                    if msg is None: break
-                    r = session.handle_message(msg)
-                    conn.write_message(json.dumps(r))
+                    if msg is None:
+                        break
+                    if mode == 'remote':
+                        process_events(msg)
+                    else:
+                        r = session.handle_message(msg)
+                        conn.write_message(json.dumps(r))
                 session.connected = False
             except Exception as e:
                 print("Dev client connection dropped: {}".format(e))
@@ -321,6 +349,10 @@ class TornadoDevClient(DevClient):
 
         #: Start
         session.app.deferred_call(run)
+
+    def write_message(self, data, binary=False):
+        """ Write a message to the client """
+        self.connection.write_message(data, binary)
 
 
 class TwistedDevClient(DevClient):
@@ -339,18 +371,27 @@ class TwistedDevClient(DevClient):
         from autobahn.twisted.websocket import (
             WebSocketClientProtocol, WebSocketClientFactory
         )
+        client = self
+
+        #: Create local references
+        mode = session.mode
+        process_events = session.app.process_events
 
         class DevClient(WebSocketClientProtocol):
             def onConnect(self, response=None):
                 print("Dev client connected!")
                 session.connected = True
+                client.connection = self
 
             def onOpen(self):
                 pass
 
             def onMessage(self, payload, isBinary):
-                r = session.handle_message(payload)
-                self.sendMessage(json.dumps(r))
+                if mode == 'remote':
+                    process_events(payload)
+                else:
+                    r = session.handle_message(payload)
+                    self.sendMessage(json.dumps(r))
 
             def onClose(self, wasClean, code, reason):
                 print("Dev client disconnected: {} {} {}".format(
@@ -369,6 +410,10 @@ class TwistedDevClient(DevClient):
 
         #: Start
         session.app.deferred_call(run)
+
+    def write_message(self, data, binary=False):
+        """ Write a message to the client """
+        self.connection.sendMessage(data, binary)
 
 
 class DevServer(Atom):
@@ -667,7 +712,7 @@ class DevServerSession(Atom):
     buf = Unicode()
 
     #: Dev session mode
-    mode = Enum('client', 'server')
+    mode = Enum('client', 'server', 'remote')
 
     #: Hotswap support class
     hotswap = Instance(Hotswapper)
@@ -680,7 +725,7 @@ class DevServerSession(Atom):
     server = Instance(DevServer)
 
     #: Delegate dev client
-    clients= List(Subclass(DevClient), default=[
+    clients = List(Subclass(DevClient), default=[
         TornadoDevClient,
         TwistedDevClient,
     ])
@@ -695,7 +740,6 @@ class DevServerSession(Atom):
         try:
             return DevServerSession(*args, **kwargs)
         except ImportError:
-            #: TODO: Try twisted
             pass
 
     @classmethod
@@ -733,11 +777,17 @@ class DevServerSession(Atom):
     # -------------------------------------------------------------------------
     def _default_mode(self):
         """ If host is set to server then serve it from the app! """
-        return "server" if self.host == "server" else "client"
+        host = self.host
+        if host == 'server':
+            return 'server'
+        elif host == 'remote':
+            return 'remote'
+        return 'client'
 
     def _default_url(self):
         """ Websocket URL to connect to and listen for reload requests """
-        return 'ws://{}:{}/dev'.format(self.host, self.port)
+        host = 'localhost' if self.mode == 'remote' else self.host
+        return 'ws://{}:{}/dev'.format(host, self.port)
 
     def _default_app(self):
         """ Application instance """
@@ -767,6 +817,12 @@ class DevServerSession(Atom):
     # -------------------------------------------------------------------------
     # Dev Session API
     # -------------------------------------------------------------------------
+    def write_message(self, data, binary=False):
+        """ Write a message to the active client
+        
+        """
+        self.client.write_message(data, binary=binary)
+
     def handle_message(self, data):
         """ When we get a message """
         msg = json.loads(data)
@@ -799,9 +855,9 @@ class DevServerSession(Atom):
             pass
         self.save_changed_files(msg)
 
-        if app.reload_view is None:
+        if app.load_view is None:
             print("Warning: Reloading the view is not implemented. "
-                  "Please set `app.reload_view` to support this.")
+                  "Please set `app.load_view` to support this.")
             return
         if app.view is not None:
             try:
@@ -820,7 +876,7 @@ class DevServerSession(Atom):
                     app.send_event(Command.ERROR, traceback.format_exc())
             return safe_reload
 
-        app.deferred_call(wrapped(app.reload_view), app)
+        app.deferred_call(wrapped(app.load_view), app)
 
     def do_hotswap(self, msg):
         """ Attempt to hotswap the code """

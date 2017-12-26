@@ -4,7 +4,7 @@ Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
-The full license is in the file COPYING.txt, distributed with this software.
+The full license is in the file LICENSE, distributed with this software.
 
 Created on May 20, 2017
 
@@ -25,44 +25,34 @@ import os
 def main():
     """ Called by PyBridge.start()
     """
+
     #: If we don't our code goes away
     os.environ['TMP'] = os.path.join(sys.path[0], '../tmp')
 
-    import enamlnative
     from enamlnative.android.app import AndroidApplication
-    app = AndroidApplication()
-    #app.debug = True #: Makes a lot of lag!
-    app.dev = 'server' # "10.0.2.2" # or 'server'
-    app.reload_view = reload_view
-    app.deferred_call(load_view, app)
-    app.deferred_call(dump_stats)
+    app = AndroidApplication(
+        debug=True,
+        dev='remote',  # "10.0.2.2" # or 'server'
+        load_view=load_view
+    )
     app.start()
 
 
-def load_view(app):
+def load_view(app, should_reload=False):
     import enaml
-    import enamlnative
-    with enaml.imports():
-        from view import ContentView
-        app.view = ContentView()
-    #: Time how long it takes
-    app.show_view()
 
-
-def reload_view(app):
-    import enaml
-    import enamlnative
-
-    #: For Debug purposes only!
+    #: For debug purposes only!
     app.widget.resetBridgeStats()
+    app.widget.resetBridgeCache()
 
     with enaml.imports():
         import view
-        reload(view)
+        if should_reload:
+            reload(view)
         app.view = view.ContentView()
-
     #: Time how long it takes
     app.show_view()
+
 
 def dump_stats():
     try:
@@ -77,5 +67,11 @@ def dump_stats():
         pass
 
 
+if __name__ == '__main__':
+    #: This is used when remote debugging
+    sys.path.append(os.path.abspath('.'))
 
-
+    #: Init remote nativehooks implementation
+    from enamlnative.core import remotehooks
+    remotehooks.init()
+    main()

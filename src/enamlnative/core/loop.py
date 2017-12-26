@@ -3,7 +3,7 @@ Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
-The full license is in the file COPYING.txt, distributed with this software.
+The full license is in the file LICENSE, distributed with this software.
 
 @author jrm
 
@@ -26,6 +26,9 @@ class EventLoop(Atom):
 
     #: Error handler fallback
     _handler = Callable()
+
+    #: Future implementation for type checks
+    future = Subclass(object)
 
     @classmethod
     def default(cls):
@@ -114,9 +117,6 @@ class EventLoop(Atom):
 
 class TornadoEventLoop(EventLoop):
     """ Eventloop using tornado's ioloop """
-
-    #: Future implementation
-    future = Subclass(object)
 
     @classmethod
     def available(cls):
@@ -220,6 +220,10 @@ class TwistedEventLoop(EventLoop):
         from twisted.internet import reactor
         return reactor
 
+    def _default_future(self):
+        from twisted.internet.defer import Deferred
+        return Deferred
+
     def start(self):
         print("Starting reactor {}".format(self.loop))
         self.loop.run()
@@ -247,8 +251,7 @@ class TwistedEventLoop(EventLoop):
         return r
 
     def create_future(self):
-        from twisted.internet.defer import Deferred
-        d = Deferred()
+        d = self.future()
 
         bridge.tag_object_with_id(d)
 

@@ -4,7 +4,7 @@ Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
-The full license is in the file COPYING.txt, distributed with this software.
+The full license is in the file LICENSE, distributed with this software.
 
 @author jrm
 
@@ -57,13 +57,15 @@ class BridgedApplication(Application):
     #: View to display within the activity
     view = Value()
 
+    #: Factory to create and show the view. It takes the app as the first arg
+    load_view = Callable()
+
     #: If true, debug bridge statements
     debug = Bool()
 
     #: Use dev server
     dev = Unicode()
     _dev_session = Value()
-    reload_view = Callable()
 
     #: Event loop
     loop = Instance(EventLoop)
@@ -108,12 +110,14 @@ class BridgedApplication(Application):
     # -------------------------------------------------------------------------
     # BridgedApplication Constructor
     # -------------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """ Initialize the event loop error handler.  Subclasses must properly
         initialize the proxy resolver.
         
         """
-        super(BridgedApplication, self).__init__()
+        super(BridgedApplication, self).__init__(*args, **kwargs)
+        if self.dev:
+            self.start_dev_session()
         self.init_error_handler()
         self.load_plugin_widgets()
         self.load_plugin_factories()
@@ -126,8 +130,10 @@ class BridgedApplication(Application):
         using either twisted or tornado.
         
         """
-        if self.dev:
-            self.start_dev_session()
+        #: Schedule a load view if given and remote debugging is not active
+        #: the remote debugging init call this after dev connection is ready
+        if self.load_view and self.dev != "remote":
+            self.deferred_call(self.load_view, self)
 
         self.loop.start()
 

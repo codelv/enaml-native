@@ -3,7 +3,7 @@ Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
-The full license is in the file COPYING.txt, distributed with this software.
+The full license is in the file LICENSE, distributed with this software.
 
 Created on July 10, 2017
 
@@ -47,7 +47,7 @@ def find_data_files(dest, *folders):
 
 setup(
     name="enaml-native",
-    version="2.11.15",
+    version="2.13.2",
     author="CodeLV",
     author_email="frmdstryr@gmail.com",
     license='MIT',
