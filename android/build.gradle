@@ -24,23 +24,19 @@ allprojects {
 android {
     compileSdkVersion 25
     buildToolsVersion '26.0.2'
-    buildTypes {
-        debug {
-
-            // Set dev remote to true to use the remote debugger (running python remotely)
-            // must run `enaml-native start --remote-debug` then run your app locally
-            buildConfigField "boolean", "DEV_REMOTE_DEBUG", "false"
-
-            // Put your system ip here
-            buildConfigField "String", "DEV_SERVER", "\"ws://localhost:8888/dev\""
-        }
-    }
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 25
         versionCode 12
-        versionName "1.12"
+        versionName "2.14"
         vectorDrawables.useSupportLibrary = true
+
+        // Set dev remote to true to use the remote debugger (running python remotely)
+        // must run `enaml-native start --remote-debug` then run your app locally
+        buildConfigField "boolean", "DEV_REMOTE_DEBUG", "false"
+
+        // Put your system ip here
+        buildConfigField "String", "DEV_SERVER", "\"ws://localhost:8888/dev\""
     }
     sourceSets.main {
         jni.srcDirs = []

@@ -12,13 +12,12 @@ Created on May 20, 2017
 from atom.api import Typed, Int, List, set_default
 
 from enamlnative.widgets.view_pager import (
-    ProxyViewPager, ProxyPagerTitleStrip, ProxyPagerTabStrip, ProxyPagerFragment
+    ProxyViewPager, ProxyPagerTitleStrip, ProxyPagerTabStrip
 )
 
 from .android_view import LayoutParams
 from .android_view_group import AndroidViewGroup, ViewGroup
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField
-from .app import AndroidApplication
 
 
 class ViewPager(ViewGroup):
@@ -166,10 +165,12 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         super(AndroidViewPager, self).init_layout()
         d = self.declaration
 
+        w = self.widget
+
         #: Set adapter
-        self.widget.setAdapter(self.adapter)
-        self.widget.addOnPageChangeListener(self.widget.getId())
-        self.widget.onPageSelected.connect(self.on_page_selected)
+        w.setAdapter(self.adapter)
+        w.addOnPageChangeListener(w.getId())
+        w.onPageSelected.connect(self.on_page_selected)
 
         if d.current_index:
             self.set_current_index(d.current_index)
@@ -178,14 +179,14 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         """ When a child is added, schedule a data changed notification """
         super(AndroidViewPager, self).child_added(child)
         self._notify_count += 1
-        AndroidApplication.instance().timed_call(
+        self.get_context().timed_call(
             self._notify_delay, self._notify_change)
 
     def child_removed(self, child):
         """ When a child is removed, schedule a data changed notification """
         super(AndroidViewPager, self).child_removed(child)
         self._notify_count += 1
-        AndroidApplication.instance().timed_call(
+        self.get_context().timed_call(
             self._notify_delay, self._notify_change)
 
     def destroy(self):
@@ -201,7 +202,7 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         if self._notify_count == 0:
             #: Tell the UI we made changes
             self.adapter.notifyDataSetChanged(now=True)
-            AndroidApplication.instance().timed_call(
+            self.get_context().timed_call(
                 500, self._queue_pending_calls)
 
     def _queue_pending_calls(self):

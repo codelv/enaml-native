@@ -15,9 +15,9 @@ from enamlnative.widgets.fragment import ProxyFragment
 from enamlnative.widgets.view_pager import ProxyPagerFragment
 
 from .android_toolkit_object import AndroidToolkitObject
+from .android_frame_layout import FrameLayout
 from .android_view_pager import BridgedFragmentStatePagerAdapter
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
-from .app import AndroidApplication
 
 
 class FragmentManager(JavaBridgeObject):
@@ -29,8 +29,8 @@ class FragmentManager(JavaBridgeObject):
 class FragmentTransaction(JavaBridgeObject):
     __nativeclass__ = set_default('android.support.v4.app.FragmentTransaction')
     commit = JavaMethod(returns='int')
-    add = JavaMethod('int','android.support.v4.app.Fragment')
-    replace = JavaMethod('int','android.support.v4.app.Fragment')
+    add = JavaMethod('int', 'android.support.v4.app.Fragment')
+    replace = JavaMethod('int', 'android.support.v4.app.Fragment')
 
 
 class BridgedFragment(JavaBridgeObject):
@@ -59,7 +59,7 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
     ready = Value()
 
     def _default_ready(self):
-        return AndroidApplication.instance().create_future()
+        return self.get_context().create_future()
 
     # -------------------------------------------------------------------------
     # Initialization API
@@ -75,10 +75,10 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
 
         """
         super(AndroidFragment, self).init_widget()
-        d = self.declaration
-        self.fragment.setFragmentListener(self.fragment.getId())
-        self.fragment.onCreateView.connect(self.on_create_view)
-        self.fragment.onDestroyView.connect(self.on_destroy_view)
+        f = self.fragment
+        f.setFragmentListener(f.getId())
+        f.onCreateView.connect(self.on_create_view)
+        f.onDestroyView.connect(self.on_destroy_view)
 
     def init_layout(self):
         """ Initialize the layout of the toolkit widget.
@@ -119,24 +119,54 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
 
         """
         d = self.declaration
-        d.condition = True
+        changed = not d.condition
+        if changed:
+            d.condition = True
+
         view = self.get_view()
 
-        app = AndroidApplication.instance()
-        app.deferred_call(app.set_future_result, self.ready, True)
+        if changed:
+            self.ready.set_result(True)
+
         return view
 
     def on_destroy_view(self):
         d = self.declaration
-        d.condition = False
 
-        #: Clear the ready state again!
-        self.ready = self._default_ready()
+        #: Destroy if we don't want to cache it
+        if not d.cached:
+            d.condition = False
+
+            #: Delete the reference
+            if self.widget:
+                del self.widget
+
+            #: Clear the ready state again!
+            self.ready = self._default_ready()
 
     # -------------------------------------------------------------------------
     # ProxyFragment API
     # -------------------------------------------------------------------------
     def get_view(self):
+        """ Get the page to display. If a view has already been created and
+        is cached, use that otherwise initialize the view and proxy. If defer
+        loading is used, wrap the view in a FrameLayout and defer add view 
+        until later. 
+        
+        """
+        d = self.declaration
+        if d.cached and self.widget:
+            return self.widget
+        if d.defer_loading:
+             self.widget = FrameLayout(self.get_context())
+             app = self.get_context()
+             app.deferred_call(
+                 lambda: self.widget.addView(self.load_view(), 0))
+        else:
+            self.widget = self.load_view()
+        return self.widget
+
+    def load_view(self):
         d = self.declaration
         for view in d.items:
             if not view.is_initialized:
@@ -144,6 +174,15 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
             if not view.proxy_is_active:
                 view.activate_proxy()
             return view.proxy.widget
+
+
+
+
+    def set_cached(self, cached):
+        pass
+
+    def set_defer_loading(self, defer):
+        pass
 
 
 class AndroidPagerFragment(AndroidFragment, ProxyPagerFragment):

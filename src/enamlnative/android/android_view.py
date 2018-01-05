@@ -124,6 +124,7 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         """
         super(AndroidView, self).init_widget()
         d = self.declaration
+        w = self.widget
         #if d.layout_direction != 'ltr':  #: Default, no need to set it
         #    self.set_layout_direction(d.layout_direction)
         if d.tool_tip:
@@ -138,7 +139,7 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         # then reparented by the status bar. Real top-level widgets must
         # be explicitly shown by calling their .show() method after they
         # are created.
-        if self.widget and not d.visible:
+        if w and not d.visible:
             self.set_visible(d.visible)
         if d.background_color:
             self.set_background_color(d.background_color)
@@ -165,15 +166,15 @@ class AndroidView(AndroidToolkitObject, ProxyView):
             if d.margins:
                 self.set_margins(d.margins)
         if d.clickable:
-            self.widget.setOnClickListener(self.widget.getId())
-            self.widget.onClick.connect(self.on_click)
+            w.setOnClickListener(w.getId())
+            w.onClick.connect(self.on_click)
             self.set_clickable(d.clickable)
         if d.key_events:
-            self.widget.setOnKeyListener(self.widget.getId())
-            self.widget.onKey.connect(self.on_key)
+            w.setOnKeyListener(w.getId())
+            w.onKey.connect(self.on_key)
         if d.touch_events:
-            self.widget.setOnTouchListener(self.widget.getId())
-            self.widget.onTouch.connect(self.on_touch)
+            w.setOnTouchListener(w.getId())
+            w.onTouch.connect(self.on_touch)
         if d.layout:
             self.set_layout(d.layout)
 

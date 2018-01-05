@@ -15,8 +15,9 @@ from atom.api import (
 
 from enaml.core.declarative import d_
 from enaml.core.conditional import Conditional, new_scope
-from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject, flag_property, ACTIVE_PROXY_FLAG
-from enaml.application import Application
+from enaml.widgets.toolkit_object import (
+    ToolkitObject, ProxyToolkitObject, flag_property, ACTIVE_PROXY_FLAG
+)
 
 
 class ProxyFragment(ProxyToolkitObject):
@@ -25,7 +26,13 @@ class ProxyFragment(ProxyToolkitObject):
     """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Fragment)
-    
+
+    def set_cached(self, cached):
+        raise NotImplementedError
+
+    def set_defer_loading(self, defer):
+        raise NotImplementedError
+
 
 class Fragment(Conditional, ToolkitObject):
     """ Fragment a "sub" activity with a lifecycle,  view, and state.
@@ -37,6 +44,12 @@ class Fragment(Conditional, ToolkitObject):
 
     #: A reference to the proxy object.
     proxy = Typed(ProxyFragment)
+
+    #: Don't destroy the view once loaded
+    cached = d_(Bool())
+
+    #: Defer loading of child nodes
+    defer_loading = d_(Bool(True))
 
     def refresh_items(self):
         """ Refresh the items of the pattern.
@@ -65,5 +78,9 @@ class Fragment(Conditional, ToolkitObject):
         #: Insert items into THIS node, NOT the PARENT
         #if len(items) > 0:
         #    self.parent.insert_children(self, items)
-
         self.items = items
+
+    @observe('cached', 'defer_loading')
+    def _update_proxy(self, change):
+        """ Update the proxy """
+        super(Fragment, self)._update_proxy(change)
