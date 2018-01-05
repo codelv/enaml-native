@@ -1,5 +1,82 @@
 
-Currently there is no `live` debugger where you can breakpoint and step through code like in react-native. There are a few helpful things you can do to make life easier though.
+### Remote debugging
+
+You can now enable and use remote debugging in enaml-native apps!  This allows you to run python locally on your system but still control the android phone/app over the bridge.  You can then use an IDE with a debugger like [PyDev](http://www.pydev.org/) or [PyCharm](https://www.jetbrains.com/pycharm/) (or android studio with the Python plugins) to breakpoint and step through code.
+
+[![Remote debugging in enaml native](https://img.youtube.com/vi/XpCKBH5sGcM/0.jpg)](https://youtu.be/XpCKBH5sGcM)
+
+#### Installing
+
+Remote debugging requires. 
+
+    :::bash
+    pip install enaml-native-cli >= 1.4.0
+    pip install enaml-native >= 2.12.0
+
+#### Using
+
+Start the forwarding service
+
+    :::bash
+    #: In one shell run
+    enaml-native start --remote-debugging
+
+
+Modify your apps enaml-native build.gradle to use remote-debugging (until a command is made for it). Make sure to set the `DEV_REMOTE_DEBUG` config var to `true` and the
+update the `DEV_SERVER` address to your system's address.
+
+    :::gradle
+    // Open the android folder in android-studio 
+    // Edit the build.gradle for enaml-native (or edit venv/packages/enaml-native/src/build.gradle)
+    debug {
+        // Set dev remote to true to use the remote debugger
+        // must run `enaml-native start` then run your app locally
+        buildConfigField "boolean", "DEV_REMOTE_DEBUG", "true"
+        buildConfigField "String", "DEV_SERVER", "\"ws://<your-pc-ip>:8888/dev\""
+    }
+
+
+Now build in run the app. It will simply sit at the loading screen.
+
+    :::bash
+    #: Build the app in remote-debugging mode 
+    enaml-native run-android
+
+Modify your apps `main.py` to use `dev='remote'`. It is now passed to the constructor.
+
+    :::python
+    def main():
+        """ Called by PyBridge.start()
+        """
+        from enamlnative.android.app import AndroidApplication
+        app = AndroidApplication(
+            debug=True,
+            dev='remote',  # "10.0.2.2" # or 'server'
+            reload_view=load_view
+        )
+        app.deferred_call(load_view, app)
+        app.start()
+
+    # And setup a run hook
+    if __name__ == '__main__':
+        #: This is used when remote debugging
+        sys.path.append(os.path.abspath('.'))
+
+        #: Init remote nativehooks implementation
+        from enamlnative.core import remotehooks
+        remotehooks.init()
+        main()
+
+
+
+Next run your python script locally (or use an IDE like PyCharm)!
+
+    :::bash
+    python main.py
+
+
+The app runs off your PC but controls the phone as if it were running on the device!
+
 
 ### Development server
 
