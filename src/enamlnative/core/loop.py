@@ -28,7 +28,7 @@ class EventLoop(Atom):
     _handler = Callable()
 
     #: Future implementation for type checks
-    future = Subclass(object)
+    future = Value()
 
     @classmethod
     def default(cls):
