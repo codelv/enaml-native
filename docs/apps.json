@@ -19,5 +19,12 @@
     "image":"https://lh3.googleusercontent.com/a2BPJE2-WOflrEEKTgxFBp-m6Jln5NF62hc_zssHPEN1E-d6YoNRGZOr-ldNy2zSKoM=h900-rw", 
     "os":["android"],
     "url":"https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo"
+  },
+  {
+    "name":"Wifi Thermostat", 
+    "caption":"App to control a Particle based DIY Wifi thermostat.", 
+    "image":"https://lh3.googleusercontent.com/UwwHUlVuWjGadUcbLxckugP_FB0IX-lqZN0elUI6E7UITcKSJjQLAd0x7H3y1cjOkuo=h900", 
+    "os":["android"],
+    "url":"https://play.google.com/store/apps/details?id=com.codelv.thermostat"
   }
 ]
