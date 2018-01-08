@@ -13,9 +13,6 @@ I made this because wanted to have a more "React Native" like environment that:
 4. Uses enaml's models, and declarative and dynamic widget framework instead of kvlang
 5. Uses versioned "packages" and "recipes" than can be installed/updated/removed to make repeatable builds (like rnpm)
 
-> Android apps are currently working and have a lot of components. 
-iOS is currently broken, and is limited to only a few components at the moment
-
 ### Docs and Examples ###
 
 See the [project site](https://www.codelv.com/projects/enaml-native/). There's also some short tutorials and examples on [youtube](https://www.youtube.com/playlist?list=PLXUaMWWFaOjT2WdIrJdTYjEMJmrjuvVz0).
@@ -54,6 +51,18 @@ Apps using enaml-native can be found [here](https://www.codelv.com/projects/enam
 ### Demos ###
 1. Try out the beta demo app here [on google play](https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo)
 2. Try out code without installing the android SDK or NDK via the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground)!
+
+### Status ###
+
+##### Android
+
+Currently enaml-native's Android support is good enough to make real usable app.  A lot of components are supported and several apps have already been relased using enaml-native.
+
+##### iOS
+
+Currently enaml-native's iOS support is not yet good enough to make a real app. Only a few components are implemented at the moment and a lot of work is needed to get it to the point where it's really usable, but my "proof of concept" demo shows that it does work. 
+
+[![Enaml-native iOS Preview](https://img.youtube.com/vi/8woq4qsedss/0.jpg)](https://youtu.be/8woq4qsedss)
 
 
 ### Thanks to ###
