@@ -1,0 +1,88 @@
+'''
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file COPYING.txt, distributed with this software.
+
+Created on June 21, 2017
+
+@author: jrm
+'''
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+    background_color = "#abc"
+    #: TODO: Padding not working...
+    #padding = (10,10,10,10)
+
+    TextView:
+        text = "Switches"
+    Flexbox:
+        justify_content = "space_around"
+
+        Switch: sw:
+            pass
+        Switch:
+            checked := sw.checked
+        TextView:
+            text << "State: {}".format(sw.checked)
+    TextView:
+        text = "Buttons"
+    Flexbox:
+        justify_content = "space_around"
+        Button:
+            text = "Button"
+            clicked :: tv.count +=1
+        TextView: tv:
+            attr count = 0
+            text << "Clicked {}".format(self.count)
+            #flex_direction = "row"
+    TextView:
+        text = "ActivityIndicator"
+    Flexbox:
+        justify_content = "center"
+        ActivityIndicator:
+            pass
+    TextView:
+        text = "Progressbar"
+    Flexbox:
+        flex_direction = "column"
+        justify_content = "center"
+        align_items = "center"
+        ProgressBar: pb:
+            progress = 0
+        Button:
+            text = "Increment"
+            clicked :: pb.progress = (pb.progress+10)%100
+    Flexbox:
+        flex_direction = "column"
+        EditText: et:
+            text = ""
+            placeholder = "Type something here..."
+        EditText:
+            text := et.text
+            style = "rounded_rect"
+        TextView:
+            text << "You typed: {}".format(et.text)
+    # Flexbox:
+    #     flex_direction = "column"
+    #     SeekBar:
+    #         min = 0
+    #         max = 100
+    #         progress = 10
+    Flexbox:
+        flex_direction = "column"
+        SeekBar: sb:
+            min = 0
+            progress = 30
+            max = 100
+        SeekBar:
+            min = 0
+            progress := sb.progress
+            max = 100
+        TextView:
+            text << "Slider: {}".format(sb.progress)
+
