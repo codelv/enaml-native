@@ -184,13 +184,15 @@ do any configuration necessary.
 
 ###### Android
 
+See https://developer.android.com/studio/publish/index.html
+
 - Open the `android` folder in android-studio
 - From the menu choose `Build -> Generate signed APK`
 - Create or choose a certificate to sign the app
 - Select release and make sure that V1 and V2 are checked
 - Press finish
 - When the build completes click locate to open the location (android/app/release) 
-- Then you can upload this to the Play Store
+- Then you can publish this apk to the [Play Store](https://developer.android.com/distribute/console/index.html)
 
 ![Enaml-native - Creating a android release build](https://user-images.githubusercontent.com/380158/34739803-78127ecc-f54b-11e7-811a-2cef4ba05272.gif)
 
