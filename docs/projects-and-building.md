@@ -182,6 +182,19 @@ from the cli is doing.
 It's easiest to just make release builds using android-studio or xcode. It will prompt you to 
 do any configuration necessary.
 
+###### Android
+
+- Open the `android` folder in android-studio
+- From the menu choose `Build -> Generate signed APK`
+- Create or choose a certificate to sign the app
+- Select release and make sure that V1 and V2 are checked
+- Press finish
+- When the build completes click locate to open the location (android/app/release) 
+- Then you can upload this to the Play Store
+
+![Enaml-native - Creating a android release build](https://user-images.githubusercontent.com/380158/34739803-78127ecc-f54b-11e7-811a-2cef4ba05272.gif)
+
+
 Once that is done you can then do release builds with the enaml-native cli using 
 `enaml-native build-android --release` or `enaml-native build-ios --release`. 
 The `--release` flag tells it to do a release build (it's debug by default). 
