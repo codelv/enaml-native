@@ -40,6 +40,7 @@ from utils import load
     (["android"], 'radio_buttons.enaml'),
     (["android"], 'rating_bar.enaml'),
     (["android"], 'seekbar.enaml'),
+    (["android"], 'sensors.enaml'),
     (["android"], 'snackbar.enaml'),
     (["android"], 'spacer.enaml'),
     (["android"], 'spinner.enaml'),
