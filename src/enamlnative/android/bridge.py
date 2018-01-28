@@ -101,10 +101,20 @@ class JavaBridgeObject(BridgeObject):
 
     #: A callback with an implementation built in
     hashCode = JavaCallback(returns="int")
+    toString = JavaCallback(returns="java.lang.String")
+    equals = JavaCallback(returns="boolean")
 
     def _impl_hashCode(self):
         #: Add a default callback for hashCode
         return self.__id__
+
+    def _impl_toString(self):
+        #: Add a default callback for toString
+        return "{}".format(self)
+
+    def _impl_equals(self, other):
+        #: Add a default callback for toString
+        return other == self.__id__
 
 
 class JavaProxy(JavaBridgeObject):

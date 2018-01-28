@@ -175,9 +175,6 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
                 view.activate_proxy()
             return view.proxy.widget
 
-
-
-
     def set_cached(self, cached):
         pass
 

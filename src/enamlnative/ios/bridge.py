@@ -141,6 +141,7 @@ class ObjcBridgeObject(BridgeObject):
             self.__app__.send_event(
                 Command.CREATE,  #: method
                 self.__id__,  #: id to assign in bridge cache
+                self.__bridge_id__,
                 self.__nativeclass__,
                 *self._pack_args(**kwargs)
             )

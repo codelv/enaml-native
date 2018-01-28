@@ -37,7 +37,7 @@ Install the following dependencies
     sudo apt install -y build-essential ccache git zlib1g-dev python2.7 python2.7-dev libncurses5:i386 libstdc++6:i386 zlib1g:i386 unzip ant ccache autoconf libtool
 
     #: Install java
-    sudo apt install openjdk-7-jdk
+    sudo apt install openjdk-8-jdk
     #: or actual java (preferred)
     #: see http://www.webupd8.org/2012/09/install-oracle-java-8-in-ubuntu-via-ppa.html
     sudo add-apt-repository ppa:webupd8team/java
@@ -121,19 +121,6 @@ Now cd to the destination folder, activate the virtual env, and build the python
     source venv/bin/activate
     
     #: Build python and ndk libraries
-    enaml-native build-python 
-
-
-Next, on android, we have to do a gradle sync by building the android project. 
-
-    :::bash
-    enaml-native build-android 
-
-
-We must install the native python libraries and modules by running build python again.
-
-    :::bash
-    
     enaml-native build-python 
 
 
