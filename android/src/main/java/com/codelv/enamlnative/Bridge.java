@@ -3,6 +3,7 @@ package com.codelv.enamlnative;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.hardware.SensorEvent;
 import android.net.DhcpInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
@@ -290,6 +291,23 @@ public class Bridge implements PythonInterpreter.EventListener {
                 packer.packInt(((View) object).getId());
             }
 
+        });
+
+        // Unpack Sensor objects
+        addPacker(SensorEvent.class, (packer, id, object)->{
+            SensorEvent event = (SensorEvent) object;
+            packer.packMapHeader(4);
+            packer.packString("sensor");
+            packer.packInt(id);
+            packer.packString("acc");
+            packer.packInt(event.accuracy);
+            packer.packString("time");
+            packer.packLong(event.timestamp);
+            packer.packString("data");
+            packer.packArrayHeader(event.values.length);
+            for (float v: event.values) {
+                packer.packFloat(v);
+            }
         });
 
         // Unpack Wifi objects
