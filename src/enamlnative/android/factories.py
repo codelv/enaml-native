@@ -26,6 +26,11 @@ def auto_complete_text_view_factory():
     return AndroidAutoCompleteTextView
 
 
+def bottom_sheet_dialog_factory():
+    from .android_bottom_sheet_dialog import AndroidBottomSheetDialog
+    return AndroidBottomSheetDialog
+
+
 def button_factory():
     from .android_button import AndroidButton
     return AndroidButton
@@ -275,6 +280,7 @@ ANDROID_FACTORIES = {
     'ActivityIndicator': activity_indicator_factory,
     'AnalogClock': analog_clock_factory,
     'AutoCompleteTextView': auto_complete_text_view_factory,
+    'BottomSheetDialog': bottom_sheet_dialog_factory,
     'Button': button_factory,
     'CalendarView': calendar_view_factory,
     'CardView': card_view_factory,

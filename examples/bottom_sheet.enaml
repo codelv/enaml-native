@@ -1,0 +1,29 @@
+from enamlnative.widgets.api import *
+from enamlnative.android.app import AndroidApplication
+
+AndroidApplication.instance().debug = False
+
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+    Button:
+        text = "Open bottom sheet"
+        clicked :: sheet.show = True
+    TextView:
+        text << "Show: {}".format(sheet.show)
+    BottomSheetDialog: sheet:
+        Flexbox:
+            flex_direction = "column"
+            Button:
+                style = "borderless"
+                text = "Action 1"
+                clicked ::
+                    AndroidApplication.instance().show_toast(self.text)
+                    sheet.show = False
+            Button:
+                style = "borderless"
+                text = "Action 2"
+                clicked ::
+                    AndroidApplication.instance().show_toast(self.text)
+                    sheet.show = False
+
