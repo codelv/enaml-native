@@ -269,7 +269,9 @@ class AndroidTextView(AndroidView, ProxyTextView):
         self.widget.setTypeface(d.font_family, font_style)  #, d.font_style)
 
     def set_input_type(self, input_type):
-        it = TextView.INPUT_TYPES[input_type]
+        it = 0
+        for t in input_type.split("|"):
+            it |= TextView.INPUT_TYPES[t]
         self.widget.setInputType(it)
 
     def set_text(self, text):

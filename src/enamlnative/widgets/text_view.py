@@ -98,25 +98,28 @@ class TextView(View):
     #: Font style
     font_style = d_(Enum('normal', 'bold', 'italic', 'bold_italic'))
 
-    #: Input type
-    #: https://developer.android.com/reference/android/widget/TextView.html
-    #: #attr_android:inputType
-    input_type = d_(Enum('', 'date', 'datetime', 'number',
-                         'number_decimal', 'number_password',
-                         'number_signed', 'phone', 'text',
-                         'text_auto_complete', 'text_auto_correct',
-                         'text_cap_characters', 'text_cap_sentences',
-                         'text_cap_words',
-                         'text_email_address', 'text_email_subject',
-                         'text_filter', 'text_ime_multi_line',
-                         'text_long_message', 'text_multi_line',
-                         'text_no_suggestions', 'text_password',
-                         'text_person_name', 'text_phonetic',
-                         'text_postal_address', 'text_short_message',
-                         'text_uri', 'text_visible_password',
-                         'text_web_edit_text', 'text_web_email_address',
-                         'text_web_password', 'time',
-                         ))
+    #: Input type or types separated by "|"
+    #: See https://developer.android.com/reference/android/widget/TextView.html
+    #: attr_android:inputType
+    input_type = d_(Unicode())
+
+    INPUT_TYPES = (
+        'date', 'datetime', 'number',
+        'number_decimal', 'number_password',
+        'number_signed', 'phone', 'text',
+        'text_auto_complete', 'text_auto_correct',
+        'text_cap_characters', 'text_cap_sentences',
+        'text_cap_words',
+        'text_email_address', 'text_email_subject',
+        'text_filter', 'text_ime_multi_line',
+        'text_long_message', 'text_multi_line',
+        'text_no_suggestions', 'text_password',
+        'text_person_name', 'text_phonetic',
+        'text_postal_address', 'text_short_message',
+        'text_uri', 'text_visible_password',
+        'text_web_edit_text', 'text_web_email_address',
+        'text_web_password', 'time',
+    )
 
     #: Sets the color used to display the selection highlight.
     highlight_color = d_(Unicode())
