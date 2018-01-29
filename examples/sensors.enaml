@@ -1,0 +1,56 @@
+# -*- coding: utf-8 -*-
+"""
+Copyright (c) 2017, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file LICENSE, distributed with this software.
+
+Created on May 20, 2017
+
+@author: jrm
+"""
+from enamlnative.widgets.api import *
+from enaml.core.api import Conditional, Looper
+from enamlnative.android.api import SensorManager, Sensor
+
+
+enamldef ContentView(ScrollView): view:
+    attr manager
+    attr sensor
+    attr event
+    func on_sensor_changed(data):
+        view.event = data
+
+    LinearLayout:
+        orientation = 'vertical'
+        LinearLayout:
+            Button:
+                text = "Get manager"
+                clicked::
+                    SensorManager.get().then(
+                        lambda m, view=view:setattr(view, 'manager', m))
+            Button:
+                text = "Get accelerometer"
+                clicked::
+                    Sensor.get(Sensor.TYPE_ACCELEROMETER).then(
+                        lambda s, view=view:setattr(view, 'sensor', s))
+            Button:
+                text = "Start"
+                clicked::
+                    # Hard way
+                    #sensor.onSensorChanged.connect(on_sensor_changed)
+                    #manager.registerListener(sensor.getId(), sensor, Sensor.SENSOR_DELAY_NORMAL)
+                    sensor.start(on_sensor_changed)
+            Button:
+                text = "Stop"
+                clicked::
+                    # Hard way
+                    #manager.unregisterListener(sensor.getId(), sensor)
+                    sensor.stop()
+        TextView:
+            text << "Manager: {}".format(manager)
+        TextView:
+            text << "Sensor: {}".format(sensor)
+        TextView:
+            text << "Event: {}".format(event)
