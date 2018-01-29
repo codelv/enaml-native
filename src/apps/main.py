@@ -38,7 +38,7 @@ def main():
     app.start()
 
 
-def load_view(app, should_reload=False):
+def load_view(app):
     import enaml
 
     #: For debug purposes only!
@@ -47,7 +47,7 @@ def load_view(app, should_reload=False):
 
     with enaml.imports():
         import view
-        if should_reload:
+        if app.view:
             reload(view)
         app.view = view.ContentView()
     #: Time how long it takes

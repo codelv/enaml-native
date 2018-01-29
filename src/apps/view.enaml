@@ -540,9 +540,9 @@ enamldef ContentView(VBox): content_view:
                 CardTitle:
                   text = "Input types"
                 TextView:
-                  text = "Can be any of:\n{}".format('\n'.join(EditText.input_type.items))
+                  text = "Can be any of:\n{}".format('\n'.join(EditText.INPUT_TYPES))
                 Looper:
-                  iterable = EditText.input_type.items[0:5]
+                  iterable = EditText.INPUT_TYPES[0:5]
                   TextView:
                     text = "{}:".format(loop_item)
                   EditText:
@@ -901,32 +901,39 @@ enamldef ContentView(VBox): content_view:
             Card: http_card:
               attr httpclient = AsyncHttpClient()
               attr request
-              VBox:
-                CardTitle:
-                  text = "Http Client"
-                TextView:
-                  text = "A bridged wrapper for loopj's AsyncHttpClient "
-                EditText: http_url:
-                  text = "https://raw.githubusercontent.com/codelv/enaml-native/master/README.md"
-                Button:
-                  text = "Download"
-                  clicked ::
-                    f = httpclient.fetch(http_url.text)
-                    http_card.request = f.request
-
-                Conditional:
-                  condition << request is not None
-                  ProgressBar:
-                    progress << request.response.progress
+              SwipeRefreshLayout:
+                trigger_distance = 10
+                indicator_color = "#0F0"
+                indicator_background_color = "#EEE"
+                refreshed::
+                  f = httpclient.fetch(http_url.text)
+                  view.request = f.request
+                VBox:
+                  CardTitle:
+                    text = "Http Client"
                   TextView:
-                    text << "Status: {} Reason: ".format(
+                    text = "A bridged wrapper for Okhttp client. You can also swipe to refresh. "
+                  EditText: http_url:
+                    text = "https://raw.githubusercontent.com/codelv/enaml-native/master/README.md"
+                  Button:
+                    text = "Download"
+                    clicked ::
+                      f = httpclient.fetch(http_url.text)
+                      http_card.request = f.request
+
+                  Conditional:
+                    condition << request is not None
+                    ProgressBar:
+                      progress << request.response.progress
+                    TextView:
+                      text << "Status: {} Reason: ".format(
                                   request.response.code,
                                   request.response.reason,
                             )
-                  Conditional:
-                    condition << request.response.ok
-                    TextView:
-                      text << "{}".format(request.response.body)
+                    Conditional:
+                      condition << request.response.ok
+                      TextView:
+                        text << "{}".format(request.response.body)
       Page:
         title = "Toast"
         Scroller:
