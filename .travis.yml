@@ -27,8 +27,11 @@ before_install:
   # Install p4a dependencies
   - pip install sh colorama appdirs six jinja2
 
-  # Intall test tools
+  # Install test tools
   - pip install pytest pytest-cov pytest-timeout
+
+  # Install the cli
+  - pip install enaml-native-cli
 
   # Install codecov report tools
   - pip install codecov
