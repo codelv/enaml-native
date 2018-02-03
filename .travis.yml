@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty
+dist: precise
 language: android
 jdk: oraclejdk8
 android:
@@ -8,17 +8,22 @@ android:
     - platform-tools
     - tools
 
+
     # The BuildTools version used by your project
     - build-tools-26.0.2
 
     # The SDK version used to compile your project
-    - android-25
+    - android-26
 
-    #: Add android image
-    - android-25 # Android platform used by your alternative emulator
-    - sys-img-armeabi-v7a-android-25
+    # Additional components
+    - extra-google-google_play_services
     - extra-google-m2repository
     - extra-android-m2repository
+    - addon-google_apis-google-26
+
+    # Specify at least one system image,
+    # if you need to run emulator(s) during your tests
+    - sys-img-armeabi-v7a-android-26
 
 branches:
   only:
