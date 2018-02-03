@@ -59,7 +59,7 @@ def load_view(app):
 
 
 def test_remote_debug():
-    sh.pip('install tornado'.split())
+    sh.pip('install tornado --user'.split())
     enaml_native = sh.Command('enaml-native')
     enaml_native('start', '--remote-debugging', _bg=True)
 
