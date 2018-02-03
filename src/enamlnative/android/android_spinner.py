@@ -63,14 +63,24 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
         """ Initialize the underlying widget.
 
         """
-        super(AndroidSpinner, self).init_widget()
         w = self.widget
-
         # Selection listener
         w.setAdapter(self.adapter)
         w.setOnItemSelectedListener(w.getId())
         w.onItemSelected.connect(self.on_item_selected)
         w.onNothingSelected.connect(self.on_nothing_selected)
+        super(AndroidSpinner, self).init_widget()
+
+    def get_declared_items(self):
+        selection = None
+        for k, v in super(AndroidSpinner, self).get_declared_items():
+            if k == 'selection':
+                selection = (k, v)
+            else:
+                yield (k, v)
+        # Select last
+        if selection:
+            yield selection
 
     # -------------------------------------------------------------------------
     # OnSelectionListener API
@@ -98,7 +108,6 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
         """
         self.adapter.clear()
         self.adapter.addAll(items)
-        #self.adapter.add(item)
 
     def set_item_gravity(self, gravity):
         self.widget.setGravity(gravity)
