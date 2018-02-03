@@ -133,6 +133,8 @@ class AndroidTextView(AndroidView, ProxyTextView):
         w = self.widget
         if d.input_type:
             self.set_input_type(d.input_type)
+            w.addTextChangedListener(w.getId())
+            w.onTextChanged.connect(self.on_text_changed)
 
     # -------------------------------------------------------------------------
     # TextWatcher API
