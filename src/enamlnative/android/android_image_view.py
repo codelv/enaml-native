@@ -27,7 +27,8 @@ class ImageView(View):
     setImageLevel = JavaMethod('int')
     seImageMatrix = JavaMethod('android.graphics.Matrix')
     setImageResource = JavaMethod('android.R')
-    setImageUri = JavaMethod('android.net.Uri')
+    setImageDrawable = JavaMethod('android.graphics.drawable.Drawable')
+    setImageURI = JavaMethod('android.net.Uri')
     setMaxHeight = JavaMethod('int')
     setMaxWidth = JavaMethod('int')
     setScaleType = JavaMethod('android.view.ImageView.ScaleType')
@@ -62,20 +63,6 @@ class AndroidImageView(AndroidView, ProxyImageView):
         """
         self.widget = ImageView(self.get_context())
 
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidImageView, self).init_widget()
-        d = self.declaration
-        if d.alpha:
-            self.set_alpha(d.alpha)
-        if d.max_height:
-            self.set_max_height(d.max_height)
-        if d.max_width:
-            self.set_max_width(d.max_width)
-        self.set_src(d.src)
-
     # -------------------------------------------------------------------------
     # OnDrawableLoaded API
     # -------------------------------------------------------------------------
@@ -88,11 +75,15 @@ class AndroidImageView(AndroidView, ProxyImageView):
     def set_src(self, src):
         if src.startswith("@"):
             self.widget.setImageResource(src)
+        elif src.startswith("{"):
+            from .android_iconify import IconDrawable
+            self.widget.setImageDrawable(
+                IconDrawable(self.get_context(), src[1:-1]))
         else:
-            self.widget.setImageUri(src)
+            self.widget.setImageURI(src)
 
-    def set_max_height(self, height):
-        self.widget.setMaxHeight(height)
-
-    def set_max_width(self, width):
-        self.widget.setMaxWidth(width)
+    # def set_max_height(self, height):
+    #     self.widget.setMaxHeight(height)
+    #
+    # def set_max_width(self, width):
+    #     self.widget.setMaxWidth(width)

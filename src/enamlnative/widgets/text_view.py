@@ -92,12 +92,6 @@ class TextView(View):
     #: Listen for editor actions
     editor_action = d_(Event(dict), writable=False)
 
-    #: Font family
-    font_family = d_(Unicode())
-
-    #: Font style
-    font_style = d_(Enum('normal', 'bold', 'italic', 'bold_italic'))
-
     #: Input type or types separated by "|"
     #: See https://developer.android.com/reference/android/widget/TextView.html
     #: attr_android:inputType
@@ -120,6 +114,12 @@ class TextView(View):
         'text_web_edit_text', 'text_web_email_address',
         'text_web_password', 'time',
     )
+
+    #: Font family
+    font_family = d_(Unicode())
+
+    #: Font style
+    font_style = d_(Enum('normal', 'bold', 'italic', 'bold_italic'))
 
     #: Sets the color used to display the selection highlight.
     highlight_color = d_(Unicode())

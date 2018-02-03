@@ -52,6 +52,7 @@ class AndroidSeekBar(AndroidProgressBar, ProxySeekBar):
         """
         super(AndroidSeekBar, self).init_widget()
         d = self.declaration
+        w = self.widget
 
         if d.split_track:
             self.set_split_track(d.split_track)
@@ -59,8 +60,8 @@ class AndroidSeekBar(AndroidProgressBar, ProxySeekBar):
             self.set_key_progress_increment(d.key_progress_increment)
 
         #: Setup listener
-        self.widget.setOnSeekBarChangeListener(self.widget.getId())
-        self.widget.onProgressChanged.connect(self.on_progress_changed)
+        w.setOnSeekBarChangeListener(w.getId())
+        w.onProgressChanged.connect(self.on_progress_changed)
 
     # -------------------------------------------------------------------------
     # OnSeekBarChangeListener API

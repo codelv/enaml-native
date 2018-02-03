@@ -69,7 +69,6 @@ class YogaNode(JavaBridgeObject):
     setAspectRatio = JavaMethod('float')
 
 
-
 class YogaLayoutParams(LayoutParams):
     __nativeclass__ = set_default('com.facebook.yoga.YogaLayout$LayoutParams')
 

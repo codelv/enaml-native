@@ -142,14 +142,8 @@ class ViewPager(ViewGroup):
 
 
 class PagerTitleStrip(ViewGroup):
-
-    #: Titles to use
-    #titles = d_(List(basestring))
-
-    #: Update defaults
-    layout_width = set_default("match_parent")
-    layout_height = set_default("wrap_content")
-    layout_gravity = set_default("top")
+    #: Top by default
+    gravity = set_default('top')
 
     #: Set the alpha value used for non-primary page titles.
     inactive_alpha = d_(Float())

@@ -47,11 +47,6 @@ class RatingBar(ProgressBar):
     #: (thus non-changeable by the user).
     is_indicator = d_(Bool())
 
-    #: The number of stars set (via setNumStars(int) or in an XML layout)
-    #: will be shown when the layout width is set to wrap content
-    #: (if another layout width is set, the results may be unpredictable).
-    layout_width = set_default('wrap_content')
-
     #: Sets the number of stars to show.
     num_stars = d_(Int())
 

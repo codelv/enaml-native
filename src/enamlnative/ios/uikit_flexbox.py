@@ -11,7 +11,6 @@ Created on Aug 3, 2017
 """
 
 from atom.api import Atom, Typed, Instance, set_default
-from enamlnative.core.layout import FlexParams
 from enamlnative.widgets.flexbox import ProxyFlexbox
 
 from .bridge import NestedBridgeObject, ObjcMethod, ObjcProperty
@@ -84,7 +83,6 @@ class Yoga(NestedBridgeObject):
     YGAlignBaseline = 5
     YGAlignSpaceBetween = 6
     YGAlignSpaceAround = 7
-
 
     YGDirectionInherit = 0
     YGDirectionLTR = 1
@@ -162,7 +160,7 @@ class Yoga(NestedBridgeObject):
 
 class FlexboxLayoutHelper(Atom):
 
-    layout = Typed(FlexParams)
+    #layout = Typed(FlexParams)
     yoga = Instance(Yoga)
 
     @staticmethod
@@ -203,7 +201,6 @@ class FlexboxLayoutHelper(Atom):
             self.set_start(d.start)
         if d.end:
             self.set_end(d.end)
-
 
         if d.min_height:
             self.set_min_height(d.min_height)

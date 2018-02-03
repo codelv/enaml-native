@@ -52,13 +52,13 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
         """
         super(AndroidTimePicker, self).init_widget()
         d = self.declaration
+        w = self.widget
         self.set_hour(d.hour)
         self.set_minute(d.minute)
         self.set_hour_mode(d.hour_mode)
-        self.set_enabled(d.enabled)
 
-        self.widget.setOnTimeChangedListener(self.widget.getId())
-        self.widget.onTimeChanged.connect(self.on_time_changed)
+        w.setOnTimeChangedListener(w.getId())
+        w.onTimeChanged.connect(self.on_time_changed)
 
     # -------------------------------------------------------------------------
     # OnTimeChangedListener API
@@ -80,7 +80,6 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
             self.widget.setHour(hour)
 
     def set_minute(self, minute):
-
         if self.get_context().api_level < 23:
             self.widget.setCurrentMinute(minute)
         else:
@@ -88,6 +87,3 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
 
     def set_hour_mode(self, mode):
         self.widget.setIs24HourView(mode == '24')
-
-    def set_enabled(self, enabled):
-        self.widget.setEnabled(enabled)

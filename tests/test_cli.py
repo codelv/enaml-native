@@ -56,13 +56,6 @@ def test_init_build():
                 print(enamlnative('install', 'p4a-msgpack'))
                 print(enamlnative('list'))
 
-                #: TODO: Should not have to build twice!
-                #: Now build python
-                print(enamlnative('build-python'))
-
-                #: Build and do a gradle sync, this will NOT include jni and native libs!
-                print(enamlnative('build-android'))
-
                 #: Now build python (again) to put them in the correct spot
                 print(enamlnative('build-python'))
 

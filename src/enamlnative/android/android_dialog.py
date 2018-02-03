@@ -61,28 +61,15 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
         self.dialog = Dialog(self.get_context(), d.style)
 
     def init_widget(self):
+        """ Set the listeners
         """
-        """
+        w = self.dialog
+        # Listen for events
+        w.setOnDismissListener(w.getId())
+        w.onDismiss.connect(self.on_dismiss)
+        w.setOnCancelListener(w.getId())
+        w.onCancel.connect(self.on_cancel)
         super(AndroidDialog, self).init_widget()
-
-        #: Bind our listener
-
-        d = self.declaration
-        if d.title:
-            self.set_title(d.title)
-        if not d.cancel_on_back:
-            self.set_cancel_on_back(d.cancel_on_back)
-        if not d.cancel_on_touch_outside:
-            self.set_cancel_on_touch_outside(d.cancel_on_touch_outside)
-        if d.key_events:
-            self.set_key_events(d.key_events)
-
-        #: Listen for events
-        self.dialog.setOnDismissListener(self.dialog.getId())
-        self.dialog.onDismiss.connect(self.on_dismiss)
-
-        self.dialog.setOnCancelListener(self.dialog.getId())
-        self.dialog.onCancel.connect(self.on_cancel)
 
     def init_layout(self):
         """ If a view is given show it 
@@ -173,7 +160,6 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
 
     def set_show(self, show):
         if show:
-            d = self.declaration
             self.dialog.show()
         else:
             self.dialog.dismiss()

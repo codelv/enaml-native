@@ -48,11 +48,11 @@ class DatePicker(FrameLayout):
 
     #: Sets the minimal date supported by this DatePicker in milliseconds
     #: since January 1, 1970 00:00:00 in getDefault() time zone.
-    min_date = d_(Instance(datetime))
+    min_date = d_(Instance(datetime, factory=datetime.now))
 
     #: Sets the maximal date supported by this DatePicker in milliseconds
     #: since January 1, 1970 00:00:00 in getDefault() time zone.
-    max_date = d_(Instance(datetime))
+    max_date = d_(Instance(datetime, factory=datetime.now))
 
     #: Sets the first day of week.
     first_day_of_week = d_(Range(1, 7))

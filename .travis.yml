@@ -28,7 +28,7 @@ before_install:
   - pip install sh colorama appdirs six jinja2
 
   # Intall test tools
-  - pip install pytest pytest-cov pytest-catchlog pytest-timeout
+  - pip install pytest pytest-cov pytest-timeout
 
   # Install codecov report tools
   - pip install codecov

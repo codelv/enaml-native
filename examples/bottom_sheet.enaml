@@ -1,10 +1,9 @@
 from enamlnative.widgets.api import *
 from enamlnative.android.app import AndroidApplication
-
-AndroidApplication.instance().debug = False
-
+from enamlnative.core.api import Looper
 
 enamldef ContentView(Flexbox):
+    attr app = AndroidApplication.instance()
     flex_direction = "column"
     Button:
         text = "Open bottom sheet"
@@ -14,16 +13,12 @@ enamldef ContentView(Flexbox):
     BottomSheetDialog: sheet:
         Flexbox:
             flex_direction = "column"
-            Button:
-                style = "borderless"
-                text = "Action 1"
-                clicked ::
-                    AndroidApplication.instance().show_toast(self.text)
-                    sheet.show = False
-            Button:
-                style = "borderless"
-                text = "Action 2"
-                clicked ::
-                    AndroidApplication.instance().show_toast(self.text)
-                    sheet.show = False
+            Looper:
+                iterable = range(3)
+                Button:
+                    flat = True
+                    text = "Action {}".format(loop_item)
+                    clicked ::
+                        app.show_toast(self.text, False)
+                        sheet.show = False
 

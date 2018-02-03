@@ -24,7 +24,7 @@ class ProxyActivityIndicator(ProxyView):
     #: A reference to the declaration.
     declaration = ForwardTyped(lambda: ActivityIndicator)
 
-    def set_style(self, style):
+    def set_size(self, size):
         raise NotImplementedError
 
     def set_color(self, color):
@@ -37,7 +37,7 @@ class ActivityIndicator(View):
     """
 
     #: Style for indeterminate
-    style = d_(Enum('normal', 'small', 'large'))
+    size = d_(Enum('normal', 'small', 'large'))
 
     #: Sets the color of the indicator.
     color = d_(Unicode())
@@ -48,7 +48,7 @@ class ActivityIndicator(View):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('style', 'color')
+    @observe('size', 'color')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

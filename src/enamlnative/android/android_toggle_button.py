@@ -39,17 +39,6 @@ class AndroidToggleButton(AndroidCompoundButton, ProxyToggleButton):
         """
         self.widget = ToggleButton(self.get_context())
 
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidToggleButton, self).init_widget()
-        d = self.declaration
-        if d.text_off:
-            self.set_text_off(d.text_off)
-        if d.text_on:
-            self.set_text_on(d.text_on)
-
     # -------------------------------------------------------------------------
     # ProxyToggleButton API
     # -------------------------------------------------------------------------

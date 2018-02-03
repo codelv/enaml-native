@@ -1,7 +1,6 @@
 from enamlnative.widgets.api import *
 from enamlnative.android.app import AndroidApplication
 
-AndroidApplication.instance().debug = False
 
 enamldef ContentView(Flexbox):
     flex_direction = "column"
@@ -21,24 +20,23 @@ enamldef ContentView(Flexbox):
         Flexbox:
             flex_direction = "column"
             justify_content = "space_between"
+            padding = (20, 20, 20, 0)
+            TextView:
+                text = "Are you sure you want to delete?"
+                font_family = "sans-serif-medium"
+            TextView:
+                text = "This operation cannot be undone."
             Flexbox:
-                flex_direction = "column"
-                padding = (20, 20, 20, 50)
-                TextView:
-                    text = "Are you sure you want to delete?"
-                    font_family = "sans-serif-medium"
-                TextView:
-                    text = "This operation cannot be undone."
-            Flexbox:
-                justify_content = "flex_end"
+                justify_content = "space_between"
+                margin = (0, 20, 0, 10)
                 Button:
-                    style = "borderless"
+                    flat = True
                     text = "Ok"
                     clicked ::
                         print("ok!")
                         dialog.show = False
                 Button:
-                    style = "borderless"
+                    flat = True
                     text = "Cancel"
                     clicked :: dialog.show = False
 

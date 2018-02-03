@@ -71,25 +71,11 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
     #: Save created tab spec references
     tabs = List(Tab)
 
-    #: ViewPager views should have the given layout params
-    layout_param_type = set_default(ViewPagerLayoutParams)
-
-    def _default_layout_params(self):
-        d = self.declaration
-        try:
-            w = int(int(d.layout_width)*self.dp)
-        except ValueError:
-            w = LayoutParams.LAYOUTS[d.layout_width or 'match_parent']
-        try:
-            h = int(int(d.layout_height)*self.dp)
-        except ValueError:
-            h = LayoutParams.LAYOUTS[d.layout_height or 'match_parent']
-        #: Takes no arguments
-        layout_params = self.layout_param_type()
-        layout_params.width = w
-        layout_params.height = h
-        layout_params.isDecor = True
-        return layout_params
+    default_layout = set_default({
+        'width': 'match_parent',
+        'height': 'wrap_content',
+        'gravity': 'top'
+    })
 
     # -------------------------------------------------------------------------
     # Initialization API
@@ -106,6 +92,7 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
         """
         super(AndroidTabLayout, self).init_widget()
         d = self.declaration
+        w = self.widget
         if d.tab_mode != 'fixed':  #: Default
             self.set_tab_mode(d.tab_mode)
         if d.tab_gravity != 'fill':  #: Default
@@ -118,9 +105,9 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
         if d.tab_color or d.tab_color_selected:
             self.set_tab_color(d.tab_color)
 
-        self.widget.addOnTabSelectedListener(self.widget.getId())
-        self.widget.onTabSelected.connect(self.on_tab_selected)
-        self.widget.onTabUnselected.connect(self.on_tab_unselected)
+        w.addOnTabSelectedListener(w.getId())
+        w.onTabSelected.connect(self.on_tab_selected)
+        w.onTabUnselected.connect(self.on_tab_unselected)
 
     def init_layout(self):
         """ Initialize the tabs.

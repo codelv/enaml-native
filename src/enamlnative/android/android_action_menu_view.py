@@ -37,7 +37,6 @@ class Menu(JavaBridgeObject):
         super(Atom, self).__init__()
 
 
-
 class MenuItem(JavaBridgeObject):
     __nativeclass__ = set_default('android.view.MenuItem')
 
@@ -64,24 +63,21 @@ class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
         """
         super(AndroidActionMenuView, self).init_widget()
         d = self.declaration
+        w = self.widget
 
         #: Kinda hackish, but when we get the menu back, load it
-        self.widget.getMenu().then(self.on_menu)
-        self.widget.setOnMenuItemClickListener(self.widget.getId())
-        self.widget.onMenuItemClick.connect(self.on_menu_item_click)
-
+        w.getMenu().then(self.on_menu)
+        w.setOnMenuItemClickListener(w.getId())
+        w.onMenuItemClick.connect(self.on_menu_item_click)
 
     def on_menu(self, menu):
         """ """
-        # This is just an id?
-        Menu(menu)
-        pass
+        Menu(__id__=menu)
 
     # -------------------------------------------------------------------------
     # OnMenuItemClickListener API
     # -------------------------------------------------------------------------
     def on_menu_item_click(self, item):
-
         return False
 
     # -------------------------------------------------------------------------

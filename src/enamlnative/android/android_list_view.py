@@ -115,6 +115,14 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
         #self.widget.onItemSelected.connect(self.on_item_selected)
         #self.widget.onNothingSelected.connect(self.on_nothing_selected)
 
+    def get_declared_items(self):
+        """ Override to do it manually
+        
+        """
+        for k, v in super(AndroidListView, self).get_declared_items():
+            if k == 'layout':
+                yield k, v
+                break
 
     def init_layout(self):
         """ Initialize the underlying widget.
@@ -122,23 +130,22 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
         """
         super(AndroidListView, self).init_layout()
         d = self.declaration
+        w = self.widget
 
-        #: Prepare adapter
-        self.adapter = BridgedListAdapter()
+        # Prepare adapter
+        adapter = self.adapter = BridgedListAdapter()
 
-        #: I'm sure this will make someone upset haha
-        self.adapter.setListView(self.widget, self.adapter.getId())
-        self.adapter.onRecycleView.connect(self.on_recycle_view)
-        self.adapter.onVisibleCountChanged.connect(
-            self.on_visible_count_changed)
-        self.adapter.onScrollStateChanged.connect(
-            self.on_scroll_state_changed)
+        # I'm sure this will make someone upset haha
+        adapter.setListView(w, adapter.getId())
+        adapter.onRecycleView.connect(self.on_recycle_view)
+        adapter.onVisibleCountChanged.connect(self.on_visible_count_changed)
+        adapter.onScrollStateChanged.connect(self.on_scroll_state_changed)
 
         if d.items:
             self.set_items(d.items)
         self.refresh_views()
 
-        self.widget.setAdapter(self.adapter)
+        w.setAdapter(adapter)
         if d.selected >= 0:
             self.set_selected(d.selected)
 

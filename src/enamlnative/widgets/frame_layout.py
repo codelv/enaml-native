@@ -9,13 +9,10 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Int, Bool, observe
-)
-
+from atom.api import Typed, ForwardTyped, Coerced, Bool, observe
 from enaml.core.declarative import d_
-
 from .view_group import ViewGroup, ProxyViewGroup
+from .view import coerce_gravity
 
 
 class ProxyFrameLayout(ProxyViewGroup):
@@ -28,9 +25,6 @@ class ProxyFrameLayout(ProxyViewGroup):
     def set_foreground_gravity(self, gravity):
         raise NotImplementedError
 
-    def set_measure_all_children(self, enabled):
-        raise NotImplementedError
-
 
 class FrameLayout(ViewGroup):
     """ FrameLayout is a view group that displays
@@ -39,9 +33,7 @@ class FrameLayout(ViewGroup):
     """
     #: Describes how the child views are positioned.
     #: Defaults to Gravity.START | Gravity.TOP.
-    foreground_gravity = d_(Int())
-
-    measure_all_children = d_(Bool())
+    foreground_gravity = d_(Coerced(int, coercer=coerce_gravity))
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyFrameLayout)
@@ -49,7 +41,7 @@ class FrameLayout(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('foreground_gravity', 'measure_all_children')
+    @observe('foreground_gravity')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

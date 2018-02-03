@@ -13,7 +13,7 @@ enamldef ContentView(ScrollView): finder:
         CardView:
             Flexbox:
                 flex_direction = "column"
-                layout_height = "wrap_content"
+                height = "wrap_content"
                 Text:
                     text = "Icons"
                     text_size = 32
@@ -39,7 +39,7 @@ enamldef ContentView(ScrollView): finder:
                         iterable = [72, 64, 48, 32, 24, 18]
                         Icon:
                             text_size = loop_item
-                            padding = (8, 0, 8, 0)
+                            padding =  (8, 0, 8, 0)
                             text << display.text
 
                 Text:

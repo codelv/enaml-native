@@ -12,7 +12,7 @@ Created on May 20, 2017
 from atom.api import (
     Typed, ForwardTyped, Long, Unicode, Enum, Bool, observe, set_default
 )
-
+from datetime import datetime
 from enaml.core.declarative import d_
 
 from .text_view import TextView, ProxyTextView
@@ -37,6 +37,9 @@ class ProxyChronometer(ProxyTextView):
     def set_running(self, running):
         raise NotImplementedError
 
+    def set_mode(self, mode):
+        raise NotImplementedError
+
 
 class Chronometer(TextView):
     """ A simple control for displaying read-only text.
@@ -44,7 +47,7 @@ class Chronometer(TextView):
     """
 
     #: Set the time that the count-up timer is in reference to.
-    base = d_(Long())
+    base = d_(Typed(datetime, factory=datetime.now))
 
     #: Tick counter
     ticks = d_(Long(), writable=False)
@@ -53,7 +56,12 @@ class Chronometer(TextView):
     format = d_(Unicode())
 
     #: Counting direction
-    direction = d_(Enum('up','down'))
+    direction = d_(Enum('up', 'down'))
+
+    #: Defines the behavior when restarting
+    #: If mode is resume it will continue otherwise
+    #: it will reset the count.
+    mode = d_(Enum('resume', 'reset', 'manual'))
 
     #: Start / stop the counter
     running = d_(Bool())
@@ -61,7 +69,7 @@ class Chronometer(TextView):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyChronometer)
 
-    @observe('base', 'direction', 'format', 'running')
+    @observe('base', 'direction', 'format', 'running', 'mode')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

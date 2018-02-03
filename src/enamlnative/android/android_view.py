@@ -9,13 +9,20 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, Instance, Subclass, Bool, Float, set_default
-
-from enamlnative.widgets.view import ProxyView
+from atom.api import Typed, Dict, Instance, Subclass, Float, set_default
 
 from .android_toolkit_object import AndroidToolkitObject
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField
 
+from enamlnative.widgets.view import ProxyView
+
+
+LAYOUT_KEYS = (
+    'x', 'y', 'z', 'width', 'height', 'gravity',
+    'margin', 'padding', 'top', 'bottom', 'left', 'right',
+    'align_self', 'flex_basis', 'position',
+    'max_width', 'min_width', 'max_height', 'min_height'
+)
 
 class View(JavaBridgeObject):
     __nativeclass__ = set_default('android.view.View')
@@ -40,14 +47,15 @@ class View(JavaBridgeObject):
     setLeft = JavaMethod('int')
     setRight = JavaMethod('int')
     setLayoutDirection = JavaMethod('int')
+
     setLayoutParams = JavaMethod('android.view.ViewGroup$LayoutParams')
     setPadding = JavaMethod('int', 'int', 'int', 'int')
 
     getWindowToken = JavaMethod(returns='android.os.IBinder')
 
-    setX = JavaMethod('int')
-    setY = JavaMethod('int')
-    setZ = JavaMethod('int')
+    setX = JavaMethod('float')
+    setY = JavaMethod('float')
+    setZ = JavaMethod('float')
     setMaximumHeight = JavaMethod('int')
     setMaximumWidth = JavaMethod('int')
     setMinimumHeight = JavaMethod('int')
@@ -64,6 +72,22 @@ class View(JavaBridgeObject):
         'inherit': 2,
     }
 
+    GRAVITIES = {
+        'no_gravity': 0,
+        'center_horizontal': 1,
+        'center_vertical': 16,
+        'center': 11,
+        'fill': 119,
+        'fill_horizontal': 7,
+        'fill_vertical': 112,
+        'top': 48,
+        'bottom': 80,
+        'left': 3,
+        'right': 5,
+        'start': 8388611,
+        'end': 8388613
+    }
+
 
 class LayoutParams(JavaBridgeObject):
     __nativeclass__ = set_default('android.view.ViewGroup$LayoutParams')
@@ -76,13 +100,6 @@ class LayoutParams(JavaBridgeObject):
     }
 
 
-class MarginLayoutParams(LayoutParams):
-    __nativeclass__ = set_default('android.view.ViewGroup$MarginLayoutParams')
-    __signature__ = set_default(('int', 'int'))
-    setMargins = JavaMethod('int', 'int', 'int', 'int')
-    setLayoutDirection = JavaMethod('int')
-
-
 class AndroidView(AndroidToolkitObject, ProxyView):
     """ An Android implementation of an Enaml ProxyView.
 
@@ -93,18 +110,14 @@ class AndroidView(AndroidToolkitObject, ProxyView):
     #: Display metrics density
     dp = Float(1.0)
 
-    #: Layout type
-    layout_param_type = Subclass(LayoutParams, default=MarginLayoutParams)
-
     #: Layout params
     layout_params = Instance(LayoutParams)
 
-    #: Flag to know if layout params should be destroyed
-    _destroy_layout_params = Bool()
-
-    def _observe_layout_params(self, change):
-        """ If layout_params is set, make sure it get's deleted later. """
-        self._destroy_layout_params = True
+    #: Default layout params
+    default_layout = Dict(default={
+        'width': 'wrap_content',
+        'height': 'wrap_content'
+    })
 
     def _default_dp(self):
         return self.get_context().dp
@@ -120,82 +133,54 @@ class AndroidView(AndroidToolkitObject, ProxyView):
 
     def init_widget(self):
         """ Initialize the underlying widget.
+        
+        This reads all items declared in the enamldef block for this node 
+        and sets only the values that have been specified. All other values 
+        will be left as default. Doing it this way makes atom to only create 
+        the properties that need to be overridden from defaults thus greatly 
+        reducing the number of initialization checks, saving time and memory.
+        
+        If you don't want this to happen override `get_declared_keys` 
+        to return an empty list. 
 
         """
         super(AndroidView, self).init_widget()
-        d = self.declaration
-        w = self.widget
-        #if d.layout_direction != 'ltr':  #: Default, no need to set it
-        #    self.set_layout_direction(d.layout_direction)
-        if d.tool_tip:
-            self.set_tool_tip(d.tool_tip)
-        if d.status_tip:
-            self.set_status_tip(d.status_tip)
-        if not d.enabled:
-            self.set_enabled(d.enabled)
-        # Don't make toplevel widgets visible during init or they will
-        # flicker onto the screen. This applies particularly for things
-        # like status bar widgets which are created with no parent and
-        # then reparented by the status bar. Real top-level widgets must
-        # be explicitly shown by calling their .show() method after they
-        # are created.
-        if w and not d.visible:
-            self.set_visible(d.visible)
-        if d.background_color:
-            self.set_background_color(d.background_color)
-        if d.top:
-            self.set_top(d.top)
-        if d.bottom:
-            self.set_bottom(d.bottom)
-        if d.left:
-            self.set_left(d.left)
-        if d.right:
-            self.set_right(d.right)
-        if d.x:
-            self.set_x(d.x)
-        if d.y:
-            self.set_y(d.y)
-        if d.z:
-            self.set_y(d.z)
-        if d.alpha != 1:
-            self.set_alpha(d.alpha)
-        if d.padding:
-            self.set_padding(d.padding)
-        if d.margins or d.layout_width or d.layout_height:
-            self.set_layout_params(self.layout_params)
-            if d.margins:
-                self.set_margins(d.margins)
-        if d.clickable:
-            w.setOnClickListener(w.getId())
-            w.onClick.connect(self.on_click)
-            self.set_clickable(d.clickable)
-        if d.key_events:
-            w.setOnKeyListener(w.getId())
-            w.onKey.connect(self.on_key)
-        if d.touch_events:
-            w.setOnTouchListener(w.getId())
-            w.onTouch.connect(self.on_touch)
-        if d.layout:
-            self.set_layout(d.layout)
 
-    def _default_layout_params(self):
-        d = self.declaration
-        LayoutParamsFactory = self.layout_param_type
-        try:
-            w = int(int(d.layout_width)*self.dp)
-        except ValueError:
-            w = LayoutParams.LAYOUTS[d.layout_width or 'match_parent']
-        try:
-            h = int(int(d.layout_height)*self.dp)
-        except ValueError:
-            h = LayoutParams.LAYOUTS[d.layout_height or 'match_parent']
-        return LayoutParamsFactory(w, h)
+        # Initialize the widget by updating only the members that
+        # have read expressions declared. This saves a lot of time and
+        # simplifies widget initialization code
+        for k, v in self.get_declared_items():
+            handler = getattr(self, 'set_'+k, None)
+            if handler:
+                handler(v)
 
-    def destroy(self):
-        """ Destroy layout params if needed. """
-        super(AndroidView, self).destroy()
-        if self._destroy_layout_params:
-            del self.layout_params
+    def get_declared_items(self):
+        """ Get the members that were set in the enamldef block for this
+        Declaration. Layout keys are grouped together until the end so as
+        to avoid triggering multiple updates.
+        
+        Returns
+        -------
+        result: List of (k,v) pairs that were defined for this widget in enaml
+            List of keys and values
+
+        """
+        d = self.declaration
+        engine = d._d_engine
+        if engine:
+            layout = {}
+            for k, h in engine._handlers.items():
+                # Handlers with read operations
+                if not h.read_pair:
+                    continue
+                v = getattr(d, k)
+                if k in LAYOUT_KEYS:
+                    layout[k] = v
+                    continue
+                yield (k, v)
+
+            if layout:
+                yield ('layout', layout)
 
     # -------------------------------------------------------------------------
     # OnClickListener API
@@ -243,103 +228,37 @@ class AndroidView(AndroidToolkitObject, ProxyView):
 
         """
         d = self.declaration
-        r = {'event':event,'result':False}
+        r = {'event': event, 'result': False}
         d.touch_event(r)
         return r['result']
-
 
     # -------------------------------------------------------------------------
     # ProxyView API
     # -------------------------------------------------------------------------
-    def set_alpha(self, alpha):
-        self.widget.setAlpha(alpha)
+    def set_touch_events(self, enabled):
+        w = self.widget
+        if enabled:
+            w.setOnTouchListener(w.getId())
+            w.onTouch.connect(self.on_touch)
+        else:
+            w.onTouch.disconnect(self.on_touch)
 
-    def set_background_color(self, color):
-        self.widget.setBackgroundColor(color)
-        
+    def set_key_events(self, enabled):
+        w = self.widget
+        if enabled:
+            w.setOnKeyListener(w.getId())
+            w.onKey.connect(self.on_key)
+        else:
+            w.onKey.disconnect(self.on_key)
+
     def set_clickable(self, clickable):
-        self.widget.setClickable(clickable)    
-
-    def set_top(self, top):
-        self.widget.setTop(top)
-
-    def set_bottom(self, bottom):
-        self.widget.setBottom(bottom)
-
-    def set_left(self, left):
-        self.widget.setLeft(left)
-
-    def set_right(self, right):
-        self.widget.setRight(right)
-
-    def set_layout_height(self, height):
-        try:
-            h = int(int(height)*self.dp)
-        except ValueError:
-            h = LayoutParams.LAYOUTS[height or 'match_parent']
-        self.layout_params.height = h
-
-    def set_layout_width(self, width):
-        try:
-            w = int(int(width)*self.dp)
-        except ValueError:
-            w = LayoutParams.LAYOUTS[width or 'match_parent']
-        self.layout_params.width = w
-
-    def set_layout_direction(self, direction):
-        d = View.LAYOUT_DIRECTIONS[direction]
-        self.widget.setLayoutDirection(d)
-
-    def set_layout_params(self, params):
-        self.widget.setLayoutParams(params)
-
-    def set_margins(self, margins):
-        dp = self.dp
-        l, t, r, b = margins
-        self.layout_params.setMargins(int(l*dp), int(t*dp),
-                                      int(r*dp), int(b*dp))
-
-    def set_padding(self, padding):
-        dp = self.dp
-        l, t, r, b = padding
-        self.widget.setPadding(int(l*dp), int(t*dp),
-                               int(r*dp), int(b*dp))
-
-    def set_x(self, x):
-        self.widget.setX(x)
-
-    def set_y(self, y):
-        self.widget.setY(y)
-
-    def set_z(self, z):
-        self.widget.setZ(z)
-
-    def set_layout(self, layout):
-        #: Hack for flexbox
-        from .android_flexbox import FlexboxLayoutHelper
-        FlexboxLayoutHelper.apply_layout(self)
-
-    def set_minimum_size(self, min_size):
-        """ Sets the minimum size of the widget.
-
-        """
-        # QWidget uses (0, 0) as the minimum size.
-        if -1 in min_size:
-            min_size = (0, 0)
-        w,h = min_size
-        self.widget.setMinimumWidth(w)
-        self.widget.setMinimumHeight(h)
-
-    def set_maximum_size(self, max_size):
-        """ Sets the maximum size of the widget.
-
-        """
-        # QWidget uses 16777215 as the max size
-        if -1 in max_size:
-            max_size = (16777215, 16777215)
-        w, h = max_size
-        self.widget.setMaximumWidth(w)
-        self.widget.setMaximumHeight(h)
+        w = self.widget
+        if clickable:
+            w.setOnClickListener(w.getId())
+            w.onClick.connect(self.on_click)
+        else:
+            w.onClick.disconnect(self.on_click)
+        w.setClickable(clickable)
 
     def set_enabled(self, enabled):
         """ Set the enabled state of the widget.
@@ -354,28 +273,112 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         v = View.VISIBILITY_VISIBLE if visible else View.VISIBILITY_GONE
         self.widget.setVisibility(v)
 
-    def set_tool_tip(self, tool_tip):
-        """ Set the tool tip for the widget.
-
+    # -------------------------------------------------------------------------
+    # Style updates
+    # -------------------------------------------------------------------------
+    def set_background_color(self, color):
+        """ Set the background color of the widget.
+        
         """
-        self.widget.setToolTipText(tool_tip)
+        self.widget.setBackgroundColor(color)
 
-    def set_status_tip(self, status_tip):
-        """ Set the status tip for the widget.
+    def set_alpha(self, alpha):
+        """ Sets the alpha or opacity of the widget. """
+        self.widget.setAlpha(alpha)
 
+    # -------------------------------------------------------------------------
+    # Layout updates
+    # -------------------------------------------------------------------------
+    def set_layout(self, layout):
+        """ Sets the LayoutParams of this widget. 
+           
+        Since the available properties that may be set for the layout params 
+        depends on the parent, actual creation of the params is delegated to 
+        the parent
+        
+        Parameters
+        ----------
+        layout: Dict
+            A dict of layout parameters the parent should used to layout this
+            child.  The widget defaults are updated with user passed values. 
+        
         """
-        return # Not implemented on android
+        # Update the layout with the widget defaults
+        update = self.layout_params is not None
+        params = self.default_layout.copy()
+        params.update(layout)
 
-    def ensure_visible(self):
-        """ Ensure the widget is visible.
+        # Create the layout params
+        parent = self.parent()
 
+        if not isinstance(parent, AndroidView):
+            # Root node
+            parent = self
+            update = True
+
+        parent.apply_layout(self, params)
+        if update:
+            self.widget.setLayoutParams(self.layout_params)
+
+    def update_layout(self, **params):
+        """ Updates the LayoutParams of this widget. 
+           
+        This delegates to the parent and expects the parent to update the
+        existing layout without recreating it.
+        
+        Parameters
+        ----------
+        params: Dict
+            A dict of layout parameters the parent should used to layout this
+            child.  The widget defaults are updated with user passed values. 
+        
         """
-        # 0 - visible, 4 - invisible, 8 - gone
-        self.widget.setVisibility(View.VISIBILITY_VISIBLE)
+        self.parent().apply_layout(self, params)
 
-    def ensure_hidden(self):
-        """ Ensure the widget is hidden.
+    def set_width(self, width):
+        self.update_layout(width=width)
 
-        """
-        # 0 - visible, 2 - invisible, 8 - gone
-        self.widget.setVisibility(View.VISIBILITY_GONE)
+    def set_height(self, height):
+        self.update_layout(height=height)
+
+    def set_padding(self, padding):
+        self.update_layout(padding=padding)
+
+    def set_margin(self, margin):
+        self.update_layout(margin=margin)
+
+    def set_x(self, x):
+        self.update_layout(x=x)
+
+    def set_y(self, y):
+        self.update_layout(y=y)
+
+    def set_z(self, z):
+        self.update_layout(z=z)
+
+    def set_top(self, top):
+        self.update_layout(top=top)
+
+    def set_left(self, left):
+        self.update_layout(left=left)
+
+    def set_right(self, right):
+        self.update_layout(right=right)
+
+    def set_bottom(self, bottom):
+        self.update_layout(bottom=bottom)
+
+    def set_gravity(self, gravity):
+        self.update_layout(gravity=gravity)
+
+    def set_min_height(self, min_height):
+        self.update_layout(min_height=min_height)
+
+    def set_max_height(self, max_height):
+        self.update_layout(max_height=max_height)
+
+    def set_min_width(self, min_width):
+        self.update_layout(min_width=min_width)
+
+    def set_max_width(self, max_width):
+        self.update_layout(max_width=max_width)

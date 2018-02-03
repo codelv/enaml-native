@@ -1,9 +1,18 @@
 from enamlnative.widgets.api import *
+from enamlnative.core.api import Looper
+
 
 enamldef ContentView(Flexbox):
-    #: Normal size
-    AnalogClock:
-        pass
-
-    TextClock:
-        pass
+    flex_direction = 'column'
+    justify_content = "center"
+    align_items = "center"
+    Looper:
+        iterable = ["America/Los_Angeles",
+                    "America/New_York",
+                    "UTC"]
+        TextView:
+            text = loop_item
+        TextClock:
+            text_size = 32
+            text_color = "#00F"
+            time_zone = loop_item

@@ -146,8 +146,8 @@ class UiKitView(UiKitToolkitObject, ProxyView):
             widget.addSubview(child_widget)
 
         d = self.declaration
-        if d.layout:
-            self.set_layout(d.layout)
+        #if d.layout:
+        #    self.set_layout(d.layout)
 
     def update_frame(self):
         """ Define the view frame for this widgets"""
@@ -299,7 +299,9 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         raise NotImplementedError
 
     def set_layout(self, layout):
-        from .uikit_flexbox import FlexboxLayoutHelper
-        FlexboxLayoutHelper.apply_layout(self)
+        pass
+        # TODO: Reimplement this
+        #from .uikit_flexbox import FlexboxLayoutHelper
+        #FlexboxLayoutHelper.apply_layout(self)
 
 

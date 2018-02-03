@@ -55,9 +55,7 @@ class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
     # ProxyScrollView API
     # -------------------------------------------------------------------------
     def set_orientation(self, orientation):
-        #: Cannot be changed once set
-        raise NotImplementedError(
-            "ScrollView orientation cannot be changed dynamically.")
+       pass
 
     def set_scroll_by(self, delta):
         self.widget.smoothScrollBy(*delta)

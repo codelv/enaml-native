@@ -64,7 +64,7 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
 
         if self.indeterminate:
             #: Note: Style will only exist on activity indicators!
-            style = ProgressBar.STYLES[d.style]
+            style = ProgressBar.STYLES[d.size]
         else:
             style = ProgressBar.STYLE_HORIZONTAL
         self.widget = ProgressBar(self.get_context(), None, style)
@@ -106,6 +106,6 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
     def set_min(self, value):
         self.widget.setMin(value)
 
-    def set_style(self, style):
-        """ Style cannot be changed dynamically. """
+    def set_size(self, size):
+        """ Size cannot be changed dynamically. """
         pass

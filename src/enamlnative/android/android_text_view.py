@@ -17,68 +17,6 @@ from .android_view import AndroidView, View
 from .bridge import JavaMethod, JavaCallback
 
 
-class Gravity:
-    # Push object to the bottom of its container, not changing its size.
-    bottom = 50
-
-    # Place the object in the center of its container in both the
-    # vertical and horizontal axis, not changing its size.
-    center = 11
-
-    # Place object in the horizontal center of its container,
-    # not changing its size.
-    center_horizontal = 1
-
-    # Place object in the vertical center of its container,
-    # not changing its size.
-    center_vertical = 10
-
-    # Additional option that can be set to have the left and/or right edges
-    # of the child clipped to its container's bounds. The clip will be based
-    # on the horizontal gravity: a left gravity will clip the right edge,
-    # a right gravity will clip the left edge, and neither will clip
-    # both edges.
-    clip_horizontal = 8
-
-    # Additional option that can be set to have the top and/or bottom edges
-    # of the child clipped to its container's bounds. The clip will be based
-    # on the vertical gravity: a top gravity will clip the bottom edge, a
-    # bottom gravity will clip the top edge, and neither will clip both edges.
-    clip_vertical = 80
-
-    # Push object to the end of its container, not changing its size.
-    end = 800005
-
-    # Grow the horizontal and vertical size of the object
-    # if needed so it completely fills its container.
-    fill = 77
-
-    # Grow the horizontal size of the object if needed so it completely
-    # fills its container.
-    fill_horizontal = 7
-
-    # Grow the vertical size of the object if needed so it completely
-    # fills its container.
-    fill_vertical = 70
-
-    # Push object to the left of its container, not changing its size.
-    left = 3
-    right = 5
-
-    # Push object to the right of its container, not changing its size.
-    start = 800003
-
-    # Push object to the beginning of its container, not changing its size.
-    top = 30
-
-    @staticmethod
-    def parse(gravity):
-        g = 0
-        for key in gravity.split("|"):
-            g |= getattr(Gravity, key)
-        return g
-
-
 class TextView(View):
     __nativeclass__ = set_default('android.widget.TextView')
     setAllCaps = JavaMethod('boolean')
@@ -192,42 +130,9 @@ class AndroidTextView(AndroidView, ProxyTextView):
         """
         super(AndroidTextView, self).init_widget()
         d = self.declaration
-
-        if d.text:
-            self.set_text(d.text)
-        if d.all_caps:
-            self.set_all_caps(d.all_caps)
-        if d.auto_link_mask:
-            self.set_auto_link_mask(d.auto_link_mask)
-        if d.font_family or d.font_style:
-            self.update_font()
-        if d.text_size:
-            self.set_text_size(d.text_size)
-        if d.text_color:
-            self.set_text_color(d.text_color)
-        if d.text_alignment:
-            self.set_text_alignment(d.text_alignment)
-        if d.text_selectable:
-            self.set_text_selectable(d.text_selectable)
-        if d.link_color:
-            self.set_link_color(d.link_color)
-        if d.highlight_color:
-            self.set_highlight_color(d.highlight_color)
-        if d.lines:
-            self.set_lines(d.lines)
-        if d.line_spacing:
-            self.set_line_spacing(d.line_spacing)
-        if d.letter_spacing:
-            self.set_letter_spacing(d.letter_spacing)
-        if d.max_lines:
-            self.set_max_lines(d.max_lines)
+        w = self.widget
         if d.input_type:
             self.set_input_type(d.input_type)
-            self.widget.addTextChangedListener(self.widget.getId())
-            self.widget.onTextChanged.connect(self.on_text_changed)
-        if d.editor_actions:
-            self.widget.setOnEditorActionListener(self.widget.getId())
-            self.widget.onEditorAction.connect(self.on_editor_action)
 
     # -------------------------------------------------------------------------
     # TextWatcher API
@@ -244,11 +149,19 @@ class AndroidTextView(AndroidView, ProxyTextView):
         d = self.declaration
         r = {'key': key, 'result': False}
         d.editor_action(r)
-        return not not r['result']  # Apparently not not is faster than bool
+        return bool(r['result'])  # Apparently not not is faster than bool
 
     # -------------------------------------------------------------------------
     # ProxyTextView API
     # -------------------------------------------------------------------------
+    def set_editor_actions(self, enabled):
+        w = self.widget
+        if enabled:
+            w.setOnEditorActionListener(w.getId())
+            w.onEditorAction.connect(self.on_editor_action)
+        else:
+            w.onEditorAction.disconnect(self.on_editor_action)
+
     def set_all_caps(self, enabled):
         self.widget.setAllCaps(enabled)
 
@@ -264,9 +177,7 @@ class AndroidTextView(AndroidView, ProxyTextView):
     def update_font(self):
         d = self.declaration
         font_style = TextView.FONT_STYLES[d.font_style or 'normal']
-        #style = getattr(Typeface, d.font_style.upper() or 'NORMAL')
-        #tf = Typeface.create(d.font_family or None, style)
-        self.widget.setTypeface(d.font_family, font_style)  #, d.font_style)
+        self.widget.setTypeface(d.font_family, font_style)
 
     def set_input_type(self, input_type):
         it = 0
@@ -278,7 +189,7 @@ class AndroidTextView(AndroidView, ProxyTextView):
         """ Set the text in the widget.
 
         """
-        self.widget.setTextKeepState(text)  #, 0, len(text))
+        self.widget.setTextKeepState(text)
 
     def set_text_alignment(self, alignment):
         self.widget.setGravity(TextView.TEXT_ALIGNMENT[alignment])

@@ -56,37 +56,6 @@ class AndroidToolbar(AndroidViewGroup, ProxyToolbar):
         """
         self.widget = Toolbar(self.get_context())
 
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidToolbar, self).init_widget()
-        d = self.declaration
-        if d.content_padding:
-            self.set_content_padding(d.content_padding)
-        if d.title:
-            self.set_title(d.title)
-        if d.title_margins:
-            self.set_title_margins(d.title_margins)
-        if d.title_color:
-            self.set_title_color(d.title_color)
-        if d.subtitle:
-            self.set_subtitle(d.subtitle)
-        if d.subtitle_color:
-            self.set_subtitle_color(d.subtitle_color)
-
-        #: Force all children to use ToolbarLayoutParams
-        #for c in self.children():
-        #    c.layout_param_type = ToolbarLayoutParams
-
-
-    # def init_layout(self):
-    #     """
-    #
-    #     """
-    #     activity = self.get_context().widget
-    #     activity.setSupportActionBar(self.widget)
-
     # -------------------------------------------------------------------------
     # ProxyToolbar API
     # -------------------------------------------------------------------------

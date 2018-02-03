@@ -16,11 +16,6 @@ def activity_indicator_factory():
     return UiKitActivityIndicator
 
 
-def analog_clock_factory():
-    from .uikit_analog_clock import UiKitAnalogClock
-    return UiKitAnalogClock
-
-
 def auto_complete_text_view_factory():
     from .uikit_auto_complete_text_view import UiKitAutoCompleteTextView
     return UiKitAutoCompleteTextView
@@ -281,7 +276,6 @@ def web_view_factory():
 
 IOS_FACTORIES = {
     'ActivityIndicator': activity_indicator_factory,
-    'AnalogClock': analog_clock_factory,
     'AutoCompleteTextView': auto_complete_text_view_factory,
     'Button': button_factory,
     'CalendarView': calendar_view_factory,
@@ -294,7 +288,7 @@ IOS_FACTORIES = {
     'EditText': edit_text_factory,
     'Flexbox': flexbox_factory,
     'Fragment': fragment_factory,
-    'FrameLayout': frame_layout_factory,
+    #'FrameLayout': frame_layout_factory,
     'GridLayout': grid_layout_factory,
     'Icon': icon_factory,
     'IconButton': icon_button_factory,

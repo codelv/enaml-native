@@ -15,6 +15,10 @@ from enamlnative.widgets.chronometer import ProxyChronometer
 
 from .android_text_view import AndroidTextView, TextView
 from .bridge import JavaCallback, JavaMethod
+from datetime import datetime, timedelta
+
+
+UTC_START = datetime(1970, 1, 1)
 
 
 class Chronometer(TextView):
@@ -51,36 +55,31 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
 
         """
         super(AndroidChronometer, self).init_widget()
-        d = self.declaration
-        if d.base:
-            self.set_base(d.base)
-        if d.format:
-            self.set_format(d.format)
-        if d.direction == 'down':
-            self.set_direction(d.direction)
-
-        self.widget.setOnChronometerTickListener(self.widget.getId())
-        self.widget.onChronometerTick.connect(self.on_chronometer_tick)
-
-        if d.running:
-            self.set_running(d.running)
+        w = self.widget
+        w.setOnChronometerTickListener(w.getId())
+        w.onChronometerTick.connect(self.on_chronometer_tick)
 
     # -------------------------------------------------------------------------
     # OnChronometerTickListener API
     # -------------------------------------------------------------------------
     def on_chronometer_tick(self, view):
         d = self.declaration
-        #d.text = self.widget.getText()
         d.ticks += 1
 
     # -------------------------------------------------------------------------
     # ProxyChronometer API
     # -------------------------------------------------------------------------
-    def set_base(self, base):
-        self.widget.setBase(base)  # or SystemClock.elapsedRealtime())
+    def set_base(self, base, shift=0):
+        #: TODO: This is wrong becuase it uses system uptime
+        #: instead of the actual time
+        s = long((base - UTC_START).total_seconds())-shift
+        self.widget.setBase(s)
 
     def set_format(self, format):
         self.widget.setFormat(format)
+
+    def set_mode(self, mode):
+        pass
 
     def set_direction(self, direction):
         self.widget.setCountDown(direction == 'down')
@@ -88,7 +87,12 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
     def set_running(self, running):
         if running:
             d = self.declaration
-            d.ticks = 0
+            if d.mode == 'reset':
+                d.ticks = 0
+                self.set_base(datetime.now())
+            elif d.mode == 'resume':
+                # Shift the date by now - ticks
+                self.set_base(datetime.now(), shift=d.ticks*1000)
             self.widget.start()
         else:
             self.widget.stop()
