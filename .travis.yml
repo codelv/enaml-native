@@ -15,8 +15,8 @@ android:
     - android-25
 
     #: Add android image
-    - android-22 # Android platform used by your alternative emulator
-    - sys-img-armeabi-v7a-android-22
+    - android-25 # Android platform used by your alternative emulator
+    - sys-img-armeabi-v7a-android-25
     - extra-google-m2repository
     - extra-android-m2repository
 
@@ -37,7 +37,7 @@ before_install:
 
   # Start the emulator!
   - android list target
-  - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
+  - echo no | android create avd --force -n test -t android-25 --abi armeabi-v7a
   - emulator -avd test -no-audio -no-window &
   - android-wait-for-emulator
 
