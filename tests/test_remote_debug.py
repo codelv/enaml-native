@@ -14,8 +14,9 @@ import sys
 
 
 def main():
-    """ Called by PyBridge.start()
-    """
+    # Make sure instance is cleared
+    from enaml.application import Application
+    Application._instance = None
 
     from enamlnative.android.app import AndroidApplication
     app = AndroidApplication(

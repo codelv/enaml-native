@@ -1,6 +1,24 @@
 sudo: required
 dist: trusty
-language: python
+language: android
+jdk: oraclejdk8
+android:
+  components:
+    - tools
+    - platform-tools
+    - tools
+
+    # The BuildTools version used by your project
+    - build-tools-26.0.2
+
+    # The SDK version used to compile your project
+    - android-25
+
+    #: Add android image
+    - android-22 # Android platform used by your alternative emulator
+    - sys-img-armeabi-v7a-android-22
+    - extra-google-m2repository
+    - extra-android-m2repository
 
 branches:
   only:
@@ -11,6 +29,17 @@ matrix:
     - env: PYTHON=2.7
 
 before_install:
+  #: Setup Python
+  - sudo dpkg --add-architecture i386
+  - sudo apt update
+  - sudo apt install -y build-essential ccache git zlib1g-dev python2.7 python2.7-dev python-virtualenv libncurses5:i386 libstdc++6:i386 zlib1g:i386 unzip ant ccache autoconf libtool
+  - sudo apt install -y openjdk-8-jdk
+
+  # Start the emulator!
+  - android list target
+  - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
+  - emulator -avd test -no-audio -no-window &
+  - android-wait-for-emulator
 
   # Just to be sure
   - pip install -U pip
