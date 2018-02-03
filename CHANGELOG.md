@@ -6,13 +6,15 @@ Introduces a major redesign in the core widget initialization
 Changes
 
 - Redesign widget initialization to only set attributes defined in the enaml
-declaration of the widget.  This 
+declaration of the widget.  This should improve speed and memory usage as it now will reduce
+the number of checks required for initialization.
 
 - Fix a major layout issue where layout parameters were not properly applied based on the parent 
 container. Now all `Flexbox` parameters (such as `align_self`, `min_width`, etc..) will work when
 a view is nested in a `Flexbox` layout.
 
-- Removed `AnalogClock` and `Spacer` widgets as they are rarely ever used.
+- Removed `AnalogClock`, `TabWidget` (not `TabLayout`), and `Spacer` widgets as they are rarely 
+ever used.
 
 
 
