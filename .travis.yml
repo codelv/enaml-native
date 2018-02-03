@@ -67,7 +67,7 @@ install:
 
   # Install enamlnative (check that build script is not broken
   - cd $TRAVIS_BUILD_DIR
-  - python src/setup.py develop
+  - python src/setup.py develop --user
   - cd ~
 
 script:
