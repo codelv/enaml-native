@@ -43,25 +43,25 @@ before_install:
   - android list target
   - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
   - emulator -avd test -no-audio -no-window &
-  - android-wait-for-emulator
+  #- android-wait-for-emulator
 
   #: Install cython
-  - pip install Cython --install-option="--no-cython-compile"
+  - pip install --user Cython --install-option="--no-cython-compile"
 
   # Install enamlnative dependencies
-  - pip install enaml==0.9.8 ply msgpack-python
+  - pip install --user enaml==0.9.8 ply msgpack-python
 
   # Install p4a dependencies
-  - pip install sh colorama appdirs six jinja2
+  - pip install --user sh colorama appdirs six jinja2
 
   # Install test tools
-  - pip install pytest pytest-cov pytest-timeout
+  - pip install --user pytest pytest-cov pytest-timeout
 
   # Install the cli
-  - pip install enaml-native-cli
+  - pip install --user enaml-native-cli
 
   # Install codecov report tools
-  - pip install codecov
+  - pip install --user codecov
 
 install:
 
