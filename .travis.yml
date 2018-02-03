@@ -41,12 +41,6 @@ before_install:
   - emulator -avd test -no-audio -no-window &
   - android-wait-for-emulator
 
-  # Just to be sure
-  - pip install -U pip
-
-  # pip is not able to install distribute: "ImportError: No module named _markerlib"
-  - easy_install distribute
-
   #: Install cython
   - pip install Cython --install-option="--no-cython-compile"
 
