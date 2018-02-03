@@ -32,11 +32,11 @@ def run_gestures(app):
         #: Swipe to next page
         t = i*2000
         app.timed_call(t,
-                       sh.adb('shell input swipe 250 300 -800 300'.split()))
+            sh.adb, *'shell input swipe 250 300 -800 300'.split(), _bg=True)
         #: Tap a few places
         for j in range(4):
             app.timed_call(t+i*200,
-                       sh.adb('shell input tap 500 150'.split()))
+                sh.adb, *'shell input tap 500 150'.split(), _bg=True)
 
     app.timed_call(120000, app.stop)
 
