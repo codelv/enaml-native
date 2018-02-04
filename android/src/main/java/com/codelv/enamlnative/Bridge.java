@@ -1321,6 +1321,7 @@ public class Bridge implements PythonInterpreter.EventListener {
         mFieldCache.clear();
         mMethodCache.clear();
         mReflectionCache.clear();
+        mClassSpecCache.clear();
     }
 
     /**
