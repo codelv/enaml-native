@@ -89,10 +89,11 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
             d = self.declaration
             if d.mode == 'reset':
                 d.ticks = 0
-                self.set_base(datetime.now())
+                #self.set_base(datetime.now())
             elif d.mode == 'resume':
                 # Shift the date by now - ticks
-                self.set_base(datetime.now(), shift=d.ticks*1000)
+                #self.set_base(datetime.now(), shift=d.ticks*1000)
+                pass
             self.widget.start()
         else:
             self.widget.stop()
