@@ -26,6 +26,9 @@ class ScrollView(FrameLayout):
     FOCUS_UP = 0x00000021
     FOCUS_DOWN = 0x00000082
 
+    setVerticalScrollBarEnabled = JavaMethod('boolean')
+    setHorizontalScrollBarEnabled = JavaMethod('boolean')
+
 
 class HorizontalScrollView(ScrollView):
     __nativeclass__ = set_default('android.widget.HorizontalScrollView')
@@ -69,4 +72,12 @@ class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
                 if point == 'top' else ScrollView.FOCUS_DOWN)
         else:
             self.widget.smoothScrollTo(*point)
+
+    def set_scrollbars(self, scrollbars):
+        w = self.widget
+        v, h = (scrollbars in ('both', 'vertical'),
+                   scrollbars in ('both', 'horizontal'))
+        w.setHorizontalScrollBarEnabled(h)
+        w.setVerticalScrollBarEnabled(v)
+
 
