@@ -60,18 +60,11 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
         w.setOnRatingBarChangeListener(w.getId())
         w.onRatingChanged.connect(self.on_rating_changed)
 
-    def get_declared_items(self):
-        """ Overridden to force a layout to always be set
-        
-        """
-        layout = {}
-        for k, v in super(AndroidRatingBar, self).get_declared_items():
-            if k == 'layout':
-                layout = v
-            else:
-                yield k, v
-        #: Make sure set layout always is called
-        yield 'layout', layout
+    def init_layout(self):
+        # Make sure the layout always exists
+        if not self.layout_params:
+            self.set_layout({})
+        super(AndroidRatingBar, self).init_layout()
 
     # -------------------------------------------------------------------------
     # OnRatingBarChangeListener API
