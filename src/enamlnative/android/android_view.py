@@ -20,7 +20,7 @@ from enamlnative.widgets.view import ProxyView
 LAYOUT_KEYS = (
     'x', 'y', 'z', 'width', 'height', 'gravity',
     'margin', 'padding', 'top', 'bottom', 'left', 'right',
-    'align_self', 'flex_basis', 'position',
+    'align_self', 'flex_basis', 'flex_shrink', 'flex_grow', 'position',
     'max_width', 'min_width', 'max_height', 'min_height'
 )
 
@@ -382,3 +382,15 @@ class AndroidView(AndroidToolkitObject, ProxyView):
 
     def set_max_width(self, max_width):
         self.update_layout(max_width=max_width)
+
+    def set_flex_grow(self, flex_grow):
+        self.update_layout(flex_grow=flex_grow)
+
+    def set_flex_basis(self, flex_basis):
+        self.update_layout(flex_basis=flex_basis)
+
+    def set_flex_shrink(self, flex_shrink):
+        self.update_layout(flex_shrink=flex_shrink)
+
+    def set_align_self(self, align_self):
+        self.update_layout(align_self=align_self)

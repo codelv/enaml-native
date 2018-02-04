@@ -129,6 +129,18 @@ class ProxyView(ProxyToolkitObject):
     def set_max_width(self, max_width):
         raise NotImplementedError
 
+    def set_flex_grow(self, flex_grow):
+        raise NotImplementedError
+
+    def set_flex_basis(self, flex_basis):
+        raise NotImplementedError
+
+    def set_flex_shrink(self, flex_shrink):
+        raise NotImplementedError
+
+    def set_align_self(self, align_self):
+        raise NotImplementedError
+
 
 class View(ToolkitObject):
     """ View is a view group that displays
@@ -221,7 +233,9 @@ class View(ToolkitObject):
     #: if its parent is a container with FlexDirection = column. The FlexBasis
     #: of an item is the default size of that item, the size of the item
     #: before any FlexGrow and FlexShrink calculations are performed.
-    flex_basis = d_(Float())
+    flex_basis = d_(Float(strict=False))
+    flex_grow = d_(Float(strict=False))
+    flex_shrink = d_(Float(strict=False))
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyView)
@@ -230,11 +244,12 @@ class View(ToolkitObject):
     # Observers
     # -------------------------------------------------------------------------
     @observe('enabled', 'clickable', 'long_clickable', 'focusable',
-             'animations', 'key_events', 'touch_events', 'visible', 'animate',
+             'animate', 'animations', 'key_events', 'touch_events', 'visible',
              'background_color', 'alpha', 'width', 'height', 'min_height', 
              'min_width', 'max_height', 'max_width', 'x', 'y', 'z', 'gravity', 
              'top', 'bottom', 'right', 'left', 'margin', 'padding', 
-             'flex_basis', 'align_self', 'position')
+             'flex_basis', 'flex_grow', 'flex_shrink', 'align_self',
+             'position')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

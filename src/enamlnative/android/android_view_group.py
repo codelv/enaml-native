@@ -15,7 +15,7 @@ from enamlnative.widgets.view_group import ProxyViewGroup
 from enamlnative.widgets.view import coerce_size
 
 from .android_view import AndroidView, View, LayoutParams
-from .bridge import JavaMethod
+from .bridge import JavaBridgeObject, JavaMethod
 
 
 class ViewGroup(View):
@@ -26,10 +26,11 @@ class ViewGroup(View):
 
     removeView = JavaMethod('android.view.View')
 
+    setLayoutTransition = JavaMethod('android.animation.LayoutTransition')
+
     def __init__(self, *args, **kwargs):
         ViewGroup.addViewWithParams.set_name('addView')
         super(ViewGroup, self).__init__(*args, **kwargs)
-
 
 
 class MarginLayoutParams(LayoutParams):
@@ -37,6 +38,10 @@ class MarginLayoutParams(LayoutParams):
     __signature__ = set_default(('int', 'int'))
     setMargins = JavaMethod('int', 'int', 'int', 'int')
     setLayoutDirection = JavaMethod('int')
+
+
+class LayoutTransition(JavaBridgeObject):
+    __nativeclass__ = set_default('android.animation.LayoutTransition')
 
 
 class AndroidViewGroup(AndroidView, ProxyViewGroup):
@@ -169,36 +174,40 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
             layout_params = self.create_layout_params(child, layout)
         w = child.widget
         if w:
+            dp = self.dp
             # padding
             if 'padding' in layout:
-                dp = self.dp
                 l, t, r, b = layout['padding']
                 w.setPadding(int(l*dp), int(t*dp),
                              int(r*dp), int(b*dp))
 
             # left, top, right, bottom
             if 'left' in layout:
-                w.setLeft(layout['left'])
+                w.setLeft(int(layout['left']*dp))
             if 'top' in layout:
-                w.setTop(layout['top'])
+                w.setTop(int(layout['top']*dp))
             if 'right' in layout:
-                w.setRight(layout['right'])
+                w.setRight(int(layout['right']*dp))
             if 'bottom' in layout:
-                w.setBottom(layout['bottom'])
+                w.setBottom(int(layout['bottom']*dp))
 
             # x, y, z
             if 'x' in layout:
-                w.setX(layout['x'])
+                w.setX(layout['x']*dp)
             if 'y' in layout:
-                w.setY(layout['y'])
+                w.setY(layout['y']*dp)
             if 'z' in layout:
-                w.setZ(layout['z'])
+                w.setZ(layout['z']*dp)
 
             # set min width and height
             # maximum is not supported by AndroidViews (without flexbox)
             if 'min_height' in layout:
-                w.setMinimumHeight(layout['min_height'])
+                w.setMinimumHeight(int(layout['min_height']*dp))
             if 'min_width' in layout:
-                w.setMinimumWidth(layout['min_width'])
+                w.setMinimumWidth(int(layout['min_width']*dp))
 
         child.layout_params = layout_params
+
+    def set_transition(self, transition):
+        t = LayoutTransition() if transition == 'default' else None
+        self.widget.setLayoutTransition(t)

@@ -151,6 +151,7 @@ class AndroidFlexbox(AndroidViewGroup, ProxyFlexbox):
     def create_layout_params(self, child, layout):
         params = super(AndroidFlexbox, self).create_layout_params(child,
                                                                   layout)
+        dp = self.dp
         if 'align_self' in layout:
             params.setAlignSelf(Flexbox.ALIGN_SELF[layout['align_self']])
         if 'flex_basis' in layout:
@@ -160,13 +161,13 @@ class AndroidFlexbox(AndroidViewGroup, ProxyFlexbox):
         if 'flex_shrink' in layout:
             params.setFlexShrink(layout['flex_shrink'])
         if 'min_height' in layout:
-            params.setMinHeight(layout['min_height'])
+            params.setMinHeight(int(layout['min_height']*dp))
         if 'max_height' in layout:
-            params.setMinHeight(layout['max_height'])
+            params.setMinHeight(int(layout['max_height']*dp))
         if 'min_width' in layout:
-            params.setMinWidth(layout['min_width'])
+            params.setMinWidth(int(layout['min_width']*dp))
         if 'max_width' in layout:
-            params.setMaxWidth(layout['max_width'])
+            params.setMaxWidth(int(layout['max_width']*dp))
 
         return params
 
