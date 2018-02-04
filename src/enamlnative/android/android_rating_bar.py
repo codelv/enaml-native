@@ -56,19 +56,22 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
 
         """
         super(AndroidRatingBar, self).init_widget()
-        d = self.declaration
-        if d.is_indicator:
-            self.set_is_indicator(d.is_indicator)
-        if d.num_stars:
-            self.set_num_stars(d.num_stars)
-        if d.step_size:
-            self.set_step_size(d.step_size)
+        w = self.widget
+        w.setOnRatingBarChangeListener(w.getId())
+        w.onRatingChanged.connect(self.on_rating_changed)
 
-        self.set_rating(d.rating)
-
-        #: Setup listener
-        self.widget.setOnRatingBarChangeListener(self.widget.getId())
-        self.widget.onRatingChanged.connect(self.on_rating_changed)
+    def get_declared_items(self):
+        """ Overridden to force a layout to always be set
+        
+        """
+        layout = {}
+        for k, v in super(AndroidRatingBar, self).get_declared_items():
+            if k == 'layout':
+                layout = v
+            else:
+                yield k, v
+        #: Make sure set layout always is called
+        yield 'layout', layout
 
     # -------------------------------------------------------------------------
     # OnRatingBarChangeListener API

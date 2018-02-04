@@ -37,6 +37,11 @@ class AndroidSeekBar(AndroidProgressBar, ProxySeekBar):
     #: A reference to the widget created by the proxy.
     widget = Typed(SeekBar)
 
+    default_layout = set_default({
+        'width': 'wrap_content',
+        'height': 'wrap_content'
+    })
+
     # -------------------------------------------------------------------------
     # Initialization API
     # -------------------------------------------------------------------------
@@ -51,13 +56,7 @@ class AndroidSeekBar(AndroidProgressBar, ProxySeekBar):
 
         """
         super(AndroidSeekBar, self).init_widget()
-        d = self.declaration
         w = self.widget
-
-        if d.split_track:
-            self.set_split_track(d.split_track)
-        if d.key_progress_increment:
-            self.set_key_progress_increment(d.key_progress_increment)
 
         #: Setup listener
         w.setOnSeekBarChangeListener(w.getId())
