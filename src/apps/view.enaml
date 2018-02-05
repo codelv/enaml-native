@@ -583,8 +583,15 @@ enamldef ContentView(VBox): content_view:
           Card: card_looper:
             attr items = []
             VBox:
+              transition = 'default'
               CardTitle:
                 text = "Looping items"
+              TextView:
+                 text = "Use transition='default' to have it fade in and out children"
+              Switch:
+                text = "Transition"
+                checked << self.parent.transition == 'default'
+                checked :: self.parent.transition = '' if self.parent.transition else 'default'
               HBox:
                 Button:
                   text = "Add item"
@@ -770,6 +777,16 @@ enamldef ContentView(VBox): content_view:
             Card:
               VBox:
                 CardTitle:
+                  text = "Icons"
+                TextView:
+                  text = "Use '{<icon>}' for an Icon"
+                ImageView:
+                   width = 64
+                   height = 64
+                   src = "{entypo-rocket}"
+            Card:
+              VBox:
+                CardTitle:
                   text = "Image URIs"
                 TextView:
                   text = "Use '<proto>://<path>' for a URI"
@@ -805,7 +822,7 @@ enamldef ContentView(VBox): content_view:
                              "They can be placed at the top or bottom using gravity."
                     Spinner:
                       items = ['top', 'bottom']
-                      selected << 0 if pager_tab_strip.tab_position == 'top' else 1
+                      selected << self.items.index(pager_tab_strip.tab_position)
                       selected::
                         pager_tab_strip.tab_position = self.items[self.selected]
       Page:
@@ -865,6 +882,7 @@ enamldef ContentView(VBox): content_view:
                     Icon:
                       text_size = 32
                       text << u"{%s}"%li.item
+                      padding = (10, 10, 10, 10)
                     VBox:
                       CardTitle:
                         text << "Card {}".format(li.index)
@@ -872,19 +890,19 @@ enamldef ContentView(VBox): content_view:
                         text << li.item
       Page:
         title = "Http Client"
-        Scroller:
-          VBox:
+        SwipeRefreshLayout:
+          attr httpclient = AsyncHttpClient()
+          trigger_distance = 10
+          indicator_color = "#0F0"
+          indicator_background_color = "#EEE"
+          refreshed::
+            f = httpclient.fetch(http_url.text)
+            http_card.request = f.request
+          Scroller:
             Card: http_card:
-              attr httpclient = AsyncHttpClient()
               attr request
-              SwipeRefreshLayout:
-                trigger_distance = 10
-                indicator_color = "#0F0"
-                indicator_background_color = "#EEE"
-                refreshed::
-                  f = httpclient.fetch(http_url.text)
-                  view.request = f.request
-                VBox:
+
+              VBox:
                   CardTitle:
                     text = "Http Client"
                   TextView:
