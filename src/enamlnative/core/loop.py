@@ -96,6 +96,10 @@ class EventLoop(Atom):
         so it can be resolved by the bridge.
 
         """
+        return self.future()
+
+    def run_iteration(self):
+        """ Run one iteration of the event loop """
         raise NotImplementedError
 
     def set_error_handler(self, handler):
@@ -104,19 +108,22 @@ class EventLoop(Atom):
 
     def add_done_callback(self, future, callback):
         """ Add a callback will be triggered when the callback completes. """
-        raise NotImplementedError
+        future.then(callback)
 
     def set_future_result(self, future, result):
         """ Set the result of a Future to trigger any attached callbacks. """
-        raise NotImplementedError
+        future.set_result(result)
 
-    def log_error(self, callback):
+    def log_error(self, callback, error=None):
         """ Log the error that occurred when running the given callback. """
-        raise NotImplementedError
+        print("Uncaught error during callback: {}".format(callback))
+        print("Error: {}".format(error))
 
 
 class TornadoEventLoop(EventLoop):
     """ Eventloop using tornado's ioloop """
+
+    base_future = Value()
 
     @classmethod
     def available(cls):
@@ -142,63 +149,62 @@ class TornadoEventLoop(EventLoop):
         return self.loop.call_later(ms/1000.0, callback, *args, **kwargs)
 
     def set_error_handler(self, handler):
-        super(TornadoEventLoop, self).set_error_handler(handler)
+        self._handler = handler
         self.loop.handle_callback_exception = handler
 
-    def _default_future(self):
+    def _default_base_future(self):
         from tornado.concurrent import Future
         return Future
 
-    def create_future(self):
-        f = self.future()
-        bridge.tag_object_with_id(f)
+    def _default_future(self):
+        BaseFuture = self.base_future
+        loop = self
 
-        #: Add then method so you can easily chain callbacks
-        #: Tornado returns the future not the result to callbacks
-        def then(f, callback):
-            f.add_done_callback(partial(self.safe_callback, callback=callback))
-            return f
-        f.then = partial(then, f)
+        class Future(BaseFuture):
+            def __init__(self):
+                super(Future, self).__init__()
+                bridge.tag_object_with_id(self)
 
-        #: Add catch method so you can easily chain callbacks
-        def catch(f, callback):
-            def safe_callback(f, callback):
+            def then(self, callback):
+                """ Add then method so you can easily chain callbacks
+                Tornado returns the future not the result to callbacks
+                """
+                self.add_done_callback(partial(self.safe_callback, callback,
+                                               False))
+                return self
+
+            def catch(self, callback):
+                """ Add catch method so you can easily chain callbacks 
+                """
+                self.add_done_callback(partial(self.safe_callback, callback,
+                                               False))
+                return self
+
+            def safe_callback(self, callback, catch, future):
                 try:
-                    error = f.exception()
-                    if error is not None:
-                        callback(error)
+                    if catch:
+                        error = future.exception()
+                        if error is not None:
+                            callback(error)
+                    else:
+                        result = future.result()
+                        callback(result)
+                        return result
                 except Exception as e:
-                    if self._handler:
-                        self._handler(callback)
+                    if loop._handler:
+                        loop._handler(callback)
                     else:
                         raise
-            f.add_done_callback(partial(safe_callback, callback=callback))
-            return f
 
-        f.catch = partial(then, f)
+        return Future
 
-        return f
-
-    def add_done_callback(self, future, callback):
-        future.add_done_callback(partial(self.safe_callback,
-                                         callback=callback))
-        return future
-
-    def set_future_result(self, future, result):
-        future.set_result(result)
+    def run_iteration(self):
+        """ Run one iteration of the event loop """
+        self.loop.doIteration(0.000001)
 
     def log_error(self, callback):
         from tornado.log import app_log
         app_log.error("Exception in callback %r", callback, exc_info=True)
-
-    def safe_callback(self, f, callback):
-        try:
-            return callback(f.result())
-        except Exception as e:
-            if self._handler:
-                self._handler(callback)
-            else:
-                raise
 
 
 class TwistedEventLoop(EventLoop):
@@ -222,7 +228,40 @@ class TwistedEventLoop(EventLoop):
 
     def _default_future(self):
         from twisted.internet.defer import Deferred
-        return Deferred
+        loop = self
+
+        class Future(Deferred, object):
+            def __init__(self):
+                bridge.tag_object_with_id(self)
+                super(Future, self).__init__()
+
+            def safe_callback(self, callback, result):
+                """ Twisted passes the callback return value to the next 
+                callback. We want the same API as tornado, hence we wrap it.
+                """
+                try:
+                    callback(result)
+                    return result
+                except Exception as e:
+                    if loop._handler:
+                        loop._handler(callback)
+                    else:
+                        raise
+
+            def catch(self, callback):
+                #: Add then method so you can easily chain callbacks
+                self.addErrback(partial(self.safe_callback, callback))
+                return self
+
+            def then(self, callback):
+                #: Add custom API methods
+                self.addCallback(partial(self.safe_callback, callback))
+                return self
+
+            def set_result(self, result):
+                self.callback(result)
+
+        return Future
 
     def start(self):
         print("Starting reactor {}".format(self.loop))
@@ -235,8 +274,9 @@ class TwistedEventLoop(EventLoop):
         processed until after the reactor "wakes up"
         
         """
-        r = self.loop.callLater(0, callback, *args, **kwargs)
-        self.loop.wakeUp()
+        loop = self.loop
+        r = loop.callLater(0, callback, *args, **kwargs)
+        loop.wakeUp()
         return r
 
     def timed_call(self, ms, callback, *args, **kwargs):
@@ -246,50 +286,14 @@ class TwistedEventLoop(EventLoop):
         processed until after the reactor "wakes up"
         
         """
-        r = self.loop.callLater(ms/1000.0, callback, *args, **kwargs)
-        self.loop.wakeUp()
+        loop = self.loop
+        r = loop.callLater(ms/1000.0, callback, *args, **kwargs)
+        loop.wakeUp()
         return r
 
-    def create_future(self):
-        d = self.future()
-
-        bridge.tag_object_with_id(d)
-
-        #: Add then method so you can easily chain callbacks
-        def catch(d, callback):
-            d.addErrback(partial(self.safe_callback, callback))
-            return d
-
-        #: Add custom API methods
-        d.then = partial(self.add_done_callback, d)
-        d.catch = partial(catch, d)
-        d.set_result = partial(self.set_future_result, d)
-
-        return d
-
-    def add_done_callback(self, future, callback):
-        #: Both?
-        future.addCallback(partial(self.safe_callback, callback))
-
-    def set_future_result(self, future, result):
-        future.callback(result)
-
-    def log_error(self, callback):
-        print("Uncaught error during callback: {}".format(callback))
-
-    def safe_callback(self, callback, result):
-        """ Twisted passes the callback return value to the next callback. 
-        We want the same API as tornado, hence we wrap it.
-        
-        """
-        try:
-            callback(result)
-            return result
-        except Exception as e:
-            if self._handler:
-                self._handler(callback)
-            else:
-                raise
+    def run_iteration(self):
+        """ Run one iteration of the event loop """
+        self.loop.doIteration(0.000001)
 
 
 class BuiltinEventLoop(TornadoEventLoop):
@@ -309,7 +313,7 @@ class BuiltinEventLoop(TornadoEventLoop):
                   "shared libraries.")
             return False
 
-    def _default_future(self):
+    def _default_base_future(self):
         from .eventloop.concurrent import Future
         return Future
 
@@ -320,6 +324,3 @@ class BuiltinEventLoop(TornadoEventLoop):
     def set_error_handler(self, handler):
         self._handler = handler
         self.loop.set_callback_exception_handler(handler)
-
-    def log_error(self, callback):
-        print("Uncaught error during callback: {}".format(callback))
