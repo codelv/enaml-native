@@ -10,11 +10,12 @@ Created on Aug 3, 2017
 @author: jrm
 """
 
-from atom.api import Typed, Tuple, ForwardInstance, observe
+from atom.api import Typed, Tuple, observe
 from enamlnative.widgets.view import ProxyView
 
 from .bridge import ObjcBridgeObject, ObjcMethod, ObjcProperty, ObjcCallback
 from .uikit_toolkit_object import UiKitToolkitObject
+from .yoga import Yoga
 
 
 class NSObject(ObjcBridgeObject):
@@ -40,20 +41,14 @@ class UIResponder(NSObject):
     pass
 
 
-def yoga_class():
-    from .uikit_flexbox import Yoga
-    return Yoga
-
 class UIView(UIResponder):
     """ From:
         https://developer.apple.com/documentation/uikit/uiview?language=objc
     """
-    #__signature__ = set_default((dict(initWithFrame='CGRect'),))
-
-    yoga = ForwardInstance(yoga_class)
+    yoga = Typed(Yoga)
 
     def _default_yoga(self):
-        return yoga_class()(self, 'yoga')
+        return Yoga(self, 'yoga')
 
     #: Properties
     backgroundColor = ObjcProperty('UIColor')
@@ -116,22 +111,50 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         self.widget = UIView()#initWithFrame=frame)
 
     def init_widget(self):
-        """ Initialize the state of the toolkit widget.
+        """ Initialize the underlying widget.
 
-        This method is called during the top-down pass, just after the
-        'create_widget()' method is called. This method should init the
-        state of the widget. The child widgets will not yet be created.
+        This reads all items declared in the enamldef block for this node
+        and sets only the values that have been specified. All other values
+        will be left as default. Doing it this way makes atom to only create
+        the properties that need to be overridden from defaults thus greatly
+        reducing the number of initialization checks, saving time and memory.
+
+        If you don't want this to happen override `get_declared_keys`
+        to return an empty list.
 
         """
         super(UiKitView, self).init_widget()
+
+        self.widget.yoga.isEnabled = True
+
+        # Initialize the widget by updating only the members that
+        # have read expressions declared. This saves a lot of time and
+        # simplifies widget initialization code
+        for k, v in self.get_declared_items():
+            handler = getattr(self, 'set_'+k, None)
+            if handler:
+                handler(v)
+
+    def get_declared_items(self):
+        """ Get the members that were set in the enamldef block for this
+        Declaration. Layout keys are grouped together until the end so as
+        to avoid triggering multiple updates.
+
+        Returns
+        -------
+        result: List of (k,v) pairs that were defined for this widget in enaml
+            List of keys and values
+
+        """
         d = self.declaration
-
-        self.update_frame()
-
-        if d.background_color:
-            self.set_background_color(d.background_color)
-        if d.alpha:
-            self.set_alpha(d.alpha)
+        engine = d._d_engine
+        if engine:
+            for k, h in engine._handlers.items():
+                # Handlers with read operations
+                if not h.read_pair:
+                    continue
+                v = getattr(d, k)
+                yield (k, v)
 
     def init_layout(self):
         """ Initialize the layout of the toolkit widget.
@@ -144,10 +167,6 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         widget = self.widget
         for child_widget in self.child_widgets():
             widget.addSubview(child_widget)
-
-        d = self.declaration
-        #if d.layout:
-        #    self.set_layout(d.layout)
 
     def update_frame(self):
         """ Define the view frame for this widgets"""
@@ -230,14 +249,11 @@ class UiKitView(UiKitToolkitObject, ProxyView):
     def set_background_color(self, color):
         self.widget.backgroundColor = color
 
-    def set_layout_width(self, width):
-        raise NotImplementedError
+    def set_width(self, width):
+        self.yoga.width = width
 
-    def set_layout_height(self, height):
-        raise NotImplementedError
-
-    def set_layout_direction(self, direction):
-        raise NotImplementedError
+    def set_height(self, height):
+        self.yoga.height = height
 
     def set_padding(self, padding):
         yoga = self.widget.yoga
@@ -254,54 +270,44 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         yoga.marginLeft = margins[3]
 
     def set_top(self, top):
-        self.yoga.top = top
+        self.widget.yoga.top = top
 
     def set_left(self, left):
-        self.yoga.left = left
+        self.widget.yoga.left = left
 
     def set_right(self, right):
-        self.yoga.right = right
+        self.widget.yoga.right = right
 
     def set_bottom(self, bottom):
-        self.yoga.bottom = bottom
-
-    def set_rotation(self,rotation):
-        raise NotImplementedError
-
-    def set_rotation_x(self, rotation):
-        raise NotImplementedError
-
-    def set_rotation_y(self, rotation):
-        raise NotImplementedError
-
-    def set_scale_x(self, scale):
-        raise NotImplementedError
-
-    def set_scale_y(self, scale):
-        raise NotImplementedError
-
-    def set_translation_x(self, translation):
-        raise NotImplementedError
-
-    def set_translation_y(self, translation):
-        raise NotImplementedError
-
-    def set_translation_z(self, translation):
-        raise NotImplementedError
+        self.widget.yoga.bottom = bottom
 
     def set_x(self, x):
-        self.yoga.left = x
+        self.widget.yoga.left = x
 
     def set_y(self, y):
-        self.yoga.top = y
+        self.widget.yoga.top = y
 
     def set_z(self, z):
         raise NotImplementedError
 
-    def set_layout(self, layout):
-        pass
-        # TODO: Reimplement this
-        #from .uikit_flexbox import FlexboxLayoutHelper
-        #FlexboxLayoutHelper.apply_layout(self)
+    def set_max_height(self, max_height):
+        self.widget.yoga.maxHeight = max_height
 
+    def set_min_width(self, min_width):
+        self.widget.yoga.minWidth = min_width
+
+    def set_max_width(self, max_width):
+        self.widget.yoga.maxWidth = max_width
+
+    def set_flex_grow(self, flex_grow):
+        self.widget.yoga.flexGrow = flex_grow
+
+    def set_flex_basis(self, basis):
+        self.widget.yoga.flexBasis = int(basis*100)
+
+    def set_flex_shrink(self, flex_shrink):
+        self.widget.yoga.flexShrink = flex_shrink
+
+    def set_align_self(self, align_self):
+        self.widget.yoga.alignSelf = Yoga.ALIGN_SELF[align_self]
 

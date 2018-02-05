@@ -50,6 +50,7 @@ from utils import load
     (["android"], 'toast.enaml'),
     (["android"], 'view_pager.enaml'),
     (["android"], 'webview.enaml'),
+    (["android"], '../ios/demo/Python/view.enaml'),
 ])
 def test_examples(platforms, path):
     #: Load

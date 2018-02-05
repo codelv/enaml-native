@@ -57,12 +57,7 @@ class UiKitButton(UiKitControl, ProxyButton):
         """ Create the toolkit widget for the proxy object.
         """
         d = self.declaration
-        button_type = {
-            '': UIButton.UIButtonTypeSystem,
-            'borderless': UIButton.UIButtonTypeSystem,
-            'inset': UIButton.UIButtonTypeCustom,
-            'small': UIButton.UIButtonTypeCustom
-        }[d.style]
+        button_type = UIButton.UIButtonTypeSystem if d.flat else UIButton.UIButtonTypeRoundedRect
         self.widget = UIButton(buttonWithType=button_type)
 
     def init_widget(self):
