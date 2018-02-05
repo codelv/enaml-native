@@ -38,6 +38,7 @@ before_install:
   - sudo apt update
   - sudo apt install -y build-essential ccache git zlib1g-dev python2.7 python2.7-dev python-virtualenv libncurses5:i386 libstdc++6:i386 zlib1g:i386 unzip ant ccache autoconf libtool
   - sudo apt install -y openjdk-8-jdk
+  - sudo apt install -y libimobiledevice-dev
 
   # Start the emulator!
   - android list target
