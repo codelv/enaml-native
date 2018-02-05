@@ -324,3 +324,8 @@ class BuiltinEventLoop(TornadoEventLoop):
     def set_error_handler(self, handler):
         self._handler = handler
         self.loop.set_callback_exception_handler(handler)
+
+    def log_error(self, callback, error=None):
+        """ Log the error that occurred when running the given callback. """
+        print("Uncaught error during callback: {}".format(callback))
+        print("Error: {}".format(error))
