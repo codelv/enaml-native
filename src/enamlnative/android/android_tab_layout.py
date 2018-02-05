@@ -91,35 +91,10 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
 
         """
         super(AndroidTabLayout, self).init_widget()
-        d = self.declaration
         w = self.widget
-        if d.tab_mode != 'fixed':  #: Default
-            self.set_tab_mode(d.tab_mode)
-        if d.tab_gravity != 'fill':  #: Default
-            self.set_tab_gravity(d.tab_gravity)
-        if d.tab_indicator_color_selected:
-            self.set_tab_indicator_color_selected(
-                d.tab_indicator_color_selected)
-        if d.tab_indicator_height:
-            self.set_tab_indicator_height(d.tab_indicator_height)
-        if d.tab_color or d.tab_color_selected:
-            self.set_tab_color(d.tab_color)
-
         w.addOnTabSelectedListener(w.getId())
         w.onTabSelected.connect(self.on_tab_selected)
         w.onTabUnselected.connect(self.on_tab_unselected)
-
-    def init_layout(self):
-        """ Initialize the tabs.
-
-        """
-        super(AndroidTabLayout, self).init_layout()
-        app = self.get_context()
-        d = self.declaration
-        parent = self.parent()
-        #for page in parent.declaration.pages:
-        #    self.widget.newTab().then(lambda tab,page=page:
-        # self.on_new_tab(tab,page))
 
     # --------------------------------------------------------------------------
     # OnTabSelectedListener API
