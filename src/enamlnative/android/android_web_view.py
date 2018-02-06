@@ -22,6 +22,11 @@ class WebView(ViewGroup):
     loadUrl = JavaMethod('java.lang.String')
     loadData = JavaMethod('java.lang.String', 'java.lang.String',
                           'java.lang.String')
+    loadDataWithBaseURL = JavaMethod('java.lang.String',
+                                     'java.lang.String',
+                                     'java.lang.String',
+                                     'java.lang.String',
+                                     'java.lang.String')
     setWebViewClient = JavaMethod('android.webkit.WebViewClient')
     reload = JavaMethod()
     goBack = JavaMethod()
@@ -141,7 +146,8 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
         a file or http resource use the `url` instead.
         
         """
-        self.widget.loadData(source, 'text/html', None)
+        self.widget.loadDataWithBaseURL(
+            None, source, 'text/html', "utf-8", None)
 
     def set_javascript_enabled(self, enabled):
         self.client.setJavaScriptEnabled(enabled)
