@@ -13,29 +13,34 @@ from atom.api import Typed, set_default
 
 from enamlnative.widgets.view_group import ProxyViewGroup
 
-from .android_view import AndroidView, View, LayoutParams, MarginLayoutParams
-from .bridge import JavaMethod
-
-class Gravity:
-    NO_GRAVITY = 0
-    CENTER_HORIZONTAL = 1
-    CENTER_VERTICAL = 16
-    CENTER = 11
-    FILL = 119
-    FILL_HORIZONTAL = 7
-    FILL_VERTICAL = 112
-    TOP = 48
-    BOTTOM = 80
-    LEFT = 3
-    RIGHT = 5
-    START = 8388611
-    END = 8388613
+from .android_view import AndroidView, View, LayoutParams
+from .bridge import JavaBridgeObject, JavaMethod
 
 
 class ViewGroup(View):
     __nativeclass__ = set_default('android.view.ViewGroup')
+    addViewWithParams = JavaMethod('android.view.View', 'int',
+                         'android.view.ViewGroup$LayoutParams')
     addView = JavaMethod('android.view.View', 'int')
+
     removeView = JavaMethod('android.view.View')
+
+    setLayoutTransition = JavaMethod('android.animation.LayoutTransition')
+
+    def __init__(self, *args, **kwargs):
+        ViewGroup.addViewWithParams.set_name('addView')
+        super(ViewGroup, self).__init__(*args, **kwargs)
+
+
+class MarginLayoutParams(LayoutParams):
+    __nativeclass__ = set_default('android.view.ViewGroup$MarginLayoutParams')
+    __signature__ = set_default(('int', 'int'))
+    setMargins = JavaMethod('int', 'int', 'int', 'int')
+    setLayoutDirection = JavaMethod('int')
+
+
+class LayoutTransition(JavaBridgeObject):
+    __nativeclass__ = set_default('android.animation.LayoutTransition')
 
 
 class AndroidViewGroup(AndroidView, ProxyViewGroup):
@@ -44,6 +49,15 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(ViewGroup)
+
+    #: Layout type
+    layout_param_type = set_default(MarginLayoutParams)
+
+    #: Default layout params
+    default_layout = set_default({
+        'width': 'match_parent',
+        'height': 'match_parent'
+    })
 
     # -------------------------------------------------------------------------
     # Initialization API
@@ -54,21 +68,25 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
         """
         self.widget = ViewGroup(self.get_context())
 
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidViewGroup, self).init_widget()
-        d = self.declaration
-        if d.layout_gravity:
-            self.set_layout_gravity(d.layout_gravity)
-
     def init_layout(self):
         """ Add all child widgets to the view
         """
+        super(AndroidViewGroup, self).init_layout()
         widget = self.widget
-        for i, child_widget in enumerate(self.child_widgets()):
-            widget.addView(child_widget, i)
+        i = 0
+        for child in self.children():
+            child_widget = child.widget
+            if child_widget:
+                if child.layout_params:
+                    widget.addViewWithParams(child_widget, i,
+                                             child.layout_params)
+                else:
+                    widget.addView(child_widget, i)
+                i += 1
+
+        # Force layout using the default params
+        if not self.layout_params:
+            self.set_layout({})
 
     def child_added(self, child):
         """ Handle the child added event from the declaration.
@@ -83,7 +101,11 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
         #: TODO: Should index be cached?
         for i, child_widget in enumerate(self.child_widgets()):
             if child_widget == child.widget:
-                widget.addView(child_widget, i)
+                if child.layout_params:
+                    widget.addViewWithParams(child_widget, i,
+                                             child.layout_params)
+                else:
+                    widget.addView(child_widget, i)
 
     def child_moved(self, child):
         """ Handle the child moved event from the declaration.
@@ -105,9 +127,6 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
         if child.widget is not None:
             self.widget.removeView(child.widget)
 
-    # --------------------------------------------------------------------------
-    # ProxyViewGroup API
-    # --------------------------------------------------------------------------
-    def set_layout_gravity(self, gravity):
-        g = getattr(Gravity, gravity.upper())
-        self.layout_params.gravity = g
+    def set_transition(self, transition):
+        t = LayoutTransition() if transition == 'default' else None
+        self.widget.setLayoutTransition(t)

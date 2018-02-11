@@ -44,13 +44,13 @@ class CalendarView(FrameLayout):
 
     """
     #: Selected date
-    date = d_(Instance(datetime))
+    date = d_(Instance(datetime, factory=datetime.now))
 
     #: Max date
-    max_date = d_(Instance(datetime))
+    max_date = d_(Instance(datetime, factory=datetime.now))
 
     #: Min date
-    min_date = d_(Instance(datetime))
+    min_date = d_(Instance(datetime, factory=datetime.now))
 
     #: First day of week
     first_day_of_week = d_(Range(1, 7))

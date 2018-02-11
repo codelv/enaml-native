@@ -9,7 +9,7 @@ enamldef ContentView(Flexbox): view:
         flex_direction = "column"
 
         #: flex_basis (on Android) is the percentage of the parent size to consume
-        layout = dict(flex_basis=0.25)
+        flex_basis=0.25
 
         TextView:
             text = "flex_direction"
@@ -21,7 +21,7 @@ enamldef ContentView(Flexbox): view:
         background_color = "#bac"
         flex_direction = "column"
         #: flex_basis (on Android) is the percentage of the parent size to consume
-        layout = dict(flex_basis=0.25)
+        flex_basis=0.25
 
         #: Flex direction arranges children in either a row or column
         justify_content = "center"
@@ -34,7 +34,7 @@ enamldef ContentView(Flexbox): view:
             selected :: parent.justify_content = self.items[change['value']]
     Flexbox:
         background_color = "#cba"
-        layout = dict(flex_basis=0.15)
+        flex_basis=0.15
         flex_direction = "column"
         TextView:
             text = "align_items (within column)"
@@ -44,10 +44,10 @@ enamldef ContentView(Flexbox): view:
             selected :: parent.align_items = self.items[change['value']]
     Flexbox:
         background_color = "#abc"
-        layout = dict(flex_basis=0.35)
+        flex_basis=0.35
         flex_direction = "column"
         Flexbox:
-            layout_height = "wrap_content"
+            height = "wrap_content"
             TextView:
                 text = "align_content"
             Spinner:

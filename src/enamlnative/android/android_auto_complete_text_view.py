@@ -44,34 +44,16 @@ class AndroidAutoCompleteTextView(AndroidEditText, ProxyAutoCompleteTextView):
         """ Create the underlying widget.
 
         """
-        self.widget = AutoCompleteTextView(self.get_context())
+        context = self.get_context()
+        self.widget = AutoCompleteTextView(context)
+        self.adapter = ArrayAdapter(context, '@layout/simple_list_item_1')
 
     def init_widget(self):
         """ Initialize the underlying widget.
 
         """
         super(AndroidAutoCompleteTextView, self).init_widget()
-        d = self.declaration
-        if d.threshold:
-            self.set_threshold(d.threshold)
-        if d.drop_down_width:
-            self.set_drop_down_width(d.drop_down_width)
-        if d.drop_down_height:
-            self.set_drop_down_height(d.drop_down_height)
-
-        self.adapter = ArrayAdapter(self.get_context(),
-                                    '@layout/simple_list_item_1')
-
-        if d.choices:
-            self.set_choices(d.choices)
-
         self.widget.setAdapter(self.adapter)
-
-    def destroy(self):
-        """ Properly destroy adapter """
-        super(AndroidAutoCompleteTextView, self).destroy()
-        if self.adapter:
-            del self.adapter
 
     # -------------------------------------------------------------------------
     # ProxyAutoCompleteTextView API

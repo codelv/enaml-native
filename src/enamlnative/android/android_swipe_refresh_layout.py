@@ -54,6 +54,7 @@ class AndroidSwipeRefreshLayout(AndroidViewGroup, ProxySwipeRefreshLayout):
         """
         super(AndroidSwipeRefreshLayout, self).init_widget()
         d = self.declaration
+        w = self.widget
         if not d.enabled:
             self.set_enabled(d.enabled)
         if d.indicator_background_color:
@@ -62,8 +63,8 @@ class AndroidSwipeRefreshLayout(AndroidViewGroup, ProxySwipeRefreshLayout):
             self.set_indicator_color(d.indicator_color)
         if d.trigger_distance:
             self.set_trigger_distance(d.trigger_distance)
-        self.widget.onRefresh.connect(self.on_refresh)
-        self.widget.setOnRefreshListener(self.widget.getId())
+        w.onRefresh.connect(self.on_refresh)
+        w.setOnRefreshListener(w.getId())
 
     # -------------------------------------------------------------------------
     # OnRefreshListener API

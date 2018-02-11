@@ -37,17 +37,6 @@ class AndroidViewAnimator(AndroidFrameLayout, ProxyViewAnimator):
         """
         self.widget = ViewAnimator(self.get_context())
 
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidViewAnimator, self).init_widget()
-        d = self.declaration
-        if d.animate_first_view:
-            self.set_animate_first_view(d.animate_first_view)
-        if d.displayed_child:
-            self.set_displayed_child(d.displayed_child)
-
     # -------------------------------------------------------------------------
     # ProxyViewAnimator API
     # -------------------------------------------------------------------------

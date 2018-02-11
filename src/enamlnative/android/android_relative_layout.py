@@ -19,7 +19,6 @@ from .bridge import JavaMethod
 
 class RelativeLayout(ViewGroup):
     __nativeclass__ = set_default('android.widget.RelativeLayout')
-    setGravity = JavaMethod('int')
     setHorizontalGravity = JavaMethod('int')
     setVerticalGravity = JavaMethod('int')
 

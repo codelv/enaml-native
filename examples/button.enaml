@@ -1,32 +1,36 @@
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
+from enamlnative.android.app import AndroidApplication
 
-enamldef ContentView(Flexbox):
-    flex_direction = "column"
-
-    TextView: tv:
-     pass
-
-    Looper:
-        iterable = list(Button.style.items)
+enamldef ContentView(FrameLayout):
+    attr app = AndroidApplication.instance()
+    Flexbox:
+        flex_direction = "column"
         Button:
-            text = loop_item or "default"
+            text = "default"
+            text_color = "#f00"
+            font_family = "sans-serif-light"
+            align_self = 'flex_end'
+            text_size = 32
+            clicked :: app.show_toast("Clicked {}".format(self.text))
+        Button:
+            text = "flat"
+            flat = True
+            text_color = "#c1a"
+            align_self = 'flex_start'
+            clicked :: app.show_toast("Clicked {}".format(self.text))
+        ToggleButton:
+            text = "Initial"
+            text_on = "It's on!"
+            text_off = "Awwff"
+            min_width = 400
+            max_width = 500
+            align_self = 'center'
+            clicked :: app.show_toast("State {}".format(self.checked))
+    FloatingActionButton:
+        gravity = "bottom|right"
+        margin = (0, 0, 10, 10)
+        src = "{md-play-arrow}"
+        clicked :: app.show_toast("Play clicked!")
 
-            #: Button style
-            style = loop_item
 
-            #: Listen to click events
-            clicked :: tv.text = "Style {}".format(loop_item)
-
-
-    Button:
-        text = "default"
-        text_color = "#f00"
-        font_family = "sans-serif-light"
-        text_size = 32
-        style = "borderless"
-
-    Button:
-        text = "borderless"
-        style = "borderless"
-        text_color = "#c1a"

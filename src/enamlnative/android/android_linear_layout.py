@@ -23,7 +23,7 @@ class LinearLayout(ViewGroup):
     setGravity = JavaMethod('int')
 
 
-class LinearLayoutLayoutParams(MarginLayoutParams):
+class LinearLayoutParams(MarginLayoutParams):
     __nativeclass__ = set_default('android.widget.LinearLayout$LayoutParams')
     gravity = JavaField('int')
     weight = JavaField('int')
@@ -36,7 +36,8 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
     #: A reference to the widget created by the proxy.
     widget = Typed(LinearLayout)
 
-    layout_param_type = set_default(LinearLayoutLayoutParams)
+    #: Use LinearLayout params
+    layout_param_type = set_default(LinearLayoutParams)
 
     # -------------------------------------------------------------------------
     # Initialization API
@@ -47,16 +48,6 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
         """
         self.widget = LinearLayout(self.get_context())
 
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidLinearLayout, self).init_widget()
-        d = self.declaration
-        self.set_orientation(d.orientation)
-        if d.gravity:
-            self.set_gravity(d.gravity)
-
     # -------------------------------------------------------------------------
     # ProxyLinearLayout API
     # -------------------------------------------------------------------------
@@ -66,5 +57,9 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
         """
         self.widget.setOrientation(0 if orientation == 'horizontal' else 1)
 
-    def set_gravity(self, gravity):
-        self.widget.setGravity(gravity)
+    def create_layout_params(self, child, layout):
+        params = super(AndroidLinearLayout, self).create_layout_params(child,
+                                                                       layout)
+        if 'gravity' in layout:
+            params.gravity = layout['gravity']
+        return params

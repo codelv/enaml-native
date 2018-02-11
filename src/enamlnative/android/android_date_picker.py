@@ -53,19 +53,12 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
         """ Initialize the underlying widget.
 
         """
-        super(AndroidDatePicker, self).init_widget()
         d = self.declaration
-
-        if d.min_date:
-            self.set_min_date(d.min_date)
-        if d.max_date:
-            self.set_max_date(d.max_date)
-        if d.first_day_of_week != 1:
-            self.set_first_day_of_week(d.first_day_of_week)
-
-        self.widget.init(d.date.year, d.date.month-1, d.date.day,
-                         self.widget.getId())
-        self.widget.onDateChanged.connect(self.on_date_changed)
+        w = self.widget
+        date = d.date
+        w.init(date.year, date.month-1, date.day, w.getId())
+        super(AndroidDatePicker, self).init_widget()
+        w.onDateChanged.connect(self.on_date_changed)
 
     # -------------------------------------------------------------------------
     # OnDateChangedListener API

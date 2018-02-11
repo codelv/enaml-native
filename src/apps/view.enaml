@@ -15,6 +15,7 @@ import traceback
 from enamlnative.widgets.api import *
 from enaml.core.api import Conditional, Looper
 from enamlnative.core.api import AsyncHttpClient
+from enamlnative.android.app import AndroidApplication
 from datetime import datetime
 
 enamldef HBox(LinearLayout):
@@ -25,7 +26,7 @@ enamldef VBox(LinearLayout):
 
 enamldef Card(CardView):
   padding = (20, 20, 20, 20)
-  margins = (10, 10, 10, 10)
+  margin = (10, 10, 10, 10)
   content_padding = (10,10,10,10)
   #card_background_color = '#FF0000'
 
@@ -36,13 +37,14 @@ enamldef CardTitle(TextView):
 enamldef MenuItem(Button):
   font_family = "sans-serif-serif-medium"
   text_size = 16
-  style = 'borderless'
+  text_alignment = 'center'
+  flat = True
   padding = (10,10,10,10)
 
 enamldef MenuIcon(IconButton):
   #: This should have the fancy ripple effect on press
   padding = (12, 12, 12 ,12)
-  style = 'borderless'
+  flat = True
   text_size = 48
 
 
@@ -50,9 +52,9 @@ enamldef LeftDrawer(ScrollView):
   attr pager
   attr drawer
   attr root
-  layout_gravity = 'left'
-  layout_width = '200'
-  layout_height = 'match_parent'
+  gravity = 'left'
+  width = 200
+  height = 'match_parent'
   background_color = '#FFFFFF'
   VBox:
     Looper:
@@ -66,9 +68,9 @@ enamldef LeftDrawer(ScrollView):
 enamldef RightDrawer(VBox):
   attr pager
   attr drawer
-  layout_gravity = 'right'
-  layout_width = '72'
-  layout_height = 'match_parent'
+  gravity = 'right'
+  width = 72
+  height = 'match_parent'
   background_color = '#004981'
 
   MenuIcon:
@@ -88,8 +90,8 @@ enamldef RightDrawer(VBox):
       drawer.opened = []
 
 enamldef Scroller(ScrollView):
-  layout_width = 'match_parent'
-  layout_height = 'match_parent'
+  width = 'match_parent'
+  height = 'match_parent'
   background_color = '#EEEEEE'
   #padding = (10,10,10,10)
 
@@ -204,8 +206,8 @@ enamldef WebBrowser(ScrollView): browser:
       text_color = '#FF0000'
       text << u"Error: {} - {}".format(web_view.error_code, web_view.error_message)
     WebView: web_view:
-      layout_height = 'match_parent'
-      layout_width = 'match_parent'
+      height = 'match_parent'
+      width = 'match_parent'
       #: When url updates, set the text
       url = "https://github.com/frmdstryr/enaml-native"
       url >> web_url.text
@@ -243,8 +245,6 @@ enamldef IconFinder(Scroller): finder:
         Icon:
           text_size = 32
           text << u" ".join([u"{%s}"%n for n in finder.icons])
-    Spacer:
-      layout_height = '10'
 
 enamldef ContentView(VBox): content_view:
   #: This should be read from the drawer's children...
@@ -259,14 +259,14 @@ enamldef ContentView(VBox): content_view:
     background_color = '#004981'
     content_padding = (0,0,0,0)
     HBox:
-      layout_gravity = "left"
+      gravity = "left"
       IconButton:
         text = u"{md-menu}"
         text_size = 24
         text_color << toolbar.title_color
-        style = "borderless"
-        layout_width = "48"
-        layout_height = "48"
+        flat = True
+        width = 48
+        height = 48
         clicked ::
           if not drawer_layout.opened:
             drawer_layout.opened = [left_drawer]
@@ -278,10 +278,9 @@ enamldef ContentView(VBox): content_view:
         text << u"Enaml Native - {}".format(current_page.title)
 
   DrawerLayout: drawer_layout:
-    layout_height = 'match_parent'
+    height = 'match_parent'
+    width = 'match_parent'
     ViewPager: view_pager:
-      layout_width = 'match_parent'
-      layout_height = 'match_parent'
       Page:
         title = "Intro"
         Scroller:
@@ -372,17 +371,14 @@ enamldef ContentView(VBox): content_view:
                   text << "Clicked {}".format(count)
 
                 Button:
-                  text = "Borderless"
-                  style = 'borderless'
-
-                Button:
-                  text = "Small"
-                  layout_height = 'wrap_content'
-                  layout_width = 'wrap_content'
-                  style = 'small'
+                  text = "Flat"
+                  flat = True
 
                 IconButton:
                   text = u"{entypo-home} Home"
+
+                FloatingActionButton:
+                  src = u"{entypo-home}"
 
             Card:
               VBox:
@@ -428,9 +424,9 @@ enamldef ContentView(VBox): content_view:
               ActivityIndicator:
                 pass
               ActivityIndicator:
-                style = 'small'
+                size = 'small'
               ActivityIndicator:
-                style = 'large'
+                size = 'large'
               ProgressBar:
                 progress = 32
 
@@ -480,12 +476,6 @@ enamldef ContentView(VBox): content_view:
                 TextClock:
                   text_size = 48
                   font_family = 'sans-serif-condensed-light'
-            Card:
-              VBox:
-                CardTitle:
-                  text = "AnalogClock"
-                AnalogClock:
-                  pass
       Page:
         title = "Spinners"
         Scroller:
@@ -593,8 +583,15 @@ enamldef ContentView(VBox): content_view:
           Card: card_looper:
             attr items = []
             VBox:
+              transition = 'default'
               CardTitle:
                 text = "Looping items"
+              TextView:
+                 text = "Use transition='default' to have it fade in and out children"
+              Switch:
+                text = "Transition"
+                checked << self.parent.transition == 'default'
+                checked :: self.parent.transition = '' if self.parent.transition else 'default'
               HBox:
                 Button:
                   text = "Add item"
@@ -646,7 +643,7 @@ enamldef ContentView(VBox): content_view:
               Toolbar:
                 title = "Toolbar"
                 background_color = '#004981'
-                margins = (0, 0, 0, 10)
+                margin = (0, 0, 0, 10)
               Toolbar:
                 title = "Title"
                 subtitle = "Subtitle"
@@ -674,8 +671,6 @@ enamldef ContentView(VBox): content_view:
                   clicked:: ll.orientation = 'horizontal' if ll.orientation == 'vertical' else 'vertical'
                 LinearLayout: ll:
                   orientation << "horizontal"
-                  layout_height = 'fill_parent'
-                  layout_width = 'fill_parent'
                   Looper:
                     iterable = range(6)
                     TextView:
@@ -691,24 +686,11 @@ enamldef ContentView(VBox): content_view:
                 GridLayout: gl:
                   #: Crashes if you go from 3 to 2 for some reason
                   columns = 3# glsp.items[glsp.selected]
-                  layout_height = 'fill_parent'
-                  layout_width = 'fill_parent'
-                  selected = 2
+                  #selected = 2
                   Looper:
                     iterable = range(6)
                     TextView:
                       text = "{}".format(loop_index)
-            Card:
-              VBox:
-                CardTitle:
-                  text = "Spacer"
-                HBox:
-                  TextView:
-                    text = "Start"
-                  Spacer:
-                    layout_width = '100' #: Percentages NOT supported yet...
-                  TextView:
-                    text = "End"
       Page:
         title = "Drawers"
         VBox:
@@ -721,7 +703,7 @@ enamldef ContentView(VBox): content_view:
                 text = "Swipe in from the left or right to open the drawers. " \
                        "The first child is the main content. " \
                        "Subsequent children will be either a left or right drawer " \
-                       "depending on layout_gravity. The width is set by the layout_width" \
+                       "depending on gravity. The width is set by the layout_width" \
                        "Drawers can be opened and closed using the drawer.opened property " \
                        "which is a list of the opened drawers. "
               HBox:
@@ -795,6 +777,16 @@ enamldef ContentView(VBox): content_view:
             Card:
               VBox:
                 CardTitle:
+                  text = "Icons"
+                TextView:
+                  text = "Use '{<icon>}' for an Icon"
+                ImageView:
+                   width = 64
+                   height = 64
+                   src = "{entypo-rocket}"
+            Card:
+              VBox:
+                CardTitle:
                   text = "Image URIs"
                 TextView:
                   text = "Use '<proto>://<path>' for a URI"
@@ -809,10 +801,11 @@ enamldef ContentView(VBox): content_view:
         #: Android tab's design is so STUPID
         ViewPager: tab_pager:
           PagerTabStrip: pager_tab_strip:
+            attr tab_position = 'bottom'
             text_color << toolbar.title_color
             background_color << toolbar.background_color
             tab_indicator_color = '#97c024'
-            layout_gravity = 'bottom'
+            gravity << tab_position
             #tab_full_underline = True
           Looper:
             iterable = ['First', 'Second', 'Third']#tab_host.tabs
@@ -826,17 +819,19 @@ enamldef ContentView(VBox): content_view:
                       text = "{} Tab".format(loop_item)
                     TextView:
                       text = "Add a PagerTitleStrip or PagerTabStrip to a ViewPager for tabs. " \
-                             "They can be placed at the top or bottom using layout_gravity."
+                             "They can be placed at the top or bottom using gravity."
                     Spinner:
                       items = ['top', 'bottom']
-                      selected << 0 if pager_tab_strip.layout_gravity == 'top' else 1
+                      selected << self.items.index(pager_tab_strip.tab_position)
                       selected::
-                        pager_tab_strip.layout_gravity = self.items[self.selected]
+                        pager_tab_strip.tab_position = self.items[self.selected]
       Page:
         title = "Tabs"
         #: Android tab's design is so STUPID
         ViewPager:
           TabLayout: tab_layout:
+            attr tab_position = 'top'
+            gravity << tab_position
             tab_color = '#CCCCCC'
             tab_color_selected << toolbar.title_color
             background_color << toolbar.background_color
@@ -852,11 +847,11 @@ enamldef ContentView(VBox): content_view:
                       text = "{} Tab".format(loop_item)
                     TextView:
                       text = "Add a TabLayout to a ViewPager for tabs. " \
-                             "They can be placed at the top or bottom using layout_gravity."
+                             "They can be placed at the top or bottom using gravity."
                     Spinner:
                       items = ['top', 'bottom']
-                      selected << 0 if tab_layout.layout_gravity == 'top' else 1
-                      selected :: tab_layout.layout_gravity = self.items[self.selected]
+                      selected << 0 if tab_layout.tab_position == 'top' else 1
+                      selected :: tab_layout.tab_position = self.items[self.selected]
                     TextView:
                       text = "Tab modes"
                     Spinner:
@@ -887,8 +882,7 @@ enamldef ContentView(VBox): content_view:
                     Icon:
                       text_size = 32
                       text << u"{%s}"%li.item
-                    Spacer:
-                      layout_width = '10'
+                      padding = (10, 10, 10, 10)
                     VBox:
                       CardTitle:
                         text << "Card {}".format(li.index)
@@ -896,19 +890,19 @@ enamldef ContentView(VBox): content_view:
                         text << li.item
       Page:
         title = "Http Client"
-        Scroller:
-          VBox:
+        SwipeRefreshLayout:
+          attr httpclient = AsyncHttpClient()
+          trigger_distance = 10
+          indicator_color = "#0F0"
+          indicator_background_color = "#EEE"
+          refreshed::
+            f = httpclient.fetch(http_url.text)
+            http_card.request = f.request
+          Scroller:
             Card: http_card:
-              attr httpclient = AsyncHttpClient()
               attr request
-              SwipeRefreshLayout:
-                trigger_distance = 10
-                indicator_color = "#0F0"
-                indicator_background_color = "#EEE"
-                refreshed::
-                  f = httpclient.fetch(http_url.text)
-                  view.request = f.request
-                VBox:
+
+              VBox:
                   CardTitle:
                     text = "Http Client"
                   TextView:
@@ -937,34 +931,53 @@ enamldef ContentView(VBox): content_view:
       Page:
         title = "Toast"
         Scroller:
-          VBox:
-            Card:
-              VBox:
-                CardTitle:
-                  text = "Toast"
-                Button:
-                  text = "Show toast"
-                  clicked :: toast.show = True
-                Toast: toast:
-                  text = "Toasty"
+          Card:
+            VBox:
+              CardTitle:
+                text = "Toast"
+              Button:
+                text = "Show toast"
+                clicked :: toast.show = True
+              Toast: toast:
+                text = "Toasty"
       Page:
         title = "Snackbar"
         CoordinatorLayout:
           Scroller:
-            VBox:
-              Card:
-                VBox:
-                  CardTitle:
-                    text = "Snackbar"
-                  Button:
-                    text = "Show snackbar"
-                    clicked :: snackbar.show = True
-                  Toast: toast2:
-                    text = "Undo clicked"
+            Card:
+              VBox:
+                CardTitle:
+                  text = "Snackbar"
+                Button:
+                  text = "Show snackbar"
+                  clicked :: snackbar.show = True
+                Toast: toast2:
+                  text = "Undo clicked"
           Snackbar: snackbar:
             text = "Item deleted"
             action_text = "Undo"
             clicked :: toast2.show = True
+      Page:
+        title = "Bottom Sheet"
+        Scroller:
+          Card:
+            VBox:
+              Button:
+                text = "Open bottom sheet"
+                clicked :: sheet.show = True
+              TextView:
+                text << "Show: {}".format(sheet.show)
+              BottomSheetDialog: sheet:
+                Flexbox:
+                  flex_direction = "column"
+                  Looper:
+                    iterable = range(3)
+                    Button:
+                      flat = True
+                      text = "Action io{}".format(loop_item)
+                      clicked ::
+                        AndroidApplication.instance().show_toast(self.text, False)
+                        sheet.show = False
       Page:
         title = "Dialogs"
         Scroller:
@@ -1000,13 +1013,13 @@ enamldef ContentView(VBox): content_view:
                         Flexbox:
                             justify_content = "space_between"
                             Button:
-                                style = "borderless"
+                                flat = True
                                 text = "Ok"
                                 clicked ::
                                     print("ok!")
                                     dialog.show = False
                             Button:
-                                style = "borderless"
+                                flat = True
                                 text = "Cancel"
                                 clicked :: dialog.show = False
       # Page:

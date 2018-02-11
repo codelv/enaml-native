@@ -1,6 +1,28 @@
 sudo: required
 dist: trusty
-language: python
+language: android
+jdk: oraclejdk8
+android:
+  components:
+    - tools
+    - platform-tools
+    - tools
+
+
+    # The BuildTools version used by your project
+    - build-tools-26.0.2
+
+    # The SDK version used to compile your project
+    - android-22
+
+
+    #: Add android image
+    - android-22 # Android platform used by your alternative emulator
+    - sys-img-armeabi-v7a-android-22
+    - extra-google-m2repository
+    - extra-android-m2repository
+
+
 
 branches:
   only:
@@ -11,33 +33,42 @@ matrix:
     - env: PYTHON=2.7
 
 before_install:
+  #: Setup Python
+  - sudo dpkg --add-architecture i386
+  - sudo apt update
+  - sudo apt install -y build-essential ccache git zlib1g-dev python2.7 python2.7-dev python-virtualenv libncurses5:i386 libstdc++6:i386 zlib1g:i386 unzip ant ccache autoconf libtool
+  - sudo apt install -y openjdk-8-jdk
+  - sudo apt install -y libimobiledevice-dev
 
-  # Just to be sure
-  - pip install -U pip
-
-  # pip is not able to install distribute: "ImportError: No module named _markerlib"
-  - easy_install distribute
+  # Start the emulator!
+  - android list target
+  - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
+  - emulator -avd test -no-audio -no-window &
+  #- android-wait-for-emulator
 
   #: Install cython
-  - pip install Cython --install-option="--no-cython-compile"
+  - pip install --user Cython --install-option="--no-cython-compile"
 
   # Install enamlnative dependencies
-  - pip install enaml==0.9.8 ply msgpack-python
+  - pip install --user enaml==0.9.8 ply msgpack-python
 
   # Install p4a dependencies
-  - pip install sh colorama appdirs six jinja2
+  - pip install --user sh colorama appdirs six jinja2
 
-  # Intall test tools
-  - pip install pytest pytest-cov pytest-catchlog pytest-timeout
+  # Install test tools
+  - pip install --user pytest pytest-cov pytest-timeout
+
+  # Install the cli
+  - pip install --user enaml-native-cli
 
   # Install codecov report tools
-  - pip install codecov
+  - pip install --user codecov
 
 install:
 
   # Install enamlnative (check that build script is not broken
   - cd $TRAVIS_BUILD_DIR
-  - python src/setup.py develop
+  - python src/setup.py develop --user
   - cd ~
 
 script:

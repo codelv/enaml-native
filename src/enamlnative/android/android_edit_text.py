@@ -41,17 +41,6 @@ class AndroidEditText(AndroidTextView, ProxyEditText):
         """
         self.widget = EditText(self.get_context())
 
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidEditText, self).init_widget()
-        d = self.declaration
-        if d.selection:
-            self.set_selection(d.selection)
-        if d.placeholder:
-            self.set_placeholder(d.placeholder)
-
     # -------------------------------------------------------------------------
     # ProxyEditText API
     # -------------------------------------------------------------------------

@@ -14,6 +14,7 @@ from atom.api import Typed, Int, List, set_default
 from enamlnative.widgets.view_pager import (
     ProxyViewPager, ProxyPagerTitleStrip, ProxyPagerTabStrip
 )
+from enamlnative.widgets.view import coerce_gravity, coerce_size
 
 from .android_view import LayoutParams
 from .android_view_group import AndroidViewGroup, ViewGroup
@@ -142,29 +143,28 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
 
         """
         self.widget = ViewPager(self.get_context())
-
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidViewPager, self).init_widget()
-        d = self.declaration
-        if d.offscreen_page_limit:
-            self.set_offscreen_page_limit(d.offscreen_page_limit)
-        if d.page_margin >= 0:
-            self.set_page_margin(d.page_margin)
-        if not d.paging_enabled:
-            self.set_paging_enabled(d.paging_enabled)
-        if d.transition != 'default':
-            self.set_transition(d.transition)
-
-        #: Create adapter
         self.adapter = BridgedFragmentStatePagerAdapter()
+
+    # def init_widget(self):
+    #     """ Initialize the underlying widget.
+    #
+    #     """
+    #     super(AndroidViewPager, self).init_widget()
+    #     d = self.declaration
+    #     # if d.offscreen_page_limit:
+    #     #     self.set_offscreen_page_limit(d.offscreen_page_limit)
+    #     # if d.page_margin >= 0:
+    #     #     self.set_page_margin(d.page_margin)
+    #     # if not d.paging_enabled:
+    #     #     self.set_paging_enabled(d.paging_enabled)
+    #     # if d.transition != 'default':
+    #     #     self.set_transition(d.transition)
+    #
+    #
 
     def init_layout(self):
         super(AndroidViewPager, self).init_layout()
         d = self.declaration
-
         w = self.widget
 
         #: Set adapter
@@ -188,12 +188,6 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         self._notify_count += 1
         self.get_context().timed_call(
             self._notify_delay, self._notify_change)
-
-    def destroy(self):
-        """ Properly destroy adapter """
-        super(AndroidViewPager, self).destroy()
-        if self.adapter:
-            del self.adapter
 
     def _notify_change(self):
         """ After all changes have settled, tell Java it changed """
@@ -274,6 +268,32 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         self.widget.setPageTransformer(True,
                                        PageTransformer.from_name(transition))
 
+    def create_layout_params(self, child, layout):
+        """ Override as there is no (width, height) constructor.
+        
+        """
+        from .android_fragment import AndroidFragment
+        if isinstance(child, AndroidFragment):
+            return super(AndroidViewPager, self).create_layout_params(child,
+                                                                      layout)
+        # Only apply to decor views
+        dp = self.dp
+        w, h = (coerce_size(layout.get('width', 'match_parent')),
+                coerce_size(layout.get('height', 'wrap_content')))
+        w = w if w < 0 else int(w * dp)
+        h = h if h < 0 else int(h * dp)
+        # No (w,h) constructor
+        params = ViewPagerLayoutParams()
+        params.width = w
+        params.height = h
+        params.isDecor = True
+        return params
+
+    def apply_layout(self, child, layout):
+        super(AndroidViewPager, self).apply_layout(child, layout)
+        if 'gravity' in layout:
+            child.layout_params.gravity = coerce_gravity(layout['gravity'])
+
 
 class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):
     """ An Android implementation of an Enaml ProxyPagerTitleStrip.
@@ -282,25 +302,11 @@ class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):
     #: A reference to the widget created by the proxy.
     widget = Typed(PagerTitleStrip)
 
-    #: ViewPager views should have the given layout params
-    layout_param_type = set_default(ViewPagerLayoutParams)
-
-    def _default_layout_params(self):
-        d = self.declaration
-        try:
-            w = int(int(d.layout_width)*self.dp)
-        except ValueError:
-            w = LayoutParams.LAYOUTS[d.layout_width or 'match_parent']
-        try:
-            h = int(int(d.layout_height)*self.dp)
-        except ValueError:
-            h = LayoutParams.LAYOUTS[d.layout_height or 'match_parent']
-        #: Takes no arguments
-        layout_params = self.layout_param_type()
-        layout_params.width = w
-        layout_params.height = h
-        layout_params.isDecor = True
-        return layout_params
+    default_layout = set_default({
+        'width': 'match_parent',
+        'height': 'wrap_content',
+        'gravity': 'top'
+    })
 
     # -------------------------------------------------------------------------
     # Initialization API
@@ -311,33 +317,15 @@ class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):
         """
         self.widget = PagerTitleStrip(self.get_context())
 
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidPagerTitleStrip, self).init_widget()
-        d = self.declaration
-        #if d.titles:
-        #    self.set_titles(d.titles)
-        if d.text_color:
-            self.set_text_color(d.text_color)
-        if d.text_size:
-            self.set_text_size(d.text_size)
-        if d.text_spacing:
-            self.set_text_spacing(d.text_spacing)
-        if d.inactive_alpha:
-            self.set_inactive_alpha(d.inactive_alpha)
+    def init_layout(self):
+        # Make sure the layout always exists
+        if not self.layout_params:
+            self.set_layout({})
+        super(AndroidPagerTitleStrip, self).init_layout()
 
     # -------------------------------------------------------------------------
     # ProxyPagerTitleStrip API
     # -------------------------------------------------------------------------
-    # def set_titles(self, titles):
-    #     parent = self.parent()
-    #     adapter = parent.adapter
-    #     adapter.clearTitles()
-    #     adapter.setTitles(titles)
-    #     self.widget.requestLayout()
-
     def set_inactive_alpha(self, alpha):
         self.widget.setNonPrimaryAlpha(alpha)
 
@@ -366,17 +354,6 @@ class AndroidPagerTabStrip(AndroidPagerTitleStrip, ProxyPagerTabStrip):
 
         """
         self.widget = PagerTabStrip(self.get_context())
-
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidPagerTabStrip, self).init_widget()
-        d = self.declaration
-        if d.tab_full_underline:
-            self.set_tab_full_underline(d.tab_full_underline)
-        if d.tab_indicator_color:
-            self.set_tab_indicator_color(d.tab_indicator_color)
 
     # -------------------------------------------------------------------------
     # ProxyPagerTabStrip API

@@ -37,7 +37,7 @@ from .list_view import ListView, ListItem
 #from .chart_view import DataSet, LineChart, BarChart, ScatterChart, PieChart
 
 #: Controls
-from .button import  Button
+from .button import  Button, ImageButton, FloatingActionButton
 from .compound_button import CompoundButton
 from .checkbox import CheckBox
 from .switch import Switch
@@ -55,7 +55,6 @@ from .time_picker import TimePicker
 from .date_picker import DatePicker
 
 #: Widgets
-from .spacer import Spacer
 from .progress_bar import ProgressBar
 from .activity_indicator import ActivityIndicator
 from .seek_bar import SeekBar
@@ -65,7 +64,6 @@ from .tab_layout import TabLayout, TabFragment
 from .fragment import Fragment
 from .picker import Picker
 from .text_clock import TextClock
-from .analog_clock import AnalogClock
 from .iconify import Icon, IconButton, IconToggleButton
 from .toast import Toast
 from .snackbar import Snackbar

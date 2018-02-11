@@ -1,4 +1,3 @@
-
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 from enamlnative.android.api import InputMethodManager

@@ -6,6 +6,9 @@ enamldef ContentView(Flexbox):
 
     ViewPager:
         PagerTabStrip: pager_tab_strip:
+            # Gravity is converted to an int so update this instead
+            attr placement = 'top'
+            gravity << placement
             text_color = '#eee'
             inactive_alpha = 0.7
             text_size = 16
@@ -21,5 +24,5 @@ enamldef ContentView(Flexbox):
                 padding = (10,10,10,10)
                 Spinner:
                   items = ['top', 'bottom']
-                  selected << 0 if pager_tab_strip.layout_gravity == 'top' else 1
-                  selected :: pager_tab_strip.layout_gravity = self.items[self.selected]
+                  selected << 0 if pager_tab_strip.placement == 'top' else 1
+                  selected :: pager_tab_strip.placement = self.items[self.selected]

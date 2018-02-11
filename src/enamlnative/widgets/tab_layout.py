@@ -59,11 +59,6 @@ class TabLayout(FrameLayout):
     """ A TabLayout contains a tab for each TabFragment child of a ViewPager
 
     """
-    #: Layout params
-    layout_width = set_default('match_parent')
-    layout_height = set_default('wrap_content')
-    layout_gravity = set_default('top')
-
     #: Set the behavior mode for the Tabs in this layout.
     tab_mode = d_(Enum('fixed', 'scrollable'))
 

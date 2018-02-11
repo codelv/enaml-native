@@ -2,17 +2,18 @@ from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 
 enamldef Drawer(ScrollView): view:
-    #: Must have layout_gravity AND layout_width
-    layout_gravity = 'left'
-    layout_width = '200'
+    #: Must have gravity AND width
+    width = 200
+    attr side = 'left'
+    gravity << side # Use an attr since this gets converted to an int
     background_color = "#fff"
     Flexbox:
         flex_direction = "column"
         Looper:
             iterable = range(20)
             Button:
-                style = "borderless"
-                text = "{} {}".format(view.layout_gravity, loop_index)
+                flat = True
+                text = "{} {}".format(view.side, loop_index)
 
 enamldef ContentView(DrawerLayout): drawer:
     background_color = "#eee"
@@ -35,6 +36,6 @@ enamldef ContentView(DrawerLayout): drawer:
             clicked :: drawer.opened = []
 
     Drawer: left_drawer:
-        layout_gravity = "left"
+        side = "left"
     Drawer: right_drawer:
-        layout_gravity = "right"
+        side = "right"

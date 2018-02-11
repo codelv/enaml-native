@@ -50,6 +50,7 @@ class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
         """
         super(AndroidRadioGroup, self).init_layout()
         d = self.declaration
+        w = self.widget
         if d.checked:
             self.set_checked(d.checked)
         else:
@@ -58,8 +59,8 @@ class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
                 if c.checked:
                     d.checked = c
 
-        self.widget.setOnCheckedChangeListener(self.widget.getId())
-        self.widget.onCheckedChanged.connect(self.on_checked_changed)
+        w.setOnCheckedChangeListener(w.getId())
+        w.onCheckedChanged.connect(self.on_checked_changed)
 
     # -------------------------------------------------------------------------
     # OnCheckedChangeListener API
@@ -95,8 +96,5 @@ class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
             #: so we need to get the ID of it
             rb = checked.proxy.widget
             if not rb:
-                raise RuntimeError(
-                    "The selected RadioButton is not yet initialized. "
-                    "Make sure it is a child of the RadioGroup and try again."
-                )
+                return
             self.widget.check(rb.getId())

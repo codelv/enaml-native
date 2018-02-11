@@ -25,10 +25,10 @@ enamldef ContentView(Flexbox): view:
                         progress << request.response.progress
                     TextView:
                         text << "Status: {} Reason: ".format(
-                                  request.response.status_code,
+                                  request.response.code,
                                   request.response.reason,
                             )
                     Conditional:
                         condition << request.response.ok
                         TextView:
-                          text << "{}".format(request.response.content)
+                          text << "{}".format(request.response.body)

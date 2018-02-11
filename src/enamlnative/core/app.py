@@ -11,11 +11,14 @@ The full license is in the file LICENSE, distributed with this software.
 """
 import json
 import traceback
-from atom.api import (Atom, Enum, Callable, List, Instance, Value,
-                      Int, Unicode, Bool, Dict)
+from atom.api import (
+    Atom, Enum, Callable, List, Instance, Value, Int, Unicode, Bool, Dict,
+    Float
+)
 from enaml.application import Application
 from . import bridge
 from .loop import EventLoop
+from time import time
 
 
 class Plugin(Atom):
@@ -73,11 +76,11 @@ class BridgedApplication(Application):
     #: Events to send to the bridge
     _bridge_queue = List()
 
-    #: Delay to wait before sending events (in ms)
-    _bridge_timeout = Int(1)
+    #: Time last sent
+    _bridge_max_delay = Float(0.005)
 
-    #: Count of pending send calls
-    _bridge_pending = Int(0)
+    #: Time last sent
+    _bridge_last_scheduled = Float()
 
     #: Entry points to load plugins
     plugins = Dict()
@@ -217,6 +220,10 @@ class BridgedApplication(Application):
         """ Create a future object using the EventLoop implementation """
         return self.loop.create_future()
 
+    def run_iteration(self):
+        """ Run an iteration of the event loop  """
+        return self.loop.run_iteration()
+
     def add_done_callback(self, future, callback):
         """ Add a callback on a future object put here so it can be
         implemented with different event loops.
@@ -294,18 +301,28 @@ class BridgedApplication(Application):
                 Send the event now
 
         """
-        self._bridge_pending += 1
+        n = len(self._bridge_queue)
+
+        # Add to queue
         self._bridge_queue.append((name, args))
 
-        if kwargs.get('now'):
+        if n == 0:
+            # First event, send at next available time
+            self._bridge_last_scheduled = time()
+            self.deferred_call(self._bridge_send)
+            return
+        elif kwargs.get('now'):
             self._bridge_send(now=True)
-        else:
-            self.timed_call(self._bridge_timeout, self._bridge_send)
+            return
+
+        # If it's been over 5 ms since we last scheduled, run now
+        dt = time() - self._bridge_last_scheduled
+        if dt > self._bridge_max_delay:
+            self._bridge_send(now=True)
 
     def force_update(self):
         """ Force an update now. """
         #: So we don't get out of order
-        self._bridge_pending += 1
         self._bridge_send(now=True)
 
     def _bridge_send(self, now=False):
@@ -319,14 +336,12 @@ class BridgedApplication(Application):
             to finish. Use this when you want to update the screen
 
         """
-        self._bridge_pending -= 1
-        if self._bridge_queue and (self._bridge_pending == 0 or now):
+        if len(self._bridge_queue):
             if self.debug:
                 print("======== Py --> Native ======")
                 for event in self._bridge_queue:
                     print(event)
                 print("===========================")
-
             self.dispatch_events(bridge.dumps(self._bridge_queue))
             self._bridge_queue = []
 

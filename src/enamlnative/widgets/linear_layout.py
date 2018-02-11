@@ -28,9 +28,6 @@ class ProxyLinearLayout(ProxyViewGroup):
     def set_orientation(self, orientation):
         raise NotImplementedError
 
-    def set_gravity(self, gravity):
-        raise NotImplementedError
-
 
 class LinearLayout(ViewGroup):
     """ A simple control for displaying read-only text.
@@ -39,21 +36,13 @@ class LinearLayout(ViewGroup):
     #: Should the layout be a column or a row.
     orientation = d_(Enum('horizontal', 'vertical'))
 
-    #: View gravity
-    gravity = d_(Int())
-    # Enum('top', 'left', 'right',
-    #                   'bottom','center',
-    #                   'end','start', 'no_gravity',
-    #                   'fill_horizontal'))
-    #
-
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyLinearLayout)
 
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('orientation', 'gravity')
+    @observe('orientation')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

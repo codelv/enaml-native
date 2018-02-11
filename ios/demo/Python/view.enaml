@@ -13,7 +13,7 @@ from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 
 enamldef ContentView(Flexbox):
-    flex_direction = "column"
+    #flex_direction = "column"
     background_color = "#abc"
     #: TODO: Padding not working...
     #padding = (10,10,10,10)
@@ -21,6 +21,7 @@ enamldef ContentView(Flexbox):
     TextView:
         text = "Switches"
     Flexbox:
+        flex_direction = "row"
         justify_content = "space_around"
 
         Switch: sw:
@@ -32,6 +33,7 @@ enamldef ContentView(Flexbox):
     TextView:
         text = "Buttons"
     Flexbox:
+        flex_direction = "row"
         justify_content = "space_around"
         Button:
             text = "Button"

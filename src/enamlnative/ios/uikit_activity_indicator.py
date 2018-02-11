@@ -52,8 +52,8 @@ class UiKitActivityIndicator(UiKitView, ProxyActivityIndicator):
         super(UiKitActivityIndicator, self).init_widget()
 
         d = self.declaration
-        if d.style != 'normal':
-            self.set_style(d.style)
+        if d.size != 'normal':
+            self.set_size(d.size)
         if d.color:
             self.set_color(d.color)
 
@@ -63,7 +63,7 @@ class UiKitActivityIndicator(UiKitView, ProxyActivityIndicator):
     # -------------------------------------------------------------------------
     # ProxyActivityIndicator API
     # -------------------------------------------------------------------------
-    def set_style(self, style):
+    def set_size(self, size):
         pass
         #self.widget.activityIndicatorViewStyle = style
 
