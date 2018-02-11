@@ -146,10 +146,10 @@ By default any references defined within a component are "private" and cannot be
     from enamlnative.widgets.api import *
 
     enamldef SettingsItem(Flexbox):
-        layout_height = "wrap_content"
+        height = "wrap_content"
         background_color = "#fff"
         padding = (10,10,10,10)
-        margins = (0,10,0,10)
+        margin = (0,10,0,10)
 
     enamldef BoringSettingsItem(SettingsItem):
         attr title
@@ -528,7 +528,7 @@ Use the `flex_direction` attribute to layout children in a row or column. Use `j
             flex_direction = "column"
 
             #: flex_basis (on Android) is the percentage of the parent size to consume
-            layout = dict(flex_basis=0.25)
+            flex_basis=0.25
 
             TextView:
                 text = "flex_direction"
@@ -540,7 +540,7 @@ Use the `flex_direction` attribute to layout children in a row or column. Use `j
             background_color = "#bac"
             flex_direction = "column"
             #: flex_basis (on Android) is the percentage of the parent size to consume
-            layout = dict(flex_basis=0.25)
+            flex_basis=0.25
 
             #: Flex direction arranges children in either a row or column 
             justify_content = "center"
@@ -553,7 +553,7 @@ Use the `flex_direction` attribute to layout children in a row or column. Use `j
                 selected :: parent.justify_content = self.items[change['value']]
         Flexbox:
             background_color = "#cba"
-            layout = dict(flex_basis=0.15)
+            flex_basis=0.15
             flex_direction = "column"
             TextView:
                 text = "align_items (within column)"
@@ -563,10 +563,10 @@ Use the `flex_direction` attribute to layout children in a row or column. Use `j
                 selected :: parent.align_items = self.items[change['value']]
         Flexbox:
             background_color = "#abc"
-            layout = dict(flex_basis=0.35)
+            flex_basis=0.35
             flex_direction = "column"
             Flexbox:
-                layout_height = "wrap_content"
+                height = "wrap_content"
                 TextView:
                     text = "align_content"
                 Spinner:
@@ -584,7 +584,10 @@ Use the `flex_direction` attribute to layout children in a row or column. Use `j
 
 
 
-You can also apply child specific layout parameters using the `layout = dict(**params)`. These parameters are `align_self`, `flex_basis`, `flex_grow`, `flex_shrink`. Margin and padding can be set directly as the `margins` and `padding` attributes. They should be tuples of the format `(left,top,right,bottom)`.  
+You can also apply child specific layout parameters: `align_self`, `flex_basis`, `flex_grow`, `flex_shrink`. 
+
+Margin and padding can be set directly as the `margin` and `padding` attributes. 
+They should be tuples of the format `(left,top,right,bottom)`.  
 
 
 More to come on layouts, stay tuned!
