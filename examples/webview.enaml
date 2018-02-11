@@ -24,8 +24,8 @@ enamldef ContentView(ScrollView): web_view:
           text_color = '#FF0000'
           text << u"Error: {} - {}".format(web_view.error_code, web_view.error_message)
         WebView: web_view:
-          layout_height = 'match_parent'
-          layout_width = 'match_parent'
+          height = 'match_parent'
+          width = 'match_parent'
           #: When url updates, set the text
           url = "https://github.com/frmdstryr/enaml-native"
           url >> web_url.text

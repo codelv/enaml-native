@@ -34,7 +34,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
         toolkit widget and assign it to the 'widget' attribute.
 
         """
-        self.widget = JavaBridgeObject(self.get_context())
+        raise NotImplementedError
 
     def init_widget(self):
         """ Initialize the state of the toolkit widget.
@@ -44,7 +44,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
         state of the widget. The child widgets will not yet be created.
 
         """
-        widget = self.widget
+        pass
 
     def init_layout(self):
         """ Initialize the layout of the toolkit widget.
@@ -121,7 +121,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
 
         """
         for child in self.children():
-            if child is not None: #: Not sure how this happens
+            if child is not None:  #: Not sure how this happens
                 w = child.widget
                 if w is not None:
                     yield w

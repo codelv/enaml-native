@@ -11,11 +11,20 @@ Created on May 20, 2017
 """
 from atom.api import Typed, set_default
 
-from enamlnative.widgets.iconify import ProxyIcon, ProxyIconButton, ProxyIconToggleButton
+from enamlnative.widgets.iconify import (
+    ProxyIcon, ProxyIconButton, ProxyIconToggleButton
+)
+from .bridge import JavaBridgeObject
 
 from .android_text_view import AndroidTextView, TextView
 from .android_button import AndroidButton, Button
 from .android_toggle_button import AndroidToggleButton, ToggleButton
+
+
+class IconDrawable(JavaBridgeObject):
+    __nativeclass__ = set_default('com.joanzapata.iconify.IconDrawable')
+    __signature__ = set_default(('android.content.Context',
+                                 'java.lang.String'))
 
 
 class Icon(TextView):
@@ -27,7 +36,8 @@ class IconButton(Button):
 
 
 class IconToggleButton(ToggleButton):
-    __nativeclass__ = set_default('com.joanzapata.iconify.widget.IconToggleButton')
+    __nativeclass__ = set_default(
+        'com.joanzapata.iconify.widget.IconToggleButton')
 
 
 class AndroidIcon(AndroidTextView, ProxyIcon):
@@ -62,7 +72,7 @@ class AndroidIconButton(AndroidButton, ProxyIconButton):
 
         """
         d = self.declaration
-        style = Button.STYLES[d.style]
+        style = Button.STYLE_FLAT if d.flat else Button.STYLE_NORMAL
         self.widget = IconButton(self.get_context(), None, style)
 
 

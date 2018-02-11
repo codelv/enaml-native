@@ -22,6 +22,11 @@ class WebView(ViewGroup):
     loadUrl = JavaMethod('java.lang.String')
     loadData = JavaMethod('java.lang.String', 'java.lang.String',
                           'java.lang.String')
+    loadDataWithBaseURL = JavaMethod('java.lang.String',
+                                     'java.lang.String',
+                                     'java.lang.String',
+                                     'java.lang.String',
+                                     'java.lang.String')
     setWebViewClient = JavaMethod('android.webkit.WebViewClient')
     reload = JavaMethod()
     goBack = JavaMethod()
@@ -73,29 +78,18 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
         """ Initialize the underlying widget.
 
         """
+        # Create and init the client
+        c = self.client = BridgedWebViewClient()
+        c.setWebView(self.widget, c.getId())
+        c.onLoadResource.connect(self.on_load_resource)
+        c.onPageFinished.connect(self.on_page_finished)
+        c.onPageStarted.connect(self.on_page_started)
+        c.onReceivedError.connect(self.on_received_error)
+        c.onScaleChanged.connect(self.on_scale_changed)
+        c.onProgressChanged.connect(self.on_progress_changed)
+        c.onReceivedTitle.connect(self.on_page_title_changed)
+
         super(AndroidWebView, self).init_widget()
-        d = self.declaration
-
-        self.client = BridgedWebViewClient()
-        #self.client.setWebViewListener(self.client.getId())
-        self.client.setWebView(self.widget, self.client.getId())
-        self.client.onLoadResource.connect(self.on_load_resource)
-        self.client.onPageFinished.connect(self.on_page_finished)
-        self.client.onPageStarted.connect(self.on_page_started)
-        self.client.onReceivedError.connect(self.on_received_error)
-        self.client.onScaleChanged.connect(self.on_scale_changed)
-        self.client.onProgressChanged.connect(self.on_progress_changed)
-        self.client.onReceivedTitle.connect(self.on_page_title_changed)
-
-        #: Done by setWebView
-        #self.widget.setWebViewClient(self.client)
-        if d.javascript_enabled:
-            self.set_javascript_enabled(d.javascript_enabled)
-
-        if d.source:
-            self.set_source(d.source)
-        elif d.url:
-            self.set_url(d.url)
 
     def destroy(self):
         """ Destroy the client
@@ -116,7 +110,6 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
     def on_page_started(self, view, url):
         d = self.declaration
         d.loading = True
-        d = self.declaration
         with self.widget.loadUrl.suppressed():
             d.url = url
 
@@ -153,7 +146,8 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
         a file or http resource use the `url` instead.
         
         """
-        self.widget.loadData(source, 'text/html', None)
+        self.widget.loadDataWithBaseURL(
+            None, source, 'text/html', "utf-8", None)
 
     def set_javascript_enabled(self, enabled):
         self.client.setJavaScriptEnabled(enabled)

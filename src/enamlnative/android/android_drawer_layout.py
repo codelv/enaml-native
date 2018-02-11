@@ -59,6 +59,9 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     #: Drawer state
     drawer_state = List()
 
+    #: Children use DrawerLayoutParams
+    layout_param_type = set_default(DrawerLayoutParams)
+
     # -------------------------------------------------------------------------
     # Initialization API
     # -------------------------------------------------------------------------
@@ -85,27 +88,19 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
         if d.status_bar_background_color:
             self.set_status_bar_background_color(d.status_bar_background_color)
 
-        #: Set the layout params to a drawer layout
-        for c in self.drawers():
-            c.layout_param_type = DrawerLayoutParams
-
     def init_layout(self):
         super(AndroidDrawerLayout, self).init_layout()
         d = self.declaration
-
-        #: Set the proper layout for each child
-        # for c in self.drawers():
-        #     #: Set the gravity
-        #     gravity = 3 if c.declaration.layout_gravity == 'left' else 5
-        #     c.layout_params.gravity = gravity
+        w = self.widget
 
         if d.opened:
             self.set_opened(d.opened)
 
         #: Add drawer listener
-        self.widget.addDrawerListener(self.widget.getId())
-        self.widget.onDrawerClosed.connect(self.on_drawer_closed)
-        self.widget.onDrawerOpened.connect(self.on_drawer_opened)
+        w.addDrawerListener(w.getId())
+        w.onDrawerClosed.connect(self.on_drawer_closed)
+        w.onDrawerOpened.connect(self.on_drawer_opened)
+        w.onDrawerStateChanged.connect(self.on_drawer_state_changed)
 
     def drawers(self):
         for i, c in enumerate(self.children()):
@@ -169,15 +164,6 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
         d = self.declaration
         self.set_side(d.side)
 
-    # def set_drawer_gravity(self,gravity):
-    #     d = self.declaration
-    #     params = DrawerLayoutLayoutParams(
-    #         d.drawer_width,
-    #         LayoutParams.MATCH_PARENT
-    #     )
-    #     params.gravity = getattr(Gravity,gravity.upper())
-    #     self.widget.setLayoutParams(params)
-
     def set_title(self, title):
         d = self.declaration
         self.widget.setDrawerTitle(d.title_gravity, title)
@@ -198,3 +184,10 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
 
     def set_status_bar_background_color(self, color):
         self.widget.setStatusBarBackgroundColor(color)
+
+    def create_layout_params(self, child, layout):
+        params = super(AndroidDrawerLayout, self).create_layout_params(child,
+                                                                       layout)
+        if 'gravity' in layout:
+            params.gravity = layout['gravity']
+        return params

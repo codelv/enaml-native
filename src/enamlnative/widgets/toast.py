@@ -10,11 +10,12 @@ Created on Sept 18, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Unicode, Int, Bool, Enum, observe, set_default
+    Typed, ForwardTyped, Unicode, Int, Bool, Coerced, observe
 )
 
 from enaml.core.declarative import d_
 from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
+from .view import coerce_gravity
 
 
 class ProxyToast(ProxyToolkitObject):
@@ -33,9 +34,6 @@ class ProxyToast(ProxyToolkitObject):
     def set_show(self, show):
         raise NotImplementedError
 
-    # def set_position(self, position):
-    #     raise NotImplementedError
-
 
 class Toast(ToolkitObject):
     """ A toast is a view containing a quick little message for the user.
@@ -49,9 +47,14 @@ class Toast(ToolkitObject):
     #: Duration to display in ms
     duration = d_(Int(1000))
 
+    #: x position
+    x = d_(Int())
+
+    #: y position
+    y = d_(Int())
+
     #: Position
-    #: Does not work correctly
-    #position = d_(Unicode())
+    gravity = d_(Coerced(int, coercer=coerce_gravity))
 
     #: Show the notification for the given duration
     show = d_(Bool())
@@ -62,7 +65,7 @@ class Toast(ToolkitObject):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('text', 'duration', 'show')
+    @observe('text', 'duration', 'show', 'gravity', 'x', 'y')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

@@ -55,19 +55,11 @@ class AndroidCalendarView(AndroidFrameLayout, ProxyCalendarView):
 
         """
         super(AndroidCalendarView, self).init_widget()
-        d = self.declaration
-        if d.date:
-            self.set_date(d.date)
-        if d.min_date:
-            self.set_min_date(d.min_date)
-        if d.max_date:
-            self.set_max_date(d.max_date)
-        if d.first_day_of_week != 1:
-            self.set_first_day_of_week(d.first_day_of_week)
 
         #: Setup listener
-        self.widget.setOnDateChangeListener(self.widget.getId())
-        self.widget.onSelectedDayChange.connect(self.on_selected_day_change)
+        w = self.widget
+        w.setOnDateChangeListener(w.getId())
+        w.onSelectedDayChange.connect(self.on_selected_day_change)
 
     # -------------------------------------------------------------------------
     # OnDateChangeListener API

@@ -50,9 +50,3 @@ class AndroidAdapterView(AndroidViewGroup):
     #: Adapter reference
     adapter = Typed(ArrayAdapter)
 
-    def destroy(self):
-        """ Destroy the adapter """
-        super(AndroidAdapterView, self).destroy()
-        if self.adapter:
-            del self.adapter
-

@@ -5,7 +5,12 @@ enamldef ContentView(Flexbox):
 
     Chronometer: cm:
         text_size = 32
-        running = True
+        running = False
 
     TextView:
         text << "Elapsed: {} seconds".format(cm.ticks)
+    ToggleButton:
+        text = "Start"
+        text_on = "Stop"
+        text_off = "Start"
+        checked := cm.running

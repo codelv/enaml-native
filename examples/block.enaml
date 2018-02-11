@@ -22,7 +22,7 @@ enamldef Card(Flexbox): card:
 
 enamldef ContentView(Flexbox):
     flex_direction = "column"
-    background_color = "#eee"
+    background_color = '#eee'
     #: Use our card component
     Card:
         Block:

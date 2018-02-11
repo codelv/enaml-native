@@ -13,7 +13,7 @@ from atom.api import Typed, set_default
 
 from enamlnative.widgets.grid_layout import ProxyGridLayout
 
-from .android_view_group import AndroidViewGroup, ViewGroup
+from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
 from .bridge import JavaMethod
 
 
@@ -28,12 +28,19 @@ class GridLayout(ViewGroup):
     setUseDefaultMargins = JavaMethod('boolean')
 
 
+class GridLayoutParams(ViewGroup):
+    __nativeclass__ = set_default('android.widget.GridLayout$LayoutParams')
+
+
 class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
     """ An Android implementation of an Enaml ProxyGridLayout.
 
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(GridLayout)
+
+    #: Update default
+    #layout_param_type = set_default(GridLayoutParams)
 
     # -------------------------------------------------------------------------
     # Initialization API
@@ -43,25 +50,6 @@ class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
 
         """
         self.widget = GridLayout(self.get_context())
-
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidGridLayout, self).init_widget()
-        d = self.declaration
-        self.set_orientation(d.orientation)
-        self.set_alignment_mode(d.alignment_mode)
-        if d.columns:
-            self.set_columns(d.columns)
-        if d.column_order_preserved:
-            self.set_column_order_preserved(d.column_order_preserved)
-        if d.rows:
-            self.set_rows(d.rows)
-        if d.row_order_preserved:
-            self.set_row_order_preserved(d.row_order_preserved)
-        if d.use_default_margins:
-            self.set_use_default_margins(d.use_default_margins)
 
     # -------------------------------------------------------------------------
     # ProxyGridLayout API

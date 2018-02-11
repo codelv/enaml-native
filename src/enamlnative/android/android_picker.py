@@ -55,6 +55,7 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
         """
         super(AndroidPicker, self).init_widget()
         d = self.declaration
+        w = self.widget
         if d.items:
             self.set_items(d.items)
         else:
@@ -69,8 +70,8 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
         if d.long_press_update_interval:
             self.set_long_press_update_interval(d.long_press_update_interval)
 
-        self.widget.setOnValueChangedListener(self.widget.getId())
-        self.widget.onValueChange.connect(self.on_value_change)
+        w.setOnValueChangedListener(w.getId())
+        w.onValueChange.connect(self.on_value_change)
 
     # -------------------------------------------------------------------------
     # OnValueChangeListener API
@@ -103,6 +104,7 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
         self.widget.setWrapSelectorWheel(wraps)
 
     def set_items(self, items):
-        self.widget.setMinValue(0)
-        self.widget.setDisplayedValues(items)
-        self.widget.setMaxValue(len(items)-1)  # max-min + 1 wtf
+        w = self.widget
+        w.setMinValue(0)
+        w.setDisplayedValues(items)
+        w.setMaxValue(len(items)-1)  # max-min + 1 wtf

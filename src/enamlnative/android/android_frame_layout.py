@@ -38,6 +38,9 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
     #: A reference to the widget created by the proxy.
     widget = Typed(FrameLayout)
 
+    #: Update default
+    layout_param_type = set_default(FrameLayoutParams)
+
     # -------------------------------------------------------------------------
     # Initialization API
     # -------------------------------------------------------------------------
@@ -47,22 +50,15 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
         """
         self.widget = FrameLayout(self.get_context())
 
-    def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidFrameLayout, self).init_widget()
-        d = self.declaration
-        if d.foreground_gravity:
-            self.set_foreground_gravity(d.foreground_gravity)
-        if d.measure_all_children:
-            self.set_measure_all_children(d.measure_all_children)
-
     # -------------------------------------------------------------------------
     # ProxyFrameLayout API
     # -------------------------------------------------------------------------
     def set_foreground_gravity(self, gravity):
         self.widget.setForegroundGravity(gravity)
 
-    def set_measure_all_children(self, enabled):
-        self.widget.setMeasureAllChildren(enabled)
+    def create_layout_params(self, child, layout):
+        params = super(AndroidFrameLayout, self).create_layout_params(child,
+                                                                      layout)
+        if 'gravity' in layout:
+            params.gravity = layout['gravity']
+        return params

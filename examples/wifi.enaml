@@ -26,28 +26,28 @@ enamldef ContentView(Flexbox): view:
         dialog.show = False
 
     Toolbar:
-        layout_height = "100"
+        height = 100
         background_color = "#bca"
         Flexbox:
             justify_content = "space_between"
             Button:
-                style = "borderless"
+                flat = True
                 text = "Scan"
                 clicked  :: start_scan()
             Button:
-                style = "borderless"
+                flat = True
                 text = "Conn"
                 clicked  ::
                     WifiManager.get_connection_info().then(
                         lambda r,view=view: setattr(view,'wifi_info',r))
             Button:
-                style = "borderless"
+                flat = True
                 text = "DHCP"
                 clicked  ::
                     WifiManager.get_dhcp_info().then(
                         lambda r,view=view: setattr(view,'dhcp_info',r))
             Button:
-                style = "borderless"
+                flat = True
                 text << "Disable" if wifi_enabled else "Enable"
                 clicked  ::
                     WifiManager.set_wifi_enabled(not wifi_enabled).then(
@@ -99,11 +99,11 @@ enamldef ContentView(Flexbox): view:
                 Flexbox:
                     justify_content = "flex_end"
                     Button:
-                        style = "borderless"
+                        flat = True
                         text = "Cancel"
                         clicked :: dialog.show = False
                     Button:
-                        style = "borderless"
+                        flat = True
                         text = "Connect"
                         clicked ::
                             WifiManager.connect(ssid=ssid,

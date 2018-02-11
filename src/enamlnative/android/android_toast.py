@@ -13,7 +13,6 @@ from atom.api import Typed, Bool, set_default
 from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
 from enamlnative.widgets.toast import ProxyToast
 from .android_toolkit_object import AndroidToolkitObject
-from .android_text_view import Gravity
 
 
 class Toast(JavaBridgeObject):
@@ -66,16 +65,16 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
         way of doing initialization. See `update_widget`
         
         """
-        super(AndroidToast, self).init_widget()
         if not self.toast:
             return
+        super(AndroidToast, self).init_widget()
 
         d = self.declaration
         if not self.made_toast:
             #: Set it to LONG
             self.toast.setDuration(1)
-        #if d.position:
-        #    self.set_position(d.position)
+        if d.gravity:
+            self.set_gravity(d.gravity)
         if d.show:
             self.set_show(d.show)
 
@@ -153,6 +152,9 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
         else:
             self.toast.cancel()
 
-    def set_position(self, position):
-        #: TODO: Handle x,y offsets
-        self.toast.setGravity(Gravity.parse(position), 0, 0)
+    def set_layout(self, layout):
+        pass
+
+    def set_gravity(self, gravity):
+        d = self.declaration
+        self.toast.setGravity(gravity, int(d.x), int(d.y))

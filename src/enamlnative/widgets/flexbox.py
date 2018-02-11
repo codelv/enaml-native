@@ -152,11 +152,11 @@ class Flexbox(ViewGroup):
         This uses Facebook's yoga.
 
     """
-    #: Default is to stretch so fill the parent
-    layout_width = set_default('match_parent')
-
-    #: Default is to stretch so fill the parent
-    layout_height = set_default('match_parent')
+    # #: Default is to stretch so fill the parent
+    # layout_width = set_default('match_parent')
+    #
+    # #: Default is to stretch so fill the parent
+    # layout_height = set_default('match_parent')
 
     #: How to align children along the cross axis of their container
     align_items = d_(Enum('stretch', 'flex_start', 'flex_end', 'center'))

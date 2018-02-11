@@ -4,7 +4,9 @@ enamldef ContentView(Flexbox):
     flex_direction = "column"
 
     ProgressBar: pb:
+        padding = (10, 10, 10, 10)
         progress = 50
 
     SeekBar:
+        padding = (10, 10, 10, 10)
         progress := pb.progress

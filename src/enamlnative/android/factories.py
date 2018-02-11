@@ -16,11 +16,6 @@ def activity_indicator_factory():
     return AndroidActivityIndicator
 
 
-def analog_clock_factory():
-    from .android_analog_clock import AndroidAnalogClock
-    return AndroidAnalogClock
-
-
 def auto_complete_text_view_factory():
     from .android_auto_complete_text_view import AndroidAutoCompleteTextView
     return AndroidAutoCompleteTextView
@@ -91,6 +86,11 @@ def flexbox_factory():
     return AndroidFlexbox
 
 
+def floating_action_button_factory():
+    from .android_button import AndroidFloatingActionButton
+    return AndroidFloatingActionButton
+
+
 def fragment_factory():
     from .android_fragment import AndroidFragment
     return AndroidFragment
@@ -119,6 +119,11 @@ def icon_button_factory():
 def icon_toggle_button_factory():
     from .android_iconify import AndroidIconToggleButton
     return AndroidIconToggleButton
+
+
+def image_button_factory():
+    from .android_button import AndroidImageButton
+    return AndroidImageButton
 
 
 def image_view_factory():
@@ -194,11 +199,6 @@ def scroll_view_factory():
 def seek_bar_factory():
     from .android_seek_bar import AndroidSeekBar
     return AndroidSeekBar
-
-
-def spacer_factory():
-    from .android_spacer import AndroidSpacer
-    return AndroidSpacer
 
 
 def spinner_factory():
@@ -278,7 +278,6 @@ def web_view_factory():
 
 ANDROID_FACTORIES = {
     'ActivityIndicator': activity_indicator_factory,
-    'AnalogClock': analog_clock_factory,
     'AutoCompleteTextView': auto_complete_text_view_factory,
     'BottomSheetDialog': bottom_sheet_dialog_factory,
     'Button': button_factory,
@@ -293,12 +292,14 @@ ANDROID_FACTORIES = {
     'DrawerLayout': drawer_layout_factory,
     'EditText': edit_text_factory,
     'Flexbox': flexbox_factory,
+    'FloatingActionButton': floating_action_button_factory,
     'Fragment': fragment_factory,
     'FrameLayout': frame_layout_factory,
     'GridLayout': grid_layout_factory,
     'Icon': icon_factory,
     'IconButton': icon_button_factory,
     'IconToggleButton': icon_toggle_button_factory,
+    'ImageButton': image_button_factory,
     'ImageView': image_view_factory,
     'LinearLayout': linear_layout_factory,
     'ListItem': list_item_factory,
@@ -314,7 +315,6 @@ ANDROID_FACTORIES = {
     'RelativeLayout': relative_layout_factory,
     'ScrollView': scroll_view_factory,
     'SeekBar': seek_bar_factory,
-    'Spacer': spacer_factory,
     'Spinner': spinner_factory,
     'Snackbar': snackbar_factory,
     'Switch': switch_factory,

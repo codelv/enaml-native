@@ -54,19 +54,6 @@ class UiKitLinearLayout(UiKitViewGroup, ProxyLinearLayout):
         """
         self.layout = UIStackView()
 
-    def init_widget(self):
-        """ Initialize the state of the toolkit widget.
-
-        This method is called during the top-down pass, just after the
-        'create_widget()' method is called. This method should init the
-        state of the widget. The child widgets will not yet be created.
-
-        """
-        super(UiKitLinearLayout, self).init_widget()
-        d = self.declaration
-        if d.orientation != "horizontal":  #: Default is horizontal
-            self.set_orientation(d.orientation)
-
     # -------------------------------------------------------------------------
     # ProxyLinearLayout API
     # -------------------------------------------------------------------------

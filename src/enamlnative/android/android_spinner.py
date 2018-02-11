@@ -55,36 +55,32 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
         mode = 1 if d.mode == 'dropdown' else 0
         self.widget = Spinner(self.get_context(), mode)
 
+        # Create the adapter simple_spinner_item = 0x01090008
+        self.adapter = ArrayAdapter(self.get_context(),
+                                    '@layout/simple_spinner_dropdown_item')
+
     def init_widget(self):
         """ Initialize the underlying widget.
 
         """
+        w = self.widget
+        # Selection listener
+        w.setAdapter(self.adapter)
+        w.setOnItemSelectedListener(w.getId())
+        w.onItemSelected.connect(self.on_item_selected)
+        w.onNothingSelected.connect(self.on_nothing_selected)
         super(AndroidSpinner, self).init_widget()
-        d = self.declaration
-        self.set_prompt(d.prompt)
-        if d.drop_down_width:
-            self.set_drop_down_width(d.drop_down_width)
-        if d.drop_down_horizontal_offset:
-            self.set_drop_down_horizontal_offset(d.drop_down_horizontal_offset)
-        if d.drop_down_vertical_offset:
-            self.set_drop_down_vertical_offset(d.drop_down_vertical_offset)
-        if d.gravity:
-            self.set_gravity(d.gravity)
 
-        #: Create the adapter simple_spinner_item = 0x01090008
-        self.adapter = ArrayAdapter(self.get_context(),
-                                    '@layout/simple_spinner_dropdown_item')
-        if d.items:
-            self.set_items(d.items)
-        self.widget.setAdapter(self.adapter)
-
-        if d.selected:
-            self.set_selected(d.selected)
-
-        #: Selection listener
-        self.widget.setOnItemSelectedListener(self.widget.getId())
-        self.widget.onItemSelected.connect(self.on_item_selected)
-        self.widget.onNothingSelected.connect(self.on_nothing_selected)
+    def get_declared_items(self):
+        selection = None
+        for k, v in super(AndroidSpinner, self).get_declared_items():
+            if k == 'selection':
+                selection = (k, v)
+            else:
+                yield (k, v)
+        # Select last
+        if selection:
+            yield selection
 
     # -------------------------------------------------------------------------
     # OnSelectionListener API
@@ -112,12 +108,9 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
         """
         self.adapter.clear()
         self.adapter.addAll(items)
-        #self.adapter.add(item)
 
-    def set_gravity(self, gravity):
-        #g = getattr(Gravity,gravity.upper())
-        #self.widget.setGravity(gravity)
-        pass
+    def set_item_gravity(self, gravity):
+        self.widget.setGravity(gravity)
 
     def set_drop_down_horizontal_offset(self, offset):
         self.widget.setDropDownHorizontalOffset(offset)

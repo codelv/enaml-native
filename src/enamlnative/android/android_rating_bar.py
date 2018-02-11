@@ -37,6 +37,11 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
     #: A reference to the widget created by the proxy.
     widget = Typed(RatingBar)
 
+    #: The number of stars set (via setNumStars(int) or in an XML layout)
+    #: will be shown when the layout width is set to wrap content
+    #: (if another layout width is set, the results may be unpredictable).
+    default_layout = set_default({'width': 'wrap_content'})
+
     # -------------------------------------------------------------------------
     # Initialization API
     # -------------------------------------------------------------------------
@@ -51,19 +56,15 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
 
         """
         super(AndroidRatingBar, self).init_widget()
-        d = self.declaration
-        if d.is_indicator:
-            self.set_is_indicator(d.is_indicator)
-        if d.num_stars:
-            self.set_num_stars(d.num_stars)
-        if d.step_size:
-            self.set_step_size(d.step_size)
+        w = self.widget
+        w.setOnRatingBarChangeListener(w.getId())
+        w.onRatingChanged.connect(self.on_rating_changed)
 
-        self.set_rating(d.rating)
-
-        #: Setup listener
-        self.widget.setOnRatingBarChangeListener(self.widget.getId())
-        self.widget.onRatingChanged.connect(self.on_rating_changed)
+    def init_layout(self):
+        # Make sure the layout always exists
+        if not self.layout_params:
+            self.set_layout({})
+        super(AndroidRatingBar, self).init_layout()
 
     # -------------------------------------------------------------------------
     # OnRatingBarChangeListener API

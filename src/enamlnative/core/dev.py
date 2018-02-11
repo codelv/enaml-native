@@ -316,16 +316,16 @@ class TornadoDevClient(DevClient):
 
         @gen.coroutine
         def run():
+            #: Create local references
+            mode = session.mode
+            process_events = session.app.process_events
+            app = session.app
+
             try:
                 print("Dev client connecting {}...".format(session.url))
                 conn = yield websocket_connect(session.url)
                 session.connected = True
                 self.connection = conn
-
-                #: Create local references
-                mode = session.mode
-                process_events = session.app.process_events
-                app = session.app
 
                 #: Start remote debugger
                 if mode == 'remote':
@@ -344,8 +344,11 @@ class TornadoDevClient(DevClient):
             except Exception as e:
                 print("Dev client connection dropped: {}".format(e))
             finally:
-                #: Try again in a few seconds
-                session.app.timed_call(1000, run)
+                if mode == 'remote':
+                    session.app.stop()
+                else:
+                    #: Try again in a few seconds
+                    session.app.timed_call(1000, run)
 
         #: Start
         session.app.deferred_call(run)
@@ -375,6 +378,7 @@ class TwistedDevClient(DevClient):
 
         #: Create local references
         mode = session.mode
+        app = session.app
         process_events = session.app.process_events
 
         class DevClient(WebSocketClientProtocol):
@@ -382,6 +386,10 @@ class TwistedDevClient(DevClient):
                 print("Dev client connected!")
                 session.connected = True
                 client.connection = self
+
+                #: Start remote debugger
+                if mode == 'remote':
+                    app.load_view(app)
 
             def onOpen(self):
                 pass
@@ -398,15 +406,25 @@ class TwistedDevClient(DevClient):
                     wasClean, code, reason))
                 session.connected = False
 
-                #: Try again in a few seconds
-                session.app.timed_call(1000, run)
+                # Stop the app if remote debugging
+                if mode == 'remote':
+                    session.app.stop()
+                else:
+                    #: Try again in a few seconds
+                    session.app.timed_call(1000, run)
 
         factory = WebSocketClientFactory(session.url)
         factory.protocol = DevClient
 
-        @inlineCallbacks
         def run():
-            yield reactor.connectTCP(session.host, session.port, factory)
+            host = session.host
+            port = session.port
+            if mode == "remote":
+                host = session.url.split("/")[2]
+                if ":" in host:
+                    host, port = host.split(":")
+            print("Starting websocket client...")
+            reactor.connectTCP(host, int(port), factory)
 
         #: Start
         session.app.deferred_call(run)
@@ -811,7 +829,7 @@ class DevServerSession(Atom):
 
     def _observe_connected(self, change):
         """ Log connection state changes """
-        print("Dev server {}".format("connected"
+        print("Dev session {}".format("connected"
                                      if self.connected else "disconnected"))
 
     # -------------------------------------------------------------------------

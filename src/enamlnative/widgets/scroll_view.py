@@ -34,6 +34,9 @@ class ProxyScrollView(ProxyFrameLayout):
     def set_scroll_to(self, point):
         raise NotImplementedError
 
+    def set_scrollbars(self, scrollbars):
+        raise NotImplementedError
+
 
 class ScrollView(FrameLayout):
     """ A simple control for displaying a ScrollView.
@@ -49,13 +52,16 @@ class ScrollView(FrameLayout):
     #: Scroll to by delta (x, y)
     scroll_by = d_(Event(tuple))
 
+    #: Set which scrollbars are enabled
+    scrollbars = d_(Enum('both', 'vertical', 'horizontal', 'none'))
+
     #: A reference to the ProxyScrollView object.
     proxy = Typed(ProxyScrollView)
 
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('orientation', 'scroll_to', 'scroll_by')
+    @observe('orientation', 'scroll_to', 'scroll_by', 'scrollbars')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 
