@@ -14,7 +14,7 @@ from atom.api import Typed, Dict, Instance, Subclass, Float, set_default
 from .android_toolkit_object import AndroidToolkitObject
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField
 
-from enamlnative.widgets.view import ProxyView
+from enamlnative.widgets.view import ProxyView, coerce_size
 
 
 LAYOUT_KEYS = (
@@ -23,6 +23,7 @@ LAYOUT_KEYS = (
     'align_self', 'flex_basis', 'flex_shrink', 'flex_grow', 'position',
     'max_width', 'min_width', 'max_height', 'min_height'
 )
+
 
 class View(JavaBridgeObject):
     __nativeclass__ = set_default('android.view.View')
@@ -109,6 +110,9 @@ class AndroidView(AndroidToolkitObject, ProxyView):
 
     #: Display metrics density
     dp = Float(1.0)
+
+    #: Layout type
+    layout_param_type = Subclass(LayoutParams)
 
     #: Layout params
     layout_params = Instance(LayoutParams)
@@ -334,6 +338,90 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         
         """
         self.parent().apply_layout(self, params)
+
+    def create_layout_params(self, child, layout):
+        """ Create the LayoutParams for a child with it's requested
+        layout parameters. Subclasses should override this as needed
+        to handle layout specific needs.
+        
+        Parameters
+        ----------
+        child: AndroidView
+            A view to create layout params for.
+        layout: Dict
+            A dict of layout parameters to use to create the layout.
+             
+        Returns
+        -------
+        layout_params: LayoutParams
+            A LayoutParams bridge object with the requested layout options.
+        
+        """
+        dp = self.dp
+        w, h = (coerce_size(layout.get('width', 'wrap_content')),
+                coerce_size(layout.get('height', 'wrap_content')))
+        w = w if w < 0 else int(w * dp)
+        h = h if h < 0 else int(h * dp)
+        layout_params = self.layout_param_type(w, h)
+
+        if layout.get('margin'):
+            l, t, r, b = layout['margin']
+            layout_params.setMargins(int(l*dp), int(t*dp),
+                                     int(b*dp), int(r*dp))
+        return layout_params
+
+    def apply_layout(self, child, layout):
+        """ Apply a layout to a child. This sets the layout_params
+        of the child which is later used during the `init_layout` pass.
+        Subclasses should override this as needed to handle layout specific
+        needs of the ViewGroup.
+        
+        Parameters
+        ----------
+        child: AndroidView
+            A view to create layout params for.
+        layout: Dict
+            A dict of layout parameters to use to create the layout.
+        
+        """
+        layout_params = child.layout_params
+        if not layout_params:
+            layout_params = self.create_layout_params(child, layout)
+        w = child.widget
+        if w:
+            dp = self.dp
+            # padding
+            if 'padding' in layout:
+                l, t, r, b = layout['padding']
+                w.setPadding(int(l*dp), int(t*dp),
+                             int(b*dp), int(r*dp))
+
+            # left, top, right, bottom
+            if 'left' in layout:
+                w.setLeft(int(layout['left']*dp))
+            if 'top' in layout:
+                w.setTop(int(layout['top']*dp))
+            if 'right' in layout:
+                w.setRight(int(layout['right']*dp))
+            if 'bottom' in layout:
+                w.setBottom(int(layout['bottom']*dp))
+
+            # x, y, z
+            if 'x' in layout:
+                w.setX(layout['x']*dp)
+            if 'y' in layout:
+                w.setY(layout['y']*dp)
+            if 'z' in layout:
+                w.setZ(layout['z']*dp)
+
+            # set min width and height
+            # maximum is not supported by AndroidViews (without flexbox)
+            if 'min_height' in layout:
+                w.setMinimumHeight(int(layout['min_height']*dp))
+            if 'min_width' in layout:
+                w.setMinimumWidth(int(layout['min_width']*dp))
+
+        child.layout_params = layout_params
 
     def set_width(self, width):
         self.update_layout(width=width)
