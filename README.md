@@ -76,3 +76,13 @@ This project is built on top of several existing projects:
 5. [pyjnius](https://github.com/kivy/pyjnius/)
 6. [kivy-ios](https://github.com/kivy/kivy-ios/)
 
+### Contributions
+
+Contributions of any kind are welcome. Please use the [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) format
+for docstrings and the [pep-8](https://www.python.org/dev/peps/pep-0008/) code style to be consistent with enaml.
+
+### Donate
+
+This is a project I develop in my free time. If you use enaml-native or simply like the project and want to help continue the development of it please consider [donating](https://www.codelv.com/projects/enaml-native/support/). 
+
+
