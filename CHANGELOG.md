@@ -1,3 +1,11 @@
+# enaml-native 3.1.0
+
+Refactor Services to use a common API for retrieving instances.
+
+# enaml-native 3.0.1
+
+Make dev server not use autoreload.
+
 
 # enaml-native 3.0.0
 

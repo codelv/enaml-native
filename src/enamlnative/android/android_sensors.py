@@ -12,7 +12,7 @@ Created on Jan 28, 2018
 from atom.api import ForwardInstance, Int, set_default
 
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
-from .android_activity import Activity
+from .android_content import Context, SystemService
 from .app import AndroidApplication
 
 
@@ -161,8 +161,8 @@ class Sensor(JavaBridgeObject):
         self.manager.unregisterListener(self.getId(), self)
 
 
-class SensorManager(JavaBridgeObject):
-    _instance = None
+class SensorManager(SystemService):
+    SERVICE_TYPE = Context.SENSOR_SERVICE
     __nativeclass__ = set_default('android.hardware.SensorManager')
 
     registerListener = JavaMethod('android.hardware.SensorEventListener',
@@ -173,61 +173,4 @@ class SensorManager(JavaBridgeObject):
 
     getDefaultSensor = JavaMethod('int', returns='android.hardware.Sensor')
     getSensorList = JavaMethod('int', returns='java.util.List')
-
-    @classmethod
-    def instance(cls):
-        """ Get an instance of this service if it was already requested.
-
-        You should request it first using `SensorManager.get()`
-
-        __Example__
-
-            :::python
-
-            def on_manager(lm):
-                #: Do stuff with it
-                assert lm == SensorManager.instance()
-
-            SensorManager.get().then(on_manager)
-
-
-        """
-        if cls._instance:
-            return cls._instance
-
-    @classmethod
-    def get(cls):
-        """ Acquires the SensorManager service. 
-        
-        Returns
-        -------
-            result: A future that resolves to an instance of the SensorManager
-        
-        """
-
-        app = AndroidApplication.instance()
-        f = app.create_future()
-
-        if cls._instance:
-            f.set_result(cls._instance)
-            return f
-
-        def on_service(obj_id):
-            #: Create the manager
-            if not SensorManager.instance():
-                lm = SensorManager(__id__=obj_id)
-            else:
-                lm = SensorManager.instance()
-            f.set_result(lm)
-
-        app.get_system_service(Activity.SENSOR_SERVICE).then(on_service)
-
-        return f
-
-    def __init__(self, *args, **kwargs):
-        if SensorManager._instance is not None:
-            raise RuntimeError("Only one instance of SensorManager can exist! "
-                               "Use SensorManager.instance() instead!")
-        super(SensorManager, self).__init__(*args, **kwargs)
-        SensorManager._instance = self
 

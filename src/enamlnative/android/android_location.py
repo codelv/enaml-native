@@ -13,7 +13,7 @@ import re
 from atom.api import Atom, List, Float, Unicode, set_default
 
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaProxy
-from .android_activity import Activity
+from .android_content import Context, SystemService
 from .app import AndroidApplication
 
 
@@ -47,8 +47,8 @@ class Location(Atom):
             self.time = et
 
 
-class LocationManager(JavaBridgeObject):
-    _instance = None
+class LocationManager(SystemService):
+    SERVICE_TYPE = Context.LOCATION_SERVICE
     __nativeclass__ = set_default('android.location.LocationManager')
 
     ACCESS_FINE_PERMISSION = 'android.permission.ACCESS_FINE_LOCATION'
@@ -83,60 +83,6 @@ class LocationManager(JavaBridgeObject):
 
     #: Active listeners
     listeners = List(LocationListener)
-
-    @classmethod
-    def instance(cls):
-        """ Get an instance of this service if it was already requested.
-
-        You should request it first using `LocationManager.request()`
-
-        __Example__
-
-            :::python
-
-            def on_manager(lm):
-                #: Do stuff with it
-                assert lm == LocationManager.instance()
-
-            LocationManager.get().then(on_manager)
-
-
-        """
-        if cls._instance:
-            return cls._instance
-
-    @classmethod
-    def get(cls):
-        """ Acquires the LocationManager service async. 
-        
-        """
-
-        app = AndroidApplication.instance()
-        f = app.create_future()
-
-        if cls._instance:
-            app.set_future_result(f, cls._instance)
-            return f
-
-        def on_service(obj_id):
-            #: Create the manager
-            if not LocationManager.instance():
-                lm = LocationManager(__id__=obj_id)
-            else:
-                lm = LocationManager.instance()
-            app.set_future_result(f, lm)
-
-        app.get_system_service(Activity.LOCATION_SERVICE).then(on_service)
-
-        return f
-
-    def __init__(self,*args, **kwargs):
-        if LocationManager._instance is not None:
-            raise RuntimeError(
-                "Only one instance of LocationManager can exist! "
-                "Use LocationManager.instance() instead!")
-        super(LocationManager, self).__init__(*args, **kwargs)
-        LocationManager._instance = self
 
     @classmethod
     def start(cls, callback, provider='gps', min_time=1000, min_distance=0):

@@ -13,7 +13,7 @@ from atom.api import List, set_default
 
 from .bridge import JavaBridgeObject, JavaMethod, JavaField
 from .android_activity import Activity
-from .android_content import BroadcastReceiver, IntentFilter
+from .android_content import SystemService, BroadcastReceiver, IntentFilter
 from .app import AndroidApplication
 
 
@@ -32,7 +32,7 @@ class WifiConfiguration(JavaBridgeObject):
     STATUS_ENABLED = 0x2
 
 
-class WifiManager(JavaBridgeObject):
+class WifiManager(SystemService):
     """ Access android's WifiManager. Use the static class methods.
     
     To Get networks use: 
@@ -56,7 +56,7 @@ class WifiManager(JavaBridgeObject):
     Returns None if access is denied otherwise the result
     
     """
-    _instance = None
+    SERVICE_TYPE = Activity.WIFI_SERVICE
     __nativeclass__ = set_default('android.new.wifi.WifiManager')
 
     PERMISSION_ACCESS_FINE_LOCATION = 'android.permission.' \
@@ -92,60 +92,11 @@ class WifiManager(JavaBridgeObject):
     #: List of receivers
     _receivers = List(BroadcastReceiver)
 
-    @classmethod
-    def instance(cls):
-        """ Get an instance of this service if it was already requested.
-
-        You should request it first using `WifiManager.get()`
-
-        __Example__
-
-            :::python
-
-            def on_manager(m):
-                #: Do stuff with it
-                assert m == WifiManager.instance()
-
-            WifiManager.get().then(on_manager)
-
-
-        """
-        if cls._instance:
-            return cls._instance
-
-    @classmethod
-    def get(cls):
-        """ Acquires the WifiManager service async. """
-
-        app = AndroidApplication.instance()
-        f = app.create_future()
-
-        if cls._instance:
-            app.set_future_result(f, cls._instance)
-            return f
-
-        def on_service(obj_id):
-            #: Create the manager
-            if not WifiManager.instance():
-                m = WifiManager(__id__=obj_id)
-            else:
-                m = WifiManager.instance()
-            app.set_future_result(f, m)
-
-        app.get_system_service(Activity.WIFI_SERVICE).then(on_service)
-
-        return f
-
-    def __init__(self,*args, **kwargs):
-        if WifiManager._instance is not None:
-            raise RuntimeError("Only one instance of WifiManager can exist! "
-                               "Use WifiManager.instance() instead!")
+    def __init__(self, *args, **kwargs):
         super(WifiManager, self).__init__(*args, **kwargs)
 
         #: Change the name of the _disconnect JavaMethod
         WifiManager._disconnect.set_name('disconnect')
-
-        WifiManager._instance = self
 
     # -------------------------------------------------------------------------
     # Public api
@@ -174,7 +125,7 @@ class WifiManager(JavaBridgeObject):
             WifiManager.get().then(on_ready)
 
         #: Check permission
-        cls.request_permission([
+        WifiManager.request_permission([
             WifiManager.PERMISSION_ACCESS_WIFI_STATE
         ]).then(on_permission_result)
         return f
@@ -204,7 +155,7 @@ class WifiManager(JavaBridgeObject):
             WifiManager.get().then(on_ready)
 
         #: Check permission
-        cls.request_permission([
+        WifiManager.request_permission([
             WifiManager.PERMISSION_CHANGE_WIFI_STATE
         ]).then(on_permission_result)
         return f
@@ -278,7 +229,7 @@ class WifiManager(JavaBridgeObject):
             WifiManager.get().then(on_ready)
 
         #: Request permissions
-        cls.request_permission(
+        WifiManager.request_permission(
             WifiManager.PERMISSIONS_REQUIRED).then(on_permission_result)
 
         return f
@@ -310,7 +261,7 @@ class WifiManager(JavaBridgeObject):
             WifiManager.get().then(on_ready)
 
         #: Request permissions
-        cls.request_permission([
+        WifiManager.request_permission([
             WifiManager.PERMISSION_CHANGE_WIFI_STATE
         ]).then(on_permission_result)
 
@@ -382,7 +333,7 @@ class WifiManager(JavaBridgeObject):
             WifiManager.get().then(on_ready)
 
         #: Request permissions
-        cls.request_permission(
+        WifiManager.request_permission(
             WifiManager.PERMISSIONS_REQUIRED).then(on_permission_result)
         return f
 
@@ -413,7 +364,7 @@ class WifiManager(JavaBridgeObject):
             WifiManager.get().then(on_ready)
 
         #: Request permissions
-        cls.request_permission([
+        WifiManager.request_permission([
             WifiManager.PERMISSION_ACCESS_WIFI_STATE
         ]).then(on_permission_result)
 
@@ -446,7 +397,7 @@ class WifiManager(JavaBridgeObject):
             WifiManager.get().then(on_ready)
 
         #: Request permissions
-        cls.request_permission([
+        WifiManager.request_permission([
             WifiManager.PERMISSION_ACCESS_WIFI_STATE
         ]).then(on_permission_result)
 

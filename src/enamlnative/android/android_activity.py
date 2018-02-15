@@ -10,7 +10,7 @@ Created on July 24, 2017
 @author: jrm
 """
 
-from atom.api import Atom, Int, set_default
+from atom.api import Int, set_default
 from .bridge import JavaMethod, JavaCallback
 from .android_content import Context
 

@@ -13,3 +13,4 @@ from .android_location import LocationManager, Location
 from .android_utils import InputMethodManager
 from .android_wifi import WifiManager
 from .android_sensors import SensorManager, Sensor
+from .android_usb import UsbManager, UsbDevice

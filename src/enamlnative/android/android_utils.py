@@ -11,7 +11,8 @@ Created on May 20, 2017
 """
 from atom.api import set_default
 from .app import AndroidApplication
-from .bridge import JavaMethod, JavaBridgeObject
+from .bridge import JavaMethod, JavaBridgeObject, JavaStaticMethod
+from .android_content import SystemService, Context
 
 
 class ArrayList(JavaBridgeObject):
@@ -23,7 +24,19 @@ class ArrayList(JavaBridgeObject):
     clear = JavaMethod()
 
 
-class InputMethodManager(JavaBridgeObject):
+class Executor(JavaBridgeObject):
+    __nativeclass__ = set_default('java.util.concurrent.Executor')
+    execute = JavaMethod('java.lang.Runnable')
+
+
+class Executors(JavaBridgeObject):
+    __nativeclass__ = set_default('java.util.concurrent.Executors')
+    newSingleThreadExecutor = JavaStaticMethod(
+        returns='java.util.concurrent.Executor')
+
+
+class InputMethodManager(SystemService):
+    SERVICE_TYPE = Context.INPUT_METHOD_SERVICE
     __nativeclass__ = set_default(
         'android.view.inputmethod.InputMethodManager')
 
@@ -51,14 +64,12 @@ class InputMethodManager(JavaBridgeObject):
         """
         app = AndroidApplication.instance()
         f = app.create_future()
-        activity = app.widget
 
-        def on_ready(__id__):
-            ims = InputMethodManager(__id__=__id__)
+        def on_ready(ims):
             ims.toggleSoftInput(flag, 0)
             f.set_result(True)
 
-        activity.getSystemService(activity.INPUT_METHOD_SERVICE).then(on_ready)
+        cls.get().then(on_ready)
         return f
 
     @classmethod
@@ -73,10 +84,8 @@ class InputMethodManager(JavaBridgeObject):
         """
         app = AndroidApplication.instance()
         f = app.create_future()
-        activity = app.widget
 
-        def on_ready(__id__):
-            ims = InputMethodManager(__id__=__id__)
+        def on_ready(ims):
             view = app.view.proxy.widget
 
             def on_token(__id__):
@@ -84,5 +93,5 @@ class InputMethodManager(JavaBridgeObject):
                     JavaBridgeObject(__id__=__id__), 0).then(f.set_result)
             view.getWindowToken().then(on_token)
 
-        activity.getSystemService(activity.INPUT_METHOD_SERVICE).then(on_ready)
+        cls.get().then(on_ready)
         return f
