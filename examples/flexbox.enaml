@@ -14,6 +14,7 @@ enamldef ContentView(Flexbox): view:
         TextView:
             text = "flex_direction"
         Spinner:
+            height = "wrap_content"
             items = list(Flexbox.flex_direction.items)
             selected = self.items.index(view.flex_direction)
             selected :: view.flex_direction = self.items[change['value']]
@@ -29,6 +30,7 @@ enamldef ContentView(Flexbox): view:
         TextView:
             text = "justify_content  (within column)"
         Spinner:
+            height = "wrap_content"
             items = list(Flexbox.justify_content.items)
             selected = self.items.index(parent.justify_content)
             selected :: parent.justify_content = self.items[change['value']]
@@ -39,6 +41,7 @@ enamldef ContentView(Flexbox): view:
         TextView:
             text = "align_items (within column)"
         Spinner:
+            height = "wrap_content"
             items = list(Flexbox.align_items.items)
             selected = self.items.index(parent.align_items)
             selected :: parent.align_items = self.items[change['value']]
@@ -51,6 +54,7 @@ enamldef ContentView(Flexbox): view:
             TextView:
                 text = "align_content"
             Spinner:
+                height = "wrap_content"
                 items = list(Flexbox.align_content.items)
                 selected = self.items.index(align_content_example.align_content)
                 selected :: align_content_example.align_content = self.items[change['value']]

@@ -1,8 +1,10 @@
+
 import random
 from enamlnative.android.app import AndroidApplication
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 from enamlnative.android.api import LocationManager
+from googlemaps.widgets.api import *
 
 enamldef ContentView(DrawerLayout): view:
     attr num_markers = 10
@@ -92,8 +94,8 @@ enamldef ContentView(DrawerLayout): view:
             text = "Marker"
             duration = 300
     ScrollView:
-        layout_gravity = "left"
-        layout_width = "200"
+        gravity = "left"
+        width = 200
         background_color = "#fff"
         Flexbox:
             padding = (10,10,10,10)
@@ -134,11 +136,11 @@ enamldef ContentView(DrawerLayout): view:
                 progress :: view.marker_alpha = change['value']/100.0
             Button:
                 text = "Add marker"
-                style = "borderless"
+                flat = True
                 clicked :: view.num_markers +=1
             Button:
                 text = "Remove marker"
-                style = "borderless"
+                flat = True
                 clicked :: view.num_markers = max(1,view.num_markers-1)
             TextView:
                 text = "Selection"
@@ -159,7 +161,7 @@ enamldef ContentView(DrawerLayout): view:
                 checked := mapview.show_location
             Button:
                 text = "Request permission"
-                style = "borderless"
+                flat = True
                 clicked :: LocationManager.request_permission()
             Switch:
                 text = "Show traffic"

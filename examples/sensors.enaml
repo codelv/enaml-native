@@ -19,35 +19,50 @@ enamldef ContentView(ScrollView): view:
     attr manager
     attr sensor
     attr event
+    attr sensor_type = 'TYPE_ACCELEROMETER'
+    attr sensor_delay = 'SENSOR_DELAY_NORMAL'
     func on_sensor_changed(data):
         view.event = data
+    Flexbox:
+        flex_direction = 'column'
+        Button:
+            text = "Get manager"
+            clicked::
+                SensorManager.get().then(
+                    lambda m, view=view:setattr(view, 'manager', m))
+        TextView:
+            text = "Sensor Type"
+        Spinner:
+            items = [v for v in dir(Sensor) if v.startswith("TYPE_")]
+            selected << self.items.index(view.sensor_type)
+            selected :: view.sensor_type = self.items[change['value']]
 
-    LinearLayout:
-        orientation = 'vertical'
-        LinearLayout:
-            Button:
-                text = "Get manager"
-                clicked::
-                    SensorManager.get().then(
-                        lambda m, view=view:setattr(view, 'manager', m))
-            Button:
-                text = "Get accelerometer"
-                clicked::
-                    Sensor.get(Sensor.TYPE_ACCELEROMETER).then(
-                        lambda s, view=view:setattr(view, 'sensor', s))
-            Button:
-                text = "Start"
-                clicked::
-                    # Hard way
-                    #sensor.onSensorChanged.connect(on_sensor_changed)
-                    #manager.registerListener(sensor.getId(), sensor, Sensor.SENSOR_DELAY_NORMAL)
-                    sensor.start(on_sensor_changed)
-            Button:
-                text = "Stop"
-                clicked::
-                    # Hard way
-                    #manager.unregisterListener(sensor.getId(), sensor)
-                    sensor.stop()
+        TextView:
+            text = "Sensor Delay"
+        Spinner:
+            items = [v for v in dir(Sensor) if v.startswith("SENSOR_DELAY_")]
+            selected << self.items.index(view.sensor_delay)
+            selected :: view.sensor_delay = self.items[change['value']]
+
+        Button:
+            text = "Get sensor"
+            clicked::
+                Sensor.get(getattr(Sensor, view.sensor_type)).then(
+                    lambda s, view=view:setattr(view, 'sensor', s))
+        Button:
+            text = "Start"
+            clicked::
+                # Hard way
+                #sensor.onSensorChanged.connect(on_sensor_changed)
+                #manager.registerListener(sensor.getId(), sensor, Sensor.SENSOR_DELAY_NORMAL)
+                if sensor is not None:
+                    sensor.start(on_sensor_changed, getattr(Sensor, view.sensor_delay))
+        Button:
+            text = "Stop"
+            clicked::
+                # Hard way
+                #manager.unregisterListener(sensor.getId(), sensor)
+                sensor.stop()
         TextView:
             text << "Manager: {}".format(manager)
         TextView:
