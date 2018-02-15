@@ -32,6 +32,7 @@ from utils import load
     (["android"], 'dialog.enaml'),
     (["android"], 'drawer_layout.enaml'),
     (["android", "ios"], 'edit_text.enaml'),
+    (["android"], 'email_app.enaml'),
     (["android"], 'flexbox.enaml'),
     (["android"], 'icon.enaml'),
     (["android"], 'keyboard.enaml'),
