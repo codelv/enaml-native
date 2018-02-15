@@ -882,13 +882,11 @@ class DevServerSession(Atom):
                 app.view.destroy()
             except:
                 pass
-        app.view = None
 
         def wrapped(f):
             def safe_reload(*args, **kwargs):
                 try:
-                    with self.hotswap.active():
-                        return f(*args, **kwargs)
+                    return f(*args, **kwargs)
                 except:
                     #: Display the error
                     app.send_event(Command.ERROR, traceback.format_exc())
