@@ -17,6 +17,7 @@ from utils import load
 
 @pytest.mark.parametrize("platforms, path", [
     (["android", "ios"], 'activity_indicator.enaml'),
+    (["android"], 'app_login.enaml'),
     (["android"], 'auto_complete_text_view.enaml'),
     (["android"], 'bottom_sheet.enaml'),
     (["android"], 'block.enaml'),

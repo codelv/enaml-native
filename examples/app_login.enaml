@@ -1,0 +1,180 @@
+from atom.api import *
+from enaml.core.api import *
+from enamlnative.widgets.api import *
+from enamlnative.core.app import BridgedApplication
+
+class User(Atom):
+    username = Unicode()
+    password = Unicode()
+
+
+class App(Atom):
+    """ App state and controller """
+
+    theme_color = Unicode("#cab")
+
+    #: Define our "user database"
+    users = List(User,default=[
+        User(username="Bob",password="secret"),
+        User(username="Jane",password="sweet"),
+    ])
+
+    #: Current user
+    current_user = Instance(User)
+
+    def login(self,user,password):
+        """ Return a user if the user and pwd match """
+        #: Simulate a login that takes time
+        app = BridgedApplication.instance()
+
+        #: Get an async result
+        result = app.create_future()
+
+        def simulate_login(result, user,password):
+            for u in self.users:
+                if u.username==user and u.password==password:
+                    self.current_user = u
+                    result.set_result(self.current_user)
+                    return
+
+            #: No passwords match!
+            self.current_user = None
+            result.set_result(self.current_user)
+
+        #: Simulate the call taking some time
+        #: In a real app we would check using some web service
+        app.timed_call(1000,simulate_login,result,user,password)
+
+        return result
+
+
+
+enamldef SignInScreen(PagerFragment): view:
+    attr app: App
+    attr working = False
+    attr pager << view.parent
+    attr error = ""
+    Flexbox:
+        flex_direction = "column"
+        background_color = "#eee"
+        justify_content = "center"
+        padding = (30, 30, 30, 30)
+
+        Flexbox:
+            justify_content="center"
+            Flexbox:
+                height="wrap_content"
+                width="wrap_content"
+                flex_direction="column"
+                justify_content="center"
+                #background_color="#f00"
+                Icon:
+                    text = "{fa-rocket}"
+                    text_size = 128
+                    text_color << view.app.theme_color
+                TextView:
+                    text = "Your company"
+        Flexbox:
+            flex_direction = "column"
+            #layout = dict(flex_basis=0.4)
+            TextView:
+                text = "Username"
+            EditText: username:
+                #: So it clears when the user is reset
+                text << "" if view.app.current_user else ""
+            TextView:
+                text = "Password"
+            EditText: password:
+                #: So it clears when the user is reset
+                text << "" if view.app.current_user else ""
+                input_type = "text_web_password"
+
+            TextView:
+                text << view.error
+                text_color = "#f00"
+            Conditional: cond:
+                condition << bool(view.working)
+                ActivityIndicator:
+                    padding = (0,10,0,0)
+                    size="small"
+            Conditional:
+                condition << bool(not view.working and not view.app.current_user)
+                Button:
+                    flat = True
+                    text << "Sign In"
+                    #text_color << view.app.theme_color
+                    attr root << view
+                    func on_login_result(r):
+                        #: Why is scope screwed up?
+                        view = self.root
+                        view.working = False
+                        if r is None:
+                            view.error = "Invalid username or password"
+                        else:
+                            view.error = ""
+                            view.pager.current_index +=1
+
+                    clicked ::
+                        view.working = True
+                        self.root = view
+                        #: Simulate an async login request
+                        view.app.login(
+                            username.text,
+                            password.text).then(on_login_result)
+
+            Conditional:
+                #: Dispal
+                condition << view.app.current_user is not None
+                Flexbox:
+                    height = "wrap_content"
+                    justify_content = "center"
+                    Icon:
+                        padding = (0,10,0,0)
+                        text = "{fa-check}"
+                        text_size = 32
+                        text_color << view.app.theme_color
+
+
+enamldef HomeScreen(PagerFragment): view:
+    attr app: App
+    attr user << app.current_user
+    Flexbox:
+        background_color << "#eee"
+        justify_content = "center"
+        Flexbox:
+            flex_direction="column"
+            Flexbox:
+                justify_content = "center"
+                Icon:
+                    padding = (0,10,0,0)
+                    text = "{fa-thumbs-up}"
+                    text_size = 128
+                    text_color << view.app.theme_color
+            Flexbox:
+                justify_content = "center"
+                TextView:
+                    text << "{}, you rock!".format(view.user.username) if view.user else ""
+                    text_color << view.app.theme_color
+            Flexbox:
+                flex_direction = "column"
+                justify_content = "flex_end"
+                Button:
+                    flat = True
+                    text = "Logout"
+                    clicked ::
+                        view.app.current_user = None
+                        view.parent.current_index = 0
+
+
+enamldef ContentView(Flexbox): root:
+    #: Our app state
+    attr app = App()
+    ViewPager:
+        #: Don't let them go by swiping!
+        paging_enabled = False
+        activated::
+            BridgedApplication.instance().show_toast("Hint use 'Bob' and 'secret'")
+        SignInScreen:
+            app << root.app
+        HomeScreen:
+            app << root.app
