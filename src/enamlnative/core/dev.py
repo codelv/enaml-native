@@ -73,7 +73,7 @@ INDEX_PAGE = """<html>
     </nav>
   </div>
   <div class="row" style="margin-bottom:0;">
-    <div class="col l3 m2 s12" style="padding:0; max-height:100%; overflow-y:scroll;">
+    <div class="col l3 m2 s12" style="padding:0; max-height:100%; overflow-y:scroll; background: #fff;">
       <nav>
         <div class="nav-wrapper grey darken-3">
           <a href="#files" style="margin-left:1em;">App</a>
