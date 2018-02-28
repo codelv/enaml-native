@@ -1,0 +1,15 @@
+channels:
+- conda-forge
+- exopy
+- defaults
+
+dependencies:
+- enaml
+- numpy
+- pyqt
+- python=2.7
+- matplotlib
+- ipython
+- sphinx
+- sphinx_rtd_theme
+- enaml-pygments
