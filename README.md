@@ -1,5 +1,5 @@
 # enaml-native
-Build native mobile apps in python using enaml and native widgets! [![Build Status](https://travis-ci.org/codelv/enaml-native.svg?branch=master)](https://travis-ci.org/codelv/enaml-native) [![codecov](https://codecov.io/gh/codelv/enaml-native/branch/master/graph/badge.svg)](https://codecov.io/gh/codelv/enaml-native) [![Help chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/enaml-native/Lobby)
+Build native mobile apps in python using enaml and native widgets! [![Build Status](https://travis-ci.org/codelv/enaml-native.svg?branch=master)](https://travis-ci.org/codelv/enaml-native) [![codecov](https://codecov.io/gh/codelv/enaml-native/branch/master/graph/badge.svg)](https://codecov.io/gh/codelv/enaml-native) [![Help chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/enaml-native/Lobby) [![Documentation Status](https://readthedocs.org/projects/enaml-native/badge/?version=latest)](http://enaml-native.readthedocs.io/en/latest/?badge=latest)
 
 
 [![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
@@ -15,7 +15,9 @@ I made this because wanted to have a more "React Native" like environment that:
 
 ### Docs and Examples ###
 
-See the [project site](https://www.codelv.com/projects/enaml-native/). There's also some short tutorials and examples on [youtube](https://www.youtube.com/playlist?list=PLXUaMWWFaOjT2WdIrJdTYjEMJmrjuvVz0).
+See the [project site](https://www.codelv.com/projects/enaml-native/) or the [api docs](http://enaml-native.readthedocs.io/) 
+
+There's also some short tutorials and examples on [youtube](https://www.youtube.com/playlist?list=PLXUaMWWFaOjT2WdIrJdTYjEMJmrjuvVz0).
 
 > Need help? Try the gitter group https://gitter.im/enaml-native/Lobby
 
