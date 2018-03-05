@@ -58,7 +58,7 @@ Apps using enaml-native can be found [here](https://www.codelv.com/projects/enam
 
 ##### Android
 
-Currently enaml-native's Android support is good enough to make real usable app.  A lot of components are supported and several apps have already been relased using enaml-native.
+Currently enaml-native's Android support is good enough to make real usable app.  A lot of components are supported and several apps have already been released using enaml-native.
 
 ##### iOS
 
@@ -77,6 +77,8 @@ This project is built on top of several existing projects:
 4. [react-native](https://github.com/facebook/react-native) (inspiration)
 5. [pyjnius](https://github.com/kivy/pyjnius/)
 6. [kivy-ios](https://github.com/kivy/kivy-ios/)
+
+Please give them a star, thanks, and/or donation as without these this project would not exist!
 
 ### Contributions
 
