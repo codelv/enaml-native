@@ -47,21 +47,13 @@ def find_data_files(dest, *folders):
 
 setup(
     name="enaml-native",
-    version="3.1.1",
+    version="4.0.0",
     author="CodeLV",
     author_email="frmdstryr@gmail.com",
     license='MIT',
     url='https://github.com/codelv/enaml-native/',
     description="Build native mobile apps in python",
     long_description=open("README.md").read(),
-    py_modules=['enamlnative_core'],
     data_files=find_data_files("enaml-native", 'android', 'ios', 'src',
                                'tests', 'docs', 'examples'),
-    install_requires=['enaml-native-cli', 'p4a-crystax>=1.1',
-                      'p4a-nucleic>=1.1', 'p4a-msgpack'],
-    entry_points={
-        'p4a_recipe': [
-            'enaml_native = enamlnative_core:get_recipe'
-        ]
-    },
 )

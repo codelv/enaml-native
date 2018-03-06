@@ -170,8 +170,8 @@ public class AssetExtractor {
     public void unzipAsset(String asset) {
         try {
             long start = System.currentTimeMillis();
-            Log.d(TAG, "Extracting: " +asset);
             // Extract zip
+            Log.d(TAG, "Extracting: " +asset);
             String extractDir = (new File(asset)).getParent();
             BufferedOutputStream dest = null;
             BufferedInputStream is = null;
@@ -216,7 +216,7 @@ public class AssetExtractor {
     /**
      * Unpack a tar asset (540ms)
      * @param asset
-    */
+     */
     public void unpackAsset(String asset) {
         try {
             long start = System.currentTimeMillis();
@@ -224,7 +224,8 @@ public class AssetExtractor {
             //LZ4Factory factory = LZ4Factory.fastestInstance();
             //LZ4FastDecompressor decompressor = factory.fastDecompressor();
             File tarFile = new File(asset);
-            String extractDir = (tarFile).getParent();
+            String extractDir = mContext.getCacheDir().getPath();
+            //String extractDir = (tarFile).getParent();
             // Create a TarInputStream
             TarInputStream tis = new TarInputStream(new FileInputStream(tarFile));
             TarEntry entry;

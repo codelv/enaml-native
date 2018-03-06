@@ -109,30 +109,27 @@ PyMODINIT_FUNC PyInit_NativeHooks(JNIEnv *env) {
 
 */
 JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_start
-        (JNIEnv *env, jclass jc, jstring path, jstring jni_path){
+        (JNIEnv *env, jclass jc, jstring assets_path, jstring cache_path, jstring jni_path){
     LOG("Initializing the Python interpreter");
 
     // Get the location of the python files
-    const char *pypath = (*env)->GetStringUTFChars(env, path, NULL);
+    const char *pypath = (*env)->GetStringUTFChars(env, assets_path, NULL);
+    const char *cachepath = (*env)->GetStringUTFChars(env, cache_path, NULL);
     const char *jnipath = (*env)->GetStringUTFChars(env, jni_path, NULL);
+    LOG(cachepath);
     LOG(pypath);
     LOG(jnipath);
-
-    // Set JNI path
-    setenv("PY_LIB_DIR", jnipath, 1);
 
     // Build paths for the Python interpreter
     char paths[512];
     // Remove extra paths, the smaller the search path the faster the import
-    snprintf(paths, sizeof(paths),"%s", pypath);
-#if PY_MAJOR_VERSION >= 3
-    // Set Python paths
-    wchar_t *wchar_paths = Py_DecodeLocale(paths, NULL);
-    Py_SetPath(wchar_paths);
-#else
-    //PySys_SetPath(paths);
-    Py_SetPath(paths); // works with crystax NOT normal python...
-#endif
+    snprintf(paths, sizeof(paths),"%s:%s/site-packages", cachepath, cachepath);
+
+    // Set JNI path
+    setenv("PYTHONPATH", paths, 1);
+    setenv("TMP", cachepath, 1);
+    setenv("PY_LIB_DIR", jnipath, 1);
+
 
 #if PY_MAJOR_VERSION >= 3
     // Initialize Python interpreter and logging
@@ -187,19 +184,10 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
       "    import traceback\n" \
       "    traceback.print_exc()\n" \
     );
-    /*
-
-
-
-
-
-          */
     // Cleanup
-    (*env)->ReleaseStringUTFChars(env, path, pypath);
+    (*env)->ReleaseStringUTFChars(env, assets_path, pypath);
+    (*env)->ReleaseStringUTFChars(env, cache_path, cachepath);
     (*env)->ReleaseStringUTFChars(env, jni_path, jnipath);
-#if PY_MAJOR_VERSION >= 3
-    PyMem_RawFree(wchar_paths);
-#endif
     return result;
 }
 

@@ -1,3 +1,13 @@
+# enaml-native 4.0.0
+
+- Python-for-android and kivy-ios have been completely dropped in favor of 
+[conda-mobile](https://github.com/codelv/conda-mobile)
+
+- Android updated to use api instead of compile
+- Android starts python in a Thread instead of using AsyncTask
+
+
+
 # enaml-native 3.1.0
 
 Refactor Services to use a common API for retrieving instances.
