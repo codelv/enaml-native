@@ -142,6 +142,8 @@ PyMODINIT_FUNC PyInit_NativeHooks(JNIEnv *env) {
         int nlib = strlen(lib_dir);
         int n;
         DIR *dir;
+        char mod[256];// lib. .so+'\0'
+        char path[256];
         struct dirent *ent;
         if ((dir = opendir(lib_dir)) != NULL) {
             // print all the files and directories within directory
@@ -149,14 +151,13 @@ PyMODINIT_FUNC PyInit_NativeHooks(JNIEnv *env) {
                 // If startswith lib. strip mod
                 if (ent->d_type == DT_REG && strncmp("lib.", ent->d_name, 4) == 0) {
                     n = strlen(ent->d_name);
-                    char mod[n-6];// lib. .so+'\0'
-                    char path[nlib+n+1];
                     strncpy(mod, ent->d_name+4, n-7);
                     mod[n-7] = '\0';
                     strcpy(path, lib_dir);
                     strcat(path, "/");
                     strcat(path, ent->d_name);
-                    PyDict_SetItemString(mExtensions, mod, Py_BuildValue("s", path));
+                    path[nlib+n+1] = '\0';
+                    PyDict_SetItem(mExtensions, Py_BuildValue("s", mod), Py_BuildValue("s", path));
                 }
             }
             closedir(dir);
@@ -170,16 +171,6 @@ PyMODINIT_FUNC PyInit_NativeHooks(JNIEnv *env) {
     Py_INCREF(mNativehooksModule);
     PyObject* meta_path = PySys_GetObject("meta_path");
     PyObject* result = PyObject_CallMethod(meta_path, "append", "O", mNativehooksModule);
-
-    // Extract assets (if needed)
-    char main_py[256];
-    strcpy(main_py, getenv("TMP"));
-    strcat(main_py, "/main.pyc");
-
-
-
-
-
 
     Py_XDECREF(result);
     Py_XDECREF(imp);
