@@ -41,11 +41,11 @@ def main():
     app.start()
 
 
-def load_view(app, should_reload=False):
+def load_view(app):
     import enaml
     with enaml.imports():
         import view
-        if should_reload:
+        if app.view:
             reload(view)
         app.view = view.ContentView()
     app.show_view()
