@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'me.tatarka.retrolambda'
 
 buildscript {
     repositories {
@@ -7,8 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
-        classpath 'me.tatarka:gradle-retrolambda:3.7.0'
+        classpath 'com.android.tools.build:gradle:3.0.0'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -51,17 +49,17 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar', '*.so'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:cardview-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support:support-v4:25.3.1'
+    implementation fileTree(include: ['*.jar', '*.so'], dir: 'libs')
+    testImplementation 'junit:junit:4.12'
+    api 'com.android.support:appcompat-v7:25.3.1'
+    api 'com.android.support:cardview-v7:25.3.1'
+    api 'com.android.support:design:25.3.1'
+    api 'com.android.support:support-v4:25.3.1'
 
     // Requirements
-    compile 'org.msgpack:msgpack-core:0.8.13'
+    api 'org.msgpack:msgpack-core:0.8.13'
     //compile 'org.lz4:lz4-java:1.4.0'
-    compile 'org.kamranzafar:jtar:2.3'
+    api 'org.kamranzafar:jtar:2.3'
 
 
     //compile 'com.github.bumptech.glide:glide:4.0.0-RC1'
@@ -69,32 +67,21 @@ dependencies {
 
     // HTTP
     //compile 'com.loopj.android:android-async-http:1.4.9'
-    compile 'com.squareup.okhttp3:okhttp:3.9.1'
+    api 'com.squareup.okhttp3:okhttp:3.9.1'
 
     // Flexbox
     //compile 'com.facebook.yoga:yoga:1.5.0'
-    compile 'com.google.android:flexbox:0.3.0'
+    api 'com.google.android:flexbox:0.3.0'
 
     // Transforms
-    compile 'com.eftimoff:android-viewpager-transformers:1.0.1@aar'
+    api 'com.eftimoff:android-viewpager-transformers:1.0.1@aar'
 
 }
 
 afterEvaluate {
-//    task buildPython(type: Exec) {
-//        workingDir "../../../../" // root enaml-native dir
-//        if (!file('./build/python/python.tar.gz').exists()) {
-//            if (project.hasProperty("preReleaseBuild")) {
-//                commandLine "enaml-native", "build-python", "--release"
-//            } else {
-//                commandLine "enaml-native", "build-python"
-//            }
-//        }
-//    }
 
     task bundlePython(type: Exec) {
-        workingDir "../../../../" // root enaml-native dir
-
+        workingDir "../../../" // root enaml-native dir
         if (project.hasProperty("preReleaseBuild")) {
             commandLine "enaml-native", "bundle-assets", "--release"
         } else {
