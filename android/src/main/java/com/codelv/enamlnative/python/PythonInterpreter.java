@@ -29,11 +29,12 @@ public class PythonInterpreter {
     /**
      * Initializes the Python interpreter.
      *
-     * @param pythonPath the location of the extracted python files
+     * @param assetsPath the location of assets
+     * @param cachePath the location for temp files
      * @param nativePath the location of native libraries
      * @return error code
      */
-    public static native int start(String pythonPath, String nativePath);
+    public native int start(String assetsPath, String cachePath, String nativePath);
 
     /**
      * Sends bridge encoded event data to the python bridge implementation
@@ -41,22 +42,21 @@ public class PythonInterpreter {
      * @param data Bridge encoded data
      * @return Bridge encoded response data
      */
-    public static native int sendEvents(byte[] data);
+    public native int sendEvents(byte[] data);
 
     /**
      * Stops the Python interpreter.
      *
      * @return error code
      */
-    public static native int stop();
+    public native int stop();
 
     /**
      * Add a listener to events in python
      * @param listener
      */
-    public static void addEventListener(EventListener listener) {
-        PythonInterpreter interpreter = PythonInterpreter.instance();
-        interpreter.getEventListeners().add(listener);
+    public void addEventListener(EventListener listener) {
+        mEventListeners.add(listener);
     }
 
 
@@ -64,9 +64,8 @@ public class PythonInterpreter {
      * Add a listener to events in python
      * @param listener
      */
-    public static void removeEventListener(EventListener listener) {
-        PythonInterpreter interpreter = PythonInterpreter.instance();
-        interpreter.getEventListeners().remove(listener);
+    public void removeEventListener(EventListener listener) {
+        mEventListeners.remove(listener);
     }
 
     /**

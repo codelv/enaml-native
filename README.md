@@ -4,14 +4,11 @@ Build native mobile apps in python using enaml and native widgets! [![Build Stat
 
 [![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
 
-The goal of this project is to be an alternative to using [kivy](https://kivy.org/) for building mobile apps with python. 
+The goal of this project is to be the python version of [react-native](https://facebook.github.io/react-native/). It targets apps that need to have a "native" look and feel and achieves this by reusing existing native Android and iOS widgets from python.  It allows you to declaratively define a UI using python based language called [enaml](http://enaml.readthedocs.io/en/latest/get_started/introduction.html). The rest is "normal" python.
 
-I made this because wanted to have a more "React Native" like environment that: 
-1. Uses python 
-2. Uses native widgets (Android / iOS)
-3. Can be run from Android Studio / XCode (ie no bootstraps)
-4. Uses enaml's models, and declarative and dynamic widget framework instead of kvlang
-5. Uses versioned "packages" and "recipes" than can be installed/updated/removed to make repeatable builds (like rnpm)
+Kivy is still recommended for games and applications that need custom widgets that native Android and iOS libraries do not provide.
+
+This is still a very young project but the results and feedback have been positive and promising. Thanks for dropping by!
 
 ### Docs and Examples ###
 
@@ -58,7 +55,7 @@ Apps using enaml-native can be found [here](https://www.codelv.com/projects/enam
 
 ##### Android
 
-Currently enaml-native's Android support is good enough to make real usable app.  A lot of components are supported and several apps have already been relased using enaml-native.
+Currently enaml-native's Android support is good enough to make real usable app.  A lot of components are supported and several apps have already been released using enaml-native.
 
 ##### iOS
 
@@ -78,6 +75,8 @@ This project is built on top of several existing projects:
 5. [pyjnius](https://github.com/kivy/pyjnius/)
 6. [kivy-ios](https://github.com/kivy/kivy-ios/)
 
+Please give them a star, thanks, and/or donation as without these this project would not exist!
+
 ### Contributions
 
 Contributions of any kind are welcome. Please use the [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) format
@@ -85,6 +84,6 @@ for docstrings and the [pep-8](https://www.python.org/dev/peps/pep-0008/) code s
 
 ### Donate
 
-This is a project I develop in my free time. If you use enaml-native or simply like the project and want to help continue the development of it please consider [donating](https://www.codelv.com/projects/enaml-native/support/). 
+This is a project I develop in my free time.  If you use enaml-native or simply like the project and want to help continue the development of it please consider [donating](https://www.codelv.com/projects/enaml-native/support/). 
 
 

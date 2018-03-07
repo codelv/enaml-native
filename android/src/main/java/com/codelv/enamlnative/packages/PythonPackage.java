@@ -12,6 +12,7 @@ import com.codelv.enamlnative.python.PythonInterpreter;
 import com.codelv.enamlnative.python.RemotePythonInterpreter;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -29,6 +30,7 @@ public class PythonPackage implements EnamlPackage {
     EnamlActivity mActivity;
     PythonTask mPython;
     boolean mDestroyRequested = false;
+    PythonInterpreter mPythonInterpreter;
 
     public void onCreate(EnamlActivity activity) {
         mActivity = activity;
@@ -37,8 +39,8 @@ public class PythonPackage implements EnamlPackage {
     @Override
     public void onStart() {
         // Extract and start python in the background
-        mPython = new PythonTask();
-        mPython.execute("python");
+        new Thread(new PythonTask()).start();
+        //mPython.execute("python");
     }
 
     @Override
@@ -67,54 +69,64 @@ public class PythonPackage implements EnamlPackage {
      *  2. Initializes the python interpreter
      *  3. Calls the app start function of the bootstrap
      */
-    private class PythonTask extends AsyncTask<String,String,String> {
+    private class PythonTask implements Runnable {//extends AsyncTask<String,String,String> {
 
-        protected String doInBackground(String... dirs) {
+        public void run() {
+            //protected String doInBackground(String... dirs) {
             // Extract python files from assets
-            String path = dirs[0];
+            String path = "python";
+
             AssetExtractor assetExtractor = new AssetExtractor(mActivity);
 
             // Get install time
             long installTime = 0;
             try {
                 installTime = mActivity.getPackageManager().getPackageInfo(
-                            mActivity.getPackageName(),0
+                        mActivity.getPackageName(),0
                 ).lastUpdateTime;
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
             }
 
+            File pyc = new File(mActivity.getCacheDir().getPath()+"/main.pyc");
+            File py = new File(mActivity.getCacheDir().getPath()+"/main.py");
+
             // If assets version changed, remove the old, and copy the new ones
-            if (assetExtractor.getAssetsVersion() != installTime) {
-                publishProgress("Updating... Please wait.");
+            if (assetExtractor.getAssetsVersion() != installTime || !(pyc.exists()||py.exists())) {
+
+                //publishProgress("Updating... Please wait.");
                 assetExtractor.removeAssets(path);
                 assetExtractor.copyAssets(path);
                 assetExtractor.setAssetsVersion(installTime);
 
                 // On first load change message
-                publishProgress("Loading... Please wait.");
+                //publishProgress("Loading... Please wait.");
             } else {
                 // Start the Python interpreter
-                publishProgress("Loading... Please wait.");
+                //publishProgress("Loading... Please wait.");
             }
 
+
             // Get the extracted assets directory
-            String pythonPath = assetExtractor.getAssetsDataDir() + path;
+            String assetsPath = mActivity.getApplicationInfo().dataDir + "/assets/"+ path;
+            String cachePath = mActivity.getCacheDir().getPath();
             String nativePath = mActivity.getApplicationInfo().nativeLibraryDir;
 
             // Initialize python
             // Note: This must be NOT done in the UI thread!
             if (BuildConfig.DEV_REMOTE_DEBUG) {
-                int result = RemotePythonInterpreter.start(pythonPath, nativePath);
-                Log.i(TAG, "Python main() finished with code: "+result);
-                PythonInterpreter.stop();
+                mPythonInterpreter = RemotePythonInterpreter.instance();
+
             } else {
-                int result = PythonInterpreter.start(pythonPath, nativePath);
-                Log.i(TAG, "Python main() finished with code: "+result);
-                PythonInterpreter.stop();
+                mPythonInterpreter = PythonInterpreter.instance();
             }
 
-            return pythonPath;
+            int result = mPythonInterpreter.start(assetsPath, cachePath, nativePath);
+            Log.i(TAG, "Python main() finished with code: "+result);
+            mPythonInterpreter.stop();
+
+            //return assetsPath;
+            onPostExecute(assetsPath);
         }
 
         /**
@@ -127,10 +139,10 @@ public class PythonPackage implements EnamlPackage {
             if (!mDestroyRequested && mActivity.showDebugMessages()) {
                 mActivity.showErrorMessage(
                         "Unexpected python interpreter exit\n" +
-                        "Check the logcat output for errors!\n" +
-                        "This may indicate a build issue leading to missing or \n" +
-                        "inaccessible python or shared libraries.\n" +
-                        "Log output:\n\n"+ getErrorMessage()
+                                "Check the logcat output for errors!\n" +
+                                "This may indicate a build issue leading to missing or \n" +
+                                "inaccessible python or shared libraries.\n" +
+                                "Log output:\n\n"+ getErrorMessage()
                 );
             }
         }

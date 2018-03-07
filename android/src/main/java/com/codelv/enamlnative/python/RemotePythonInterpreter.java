@@ -20,6 +20,7 @@ import okio.ByteString;
  */
 public class RemotePythonInterpreter extends PythonInterpreter {
     static boolean mDone = false;
+    static boolean mConnecting = false;
     static OkHttpClient mClient;
     static DevClient mDevClient;
     static WebSocket mWebsocket;
@@ -42,11 +43,12 @@ public class RemotePythonInterpreter extends PythonInterpreter {
     /**
      * Initializes the Python interpreter.
      *
-     * @param pythonPath the location of the extracted python files
+     * @param assetsPath the location of assets
+     * @param cachePath the location of cache
      * @param nativePath the location of native libraries
      * @return error code
      */
-    public static int start(String pythonPath, String nativePath) {
+    public int start(String assetsPath, String cachePath, String nativePath) {
         OkHttpClient mClient = new OkHttpClient.Builder()
                 .readTimeout(0,  TimeUnit.MILLISECONDS)
                 .build();
@@ -54,11 +56,16 @@ public class RemotePythonInterpreter extends PythonInterpreter {
                 .url(BuildConfig.DEV_SERVER)
                 .build();
         mDevClient = new DevClient();
-        mClient.newWebSocket(request, mDevClient);
         try {
             // Block indefinitely
             while (!mDone) {
                 Thread.sleep(1000);
+
+                // Reconnect
+                if (mWebsocket==null && !mConnecting) {
+                    mConnecting = true;
+                    mClient.newWebSocket(request, mDevClient);
+                }
             }
             return 0;
         } catch (InterruptedException e) {
@@ -73,7 +80,7 @@ public class RemotePythonInterpreter extends PythonInterpreter {
      * @param data Bridge encoded data
      * @return Bridge encoded response data
      */
-    public static int sendEvents(byte[] data) {
+    public int sendEvents(byte[] data) {
         if (mWebsocket != null) {
             mWebsocket.send(ByteString.of(data));
         }
@@ -85,7 +92,7 @@ public class RemotePythonInterpreter extends PythonInterpreter {
      *
      * @return error code
      */
-    public static int stop() {
+    public int stop() {
         // Trigger shutdown of the dispatcher's executor so this process can exit cleanly.
         mDone = true;
         mClient.dispatcher().executorService().shutdown();
@@ -98,6 +105,7 @@ public class RemotePythonInterpreter extends PythonInterpreter {
         public void onOpen(WebSocket webSocket, Response response) {
             // Tell the enaml-native dev server this is the android app
             mWebsocket = webSocket;
+            mConnecting = false;
         }
 
         @Override

@@ -120,6 +120,7 @@ public class Bridge implements PythonInterpreter.EventListener {
     long mTotalTime = 0;
     long mTotalTasks = 0;
 
+    final PythonInterpreter mPythonInterpreter;
 
     public Bridge(EnamlActivity activity) {
         mBridge = this;
@@ -131,10 +132,11 @@ public class Bridge implements PythonInterpreter.EventListener {
 
         // Add this as a listener
         if (BuildConfig.DEV_REMOTE_DEBUG) {
-            RemotePythonInterpreter.addEventListener(this);
+            mPythonInterpreter = RemotePythonInterpreter.instance();
         } else {
-            PythonInterpreter.addEventListener(this);
+            mPythonInterpreter = PythonInterpreter.instance();
         }
+        mPythonInterpreter.addEventListener(this);
 
         // Register default encoders
         registerBuiltinPackers();
@@ -1506,11 +1508,7 @@ public class Bridge implements PythonInterpreter.EventListener {
                 } catch (IOException e) {
                     mActivity.showErrorMessage(e);
                 }
-                if (BuildConfig.DEV_REMOTE_DEBUG) {
-                    RemotePythonInterpreter.sendEvents(packer.toByteArray());
-                } else {
-                    PythonInterpreter.sendEvents(packer.toByteArray());
-                }
+                mPythonInterpreter.sendEvents(packer.toByteArray());
             }
         }, mEventDelay);
     }
