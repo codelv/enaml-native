@@ -448,7 +448,6 @@ public class EnamlActivity extends AppCompatActivity {
             put("SERIAL", Build.SERIAL);
             put("USER", Build.USER);
             put("SDK_INT",Build.VERSION.SDK_INT);
-            put("BASE_OS", Build.VERSION.BASE_OS);
             put("RELEASE", Build.VERSION.RELEASE);
             put("CODENAME", Build.VERSION.CODENAME);
             put("DISPLAY_DENSITY", getResources().getDisplayMetrics().density);
