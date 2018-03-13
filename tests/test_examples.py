@@ -77,12 +77,18 @@ def test_examples(platforms, path):
 
 def test_demo_app():
     with enaml.imports():
-        with open('src/apps/view.enaml','rb') as f:
+        with open('examples/demo/view.enaml', 'rb') as f:
             ContentView = load(f.read())
-
         app = MockApplication.instance('android')
         app.view = ContentView()
         app.run()
 
 
+def test_playground_app():
+    with enaml.imports():
+        with open('examples/playground/view.enaml', 'rb') as f:
+            ContentView = load(f.read())
+        app = MockApplication.instance('android')
+        app.view = ContentView()
+        app.run()
 
