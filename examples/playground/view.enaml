@@ -171,7 +171,7 @@ enamldef ExamplesScreen(PagerFragment):
                 Text:
                     text = "Or choose an example"
                 Looper:
-                    iterable = sorted(os.listdir(os.path.join(sys.path[-1], 'examples')))
+                    iterable = sorted(os.listdir('examples'))
                     Button:
                         flat = True
                         text = loop_item.split('.')[0].replace("_", " ").title()
