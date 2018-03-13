@@ -1312,7 +1312,7 @@ public class Bridge implements PythonInterpreter.EventListener {
     public void clearCache() {
         // Clear object cache
         mResultCache.clear();
-        for (int id: mObjectCache.keySet()) {
+        for (int id: ((Map<Integer,Object>) mObjectCache).keySet()) {
             if (id>0) {
                 deleteObject(id);
             }
