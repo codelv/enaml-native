@@ -10,10 +10,14 @@ Created on Oct 4, 2017
 @author: jrm
 '''
 import os
+import sys
 import enaml
 import pytest
 from app import MockApplication
 from utils import load
+
+if 'src' not in sys.path:
+    sys.path.append('src')
 
 @pytest.mark.parametrize("platforms, path", [
     (["android", "ios"], 'activity_indicator.enaml'),
@@ -61,7 +65,7 @@ def test_examples(platforms, path):
     enaml_file = os.path.join(dir_path, 'examples', os.path.normpath(path))
 
     with enaml.imports():
-        with open(enaml_file,'rb') as f:
+        with open(enaml_file, 'rb') as f:
             ContentView = load(f.read())
 
     #: Run for each platform
