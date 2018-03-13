@@ -135,20 +135,20 @@ class IOLoop(Atom):
        constructor.
     """
     # Constants from the epoll module
-    _EPOLLIN = Constant(0x001)
-    _EPOLLPRI = Constant(0x002)
-    _EPOLLOUT = Constant(0x004)
-    _EPOLLERR = Constant(0x008)
-    _EPOLLHUP = Constant(0x010)
-    _EPOLLRDHUP = Constant(0x2000)
-    _EPOLLONESHOT = Constant(1 << 30)
-    _EPOLLET = Constant(1 << 31)
+    _EPOLLIN = 0x001
+    _EPOLLPRI = 0x002
+    _EPOLLOUT = 0x004
+    _EPOLLERR = 0x008
+    _EPOLLHUP = 0x010
+    _EPOLLRDHUP = 0x2000
+    _EPOLLONESHOT = 1 << 30
+    _EPOLLET = 1 << 31
 
     # Our events map exactly to the epoll events
-    NONE = Constant(0)
-    READ = Constant(0x001)
-    WRITE = Constant(0x004)
-    ERROR = Constant(0x008 | 0x010)
+    NONE = 0
+    READ = 0x001
+    WRITE = 0x004
+    ERROR = 0x008 | 0x010
 
     # Global lock for creating global IOLoop instance
     _instance_lock = threading.Lock()
@@ -249,8 +249,12 @@ class IOLoop(Atom):
             #    if IOLoop.configured_class() is AsyncIOLoop:
             #        current = AsyncIOMainLoop()
             if current is None:
-                from .platforms import EPollIOLoop
-                current = EPollIOLoop()
+                if sys.platform == 'darwin':
+                    from .platforms import KQueueIOLoop
+                    current = KQueueIOLoop()
+                else:
+                    from .platforms import EPollIOLoop
+                    current = EPollIOLoop()
                 current.initialize()
                 #current = IOLoop()
             if IOLoop._current.instance is not current:
