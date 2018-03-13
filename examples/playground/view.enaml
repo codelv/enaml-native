@@ -1,20 +1,206 @@
-"""
+'''
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
-The full license is in the file LICENSE, distributed with this software.
+The full license is in the file COPYING.txt, distributed with this software.
 
 Created on May 20, 2017
 
 @author: jrm
-"""
+'''
+import os
+import sys
+from enamlnative.core.api import *
 from enamlnative.widgets.api import *
-from enaml.core.api import Conditional, Looper
+from enamlnative.core.dev import DevServerSession
+from enamlnative.android.app import AndroidApplication
 
-enamldef ContentView(Flexbox):
-  flex_direction = "column"
+def do_reload(path):
+    # Restore it
+    session = DevServerSession.instance()
+    with open(os.path.join(sys.path[-1], path)) as f:
+        session.do_reload({'files':{'view.enaml': f.read()}})
 
-  TextView:
-    text << "Go to http://<phone's wifi IP address>:8888/"
-    layout = dict(align_self = 'center')
+enamldef PagerDots(Flexbox):
+    attr icon = "fa-circle"
+    attr color = "#fff"
+    attr pager
+    height = 100
+    justify_content = "space_between"
+    align_content = "center"
+    align_self = "flex_end"
+    attr pages << [c for c in pager._children if isinstance(c,Fragment)]
+    attr next_enabled = True
+    attr back_enabled = True
+    Flexbox:
+        Button:
+            enabled << pager.current_index>0 and back_enabled
+            flat = True
+            text << "Back" if self.enabled else ""
+            text_color << color
+            clicked :: pager.current_index -=1
+    Flexbox:
+        justify_content = "center"
+        align_items = "center"
+        Looper:
+            iterable << range(len(pages))
+            Icon:
+                text = "{%s}"%icon
+                padding = (5,5,5,5)
+                text_color << color
+                alpha << 1 if pager.current_index==loop_index else 0.4
+                clickable = True
+                clicked :: pager.current_index = loop_index
+    Flexbox:
+        Button:
+            enabled << pager.current_index+1<len(pages) and next_enabled
+            flat = True
+            text << "Next" if self.enabled else ""
+            text_color << color
+            clicked :: pager.current_index +=1
+
+enamldef AppIntro(Flexbox): view:
+    alias screens
+    flex_direction = "column"
+    #padding = (10, 10, 10, 10)
+    ViewPager: view_pager:
+        Block: screens:
+            pass
+    PagerDots: dots:
+        pager << view_pager
+
+enamldef Text(TextView):
+  text_color = "#fff"
+  text_size = 18
+  font_family = "casual"
+
+enamldef HomeScreen(PagerFragment):
+    Flexbox:
+        flex_direction = "column"
+        padding = (10,10,10,10)
+        ImageView:
+            src = "@mipmap/ic_launcher"
+        Text:
+          text = "Welcome to the python playground!"
+          text_size = 32
+        Text:
+          padding = (0, 30, 0, 0)
+          text = "This app lets you write an Android app using python from your web browser!!"
+        Text:
+          padding = (0, 30, 0, 0)
+          text = "Swipe or click next to get started."
+
+enamldef GettingStartedScreen(PagerFragment):
+    Flexbox:
+        flex_direction = "column"
+        padding = (10,10,10,10)
+        Flexbox:
+            flex_direction = "column"
+            flex_basis=0.7
+            Text:
+              text = "Getting Started"
+              text_size = 32
+            Text:
+              padding = (0, 30, 0, 0)
+              text = "Open settings and get the Wifi IP address of your device. " \
+                     "Now open your browser and go to:"
+            Flexbox:
+                height = 'wrap_content'
+                justify_content = "center"
+                Text:
+                    text = "http://<device-ip>:8888/"
+            Text:
+              padding = (0, 30, 0, 0)
+              text = "If using a simulator, run:"
+            Flexbox:
+                height = 'wrap_content'
+                justify_content = "center"
+                Text:
+                    text = "adb forward tcp:8888 tcp:8888"
+            Text:
+                 text = "and go then to:"
+            Flexbox:
+                height = 'wrap_content'
+                justify_content = "center"
+                Text:
+                    text = "http://localhost:8888/"
+        Flexbox:
+            justify_content = "center"
+            align_items = "center"
+            flex_basis=0.3
+            Icon:
+              text = "{fa-terminal}"
+              text_size = 128
+
+enamldef PlayScreen(PagerFragment):
+    Flexbox:
+        flex_direction = "column"
+        padding = (10,10,10,10)
+        Flexbox:
+            flex_direction = "column"
+            flex_basis=0.7
+            Text:
+              text = "Play!"
+              text_size = 32
+            Text:
+              padding = (0, 30, 0, 0)
+              text = "Enter your code in the editor and press play! "\
+                     "The app will reload with your code!"
+            Text:
+              padding = (0, 30, 0, 0)
+              text = "Documentation and examples can be found at: "
+            Text:
+                text_color = "#123"
+                text = "https://www.codelv.com/projects/enaml-native/docs/"
+        Flexbox:
+            justify_content = "center"
+            align_items = "center"
+            flex_basis=0.3
+            Icon:
+              text = "{fa-rocket}"
+              text_size = 128
+
+enamldef ExamplesScreen(PagerFragment):
+    Flexbox:
+        flex_direction = "column"
+        padding = (10,10,10,10)
+        ScrollView:
+            Flexbox:
+                flex_direction = "column"
+                Text:
+                    text = "Or choose an example"
+                Looper:
+                    iterable = sorted(os.listdir(os.path.join(sys.path[-1], 'examples')))
+                    Button:
+                        flat = True
+                        text = loop_item.split('.')[0].replace("_", " ").title()
+                        clicked :: do_reload(os.path.join('examples', loop_item))
+
+enamldef ContentView(AppIntro): view:
+  background_color = "#6CA6CD"
+  func on_back_pressed(change):
+      #: Don't actually go back
+      change['value']['handled'] = True
+
+      # Remove it since it get's re-added
+      app = AndroidApplication.instance()
+      app.unobserve('back_pressed', on_back_pressed)
+
+      do_reload('view.enaml')
+
+  activated::
+      app = AndroidApplication.instance()
+      app.observe('back_pressed',on_back_pressed)
+  Block:
+    block = parent.screens
+    HomeScreen:
+        pass
+    GettingStartedScreen:
+        pass
+    PlayScreen:
+        pass
+    ExamplesScreen:
+        pass
+
+
