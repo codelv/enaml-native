@@ -1,0 +1,20 @@
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+
+# You can use a LinearLayout instead of CoordinatorLayout if you want the
+# to disable expanding / contracting altogether
+enamldef ContentView(CoordinatorLayout): drawer:
+    AppBarLayout: app_bar:
+        height = "wrap_content"
+        expanded = True
+        vertical_offset :: print(self.vertical_offset)
+        Toolbar:
+            title = "Title"
+            subtitle = "Subtitle"
+            height = "wrap_content"
+    LinearLayout:
+        orientation = 'vertical'
+        margin << (0, 60 if app_bar.expanded else 0, 0, 0)
+        Switch:
+            text = "Show app bar"
+            checked := app_bar.expanded

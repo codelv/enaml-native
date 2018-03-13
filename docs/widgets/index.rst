@@ -6,6 +6,7 @@ Widgets
    :maxdepth: 2
 
    ActivityIndicator <activityindicator>
+   AppBarLayout <appbarlayout>
    AutoCompleteTextView <autocompletetextview>
    BottomSheetDialog <bottomsheetdialog>
    Button <button>

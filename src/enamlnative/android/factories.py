@@ -16,6 +16,11 @@ def activity_indicator_factory():
     return AndroidActivityIndicator
 
 
+def app_bar_layout_factory():
+    from .android_app_bar_layout import AndroidAppBarLayout
+    return AndroidAppBarLayout
+
+
 def auto_complete_text_view_factory():
     from .android_auto_complete_text_view import AndroidAutoCompleteTextView
     return AndroidAutoCompleteTextView
@@ -278,6 +283,7 @@ def web_view_factory():
 
 ANDROID_FACTORIES = {
     'ActivityIndicator': activity_indicator_factory,
+    'AppBarLayout': app_bar_layout_factory,
     'AutoCompleteTextView': auto_complete_text_view_factory,
     'BottomSheetDialog': bottom_sheet_dialog_factory,
     'Button': button_factory,

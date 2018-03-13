@@ -1,3 +1,7 @@
+# enaml-native 4.0.1
+
+- Add app bar layout
+
 # enaml-native 4.0.0
 
 - Python-for-android and kivy-ios have been completely dropped in favor of 

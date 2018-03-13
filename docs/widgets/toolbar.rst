@@ -2,7 +2,8 @@
 Toolbar
 ========================================
 
-No example available.
+.. literalinclude:: ../../examples/toolbar.enaml
+            :language: python
 
 Declaration
 ----------------------------

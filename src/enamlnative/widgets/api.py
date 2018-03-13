@@ -19,6 +19,7 @@ from .grid_layout import GridLayout
 from .flexbox import Flexbox
 from .coordinator_layout import CoordinatorLayout
 from .swipe_refresh_layout import SwipeRefreshLayout
+from .app_bar_layout import AppBarLayout
 
 #: Views
 from .view import View

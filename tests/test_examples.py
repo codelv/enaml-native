@@ -50,6 +50,7 @@ from utils import load
     (["android"], 'swipe_refresh.enaml'),
     (["android"], 'tabs.enaml'),
     (["android"], 'toast.enaml'),
+    (["android"], 'toolbar.enaml'),
     (["android"], 'view_pager.enaml'),
     (["android"], 'webview.enaml'),
     #(["ios"], '../ios/demo/Python/view.enaml'),
