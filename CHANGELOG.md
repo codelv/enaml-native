@@ -1,3 +1,7 @@
+# enaml-native 4.0.2
+
+- Fix padding and margin order
+
 # enaml-native 4.0.1
 
 - Add app bar layout

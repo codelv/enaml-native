@@ -367,7 +367,7 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         if layout.get('margin'):
             l, t, r, b = layout['margin']
             layout_params.setMargins(int(l*dp), int(t*dp),
-                                     int(b*dp), int(r*dp))
+                                     int(r*dp), int(b*dp))
         return layout_params
 
     def apply_layout(self, child, layout):
@@ -394,7 +394,7 @@ class AndroidView(AndroidToolkitObject, ProxyView):
             if 'padding' in layout:
                 l, t, r, b = layout['padding']
                 w.setPadding(int(l*dp), int(t*dp),
-                             int(b*dp), int(r*dp))
+                             int(r*dp), int(b*dp))
 
             # left, top, right, bottom
             if 'left' in layout:

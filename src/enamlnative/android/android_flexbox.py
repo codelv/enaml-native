@@ -183,5 +183,5 @@ class AndroidFlexbox(AndroidViewGroup, ProxyFlexbox):
                 dp = self.dp
                 l, t, r, b = layout['padding']
                 w.setPadding(int(l*dp), int(t*dp),
-                             int(b*dp), int(r*dp))
+                             int(r*dp), int(b*dp))
         child.layout_params = params
