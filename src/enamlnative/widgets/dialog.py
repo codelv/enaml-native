@@ -117,7 +117,7 @@ class Dialog(ToolkitObject):
         or the `show` state should be observed to know when it is closed.
          
         """
-        if not self.initialized:
+        if not self.is_initialized:
             self.initialize()
         if not self.proxy_is_active:
             self.activate_proxy()
