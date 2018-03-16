@@ -48,6 +48,8 @@ enamldef ContentView(Flexbox):
     Dialog: modal:
         #: Fullscreen style
         style = "@style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen"
+        #: Activity style (full screen but keep the action bar)
+        #style = "@style/Animation.Activity
         Flexbox:
             flex_direction = "column"
             CalendarView:
