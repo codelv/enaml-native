@@ -86,5 +86,43 @@ class Dialog(ToolkitObject):
         # The superclass implementation is sufficient.
         super(Dialog, self)._update_proxy(change)
 
+    def popup(self):
+        """ Show the dialog from code. This will initialize and activate
+        if needed.
+        
+        Examples
+        --------
+        
+        >>> enamldef AlertDialog(Dialog): dialog:
+              attr result: lambda text: None
+              TextView:
+                text = "Are you sure you want to delete?"
+              Button:
+                text = "Yes"
+                clicked ::
+                  dialog.show = False
+                  dialog.result(self.text)
+              Button:
+                text = "No"
+                clicked ::
+                  dialog.show = False
+                  dialog.result(self.text)
+            def on_result(value):
+              print("User clicked: {}".format(value))
+            AlertDialog(result=on_result).popup()
+        
+        Notes
+        ------
+        This does NOT block. Callbacks should be used to handle click events
+        or the `show` state should be observed to know when it is closed.
+         
+        """
+        if not self.initialized:
+            self.initialize()
+        if not self.proxy_is_active:
+            self.activate_proxy()
+        self.show = True
+
+
 
 

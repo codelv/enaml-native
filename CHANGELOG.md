@@ -1,3 +1,8 @@
+# enaml-native 4.0.3
+
+- Add `popup` method to open dialogs from code
+
+
 # enaml-native 4.0.2
 
 - Fix padding and margin order
