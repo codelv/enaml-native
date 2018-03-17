@@ -1,0 +1,56 @@
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+
+enamldef ContextMenu(PopupWindow): popup:
+    attr items = []
+    attr result = lambda r:r
+    ScrollView:
+        LinearLayout:
+            orientation = 'vertical'
+            background_color = "#FFF"
+            Looper:
+                iterable << popup.items
+                Button:
+                    flat = True
+                    text = loop_item
+                    clicked ::
+                        popup.result(self.text)
+                        popup.show = False
+
+
+enamldef ContentView(LinearLayout): drawer:
+    orientation = 'vertical'
+    AppBarLayout: app_bar:
+        height = "wrap_content"
+        Toolbar:
+            height = "wrap_content"
+            content_padding = (0,0,0,0)
+            Flexbox:
+                justify_content = "space_between"
+                Button:
+                    flat = True
+                    text = "Menu"
+                    clicked :: self.children[0].show = True
+                    ContextMenu:
+                        gravity="bottom|right"
+                        x=-20
+                        items = ["One", "Two", "Three"]
+                Button:
+                    flat = True
+                    text = "Settings"
+                    clicked :: ContextMenu(
+                                    parent=self,
+                                    x=-20,
+                                    items=["A", "B"]).popup()
+    Button:
+        text = "Popup in center"
+        clicked ::  self.children[0].show = True
+        PopupWindow:
+            gravity = "center_horizontal|center_vertical"
+            position = 'absolute'
+            LinearLayout:
+                padding = (20, 20, 20, 20)
+                TextView:
+                    text = "Volume"
+                SeekBar:
+                    width = 200

@@ -1,7 +1,10 @@
+# enaml-native 4.1.0
+
+- Add `PopupWindow` that lets you build context menus or absolutely positioned views.
+
 # enaml-native 4.0.3
 
 - Add `popup` method to open dialogs from code
-
 
 # enaml-native 4.0.2
 

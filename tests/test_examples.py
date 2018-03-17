@@ -43,6 +43,7 @@ if 'src' not in sys.path:
     #(["android"], 'mapview.enaml'),# now requires enaml-native-maps
     (["android"], 'pager_tab_strip.enaml'),
     (["android"], 'picker.enaml'),
+    (["android"], 'popup_window.enaml'),
     (["android", "ios"], 'progress_bar.enaml'),
     (["android"], 'radio_buttons.enaml'),
     (["android"], 'rating_bar.enaml'),

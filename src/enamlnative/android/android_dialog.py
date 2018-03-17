@@ -112,12 +112,12 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
     # -------------------------------------------------------------------------
     def on_cancel(self, dialog):
         d = self.declaration
-        with self.dialog.show.suppressed():
+        with self.dialog.dismiss.suppressed():
             d.show = False
 
     def on_dismiss(self, dialog):
         d = self.declaration
-        with self.dialog.show.suppressed():
+        with self.dialog.dismiss.suppressed():
             d.show = False
 
     # -------------------------------------------------------------------------

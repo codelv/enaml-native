@@ -37,6 +37,7 @@ Widgets
    PagerTabStrip <pagertabstrip>
    PagerTitleStrip <pagertitlestrip>
    Picker <picker>
+   PopupWindow <popupwindow>
    ProgressBar <progressbar>
    RadioButton <radiobutton>
    RadioGroup <radiogroup>

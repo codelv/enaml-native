@@ -171,6 +171,11 @@ def pager_fragment_factory():
     return AndroidPagerFragment
 
 
+def popup_window_factory():
+    from .android_popup_window import AndroidPopupWindow
+    return AndroidPopupWindow
+
+
 def progress_bar_factory():
     from .android_progress_bar import AndroidProgressBar
     return AndroidProgressBar
@@ -314,6 +319,7 @@ ANDROID_FACTORIES = {
     'PagerTabStrip': pager_tab_strip_factory,
     'PagerFragment': pager_fragment_factory,
     'Picker': picker_factory,
+    'PopupWindow': popup_window_factory,
     'ProgressBar': progress_bar_factory,
     'RadioButton': radio_button_factory,
     'RadioGroup': radio_group_factory,
