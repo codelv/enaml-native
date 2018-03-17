@@ -15,6 +15,7 @@ from enamlnative.android.bridge import (
 )
 from enamlnative.android.android_toolkit_object import AndroidToolkitObject
 from enamlnative.widgets.popup_window import ProxyPopupWindow
+from .android_utils import ColorDrawable
 
 
 class PopupWindow(JavaBridgeObject):
@@ -49,6 +50,8 @@ class PopupWindow(JavaBridgeObject):
     update = JavaMethod('android.view.View', 'int', 'int', 'int', 'int')
     updateAbsolute = JavaMethod('int', 'int', 'int', 'int')
 
+    setBackgroundDrawable = JavaMethod('android.graphics.drawable.Drawable')
+
 
 class AndroidPopupWindow(AndroidToolkitObject, ProxyPopupWindow):
     """ An Android implementation of an Enaml ProxyPopupWindow.
@@ -82,6 +85,7 @@ class AndroidPopupWindow(AndroidToolkitObject, ProxyPopupWindow):
         """
         w = self.window
         d = self.declaration
+        self.set_background_color(d.background_color)
         self.set_touchable(d.touchable)
         self.set_outside_touchable(d.outside_touchable)
 
@@ -117,14 +121,14 @@ class AndroidPopupWindow(AndroidToolkitObject, ProxyPopupWindow):
         the dialog before destroying. 
         
         """
+        super(AndroidPopupWindow, self).destroy()
         window = self.window
         if window:
             #: Clear the dismiss listener
             #: (or we get an error during the callback)
             window.setOnDismissListener(None)
-            window.dismiss()
+            #window.dismiss()
             del self.window
-        super(AndroidPopupWindow, self).destroy()
 
     # -------------------------------------------------------------------------
     # DismissListener API
@@ -146,6 +150,10 @@ class AndroidPopupWindow(AndroidToolkitObject, ProxyPopupWindow):
             return
         d = self.declaration
         self.set_show(d.show)
+
+    def set_background_color(self, color):
+        color = color or "#FFF"
+        self.window.setBackgroundDrawable(ColorDrawable(color))
 
     def set_touchable(self, enabled):
         self.window.setTouchable(enabled)
@@ -175,7 +183,7 @@ class AndroidPopupWindow(AndroidToolkitObject, ProxyPopupWindow):
 
     def set_show(self, show):
         d = self.declaration
-        if self.showing:
+        if show and self.showing:
             dp = self.get_context().dp
             x, y = int(d.x*dp), int(d.y*dp)
             view = self.parent_widget()
