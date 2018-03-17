@@ -49,6 +49,9 @@ class ProxyPopupWindow(ProxyToolkitObject):
     def set_outside_touchable(self, enabled):
         raise NotImplementedError
 
+    def set_background_color(self, color):
+        raise NotImplementedError
+
     def set_show(self, show):
         raise NotImplementedError
 
@@ -60,7 +63,7 @@ class ProxyPopupWindow(ProxyToolkitObject):
 
 
 class PopupWindow(ToolkitObject):
-    """ A popup dialog that may contain a view.
+    """ A popup window that may contain a view.
     
     """
 
@@ -88,6 +91,9 @@ class PopupWindow(ToolkitObject):
     #: Start the popup and display it on screen (or hide if False)
     show = d_(Bool())
 
+    #: Background color of the window (white by default)
+    background_color = d_(Unicode())
+
     #: If relative, show as a dropdown on the parent view, otherwise
     #: show at the position given by `x` and `y`.
     position = d_(Enum('relative', 'absolute'))
@@ -107,7 +113,8 @@ class PopupWindow(ToolkitObject):
     # Observers
     # -------------------------------------------------------------------------
     @observe('width', 'height', 'x', 'y', 'position', 'focusable', 'touchable',
-             'outside_touchable', 'show', 'animation', 'style')
+             'outside_touchable', 'show', 'animation', 'style',
+             'background_color')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

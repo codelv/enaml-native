@@ -35,6 +35,11 @@ class Executors(JavaBridgeObject):
         returns='java.util.concurrent.Executor')
 
 
+class ColorDrawable(JavaBridgeObject):
+    __nativeclass__ = set_default('android.graphics.drawable.ColorDrawable')
+    __signature__ = set_default(('android.graphics.Color',))
+
+
 class InputMethodManager(SystemService):
     SERVICE_TYPE = Context.INPUT_METHOD_SERVICE
     __nativeclass__ = set_default(
