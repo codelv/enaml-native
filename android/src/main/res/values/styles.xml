@@ -8,4 +8,22 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="ActivityDialog.Fade" parent="@android:style/Widget.DeviceDefault.PopupWindow">
+        <item name="android:windowAnimationStyle">@style/ActivityDialogFadeAnimation</item>
+    </style>
+
+    <style name="ActivityDialog.Slide" parent="@android:style/Widget.DeviceDefault.PopupWindow">
+        <item name="android:windowAnimationStyle">@style/ActivityDialogSlideAnimation</item>
+    </style>
+
+    <style name="ActivityDialogFadeAnimation">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
+    <style name="ActivityDialogSlideAnimation">
+        <item name="android:windowEnterAnimation">@android:anim/slide_in_left</item>
+        <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>
+    </style>
+
 </resources>
