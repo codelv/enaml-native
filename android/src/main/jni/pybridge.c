@@ -195,11 +195,11 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
     LOG("Initializing the Python interpreter");
 
     // Get the location of the python files
-    const char *pypath = (*env)->GetStringUTFChars(env, assets_path, NULL);
+    const char *assetspath = (*env)->GetStringUTFChars(env, assets_path, NULL);
     const char *cachepath = (*env)->GetStringUTFChars(env, cache_path, NULL);
     const char *jnipath = (*env)->GetStringUTFChars(env, jni_path, NULL);
     LOG(cachepath);
-    LOG(pypath);
+    LOG(assetspath);
     LOG(jnipath);
 
     // Build paths for the Python interpreter
@@ -208,7 +208,7 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
     snprintf(paths, sizeof(paths),"%s:%s/site-packages", cachepath, cachepath);
 
     // Set JNI path
-    setenv("PYTHONHOME", assets_path, 1);
+    setenv("ASSETS", assetspath, 1);
     setenv("PYTHONPATH", paths, 1);
     setenv("TMP", cachepath, 1);
     setenv("PY_LIB_DIR", jnipath, 1);
@@ -245,7 +245,7 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
     );
 
     // Cleanup
-    (*env)->ReleaseStringUTFChars(env, assets_path, pypath);
+    (*env)->ReleaseStringUTFChars(env, assets_path, assetspath);
     (*env)->ReleaseStringUTFChars(env, cache_path, cachepath);
     (*env)->ReleaseStringUTFChars(env, jni_path, jnipath);
     return result;
