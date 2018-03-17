@@ -666,14 +666,24 @@ public class Bridge implements PythonInterpreter.EventListener {
                         if (sv.startsWith("@")) {
                             // The: package.name:type/field syntax
                             String[] res = sv.substring(1).split("/");
-                            assert res.length == 2: "Resources must match @<type>/<name>, got '"+sv+"'!";
-                            resId = mActivity.getResources().getIdentifier(
-                                    res[1], res[0], "android"
-                            );
-                            if (resId==0) {
+                            if (res.length != 2) {
+                                Log.w(TAG, "Resources must match @<type>/<name>, got '"+sv+"'!");
+                            } else {
+                                // Support @pkg:res/name syntax
+                                String pkg = "android";
+                                String[] parts = res[0].split(":");
+                                if (parts.length > 1) {
+                                    pkg = parts[0];
+                                    res[0] = parts[1];
+                                }
                                 resId = mActivity.getResources().getIdentifier(
-                                        res[1], res[0], mActivity.getPackageName()
+                                        res[1], res[0], pkg
                                 );
+                                if (resId == 0) {
+                                    resId = mActivity.getResources().getIdentifier(
+                                            res[1], res[0], mActivity.getPackageName()
+                                    );
+                                }
                             }
                         } else {
                             // The: package.name:type/field syntax

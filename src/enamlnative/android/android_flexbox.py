@@ -81,7 +81,6 @@ class Flexbox(ViewGroup):
         'stretch': 4
     }
 
-
     SHOW_DIVIDER = {
         'none': 0,
         'beginning': 1,
