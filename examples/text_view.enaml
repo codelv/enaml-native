@@ -1,0 +1,24 @@
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+
+enamldef ContentView(LinearLayout): drawer:
+    orientation = 'vertical'
+    TextView:
+        # Set input type to html
+        input_type = 'html'
+        text = "You <i>are</i> <b>really</b> <font color='red'>awesome</font>!"
+    TextView:
+        text_size = 20
+        text = "Regular text"
+    TextView:
+      text = "Error"
+      font_style = "italic"
+      text_size = 16
+      text_color = "#FF0000"
+    TextView:
+      text = "This takes up three lines, can be selected, and shared."
+      text_selectable = True
+      lines = 3
+    TextView:
+      text = """This gets trunicated. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32."""
+      max_lines = 5

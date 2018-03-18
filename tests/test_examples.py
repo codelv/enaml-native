@@ -54,6 +54,7 @@ if 'src' not in sys.path:
     (["android", "ios"], 'switch.enaml'),
     (["android"], 'swipe_refresh.enaml'),
     (["android"], 'tabs.enaml'),
+    (["android"], 'text_view.enaml'),
     (["android"], 'toast.enaml'),
     (["android"], 'toolbar.enaml'),
     (["android"], 'view_pager.enaml'),

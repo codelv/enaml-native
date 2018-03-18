@@ -14,7 +14,9 @@ from atom.api import Typed, set_default
 from enamlnative.widgets.text_view import ProxyTextView
 
 from .android_view import AndroidView, View
-from .bridge import JavaMethod, JavaCallback
+from .bridge import (
+    JavaMethod, JavaCallback, JavaStaticMethod, JavaBridgeObject
+)
 
 
 class TextView(View):
@@ -108,6 +110,17 @@ class TextView(View):
     }
 
 
+class Spanned(JavaBridgeObject):
+    __nativeclass__ = set_default('android.text.Spanned')
+
+
+class Html(JavaBridgeObject):
+    __nativeclass__ = set_default('android.text.Html')
+
+    fromHtml = JavaStaticMethod('java.lang.String',
+                                returns='android.text.Spanned')
+
+
 class AndroidTextView(AndroidView, ProxyTextView):
     """ An Android implementation of an Enaml ProxyTextView.
 
@@ -183,6 +196,8 @@ class AndroidTextView(AndroidView, ProxyTextView):
 
     def set_input_type(self, input_type):
         it = 0
+        if input_type == 'html':
+            return  # Special case
         for t in input_type.split("|"):
             it |= TextView.INPUT_TYPES[t]
         self.widget.setInputType(it)
@@ -191,6 +206,9 @@ class AndroidTextView(AndroidView, ProxyTextView):
         """ Set the text in the widget.
 
         """
+        d = self.declaration
+        if d.input_type == 'html':
+            text = Spanned(__id__=Html.fromHtml(text))
         self.widget.setTextKeepState(text)
 
     def set_text_alignment(self, alignment):

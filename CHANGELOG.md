@@ -1,3 +1,8 @@
+# enaml-native 4.1.1
+
+- Add support for html in `TextView` by setting `input_type = 'html'` using Android's Html.fromHtml.
+See the [supported tags](https://stackoverflow.com/questions/9754076/which-html-tags-are-supported-by-android-textview#10262460)
+
 # enaml-native 4.1.0
 
 - Add `PopupWindow` that lets you build context menus or absolutely positioned views.

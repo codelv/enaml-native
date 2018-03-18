@@ -2,7 +2,8 @@
 TextView
 ========================================
 
-No example available.
+.. literalinclude:: ../../examples/text_view.enaml
+            :language: python
 
 Declaration
 ----------------------------
