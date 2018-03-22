@@ -19,17 +19,13 @@ from .bridge import JavaBridgeObject, JavaMethod
 
 class ViewGroup(View):
     __nativeclass__ = set_default('android.view.ViewGroup')
-    addViewWithParams = JavaMethod('android.view.View', 'int',
-                         'android.view.ViewGroup$LayoutParams')
+    addView_ = JavaMethod('android.view.View', 'int',
+                          'android.view.ViewGroup$LayoutParams')
     addView = JavaMethod('android.view.View', 'int')
 
     removeView = JavaMethod('android.view.View')
 
     setLayoutTransition = JavaMethod('android.animation.LayoutTransition')
-
-    def __init__(self, *args, **kwargs):
-        ViewGroup.addViewWithParams.set_name('addView')
-        super(ViewGroup, self).__init__(*args, **kwargs)
 
 
 class MarginLayoutParams(LayoutParams):
@@ -78,7 +74,7 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
             child_widget = child.widget
             if child_widget:
                 if child.layout_params:
-                    widget.addViewWithParams(child_widget, i,
+                    widget.addView_(child_widget, i,
                                              child.layout_params)
                 else:
                     widget.addView(child_widget, i)
@@ -102,7 +98,7 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
         for i, child_widget in enumerate(self.child_widgets()):
             if child_widget == child.widget:
                 if child.layout_params:
-                    widget.addViewWithParams(child_widget, i,
+                    widget.addView_(child_widget, i,
                                              child.layout_params)
                 else:
                     widget.addView(child_widget, i)

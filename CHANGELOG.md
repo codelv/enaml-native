@@ -1,3 +1,12 @@
+# enaml-native 4.2.0
+
+- [Glide](http://bumptech.github.io/glide/) is not added for loading images into ImageView's
+by default.
+- `JavaMethod` and `JavaStaticMethod` will now strip any trailing underscores from the name 
+allowing you to define multiple method with different signatures with the same name by 
+appending 1 or more '_'.  
+- Add files for building the conda recipe here
+
 # enaml-native 4.1.1
 
 - Add support for html in `TextView` by setting `input_type = 'html'` using Android's Html.fromHtml.
@@ -26,7 +35,6 @@ See the [supported tags](https://stackoverflow.com/questions/9754076/which-html-
 
 - Android updated to use api instead of compile
 - Android starts python in a Thread instead of using AsyncTask
-
 
 
 # enaml-native 3.1.0

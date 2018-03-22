@@ -26,7 +26,7 @@ class JavaMethod(BridgeMethod):
 
     def pack_args(self, obj, *args, **kwargs):
         signature = self.__signature__
-
+        name = self.name.rstrip("_")
         vargs = signature and signature[-1].endswith("...")
         if not vargs and (len(args) != len(signature)):
             raise ValueError(
@@ -34,21 +34,21 @@ class JavaMethod(BridgeMethod):
                 .format(args, signature))
         if vargs:
             varg = signature[-1].replace('...', '')
-            return (self.name, [
+            return (name, [
                 msgpack_encoder(
                     signature[i] if i+1 < len(signature) else varg, args[i])
                 for i in range(len(args))
             ])
 
-        return (self.name, [msgpack_encoder(sig, arg)
-                            for sig, arg in zip(signature, args)])
+        return (name, [msgpack_encoder(sig, arg)
+                       for sig, arg in zip(signature, args)])
 
 
 class JavaStaticMethod(BridgeStaticMethod):
 
     def pack_args(self, *args, **kwargs):
         signature = self.__signature__
-
+        name = self.name.rstrip("_")
         vargs = signature and signature[-1].endswith("...")
         if not vargs and (len(args) != len(signature)):
             raise ValueError(
@@ -56,14 +56,14 @@ class JavaStaticMethod(BridgeStaticMethod):
                 .format(args, signature))
         if vargs:
             varg = signature[-1].replace('...', '')
-            return (self.name, [
+            return (name, [
                 msgpack_encoder(signature[i]
                                 if i+1 < len(signature) else varg, args[i])
                 for i in range(len(args))
                 ])
 
-        return (self.name, [msgpack_encoder(sig, arg)
-                            for sig, arg in zip(signature, args)])
+        return (name, [msgpack_encoder(sig, arg)
+                       for sig, arg in zip(signature, args)])
 
 
 class JavaField(BridgeField):

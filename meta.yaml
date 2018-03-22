@@ -1,0 +1,23 @@
+package:
+  name: enaml-native
+  version: 4.2.0
+
+requirements:
+  build:
+    - python
+
+  run:
+    - python
+    - android-enaml
+    - android-msgpack
+    - ios-enaml # [osx]
+    - ios-msgpack # [osx]l
+
+build:
+  number: 1
+  noarch: generic
+  include_recipe: False
+
+about:
+  home: http://github.com/codelv/enaml-native
+  license: MIT

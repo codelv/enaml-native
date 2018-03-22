@@ -21,11 +21,11 @@ allprojects {
 }
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 25
+        targetSdkVersion 27
         versionCode 12
         versionName "2.14"
         vectorDrawables.useSupportLibrary = true
@@ -52,27 +52,27 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar', '*.so'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
-    api 'com.android.support:appcompat-v7:25.3.1'
-    api 'com.android.support:cardview-v7:25.3.1'
-    api 'com.android.support:design:25.3.1'
-    api 'com.android.support:support-v4:25.3.1'
+    api 'com.android.support:appcompat-v7:27.+s'
+    api 'com.android.support:cardview-v7:27.+'
+    api 'com.android.support:design:27.+'
+    api "com.android.support:support-fragment:27.+"
+    api 'com.android.support:support-v4:27.+'
 
     // Requirements
-    api 'org.msgpack:msgpack-core:0.8.13'
-    //compile 'org.lz4:lz4-java:1.4.0'
+    api 'org.msgpack:msgpack-core:0.8.+'
     api 'org.kamranzafar:jtar:2.3'
 
-
-    //compile 'com.github.bumptech.glide:glide:4.0.0-RC1'
-    //annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
+    // Images
+    api 'com.github.bumptech.glide:glide:4.6.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
+    api "com.github.bumptech.glide:okhttp3-integration:4.6.1"
 
     // HTTP
-    //compile 'com.loopj.android:android-async-http:1.4.9'
-    api 'com.squareup.okhttp3:okhttp:3.9.1'
+    api 'com.squareup.okhttp3:okhttp:3.+'
 
     // Flexbox
     //compile 'com.facebook.yoga:yoga:1.5.0'
-    api 'com.google.android:flexbox:0.3.0'
+    api 'com.google.android:flexbox:0.3.+'
 
     // Transforms
     api 'com.eftimoff:android-viewpager-transformers:1.0.1@aar'

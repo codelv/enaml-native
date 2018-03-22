@@ -14,7 +14,9 @@ from atom.api import Typed, set_default
 from enamlnative.widgets.image_view import ProxyImageView
 
 from .android_view import AndroidView, View
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .bridge import (
+    JavaBridgeObject, JavaMethod, JavaCallback, JavaStaticMethod
+)
 
 
 class ImageView(View):
@@ -47,12 +49,33 @@ class Icon(JavaBridgeObject):
                                       returns='android.graphics.drawable.Icon')
 
 
+class Glide(JavaBridgeObject):
+    __nativeclass__ = set_default('com.bumptech.glide.Glide')
+
+    with_ = JavaStaticMethod('android.view.View',
+                             returns='com.bumptech.glide.RequestManager')
+
+
+class RequestManager(JavaBridgeObject):
+    __nativeclass__ = set_default('com.bumptech.glide.RequestManager')
+    load = JavaMethod('java.lang.String',
+                      returns='com.bumptech.glide.RequestBuilder')
+
+
+class RequestBuilder(JavaBridgeObject):
+    __nativeclass__ = set_default('com.bumptech.glide.RequestBuilder')
+    into = JavaMethod('android.widget.ImageView')
+
+
 class AndroidImageView(AndroidView, ProxyImageView):
     """ An Android implementation of an Enaml ProxyImageView.
 
     """
     #: A reference to the widget created by the proxy.
     widget = Typed(ImageView)
+
+    #: A Glide request manager for loading images from urls or files
+    manager = Typed(RequestManager)
 
     # -------------------------------------------------------------------------
     # Initialization API
@@ -72,6 +95,9 @@ class AndroidImageView(AndroidView, ProxyImageView):
     # -------------------------------------------------------------------------
     # ProxyImageView API
     # -------------------------------------------------------------------------
+    def _default_manager(self):
+        return RequestManager(__id__=Glide.with_(self.widget))
+
     def set_src(self, src):
         if src.startswith("@"):
             self.widget.setImageResource(src)
@@ -80,10 +106,10 @@ class AndroidImageView(AndroidView, ProxyImageView):
             self.widget.setImageDrawable(
                 IconDrawable(self.get_context(), src[1:-1]))
         else:
-            self.widget.setImageURI(src)
+            RequestBuilder(__id__=self.manager.load(src)).into(self.widget)
 
-    # def set_max_height(self, height):
-    #     self.widget.setMaxHeight(height)
-    #
-    # def set_max_width(self, width):
-    #     self.widget.setMaxWidth(width)
+    def set_max_height(self, height):
+        self.widget.setMaxHeight(height)
+
+    def set_max_width(self, width):
+        self.widget.setMaxWidth(width)

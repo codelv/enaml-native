@@ -85,18 +85,12 @@ class WifiManager(SystemService):
     addNetwork = JavaMethod('android.net.wifi.WifiConfiguration',
                             returns='int')
     enableNetwork = JavaMethod('int', 'boolean', returns='boolean')
-    _disconnect = JavaMethod(returns='boolean')
+    disconnect_ = JavaMethod(returns='boolean')
     getConnectionInfo = JavaMethod(returns='android.net.wifi.WifiInfo')
     getDhcpInfo = JavaMethod(returns='android.net.DhcpInfo')
 
     #: List of receivers
     _receivers = List(BroadcastReceiver)
-
-    def __init__(self, *args, **kwargs):
-        super(WifiManager, self).__init__(*args, **kwargs)
-
-        #: Change the name of the _disconnect JavaMethod
-        WifiManager._disconnect.set_name('disconnect')
 
     # -------------------------------------------------------------------------
     # Public api
@@ -327,7 +321,7 @@ class WifiManager(SystemService):
                     mgr.reconnect().then(f.set_result)
 
                 #: Enable if needed
-                mgr._disconnect().then(on_disconnect)
+                mgr.disconnect_().then(on_disconnect)
 
             #: Get the service
             WifiManager.get().then(on_ready)

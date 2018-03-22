@@ -49,14 +49,7 @@ class UsbManager(SystemService):
                                    'android.app.PendingIntent')
 
     #: These names are changed to support both signatures
-    hasPermissionAcc = JavaMethod('android.hardware.usb.UsbAccessory',
-                                  returns='boolean')
-    requestPermissionAcc = JavaMethod('android.hardware.usb.UsbAccessory',
-                                      'android.app.PendingIntent')
-
-    def __init__(self, *args, **kwargs):
-        super(UsbManager, self).__init__(*args, **kwargs)
-
-        #: These are overridden
-        UsbManager.hasPermissionAcc.set_name('hasPermission')
-        UsbManager.requestPermissionAcc.set_name('requestPermission')
+    hasPermission_ = JavaMethod('android.hardware.usb.UsbAccessory',
+                                returns='boolean')
+    requestPermission_ = JavaMethod('android.hardware.usb.UsbAccessory',
+                                    'android.app.PendingIntent')

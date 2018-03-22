@@ -48,7 +48,7 @@ class PopupWindow(JavaBridgeObject):
     onTouch = JavaCallback('android.view.View', 'android.view.MotionEvent')
 
     update = JavaMethod('android.view.View', 'int', 'int', 'int', 'int')
-    updateAbsolute = JavaMethod('int', 'int', 'int', 'int')
+    update_ = JavaMethod('int', 'int', 'int', 'int')
 
     setBackgroundDrawable = JavaMethod('android.graphics.drawable.Drawable')
 
@@ -77,7 +77,6 @@ class AndroidPopupWindow(AndroidToolkitObject, ProxyPopupWindow):
         d = self.declaration
         style = d.style or '@style/Widget.DeviceDefault.PopupMenu'
         self.window = PopupWindow(self.get_context(), None, 0, style)
-        self.window.updateAbsolute.name = 'update'
         self.showing = False
 
     def init_widget(self):
@@ -190,7 +189,7 @@ class AndroidPopupWindow(AndroidToolkitObject, ProxyPopupWindow):
             if d.position == 'relative':
                 self.window.update(view, x, y, d.width, d.height)
             else:
-                self.window.updateAbsolute(x, y, d.width, d.height)
+                self.window.update_(x, y, d.width, d.height)
         elif show:
             dp = self.get_context().dp
             x, y = int(d.x*dp), int(d.y*dp)
