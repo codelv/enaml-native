@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2018, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Value, Bool, Int, List, observe
+    Typed, ForwardTyped, Value, Bool, Int, List, Event, observe
 )
 
 from enaml.core.declarative import d_
@@ -106,6 +106,12 @@ class ListItem(ToolkitObject):
 
     #: The position of this item within the ListView
     index = d_(Int(), writable=False)
+
+    #: Triggered when this item is clicked
+    clicked = d_(Event())
+
+    #: Triggered when this item is long clicked
+    long_clicked = d_(Event())
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyListItem)

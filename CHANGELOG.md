@@ -1,3 +1,7 @@
+# enaml-native 4.2.1
+
+- Add missing click handlers in `ListView` and `ListItem`
+
 # enaml-native 4.2.0
 
 - [Glide](http://bumptech.github.io/glide/) is not added for loading images into ImageView's

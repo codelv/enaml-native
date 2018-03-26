@@ -36,10 +36,10 @@ class AdapterView(ViewGroup):
         'android.widget.AdapterView$OnItemSelectedListener')
     setSelection = JavaMethod('int')
 
-    onItemClick = JavaMethod('android.widget.AdapterView',
-                             'android.view.View', 'int', 'long')
-    onItemLongClick = JavaMethod('android.widget.AdapterView',
-                                 'android.view.View', 'int', 'long')
+    onItemClick = JavaCallback('android.widget.AdapterView',
+                               'android.view.View', 'int', 'long')
+    onItemLongClick = JavaCallback('android.widget.AdapterView',
+                                   'android.view.View', 'int', 'long')
     onItemSelected = JavaCallback('android.widget.AdapterView',
                                   'android.view.View', 'int', 'long')
     onNothingSelected = JavaCallback('android.widget.AdapterView')

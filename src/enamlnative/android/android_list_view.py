@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, Property, set_default, observe
+from atom.api import Typed, Property, Dict, set_default, observe
 
 from enamlnative.widgets.list_view import ProxyListView, ProxyListItem
 
@@ -74,8 +74,10 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
         return [c for c in self.children() if isinstance(c, AndroidListItem)]
 
     #: List items
-    list_items = Property(lambda self:self._get_list_items(),
-                          cached=True)
+    list_items = Property(lambda self: self._get_list_items(), cached=True)
+
+    #: List mapping from index to view
+    item_mapping = Dict()
 
     # -------------------------------------------------------------------------
     # Initialization API
@@ -102,11 +104,11 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
         if d.items_can_focus:
             self.set_items_can_focus(d.items_can_focus)
 
-
-        #: Set initial ListItem state:
-        for i, item in enumerate(self.list_items):
-            item.recycle_view(i)
-
+        w = self.widget
+        w.setOnItemClickListener(w.getId())
+        w.setOnItemLongClickListener(w.getId())
+        w.onItemClick.connect(self.on_item_click)
+        w.onItemLongClick.connect(self.on_item_long_click)
         #self.widget.setOnScrollListener(self.widget.getId())
         #self.widget.onScroll.connect(self.on_scroll)
 
@@ -143,7 +145,6 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
 
         if d.items:
             self.set_items(d.items)
-        self.refresh_views()
 
         w.setAdapter(adapter)
         if d.selected >= 0:
@@ -155,7 +156,9 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
     def on_recycle_view(self, index, position):
         """ Update the item the view at the given index should display
         """
-        self.list_items[index].recycle_view(position)
+        item = self.list_items[index]
+        self.item_mapping[position] = item
+        item.recycle_view(position)
 
     def on_visible_count_changed(self, count, total):
         d = self.declaration
@@ -167,8 +170,17 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
     # -------------------------------------------------------------------------
     # ListAdapter API
     # -------------------------------------------------------------------------
-    #def on_view_requested(self, index, convert, parent):
-    #    return self.declaration.items[index] # Should be a view right?
+    def on_item_click(self, adapter, view, index, row_id):
+        # Get the ListItem at this index
+        item = self.item_mapping.get(index)
+        if item:
+            item.on_click()
+
+    def on_item_long_click(self, adapter, view, index, row_id):
+        # Get the ListItem at this index
+        item = self.item_mapping.get(index)
+        if item:
+            item.on_long_click()
 
     # -------------------------------------------------------------------------
     # ProxyListView API
@@ -176,13 +188,22 @@ class AndroidListView(AndroidAdapterView, ProxyListView):
     #@observe('declaration.visible_count')
     def refresh_views(self, change=None):
         """ Set the views that the adapter will cycle through. """
-        if self.adapter:
-            self.adapter.clearRecycleViews()
-            self.adapter.setRecycleViews(
+        adapter = self.adapter
+
+        # Set initial ListItem state
+        item_mapping = self.item_mapping
+        for i, item in enumerate(self.list_items):
+            item_mapping[i] = item
+            item.recycle_view(i)
+
+        if adapter:
+           adapter.clearRecycleViews()
+           adapter.setRecycleViews(
                 [encode(li.get_view()) for li in self.list_items])
 
     def set_items(self, items):
         self.adapter.setCount(len(items))
+        self.refresh_views()
 
     def set_divider_height(self, height):
         self.widget.setDividerHeight(height)
@@ -222,10 +243,23 @@ class AndroidListItem(AndroidToolkitObject, ProxyListItem):
     def recycle_view(self, position):
         """ Tell the view to render the item at the given position """
         d = self.declaration
-        d.index = position
-        d.item = d.parent.items[position]
+
+        if position < len(d.parent.items):
+            d.index = position
+            d.item = d.parent.items[position]
+        else:
+            d.index = -1
+            d.item = None
 
     def get_view(self):
         """ Return the view for this item (first child widget) """
         for w in self.child_widgets():
             return w
+
+    def on_click(self):
+        d = self.declaration
+        d.clicked()
+
+    def on_long_click(self):
+        d = self.declaration
+        d.long_clicked()
