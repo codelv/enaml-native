@@ -1,0 +1,15 @@
+from enamlnative.widgets.api import *
+from enamlnative.android.api import NotificationManager
+
+CHANNEL_ID = "John Doe"
+
+
+enamldef ContentView(Flexbox): view:
+    flex_direction = "column"
+    activated::
+        NotificationManager.create_channel(CHANNEL_ID, "Messages")
+    Button:
+        text = "Show notification"
+        clicked ::
+            NotificationManager.show_notification(CHANNEL_ID, "John Doe",
+                "Enaml-native basic notifications now work!")

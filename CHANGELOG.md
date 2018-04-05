@@ -1,3 +1,13 @@
+# enaml-native 4.2.3
+
+- Add notifications
+
+# enaml-native 4.2.2
+
+- Allow appending to a TextView directly
+- Disable scrollbars on loading view
+- Let loading view be overridden
+
 # enaml-native 4.2.1
 
 - Add missing click handlers in `ListView` and `ListItem`

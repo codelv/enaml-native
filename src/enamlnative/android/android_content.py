@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2018, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -11,7 +11,9 @@ Created on July 24, 2017
 """
 
 from atom.api import Atom, Int, set_default
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .bridge import (
+    JavaBridgeObject, JavaMethod, JavaCallback, JavaStaticMethod
+)
 
 
 class Context(JavaBridgeObject):
@@ -156,6 +158,16 @@ class Context(JavaBridgeObject):
 
 class Intent(JavaBridgeObject):
     __nativeclass__ = set_default('android.content.Intent')
+    setAction = JavaMethod('java.lang.String')
+    setClass = JavaMethod('android.content.Context', 'java.lang.Class')
+    putExtra = JavaMethod('java.lang.String', 'java.lang.String')
+
+
+class PendingIntent(JavaBridgeObject):
+    __nativeclass__ = set_default('android.app.PendingIntent')
+    getBroadcast = JavaStaticMethod('android.content.Context', 'int',
+                                    'android.content.Intent', 'int',
+                                    returns='androind.app.PendingIntent')
 
 
 class IntentFilter(JavaBridgeObject):

@@ -10,18 +10,19 @@ The project directory consists of the basic structure:
     android/      #: Android project using gradle
     ios/          #: iOS xcode project with cocoapods
     src/          #: Python source for your app 
-    venv/         #: Python venv for enaml-native packages and p4a recipes
-    package.json  #: Project config
+    venv/         #: Conda environement for enaml-native packages and cross compiled libraries
+    environment.yml  #: Project config
 
 This structure is created for you using the [enaml-native-cli](https://github.com/codelv/enaml-native-cli) 
-when you run `enaml-native init <name> <bundle_id> <destination>`. 
+when you run `enaml-native create app` and fill out all the items.
+ 
 Your actual apps are in the `android` and `ios` folders. The build scripts are configured 
 to run enaml-native commands that build and package your python source files as required 
 for the app based on the dependencies.
 
 ### Configuring the project
 
-The `package.json` file is your project config. If you open it you see the following.
+The `environment.yml` file is your project config. If you open it you see the following.
     
     :::json
     {
@@ -102,80 +103,6 @@ If you're interested you can read through the
 [enaml-native cli](https://github.com/codelv/enaml-native-cli/blob/master/enaml-native) source 
 which is what actually uses this config file.
 
-### Build process
-
-The build process depends on the platform but from a high level the following must occur.
-
-1. Python dependencies must be cross compiled for the target platform and arches for each platform.
-2. App python source, site-packages, and the standard library must be "bundled" to be included in the native app
-3. The native app build system (gradle, xcode) must be configured to include the bundled python and any linked with compiled libraries. 
-4. Native build system builds the app and uses python via native hooks and [the bridge](https://www.codelv.com/projects/enaml-native/docs/bridge).
-
-> See [enaml-native packages](#enamlnativepackages)
-
-### Building python
-
-The `package.json` config file defines an `arches` list for each platform. 
-This is the list of ABI's or target platforms to build your python and extensions for. 
-
-> This is very complicated internally and only supported by OSX and linux! 
-> Note: You can skip this by downloading and including precompiled libraries. Links to come see issue [#22](https://github.com/codelv/enaml-native/issues/22)
-
-To cross compile python and modules for different arches you must:
-
-1. Add or remove from the config `arches` list
-2. Run `enaml-native clean-python`
-3. Run `enaml-native build-python`
-
-This will rebuild for both Android and iOS (if applicable). 
-If you want to restrict building to only one or the other (on OSX only) pass the 
-`--ios` or `--android` flag.
-
-Python builds are done using modified versions of [python-for-android](https://github.com/kivy/python-for-android/) 
-and [kivy-ios](https://github.com/kivy/kivy-ios/). The python build process is VERY complicated 
-and prone to errors on new installs due to the various system dependencies.  
-
-> Note: These modified projects are now included in the [enaml-native-cli](https://github.com/codelv/enaml-native-cli).
-
-
-#### Debugging build failures
-
-If the build fails for whatever reason you can get the full log by adding the `-d` flag like
-
-`enaml-native build-python -d`
-
-
-This will print the entire p4a build in debug mode. See the p4a docs. You can check the following
-locations to ensure the build is working in each stage.
-
-            
-1. Make sure the download is correct in
-    `~/.local/share/python-for-android/packages/<recipe-name>`
-
-2. Make sure the patches applied and build is correct under
-    `~/.local/share/python-for-android/build/other_builds/<recipe-name>`
-
-3. Make sure everything was installed to
-    `~/.local/share/python-for-android/dists/enaml-native/python`
-    
-4. Finally make sure everything was copied to:
-    Python sources:
-    `<app dir>/build/python/<arch>/site-packages/`
-    
-    Native libraries:
-    `<app dir>/build/python/<arch>/modules/`
-    
-5. Lastly make sure enaml-native is copying everything during the build-android command to the 
-   actual android project.
-   
-    Python sources:
-   `<app dir>/android/app/src/main/assets/python/`
-    
-    Native libraries:
-    `<app dir>/venv/packages/enaml-native/android/src/main/lib/<arch>/`
-            
-For more detailed debugging see what the actual [build command](https://github.com/codelv/enaml-native-cli/blob/master/enaml-native#L433) 
-from the cli is doing.
 
 ### Release your app
 

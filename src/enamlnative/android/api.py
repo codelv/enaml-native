@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2018, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -14,3 +14,6 @@ from .android_utils import InputMethodManager
 from .android_wifi import WifiManager
 from .android_sensors import SensorManager, Sensor
 from .android_usb import UsbManager, UsbDevice
+from .android_notifications import (
+    Notification, NotificationChannel, NotificationManager
+)

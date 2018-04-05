@@ -73,6 +73,9 @@ class ProxyTextView(View):
     def set_text_selectable(self, selectable):
         raise NotImplementedError
 
+    def append_text(self, text):
+        raise NotImplementedError
+
 
 class TextView(View):
     """ A simple control for displaying read-only text.
@@ -174,3 +177,12 @@ class TextView(View):
         """
         # The superclass implementation is sufficient.
         super(TextView, self)._update_proxy(change)
+
+    # -------------------------------------------------------------------------
+    # TextView API
+    # -------------------------------------------------------------------------
+    def append_text(self, text):
+        """ Add text to the existing text 
+        
+        """
+        self.proxy.append_text(text)

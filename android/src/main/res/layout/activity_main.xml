@@ -13,10 +13,12 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:scrollbars="none"
             android:fillViewport="true">
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:scrollbars="none"
                 android:fillViewport="true">
                 <TextView
                     android:id="@+id/textView"
@@ -24,19 +26,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="200dp"
                     android:scrollHorizontally="true"
-                    android:text="Starting... Please wait."
+                    android:text=""
                     android:textAlignment="center"/>
             </HorizontalScrollView>
         </ScrollView>
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/textView"
-            />
-
     </LinearLayout>
 </FrameLayout>

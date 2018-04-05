@@ -42,6 +42,8 @@ class TextView(View):
     addTextChangedListener = JavaMethod('android.text.TextWatcher')
     removeTextChangedListener = JavaMethod('android.text.TextWatcher')
 
+    append = JavaMethod('java.lang.CharSequence')
+
     #: TextWatcher API
     afterTextChanged = JavaCallback('android.text.Editable')
     beforeTextChanged = JavaCallback('java.lang.CharSequence', 'int', 'int',
@@ -241,4 +243,5 @@ class AndroidTextView(AndroidView, ProxyTextView):
     def set_max_lines(self, lines):
         self.widget.setMaxLines(lines)
 
-
+    def append_text(self, text):
+        self.widget.append(text)

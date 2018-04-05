@@ -92,7 +92,26 @@ public class EnamlActivity extends AppCompatActivity {
 
         // Save views for animation when loading is complete
         mContentView = (FrameLayout) findViewById(R.id.contentView);
-        mLoadingView = findViewById(R.id.loadingView);
+        mLoadingView = getLoadingScreen();
+    }
+
+    /**
+     * Get the loading screen. This must contain a TextView for displaying
+     * error messages. It will be swapped in and out when
+     * @return
+     */
+    protected View getLoadingScreen() {
+        return findViewById(R.id.loadingView);
+    }
+
+    /**
+     * Get the text view from the loading screen that will be used
+     * to display error messages and reloading status.
+     *
+     * @return
+     */
+    public TextView getMessageTextView() {
+        return findViewById(R.id.textView);
     }
 
     /**
@@ -102,7 +121,6 @@ public class EnamlActivity extends AppCompatActivity {
     public void setBridge(Bridge bridge) {
         mBridge = bridge;
     }
-
 
     /**
      * Should debug messages be used.
@@ -126,7 +144,7 @@ public class EnamlActivity extends AppCompatActivity {
         // Push to end of handler stack as this can occur during the view change animation
         mHandler.post(()->{
             // Move to top of screen
-            TextView textView = (TextView) findViewById(R.id.textView);
+            TextView textView = (TextView) getMessageTextView();
             textView.setHorizontallyScrolling(true);
             ((ViewGroup.MarginLayoutParams) textView.getLayoutParams()).setMargins(10, 10, 10, 10);
             textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
@@ -134,8 +152,8 @@ public class EnamlActivity extends AppCompatActivity {
             textView.setText(message);
 
             // Hide progress bar
-            View progressBar = findViewById(R.id.progressBar);
-            progressBar.setVisibility(View.INVISIBLE);
+            //View progressBar = findViewById(R.id.progressBar);
+            //progressBar.setVisibility(View.INVISIBLE);
 
             // If error occured after view was loaded, animate the error back in
             if (mLoadingDone) {
@@ -180,7 +198,7 @@ public class EnamlActivity extends AppCompatActivity {
      */
     public void showLoading(String message) {
         // Set the message
-        TextView textView = (TextView) findViewById(R.id.textView);
+        TextView textView = (TextView) getMessageTextView();
         float dp = getResources().getDisplayMetrics().density;
         ((ViewGroup.MarginLayoutParams) textView.getLayoutParams()).setMargins(10, Math.round(200*dp), 10, 10);
         textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -188,8 +206,8 @@ public class EnamlActivity extends AppCompatActivity {
         textView.setText(message);
 
         // Show progress bar
-        View progressBar = findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.VISIBLE);
+        //View progressBar = findViewById(R.id.progressBar);
+        //progressBar.setVisibility(View.VISIBLE);
         if (mPythonView!=null && mLoadingView!=mPythonView) {
             // Swap the views back
             animateView(mLoadingView, mPythonView);
@@ -205,22 +223,22 @@ public class EnamlActivity extends AppCompatActivity {
         // Animate the content view to 100% opacity, and clear any animation
         // listener set on the view.
         in.animate()
-            .alpha(1f)
-            .setDuration(mShortAnimationDuration)
-            .setListener(null);
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(null);
 
         // Animate the loading view to 0% opacity. After the animation ends,
         // set its visibility to GONE as an optimization step (it won't
         // participate in layout passes, etc.)
         out.animate()
-            .alpha(0f)
-            .setDuration(mShortAnimationDuration)
-            .setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    out.setVisibility(View.GONE);
-                }
-            });
+                .alpha(0f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        out.setVisibility(View.GONE);
+                    }
+                });
     }
 
 
@@ -474,7 +492,7 @@ public class EnamlActivity extends AppCompatActivity {
      * Reset stats on the bridge
      */
     public void resetBridgeStats() {
-       mBridge.resetStats();
+        mBridge.resetStats();
     }
 
     /**

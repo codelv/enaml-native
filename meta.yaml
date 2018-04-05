@@ -1,6 +1,6 @@
 package:
   name: enaml-native
-  version: 4.2.1
+  version: 4.2.2.a0
 
 requirements:
   build:
@@ -11,7 +11,7 @@ requirements:
     - android-enaml
     - android-msgpack
     - ios-enaml # [osx]
-    - ios-msgpack # [osx]l
+    - ios-msgpack # [osx]
 
 build:
   number: 1
