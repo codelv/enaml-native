@@ -9,42 +9,15 @@ Created on Sept 5, 2017
 
 @author: jrm
 """
-import re
 from atom.api import Atom, List, Float, Unicode, set_default
 
-from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaProxy
+from .bridge import JavaCallback, JavaMethod, JavaProxy
 from .android_content import Context, SystemService
 from .app import AndroidApplication
 
 
 class LocationAccessDenied(RuntimeError):
     """ User denied access or it's disabled by the system """
-
-
-class Location(Atom):
-    """ A helper class for parsing locations from a string """
-    lat = Float()
-    lng = Float()
-    accuracy = Float()
-    altitude = Float()
-    time = Unicode()
-
-    source = Unicode()
-
-    def _observe_source(self, change):
-        """ Parse source into the fields """
-        src = self.source
-        m = re.search(
-            r'Location\[gps (-?\d+\.?\d*),(-?\d+\.?\d*)'
-            r' acc=(\d+\.?\d*) et=(.+) alt=(\d+\.?\d*) ',
-            src
-        )
-        if m:
-            lat, lng, acc, et, alt = m.groups()
-            self.lat, self.lng, self.accuracy, self.altitude = (
-                float(lat), float(lng), float(acc), float(alt)
-            )
-            self.time = et
 
 
 class LocationManager(SystemService):
@@ -97,13 +70,9 @@ class LocationManager(SystemService):
         app = AndroidApplication.instance()
         f = app.create_future()
 
-        def on_location(loc):
-            #: Invoke the callback with the parsed location
-            callback(Location(source=loc))
-
         def on_success(lm):
             #: When we have finally have permission
-            lm.onLocationChanged.connect(on_location)
+            lm.onLocationChanged.connect(callback)
 
             #: Save a reference to our listener
             #: because we may want to stop updates

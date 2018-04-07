@@ -1,6 +1,6 @@
 package:
   name: enaml-native
-  version: 4.2.2.a0
+  version: 4.2.4
 
 requirements:
   build:

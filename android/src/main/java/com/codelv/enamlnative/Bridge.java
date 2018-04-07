@@ -1,9 +1,11 @@
 package com.codelv.enamlnative;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.hardware.SensorEvent;
+import android.location.Location;
 import android.net.DhcpInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
@@ -294,6 +296,41 @@ public class Bridge implements PythonInterpreter.EventListener {
             }
 
         });
+
+        // Unpack Intent objects
+        addPacker(Intent.class, (packer, id, object)->{
+            Intent intent = (Intent) object;
+            packer.packMapHeader(3);
+            packer.packString("id");
+            packer.packInt(id);
+            packer.packString("action");
+            packer.packString(intent.getAction());
+            packer.packString("uri");
+            packer.packString(intent.toUri(0));
+        });
+
+        // Unpack Location objects
+        addPacker(Location.class, (packer, id, object)->{
+            Location location = (Location) object;
+            packer.packMapHeader(8);
+            packer.packString("latitude");
+            packer.packDouble(location.getLatitude());
+            packer.packString("longitude");
+            packer.packDouble(location.getLongitude());
+            packer.packString("time");
+            packer.packLong(location.getTime());
+            packer.packString("bearing");
+            packer.packFloat(location.getBearing());
+            packer.packString("accuracy");
+            packer.packFloat(location.getAccuracy());
+            packer.packString("altitude");
+            packer.packDouble(location.getAltitude());
+            packer.packString("speed");
+            packer.packFloat(location.getSpeed());
+            packer.packString("provider");
+            packer.packString(location.getProvider());
+        });
+
 
         // Unpack Sensor objects
         addPacker(SensorEvent.class, (packer, id, object)->{

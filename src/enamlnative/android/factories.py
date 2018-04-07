@@ -151,6 +151,11 @@ def list_view_factory():
     return AndroidListView
 
 
+def notification_factory():
+    from .android_notification import AndroidNotification
+    return AndroidNotification
+
+
 def picker_factory():
     from .android_picker import AndroidPicker
     return AndroidPicker
@@ -315,6 +320,7 @@ ANDROID_FACTORIES = {
     'LinearLayout': linear_layout_factory,
     'ListItem': list_item_factory,
     'ListView': list_view_factory,
+    'Notification': notification_factory,
     'PagerTitleStrip': pager_title_strip_factory,
     'PagerTabStrip': pager_tab_strip_factory,
     'PagerFragment': pager_fragment_factory,

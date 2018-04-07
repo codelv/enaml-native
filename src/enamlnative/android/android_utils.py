@@ -100,3 +100,8 @@ class InputMethodManager(SystemService):
 
         cls.get().then(on_ready)
         return f
+
+
+class Uri(JavaBridgeObject):
+    __nativeclass__ = set_default('android.net.Uri')
+    parse = JavaStaticMethod('java.lang.String', returns='android.net.Uri')

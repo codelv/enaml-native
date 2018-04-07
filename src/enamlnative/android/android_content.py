@@ -165,6 +165,12 @@ class Intent(JavaBridgeObject):
 
 class PendingIntent(JavaBridgeObject):
     __nativeclass__ = set_default('android.app.PendingIntent')
+    getActivity = JavaStaticMethod('android.content.Context', 'int',
+                                   'android.content.Intent', 'int',
+                                   returns='androind.app.PendingIntent')
+    getService = JavaStaticMethod('android.content.Context', 'int',
+                                  'android.content.Intent', 'int',
+                                  returns='androind.app.PendingIntent')
     getBroadcast = JavaStaticMethod('android.content.Context', 'int',
                                     'android.content.Intent', 'int',
                                     returns='androind.app.PendingIntent')
@@ -176,7 +182,8 @@ class IntentFilter(JavaBridgeObject):
 
 
 class BroadcastReceiver(JavaBridgeObject):
-    """ A BroadcastReceiver that delegates to a listener """
+    """ A BroadcastReceiver that delegates to a listener 
+    """
     __nativeclass__ = set_default(
         'com.codelv.enamlnative.adapters.BridgeBroadcastReceiver')
 
@@ -186,6 +193,44 @@ class BroadcastReceiver(JavaBridgeObject):
     #: Delegate receiver callback
     onReceive = JavaCallback('android.content.Context',
                              'android.content.Intent')
+
+    @classmethod
+    def for_action(cls, action, callback, single_shot=True):
+        """ Create a BroadcastReceiver that is invoked when the given 
+        action is received.
+        
+        Parameters
+        ----------
+        action: String
+            Action to receive
+        callback: Callable
+            Callback to invoke when the action is received
+        single_shot: Bool
+            Cleanup after one callback
+
+        Returns
+        -------
+            receiver: BroadcastReceiver
+                The receiver that was created. You must hold on to this
+                or the GC will clean it up.
+
+        """
+        receiver = cls()
+        activity = receiver.__app__.widget
+        receiver.setReceiver(receiver.getId())
+
+        def on_receive(ctx, intent):
+            callback(intent)
+
+        receiver.onReceive.connect(on_receive)
+        activity.registerReceiver(receiver, IntentFilter(action))
+        return receiver
+
+    def __del__(self):
+        """ Unregister automatically """
+        activity = self.__app__.widget
+        activity.unregisterReceiver(self)
+        super(BroadcastReceiver, self).__del__()
 
 
 class SystemService(JavaBridgeObject):

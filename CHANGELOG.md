@@ -1,3 +1,8 @@
+# enaml-native 4.2.4
+
+- Simplify location by using a dict
+- Support more notificaton features
+
 # enaml-native 4.2.3
 
 - Add notifications

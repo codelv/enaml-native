@@ -1,15 +1,48 @@
+""" Example demonstrates how to create and use Notifications
+with the NotificationManager.show_notification or the Notification widget.
+"""
 from enamlnative.widgets.api import *
 from enamlnative.android.api import NotificationManager
+from enamlnative.android.app import AndroidApplication
 
 CHANNEL_ID = "John Doe"
 
 
 enamldef ContentView(Flexbox): view:
     flex_direction = "column"
+    attr app = AndroidApplication.instance()
     activated::
         NotificationManager.create_channel(CHANNEL_ID, "Messages")
     Button:
-        text = "Show notification"
+        text = "Show basic notification"
+        clicked :: NotificationManager.show_notification(CHANNEL_ID,
+                    title="John Doe", text="Hello world!", color="#F00")
+    Button:
+        text = "Show progress notification"
         clicked ::
-            NotificationManager.show_notification(CHANNEL_ID, "John Doe",
-                "Enaml-native basic notifications now work!")
+            pn.show = True
+            # Simulate progress
+            for i in range(10):
+                app.timed_call(i*1000, lambda v=pn, i=i:setattr(v, 'progress', i*10))
+            app.timed_call(11000, lambda v=pn: setattr(v, 'show', False))
+
+    Notification: pn:
+        channel_id = CHANNEL_ID
+        title = "Picture download"
+        text << "Download in progress {}%".format(self.progress)
+        color = "#bac"
+        show_progress = True
+        progress = 0 # Initial progress must be zero then incremented
+        settings = {"ongoing":True}
+
+    Button:
+        text = "Show notification with actions"
+        attr ref
+        func on_snooze(intent):
+            app.show_toast("Snooze clicked!")
+        clicked ::
+            # Must save a ref when using it this way or the buttons won't work
+            self.ref = NotificationManager.show_notification(CHANNEL_ID,
+                    title="Good morning!", text="Wake up you lazy bum!", actions=[
+                        ("@drawable/ic_snooze", "SNOOZE", on_snooze),
+                    ])

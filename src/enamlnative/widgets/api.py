@@ -73,3 +73,4 @@ from .snackbar import Snackbar
 from .dialog import Dialog
 from .bottom_sheet_dialog import BottomSheetDialog
 from .popup_window import PopupWindow
+from .notification import Notification

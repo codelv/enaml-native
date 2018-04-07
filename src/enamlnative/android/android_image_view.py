@@ -41,6 +41,10 @@ class Drawable(JavaBridgeObject):
     onDrawableLoaded = JavaCallback('android.graphics.drawable.Drawable')
 
 
+class Bitmap(JavaBridgeObject):
+    __nativeclass__ = set_default('android.graphics.Bitmap')
+
+
 class Icon(JavaBridgeObject):
     __nativeclass__ = set_default('android.graphics.drawable.Icon')
     createWithFilePath = JavaMethod('java.lang.String',
@@ -54,6 +58,8 @@ class Glide(JavaBridgeObject):
 
     with_ = JavaStaticMethod('android.view.View',
                              returns='com.bumptech.glide.RequestManager')
+    with__ = JavaStaticMethod('android.content.Context',
+                              returns='com.bumptech.glide.RequestManager')
 
 
 class RequestManager(JavaBridgeObject):
@@ -64,6 +70,7 @@ class RequestManager(JavaBridgeObject):
 
 class RequestBuilder(JavaBridgeObject):
     __nativeclass__ = set_default('com.bumptech.glide.RequestBuilder')
+    asBitmap = JavaMethod(returns='android.graphics.Bitmap')
     into = JavaMethod('android.widget.ImageView')
 
 
