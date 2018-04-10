@@ -24,10 +24,10 @@ android {
     compileSdkVersion 27
     buildToolsVersion '27.0.3'
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 27
-        versionCode 12
-        versionName "2.14"
+        versionCode 13
+        versionName "4.3"
         vectorDrawables.useSupportLibrary = true
 
         // Set dev remote to true to use the remote debugger (running python remotely)

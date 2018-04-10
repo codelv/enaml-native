@@ -1,3 +1,7 @@
+# enaml-native 4.3
+
+- Change minimumSdkLevel and APP_PLATFORM to 21
+
 # enaml-native 4.2.4
 
 - Simplify location by using a dict
