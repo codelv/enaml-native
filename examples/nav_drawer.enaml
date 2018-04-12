@@ -1,0 +1,159 @@
+"""
+Example demonstrates a more complex drawer layout commonly seen
+in a typical app with a user login.
+
+"""
+from atom.api import Atom, Unicode
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+
+
+class AppState(Atom):
+    _instance = None
+    page = Unicode("Inbox")
+
+    @classmethod
+    def instance(cls):
+        """ Use this to access the state """
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+
+    def __init__(self):
+        """ Make it a singleton """
+        if AppState._instance is not None:
+            raise RuntimeError("Only one AppState should exist!")
+        super(AppState, self).__init__()
+
+
+enamldef DrawerButton(Flexbox): button:
+    attr state = AppState.instance()
+    attr icon = "md-inbox"
+    attr text = "Inbox"
+    attr active << self.text == state.page
+    attr active_color = "#33b5e5"
+    attr inactive_color = "#8b8b8b"
+    attr active_bg = "#e0e0e0"
+    attr inactive_bg = "#fff"
+    clickable = True
+    padding = (15, 15, 15, 15)
+    align_items = "center"
+    background_color << active_bg if active else inactive_bg
+    Icon:
+        text_size = 24
+        text_color << active_color if active else  inactive_color
+        text << "{%s}"%icon
+        padding = (0, 0, 20, 0)
+    TextView:
+        text_color << active_color if active else  inactive_color
+        text_size = 16
+        font_style = "bold"
+        text << button.text
+
+enamldef DrawerDivider(View):
+    height = 1
+    background_color = '#8b8b8b'
+
+enamldef DrawerHeader(TextView):
+    padding = (15, 15, 15, 15)
+    text_size = 18
+    font_style = "bold"
+    text_color = "#8b8b8b"
+    background_color = '#fff'
+
+enamldef Drawer(ScrollView): drawer:
+    attr state = AppState.instance()
+    #: Must have gravity AND width
+    width = 240
+    attr side = 'left'
+    gravity << side # Use an attr since this gets converted to an int
+    background_color = "#efefef"
+    func close_drawer():
+        parent.opened = []
+    Flexbox:
+        flex_direction = "column"
+        FrameLayout:
+            ImageView:
+                src = "https://antonioleiva.com/wp-content/uploads/2014/10/WallpaperAndroid50.jpg"
+                width = 240
+            Flexbox:
+                flex_direction = "column"
+                justify_content = "flex_end"
+                padding = (10, 10, 10, 10)
+                Icon:
+                    # Use an actual image...
+                    text = "{md-android}"
+                    text_size = 64
+                TextView:
+                    text = "John Doe"
+                    text_size = 18
+                    text_color = "#fff"
+        DrawerButton:
+            icon = "md-inbox"
+            text = "Inbox"
+            clicked ::
+                close_drawer()
+                state.page = self.text
+        DrawerButton:
+            icon = "md-favorite"
+            text = "Starred"
+            clicked ::
+                close_drawer()
+                state.page = self.text
+        DrawerButton:
+            icon = "md-send"
+            text = "Sent mail"
+            clicked ::
+                close_drawer()
+                state.page = self.text
+        DrawerButton:
+            icon = "md-message"
+            text = "Drafts"
+
+            clicked ::
+                close_drawer()
+                state.page = self.text
+        DrawerDivider:
+            pass
+        DrawerHeader:
+            text = "Labels"
+        DrawerButton:
+            icon = "md-mail"
+            text = "All mail"
+            clicked ::
+                close_drawer()
+                state.page = self.text
+        DrawerDivider:
+            pass
+        DrawerButton:
+            icon = "md-settings"
+            text = "Settings"
+            background_color  = drawer.background_color
+            clicked ::
+                close_drawer()
+                state.page = self.text
+        DrawerButton:
+            icon = "md-help"
+            text = "Help & Feedback"
+            background_color  = drawer.background_color
+            clicked ::
+                close_drawer()
+                state.page = self.text
+
+enamldef ContentView(DrawerLayout): drawer:
+    background_color = "#eee"
+    attr state = AppState.instance()
+    LinearLayout:
+        orientation = "vertical"
+        Toolbar:
+            title << state.page
+            subtitle = "Swipe to open drawers"
+            background_color = "#e0e0e0"
+            height = "wrap_content"
+        Button:
+            text = "Open left"
+            #: Set the `opened` attribute to the list of drawers
+            clicked :: drawer.opened = [left_drawer]
+
+    Drawer: left_drawer:
+        side = "left"
