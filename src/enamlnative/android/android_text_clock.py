@@ -38,7 +38,8 @@ class AndroidTextClock(AndroidTextView, ProxyTextClock):
         """ Create the underlying widget.
 
         """
-        self.widget = TextClock(self.get_context())
+        d = self.declaration
+        self.widget = TextClock(self.get_context(), None, d.style)
 
     def init_widget(self):
         """ Initialize the underlying widget.

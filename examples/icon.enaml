@@ -1,12 +1,34 @@
+import importlib
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
+
+import iconify
+iconify.install(*iconify.BUILTIN_ICON_PACKS)
+
+from iconify import (
+    #cryptocoins,
+    entypo, ionicons, fontawesome, material, material_community,
+    simplelineicons, meteocons, weathericons
+)
+
+ICON_PACKS = {
+  #'Cryptocoins': cryptocoins,
+  'Entypo': entypo,
+  'Fontawesome': fontawesome,
+  'Ionicons': ionicons,
+  'Material': material,
+  'Material community': material_community,
+  'Meteocons': meteocons,
+  'Simple line icons': simplelineicons,
+  'Weather': weathericons,
+}
 
 enamldef Text(TextView):
     #: Add Spacing
     padding = (0, 20, 0, 0)
 
 enamldef ContentView(ScrollView): finder:
-    attr icons << getattr(Icon,"PACK_%s"%icon_pack.items[icon_pack.selected].replace(" ","_").upper())
+    attr icons << ICON_PACKS[icon_pack.items[icon_pack.selected]].ICONS.keys()
     padding = (10, 10, 10, 10)
     Flexbox:
         flex_direction = "column"
@@ -23,8 +45,7 @@ enamldef ContentView(ScrollView): finder:
                 Text:
                   text = "Icon packs"
                 Spinner: icon_pack:
-                  items = ['Entypo','Font awesome','Ionicons', 'Material community', 'Material',
-                            'Meteocons', "Weather"]
+                  items = ICON_PACKS.keys()
 
                 Text:
                   text = "Icon"

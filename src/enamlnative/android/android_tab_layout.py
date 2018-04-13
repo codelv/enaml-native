@@ -84,7 +84,8 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
         """ Create the underlying widget.
 
         """
-        self.widget = TabLayout(self.get_context())
+        d = self.declaration
+        self.widget = TabLayout(self.get_context(), None, d.style)
 
     def init_widget(self):
         """ Initialize the underlying widget.

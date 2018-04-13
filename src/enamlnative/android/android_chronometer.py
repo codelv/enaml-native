@@ -48,7 +48,8 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
         """ Create the underlying widget.
 
         """
-        self.widget = Chronometer(self.get_context())
+        d = self.declaration
+        self.widget = Chronometer(self.get_context(), None, d.style)
 
     def init_widget(self):
         """ Initialize the underlying widget.

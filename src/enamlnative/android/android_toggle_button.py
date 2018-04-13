@@ -37,7 +37,9 @@ class AndroidToggleButton(AndroidCompoundButton, ProxyToggleButton):
         """ Create the underlying widget.
 
         """
-        self.widget = ToggleButton(self.get_context())
+        d = self.declaration
+        self.widget = ToggleButton(self.get_context(), None,
+                                   d.style or "@attr/buttonStyleToggle")
 
     # -------------------------------------------------------------------------
     # ProxyToggleButton API

@@ -36,4 +36,5 @@ class AndroidCoordinatorLayout(AndroidFrameLayout, ProxyCoordinatorLayout):
         """ Create the underlying widget.
 
         """
-        self.widget = CoordinatorLayout(self.get_context())
+        d = self.declaration
+        self.widget = CoordinatorLayout(self.get_context(), None, d.style)

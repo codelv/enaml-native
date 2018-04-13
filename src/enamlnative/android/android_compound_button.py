@@ -39,7 +39,7 @@ class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
         """ Create the underlying widget.
 
         """
-        self.widget = CompoundButton(self.get_context())
+        raise NotImplementedError
 
     def init_widget(self):
         """ Initialize the underlying widget.

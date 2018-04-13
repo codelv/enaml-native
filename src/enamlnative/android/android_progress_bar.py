@@ -19,20 +19,19 @@ from .bridge import JavaMethod
 class ProgressBar(View):
     __nativeclass__ = set_default('android.widget.ProgressBar')
     __signature__ = set_default(('android.content.Context',
-                                 'android.util.AttributeSet', 'int'))
+                                 'android.util.AttributeSet',
+                                 'android.R'))
     setIndeterminate = JavaMethod('boolean')
     setMax = JavaMethod('int')
     setMin = JavaMethod('int')
     setProgress = JavaMethod('int')#, 'boolean')
     setSecondaryProgress = JavaMethod('int')
 
-    STYLE_HORIZONTAL = 0x01010078
-    STYLE_INVERSE = 0x01010287
-    STYLE_LARGE = 0x0101007a
-    STYLE_LARGE_INVERSE = 0x01010289
-    STYLE_SMALL = 0x01010079
-    STYLE_NORMAL = 0x01010077
-    STYLE_SMALL_INVERSE = 0x01010288
+    STYLE_HORIZONTAL = '@attr/progressBarStyleHorizontal'
+    STYLE_INVERSE = '@attr/progressBarStyleInverse'
+    STYLE_LARGE = '@attr/progressBarStyleLarge'
+    STYLE_SMALL = '@attr/progressBarStyleSmall'
+    STYLE_NORMAL = '@attr/progressBarStyle'
 
     STYLES = {
         'normal': STYLE_NORMAL,

@@ -1,3 +1,14 @@
+# enaml-native 4.4.0
+
+- Add the `style` attribute for _all_ widgets that support it 
+ex `style='@attr/borderlessButtonStyle'`
+- Add the `background_style` attribute so you can make an clickable view have touch animations
+by using `background_style='?attr/selectableItemBackground'`
+(see [Ripple-Animation](https://guides.codepath.com/android/Ripple-Animation))
+- Add "complex" style support when parsing android resources starting with `?`
+- Update several examples
+- Minor fixes to Spinner and RatingBar
+
 # enaml-native 4.3
 
 - Change minimumSdkLevel and APP_PLATFORM to 21

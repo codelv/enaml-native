@@ -48,7 +48,9 @@ class AndroidCalendarView(AndroidFrameLayout, ProxyCalendarView):
         """ Create the underlying widget.
 
         """
-        self.widget = CalendarView(self.get_context())
+        d = self.declaration
+        self.widget = CalendarView(self.get_context(), None,
+                                   d.style or "@attr/calendarViewStyle")
 
     def init_widget(self):
         """ Initialize the underlying widget.

@@ -8,6 +8,9 @@ from atom.api import *
 from enaml.core.api import *
 from enamlnative.widgets.api import *
 
+import iconify
+iconify.install('iconify.fontawesome')
+
 class Message(Atom):
     name = Unicode()
     subject = Unicode()
@@ -89,7 +92,7 @@ enamldef Drawer(ScrollView): view:
                     app.current_folder = loop_item
                     view.parent.opened = []
                 Icon:
-                    text = "{md-folder}"
+                    text = "{fa-folder}"
                     text_size = 24
                 TextView:
                     padding = (20, 0, 0, 0)
@@ -108,7 +111,7 @@ enamldef ContentView(DrawerLayout): drawer:
             Flexbox:
                 align_items = "center"
                 IconButton:
-                    text = "{md-menu}"
+                    text = "{fa-bars}"
                     text_size = 24
                     text_color = "#fff"
                     width = "50"
@@ -129,6 +132,9 @@ enamldef ContentView(DrawerLayout): drawer:
                     Flexbox:
                         padding = (10,20,10,20)
                         align_items = "center"
+                        clickable = True
+                        background_style = "?attr/selectableItemBackground"
+
                         Icon:
                             text = "{fa-user}"
                             text_size = 32
@@ -141,7 +147,7 @@ enamldef ContentView(DrawerLayout): drawer:
                                 font_family = "sans-serif-medium"
                             TextView:
                                 text << loop_item.subject
-                    Flexbox:
+                    View:
                         #: Add a bottom border
                         height="1"
                         background_color = "#ccc"

@@ -45,7 +45,9 @@ class AndroidAutoCompleteTextView(AndroidEditText, ProxyAutoCompleteTextView):
 
         """
         context = self.get_context()
-        self.widget = AutoCompleteTextView(context)
+        d = self.declaration
+        style = d.style or '@attr/autoCompleteTextViewStyle'
+        self.widget = AutoCompleteTextView(context, None, style)
         self.adapter = ArrayAdapter(context, '@layout/simple_list_item_1')
 
     def init_widget(self):

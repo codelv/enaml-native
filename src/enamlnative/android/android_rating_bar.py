@@ -49,13 +49,17 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
         """ Create the underlying widget.
 
         """
-        self.widget = RatingBar(self.get_context())
+        d = self.declaration
+        self.widget = RatingBar(self.get_context(), None,
+                                d.style or '@attr/ratingBarStyle')
 
     def init_widget(self):
         """ Initialize the underlying widget.
 
         """
         super(AndroidRatingBar, self).init_widget()
+        d = self.declaration
+        self.set_rating(d.rating)
         w = self.widget
         w.setOnRatingBarChangeListener(w.getId())
         w.onRatingChanged.connect(self.on_rating_changed)

@@ -39,7 +39,9 @@ class AndroidSwitch(AndroidCompoundButton, ProxySwitch):
         """ Create the underlying widget.
 
         """
-        self.widget = Switch(self.get_context())
+        d = self.declaration
+        self.widget = Switch(self.get_context(), None,
+                             d.style or '@attr/switchStyle')
 
     def init_widget(self):
         """ Initialize the underlying widget.

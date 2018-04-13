@@ -3,6 +3,12 @@ from enaml.core.api import *
 from enamlnative.widgets.api import *
 from enamlnative.core.app import BridgedApplication
 
+try:
+    import iconify
+    iconify.install('iconify.fontawesome')
+except ImportError:
+    print("Warning: Install enaml-native-icons and rebuild for icons to work!")
+
 class User(Atom):
     username = Unicode()
     password = Unicode()

@@ -44,6 +44,9 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
     #: Reference to adapter
     adapter = Typed(ArrayAdapter)
 
+    #: Wrap content by default
+    default_layout = set_default({'height': 'wrap_content'})
+
     # -------------------------------------------------------------------------
     # Initialization API
     # -------------------------------------------------------------------------
@@ -70,6 +73,13 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
         w.onItemSelected.connect(self.on_item_selected)
         w.onNothingSelected.connect(self.on_nothing_selected)
         super(AndroidSpinner, self).init_widget()
+
+    def init_layout(self):
+        # Make sure the layout always exists
+        if not self.layout_params:
+            self.set_layout({})
+        super(AndroidSpinner, self).init_layout()
+
 
     def get_declared_items(self):
         selection = None

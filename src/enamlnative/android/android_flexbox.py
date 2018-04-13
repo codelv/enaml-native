@@ -127,7 +127,8 @@ class AndroidFlexbox(AndroidViewGroup, ProxyFlexbox):
         """ Create the underlying widget.
 
         """
-        self.widget = Flexbox(self.get_context())
+        d = self.declaration
+        self.widget = Flexbox(self.get_context(), None, d.style)
 
     # -------------------------------------------------------------------------
     # ProxyFlexbox API

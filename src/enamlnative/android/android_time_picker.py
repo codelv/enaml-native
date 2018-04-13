@@ -44,7 +44,9 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
         """ Create the underlying widget.
 
         """
-        self.widget = TimePicker(self.get_context())
+        d = self.declaration
+        self.widget = TimePicker(self.get_context(), None,
+                                 d.style or '@attr/timePickerStyle')
 
     def init_widget(self):
         """ Initialize the underlying widget.

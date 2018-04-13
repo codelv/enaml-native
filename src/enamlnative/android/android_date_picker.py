@@ -47,7 +47,9 @@ class AndroidDatePicker(AndroidFrameLayout, ProxyDatePicker):
         """ Create the underlying widget.
 
         """
-        self.widget = DatePicker(self.get_context())
+        d = self.declaration
+        self.widget = DatePicker(self.get_context(), None,
+                                 d.style or "@attr/datePickerStyle")
 
     def init_widget(self):
         """ Initialize the underlying widget.

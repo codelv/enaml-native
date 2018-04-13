@@ -84,6 +84,9 @@ class ProxyView(ProxyToolkitObject):
     def set_style(self, style):
         raise NotImplementedError
 
+    def set_background_style(self, style):
+        raise NotImplementedError
+
     def set_background_color(self, color):
         raise NotImplementedError
 
@@ -187,6 +190,12 @@ class View(ToolkitObject):
     #: Foreground alpha
     alpha = d_(Float(1.0, strict=False))
 
+    #: Initial widget style
+    style = d_(Unicode())
+
+    #: Background style
+    background_style = d_(Unicode())
+
     #: Background color
     background_color = d_(Unicode())
 
@@ -249,7 +258,7 @@ class View(ToolkitObject):
              'min_width', 'max_height', 'max_width', 'x', 'y', 'z', 'gravity', 
              'top', 'bottom', 'right', 'left', 'margin', 'padding', 
              'flex_basis', 'flex_grow', 'flex_shrink', 'align_self',
-             'position')
+             'position', 'background_style')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 

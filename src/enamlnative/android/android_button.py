@@ -24,7 +24,7 @@ from .android_image_view import AndroidImageView, ImageView
 class Button(TextView):
     __nativeclass__ = set_default('android.widget.Button')
     __signature__ = set_default(('android.content.Context',
-                                 'android.util.AttributeSet', 'int'))
+                                 'android.util.AttributeSet', 'android.R'))
     STYLE_NORMAL = 0x01010048
     STYLE_FLAT = 0x0101032b
     STYLES = {
@@ -75,7 +75,8 @@ class AndroidButton(AndroidTextView, ProxyButton):
 
         """
         d = self.declaration
-        style = Button.STYLE_FLAT if d.flat else Button.STYLE_NORMAL
+        style = d.style if d.style else (
+            '@attr/borderlessButtonStyle' if d.flat else '@attr/buttonStyle')
         self.widget = Button(self.get_context(), None, style)
 
     def init_widget(self):
@@ -131,7 +132,8 @@ class AndroidFloatingActionButton(AndroidImageButton,
         """ Create the underlying widget.
 
         """
-        self.widget = FloatingActionButton(self.get_context())
+        d = self.declaration
+        self.widget = FloatingActionButton(self.get_context(), None, d.style)
 
     # -------------------------------------------------------------------------
     # ProxyFloatingActionButton API

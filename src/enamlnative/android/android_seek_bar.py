@@ -19,6 +19,8 @@ from .bridge import JavaMethod, JavaCallback
 
 class SeekBar(ProgressBar):
     __nativeclass__ = set_default('android.widget.SeekBar')
+    __signature__ = set_default(('android.content.Context',
+                                 'android.util.AttributeSet', 'android.R'))
     setSplitTrack = JavaMethod('boolean')
     setOnSeekBarChangeListener = JavaMethod(
         'android.widget.SeekBar$OnSeekBarChangeListener')
@@ -49,7 +51,9 @@ class AndroidSeekBar(AndroidProgressBar, ProxySeekBar):
         """ Create the underlying widget.
 
         """
-        self.widget = SeekBar(self.get_context())
+        d = self.declaration
+        self.widget = SeekBar(self.get_context(), None,
+                              d.style or '@attr/seekBarStyle')
 
     def init_widget(self):
         """ Initialize the underlying widget.

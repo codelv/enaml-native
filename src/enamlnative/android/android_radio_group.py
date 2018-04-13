@@ -19,6 +19,7 @@ from .bridge import JavaCallback, JavaMethod
 
 class RadioGroup(LinearLayout):
     __nativeclass__ = set_default('android.widget.RadioGroup')
+    __signature__ = set_default(('android.content.Context',))
 
     check = JavaMethod('int')
     clearCheck = JavaMethod()

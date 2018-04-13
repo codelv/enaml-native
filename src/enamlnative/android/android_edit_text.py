@@ -39,7 +39,9 @@ class AndroidEditText(AndroidTextView, ProxyEditText):
         """ Create the underlying widget.
 
         """
-        self.widget = EditText(self.get_context())
+        d = self.declaration
+        self.widget = EditText(self.get_context(), None,
+                               d.style or "@attr/editTextStyle")
 
     # -------------------------------------------------------------------------
     # ProxyEditText API

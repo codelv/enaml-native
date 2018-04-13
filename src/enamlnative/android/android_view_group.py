@@ -62,7 +62,7 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
         """ Create the underlying widget.
 
         """
-        self.widget = ViewGroup(self.get_context())
+        raise NotImplementedError
 
     def init_layout(self):
         """ Add all child widgets to the view

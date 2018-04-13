@@ -46,7 +46,8 @@ class AndroidCardView(AndroidFrameLayout, ProxyCardView):
         """ Create the underlying widget.
 
         """
-        self.widget = CardView(self.get_context())
+        d = self.declaration
+        self.widget = CardView(self.get_context(), None, d.style)
 
     # -------------------------------------------------------------------------
     # ProxyCardView API

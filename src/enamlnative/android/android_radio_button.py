@@ -34,4 +34,6 @@ class AndroidRadioButton(AndroidCompoundButton, ProxyRadioButton):
         """ Create the underlying widget.
 
         """
-        self.widget = RadioButton(self.get_context())
+        d = self.declaration
+        self.widget = RadioButton(self.get_context(), None,
+                                  d.style or '@attr/radioButtonStyle')

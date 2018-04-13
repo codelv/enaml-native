@@ -28,7 +28,7 @@ enamldef ContentView(Flexbox):
                 padding = (20, 10, 20, 10)
                 Icon:
                     text_color = "#fff"
-                    text = "{fa-check}"
+                    text = "{md-check}"
                 TextView:
                     padding = (10, 10, 10, 10)
                     text = "PAGE ADDED"

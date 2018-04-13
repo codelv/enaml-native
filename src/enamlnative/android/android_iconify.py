@@ -54,7 +54,8 @@ class AndroidIcon(AndroidTextView, ProxyIcon):
         """ Create the underlying widget.
 
         """
-        self.widget = Icon(self.get_context())
+        d = self.declaration
+        self.widget = Icon(self.get_context(), None, d.style)
 
 
 class AndroidIconButton(AndroidButton, ProxyIconButton):
@@ -72,7 +73,8 @@ class AndroidIconButton(AndroidButton, ProxyIconButton):
 
         """
         d = self.declaration
-        style = Button.STYLE_FLAT if d.flat else Button.STYLE_NORMAL
+        style = d.style if d.style else (
+            '@attr/borderlessButtonStyle' if d.flat else '@attr/buttonStyle')
         self.widget = IconButton(self.get_context(), None, style)
 
 

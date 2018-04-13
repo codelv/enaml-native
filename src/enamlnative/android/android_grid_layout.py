@@ -49,7 +49,8 @@ class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
         """ Create the underlying widget.
 
         """
-        self.widget = GridLayout(self.get_context())
+        d = self.declaration
+        self.widget = GridLayout(self.get_context(), None, d.style)
 
     # -------------------------------------------------------------------------
     # ProxyGridLayout API

@@ -50,9 +50,10 @@ class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
         """
         d = self.declaration
         if d.orientation == 'vertical':
-            self.widget = ScrollView(self.get_context())
+            self.widget = ScrollView(self.get_context(), None, d.style)
         else:
-            self.widget = HorizontalScrollView(self.get_context())
+            self.widget = HorizontalScrollView(self.get_context(),
+                                               None, d.style)
 
     # -------------------------------------------------------------------------
     # ProxyScrollView API

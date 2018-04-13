@@ -34,4 +34,6 @@ class AndroidCheckBox(AndroidCompoundButton, ProxyCheckBox):
         """ Create the underlying widget.
 
         """
-        self.widget = CheckBox(self.get_context())
+        d = self.declaration
+        self.widget = CheckBox(self.get_context(), None,
+                               d.style or "@attr/checkboxStyle")

@@ -24,6 +24,7 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField
 class ViewPager(ViewGroup):
     __nativeclass__ = set_default(
         'com.codelv.enamlnative.adapters.BridgedViewPager')
+    __signature__ = set_default(('android.content.Context',))
     addOnPageChangeListener = JavaMethod(
         'android.support.v4.view.ViewPager$OnPageChangeListener')
     setCurrentItem = JavaMethod('int')
@@ -88,6 +89,7 @@ class ViewPagerLayoutParams(LayoutParams):
 
 class PagerTitleStrip(ViewGroup):
     __nativeclass__ = set_default('android.support.v4.view.PagerTitleStrip')
+    __signature__ = set_default(('android.content.Context',))
     setNonPrimaryAlpha = JavaMethod('float')
     setCurrentItem = JavaMethod('int')
     setTextColor = JavaMethod('android.graphics.Color')
@@ -144,23 +146,6 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         """
         self.widget = ViewPager(self.get_context())
         self.adapter = BridgedFragmentStatePagerAdapter()
-
-    # def init_widget(self):
-    #     """ Initialize the underlying widget.
-    #
-    #     """
-    #     super(AndroidViewPager, self).init_widget()
-    #     d = self.declaration
-    #     # if d.offscreen_page_limit:
-    #     #     self.set_offscreen_page_limit(d.offscreen_page_limit)
-    #     # if d.page_margin >= 0:
-    #     #     self.set_page_margin(d.page_margin)
-    #     # if not d.paging_enabled:
-    #     #     self.set_paging_enabled(d.paging_enabled)
-    #     # if d.transition != 'default':
-    #     #     self.set_transition(d.transition)
-    #
-    #
 
     def init_layout(self):
         super(AndroidViewPager, self).init_layout()

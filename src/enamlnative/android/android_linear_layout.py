@@ -46,7 +46,8 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
         """ Create the underlying widget.
 
         """
-        self.widget = LinearLayout(self.get_context())
+        d = self.declaration
+        self.widget = LinearLayout(self.get_context(), None, d.style)
 
     # -------------------------------------------------------------------------
     # ProxyLinearLayout API

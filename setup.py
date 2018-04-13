@@ -47,7 +47,7 @@ def find_data_files(dest, *folders):
 
 setup(
     name="enaml-native",
-    version="4.3.0",
+    version="4.4.0",
     author="CodeLV",
     author_email="frmdstryr@gmail.com",
     license='MIT',

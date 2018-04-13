@@ -19,6 +19,7 @@ from .bridge import JavaMethod, JavaCallback, JavaField
 
 class Toolbar(ViewGroup):
     __nativeclass__ = set_default('android.support.v7.widget.Toolbar')
+    __signature__ = set_default(('android.content.Context',))
     setTitle = JavaMethod('java.lang.CharSequence')
     setSubtitle = JavaMethod('java.lang.CharSequence')
     setSubtitleTextColor = JavaMethod('android.graphics.Color')

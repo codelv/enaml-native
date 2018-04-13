@@ -137,7 +137,9 @@ class AndroidTextView(AndroidView, ProxyTextView):
         """ Create the underlying widget.
 
         """
-        self.widget = TextView(self.get_context())
+        d = self.declaration
+        self.widget = TextView(self.get_context(), None,
+                               d.style or '@attr/textViewStyle')
 
     def init_widget(self):
         """ Initialize the underlying widget.

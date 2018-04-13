@@ -1,0 +1,182 @@
+from enamlnative.core.api import Looper, Conditional
+from enamlnative.widgets.api import (
+    Flexbox, Toolbar, Button, Dialog, TextView, View, ViewPager, PagerFragment, WebView, ScrollView
+)
+from enamlnative.android.app import AndroidApplication
+
+app = AndroidApplication.instance()
+
+COLORS = {
+    "blue": "#3F51B5",
+    "red": "#b53f3f",
+    "green": "#3f8e3d"
+}
+
+enamldef Spacer(View):
+    height = 1
+    background_color = "#ccc"
+
+enamldef ListButton(Button):
+    flat = True
+    all_caps = False
+    text_alignment = "left"
+    padding = (20, 20, 10, 20)
+
+enamldef HomeScreen(PagerFragment): page:
+    Flexbox:
+        flex_direction = "column"
+        background_color = "#FFF"
+        Toolbar:
+            height = "wrap_content"
+            min_height = 60
+            background_color << COLORS['blue']
+            title = "Enaml demo"
+            title_color = "#FFF"
+        ListButton:
+            text = "Android UI demo"
+            clicked :: page.parent.current_index = 1
+
+enamldef AndroidDemoScreen(PagerFragment): page:
+    Flexbox: view:
+        attr color = "blue"
+        attr show_source = False
+        flex_direction = "column"
+        align_items = "stretch"
+        #align_content = "stretch"
+        background_color = "#FFF"
+        transition = "default"
+        Toolbar:
+            height = "wrap_content"
+            min_height = 60
+            background_color << COLORS[view.color]
+            content_padding = (0,0,0,0)
+            Flexbox:
+                width = "match_parent"
+                justify_content = "space_between"
+                align_items = "center"
+                TextView:
+                    text = "Android UI demo"
+                    padding = (10, 10, 10, 10)
+                    font_style = "bold"
+                    text_size = 18
+                    text_color = "#FFF"
+                Button:
+                    flat = True
+                    text = "View source"
+                    text_size = 14
+                    text_color = "#FFF"
+                    clicked :: view.show_source = not view.show_source
+        TextView:
+            height = "wrap_content"
+            width = "match_parent"
+            min_height = 80
+            text = "This activity was written entirely in Python using enaml-native. " \
+                   "To view it's source code, press the button above."
+            padding = (10, 10, 10, 10)
+        ScrollView:
+            height = "wrap_content"
+            width = "match_parent"
+            Flexbox:
+                flex_direction = "column"
+                height = 200
+                Spacer:
+                    pass
+
+                ListButton:
+                    text = "Dialog box"
+                    clicked :: dialog.show = True
+                Spacer:
+                        pass
+                ListButton:
+                    text = "Notification"
+                    clicked :: dialog.show = True
+                Spacer:
+                        pass
+                ListButton:
+                    text = "Toast"
+                    clicked :: app.show_toast("Toast from Python")
+                Spacer:
+                    pass
+                ListButton:
+                    text = "Sound"
+                    clicked :: app.show_toast("Toast from Python")
+                Spacer:
+                    pass
+                ListButton:
+                    text = "Vibration"
+                    clicked :: app.show_toast("Toast from Python")
+                Spacer:
+                    pass
+        Conditional:
+            condition << view.show_source
+            WebView:
+                width = "match_parent"
+                height = 300
+                activated ::
+                    with open(__file__) as f:
+                        self.source = """<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+                        <html>
+                            <head>
+                                <link rel="stylesheet"
+                                      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
+                                <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+                            </head>
+                            <body><pre><code class="python">{}</code></pre>
+                            <script>hljs.initHighlightingOnLoad();</script>
+                            </body>
+                        </html>""".format(f.read())
+                source = ""
+                javascript_enabled = True
+        Dialog: dialog:
+            Flexbox:
+                flex_direction = "column"
+                TextView:
+                    text = "Dialog from Python"
+                    font_style = "bold"
+                    text_size = 18
+                    padding = (20, 20, 20, 0)
+                TextView:
+                    text = "Select title color"
+                    padding = (20, 0, 0, 0)
+                Flexbox:
+                    width = "match_parent"
+                    justify_content = "space_between"
+                    padding = (0, 20, 0, 0)
+                    Button:
+                        flat = True
+                        text = "green"
+                        text_color = COLORS[self.text]
+                        clicked ::
+                            view.color = self.text
+                            dialog.show = False
+                    Button:
+                        flat = True
+                        text = "red"
+                        text_color = COLORS[self.text]
+                        clicked ::
+                            view.color = self.text
+                            dialog.show = False
+                    Button:
+                        flat = True
+                        text = "blue"
+                        text_color = COLORS[self.text]
+                        clicked ::
+                            view.color = self.text
+                            dialog.show = False
+
+
+enamldef ContentView(ViewPager): view:
+    transition = 'draw_from_back'
+    background_color = "#000"
+    paging_enabled = False
+
+    activated::
+        app.observe('back_pressed',on_back_pressed)
+    func on_back_pressed(change):
+        change['value']['handled'] = True
+        view.current_index = max(0, view.current_index-1)
+
+    HomeScreen:
+        pass
+    AndroidDemoScreen:
+        pass

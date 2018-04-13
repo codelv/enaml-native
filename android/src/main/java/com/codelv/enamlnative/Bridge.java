@@ -700,11 +700,11 @@ public class Bridge implements PythonInterpreter.EventListener {
                         // Strip off the @ and split by path
                         String sv = v.asStringValue().asString();
                         int resId = 0;
-                        if (sv.startsWith("@")) {
+                        if (sv.startsWith("@") || sv.startsWith("?")) {
                             // The: package.name:type/field syntax
                             String[] res = sv.substring(1).split("/");
                             if (res.length != 2) {
-                                Log.w(TAG, "Resources must match @<type>/<name>, got '"+sv+"'!");
+                                Log.w(TAG, "Resources must match @<type>/<name>, got '" + sv + "'!");
                             } else {
                                 // Support @pkg:res/name syntax
                                 String pkg = "android";
@@ -721,6 +721,11 @@ public class Bridge implements PythonInterpreter.EventListener {
                                             res[1], res[0], mActivity.getPackageName()
                                     );
                                 }
+                            }
+                            // Complex resource
+                            if (sv.startsWith("?")) {
+                                resId = mActivity.obtainStyledAttributes(
+                                        new int[]{resId}).getResourceId(0, 0);
                             }
                         } else {
                             // The: package.name:type/field syntax

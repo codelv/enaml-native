@@ -27,7 +27,9 @@ LAYOUT_KEYS = (
 
 class View(JavaBridgeObject):
     __nativeclass__ = set_default('android.view.View')
-    __signature__ = set_default(('android.content.Context',))
+    __signature__ = set_default(('android.content.Context',
+                                 'android.util.AttributeSet',
+                                 'android.R'))
 
     VISIBILITY_VISIBLE = 0
     VISIBILITY_INVISIBLE = 4
@@ -40,6 +42,8 @@ class View(JavaBridgeObject):
     setOnKeyListener = JavaMethod('android.view.View$OnKeyListener')
     setOnTouchListener = JavaMethod('android.view.View$OnTouchListener')
     setLayoutParams = JavaMethod('android.view.ViewGroup.LayoutParams')
+    setBackground = JavaMethod('android.graphics.drawable.Drawable')
+    setBackgroundResource = JavaMethod('android.R')
     setBackgroundColor = JavaMethod('android.graphics.Color')
     setClickable = JavaMethod('boolean')
     setAlpha = JavaMethod('float')
@@ -133,7 +137,8 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         """ Create the underlying label widget.
 
         """
-        self.widget = View(self.get_context())
+        d = self.declaration
+        self.widget = View(self.get_context(), None, d.style)
 
     def init_widget(self):
         """ Initialize the underlying widget.
@@ -280,6 +285,12 @@ class AndroidView(AndroidToolkitObject, ProxyView):
     # -------------------------------------------------------------------------
     # Style updates
     # -------------------------------------------------------------------------
+    def set_background_style(self, style):
+        """ Sets the background resources.
+        
+        """
+        self.widget.setBackgroundResource(style)
+
     def set_background_color(self, color):
         """ Set the background color of the widget.
         

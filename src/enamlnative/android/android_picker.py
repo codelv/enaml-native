@@ -46,7 +46,9 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
         """ Create the underlying widget.
 
         """
-        self.widget = Picker(self.get_context())
+        d = self.declaration
+        self.widget = Picker(self.get_context(), None,
+                             d.style or '@attr/numberPickerStyle')
 
     def init_widget(self):
         """ Set the checked state after all children have

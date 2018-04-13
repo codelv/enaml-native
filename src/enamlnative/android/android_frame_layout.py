@@ -48,7 +48,8 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
         """ Create the underlying widget.
 
         """
-        self.widget = FrameLayout(self.get_context())
+        d = self.declaration
+        self.widget = FrameLayout(self.get_context(), None, d.style)
 
     # -------------------------------------------------------------------------
     # ProxyFrameLayout API

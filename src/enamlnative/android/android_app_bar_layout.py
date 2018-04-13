@@ -20,6 +20,7 @@ from .bridge import JavaMethod, JavaCallback
 class AppBarLayout(LinearLayout):
     __nativeclass__ = set_default(
         'android.support.design.widget.AppBarLayout')
+    __signature__ = set_default(('android.content.Context',))
 
     addOnOffsetChangedListener = JavaMethod(
         'android.support.design.widget.AppBarLayout$OnOffsetChangedListener')
