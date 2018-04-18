@@ -1,9 +1,6 @@
 # enaml-native
 Build native mobile apps in python using enaml and native widgets! [![Build Status](https://travis-ci.org/codelv/enaml-native.svg?branch=master)](https://travis-ci.org/codelv/enaml-native) [![codecov](https://codecov.io/gh/codelv/enaml-native/branch/master/graph/badge.svg)](https://codecov.io/gh/codelv/enaml-native) [![Help chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/enaml-native/Lobby) [![Documentation Status](https://readthedocs.org/projects/enaml-native/badge/?version=latest)](http://enaml-native.readthedocs.io/en/latest/?badge=latest)
 
-
-[![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
-
 The goal of this project is to be the python version of [react-native](https://facebook.github.io/react-native/). It targets apps that need to have a "native" look and feel and achieves this by reusing existing native Android and iOS widgets from python.  It allows you to declaratively define a UI using python based language called [enaml](http://enaml.readthedocs.io/en/latest/get_started/introduction.html). The rest is "normal" python.
 
 Kivy is still recommended for games and applications that need custom widgets that native Android and iOS libraries do not provide.
@@ -60,9 +57,6 @@ Currently enaml-native's Android support is good enough to make real usable app.
 ##### iOS
 
 Currently enaml-native's iOS support is not yet good enough to make a real app. Only a few components are implemented at the moment and a lot of work is needed to get it to the point where it's really usable, but my "proof of concept" demo shows that it does work. 
-
-[![Enaml-native iOS Preview](https://img.youtube.com/vi/8woq4qsedss/0.jpg)](https://youtu.be/8woq4qsedss)
-
 
 ### Thanks to ###
  
