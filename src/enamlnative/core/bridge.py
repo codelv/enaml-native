@@ -109,7 +109,7 @@ def loads(data):
     """ Decodes and processes events received from the bridge """
     #if not data:
     #    raise ValueError("Tried to load empty data!")
-    return msgpack.loads(data)
+    return msgpack.loads(data, use_list=False, raw=False)
 
 
 class BridgeReferenceError(ReferenceError):

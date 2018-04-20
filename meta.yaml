@@ -1,13 +1,12 @@
 package:
   name: enaml-native
-  version: 4.4.0
+  version: 4.4.1
 
 requirements:
   build:
     - python
 
   run:
-    - python
     - android-enaml
     - android-msgpack
     - ios-enaml # [osx]

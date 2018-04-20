@@ -14,6 +14,7 @@ from atom.api import (
 )
 
 from enaml.core.declarative import d_
+from enaml.compat import str
 
 from .linear_layout import LinearLayout, ProxyLinearLayout
 
@@ -61,7 +62,7 @@ class Picker(LinearLayout):
     value = d_(Int())
 
     #: Items to display
-    items = d_(List(basestring))
+    items = d_(List(str))
 
     #: Sets the speed at which the numbers be incremented and decremented
     #: when the up and down buttons are long pressed respectively.

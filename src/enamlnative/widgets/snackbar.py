@@ -14,6 +14,7 @@ from atom.api import (
 )
 
 from enaml.core.declarative import d_
+from enaml.compat import str
 from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
 
 
@@ -61,7 +62,7 @@ class Snackbar(ToolkitObject):
     clicked = d_(Event(), writable=False)
 
     #: When an action occurs such as swiped out, clicked, timed out, etc..
-    action = d_(Event(basestring), writable=False)
+    action = d_(Event(str), writable=False)
 
     #: Show the snackbar for the given duration
     show = d_(Bool())

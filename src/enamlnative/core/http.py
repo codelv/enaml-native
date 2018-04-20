@@ -8,8 +8,14 @@ The full license is in the file LICENSE, distributed with this software.
 @author jrm
 
 """
+import sys
 import time
-from httplib import responses
+
+if sys.version_info.major < 3:
+    from httplib import responses
+else:
+    from http.client import responses
+
 from atom.api import (Atom, List, Bool, Unicode, Dict, Int, ForwardInstance,
                       Instance, Float, Callable, Subclass)
 from .app import BridgedApplication

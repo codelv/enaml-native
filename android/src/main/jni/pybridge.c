@@ -14,9 +14,6 @@
 #include <string.h>
 #include <dirent.h>
 
-#define LOG(x) __android_log_write(ANDROID_LOG_INFO, "pybridge", (x))
-
-
 /* --------------- */
 /*   Android log   */
 /* --------------- */
@@ -26,6 +23,48 @@ static jmethodID mPublishEvents;
 static PyObject* mExtensions;
 static PyObject* mImpLoadDynamic;
 static PyObject* mNativehooksModule;
+static int pfd[2];
+static pthread_t mLogThread;
+static const char *tag = "pybridge";
+#define LOG(x) __android_log_write(ANDROID_LOG_INFO, tag, (x))
+
+/**
+ * Pipe to catch output from stdout and log it
+ */
+static void *thread_func(void* x) {
+    ssize_t rdsz;
+    char buf[128];
+    while((rdsz = read(pfd[0], buf, sizeof buf - 1)) > 0) {
+        if(buf[rdsz - 1] == '\n') --rdsz;
+        buf[rdsz] = 0;  /* add null-terminator */
+        __android_log_write(ANDROID_LOG_DEBUG, tag, buf);
+    }
+    return 0;
+}
+
+/**
+ * Create a pipe and spawn a thread to catch output from nkd libraries
+ * and send it to androids log.
+ *
+ * Thanks to https://codelab.wordpress.com/2014/11/03/how-to-use-standard-output-streams-for-logging-in-android-apps/
+ */
+int start_logger() {
+    /* make stdout line-buffered and stderr unbuffered */
+    setvbuf(stdout, 0, _IOLBF, 0);
+    setvbuf(stderr, 0, _IONBF, 0);
+
+    /* create the pipe and redirect stdout and stderr */
+    pipe(pfd);
+    dup2(pfd[1], 1);
+    dup2(pfd[1], 2);
+
+    /* spawn the logging thread */
+    if(pthread_create(&mLogThread, 0, thread_func, 0) == -1)
+        return -1;
+    pthread_detach(mLogThread);
+    return 0;
+}
+
 
 /**
  * Call our hook into java. From python use it via
@@ -79,7 +118,15 @@ static PyObject *NativeHooks_load_module(PyObject *self, PyObject *args) {
     if (PyDict_Contains(sys_modules, mod)) {
         return PyDict_GetItem(sys_modules, mod);
     }
+#if PY_MAJOR_VERSION >= 3
+    // Create an ExtensionFileLoader instance
+    PyObject *loader = PyObject_CallFunction(mImpLoadDynamic, "OO", mod, PyDict_GetItem(mExtensions, mod));
+    PyObject *result =  PyObject_CallMethod(loader, "load_module", NULL);
+    Py_XDECREF(loader);
+    return result;
+#else
     return PyObject_CallFunction(mImpLoadDynamic, "OO", mod, PyDict_GetItem(mExtensions, mod));
+#endif
 }
 
 static PyObject *NativeHooks_find_module(PyObject *self, PyObject *args) {
@@ -116,11 +163,10 @@ static struct PyModuleDef NativeHooksModule = {
 
 #endif
 
-PyMODINIT_FUNC PyInit_NativeHooks(JNIEnv *env) {
-    // Get and cache the method pointer
-    jenv = env;
-    mPythonInterpreter = (*env)->FindClass(env, "com/codelv/enamlnative/python/PythonInterpreter");
-    mPublishEvents = (*env)->GetStaticMethodID(env, mPythonInterpreter, "publishEvents", "([B)V");
+PyMODINIT_FUNC PyInit_NativeHooks() {
+    LOG("Init native hooks");
+    mPythonInterpreter = (*jenv)->FindClass(jenv, "com/codelv/enamlnative/python/PythonInterpreter");
+    mPublishEvents = (*jenv)->GetStaticMethodID(jenv, mPythonInterpreter, "publishEvents", "([B)V");
 #if PY_MAJOR_VERSION >= 3
     mNativehooksModule = PyModule_Create(&NativeHooksModule);
 #else
@@ -131,9 +177,14 @@ PyMODINIT_FUNC PyInit_NativeHooks(JNIEnv *env) {
     PySys_SetObject("stdout", mNativehooksModule);
     PySys_SetObject("stderr", mNativehooksModule);
 
+#if PY_MAJOR_VERSION >= 3
+    PyObject* imp =  PyImport_ImportModule("importlib.machinery");
+    mImpLoadDynamic = PyObject_GetAttrString(imp, "ExtensionFileLoader");
+#else
     // Get load dynamic
     PyObject* imp =  PyImport_ImportModule("imp");
     mImpLoadDynamic = PyObject_GetAttrString(imp, "load_dynamic");
+#endif
 
     // Build extension dict
     mExtensions = PyDict_New();
@@ -169,11 +220,16 @@ PyMODINIT_FUNC PyInit_NativeHooks(JNIEnv *env) {
 
     // Add to meta path
     Py_INCREF(mNativehooksModule);
+
     PyObject* meta_path = PySys_GetObject("meta_path");
     PyObject* result = PyObject_CallMethod(meta_path, "append", "O", mNativehooksModule);
 
     Py_XDECREF(result);
     Py_XDECREF(imp);
+
+#if PY_MAJOR_VERSION >= 3
+    return mNativehooksModule;
+#endif
 }
 
 /* ------------------ */
@@ -193,6 +249,11 @@ PyMODINIT_FUNC PyInit_NativeHooks(JNIEnv *env) {
 JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_start
         (JNIEnv *env, jclass jc, jstring assets_path, jstring cache_path, jstring jni_path){
     LOG("Initializing the Python interpreter");
+    // Save the env
+    jenv = env;
+
+    // This forwards NDK stdout output to logcat
+    start_logger();
 
     // Get the location of the python files
     const char *assetspath = (*env)->GetStringUTFChars(env, assets_path, NULL);
@@ -221,11 +282,14 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
     //Py_OptimizeFlag = 1;
     Py_NoSiteFlag = 1;
     Py_Initialize();
+
     if (! PyEval_ThreadsInitialized()) {
         PyEval_InitThreads();
     }
 
-    PyInit_NativeHooks(env);
+#if PY_MAJOR_VERSION < 3
+    PyInit_NativeHooks();
+#endif
 
     // Inject  bootstrap code to redirect python stdin/stdout
     // to the androidlog module
@@ -268,6 +332,7 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_stop
 JNIEXPORT int JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_sendEvents
         (JNIEnv *env, jclass jc, jbyteArray payload) {
     PyGILState_STATE state = PyGILState_Ensure();
+
     // Import module
     PyObject* module = PyImport_ImportModule("enamlnative.android.app");
 
@@ -287,11 +352,19 @@ JNIEXPORT int JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_sendE
       return -1;
     }
 
+
+#if PY_MAJOR_VERSION >= 3
+    const char* sig="y#";
+#else
+    const char* sig="s#";
+#endif
+
     // Send the events
-    PyObject_CallMethod(app, "on_events", "s#", buf, size);
+    PyObject* result = PyObject_CallMethod(app, "on_events", sig, buf, size);
 
     // Cleanup
     (*env)->ReleaseByteArrayElements(env, payload, buf, JNI_ABORT);
+    Py_DECREF(result);
     Py_DECREF(app);
     Py_DECREF(AndroidApplication);
     Py_DECREF(module);

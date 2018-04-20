@@ -1,3 +1,9 @@
+# enaml-native 4.4.1
+
+- Speed up msgpack with use_list=False
+- Compat changes to support python versions
+- Use pipe to redirect library output to logcat
+
 # enaml-native 4.4.0
 
 - Add the `style` attribute for _all_ widgets that support it 

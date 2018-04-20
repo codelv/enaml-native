@@ -39,6 +39,7 @@ enamldef DrawerButton(Flexbox): button:
     padding = (15, 15, 15, 15)
     align_items = "center"
     background_color << active_bg if active else inactive_bg
+    background_style = "?attr/selectableItemBackground"
     Icon:
         text_size = 24
         text_color << active_color if active else  inactive_color
