@@ -16,8 +16,8 @@ Instructions for each are below. Please feel free to suggest changes or ask for 
 The toolchain now provides precompiled packages that can be installed and used from Windows, 
 Ubuntu and OSX by using the `conda` package manager.   
 
-The preferred method is to install the `conda` package manager is by installing `miniconda2` 
-(2.7 version) from [conda.io/miniconda.html](https://conda.io/miniconda.html).
+The preferred method is to install the `conda` package manager is by installing `miniconda` 
+from [conda.io/miniconda.html](https://conda.io/miniconda.html).
 
 > Note: [conda-mobile](https://github.com/codelv/conda-mobile) is a new build system that 
 enaml-native now uses which completely replaces python-for-android and kivy-ios with a uniform
@@ -54,15 +54,10 @@ installing from source. Simply use:
   
 ```bash
 
-pip install --user enaml-native-cli
+conda install -c codelv enaml-native-cli
 
 ```
     
-
-Which installs all the python requirements for you.
-
-> Note: If `pip` does not work make sure that `conda` was installed as mentioned above.
- 
 
 ### Create and run a new project
 
