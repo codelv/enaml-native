@@ -57,6 +57,15 @@ class BridgedApplication(Application):
     #: Application lifecycle state must be set by the implementation
     state = Enum('created', 'paused', 'resumed', 'stopped', 'destroyed')
 
+    #: Width of the screen in dp
+    width = Float(strict=False)
+
+    #: Height of the screen in dp
+    height = Float(strict=False)
+
+    #: Screen orientation
+    orientation = Enum('portrait', 'landscape', 'square')
+
     #: View to display within the activity
     view = Value()
 

@@ -81,13 +81,18 @@ class AndroidApplication(BridgedApplication):
         
         """
         #: Add a ActivityLifecycleListener to update the application state
-        self.widget.addActivityLifecycleListener(self.widget.getId())
-        self.widget.onActivityLifecycleChanged.connect(
+        activity = self.widget
+        activity.addActivityLifecycleListener(activity.getId())
+        activity.onActivityLifecycleChanged.connect(
             self.on_activity_lifecycle_changed)
 
         #: Add BackPressedListener to trigger the event
-        self.widget.addBackPressedListener(self.widget.getId())
-        self.widget.onBackPressed.connect(self.on_back_pressed)
+        activity.addBackPressedListener(activity.getId())
+        activity.onBackPressed.connect(self.on_back_pressed)
+
+        #: Add ConfigurationChangedListener to trigger the event
+        activity.addConfigurationChangedListener(activity.getId())
+        activity.onConfigurationChanged.connect(self.on_configuration_changed)
 
     # -------------------------------------------------------------------------
     # App API Implementation
@@ -190,6 +195,15 @@ class AndroidApplication(BridgedApplication):
             #: Must return a boolean or we will cause android to abort
             return False
 
+    def on_configuration_changed(self, config):
+        """ Handles a screen configuration change.
+
+        """
+        self.width = config['width']
+        self.height = config['height']
+        self.orientation = ('square', 'portrait', 'landscape')[
+                            config['orientation']]
+
     # --------------------------------------------------------------------------
     # Bridge API Implementation
     # --------------------------------------------------------------------------
@@ -205,6 +219,10 @@ class AndroidApplication(BridgedApplication):
                 
                 """
                 self.dp = info['DISPLAY_DENSITY']
+                self.width = info['DISPLAY_WIDTH']
+                self.height = info['DISPLAY_HEIGHT']
+                self.orientation = ('square', 'portrait', 'landscape')[
+                                    info['DISPLAY_ORIENTATION']]
                 self.api_level = info['SDK_INT']
                 self.build_info = info
                 self._show_view()

@@ -2,6 +2,7 @@ package com.codelv.enamlnative;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -42,6 +44,7 @@ public class EnamlActivity extends AppCompatActivity {
     final List<ActivityResultListener> mActivityResultListeners = new ArrayList<ActivityResultListener>();
     final List<ActivityLifecycleListener> mActivityLifecycleListeners = new ArrayList<ActivityLifecycleListener>();
     final List<BackPressedListener> mBackPressedListeners = new ArrayList<BackPressedListener>();
+    final List<ConfigurationChangedListener> mConfigurationChangedListeners = new ArrayList<ConfigurationChangedListener>();
 
     final HashMap<String, Long> mProfilers = new HashMap<>();
     final Handler mHandler = new Handler();
@@ -294,6 +297,21 @@ public class EnamlActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Dispatch the back pressed event to all listeners.
+     */
+    @Override
+    public void onConfigurationChanged(Configuration config) {
+        super.onConfigurationChanged(config);
+        for (ConfigurationChangedListener listener: mConfigurationChangedListeners) {
+            listener.onConfigurationChanged(new HashMap<String, Object>() {{
+                put("width", config.screenWidthDp);
+                put("height", config.screenHeightDp);
+                put("orientation", config.orientation);
+            }});
+        }
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -443,12 +461,36 @@ public class EnamlActivity extends AppCompatActivity {
     }
 
     /**
+     * Add an configuration change listener. Meant to be used from python
+     * so it can receive events from java when screen orientation changes.
+     * @param listener
+     */
+    public void addConfigurationChangedListener(ConfigurationChangedListener listener) {
+        mConfigurationChangedListeners.add(listener);
+    }
+
+    public void removeConfigurationChangedListener(ConfigurationChangedListener listener) {
+        mConfigurationChangedListeners.remove(listener);
+    }
+
+    public interface ConfigurationChangedListener {
+        /**
+         * Called when screen configuration changes. All listeners will be called.
+         *
+         * Handlers must be fast or they will block the UI.
+         */
+        void onConfigurationChanged(HashMap<String, Object> configuration);
+    }
+
+
+    /**
      * Return build info. Called from python at startup to get info like screen density
      * and API version.
      * @return
      */
     public HashMap<String,Object> getBuildInfo() {
-        HashMap<String, Object> result = new HashMap<String, Object>() {{
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        return new HashMap<String, Object>() {{
             put("BOARD",Build.BOARD);
             put("BOOTLOADER", Build.BOOTLOADER);
             put("BRAND", Build.BRAND);
@@ -468,11 +510,11 @@ public class EnamlActivity extends AppCompatActivity {
             put("SDK_INT",Build.VERSION.SDK_INT);
             put("RELEASE", Build.VERSION.RELEASE);
             put("CODENAME", Build.VERSION.CODENAME);
-            put("DISPLAY_DENSITY", getResources().getDisplayMetrics().density);
-            put("DISPLAY_WIDTH", getResources().getDisplayMetrics().widthPixels);
-            put("DISPLAY_HEIGHT", getResources().getDisplayMetrics().heightPixels);
+            put("DISPLAY_DENSITY", metrics.density);
+            put("DISPLAY_WIDTH", metrics.widthPixels/metrics.density);
+            put("DISPLAY_HEIGHT", metrics.heightPixels/metrics.density);
+            put("DISPLAY_ORIENTATION", getResources().getConfiguration().orientation);
         }};
-        return result;
     }
 
     /**

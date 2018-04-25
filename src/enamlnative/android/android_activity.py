@@ -78,3 +78,12 @@ class Activity(Context):
 
     #: Called with the lifecycle state like 'pause', 'resume', etc...
     onBackPressed = JavaCallback(returns='boolean')
+
+    #: Back pressed listener
+    addConfigurationChangedListener = JavaMethod(
+        'com.codelv.enamlnative.EnamlActivity$ConfigurationChangedListener')
+    removeConfigurationChangedListener = JavaMethod(
+        'com.codelv.enamlnative.EnamlActivity$ConfigurationChangedListener')
+
+    #: Called with the lifecycle state like 'pause', 'resume', etc...
+    onConfigurationChanged = JavaCallback('java.lang.HashMap')

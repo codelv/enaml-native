@@ -1,3 +1,8 @@
+# enaml-native 4.4.2
+
+- Support screen orientation changes
+- Set width and height of application in dp units
+
 # enaml-native 4.4.1
 
 - Speed up msgpack with use_list=False
