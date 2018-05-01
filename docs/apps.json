@@ -7,6 +7,13 @@
     "url":"https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground"
   },
   {
+    "name":"Inventory Management",
+    "caption":"Inventory management that syncs to Magento",
+    "image":"https://lh3.googleusercontent.com/2ETpuwn8dYt_gB18_Bj3HxyXK6u1ogwgA-1kJUS7wDIipwc25fMpzgX-_3BBk4Y65Qk=w743-h782-rw",
+    "os":["android"],
+    "url":"#internal-app"
+  },
+  {
     "name":"Anchored Bible", 
     "caption":"Simple multi-lingual bible app", 
     "image":"https://lh3.googleusercontent.com/qEQVv8oS7Evcq4gRjENy-F1OLFGmrEaJWqv6Z0RwrSgh-hjtge649fICRIo_iSpw8JQD=h900", 
