@@ -107,10 +107,8 @@ class _TracebackLogger(Atom):
     formatted_tb = Value()
     exc_info = Value()
 
-    __slots__ = ('exc_info', 'formatted_tb')
-
     def __init__(self, exc_info):
-        super(_TracebackLogger,self).__init__()
+        super(_TracebackLogger, self).__init__()
         self.exc_info = exc_info
 
     def activate(self):
