@@ -1,0 +1,90 @@
+"""
+
+Demonstrates using a ListView
+
+"""
+from atom.api import Atom, Unicode, List, Bool
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+
+from iconify import material
+
+class AppState(Atom):
+    _instance = None
+
+    search = Unicode()
+    data = List()
+    show_search = Bool()
+
+    def _default_data(self):
+        return list(material.ICONS.keys())
+
+    @classmethod
+    def instance(cls):
+        """ Use this to access the state """
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+
+    def __init__(self):
+        """ Make it a singleton """
+        if AppState._instance is not None:
+            raise RuntimeError("Only one AppState should exist!")
+        super(AppState, self).__init__()
+
+
+enamldef ContentView(LinearLayout): drawer:
+    attr state = AppState.instance()
+    orientation = 'vertical'
+    AppBarLayout:
+        height = "wrap_content"
+        width = 'match_parent'
+        Toolbar:
+            Flexbox:
+                justify_content = "space_between"
+                align_items = "center"
+                TextView:
+                    text = "Icons"
+                    visible << not state.show_search
+                    text_color = "#fff"
+                    text_size = 18
+                    clickable = True
+                EditText:
+                    width = 'match_parent'
+                    visible << state.show_search
+                    placeholder = "Filter"
+                    text_color = "#fff"
+                    editor_actions = True
+                    text := state.search
+                    editor_action :: state.show_search = False
+                Icon:
+                    text = "{md-search}"
+                    visible << not state.show_search
+                    padding = (10, 10, 10, 10)
+                    text_size = 32
+                    text_color = "#fff"
+                    clickable = True
+                    clicked :: state.show_search = True
+
+    ListView: list_view:
+        items << [s for s in state.data
+                        if not state.search or state.search in s]
+        Looper:
+            iterable = range(30)
+            ListItem:
+                attr icon << item or ''
+                LinearLayout:
+                    orientation = 'vertical'
+                    Flexbox:
+                        align_items = 'center'
+                        padding = (10, 10, 10, 10)
+                        Icon:
+                            text << "{%s}"%icon
+                            text_size = 32
+                            width = 50
+                        TextView:
+                            text << "{}".format(icon)
+                            padding = (10, 0, 10, 10)
+                    View:
+                        background_color = '#ccc'
+                        height = 1

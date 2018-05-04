@@ -1,3 +1,9 @@
+# enaml-native 4.5.0
+
+- Refactor ListView to use RecyclerAdapter and support container
+operations (append, insert, remove, pop)
+- Fix issue with builtin event loop with Python 3
+
 # enaml-native 4.4.2
 
 - Support screen orientation changes

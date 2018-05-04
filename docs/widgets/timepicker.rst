@@ -2,7 +2,8 @@
 TimePicker
 ========================================
 
-No example available.
+.. literalinclude:: ../../examples/time_picker.enaml
+            :language: python
 
 Declaration
 ----------------------------

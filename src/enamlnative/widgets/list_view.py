@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Value, Bool, Int, List, Event, observe
+    Typed, ForwardTyped, Value, Bool, Int, Enum, ContainerList, Event, observe
 )
 
 from enaml.core.declarative import d_
@@ -28,19 +28,25 @@ class ProxyListView(ProxyViewGroup):
     def set_items(self, items):
         raise NotImplementedError
 
-    def set_divider_height(self, height):
+    def set_span_count(self, count):
         raise NotImplementedError
 
-    def set_header_dividers(self, enabled):
+    def set_orientation(self, orientation):
         raise NotImplementedError
 
-    def set_footer_dividers(self, enabled):
-        raise NotImplementedError
-
-    def set_items_can_focus(self, enabled):
+    def set_arrangement(self, arrangement):
         raise NotImplementedError
 
     def set_selected(self, index):
+        raise NotImplementedError
+
+    def set_fixed_size(self, fixed_size):
+        raise NotImplementedError
+
+    def scroll_to(self, x, y):
+        raise NotImplementedError
+
+    def scroll_to_position(self, position):
         raise NotImplementedError
 
 
@@ -55,30 +61,20 @@ class ListView(ViewGroup):
     """
 
     #: List of items to display
-    items = d_(List())
+    items = d_(ContainerList())
 
-    #: Number of visible items
-    visible_count = d_(Int(10), writable=False)
+    #:  use this setting to improve performance if you know that changes
+    #: in content do not change the layout size of the RecyclerView
+    fixed_size = d_(Bool())
 
-    #: Current index within the list
-    current_index = d_(Int(), writable=False)
+    #: Layout manager to use
+    arrangement = d_(Enum('linear', 'grid', 'staggered'))
 
-    #: Sets the height of the divider that will be drawn between each item
-    #:  in the list.
-    divider_height = d_(Int(-1))
+    #: Orientation
+    orientation = d_(Enum('vertical', 'horizontal'))
 
-    #: Enables or disables the drawing of the divider for header views.
-    header_dividers = d_(Bool())
-
-    #: Enables or disables the drawing of the divider for footer views.
-    footer_dividers = d_(Bool())
-
-    #: Indicates that the views created by the ListAdapter can contain
-    #: focusable items.
-    items_can_focus = d_(Bool())
-
-    #: Sets the currently selected item.
-    selected = d_(Int(-1))
+    #: Span count (only for grid and staggered)
+    span_count = d_(Int())
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyListView)
@@ -86,14 +82,26 @@ class ListView(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('items', 'divider_height', 'header_dividers', 'footer_dividers',
-             'items_can_focus',  'selected')
+    @observe('items', 'arrangement',  'orientation', 'span_count',
+             'fixed_size')
     def _update_proxy(self, change):
         """ An observer which sends the state change to the proxy.
 
         """
         # The superclass implementation is sufficient.
         super(ListView, self)._update_proxy(change)
+
+    def scroll_to(self, x, y):
+        """ Scroll to the given x,y coordinates within the list
+        
+        """
+        self.proxy.scroll_to(x, y)
+
+    def scroll_to_position(self, position):
+        """ Scroll to the given position in the list
+        
+        """
+        self.proxy.scroll_to_position(position)
 
 
 class ListItem(ToolkitObject):
@@ -106,12 +114,6 @@ class ListItem(ToolkitObject):
 
     #: The position of this item within the ListView
     index = d_(Int(), writable=False)
-
-    #: Triggered when this item is clicked
-    clicked = d_(Event())
-
-    #: Triggered when this item is long clicked
-    long_clicked = d_(Event())
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyListItem)

@@ -1,6 +1,6 @@
 package:
   name: enaml-native
-  version: 4.4.2
+  version: 4.5.0
 
 requirements:
   build:
@@ -13,7 +13,7 @@ requirements:
     - ios-msgpack # [osx]
 
 build:
-  number: 4
+  number: 5
   noarch: generic
   include_recipe: False
 

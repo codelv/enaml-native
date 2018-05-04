@@ -2,7 +2,8 @@
 ListView
 ========================================
 
-No example available.
+.. literalinclude:: ../../examples/list_view.enaml
+            :language: python
 
 Declaration
 ----------------------------

@@ -33,6 +33,7 @@ Widgets
    LinearLayout <linearlayout>
    ListItem <listitem>
    ListView <listview>
+   Notification <notification>
    PagerFragment <pagerfragment>
    PagerTabStrip <pagertabstrip>
    PagerTitleStrip <pagertitlestrip>

@@ -2,7 +2,8 @@
 SwipeRefreshLayout
 ========================================
 
-No example available.
+.. literalinclude:: ../../examples/swipe_refresh_layout.enaml
+            :language: python
 
 Declaration
 ----------------------------
