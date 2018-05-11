@@ -297,6 +297,10 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
     // and run main() from bootstrap.py
     int result = PyRun_SimpleString(
         "try:\n"\
+        "    import nativehooks\n"\
+        "    import sys\n"\
+        "    if sys.version_info.major > 2:\n"\
+        "       from importlib import reload\n"\
         "    print('Launching main.py...')\n"\
         "    from main import main\n" \
         "    main()\n" \

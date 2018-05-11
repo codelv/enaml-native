@@ -226,6 +226,11 @@ def snackbar_factory():
     return AndroidSnackbar
 
 
+def surface_view_factory():
+    from .android_surface_view import AndroidSurfaceView
+    return AndroidSurfaceView
+    
+    
 def switch_factory():
     from .android_switch import AndroidSwitch
     return AndroidSwitch
@@ -244,6 +249,11 @@ def text_clock_factory():
 def text_view_factory():
     from .android_text_view import AndroidTextView
     return AndroidTextView
+
+
+def texture_view_factory():
+    from .android_texture_view import AndroidTextureView
+    return AndroidTextureView
 
 
 def time_picker_factory():
@@ -274,6 +284,11 @@ def toggle_button_factory():
 def toolbar_factory():
     from .android_toolbar import AndroidToolbar
     return AndroidToolbar
+
+
+def video_view_factory():
+    from .android_video_view import AndroidVideoView
+    return AndroidVideoView
 
 
 def view_factory():
@@ -335,16 +350,19 @@ ANDROID_FACTORIES = {
     'SeekBar': seek_bar_factory,
     'Spinner': spinner_factory,
     'Snackbar': snackbar_factory,
+    'SurfaceView': surface_view_factory,
     'Switch': switch_factory,
     'SwipeRefreshLayout': swipe_refresh_layout_factory,
     'TabFragment': tab_fragment_factory,
     'TabLayout': tab_layout_factory,
     'TextClock': text_clock_factory,
     'TextView': text_view_factory,
+    'TextureView': texture_view_factory,
     'TimePicker': time_picker_factory,
     'Toast': toast_factory,
     'ToggleButton': toggle_button_factory,
     'Toolbar': toolbar_factory,
+    'VideoView': video_view_factory,
     'View': view_factory,
     'ViewPager': view_pager_factory,
     'WebView': web_view_factory,

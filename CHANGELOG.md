@@ -1,3 +1,11 @@
+# enaml-native 4.5.1
+
+- Fix NDK build warnings from not having the min sdk set and linking using `-l` instead of 
+using LOCAL_SHARED_LIBRARIES
+- Fix reloading in Python 3
+- Add VideoView
+- Changes to setup.py and build.sh to remove ios and android packages when not needed
+
 # enaml-native 4.5.0
 
 - Refactor ListView to use RecyclerAdapter and support container

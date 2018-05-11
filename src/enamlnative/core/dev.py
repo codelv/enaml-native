@@ -22,8 +22,13 @@ from atom.api import (
 from contextlib import contextmanager
 from .bridge import Command
 
+if sys.version_info.major>2:
+    from importlib import reload
+
+
 with enamlnative.imports():
     from .hotswap.api import Hotswapper
+
 
 @contextmanager
 def cd(newdir):

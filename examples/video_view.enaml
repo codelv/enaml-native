@@ -1,0 +1,109 @@
+"""
+
+Demonstrates using a VideoView
+
+"""
+from atom.api import Atom, Unicode, List, Bool
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+from enamlnative.android.app import AndroidApplication
+app = AndroidApplication.instance()
+
+
+class AppState(Atom):
+    _instance = None
+
+    current_video = Unicode()
+    videos = List(default=[
+        'https://archive.org/download/MIT6.858F14/MIT6_858F14_lec{i:02d}_300k.mp4'.format(i=i)
+        for i in range(1,30)
+    ])
+
+    def _default_current_video(self):
+        return self.videos[0]
+
+    def next_video(self):
+        i = self.videos.index(self.current_video)+1
+        if i==len(self.videos):
+            i = 0
+        self.current_video = self.videos[i]
+
+    def previous_video(self):
+        i = self.videos.index(self.current_video)-1
+        self.current_video = self.videos[i]
+
+    @classmethod
+    def instance(cls):
+        """ Use this to access the state """
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+
+    def __init__(self):
+        """ Make it a singleton """
+        if AppState._instance is not None:
+            raise RuntimeError("Only one AppState should exist!")
+        super(AppState, self).__init__()
+
+
+enamldef MediaButton(IconButton):
+    flat = True
+    visible = True
+    text_color = '#6fff'
+    text_size = 64
+
+enamldef ContentView(CoordinatorLayout):
+    attr app_state = AppState.instance()
+    background_color = '#000'
+    AppBarLayout:
+        height = "wrap_content"
+        width = 'match_parent'
+        expanded << btn.visible or video.state == 'loading'
+        Toolbar:
+            title = "MIT Computer Security Lectures"
+            title_color = '#FFF'
+            subtitle << "Lecture {} - {}".format(app_state.videos.index(app_state.current_video)+1, video.state)
+            subtitle_color = '#FFF'
+    FrameLayout:
+        clickable = True
+        clicked ::
+            btn.visible = not btn.visible
+            if btn.visible and video.state == 'playing':
+                app.timed_call(5000, lambda: setattr(btn,'visible', False))
+        Flexbox:
+            justify_content = 'center'
+            align_items = 'center'
+            VideoView: video:
+                src << app_state.current_video
+                src :: app.show_toast(self.src)
+                activated :: app.show_toast(self.src)
+                control = 'stop'
+                error :: app.show_toast("Error: {}".format(change['value']['message']))
+                info :: app.show_toast("Info: {}".format(change['value']['message']))
+        Flexbox:
+            justify_content = 'center'
+            align_items = 'center'
+            transition = 'default'
+            ActivityIndicator:
+                visible << not btn.visible and video.state == 'loading'
+            MediaButton: btn:
+                text << ("{md-play-circle-outline}" if video.control in ('pause', 'stop')
+                            else "{md-pause-circle-outline}")
+                text_color = '#6fff'
+                text_size = 64
+                clicked ::
+                    video.control = 'play' if video.control in ('stop', 'pause') else 'pause'
+                    self.visible = False
+
+        Flexbox:
+            justify_content = 'space_between'
+            align_items = 'center'
+            transition = 'default'
+            MediaButton:
+                visible := btn.visible
+                text << "{md-skip-previous}"
+                clicked :: app_state.previous_video()
+            MediaButton:
+                visible := btn.visible
+                text << "{md-skip-next}"
+                clicked :: app_state.next_video()

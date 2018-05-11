@@ -28,6 +28,7 @@ if 'src' not in sys.path:
     (["android"], 'button.enaml'),
     (["android"], 'calendar_view.enaml'),
     (["android"], 'card_view.enaml'),
+    (["android"], 'chronometer.enaml'),
     (["android"], 'clocks.enaml'),
     #(["android"], 'charts.enaml'), # now requires enaml-native-charts
     (["android"], 'checkbox.enaml'),
@@ -40,6 +41,9 @@ if 'src' not in sys.path:
     (["android"], 'flexbox.enaml'),
     (["android"], 'icon.enaml'),
     (["android"], 'keyboard.enaml'),
+    (["android"], 'list_view.enaml'),
+    (["android"], 'nav_drawer.enaml'),
+    (["android"], 'notifications.enaml'),
     #(["android"], 'mapview.enaml'),# now requires enaml-native-maps
     (["android"], 'pager_tab_strip.enaml'),
     (["android"], 'picker.enaml'),
@@ -52,13 +56,16 @@ if 'src' not in sys.path:
     (["android"], 'snackbar.enaml'),
     (["android"], 'spinner.enaml'),
     (["android", "ios"], 'switch.enaml'),
-    (["android"], 'swipe_refresh.enaml'),
+    (["android"], 'swipe_refresh_layout.enaml'),
     (["android"], 'tabs.enaml'),
     (["android"], 'text_view.enaml'),
+    (["android"], 'time_picker.enaml'),
     (["android"], 'toast.enaml'),
     (["android"], 'toolbar.enaml'),
     (["android"], 'view_pager.enaml'),
+    (["android"], 'video_view.enaml'),
     (["android"], 'webview.enaml'),
+    (["android"], 'wifi.enaml'),
     #(["ios"], '../ios/demo/Python/view.enaml'),
 ])
 def test_examples(platforms, path):

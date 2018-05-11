@@ -1,21 +1,23 @@
 package:
   name: enaml-native
-  version: 4.5.0
+  version: 4.5.1
 
 requirements:
   build:
     - python
-
+    - cython
   run:
     - android-enaml
     - android-msgpack
+    - android-libcxx
     - ios-enaml # [osx]
     - ios-msgpack # [osx]
 
 build:
-  number: 5
+  number: 0
   noarch: generic
   include_recipe: False
+  binary_relocation: False
 
 about:
   home: http://github.com/codelv/enaml-native

@@ -32,8 +32,11 @@ from .card_view import CardView
 #from .view_switcher import ViewSwitcher
 #from .text_switcher import TextSwitcher
 from .image_view import ImageView
-from .web_view import  WebView
+from .web_view import WebView
 from .list_view import ListView, ListItem
+from .surface_view import SurfaceView
+from .texture_view import TextureView
+from .video_view import VideoView
 #from .map_view import MapView, MapMarker, MapCircle, MapPolyline, MapPolygon
 #from .chart_view import DataSet, LineChart, BarChart, ScatterChart, PieChart
 

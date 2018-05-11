@@ -105,3 +105,21 @@ class InputMethodManager(SystemService):
 class Uri(JavaBridgeObject):
     __nativeclass__ = set_default('android.net.Uri')
     parse = JavaStaticMethod('java.lang.String', returns='android.net.Uri')
+
+
+class Handler(JavaBridgeObject):
+    __nativeclass__ = set_default('android.os.Handler')
+    __signature__ = set_default(('android.os.Looper',))
+
+
+class HandlerThread(JavaBridgeObject):
+    __nativeclass__ = set_default('android.os.HandlerThread')
+    __signature__ = set_default(('java.lang.String',))
+    getLooper = JavaMethod(returns='android.os.Looper')
+    getThreadId = JavaMethod('int')
+    quit = JavaMethod(returns='boolean')
+    quitSafely = JavaMethod(returns='boolean')
+    run = JavaMethod()
+    join = JavaMethod()
+    interrupt = JavaMethod()
+    start = JavaMethod()
