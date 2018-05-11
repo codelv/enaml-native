@@ -36,7 +36,7 @@ class AppBarLayout(LinearLayout):
 
     #: Sets whether this AppBarLayout is expanded or not, animating if it has
     #: already been laid out.
-    expanded = d_(Bool())
+    expanded = d_(Bool(True))
 
     #: The vertical offset for the parent AppBarLayout, in px
     vertical_offset = d_(Int(), writable=False)
