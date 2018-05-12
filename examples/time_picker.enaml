@@ -7,4 +7,4 @@ enamldef ContentView(Flexbox):
         width = "match_parent"
         height = "wrap_content"
     TextView:
-        text << "Time: {} ".format(tp.time)
+        text << "Time: {}:{} ".format(tp.hour, tp.minute)

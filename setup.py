@@ -30,6 +30,7 @@ setup(
     url='https://github.com/codelv/enaml-native/',
     description="Build native mobile apps in python",
     long_description=open("README.md").read(),
-    packages=find_packages(),
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
     ext_modules=extensions
 )

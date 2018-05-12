@@ -869,7 +869,6 @@ enamldef ContentView(VBox): content_view:
         title = "ListView"
         ListView: list_view:
           items = list(Icon.PACK_FONT_AWESOME)
-          divider_height = 0
           background_color = '#EEEEEE'
           Looper:
             iterable = range(20) #: MUST ALWAYS be > list_view.visible_count

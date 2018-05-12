@@ -13,7 +13,11 @@ See the [project site](https://www.codelv.com/projects/enaml-native/) or the [ap
 
 There's also some short tutorials and examples on [youtube](https://www.youtube.com/playlist?list=PLXUaMWWFaOjT2WdIrJdTYjEMJmrjuvVz0).
 
-> Need help? Try the gitter group https://gitter.im/enaml-native/Lobby
+Need help? Try the gitter group https://gitter.im/enaml-native/Lobby
+
+##### Screenshots
+
+[![Drawer Demo](https://user-images.githubusercontent.com/380158/38657098-60a43b9c-3dec-11e8-844b-4ac689417b7c.gif)]((https://github.com/codelv/enaml-native/blob/master/examples/nav_drawer.enaml)
 
 ### Add-on Packages ###
 

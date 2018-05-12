@@ -21,9 +21,10 @@ from enaml.application import ProxyResolver
 from enamlnative.core.app import BridgedApplication
 from enamlnative.core import bridge
 
+
 class TestBridge(Atom):
     #: Mock native side
-    app = ForwardInstance(lambda:MockApplication)
+    app = ForwardInstance(lambda: MockApplication)
 
     data = Value()
 

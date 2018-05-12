@@ -73,13 +73,14 @@ def test_examples(platforms, path):
     dir_path = os.path.abspath(os.path.split(os.path.dirname(__file__))[0])
     enaml_file = os.path.join(dir_path, 'examples', os.path.normpath(path))
 
-    with enaml.imports():
-        with open(enaml_file, 'rb') as f:
-            ContentView = load(f.read())
-
     #: Run for each platform
     for platform in platforms:
         app = MockApplication.instance(platform)
+
+        with enaml.imports():
+            with open(enaml_file, 'rb') as f:
+                ContentView = load(f.read())
+
         app.view = ContentView()
         app.run()
 

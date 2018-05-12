@@ -59,7 +59,10 @@ before_install:
   - android-wait-for-emulator
 
   # Install enamlnative dependencies
-  - pip install --user enaml==0.9.8 ply msgpack-python
+  - pip install --user git+https://github.com/nucleic/atom.git
+  - pip install --user git+https://github.com/nucleic/enaml.git
+  - pip install --user git+https://github.com/codelv/enaml-native-icons.git
+  - pip install --user msgpack-python tornado
 
   # Install test tools
   - pip install --user pytest pytest-cov pytest-timeout
@@ -70,13 +73,13 @@ before_install:
 install:
 
   # Install enamlnative (check that build script is not broken
-  - cd $TRAVIS_BUILD_DIR
+  - cd $TRAVIS_BUILD_DIR/src
   - python setup.py develop --user
   - cd ~
 
 script:
   # Run the enaml test suite
-  - cd $TRAVIS_BUILD_DIR
+  - cd $TRAVIS_BUILD_DIR/
   - py.test tests --cov enamlnative --cov-report xml -v
 
 after_success:

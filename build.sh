@@ -7,8 +7,9 @@ else
 fi
 
 # Copy 
-cp -Rf $RECIPE_DIR/src/* $SRC_DIR
+cp -Rf $RECIPE_DIR/src $SRC_DIR
 cp $RECIPE_DIR/README.md $SRC_DIR
+cp $RECIPE_DIR/setup.py $SRC_DIR
 
 # Build iOS
 export TARGETS=("iphoneos iphonesimulator")

@@ -13,6 +13,6 @@ enamldef ContentView(Flexbox):
 
     #: Use items for strings
     Picker: pk2:
-      items = ["blue",'red','green','orange','yellow','white','black']
+      items = [u"blue", u'red', u'green', u'orange', u'yellow', u'white', u'black']
     TextView:
       text << "Selected: {}".format(pk2.items[pk2.value])

@@ -11,7 +11,7 @@ def cleanup():
         sh.rm('-R', 'tmp/test_cli/')
 
 
-def test_init_build():
+def init_build():
     """ Tests that the CLI can properly init a new project install packages and build it
         1. `enaml-native init` works to create a new project
         2. `enaml-native install <package>` properly installs and links modules
