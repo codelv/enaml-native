@@ -19,7 +19,7 @@ for TARGET in $TARGETS
 do
     # Install actual
     mkdir -p $PREFIX/$TARGET/python/site-packages
-    cp -RL enamlnative $PREFIX/$TARGET/python/site-packages
+    cp -RL src/enamlnative $PREFIX/$TARGET/python/site-packages
     
     # Remove the android package
     rm -Rf $PREFIX/$TARGET/python/site-packages/enamlnative/android
