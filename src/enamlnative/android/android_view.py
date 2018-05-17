@@ -36,9 +36,12 @@ class View(JavaBridgeObject):
     VISIBILITY_GONE = 8
 
     onClick = JavaCallback('android.view.View')
+    onLongClick = JavaCallback('android.view.View', returns='boolean')
     onKey = JavaCallback('android.view.View', 'int', 'android.view.KeyEvent')
     onTouch = JavaCallback('android.view.View', 'android.view.MotionEvent')
     setOnClickListener = JavaMethod('android.view.View$OnClickListener')
+    setOnLongClickListener = JavaMethod(
+        'android.view.View$OnLongClickListener')
     setOnKeyListener = JavaMethod('android.view.View$OnKeyListener')
     setOnTouchListener = JavaMethod('android.view.View$OnTouchListener')
     setLayoutParams = JavaMethod('android.view.ViewGroup.LayoutParams')
@@ -46,6 +49,7 @@ class View(JavaBridgeObject):
     setBackgroundResource = JavaMethod('android.R')
     setBackgroundColor = JavaMethod('android.graphics.Color')
     setClickable = JavaMethod('boolean')
+    setLongClickable = JavaMethod('boolean')
     setAlpha = JavaMethod('float')
     setTop = JavaMethod('int')
     setBottom = JavaMethod('int')
@@ -201,6 +205,16 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         d = self.declaration
         d.clicked()
 
+    def on_long_click(self, view):
+        """ Trigger the click
+
+        """
+        d = self.declaration
+        try:
+            d.long_clicked()
+        finally:
+            return True
+
     # -------------------------------------------------------------------------
     # OnKeyListener API
     # -------------------------------------------------------------------------
@@ -268,6 +282,15 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         else:
             w.onClick.disconnect(self.on_click)
         w.setClickable(clickable)
+
+    def set_long_clickable(self, clickable):
+        w = self.widget
+        if clickable:
+            w.setOnLongClickListener(w.getId())
+            w.onLongClick.connect(self.on_long_click)
+        else:
+            w.onLongClick.disconnect(self.on_long_click)
+        w.setLongClickable(clickable)
 
     def set_enabled(self, enabled):
         """ Set the enabled state of the widget.

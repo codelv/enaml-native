@@ -1,3 +1,8 @@
+# enaml-native 4.5.2
+
+- Add long click listener
+
+
 # enaml-native 4.5.1
 
 - Fix NDK build warnings from not having the min sdk set and linking using `-l` instead of 

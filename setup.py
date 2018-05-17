@@ -23,7 +23,7 @@ extensions = []
 
 setup(
     name="enaml-native",
-    version="4.5.1",
+    version="4.5.2",
     author="CodeLV",
     author_email="frmdstryr@gmail.com",
     license='MIT',

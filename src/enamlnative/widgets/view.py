@@ -174,6 +174,9 @@ class View(ToolkitObject):
     #: Called when view is clicked
     clicked = d_(Event(), writable=False)
 
+    #: Called when view is clicked
+    long_clicked = d_(Event(), writable=False)
+
     #: Called when a key event occurs
     key_event = d_(Event(dict), writable=False)
 
