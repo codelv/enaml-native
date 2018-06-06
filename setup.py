@@ -23,13 +23,14 @@ extensions = []
 
 setup(
     name="enaml-native",
-    version="4.5.2",
+    version="4.5.4",
     author="CodeLV",
     author_email="frmdstryr@gmail.com",
     license='MIT',
     url='https://github.com/codelv/enaml-native/',
     description="Build native mobile apps in python",
     long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
     packages=find_packages('src'),
     package_dir={'': 'src'},
     ext_modules=extensions
