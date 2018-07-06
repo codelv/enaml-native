@@ -1,5 +1,7 @@
 # enaml-native
-Build native mobile apps in python using enaml and native widgets! [![Build Status](https://travis-ci.org/codelv/enaml-native.svg?branch=master)](https://travis-ci.org/codelv/enaml-native) [![codecov](https://codecov.io/gh/codelv/enaml-native/branch/master/graph/badge.svg)](https://codecov.io/gh/codelv/enaml-native) [![Help chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/enaml-native/Lobby) [![Documentation Status](https://readthedocs.org/projects/enaml-native/badge/?version=latest)](http://enaml-native.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/codelv/enaml-native.svg?branch=master)](https://travis-ci.org/codelv/enaml-native) [![codecov](https://codecov.io/gh/codelv/enaml-native/branch/master/graph/badge.svg)](https://codecov.io/gh/codelv/enaml-native) [![Help chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/enaml-native/Lobby) [![Documentation Status](https://readthedocs.org/projects/enaml-native/badge/?version=latest)](http://enaml-native.readthedocs.io/en/latest/?badge=latest)
+
+Build native mobile apps in python using enaml and native widgets! 
 
 The goal of this project is to be the python version of [react-native](https://facebook.github.io/react-native/). It targets apps that need to have a "native" look and feel and achieves this by reusing existing native Android and iOS widgets from python.  It allows you to declaratively define a UI using python based language called [enaml](http://enaml.readthedocs.io/en/latest/get_started/introduction.html). The rest is "normal" python.
 
@@ -48,6 +50,11 @@ Created a package? Send a PR and add it here!
 ### Apps ###
 
 Apps using enaml-native can be found [here](https://www.codelv.com/projects/enaml-native/apps/).
+
+A short video showing of some of the apps I made are here
+
+[![App examples](https://img.youtube.com/vi/VdV9HiLANyQ/0.jpg)](https://youtu.be/VdV9HiLANyQ)
+
 
 ### Demos ###
 1. Try out the beta demo app here [on google play](https://play.google.com/store/apps/details?id=com.frmdstryr.enamlnative.demo)
