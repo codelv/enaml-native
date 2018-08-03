@@ -142,7 +142,7 @@ By default any references defined within a component are "private" and cannot be
 
 
     :::python
-    from enamlnative.core.api import Block
+    from enamlnative.core.api import Block, Looper
     from enamlnative.widgets.api import *
 
     enamldef SettingsItem(Flexbox):
