@@ -15,6 +15,8 @@ See the [project site](https://www.codelv.com/projects/enaml-native/) or the [ap
 
 There's also some short tutorials and examples on [youtube](https://www.youtube.com/playlist?list=PLXUaMWWFaOjT2WdIrJdTYjEMJmrjuvVz0).
 
+Slides from a presentation [here](https://prezi.com/p/ysvx5nhbntta/enaml-native/)
+
 Need help? Try the gitter group https://gitter.im/enaml-native/Lobby
 
 ##### Screenshots
