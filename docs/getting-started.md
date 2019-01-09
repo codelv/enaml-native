@@ -57,7 +57,6 @@ installing from source. Simply use:
 conda install -c codelv enaml-native-cli
 
 ```
-    
 
 ### Create and run a new project
 
@@ -94,5 +93,28 @@ enaml-native run-android
 Your app's code resides in the `src` directory. Any files here get installed on the app.
 
 The `view.enaml` contains the UI that is shown, and `main.py` is the startup script. 
+
+### Installing packages
+
+To include 3rd-party python packages in your app they must first be built for Android or iOS, then installed into your apps virtual environment.  Enaml-native uses [conda](https://conda.io/docs/user-guide/getting-started.html) as it's package manager as it helps handle the complexity of cross compiling for Android and iOS (see [conda-mobile](https://github.com/codelv/conda-mobile) if your interested).  
+
+The `enaml-native` command includes a wrapper for conda to install packages. `enaml-native-icons` is a package that lets you use font based icons in your app. To install it run:
+
+```bash
+enaml-native install enaml-native-icons
+```
+
+or use with conda directly
+
+```bash
+conda install -c codelv enaml-native-icons
+```
+
+Once installed you can rebuild the app and your new packages should be available on the app!  
+
+If you run into issues, you can ask for help on [gitter](https://gitter.im/enaml-native/Lobby).
+
+> When installing packages with conda you need to specify the `-c codelv` flag to tell conda to include packages from the [codelv](https://anaconda.org/codelv/repo) channel which contains packages precompiled for android and iOS. If you prefer, you can add it as a default channel by running `conda config --append channels codelv` (see https://conda.io/docs/user-guide/tasks/manage-channels.html).
+
 
 Next [learn the basics](https://www.codelv.com/projects/enaml-native/docs/learn-the-basics)
