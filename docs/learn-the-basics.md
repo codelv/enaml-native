@@ -2,16 +2,10 @@
 
 Enaml-native is like Enaml, but it uses native Android or iOS components instead of Qt components as building blocks. So to understand the basic structure of an enaml-native app, you need to understand some of the basic Enaml concepts, like declarative components and data binding operators.  If you already know Enaml, there's a few enaml-native specifics but feel free to skip ahead.
 
-### Enaml
-
-What is enaml? Watch the excellent video below by the developer.
-
-[![Enaml introduction](https://img.youtube.com/vi/ycFEwz_hAxk/0.jpg)](https://youtu.be/ycFEwz_hAxk)
-
 
 ### Playground
 
-The easiest way to learn the enaml-native syntax is by downloading the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground) app. This app allows you to try out your code into a web based editor and run it as if it were built as part of the app!
+The easiest way to try out enaml-native is by downloading the [Python Playground](https://play.google.com/store/apps/details?id=com.frmdstryr.pythonplayground) app. This app is free and allows you to enter code into a web based editor and run it as if it were built as part of the app!
 
 [![Python Playground](https://img.youtube.com/vi/2IfRrqOWGPA/0.jpg)](https://youtu.be/2IfRrqOWGPA)
 
@@ -45,7 +39,7 @@ As is standard, let's start with a "Hello world" app.
 
 This doesn't look like python? We're using enaml to define a _view_ within our app. Enaml is a subset of the python language that provides a very powerful way of building UI's. 
 
-If you're unfamiliar with enaml read the [enaml introduction](https://nucleic.github.io/enaml/docs/get_started/introduction.html) to get an idea of what it is and why it's used. Once done read about the [enaml syntax](https://nucleic.github.io/enaml/docs/get_started/anatomy.html). Enaml is at the core of enaml-native.
+If you're unfamiliar with enaml read the [enaml introduction](https://enaml.readthedocs.io/en/latest/get_started/introduction.html) to get an idea of what it is and why it's used. Once done read about the [enaml syntax](https://enaml.readthedocs.io/en/latest/get_started/anatomy.html). Enaml is at the core of enaml-native.
 
 First, all the enaml-native components are imported using a standard python import statement. Next the `enamldef` keyword is used to define a new component named `ContentView` that extends the `LinearLayout` component. The `enamldef` keyword has similarities to the `class` keyword in python. After that we add a `TextView` to our layout and assign the `"Hello world!"` expression to the `text` attribute of the view.  In enaml, everything on the right hand side is evaluated lazily within the context of the view state at runtime. This lets you reference other components and their state. 
 
