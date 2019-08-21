@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.4.2'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -21,13 +21,12 @@ allprojects {
 }
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 29
+    buildToolsVersion '28.0.3'
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 27
-        versionCode 13
-        versionName "4.3"
+        targetSdkVersion 29
+        versionCode 14
+        versionName "4.6"
         vectorDrawables.useSupportLibrary = true
 
         // Set dev remote to true to use the remote debugger (running python remotely)
@@ -84,9 +83,9 @@ afterEvaluate {
     task bundlePython(type: Exec) {
         workingDir "../../../" // root enaml-native dir
         if (project.hasProperty("preReleaseBuild")) {
-            commandLine "enaml-native", "bundle-assets", "--release"
+            commandLine "venv/bin/enaml-native", "bundle-assets", "--release"
         } else {
-            commandLine "enaml-native", "bundle-assets"
+            commandLine "venv/bin/enaml-native", "bundle-assets"
         }
 
     }

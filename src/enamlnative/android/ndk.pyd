@@ -1,0 +1,764 @@
+"""
+Copyright (c) 2018, Jairus Martin.
+
+Distributed under the terms of the MIT License.
+
+The full license is in the file LICENSE, distributed with this software.
+
+Created on May 10, 2018
+
+@author: jrm
+"""
+from libc.stdint cimport uint8_t, uint32_t, int32_t, int64_t
+from libcpp cimport bool
+
+
+cdef extern from "android/native_window.h":
+    ctypedef struct ANativeWindow:
+        pass
+
+cdef extern from "camera/NdkCameraError.h":
+    cdef enum camera_status_t:
+        ACAMERA_OK = 0
+        ACAMERA_ERROR_BASE                  = -10000
+        ACAMERA_ERROR_UNKNOWN               = ACAMERA_ERROR_BASE
+        ACAMERA_ERROR_INVALID_PARAMETER     = ACAMERA_ERROR_BASE - 1
+        ACAMERA_ERROR_CAMERA_DISCONNECTED   = ACAMERA_ERROR_BASE - 2
+        ACAMERA_ERROR_NOT_ENOUGH_MEMORY     = ACAMERA_ERROR_BASE - 3
+        ACAMERA_ERROR_METADATA_NOT_FOUND    = ACAMERA_ERROR_BASE - 4
+        ACAMERA_ERROR_CAMERA_DEVICE         = ACAMERA_ERROR_BASE - 5
+        ACAMERA_ERROR_CAMERA_SERVICE        = ACAMERA_ERROR_BASE - 6
+        ACAMERA_ERROR_SESSION_CLOSED        = ACAMERA_ERROR_BASE - 7
+        ACAMERA_ERROR_INVALID_OPERATION     = ACAMERA_ERROR_BASE - 8
+        ACAMERA_ERROR_STREAM_CONFIGURE_FAIL = ACAMERA_ERROR_BASE - 9
+        ACAMERA_ERROR_CAMERA_IN_USE         = ACAMERA_ERROR_BASE - 10
+        ACAMERA_ERROR_MAX_CAMERA_IN_USE     = ACAMERA_ERROR_BASE - 11
+        ACAMERA_ERROR_CAMERA_DISABLED       = ACAMERA_ERROR_BASE - 12
+        ACAMERA_ERROR_PERMISSION_DENIED     = ACAMERA_ERROR_BASE - 13
+
+
+cdef extern from "camera/NdkCameraMetadataTags.h":
+    cdef enum acamera_metadata_section_t:
+        ACAMERA_COLOR_CORRECTION
+        ACAMERA_CONTROL
+        ACAMERA_DEMOSAIC
+        ACAMERA_EDGE
+        ACAMERA_FLASH
+        ACAMERA_FLASH_INFO
+        ACAMERA_HOT_PIXEL
+        ACAMERA_JPEG
+        ACAMERA_LENS
+        ACAMERA_LENS_INFO
+        ACAMERA_NOISE_REDUCTION
+        ACAMERA_QUIRKS
+        ACAMERA_REQUEST
+        ACAMERA_SCALER
+        ACAMERA_SENSOR
+        ACAMERA_SENSOR_INFO
+        ACAMERA_SHADING
+        ACAMERA_STATISTICS
+        ACAMERA_STATISTICS_INFO
+        ACAMERA_TONEMAP
+        ACAMERA_LED
+        ACAMERA_INFO
+        ACAMERA_BLACK_LEVEL
+        ACAMERA_SYNC
+        ACAMERA_REPROCESS
+        ACAMERA_DEPTH
+        ACAMERA_SECTION_COUNT
+        ACAMERA_VENDOR = 0x8000
+    cdef enum acamera_metadata_section_start_t:
+        ACAMERA_COLOR_CORRECTION_START = ACAMERA_COLOR_CORRECTION  << 16
+        ACAMERA_CONTROL_START          = ACAMERA_CONTROL           << 16
+        ACAMERA_DEMOSAIC_START         = ACAMERA_DEMOSAIC          << 16
+        ACAMERA_EDGE_START             = ACAMERA_EDGE              << 16
+        ACAMERA_FLASH_START            = ACAMERA_FLASH             << 16
+        ACAMERA_FLASH_INFO_START       = ACAMERA_FLASH_INFO        << 16
+        ACAMERA_HOT_PIXEL_START        = ACAMERA_HOT_PIXEL         << 16
+        ACAMERA_JPEG_START             = ACAMERA_JPEG              << 16
+        ACAMERA_LENS_START             = ACAMERA_LENS              << 16
+        ACAMERA_LENS_INFO_START        = ACAMERA_LENS_INFO         << 16
+        ACAMERA_NOISE_REDUCTION_START  = ACAMERA_NOISE_REDUCTION   << 16
+        ACAMERA_QUIRKS_START           = ACAMERA_QUIRKS            << 16
+        ACAMERA_REQUEST_START          = ACAMERA_REQUEST           << 16
+        ACAMERA_SCALER_START           = ACAMERA_SCALER            << 16
+        ACAMERA_SENSOR_START           = ACAMERA_SENSOR            << 16
+        ACAMERA_SENSOR_INFO_START      = ACAMERA_SENSOR_INFO       << 16
+        ACAMERA_SHADING_START          = ACAMERA_SHADING           << 16
+        ACAMERA_STATISTICS_START       = ACAMERA_STATISTICS        << 16
+        ACAMERA_STATISTICS_INFO_START  = ACAMERA_STATISTICS_INFO   << 16
+        ACAMERA_TONEMAP_START          = ACAMERA_TONEMAP           << 16
+        ACAMERA_LED_START              = ACAMERA_LED               << 16
+        ACAMERA_INFO_START             = ACAMERA_INFO              << 16
+        ACAMERA_BLACK_LEVEL_START      = ACAMERA_BLACK_LEVEL       << 16
+        ACAMERA_SYNC_START             = ACAMERA_SYNC              << 16
+        ACAMERA_REPROCESS_START        = ACAMERA_REPROCESS         << 16
+        ACAMERA_DEPTH_START            = ACAMERA_DEPTH             << 16
+        ACAMERA_VENDOR_START           = ACAMERA_VENDOR            << 16
+    cdef enum acamera_metadata_tag_t:
+        ACAMERA_COLOR_CORRECTION_MODE = ACAMERA_COLOR_CORRECTION_START
+        ACAMERA_COLOR_CORRECTION_TRANSFORM = ACAMERA_COLOR_CORRECTION_START + 1
+        ACAMERA_COLOR_CORRECTION_GAINS = ACAMERA_COLOR_CORRECTION_START + 2
+        ACAMERA_COLOR_CORRECTION_ABERRATION_MODE = ACAMERA_COLOR_CORRECTION_START + 3
+        ACAMERA_COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES = ACAMERA_COLOR_CORRECTION_START + 4
+        ACAMERA_COLOR_CORRECTION_END
+        ACAMERA_CONTROL_AE_ANTIBANDING_MODE = ACAMERA_CONTROL_START
+        ACAMERA_CONTROL_AE_EXPOSURE_COMPENSATION = ACAMERA_CONTROL_START + 1
+        ACAMERA_CONTROL_AE_LOCK = ACAMERA_CONTROL_START + 2
+        ACAMERA_CONTROL_AE_MODE = ACAMERA_CONTROL_START + 3
+        ACAMERA_CONTROL_AE_REGIONS = ACAMERA_CONTROL_START + 4
+        ACAMERA_CONTROL_AE_TARGET_FPS_RANGE = ACAMERA_CONTROL_START + 5
+        ACAMERA_CONTROL_AE_PRECAPTURE_TRIGGER = ACAMERA_CONTROL_START + 6
+        ACAMERA_CONTROL_AF_MODE = ACAMERA_CONTROL_START + 7
+        ACAMERA_CONTROL_AF_REGIONS = ACAMERA_CONTROL_START + 8
+        ACAMERA_CONTROL_AF_TRIGGER = ACAMERA_CONTROL_START + 9
+        ACAMERA_CONTROL_AWB_LOCK = ACAMERA_CONTROL_START + 10
+        ACAMERA_CONTROL_AWB_MODE = ACAMERA_CONTROL_START + 11
+        ACAMERA_CONTROL_AWB_REGIONS = ACAMERA_CONTROL_START + 12
+        ACAMERA_CONTROL_CAPTURE_INTENT = ACAMERA_CONTROL_START + 13
+        ACAMERA_CONTROL_EFFECT_MODE = ACAMERA_CONTROL_START + 14
+        ACAMERA_CONTROL_MODE = ACAMERA_CONTROL_START + 15
+        ACAMERA_CONTROL_SCENE_MODE = ACAMERA_CONTROL_START + 16
+        ACAMERA_CONTROL_VIDEO_STABILIZATION_MODE = ACAMERA_CONTROL_START + 17
+        ACAMERA_CONTROL_AE_AVAILABLE_ANTIBANDING_MODES = ACAMERA_CONTROL_START + 18
+        ACAMERA_CONTROL_AE_AVAILABLE_MODES = ACAMERA_CONTROL_START + 19
+        ACAMERA_CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES = ACAMERA_CONTROL_START + 20
+        ACAMERA_CONTROL_AE_COMPENSATION_RANGE = ACAMERA_CONTROL_START + 21
+        ACAMERA_CONTROL_AE_COMPENSATION_STEP = ACAMERA_CONTROL_START + 22
+        ACAMERA_CONTROL_AF_AVAILABLE_MODES = ACAMERA_CONTROL_START + 23
+        ACAMERA_CONTROL_AVAILABLE_EFFECTS = ACAMERA_CONTROL_START + 24
+        ACAMERA_CONTROL_AVAILABLE_SCENE_MODES = ACAMERA_CONTROL_START + 25
+        ACAMERA_CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES = ACAMERA_CONTROL_START + 26
+        ACAMERA_CONTROL_AWB_AVAILABLE_MODES = ACAMERA_CONTROL_START + 27
+        ACAMERA_CONTROL_MAX_REGIONS = ACAMERA_CONTROL_START + 28
+        ACAMERA_CONTROL_AE_STATE = ACAMERA_CONTROL_START + 31
+        ACAMERA_CONTROL_AF_STATE = ACAMERA_CONTROL_START + 32
+        ACAMERA_CONTROL_AWB_STATE = ACAMERA_CONTROL_START + 34
+        ACAMERA_CONTROL_AE_LOCK_AVAILABLE = ACAMERA_CONTROL_START + 36
+        ACAMERA_CONTROL_AWB_LOCK_AVAILABLE = ACAMERA_CONTROL_START + 37
+        ACAMERA_CONTROL_AVAILABLE_MODES = ACAMERA_CONTROL_START + 38
+        ACAMERA_CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE = ACAMERA_CONTROL_START + 39
+        ACAMERA_CONTROL_POST_RAW_SENSITIVITY_BOOST = ACAMERA_CONTROL_START + 40
+        ACAMERA_CONTROL_ENABLE_ZSL = ACAMERA_CONTROL_START + 41
+        ACAMERA_CONTROL_END
+        ACAMERA_EDGE_MODE = ACAMERA_EDGE_START
+        ACAMERA_EDGE_AVAILABLE_EDGE_MODES = ACAMERA_EDGE_START + 2
+        ACAMERA_EDGE_END
+        ACAMERA_FLASH_MODE = ACAMERA_FLASH_START + 2
+        ACAMERA_FLASH_STATE = ACAMERA_FLASH_START + 5
+        ACAMERA_FLASH_END
+        ACAMERA_FLASH_INFO_AVAILABLE = ACAMERA_FLASH_INFO_START
+        ACAMERA_FLASH_INFO_END
+        ACAMERA_HOT_PIXEL_MODE = ACAMERA_HOT_PIXEL_START
+        ACAMERA_HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES = ACAMERA_HOT_PIXEL_START + 1
+        ACAMERA_HOT_PIXEL_END
+        ACAMERA_JPEG_GPS_COORDINATES = ACAMERA_JPEG_START
+        ACAMERA_JPEG_GPS_PROCESSING_METHOD = ACAMERA_JPEG_START + 1
+        ACAMERA_JPEG_GPS_TIMESTAMP = ACAMERA_JPEG_START + 2
+        ACAMERA_JPEG_ORIENTATION = ACAMERA_JPEG_START + 3
+        ACAMERA_JPEG_QUALITY = ACAMERA_JPEG_START + 4
+        ACAMERA_JPEG_THUMBNAIL_QUALITY = ACAMERA_JPEG_START + 5
+        ACAMERA_JPEG_THUMBNAIL_SIZE = ACAMERA_JPEG_START + 6
+        ACAMERA_JPEG_AVAILABLE_THUMBNAIL_SIZES = ACAMERA_JPEG_START + 7
+        ACAMERA_JPEG_END
+        ACAMERA_LENS_APERTURE = ACAMERA_LENS_START
+        ACAMERA_LENS_FILTER_DENSITY = ACAMERA_LENS_START + 1
+        ACAMERA_LENS_FOCAL_LENGTH = ACAMERA_LENS_START + 2
+        ACAMERA_LENS_FOCUS_DISTANCE = ACAMERA_LENS_START + 3
+        ACAMERA_LENS_OPTICAL_STABILIZATION_MODE = ACAMERA_LENS_START + 4
+        ACAMERA_LENS_FACING = ACAMERA_LENS_START + 5
+        ACAMERA_LENS_POSE_ROTATION = ACAMERA_LENS_START + 6
+        ACAMERA_LENS_POSE_TRANSLATION = ACAMERA_LENS_START + 7
+        ACAMERA_LENS_FOCUS_RANGE = ACAMERA_LENS_START + 8
+        ACAMERA_LENS_STATE = ACAMERA_LENS_START + 9
+        ACAMERA_LENS_INTRINSIC_CALIBRATION = ACAMERA_LENS_START + 10
+        ACAMERA_LENS_RADIAL_DISTORTION = ACAMERA_LENS_START + 11
+        ACAMERA_LENS_END
+        ACAMERA_LENS_INFO_AVAILABLE_APERTURES = ACAMERA_LENS_INFO_START
+        ACAMERA_LENS_INFO_AVAILABLE_FILTER_DENSITIES = ACAMERA_LENS_INFO_START + 1
+        ACAMERA_LENS_INFO_AVAILABLE_FOCAL_LENGTHS = ACAMERA_LENS_INFO_START + 2
+        ACAMERA_LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION = ACAMERA_LENS_INFO_START + 3
+        ACAMERA_LENS_INFO_HYPERFOCAL_DISTANCE = ACAMERA_LENS_INFO_START + 4
+        ACAMERA_LENS_INFO_MINIMUM_FOCUS_DISTANCE = ACAMERA_LENS_INFO_START + 5
+        ACAMERA_LENS_INFO_SHADING_MAP_SIZE = ACAMERA_LENS_INFO_START + 6
+        ACAMERA_LENS_INFO_FOCUS_DISTANCE_CALIBRATION = ACAMERA_LENS_INFO_START + 7
+        ACAMERA_LENS_INFO_END
+        ACAMERA_NOISE_REDUCTION_MODE = ACAMERA_NOISE_REDUCTION_START
+        ACAMERA_NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES = ACAMERA_NOISE_REDUCTION_START + 2
+        ACAMERA_NOISE_REDUCTION_END
+        ACAMERA_REQUEST_MAX_NUM_OUTPUT_STREAMS = ACAMERA_REQUEST_START + 6
+        ACAMERA_REQUEST_PIPELINE_DEPTH = ACAMERA_REQUEST_START + 9
+        ACAMERA_REQUEST_PIPELINE_MAX_DEPTH = ACAMERA_REQUEST_START + 10
+        ACAMERA_REQUEST_PARTIAL_RESULT_COUNT = ACAMERA_REQUEST_START + 11
+        ACAMERA_REQUEST_AVAILABLE_CAPABILITIES = ACAMERA_REQUEST_START + 12
+        ACAMERA_REQUEST_AVAILABLE_REQUEST_KEYS = ACAMERA_REQUEST_START + 13
+        ACAMERA_REQUEST_AVAILABLE_RESULT_KEYS = ACAMERA_REQUEST_START + 14
+        ACAMERA_REQUEST_AVAILABLE_CHARACTERISTICS_KEYS = ACAMERA_REQUEST_START + 15
+        ACAMERA_REQUEST_END
+        ACAMERA_SCALER_CROP_REGION = ACAMERA_SCALER_START
+        ACAMERA_SCALER_AVAILABLE_MAX_DIGITAL_ZOOM = ACAMERA_SCALER_START + 4
+        ACAMERA_SCALER_AVAILABLE_STREAM_CONFIGURATIONS = ACAMERA_SCALER_START + 10
+        ACAMERA_SCALER_AVAILABLE_MIN_FRAME_DURATIONS = ACAMERA_SCALER_START + 11
+        ACAMERA_SCALER_AVAILABLE_STALL_DURATIONS = ACAMERA_SCALER_START + 12
+        ACAMERA_SCALER_CROPPING_TYPE = ACAMERA_SCALER_START + 13
+        ACAMERA_SCALER_END
+        ACAMERA_SENSOR_EXPOSURE_TIME = ACAMERA_SENSOR_START
+        ACAMERA_SENSOR_FRAME_DURATION = ACAMERA_SENSOR_START + 1
+        ACAMERA_SENSOR_SENSITIVITY = ACAMERA_SENSOR_START + 2
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1 = ACAMERA_SENSOR_START + 3
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT2 = ACAMERA_SENSOR_START + 4
+        ACAMERA_SENSOR_CALIBRATION_TRANSFORM1 = ACAMERA_SENSOR_START + 5
+        ACAMERA_SENSOR_CALIBRATION_TRANSFORM2 = ACAMERA_SENSOR_START + 6
+        ACAMERA_SENSOR_COLOR_TRANSFORM1 = ACAMERA_SENSOR_START + 7
+        ACAMERA_SENSOR_COLOR_TRANSFORM2 = ACAMERA_SENSOR_START + 8
+        ACAMERA_SENSOR_FORWARD_MATRIX1 = ACAMERA_SENSOR_START + 9
+        ACAMERA_SENSOR_FORWARD_MATRIX2 = ACAMERA_SENSOR_START + 10
+        ACAMERA_SENSOR_BLACK_LEVEL_PATTERN = ACAMERA_SENSOR_START + 12
+        ACAMERA_SENSOR_MAX_ANALOG_SENSITIVITY = ACAMERA_SENSOR_START + 13
+        ACAMERA_SENSOR_ORIENTATION = ACAMERA_SENSOR_START + 14
+        ACAMERA_SENSOR_TIMESTAMP = ACAMERA_SENSOR_START + 16
+        ACAMERA_SENSOR_NEUTRAL_COLOR_POINT = ACAMERA_SENSOR_START + 18
+        ACAMERA_SENSOR_NOISE_PROFILE = ACAMERA_SENSOR_START + 19
+        ACAMERA_SENSOR_GREEN_SPLIT = ACAMERA_SENSOR_START + 22
+        ACAMERA_SENSOR_TEST_PATTERN_DATA = ACAMERA_SENSOR_START + 23
+        ACAMERA_SENSOR_TEST_PATTERN_MODE = ACAMERA_SENSOR_START + 24
+        ACAMERA_SENSOR_AVAILABLE_TEST_PATTERN_MODES = ACAMERA_SENSOR_START + 25
+        ACAMERA_SENSOR_ROLLING_SHUTTER_SKEW = ACAMERA_SENSOR_START + 26
+        ACAMERA_SENSOR_OPTICAL_BLACK_REGIONS = ACAMERA_SENSOR_START + 27
+        ACAMERA_SENSOR_DYNAMIC_BLACK_LEVEL = ACAMERA_SENSOR_START + 28
+        ACAMERA_SENSOR_DYNAMIC_WHITE_LEVEL = ACAMERA_SENSOR_START + 29
+        ACAMERA_SENSOR_END
+        ACAMERA_SENSOR_INFO_ACTIVE_ARRAY_SIZE = ACAMERA_SENSOR_INFO_START
+        ACAMERA_SENSOR_INFO_SENSITIVITY_RANGE = ACAMERA_SENSOR_INFO_START + 1
+        ACAMERA_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT = ACAMERA_SENSOR_INFO_START + 2
+        ACAMERA_SENSOR_INFO_EXPOSURE_TIME_RANGE = ACAMERA_SENSOR_INFO_START + 3
+        ACAMERA_SENSOR_INFO_MAX_FRAME_DURATION = ACAMERA_SENSOR_INFO_START + 4
+        ACAMERA_SENSOR_INFO_PHYSICAL_SIZE = ACAMERA_SENSOR_INFO_START + 5
+        ACAMERA_SENSOR_INFO_PIXEL_ARRAY_SIZE = ACAMERA_SENSOR_INFO_START + 6
+        ACAMERA_SENSOR_INFO_WHITE_LEVEL = ACAMERA_SENSOR_INFO_START + 7
+        ACAMERA_SENSOR_INFO_TIMESTAMP_SOURCE = ACAMERA_SENSOR_INFO_START + 8
+        ACAMERA_SENSOR_INFO_LENS_SHADING_APPLIED = ACAMERA_SENSOR_INFO_START + 9
+        ACAMERA_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE = ACAMERA_SENSOR_INFO_START + 10
+        ACAMERA_SENSOR_INFO_END
+        ACAMERA_SHADING_MODE = ACAMERA_SHADING_START
+        ACAMERA_SHADING_AVAILABLE_MODES = ACAMERA_SHADING_START + 2
+        ACAMERA_SHADING_END
+        ACAMERA_STATISTICS_FACE_DETECT_MODE = ACAMERA_STATISTICS_START
+        ACAMERA_STATISTICS_HOT_PIXEL_MAP_MODE = ACAMERA_STATISTICS_START + 3
+        ACAMERA_STATISTICS_FACE_IDS = ACAMERA_STATISTICS_START + 4
+        ACAMERA_STATISTICS_FACE_LANDMARKS = ACAMERA_STATISTICS_START + 5
+        ACAMERA_STATISTICS_FACE_RECTANGLES = ACAMERA_STATISTICS_START + 6
+        ACAMERA_STATISTICS_FACE_SCORES = ACAMERA_STATISTICS_START + 7
+        ACAMERA_STATISTICS_LENS_SHADING_MAP = ACAMERA_STATISTICS_START + 11
+        ACAMERA_STATISTICS_SCENE_FLICKER = ACAMERA_STATISTICS_START + 14
+        ACAMERA_STATISTICS_HOT_PIXEL_MAP = ACAMERA_STATISTICS_START + 15
+        ACAMERA_STATISTICS_LENS_SHADING_MAP_MODE = ACAMERA_STATISTICS_START + 16
+        ACAMERA_STATISTICS_END
+        ACAMERA_STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES = ACAMERA_STATISTICS_INFO_START
+        ACAMERA_STATISTICS_INFO_MAX_FACE_COUNT = ACAMERA_STATISTICS_INFO_START + 2
+        ACAMERA_STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES = ACAMERA_STATISTICS_INFO_START + 6
+        ACAMERA_STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES = ACAMERA_STATISTICS_INFO_START + 7
+        ACAMERA_STATISTICS_INFO_END
+        ACAMERA_TONEMAP_CURVE_BLUE = ACAMERA_TONEMAP_START
+        ACAMERA_TONEMAP_CURVE_GREEN = ACAMERA_TONEMAP_START + 1
+        ACAMERA_TONEMAP_CURVE_RED = ACAMERA_TONEMAP_START + 2
+        ACAMERA_TONEMAP_MODE = ACAMERA_TONEMAP_START + 3
+        ACAMERA_TONEMAP_MAX_CURVE_POINTS = ACAMERA_TONEMAP_START + 4
+        ACAMERA_TONEMAP_AVAILABLE_TONE_MAP_MODES = ACAMERA_TONEMAP_START + 5
+        ACAMERA_TONEMAP_GAMMA = ACAMERA_TONEMAP_START + 6
+        ACAMERA_TONEMAP_PRESET_CURVE = ACAMERA_TONEMAP_START + 7
+        ACAMERA_TONEMAP_END
+        ACAMERA_INFO_SUPPORTED_HARDWARE_LEVEL = ACAMERA_INFO_START
+        ACAMERA_INFO_END
+        ACAMERA_BLACK_LEVEL_LOCK = ACAMERA_BLACK_LEVEL_START
+        ACAMERA_BLACK_LEVEL_END
+        ACAMERA_SYNC_FRAME_NUMBER = ACAMERA_SYNC_START
+        ACAMERA_SYNC_MAX_LATENCY = ACAMERA_SYNC_START + 1
+        ACAMERA_SYNC_END
+        ACAMERA_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS = ACAMERA_DEPTH_START + 1
+        ACAMERA_DEPTH_AVAILABLE_DEPTH_MIN_FRAME_DURATIONS = ACAMERA_DEPTH_START + 2
+        ACAMERA_DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS = ACAMERA_DEPTH_START + 3
+        ACAMERA_DEPTH_DEPTH_IS_EXCLUSIVE = ACAMERA_DEPTH_START + 4
+        ACAMERA_DEPTH_END
+    cdef enum acamera_metadata_enum_acamera_color_correction_mode_t:
+        ACAMERA_COLOR_CORRECTION_MODE_TRANSFORM_MATRIX                   = 0
+        ACAMERA_COLOR_CORRECTION_MODE_FAST                               = 1
+        ACAMERA_COLOR_CORRECTION_MODE_HIGH_QUALITY                       = 2
+    cdef enum acamera_metadata_enum_acamera_color_correction_aberration_mode_t:
+        ACAMERA_COLOR_CORRECTION_ABERRATION_MODE_OFF                     = 0
+        ACAMERA_COLOR_CORRECTION_ABERRATION_MODE_FAST                    = 1
+        ACAMERA_COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY            = 2
+    cdef enum acamera_metadata_enum_acamera_control_ae_antibanding_mode_t:
+        ACAMERA_CONTROL_AE_ANTIBANDING_MODE_OFF                          = 0
+        ACAMERA_CONTROL_AE_ANTIBANDING_MODE_50HZ                         = 1
+        ACAMERA_CONTROL_AE_ANTIBANDING_MODE_60HZ                         = 2
+        ACAMERA_CONTROL_AE_ANTIBANDING_MODE_AUTO                         = 3
+    cdef enum acamera_metadata_enum_acamera_control_ae_lock_t:
+        ACAMERA_CONTROL_AE_LOCK_OFF                                      = 0
+        ACAMERA_CONTROL_AE_LOCK_ON                                       = 1
+    cdef enum acamera_metadata_enum_acamera_control_ae_mode_t:
+        ACAMERA_CONTROL_AE_MODE_OFF                                      = 0
+        ACAMERA_CONTROL_AE_MODE_ON                                       = 1
+        ACAMERA_CONTROL_AE_MODE_ON_AUTO_FLASH                            = 2
+        ACAMERA_CONTROL_AE_MODE_ON_ALWAYS_FLASH                          = 3
+        ACAMERA_CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE                     = 4
+    cdef enum acamera_metadata_enum_acamera_control_ae_precapture_trigger_t:
+        ACAMERA_CONTROL_AE_PRECAPTURE_TRIGGER_IDLE                       = 0
+        ACAMERA_CONTROL_AE_PRECAPTURE_TRIGGER_START                      = 1
+        ACAMERA_CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL                     = 2
+    cdef enum acamera_metadata_enum_acamera_control_af_mode_t:
+        ACAMERA_CONTROL_AF_MODE_OFF                                      = 0
+        ACAMERA_CONTROL_AF_MODE_AUTO                                     = 1
+        ACAMERA_CONTROL_AF_MODE_MACRO                                    = 2
+        ACAMERA_CONTROL_AF_MODE_CONTINUOUS_VIDEO                         = 3
+        ACAMERA_CONTROL_AF_MODE_CONTINUOUS_PICTURE                       = 4
+        ACAMERA_CONTROL_AF_MODE_EDOF                                     = 5
+    cdef enum acamera_metadata_enum_acamera_control_af_trigger_t:
+        ACAMERA_CONTROL_AF_TRIGGER_IDLE                                  = 0
+        ACAMERA_CONTROL_AF_TRIGGER_START                                 = 1
+        ACAMERA_CONTROL_AF_TRIGGER_CANCEL                                = 2
+    cdef enum acamera_metadata_enum_acamera_control_awb_lock_t:
+        ACAMERA_CONTROL_AWB_LOCK_OFF                                     = 0
+        ACAMERA_CONTROL_AWB_LOCK_ON                                      = 1
+    cdef enum acamera_metadata_enum_acamera_control_awb_mode_t:
+        ACAMERA_CONTROL_AWB_MODE_OFF                                     = 0
+        ACAMERA_CONTROL_AWB_MODE_AUTO                                    = 1
+        ACAMERA_CONTROL_AWB_MODE_INCANDESCENT                            = 2
+        ACAMERA_CONTROL_AWB_MODE_FLUORESCENT                             = 3
+        ACAMERA_CONTROL_AWB_MODE_WARM_FLUORESCENT                        = 4
+        ACAMERA_CONTROL_AWB_MODE_DAYLIGHT                                = 5
+        ACAMERA_CONTROL_AWB_MODE_CLOUDY_DAYLIGHT                         = 6
+        ACAMERA_CONTROL_AWB_MODE_TWILIGHT                                = 7
+        ACAMERA_CONTROL_AWB_MODE_SHADE                                   = 8
+    cdef enum acamera_metadata_enum_acamera_control_capture_intent_t:
+        ACAMERA_CONTROL_CAPTURE_INTENT_CUSTOM                            = 0
+        ACAMERA_CONTROL_CAPTURE_INTENT_PREVIEW                           = 1
+        ACAMERA_CONTROL_CAPTURE_INTENT_STILL_CAPTURE                     = 2
+        ACAMERA_CONTROL_CAPTURE_INTENT_VIDEO_RECORD                      = 3
+        ACAMERA_CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT                    = 4
+        ACAMERA_CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG                  = 5
+        ACAMERA_CONTROL_CAPTURE_INTENT_MANUAL                            = 6
+    cdef enum acamera_metadata_enum_acamera_control_effect_mode_t:
+        ACAMERA_CONTROL_EFFECT_MODE_OFF                                  = 0
+        ACAMERA_CONTROL_EFFECT_MODE_MONO                                 = 1
+        ACAMERA_CONTROL_EFFECT_MODE_NEGATIVE                             = 2
+        ACAMERA_CONTROL_EFFECT_MODE_SOLARIZE                             = 3
+        ACAMERA_CONTROL_EFFECT_MODE_SEPIA                                = 4
+        ACAMERA_CONTROL_EFFECT_MODE_POSTERIZE                            = 5
+        ACAMERA_CONTROL_EFFECT_MODE_WHITEBOARD                           = 6
+        ACAMERA_CONTROL_EFFECT_MODE_BLACKBOARD                           = 7
+        ACAMERA_CONTROL_EFFECT_MODE_AQUA                                 = 8
+    cdef enum acamera_metadata_enum_acamera_control_mode_t:
+        ACAMERA_CONTROL_MODE_OFF                                         = 0
+        ACAMERA_CONTROL_MODE_AUTO                                        = 1
+        ACAMERA_CONTROL_MODE_USE_SCENE_MODE                              = 2
+        ACAMERA_CONTROL_MODE_OFF_KEEP_STATE                              = 3
+    cdef enum acamera_metadata_enum_acamera_control_scene_mode_t:
+        ACAMERA_CONTROL_SCENE_MODE_DISABLED                              = 0
+        ACAMERA_CONTROL_SCENE_MODE_FACE_PRIORITY                         = 1
+        ACAMERA_CONTROL_SCENE_MODE_ACTION                                = 2
+        ACAMERA_CONTROL_SCENE_MODE_PORTRAIT                              = 3
+        ACAMERA_CONTROL_SCENE_MODE_LANDSCAPE                             = 4
+        ACAMERA_CONTROL_SCENE_MODE_NIGHT                                 = 5
+        ACAMERA_CONTROL_SCENE_MODE_NIGHT_PORTRAIT                        = 6
+        ACAMERA_CONTROL_SCENE_MODE_THEATRE                               = 7
+        ACAMERA_CONTROL_SCENE_MODE_BEACH                                 = 8
+        ACAMERA_CONTROL_SCENE_MODE_SNOW                                  = 9
+        ACAMERA_CONTROL_SCENE_MODE_SUNSET                                = 10
+        ACAMERA_CONTROL_SCENE_MODE_STEADYPHOTO                           = 11
+        ACAMERA_CONTROL_SCENE_MODE_FIREWORKS                             = 12
+        ACAMERA_CONTROL_SCENE_MODE_SPORTS                                = 13
+        ACAMERA_CONTROL_SCENE_MODE_PARTY                                 = 14
+        ACAMERA_CONTROL_SCENE_MODE_CANDLELIGHT                           = 15
+        ACAMERA_CONTROL_SCENE_MODE_BARCODE                               = 16
+        ACAMERA_CONTROL_SCENE_MODE_HDR                                   = 18
+    cdef enum acamera_metadata_enum_acamera_control_video_stabilization_mode_t:
+        ACAMERA_CONTROL_VIDEO_STABILIZATION_MODE_OFF                     = 0
+        ACAMERA_CONTROL_VIDEO_STABILIZATION_MODE_ON                      = 1
+    cdef enum acamera_metadata_enum_acamera_control_ae_state_t:
+        ACAMERA_CONTROL_AE_STATE_INACTIVE                                = 0
+        ACAMERA_CONTROL_AE_STATE_SEARCHING                               = 1
+        ACAMERA_CONTROL_AE_STATE_CONVERGED                               = 2
+        ACAMERA_CONTROL_AE_STATE_LOCKED                                  = 3
+        ACAMERA_CONTROL_AE_STATE_FLASH_REQUIRED                          = 4
+        ACAMERA_CONTROL_AE_STATE_PRECAPTURE                              = 5
+    cdef enum acamera_metadata_enum_acamera_control_af_state_t:
+        ACAMERA_CONTROL_AF_STATE_INACTIVE                                = 0
+        ACAMERA_CONTROL_AF_STATE_PASSIVE_SCAN                            = 1
+        ACAMERA_CONTROL_AF_STATE_PASSIVE_FOCUSED                         = 2
+        ACAMERA_CONTROL_AF_STATE_ACTIVE_SCAN                             = 3
+        ACAMERA_CONTROL_AF_STATE_FOCUSED_LOCKED                          = 4
+        ACAMERA_CONTROL_AF_STATE_NOT_FOCUSED_LOCKED                      = 5
+        ACAMERA_CONTROL_AF_STATE_PASSIVE_UNFOCUSED                       = 6
+    cdef enum acamera_metadata_enum_acamera_control_awb_state_t:
+        ACAMERA_CONTROL_AWB_STATE_INACTIVE                               = 0
+        ACAMERA_CONTROL_AWB_STATE_SEARCHING                              = 1
+        ACAMERA_CONTROL_AWB_STATE_CONVERGED                              = 2
+        ACAMERA_CONTROL_AWB_STATE_LOCKED                                 = 3
+    cdef enum acamera_metadata_enum_acamera_control_ae_lock_available_t:
+        ACAMERA_CONTROL_AE_LOCK_AVAILABLE_FALSE                          = 0
+        ACAMERA_CONTROL_AE_LOCK_AVAILABLE_TRUE                           = 1
+    cdef enum acamera_metadata_enum_acamera_control_awb_lock_available_t:
+        ACAMERA_CONTROL_AWB_LOCK_AVAILABLE_FALSE                         = 0
+        ACAMERA_CONTROL_AWB_LOCK_AVAILABLE_TRUE                          = 1
+    cdef enum acamera_metadata_enum_acamera_control_enable_zsl_t:
+        ACAMERA_CONTROL_ENABLE_ZSL_FALSE                                 = 0
+        ACAMERA_CONTROL_ENABLE_ZSL_TRUE                                  = 1
+    cdef enum acamera_metadata_enum_acamera_edge_mode_t:
+        ACAMERA_EDGE_MODE_OFF                                            = 0
+        ACAMERA_EDGE_MODE_FAST                                           = 1
+        ACAMERA_EDGE_MODE_HIGH_QUALITY                                   = 2
+        ACAMERA_EDGE_MODE_ZERO_SHUTTER_LAG                               = 3
+    cdef enum acamera_metadata_enum_acamera_flash_mode_t:
+        ACAMERA_FLASH_MODE_OFF                                           = 0
+        ACAMERA_FLASH_MODE_SINGLE                                        = 1
+        ACAMERA_FLASH_MODE_TORCH                                         = 2
+    cdef enum acamera_metadata_enum_acamera_flash_state_t:
+        ACAMERA_FLASH_STATE_UNAVAILABLE                                  = 0
+        ACAMERA_FLASH_STATE_CHARGING                                     = 1
+        ACAMERA_FLASH_STATE_READY                                        = 2
+        ACAMERA_FLASH_STATE_FIRED                                        = 3
+        ACAMERA_FLASH_STATE_PARTIAL                                      = 4
+    cdef enum acamera_metadata_enum_acamera_flash_info_available_t:
+        ACAMERA_FLASH_INFO_AVAILABLE_FALSE                               = 0
+        ACAMERA_FLASH_INFO_AVAILABLE_TRUE                                = 1
+    cdef enum acamera_metadata_enum_acamera_hot_pixel_mode_t:
+        ACAMERA_HOT_PIXEL_MODE_OFF                                       = 0
+        ACAMERA_HOT_PIXEL_MODE_FAST                                      = 1
+        ACAMERA_HOT_PIXEL_MODE_HIGH_QUALITY                              = 2
+    cdef enum acamera_metadata_enum_acamera_lens_optical_stabilization_mode_t:
+        ACAMERA_LENS_OPTICAL_STABILIZATION_MODE_OFF                      = 0
+        ACAMERA_LENS_OPTICAL_STABILIZATION_MODE_ON                       = 1
+    cdef enum acamera_metadata_enum_acamera_lens_facing_t:
+        ACAMERA_LENS_FACING_FRONT                                        = 0
+        ACAMERA_LENS_FACING_BACK                                         = 1
+        ACAMERA_LENS_FACING_EXTERNAL                                     = 2
+    cdef enum acamera_metadata_enum_acamera_lens_state_t:
+        ACAMERA_LENS_STATE_STATIONARY                                    = 0
+        ACAMERA_LENS_STATE_MOVING                                        = 1
+    cdef enum acamera_metadata_enum_acamera_lens_info_focus_distance_calibration_t:
+        ACAMERA_LENS_INFO_FOCUS_DISTANCE_CALIBRATION_UNCALIBRATED        = 0
+        ACAMERA_LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE         = 1
+        ACAMERA_LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED          = 2
+    cdef enum acamera_metadata_enum_acamera_noise_reduction_mode_t:
+        ACAMERA_NOISE_REDUCTION_MODE_OFF                                 = 0
+        ACAMERA_NOISE_REDUCTION_MODE_FAST                                = 1
+        ACAMERA_NOISE_REDUCTION_MODE_HIGH_QUALITY                        = 2
+        ACAMERA_NOISE_REDUCTION_MODE_MINIMAL                             = 3
+        ACAMERA_NOISE_REDUCTION_MODE_ZERO_SHUTTER_LAG                    = 4
+    cdef enum acamera_metadata_enum_acamera_request_available_capabilities_t:
+        ACAMERA_REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE       = 0
+        ACAMERA_REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR             = 1
+        ACAMERA_REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING    = 2
+        ACAMERA_REQUEST_AVAILABLE_CAPABILITIES_RAW                       = 3
+        ACAMERA_REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS      = 5
+        ACAMERA_REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE             = 6
+        ACAMERA_REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT              = 8
+    cdef enum acamera_metadata_enum_acamera_scaler_available_stream_configurations_t:
+        ACAMERA_SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT            = 0
+        ACAMERA_SCALER_AVAILABLE_STREAM_CONFIGURATIONS_INPUT             = 1
+    cdef enum acamera_metadata_enum_acamera_scaler_cropping_type_t:
+        ACAMERA_SCALER_CROPPING_TYPE_CENTER_ONLY                         = 0
+        ACAMERA_SCALER_CROPPING_TYPE_FREEFORM                            = 1
+    cdef enum acamera_metadata_enum_acamera_sensor_reference_illuminant1_t:
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT                    = 1
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_FLUORESCENT                 = 2
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_TUNGSTEN                    = 3
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_FLASH                       = 4
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_FINE_WEATHER                = 9
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_CLOUDY_WEATHER              = 10
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_SHADE                       = 11
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT_FLUORESCENT        = 12
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_DAY_WHITE_FLUORESCENT       = 13
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_COOL_WHITE_FLUORESCENT      = 14
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_WHITE_FLUORESCENT           = 15
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_STANDARD_A                  = 17
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_STANDARD_B                  = 18
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_STANDARD_C                  = 19
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_D55                         = 20
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_D65                         = 21
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_D75                         = 22
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_D50                         = 23
+        ACAMERA_SENSOR_REFERENCE_ILLUMINANT1_ISO_STUDIO_TUNGSTEN         = 24
+    cdef enum acamera_metadata_enum_acamera_sensor_test_pattern_mode_t:
+        ACAMERA_SENSOR_TEST_PATTERN_MODE_OFF                             = 0
+        ACAMERA_SENSOR_TEST_PATTERN_MODE_SOLID_COLOR                     = 1
+        ACAMERA_SENSOR_TEST_PATTERN_MODE_COLOR_BARS                      = 2
+        ACAMERA_SENSOR_TEST_PATTERN_MODE_COLOR_BARS_FADE_TO_GRAY         = 3
+        ACAMERA_SENSOR_TEST_PATTERN_MODE_PN9                             = 4
+        ACAMERA_SENSOR_TEST_PATTERN_MODE_CUSTOM1                         = 256
+    cdef enum acamera_metadata_enum_acamera_sensor_info_color_filter_arrangement_t:
+        ACAMERA_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGGB                = 0
+        ACAMERA_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GRBG                = 1
+        ACAMERA_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GBRG                = 2
+        ACAMERA_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_BGGR                = 3
+        ACAMERA_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB                 = 4
+    cdef enum acamera_metadata_enum_acamera_sensor_info_timestamp_source_t:
+        ACAMERA_SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN                     = 0
+        ACAMERA_SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME                    = 1
+    cdef enum acamera_metadata_enum_acamera_sensor_info_lens_shading_applied_t:
+        ACAMERA_SENSOR_INFO_LENS_SHADING_APPLIED_FALSE                   = 0
+        ACAMERA_SENSOR_INFO_LENS_SHADING_APPLIED_TRUE                    = 1
+    cdef enum acamera_metadata_enum_acamera_shading_mode_t:
+        ACAMERA_SHADING_MODE_OFF                                         = 0
+        ACAMERA_SHADING_MODE_FAST                                        = 1
+        ACAMERA_SHADING_MODE_HIGH_QUALITY                                = 2
+    cdef enum acamera_metadata_enum_acamera_statistics_face_detect_mode_t:
+        ACAMERA_STATISTICS_FACE_DETECT_MODE_OFF                          = 0
+        ACAMERA_STATISTICS_FACE_DETECT_MODE_SIMPLE                       = 1
+        ACAMERA_STATISTICS_FACE_DETECT_MODE_FULL                         = 2
+    cdef enum acamera_metadata_enum_acamera_statistics_hot_pixel_map_mode_t:
+        ACAMERA_STATISTICS_HOT_PIXEL_MAP_MODE_OFF                        = 0
+        ACAMERA_STATISTICS_HOT_PIXEL_MAP_MODE_ON                         = 1
+    cdef enum acamera_metadata_enum_acamera_statistics_scene_flicker_t:
+        ACAMERA_STATISTICS_SCENE_FLICKER_NONE                            = 0
+        ACAMERA_STATISTICS_SCENE_FLICKER_50HZ                            = 1
+        ACAMERA_STATISTICS_SCENE_FLICKER_60HZ                            = 2
+    cdef enum acamera_metadata_enum_acamera_statistics_lens_shading_map_mode_t:
+        ACAMERA_STATISTICS_LENS_SHADING_MAP_MODE_OFF                     = 0
+        ACAMERA_STATISTICS_LENS_SHADING_MAP_MODE_ON                      = 1
+    cdef enum acamera_metadata_enum_acamera_tonemap_mode_t:
+        ACAMERA_TONEMAP_MODE_CONTRAST_CURVE                              = 0
+        ACAMERA_TONEMAP_MODE_FAST                                        = 1
+        ACAMERA_TONEMAP_MODE_HIGH_QUALITY                                = 2
+        ACAMERA_TONEMAP_MODE_GAMMA_VALUE                                 = 3
+        ACAMERA_TONEMAP_MODE_PRESET_CURVE                                = 4
+    cdef enum acamera_metadata_enum_acamera_tonemap_preset_curve_t:
+        ACAMERA_TONEMAP_PRESET_CURVE_SRGB                                = 0
+        ACAMERA_TONEMAP_PRESET_CURVE_REC709                              = 1
+    cdef enum acamera_metadata_enum_acamera_info_supported_hardware_level_t:
+        ACAMERA_INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED                    = 0
+        ACAMERA_INFO_SUPPORTED_HARDWARE_LEVEL_FULL                       = 1
+        ACAMERA_INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY                     = 2
+        ACAMERA_INFO_SUPPORTED_HARDWARE_LEVEL_3                          = 3
+    cdef enum acamera_metadata_enum_acamera_black_level_lock_t:
+        ACAMERA_BLACK_LEVEL_LOCK_OFF                                     = 0
+        ACAMERA_BLACK_LEVEL_LOCK_ON                                      = 1
+    cdef enum acamera_metadata_enum_acamera_sync_frame_number_t:
+        ACAMERA_SYNC_FRAME_NUMBER_CONVERGING                             = -1
+        ACAMERA_SYNC_FRAME_NUMBER_UNKNOWN                                = -2
+    cdef enum acamera_metadata_enum_acamera_sync_max_latency_t:
+        ACAMERA_SYNC_MAX_LATENCY_PER_FRAME_CONTROL                       = 0
+        ACAMERA_SYNC_MAX_LATENCY_UNKNOWN                                 = -1
+    cdef enum acamera_metadata_enum_acamera_depth_available_depth_stream_configurations_t:
+        ACAMERA_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS_OUTPUT       = 0
+        ACAMERA_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS_INPUT        = 1
+    cdef enum acamera_metadata_enum_acamera_depth_depth_is_exclusive_t:
+        ACAMERA_DEPTH_DEPTH_IS_EXCLUSIVE_FALSE                           = 0
+        ACAMERA_DEPTH_DEPTH_IS_EXCLUSIVE_TRUE                            = 1
+
+
+cdef extern from "camera/NdkCameraMetadata.h":
+    ctypedef struct ACameraMetadata:
+        pass
+    ctypedef struct ACameraMetadata_rational:
+        int32_t numerator
+        int32_t denominator
+    ctypedef struct ACameraMetadata_entry:
+        uint32_t tag
+        uint8_t  type
+        uint32_t count
+        uint8_t *u8
+        int32_t *i32
+        float   *f
+        int64_t *i64
+        double  *d
+        ACameraMetadata_rational* r
+    ctypedef struct ACameraMetadata_const_entry:
+        uint32_t tag
+        uint8_t  type
+        uint32_t count
+        uint8_t *u8
+        int32_t *i32
+        float   *f
+        int64_t *i64
+        double  *d
+        ACameraMetadata_rational* r
+        
+    camera_status_t ACameraMetadata_getConstEntry(
+        const ACameraMetadata* metadata, uint32_t tag, ACameraMetadata_const_entry* entry)
+    camera_status_t ACameraMetadata_getAllTags(
+        const ACameraMetadata* metadata, int32_t* numEntries, const uint32_t** tags)
+    ACameraMetadata* ACameraMetadata_copy(const ACameraMetadata* src)
+    void ACameraMetadata_free(ACameraMetadata* metadata)
+
+
+cdef extern from "camera/NdkCameraDevice.h":
+    ctypedef struct ACameraDevice:
+        pass
+    ctypedef void (*ACameraDevice_StateCallback)(void* context, ACameraDevice* device)
+    ctypedef void (*ACameraDevice_ErrorStateCallback)(void* context, ACameraDevice* device, int error)
+    ctypedef struct ACameraDevice_StateCallbacks:
+        void* context
+        ACameraDevice_StateCallback onDisconnected
+        ACameraDevice_ErrorStateCallback onError
+    camera_status_t ACameraDevice_close(ACameraDevice* device)
+    const char* ACameraDevice_getId(const ACameraDevice* device)
+    cdef enum ACameraDevice_request_template:
+        TEMPLATE_PREVIEW = 1
+        TEMPLATE_STILL_CAPTURE = 2
+        TEMPLATE_RECORD = 3
+        TEMPLATE_VIDEO_SNAPSHOT = 4
+        TEMPLATE_ZERO_SHUTTER_LAG = 5
+        TEMPLATE_MANUAL = 6
+    camera_status_t ACameraDevice_createCaptureRequest(
+        const ACameraDevice* device, ACameraDevice_request_template templateId,
+        ACaptureRequest** request)
+    
+    ctypedef struct ACaptureSessionOutputContainer:
+        pass
+    ctypedef struct ACaptureSessionOutput:
+        pass
+    camera_status_t ACaptureSessionOutputContainer_create(
+        ACaptureSessionOutputContainer** container)
+    
+    void ACaptureSessionOutputContainer_free(ACaptureSessionOutputContainer* container)
+    
+    camera_status_t ACaptureSessionOutput_create(
+        ANativeWindow* anw, ACaptureSessionOutput** output)
+    void ACaptureSessionOutput_free(ACaptureSessionOutput* output)
+    
+    camera_status_t ACaptureSessionOutputContainer_add(
+        ACaptureSessionOutputContainer* container, const ACaptureSessionOutput* output)
+    
+    camera_status_t ACaptureSessionOutputContainer_remove(
+        ACaptureSessionOutputContainer* container, const ACaptureSessionOutput* output)
+    
+    camera_status_t ACameraDevice_createCaptureSession(
+        ACameraDevice* device,
+        const ACaptureSessionOutputContainer*       outputs,
+        const ACameraCaptureSession_stateCallbacks* callbacks,
+        ACameraCaptureSession** session)
+
+
+cdef extern from "camera/NdkCameraCaptureSession.h":
+    ctypedef struct ACameraCaptureSession:
+        pass
+    ctypedef void (*ACameraCaptureSession_stateCallback)(void* context, ACameraCaptureSession *session)
+    ctypedef struct ACameraCaptureSession_stateCallbacks:
+        ACameraCaptureSession_stateCallback onClosed
+        ACameraCaptureSession_stateCallback onReady
+        ACameraCaptureSession_stateCallback onActive
+    ctypedef struct ACameraCaptureFailure:
+        int64_t frameNumber
+        int     reason
+        int     sequenceId
+        bool    wasImageCaptured
+    ctypedef void (*ACameraCaptureSession_captureCallback_start)(
+        void* context, ACameraCaptureSession* session,
+        const ACaptureRequest* request, int64_t timestamp)
+    ctypedef void (*ACameraCaptureSession_captureCallback_result)(
+        void* context, ACameraCaptureSession* session,
+        ACaptureRequest* request, const ACameraMetadata* result)
+    ctypedef void (*ACameraCaptureSession_captureCallback_failed)(
+        void* context, ACameraCaptureSession* session,
+        ACaptureRequest* request, ACameraCaptureFailure* failure)
+    ctypedef void (*ACameraCaptureSession_captureCallback_sequenceEnd)(
+        void* context, ACameraCaptureSession* session,
+        int sequenceId, int64_t frameNumber)
+    ctypedef void (*ACameraCaptureSession_captureCallback_sequenceAbort)(
+        void* context, ACameraCaptureSession* session,
+        int sequenceId)
+    ctypedef void (*ACameraCaptureSession_captureCallback_bufferLost)(
+        void* context, ACameraCaptureSession* session,
+        ACaptureRequest* request, ANativeWindow* window, int64_t frameNumber)
+    ctypedef struct ACameraCaptureSession_captureCallbacks:
+        void* context
+        ACameraCaptureSession_captureCallback_start onCaptureStarted
+        ACameraCaptureSession_captureCallback_result onCaptureProgressed
+        ACameraCaptureSession_captureCallback_result onCaptureCompleted
+        ACameraCaptureSession_captureCallback_failed onCaptureFailed
+        ACameraCaptureSession_captureCallback_sequenceEnd onCaptureSequenceCompleted
+        ACameraCaptureSession_captureCallback_sequenceAbort onCaptureSequenceAborted
+        ACameraCaptureSession_captureCallback_bufferLost onCaptureBufferLost
+    void ACameraCaptureSession_close(ACameraCaptureSession* session)
+    ctypedef struct ACameraDevice:
+        pass
+    camera_status_t ACameraCaptureSession_getDevice(
+        ACameraCaptureSession* session, ACameraDevice** device)
+    camera_status_t ACameraCaptureSession_capture(
+        ACameraCaptureSession* session,
+        ACameraCaptureSession_captureCallbacks* callbacks,
+        int numRequests, ACaptureRequest** requests,
+        int* captureSequenceId)
+    camera_status_t ACameraCaptureSession_setRepeatingRequest(
+        ACameraCaptureSession* session,
+        ACameraCaptureSession_captureCallbacks* callbacks,
+        int numRequests, ACaptureRequest** requests,
+        int* captureSequenceId)
+    camera_status_t ACameraCaptureSession_stopRepeating(ACameraCaptureSession* session)
+    camera_status_t ACameraCaptureSession_abortCaptures(ACameraCaptureSession* session)
+
+
+cdef extern from "camera/NdkCaptureRequest.h":
+    ctypedef struct ACameraOutputTargets:
+        pass
+    ctypedef struct ACameraOutputTarget:
+        pass
+    ctypedef struct ACaptureRequest:
+        pass
+    camera_status_t ACameraOutputTarget_create(ANativeWindow* window, ACameraOutputTarget** output)
+    void ACameraOutputTarget_free(ACameraOutputTarget* output)
+    camera_status_t ACaptureRequest_addTarget(ACaptureRequest* request,
+        const ACameraOutputTarget* output)
+    camera_status_t ACaptureRequest_removeTarget(ACaptureRequest* request,
+        const ACameraOutputTarget* output)
+    camera_status_t ACaptureRequest_getConstEntry(
+        const ACaptureRequest* request, uint32_t tag, ACameraMetadata_const_entry* entry)
+    camera_status_t ACaptureRequest_getAllTags(
+        const ACaptureRequest* request, int32_t* numTags, const uint32_t** tags)
+    camera_status_t ACaptureRequest_setEntry_u8(
+        ACaptureRequest* request, uint32_t tag, uint32_t count, const uint8_t* data)
+    camera_status_t ACaptureRequest_setEntry_i32(
+        ACaptureRequest* request, uint32_t tag, uint32_t count, const int32_t* data)
+    camera_status_t ACaptureRequest_setEntry_float(
+        ACaptureRequest* request, uint32_t tag, uint32_t count, const float* data)
+    camera_status_t ACaptureRequest_setEntry_i64(
+        ACaptureRequest* request, uint32_t tag, uint32_t count, const int64_t* data)
+    camera_status_t ACaptureRequest_setEntry_double(
+        ACaptureRequest* request, uint32_t tag, uint32_t count, const double* data)
+    camera_status_t ACaptureRequest_setEntry_rational(
+        ACaptureRequest* request, uint32_t tag, uint32_t count,
+        const ACameraMetadata_rational* data)
+    void ACaptureRequest_free(ACaptureRequest* request)
+    
+
+cdef extern from "camera/NdkCameraManager.h":
+    ctypedef struct ACameraManager:
+        pass
+    
+    ACameraManager* ACameraManager_create();
+    void* ACameraManager_delete(ACameraManager* manager);
+    
+    ctypedef struct ACameraIdList:
+        int numCameras
+        const char** cameraIds
+    
+    camera_status_t ACameraManager_getCameraIdList(ACameraManager* manager,
+                                                   ACameraIdList** cameraIdList)
+    
+    void ACameraManager_deleteCameraIdList(ACameraIdList* cameraIdList)
+    
+    ctypedef void (*ACameraManager_AvailabilityCallback)(void* context, const char* cameraId)
+    
+    ctypedef struct ACameraManager_AvailabilityCallbacks:
+        void* context
+        ACameraManager_AvailabilityCallback onCameraAvailable
+        ACameraManager_AvailabilityCallback onCameraUnavailable
+    
+    camera_status_t ACameraManager_registerAvailabilityCallback(
+        ACameraManager* manager, 
+        const ACameraManager_AvailabilityCallbacks* callback)
+
+    camera_status_t ACameraManager_unregisterAvailabilityCallback(
+        ACameraManager* manager, 
+        const ACameraManager_AvailabilityCallbacks* callback)
+    
+    camera_status_t ACameraManager_getCameraCharacteristics(
+        ACameraManager* manager, const char* cameraId,
+        ACameraMetadata** characteristics)
+    
+    camera_status_t ACameraManager_openCamera(
+        ACameraManager* manager, const char* cameraId,
+        ACameraDevice_StateCallbacks* callback,
+        ACameraDevice** device)

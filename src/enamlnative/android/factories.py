@@ -41,6 +41,11 @@ def calendar_view_factory():
     return AndroidCalendarView
 
 
+def camera_view_factory():
+    from .android_camera import AndroidCameraView
+    return AndroidCameraView
+
+
 def card_view_factory():
     from .android_card_view import AndroidCardView
     return AndroidCardView
@@ -313,6 +318,7 @@ ANDROID_FACTORIES = {
     'BottomSheetDialog': bottom_sheet_dialog_factory,
     'Button': button_factory,
     'CalendarView': calendar_view_factory,
+    'CameraView': camera_view_factory,
     'CardView': card_view_factory,
     'CheckBox': checkbox_factory,
     'Chronometer': chronometer_factory,

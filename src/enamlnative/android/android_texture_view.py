@@ -9,27 +9,18 @@ Created on May 9, 2018
 
 @author: jrm
 """
-from atom.api import Typed, Int, set_default
+from atom.api import Typed, Bool, Int, set_default
 
-from enamlnative.widgets.surface_view import ProxyTextureView
+from enamlnative.widgets.view import ProxyView
 
 from .android_view import AndroidView, View
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, bridge
 
 
 class SurfaceTexture(JavaBridgeObject):
     __nativeclass__ = set_default('android.graphics.SurfaceTexture')
     setDefaultBufferSize = JavaMethod('int', 'int')
-    
-
-class TextureView(View):
-    __nativeclass__ = set_default('android.view.TextureView')
-    __signature__ = set_default(('android.content.Context',))
-    getSurfaceTexture = JavaMethod(returns='android.graphics.SurfaceTexture')
-    setTransform = JavaMethod('android.graphics.Matrix')
-    setSurfaceTextureListener = JavaMethod(
-        'android.view.TextureView$SurfaceTextureListener')
-
+    available = Bool()
     onSurfaceTextureAvailable = JavaCallback('android.graphics.SurfaceTexture',
                                              'int', 'int')
     onSurfaceTextureDestroyed = JavaCallback('android.graphics.SurfaceTexture',
@@ -39,7 +30,17 @@ class TextureView(View):
     onSurfaceTextureUpdated = JavaCallback('android.graphics.SurfaceTexture')
 
 
-class AndroidTextureView(AndroidView, ProxyTextureView):
+class TextureView(View):
+    __nativeclass__ = set_default('android.view.TextureView')
+    __signature__ = set_default(('android.content.Context',))
+    getSurfaceTexture = JavaMethod(returns='android.graphics.SurfaceTexture')
+    setTransform = JavaMethod('android.graphics.Matrix')
+    setDefaultBufferSize = JavaMethod('int', 'int')
+    setSurfaceTextureListener = JavaMethod(
+        'android.view.TextureView$SurfaceTextureListener')
+
+
+class AndroidTextureView(AndroidView, ProxyView):
     """ An Android implementation of an Enaml ProxyTextureView
 
     """
@@ -72,13 +73,19 @@ class AndroidTextureView(AndroidView, ProxyTextureView):
         """ Initialize the underlying widget.
 
         """
-        super(AndroidTextureView, self).__init__(self)
+        super(AndroidTextureView, self).__init__()
         w = self.widget
-        w.setSurfaceTextureListener(w.getId())
-        w.onSurfaceTextureAvailable.connect(self.on_surface_texture_available)
-        w.onSurfaceTextureDestroyed.connect(self.on_surface_texture_destroyed)
-        w.onSurfaceTextureChanged.connect(self.on_surface_texture_changed)
-        w.onSurfaceTextureUpdated.connect(self.on_surface_texture_updated)
+
+        # Create a new reference because it creates passes a new texture in
+        # the callback
+        tid = bridge.generate_id()
+        t = self.texture = SurfaceTexture(__id__=tid)
+        w.setSurfaceTextureListener(tid)
+
+        t.onSurfaceTextureAvailable.connect(self.on_surface_texture_available)
+        t.onSurfaceTextureDestroyed.connect(self.on_surface_texture_destroyed)
+        t.onSurfaceTextureChanged.connect(self.on_surface_texture_changed)
+        t.onSurfaceTextureUpdated.connect(self.on_surface_texture_updated)
 
     def init_layout(self):
         """ Add all child widgets to the view
@@ -93,7 +100,7 @@ class AndroidTextureView(AndroidView, ProxyTextureView):
     # SurfaceTextureListener API
     # -------------------------------------------------------------------------
     def on_surface_texture_available(self, surface, width, height):
-        self.texture = SurfaceTexture(__id__=surface)
+        self.texture.available = True
         self.width = width
         self.height = height
 
@@ -105,5 +112,5 @@ class AndroidTextureView(AndroidView, ProxyTextureView):
         pass
         
     def on_surface_texture_destroyed(self, surface):
-        del self.texture
+        self.texture.available = False
         return True

@@ -37,6 +37,7 @@ from .list_view import ListView, ListItem
 from .surface_view import SurfaceView
 from .texture_view import TextureView
 from .video_view import VideoView
+from .camera_view import CameraView
 #from .map_view import MapView, MapMarker, MapCircle, MapPolyline, MapPolygon
 #from .chart_view import DataSet, LineChart, BarChart, ScatterChart, PieChart
 

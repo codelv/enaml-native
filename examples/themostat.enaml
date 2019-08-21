@@ -1,0 +1,932 @@
+# -*- coding: utf-8 -*-
+import json
+import math
+from atom.api import *
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+from enamlnative.core.http import AsyncHttpClient
+from enamlnative.core.app import BridgedApplication
+from pprint import pprint
+from datetime import datetime
+
+def c2f(c,units='imperial'):
+    if units=='metric':
+        return int(c)
+    return int(9/5.0*c+32)
+
+def f2c(f):
+    return (f-32)*5/9.0
+
+def rain_percent(weather):
+    rain = weather.get('rain')
+    if not rain:
+        return 0
+    return int(max(0,min(100,rain['3h']*100)))
+
+
+class Theme(Atom):
+    name = Unicode()
+    bg = Unicode("#eee")
+    card = Unicode("#fff")
+    text = Unicode("#333")
+    text_light = Unicode("#999")
+    icon = Unicode("#004981")
+    drawer = Unicode("#004981")
+
+
+class Weather(Atom):
+    #: Loading
+    loading_current = Bool()
+    loading_forecast = Bool()
+
+    #: Needs a refresh
+    outdated = Bool(True)
+
+    #: Weather fetching settings
+    url = Unicode("http://api.openweathermap.org/data/2.5/{mode}?units=metric&zip={zip}&appid={key}")
+    client = Instance(AsyncHttpClient,())
+    api_key = Unicode("9a225bbabfc3ef64bcbf023c4b5359b9")
+    location = Unicode("18092")
+
+    #: Map weather icons ID to an Icon
+    icons = Dict(default={
+         200: {'icon': 'wi_storm_showers', 'label': 'thunderstorm with light rain'},
+         201: {'icon': 'wi_storm_showers', 'label': 'thunderstorm with rain'},
+         202: {'icon': 'wi_storm_showers', 'label': 'thunderstorm with heavy rain'},
+         210: {'icon': 'wi_storm_showers', 'label': 'light thunderstorm'},
+         211: {'icon': 'wi_thunderstorm', 'label': 'thunderstorm'},
+         212: {'icon': 'wi_thunderstorm', 'label': 'heavy thunderstorm'},
+         221: {'icon': 'wi_thunderstorm', 'label': 'ragged thunderstorm'},
+         230: {'icon': 'wi_storm_showers', 'label': 'thunderstorm with light drizzle'},
+         231: {'icon': 'wi_storm_showers', 'label': 'thunderstorm with drizzle'},
+         232: {'icon': 'wi_storm_showers', 'label': 'thunderstorm with heavy drizzle'},
+         300: {'icon': 'wi_sprinkle', 'label': 'light intensity drizzle'},
+         301: {'icon': 'wi_sprinkle', 'label': 'drizzle'},
+         302: {'icon': 'wi_sprinkle', 'label': 'heavy intensity drizzle'},
+         310: {'icon': 'wi_sprinkle', 'label': 'light intensity drizzle rain'},
+         311: {'icon': 'wi_sprinkle', 'label': 'drizzle rain'},
+         312: {'icon': 'wi_sprinkle', 'label': 'heavy intensity drizzle rain'},
+         313: {'icon': 'wi_sprinkle', 'label': 'shower rain and drizzle'},
+         314: {'icon': 'wi_sprinkle', 'label': 'heavy shower rain and drizzle'},
+         321: {'icon': 'wi_sprinkle', 'label': 'shower drizzle'},
+         500: {'icon': 'wi_rain', 'label': 'light rain'},
+         501: {'icon': 'wi_rain', 'label': 'moderate rain'},
+         502: {'icon': 'wi_rain', 'label': 'heavy intensity rain'},
+         503: {'icon': 'wi_rain', 'label': 'very heavy rain'},
+         504: {'icon': 'wi_rain', 'label': 'extreme rain'},
+         511: {'icon': 'wi_rain_mix', 'label': 'freezing rain'},
+         520: {'icon': 'wi_showers', 'label': 'light intensity shower rain'},
+         521: {'icon': 'wi_showers', 'label': 'shower rain'},
+         522: {'icon': 'wi_showers', 'label': 'heavy intensity shower rain'},
+         531: {'icon': 'wi_showers', 'label': 'ragged shower rain'},
+         600: {'icon': 'wi_snow', 'label': 'light snow'},
+         601: {'icon': 'wi_snow', 'label': 'snow'},
+         602: {'icon': 'wi_snow', 'label': 'heavy snow'},
+         611: {'icon': 'wi_sleet', 'label': 'sleet'},
+         612: {'icon': 'wi_sleet', 'label': 'shower sleet'},
+         615: {'icon': 'wi_rain_mix', 'label': 'light rain and snow'},
+         616: {'icon': 'wi_rain_mix', 'label': 'rain and snow'},
+         620: {'icon': 'wi_rain_mix', 'label': 'light shower snow'},
+         621: {'icon': 'wi_rain_mix', 'label': 'shower snow'},
+         622: {'icon': 'wi_rain_mix', 'label': 'heavy shower snow'},
+         701: {'icon': 'wi_sprinkle', 'label': 'mist'},
+         711: {'icon': 'wi_smoke', 'label': 'smoke'},
+         721: {'icon': 'wi_day_haze', 'label': 'haze'},
+         731: {'icon': 'wi_cloudy_gusts', 'label': 'sand, dust whirls'},
+         741: {'icon': 'wi_fog', 'label': 'fog'},
+         751: {'icon': 'wi_cloudy_gusts', 'label': 'sand'},
+         761: {'icon': 'wi_dust', 'label': 'dust'},
+         762: {'icon': 'wi_smog', 'label': 'volcanic ash'},
+         771: {'icon': 'wi_day_windy', 'label': 'squalls'},
+         781: {'icon': 'wi_tornado', 'label': 'tornado'},
+         800: {'icon': 'wi_day_sunny', 'label': 'clear sky'},
+         801: {'icon': 'wi_cloudy', 'label': 'few clouds'},
+         802: {'icon': 'wi_cloudy', 'label': 'scattered clouds'},
+         803: {'icon': 'wi_cloudy', 'label': 'broken clouds'},
+         804: {'icon': 'wi_cloudy', 'label': 'overcast clouds'},
+         900: {'icon': 'wi_tornado', 'label': 'tornado'},
+         901: {'icon': 'wi_hurricane', 'label': 'tropical storm'},
+         902: {'icon': 'wi_hurricane', 'label': 'hurricane'},
+         903: {'icon': 'wi_snowflake_cold', 'label': 'cold'},
+         904: {'icon': 'wi_hot', 'label': 'hot'},
+         905: {'icon': 'wi_windy', 'label': 'windy'},
+         906: {'icon': 'wi_hail', 'label': 'hail'},
+         951: {'icon': 'wi_day_sunny', 'label': 'calm'},
+         952: {'icon': 'wi_cloudy_gusts', 'label': 'light breeze'},
+         953: {'icon': 'wi_cloudy_gusts', 'label': 'gentle breeze'},
+         954: {'icon': 'wi_cloudy_gusts', 'label': 'moderate breeze'},
+         955: {'icon': 'wi_cloudy_gusts', 'label': 'fresh breeze'},
+         956: {'icon': 'wi_cloudy_gusts', 'label': 'strong breeze'},
+         957: {'icon': 'wi_cloudy_gusts', 'label': 'high wind, near gale'},
+         958: {'icon': 'wi_cloudy_gusts', 'label': 'gale'},
+         959: {'icon': 'wi_cloudy_gusts', 'label': 'severe gale'},
+         960: {'icon': 'wi_thunderstorm', 'label': 'storm'},
+         961: {'icon': 'wi_thunderstorm', 'label': 'violent storm'},
+         962: {'icon': 'wi_cloudy_gusts', 'label': 'hurricane'}
+    })
+
+    #: Current weather data
+    current = Dict(
+        # default={
+        #  u'clouds': {u'all': 75},
+        #  u'name': u'Zionsville',
+        #  u'visibility': 16093,
+        #  u'sys': {u'country': u'US', u'sunset': 1504826552, u'message': 0.0038999999999999998, u'type': 1, u'id': 2333, u'sunrise': 1504780572},
+        #  u'weather': [
+        #      {u'main': u'Clouds', u'id': 803, u'icon': u'04d', u'description': u'broken clouds'}
+        # ],
+        #  u'coord': {u'lat': 40.469999999999999, u'lon': -75.530000000000001},
+        #  u'base': u'stations',
+        #  u'dt': 1504811700,
+        #  u'main': {u'pressure': 1014, u'temp_min': 19, u'temp_max': 22, u'temp': 20.82, u'humidity': 55},
+        #  u'id': 0,
+        #  u'wind': {u'speed': 3.1000000000000001, u'deg': 280},
+        #  u'cod': 200,
+        # }
+    )
+
+    #: Forecast data
+    forecast = Dict()
+
+    #: Forecast for every 3 hours
+    hourly_forecast = List()
+
+    #: Forecast for each day
+    daily_forecast = List()
+
+    def _observe_outdated(self, change):
+        if self.outdated:
+            self.load()
+
+    def load(self):
+        #: Fetch current
+        self.loading_current = True
+        url = self.url.format(mode="weather",zip=self.location, key=self.api_key)
+        self.client.fetch(url).then(self.on_load_current)
+
+        #: Fetch forecast
+        self.loading_forecast = True
+        url = self.url.format(mode="forecast",zip=self.location, key=self.api_key)
+        self.client.fetch(url).then(self.on_load_forecast)
+
+    def on_load_current(self,response):
+        #: Source data
+        self.current = json.loads(response.content)
+        #print("Current:")
+        #pprint(self.current)
+        self.outdated = False
+        self.loading_current = False
+
+    def on_load_forecast(self,response):
+        #: Source data
+        self.forecast = json.loads(response.content)
+        #print("Forecast:")
+        #pprint(self.forecast)
+
+        #: Update hourly
+        self.hourly_forecast = self.forecast['list'][:9]
+
+        #: Update daily
+        daily_forecast = {}
+        now = datetime.now()
+        today = datetime(now.year,now.month,now.day)
+        daily_forecast[0] = [self.current]
+        for item in self.forecast['list']:
+            #: Item is 3 hour period
+            date = datetime.fromtimestamp(item['dt'])
+
+            #: Put in correct index
+            dd = math.floor((date-today).total_seconds()/(60*60*24.0))
+            if dd not in daily_forecast:
+                daily_forecast[dd] = []
+            daily_forecast[dd].append(item)
+
+        self.daily_forecast = [daily_forecast[k] for k in sorted(daily_forecast.keys())]
+
+        self.outdated = False
+        self.loading_forecast = False
+
+
+
+class DateTime(Atom):
+    """ A model for a date so we can observe each
+        value to update the ui whenever a certain
+        value changes (ex every hour). Use date.now.strftime()
+        to get whatever textual values needed.
+    """
+    now = Instance(datetime)
+
+    #: Date fields any of these can be observed
+    year = Int()
+    day = Int()
+    month = Int()
+    hour = Int()
+    minute = Int()
+    second = Int()
+
+    def __init__(self, *args, **kwargs):
+        #: When default is requested, trigger
+        #: an async loop to keep updating the time
+        self._refresh_time()
+
+    def _observe_now(self, change):
+        """ Whenever now is changed, update all the fields """
+        now = self.now
+        self.year = now.year
+        self.day = now.day
+        self.hour = now.hour
+        self.minute = now.minute
+        self.second = now.second
+
+    def _refresh_time(self):
+        self.now = datetime.now()
+        #: Update every second
+        app = BridgedApplication.instance()
+        app.timed_call(1000, self._refresh_time)
+
+
+
+class AppState(Atom):
+    _instance = None
+    #: Thermostat state
+    current_temp = Float(30) # in C
+    current_humidity = Float(51)
+    connected = Bool(True)
+
+    #: Updates every second
+    time = Instance(DateTime,())
+    time_mode = Enum('12','24')
+
+    #: Weather results
+    weather = Instance(Weather,())
+
+    #: Fireplace state
+    fireplace = Bool()
+    has_fireplace = Bool()
+
+    #: Themes
+    themes = List(Theme,default=[
+        Theme(name="Light"),
+        Theme(name="Dark",bg="#333",card="#555",drawer="#004981",text="#fff",text_light="#ccc"),
+    ])
+    theme = Instance(Theme)
+
+    #: Pinout
+
+    #: Settings
+    set_temp = Float(28) # in C
+    system_mode = Enum('off','heat','cool','auto')
+    units = Enum('imperial', 'metric')
+    hysteresis = Float()
+    developer_mode = Bool(True)
+
+    #: Page in
+    current_screen = Int()
+
+    @classmethod
+    def instance(cls):
+        if cls._instance is None:
+            cls._instance = AppState()
+        return cls._instance
+
+    def _default_theme(self):
+        return self.themes[0]
+
+    @observe('time.hour')
+    def _update_weather(self, change):
+        """ Update weather every hour """
+        self.weather.load()
+
+
+enamldef Text(TextView):
+    attr state = AppState.instance()
+    text_color << state.theme.text
+
+enamldef DrawerIcon(IconButton):
+    style = "borderless"
+    text = "{md-dashboard}"
+    text_size = 28
+    text_color = "#fff"
+    padding = (4,4,4,4)
+
+enamldef Drawer(Flexbox):
+    flex_direction = "column"
+    justify_content = "center"
+    align_items = "center"
+    attr pager
+    padding = (5,5,5,5)
+    Looper:
+        iterable << ['md-dashboard','md-wb-cloudy','wi_fire', 'md-today', 'md-settings']
+        DrawerIcon:
+            alpha << 1 if pager.current_index == loop_index else 0.6
+            text = "{%s}"%loop_item
+            #text_color = "#cab"
+            clicked :: pager.current_index = loop_index
+    # DrawerIcon:
+    #     text = "{md-settings}"
+    #     clicked :: pager.current_index = 1
+
+enamldef Border(Flexbox):
+    layout_height = "1"
+    background_color = "#ccc"
+
+
+enamldef Card(Flexbox):
+    attr state = AppState.instance()
+    attr title = ""
+    alias content
+    margins = (5,5,5,5)
+    layout = dict(min_width=480, flex_grow=1)
+    layout_height = "wrap_content"
+    layout_width = "wrap_content"
+    background_color << state.theme.bg
+    Flexbox:
+        flex_direction = "column"
+        Flexbox:
+            justify_content = "center"
+            align_items = "center"
+            layout_height = "wrap_content"
+            padding = (10,10,10,10)
+            Text:
+                text << title
+                text_size = 18
+            #Icon:
+            #    text = "{fa-arrow-down}"
+            #    padding = (0,0,10,0)
+        Block: content:
+            pass
+
+enamldef Dashboard(PagerFragment): view:
+    attr state = AppState.instance()
+    ScrollView:
+        attr state << view.state
+        background_color << state.theme.bg
+        Flexbox:
+            #flex_direction = "column"
+            #justify_content = "center"
+            flex_wrap = "wrap"
+            padding = (10,10,10,10)
+            Card:
+                title = "Inside"
+                #layout = dict(max_width=300)
+                Block:
+                    block << parent.content
+                    Flexbox:
+                        attr state << view.state
+                        layout_height = "wrap_content"
+                        flex_direction = "column"
+                        justify_content = "center"
+                        align_items = "center"
+                        layout = dict(min_height=480)
+                        Text:
+                            text = "temperature"
+                            text_color << state.theme.text_light
+                        Conditional:
+                            condition << view.state.connected
+                            Text:
+                                text << "{}°".format(c2f(state.current_temp,state.units)) if view.state.connected else "N/A"
+                                font_family = "sans-serif-condensed-light"
+                                text_size = 124
+                        Conditional:
+                            condition << not view.state.connected
+                            ActivityIndicator:
+                                style = "large"
+                    #Border:
+                    #    pass
+                    Flexbox:
+                        layout_height = "50"
+                        justify_content = "center"
+                        align_items = "center"
+                        Conditional:
+                            condition << view.state.connected
+                            Text:
+                                padding = (10, 0, 10, 0)
+                                text <<"{}%".format(int(view.state.current_humidity)) if view.state.connected else "N/A"
+                                text_size = 24
+                        Conditional:
+                            condition << not view.state.connected
+                            ActivityIndicator:
+                                style = "small"
+                        Icon:
+                            text = "{wi_raindrop}"
+                            text_color << state.theme.text_light
+                            text_size = 24
+            Card:
+                title = "System"
+                layout_height = "wrap_content"
+                #layout = dict(max_width=300)
+                Block:
+                    block << parent.content
+                    Flexbox:
+                        layout_height = "wrap_content"
+                        justify_content = "center"
+                        Text:
+                            text = "set point"
+                            text_color << state.theme.text_light
+                    Flexbox:
+                        layout_height = "wrap_content"
+                        justify_content = "space_around"
+                        layout = dict(min_height=480)
+                        Flexbox:
+                            justify_content = 'center'
+                            align_items = 'center'
+                            Text:
+                                text << "{}°".format(c2f(state.set_temp,state.units))
+                                font_family = "sans-serif-light"
+                                text_size = 48
+                        Flexbox:
+                            flex_direction = "column"
+                            justify_content = 'center'
+                            IconButton:
+                                style = "borderless"
+                                text = "{md-keyboard-arrow-up}"
+                                text_size = 32
+                                clicked ::
+                                    v = 1 if state.units=='metric' else 5/9.0
+                                    view.state.set_temp +=v
+                                text_color << state.theme.text
+                            IconButton:
+                                style = "borderless"
+                                text = "{md-keyboard-arrow-down}"
+                                text_size = 32
+                                clicked ::
+                                    v = 1 if state.units=='metric' else 5/9.0
+                                    view.state.set_temp -=v
+                                text_color << state.theme.text
+
+                    #Border:
+                    #    pass
+                    Flexbox:
+                        layout_height = "wrap_content"
+                        justify_content = "space_around"
+                        align_items = "center"
+                        Text:
+                            text = "system mode"
+                        Spinner:
+                            items = list(AppState.system_mode.items)
+                            selected << self.items.index(view.state.system_mode)
+                            selected :: view.state.system_mode = self.items[selected].lower()
+
+
+
+enamldef Weather(PagerFragment): view:
+    attr state = AppState.instance()
+    ScrollView:
+        layout_height = "match_parent"
+        layout_width = "match_parent"
+        background_color << view.state.theme.bg
+        Flexbox:
+            flex_direction = "column"
+            justify_content = "center"
+            # Conditional:
+            #     condition << not view.state.weather.current
+            #     Flexbox:
+            #         flex_direction = "column"
+            #         justify_content = "center"
+            #         align_items = "center"
+            #         Conditional:
+            #             condition << view.state.weather.loading_current
+            #             ActivityIndicator:
+            #                 pass
+            #             Text:
+            #                 text = "Fetching weather..."
+            #         Conditional:
+            #             condition << not view.state.weather.loading
+            #             IconButton:
+            #                 text = "{wi_cloud_refresh}"
+            #                 style = "borderless"
+            #                 text_size = 128
+            #                 text_color << view.state.theme.text_light
+            #                 clicked :: view.state.weather.load()
+            #             Text:
+            #                 text = "refresh"
+
+            layout_height = "match_parent"
+            layout_width = "match_parent"
+            Conditional:
+                condition << view.state.weather.loading_current
+                Flexbox:
+                    flex_direction="column"
+                    justify_content = "center"
+                    align_items = "center"
+                    layout = dict(min_height=480)
+                    ActivityIndicator:
+                        style = "small"
+                    Text:
+                        text = "Loading current conditions..."
+            Conditional:
+                condition << (bool(view.state.weather.current)
+                                and not view.state.weather.loading_current)
+                Flexbox:
+                    attr weather << view.state.weather
+                    padding = (10,10,10,10)
+                    Card:
+                        title << "{}".format(weather.current['name'])
+                        #background_color = "#fee"
+                        Block:
+                            block << parent.content
+                            Flexbox:
+                                layout_height = "wrap_content"
+                                flex_direction = "column"
+                                justify_content = "center"
+                                align_items = "center"
+                                layout = dict(min_height=480)
+                                Flexbox:
+                                    layout_height = "wrap_content"
+                                    justify_content = "center"
+                                    align_items = "center"
+                                    Icon:
+                                        padding = (10,10,10,10)
+                                        text << "{%s}"%weather.icons[weather.current['weather'][0]['id']]['icon']
+                                        text_size = 32
+                                    Text:
+                                        text << "{}".format(weather.current['weather'][0]['description'].title())
+                                        text_color << state.theme.text_light
+
+                                Text:
+                                    text << "{}°".format(c2f(weather.current['main']['temp'],state.units))
+                                    font_family = "sans-serif-condensed-light"
+                                    text_size = 124
+                            Flexbox:
+                                layout_height = "wrap_content"
+                                justify_content = "space_between"
+                                align_items = "center"
+                                Flexbox:
+                                    flex_direction = "column"
+                                    layout_height = "wrap_content"
+                                    align_items="flex_start"
+                                    Text:
+                                        text = "wind"
+                                    Flexbox:
+                                        align_items = "center"
+                                        Text:
+                                            padding = (10, 0, 10, 0)
+                                            text <<"{}".format(int(weather.current['wind']['speed']))
+                                            text_size = 24
+                                        Icon:
+                                            text << "{wi_strong_wind}"
+                                            text_color << state.theme.text_light
+                                            text_size = 24
+                                Flexbox:
+                                    flex_direction = "column"
+                                    layout_height = "wrap_content"
+                                    align_items = "center"
+                                    Text:
+                                        text = "precipitation"
+                                    Flexbox:
+                                        justify_content = "center"
+                                        align_items = "center"
+                                        Text:
+                                            padding = (10, 0, 10, 0)
+                                            #: Fake rain % based on estimated amount in mm
+                                            text << "{}%".format(rain_percent(weather.current))
+                                            text_size = 24
+                                        Icon:
+                                            text = "{wi_raindrops}"
+                                            text_color << state.theme.text_light
+                                            text_size = 24
+                                Flexbox:
+                                    flex_direction = "column"
+                                    layout_height = "wrap_content"
+                                    align_items = "flex_end"
+                                    Text:
+                                        text = "humidity"
+                                    Flexbox:
+                                        align_items = "center"
+                                        justify_content = "flex_end"
+                                        Text:
+                                            padding = (10, 0, 10, 0)
+                                            text <<"{}%".format(weather.current['main']['humidity'])
+                                            text_size = 24
+                                        Icon:
+                                            text = "{wi_raindrop}"
+                                            text_color << state.theme.text_light
+                                            text_size = 24
+            Border:
+                pass
+            Conditional:
+                condition << view.state.weather.loading_forecast
+                Flexbox:
+                    flex_direction = "column"
+                    justify_content = "center"
+                    align_items = "center"
+                    layout = dict(min_height=240)
+                    ActivityIndicator:
+                        style = "small"
+                    Text:
+                        text = "Loading forecast..."
+            Conditional:
+                condition << (bool(view.state.weather.forecast)
+                                and not view.state.weather.loading_forecast)
+                #Border:
+                #    pass
+
+                Flexbox:
+                    flex_direction = "column"
+                    layout_height = "wrap_content"
+                    #: Group each day
+                    attr daily_forecast << view.state.weather.daily_forecast
+                    Looper:
+                        iterable << daily_forecast
+                        Flexbox:
+                            layout_height = "wrap_content"
+                            padding = (10,10,10,10)
+                            attr item_time << datetime.fromtimestamp(loop_item[0]['dt'])
+                            Flexbox:
+                                Text:
+                                    text << "Today" if loop_index == 0 else item_time.strftime('%A')
+                            Flexbox:
+                                justify_content = "center"
+                                Icon:
+                                    text << "{%s}"%view.state.weather.icons[loop_item[0]['weather'][0]['id']]['icon']
+                                    text_color << view.state.theme.text_light
+                            Flexbox:
+                                justify_content = "flex_end"
+                                Text:
+                                    text << "{}°".format(c2f(max([it['main']['temp'] for it in loop_item]),view.state.units))
+                                    padding = (0,0,10,0)
+                                Text:
+                                    text << "{}°".format(c2f(min([it['main']['temp'] for it in loop_item]),view.state.units))
+                                    text_color << view.state.theme.text_light
+                        ScrollView:
+                            orientation = "horizontal"
+                            layout_height = "wrap_content"
+                            layout_width = "match_parent"
+                            Flexbox:
+                                justify_content = "space_between"
+                                #: 3-hr forcast for next 24 hours
+                                #attr hourly_forecast = loop_item#view.state.weather.hourly_forecast
+                                attr parent_index = loop_index
+                                Looper:
+                                    #: Get the values from today
+                                    iterable << daily_forecast[loop_index]
+                                    Flexbox:
+                                        flex_direction = "column"
+                                        justify_content = "space_between"
+                                        align_items = "center"
+                                        padding = (10,10,10,10)
+                                        layout_width = "wrap_content"
+                                        attr item_time <<  datetime.fromtimestamp(loop_item['dt'])
+                                        Text:
+                                            text << "now" if (loop_index==0 and parent_index==0) else item_time.strftime('%-I %p' if view.state.time_mode=='12' else '%-H')
+                                        Icon:
+                                            padding = (0,10,0,10)
+                                            text << "{%s}"%view.state.weather.icons[loop_item['weather'][0]['id']]['icon']
+                                        Text:
+                                            text << "{}°".format(c2f(loop_item['main']['temp'],view.state.units))
+                                        Text:
+                                            attr current_rain = loop_item.get('rain')
+                                            text << "{}%".format(rain_percent(loop_item))
+                        Border:
+                            pass
+            Flexbox:
+                flex_direction = "column"
+                justify_content = "center"
+                align_items = "center"
+                Conditional:
+                    condition << not view.state.weather.loading_current  and not view.state.weather.loading_forecast
+                    IconButton:
+                        text = "{wi_cloud_refresh}"
+                        style = "borderless"
+                        text_size = 96
+                        text_color << view.state.theme.text_light
+                        clicked :: view.state.weather.load()
+                    Text:
+                        text = "refresh"
+
+enamldef Schedules(PagerFragment): view:
+    attr state = AppState.instance()
+    ScrollView:
+        background_color << view.state.theme.bg
+        Flexbox:
+            Text:
+                text = "Schedules goes here..."
+
+enamldef Fireplace(PagerFragment): view:
+    attr state = AppState.instance()
+    Flexbox:
+        flex_direction = "column"
+        justify_content = "center"
+        align_items = "center"
+        background_color << view.state.theme.bg
+        Conditional:
+            condition << view.state.has_fireplace
+            Text:
+                padding = (0,0,0,10)
+                text = "Fireplace control"
+                text_color << view.state.theme.text_light
+            IconButton:
+                attr state << view.state
+                style = "borderless"
+                text = "{wi_fire}"
+                alpha << 1 if state.fireplace else 0.5
+                text_color << "#ff7f42" if state.fireplace else state.theme.text
+                text_size = 128
+                clicked:: state.fireplace = not state.fireplace
+            Text:
+                padding = (0,10,0,0)
+                text << "ON" if view.state.fireplace else "OFF"
+                text_color << view.state.theme.text_light
+            Text:
+                padding = (0,10,0,0)
+                text << "tap the flames to turn "+("off" if view.state.fireplace else "on")
+                text_color << view.state.theme.text_light
+
+        Conditional:
+            condition << not view.state.has_fireplace
+            Icon:
+                text = "{md-feedback}"
+                text_size = 64
+            Text:
+                padding = (0,10,0,0)
+                text = "Fireplace control not enabled"
+                text_color << view.state.theme.text_light
+            Button:
+                style = "borderless"
+                text = "Settings"
+                clicked::
+                    #: TODO: Depends on position!
+                    view.state.current_screen += 2
+
+
+
+enamldef TitleRow(Flexbox):
+    attr state = AppState.instance()
+    layout_height = "wrap_content"
+    justify_content = "space_between"
+    align_items = "center"
+    padding = (10,20,10,20)
+    attr title
+    padding = (10, 10, 10, 10)
+    Text:
+        text << title
+        text_size = 18
+
+enamldef SettingsRow(Flexbox):
+    attr state = AppState.instance()
+    layout_height = "wrap_content"
+    justify_content = "space_between"
+    align_items = "center"
+    padding = (10,20,10,20)
+    alias icon
+    alias title
+    alias content
+    alias caption
+    Flexbox:
+        layout_width = "wrap_content"
+        Icon: icon:
+            text = "{md-help}"
+            text_size = 32
+            text_color << state.theme.icon
+            #background_color = "#fab"
+            layout = dict(min_width=56,max_width=64)
+        Flexbox:
+            flex_direction = "column"
+            layout_width="wrap_content"
+            #layout_height="wrap_content"
+            layout = dict(max_width=700)
+            #background_color = "#baf"
+            padding = (10,0,0,0)
+            Text: title:
+                text = "Title"
+                max_lines = 1
+                font_family = "sans-serif-medium"
+            Text: caption:
+                text = "Caption goes here"
+                max_lines = 1
+                text_color = "#999"
+                text_color << state.theme.text_light
+    #Flexbox:
+        #ayout_width = "wrap_content"
+    Block: content:
+        pass
+
+enamldef OptionSetting(SettingsRow):
+    alias option
+    Block:
+        block = parent.content
+        Spinner: option:
+            #text_color << state.theme.text
+            pass
+
+enamldef ToggleSetting(SettingsRow):
+    alias switch
+    Block:
+        block = parent.content
+        Switch: switch:
+            pass
+
+enamldef TextSetting(Flexbox):
+    attr state = AppState.instance()
+    layout_height = "wrap_content"
+    #justify_content = "space_between"
+    align_items = "center"
+    padding = (10,20,10,20)
+    alias icon
+    alias title
+    alias input
+    Icon: icon:
+        text = "{md-help}"
+        text_size = 32
+        text_color = "#356782"
+        layout_width = "56"
+        #background_color = "#fab"
+    Flexbox:
+        flex_direction = "column"
+        #background_color = "#baf"
+        padding = (10,0,0,0)
+        Text: title:
+            text = "Title"
+            max_lines = 1
+            font_family = "sans-serif-medium"
+        EditText: input:
+            pass
+
+enamldef Settings(PagerFragment): view:
+    attr state = AppState.instance()
+    ScrollView:
+        attr state << view.state
+        background_color << state.theme.bg
+        Flexbox:
+            flex_direction = "column"
+            Flexbox:
+                flex_direction = "column"
+                margins = (0, 20, 0, 0)
+                #background_color << state.theme.card
+                TitleRow:
+                    title = "Settings"
+                OptionSetting:
+                    title.text = "Units"
+                    icon.text = "{md-language}"# if state.units=='metric' else "{wi_fahrenheit}"
+                    caption.text = "Display units"
+                    option.items = list(AppState.units.items)
+                    option.selected << option.items.index(state.units)
+                    option.selected :: state.units = self.items[change['value']]
+                OptionSetting:
+                    title.text = "Theme"
+                    caption.text = "Colors and text"
+                    icon.text = "{md-format-color-fill}"
+                    option.items = [t.name for t in state.themes]
+                    option.selected << option.items.index(state.theme.name)
+                    option.selected :: state.theme = state.themes[change['value']]
+                TextSetting:
+                    title.text = "Weather location"
+                    icon.text = "{md-map}"
+                    input.text := state.weather.location
+                    input.placeholder = "City or zipcode"
+                    input.input_type = "number"
+                TitleRow:
+                    title = "System"
+                TextSetting:
+                    title.text = "Hysteresis"
+                    icon.text = "{wi_fire}"
+                    input.text << "{}".format(int(view.state.hysteresis))
+                    input.text ::
+                        try:
+                            view.state.hysteresis = float(change['value'])
+                        except ValueError:
+                            pass
+                    input.input_type = "number_decimal"
+                ToggleSetting:
+                    title.text = "Fireplace"
+                    icon.text = "{wi_fire}"
+                    caption.text = "Enable fireplace control"
+                    switch.checked := view.state.has_fireplace
+                TitleRow:
+                    title = "Developer"
+                ToggleSetting:
+                    #icon.te
+                    icon.text = "{md-developer-mode}"
+                    title.text = "Developer mode"
+                    caption.text = "Enable developer settings"
+                    switch.checked := view.state.developer_mode
+                Conditional:
+                    condition << view.state.developer_mode
+                    ToggleSetting:
+                        #icon.te
+                        icon.text = "{md-usb}"
+                        title.text = "Thermostat connection"
+                        caption.text = "Simulate the thermostat connection"
+                        switch.checked := view.state.connected
+
+enamldef ContentView(Flexbox): view:
+    attr state = AppState.instance()
+    Drawer:
+        pager << view_pager
+        background_color << state.theme.drawer
+        layout_width = "wrap_content"
+    ViewPager: view_pager:
+        current_index := state.current_screen
+        current_index ::
+            if change['value']==1 and state.weather.outdated:
+                state.weather.load()
+        Dashboard:
+            pass
+        Weather:
+            pass
+        Fireplace:
+            pass
+        Schedules:
+            pass
+        Settings:
+            pass
