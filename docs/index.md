@@ -26,7 +26,7 @@ This short video explains what enaml solves and why it's perfect for building UI
 ### Apps are declarative
 
 enaml-native apps are written declaratively using 
-[enaml](http://nucleic.github.io/enaml/docs/get_started/introduction.html).  
+[enaml](https://enaml.readthedocs.io/en/latest/get_started/introduction.html).  
 
 
 ```python
