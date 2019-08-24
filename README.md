@@ -1,7 +1,7 @@
 # enaml-native
-[![Build Status](https://travis-ci.org/codelv/enaml-native.svg?branch=master)](https://travis-ci.org/codelv/enaml-native) [![codecov](https://codecov.io/gh/codelv/enaml-native/branch/master/graph/badge.svg)](https://codecov.io/gh/codelv/enaml-native) [![Help chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/enaml-native/Lobby) [![Documentation Status](https://readthedocs.org/projects/enaml-native/badge/?version=latest)](http://enaml-native.readthedocs.io/en/latest/?badge=latest) [![Downloads](https://pepy.tech/badge/enaml-native)](https://pepy.tech/project/enaml-native)
+[![Build Status](https://travis-ci.org/codelv/enaml-native.svg?branch=master)](https://travis-ci.org/codelv/enaml-native) [![codecov](https://codecov.io/gh/codelv/enaml-native/branch/master/graph/badge.svg)](https://codecov.io/gh/codelv/enaml-native) [![Help chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/enaml-native/Lobby) [![Documentation Status](https://readthedocs.org/projects/enaml-native/badge/?version=latest)](http://enaml-native.readthedocs.io/en/latest/?badge=latest) [![Downloads](https://pepy.tech/badge/enaml-native/month)](https://pepy.tech/project/enaml-native/month)
 
-Build native mobile apps in python using enaml and native widgets! 
+Build native mobile apps in python using enaml and native widgets!
 
 The goal of this project is to be the python version of [react-native](https://facebook.github.io/react-native/). It targets apps that need to have a "native" look and feel and achieves this by reusing existing native Android and iOS widgets from python.  It allows you to declaratively define a UI using python based language called [enaml](http://enaml.readthedocs.io/en/latest/get_started/introduction.html). The rest is "normal" python.
 
@@ -11,7 +11,7 @@ This is still a very young project but the results and feedback have been positi
 
 ### Docs and Examples ###
 
-See the [project site](https://www.codelv.com/projects/enaml-native/) or the [api docs](http://enaml-native.readthedocs.io/) 
+See the [project site](https://www.codelv.com/projects/enaml-native/) or the [api docs](http://enaml-native.readthedocs.io/)
 
 There's also some short tutorials and examples on [youtube](https://www.youtube.com/playlist?list=PLXUaMWWFaOjT2WdIrJdTYjEMJmrjuvVz0).
 
@@ -29,7 +29,7 @@ Need help? Chat on:
 
 ### Add-on Packages ###
 
-Enaml-native was redesigned so separate "packages" can be created and installed to add new 
+Enaml-native was redesigned so separate "packages" can be created and installed to add new
 native widgets and other apis. Similar to the [kivy-garden](https://github.com/kivy-garden/) but
 it borrows the concepts of the [react-native package manager](https://github.com/rnpm/rnpm).
 
@@ -73,10 +73,10 @@ Currently enaml-native's Android support is good enough to make real usable app.
 
 ##### iOS
 
-Currently enaml-native's iOS support is not yet good enough to make a real app. Only a few components are implemented at the moment and a lot of work is needed to get it to the point where it's really usable, but my "proof of concept" demo shows that it does work. 
+Currently enaml-native's iOS support is not yet good enough to make a real app. Only a few components are implemented at the moment and a lot of work is needed to get it to the point where it's really usable, but my "proof of concept" demo shows that it does work.
 
 ### Thanks to ###
- 
+
 This project is built on top of several existing projects:
 
 1. [enaml](https://github.com/nucleic/enaml)
@@ -95,6 +95,6 @@ for docstrings and the [pep-8](https://www.python.org/dev/peps/pep-0008/) code s
 
 ### Donate
 
-This is a project I develop in my free time.  If you use enaml-native or simply like the project and want to help continue the development of it please consider [donating](https://www.codelv.com/projects/enaml-native/support/). 
+This is a project I develop in my free time.  If you use enaml-native or simply like the project and want to help continue the development of it please consider [donating](https://www.codelv.com/projects/enaml-native/support/).
 
 
