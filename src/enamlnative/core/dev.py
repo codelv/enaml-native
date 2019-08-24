@@ -56,11 +56,11 @@ INDEX_PAGE = """<html>
 <head>
   <title>Enaml-Native Playground</title>
   <!--Import Google Icon Font-->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" 
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
     rel="stylesheet">
 
   <!-- Compiled and minified CSS -->
-  <link rel="stylesheet" 
+  <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
   <link rel="shortcut icon" href="https://www.codelv.com/static/faveicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -545,16 +545,24 @@ class DevServer(Atom):
         source_path = inspect.getfile(declaration).replace(
                         ".pyo", ".py").replace(".pyc", ".py")
         if 'enamlnative' in source_path:
-            source_link = "https://github.com/frmdstryr/" \
-                          "enaml-native/tree/master/src/{}".format(
-                source_path.split("assets/python")[1]
-            )
+            assets_path = os.environ.get('ASSETS', 'assets/python/')
+            cache_path = os.environ.get('CACHE', 'cache/')
+            if assets_path in source_path:
+                url = source_path.split(assets_path)[-1]
+            elif cache_path in source_path:
+                url = source_path.split(cache_path)[-1]
+            else:
+                # Cant find the full path probably will be a dead link
+                url = 'enamlnative/{}'.format(
+                    source_path.split('enamlnative')[-1])
+            source_link = "https://github.com/codelv/" \
+                          "enaml-native/tree/master/src/{}".format(url)
             info.append("<tr><td>source code</td>"
                         "<td><a href='{}' target='_blank'>show</a></td></td>"
                         .format(source_link))
 
             #: Examples link
-            example_link = "https://www.codelv.com/projects/" \
+            example_link = "https://codelv.com/projects/" \
                            "enaml-native/docs/components#{}" \
                 .format(declaration.__name__.lower())
             info.append("<tr><td>example usage</td>"
@@ -771,8 +779,8 @@ class DevServerSession(Atom):
         return cls._instance
 
     def __init__(self, *args, **kwargs):
-        """ Overridden constructor that forces only one instance to ever exist. 
-        
+        """ Overridden constructor that forces only one instance to ever exist.
+
         """
         if self.instance() is not None:
             raise RuntimeError("A DevServerClient instance already exists!")
@@ -780,9 +788,9 @@ class DevServerSession(Atom):
         DevServerSession._instance = self
 
     def start(self):
-        """ Start the dev session. Attempt to use tornado first, then try 
+        """ Start the dev session. Attempt to use tornado first, then try
         twisted
-        
+
         """
         print("Starting debug client cwd: {}".format(os.getcwd()))
         print("Sys path: {}".format(sys.path))
@@ -842,7 +850,7 @@ class DevServerSession(Atom):
     # -------------------------------------------------------------------------
     def write_message(self, data, binary=False):
         """ Write a message to the active client
-        
+
         """
         self.client.write_message(data, binary=binary)
 
