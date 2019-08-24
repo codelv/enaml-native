@@ -102,18 +102,34 @@ The `view.enaml` contains the UI that is shown, and `main.py` is the startup scr
 
 ### Installing packages
 
-To include 3rd-party python packages in your app they must first be built for Android or iOS, then installed into your apps virtual environment.  Enaml-native uses [conda](https://conda.io/docs/user-guide/getting-started.html) as it's package manager as it helps handle the complexity of cross compiling for Android and iOS (see [conda-mobile](https://github.com/codelv/conda-mobile) if your interested).
+To include 3rd-party python packages in your app they must first be built for
+Android or iOS, then installed into your apps virtual environment.
+Enaml-native uses [conda](https://conda.io/docs/user-guide/getting-started.html)
+as it's package manager as it helps handle the complexity of cross compiling for
+Android and iOS (see [conda-mobile](https://github.com/codelv/conda-mobile) if your interested).
 
-The `enaml-native` command includes a wrapper for conda to install packages. `enaml-native-icons` is a package that lets you use font based icons in your app. To install it run:
+
+> As of enaml-native-cli 2.3.1 you can just add the dependencies
+> to the `environment.yml` file under the dependencies section
+> and run `enaml-native install`.
+
+
+You can use the `enaml-native install` command (a wrapper
+for `conda install`) to install packages.
+
+For example `enaml-native-icons` is a package that lets you use font based
+icons in your app.
+
+To install it run:
 
 ```bash
 enaml-native install enaml-native-icons
 ```
 
-or use with conda directly
+or add it to the `dependencies` section in `environment.yml`  and run
 
 ```bash
-conda install -c codelv enaml-native-icons
+enaml-native install
 ```
 
 Once installed you can rebuild the app and your new packages should be available on the app!
