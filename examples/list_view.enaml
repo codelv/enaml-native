@@ -2,12 +2,21 @@
 
 Demonstrates using a ListView
 
+for this to work you must first install enaml-native-icons with
+
+conda config --add channels codel
+enaml-native install enaml-native-icons
+
+# Then rebuild
+enaml-native run-android
+
 """
 from atom.api import Atom, Unicode, List, Bool
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 
-from iconify import material
+import iconify
+iconify.install()
 
 class AppState(Atom):
     _instance = None
