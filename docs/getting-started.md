@@ -134,9 +134,51 @@ enaml-native install
 
 Once installed you can rebuild the app and your new packages should be available on the app!
 
+> When installing packages with conda you need to specify the `-c codelv`
+> flag to tell conda to include packages from the [codelv](https://anaconda.org/codelv/repo)
+> channel which contains packages precompiled for android and iOS. If you prefer, you can
+> add it as a default channel by running `conda config --add channels codelv`
+(see https://conda.io/docs/user-guide/tasks/manage-channels.html).
+
+
+### Faster Development
+
+Since rebuilding the app every time you need to make a change is very slow,
+enaml-native includes a few dev tools to help speed things up.
+
+The easiest is server mode, to use server mode
+you first need to install either tornado or twisted into your app.
+
+
+```
+enaml-native install pip-tornado
+
+```
+
+Next update `src/main.py` and change the `dev=` line to say `dev=server` like
+
+```python
+
+def main():
+    Application = get_application()
+    app = Application(
+        debug=False,  # Uncomment to debug the bridge
+        dev='server',  # Set to 'server', 'remote', an IP address
+        load_view=load_view
+    )
+    app.start()
+
+```
+
+No rebuild the app with `enaml-native run-android`. Find the IP of your device
+(over wifi) and go to that ip in your browser at port `http://192.168.x.y:8888`
+and it'll show an editor just like the playground app.
+
+For other development modes, see [Debugging](https://codelv.com/projects/enaml-native/docs/debugging)
+
+
 If you run into issues, you can ask for help on [gitter](https://gitter.im/enaml-native/Lobby).
 
-> When installing packages with conda you need to specify the `-c codelv` flag to tell conda to include packages from the [codelv](https://anaconda.org/codelv/repo) channel which contains packages precompiled for android and iOS. If you prefer, you can add it as a default channel by running `conda config --append channels codelv` (see https://conda.io/docs/user-guide/tasks/manage-channels.html).
 
 
 Next [learn the basics](https://www.codelv.com/projects/enaml-native/docs/learn-the-basics)
