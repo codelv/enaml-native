@@ -82,6 +82,8 @@ afterEvaluate {
 
     task bundlePython(type: Exec) {
         workingDir "../../../" // root enaml-native dir
+        // Needed to ensure the env is correct by setting the prefix
+        environment CONDA_PREFIX: workingDir.path + "/venv/"
         if (project.hasProperty("preReleaseBuild")) {
             commandLine "venv/bin/enaml-native", "bundle-assets", "--release"
         } else {
@@ -89,7 +91,6 @@ afterEvaluate {
         }
 
     }
-    //preBuild.dependsOn buildPython
     preBuild.dependsOn bundlePython
 }
 
