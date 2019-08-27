@@ -18,19 +18,19 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class AppBarLayout(LinearLayout):
-    __nativeclass__ = set_default(
-        'android.support.design.widget.AppBarLayout')
+    package = 'com.google.android.material.appbar'
+
+    __nativeclass__ = set_default('%s.AppBarLayout' % package)
     __signature__ = set_default(('android.content.Context',))
 
     addOnOffsetChangedListener = JavaMethod(
-        'android.support.design.widget.AppBarLayout$OnOffsetChangedListener')
+        '%s.AppBarLayout$OnOffsetChangedListener' % package)
     removeOnOffsetChangedListener = JavaMethod(
-        'android.support.design.widget.AppBarLayout$OnOffsetChangedListener')
+        '%s.AppBarLayout$OnOffsetChangedListener' % package)
 
     setExpanded = JavaMethod('boolean')
 
-    onOffsetChanged = JavaCallback(
-        'android.support.design.widget.AppBarLayout', 'int')
+    onOffsetChanged = JavaCallback('%s.AppBarLayout' % package, 'int')
 
 
 class AndroidAppBarLayout(AndroidLinearLayout, ProxyAppBarLayout):

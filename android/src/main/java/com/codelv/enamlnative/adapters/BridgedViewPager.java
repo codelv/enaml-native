@@ -3,7 +3,7 @@ package com.codelv.enamlnative.adapters;
 import android.content.Context;
 import android.os.Handler;
 import android.view.MotionEvent;
-import android.support.v4.view.ViewPager;
+import androidx.viewpager.widget.ViewPager;
 
 public class BridgedViewPager extends ViewPager {
 

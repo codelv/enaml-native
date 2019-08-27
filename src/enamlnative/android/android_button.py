@@ -40,8 +40,8 @@ class ImageButton(ImageView):
 
 
 class FloatingActionButton(ImageButton):
-    __nativeclass__ = set_default(
-        'android.support.design.widget.FloatingActionButton')
+    package = 'com.google.android.material.floatingactionbutton'
+    __nativeclass__ = set_default('%s.FloatingActionButton' % package)
 
     SIZE_NORMAL = 0
     SIZE_MINI = 1

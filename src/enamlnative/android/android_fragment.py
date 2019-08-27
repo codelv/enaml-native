@@ -20,27 +20,28 @@ from .android_view_pager import BridgedFragmentStatePagerAdapter
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
+package = 'androidx.fragment.app'
+
+
 class FragmentManager(JavaBridgeObject):
-    __nativeclass__ = set_default('android.support.v4.app.FragmentManager')
-    beginTransaction = JavaMethod(
-        returns='android.support.v4.app.FragmentTransaction')
+    __nativeclass__ = set_default('%s.FragmentManager' % package)
+    beginTransaction = JavaMethod(returns='%s.FragmentTransaction' % package)
 
 
 class FragmentTransaction(JavaBridgeObject):
-    __nativeclass__ = set_default('android.support.v4.app.FragmentTransaction')
+    __nativeclass__ = set_default('%s.FragmentTransaction' % package)
     commit = JavaMethod(returns='int')
-    add = JavaMethod('int', 'android.support.v4.app.Fragment')
-    replace = JavaMethod('int', 'android.support.v4.app.Fragment')
+    add = JavaMethod('int', '%s.Fragment' % package)
+    replace = JavaMethod('int', '%s.Fragment' % package)
 
 
 class BridgedFragment(JavaBridgeObject):
+    package = 'com.codelv.enamlnative.adapters'
     __nativeclass__ = set_default(
-        'com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter'
-        '$BridgedFragment')
+        '%s.BridgedFragmentStatePagerAdapter$BridgedFragment' % package)
     setTitle = JavaMethod('java.lang.String')
     setFragmentListener = JavaMethod(
-        'com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter'
-        '$FragmentListener')
+        '%s.BridgedFragmentStatePagerAdapter$FragmentListener' % package)
     onCreateView = JavaCallback(returns='android.view.View')
     onDestroyView = JavaCallback()
 
@@ -96,7 +97,7 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
     def destroy(self):
         """ Custom destructor that deletes the fragment and removes
         itself from the adapter it was added to.
-        
+
         """
         #: Destroy fragment
         fragment = self.fragment
@@ -150,9 +151,9 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
     def get_view(self):
         """ Get the page to display. If a view has already been created and
         is cached, use that otherwise initialize the view and proxy. If defer
-        loading is used, wrap the view in a FrameLayout and defer add view 
-        until later. 
-        
+        loading is used, wrap the view in a FrameLayout and defer add view
+        until later.
+
         """
         d = self.declaration
         if d.cached and self.widget:

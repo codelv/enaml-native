@@ -13,6 +13,9 @@ import sys
 from contextlib import contextmanager
 
 
+version = "4.6.1"
+
+
 @contextmanager
 def imports():
     """ Install the import hook to load python extensions from app's lib folder

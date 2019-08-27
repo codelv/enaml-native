@@ -18,11 +18,8 @@ from .bridge import JavaMethod
 
 
 class CardView(FrameLayout):
-    """
-        Note: You must add "compile 'com.android.support:cardview-v7:21.0.+'"
-              to build.gradle for this to work!
-    """
-    __nativeclass__ = set_default('android.support.v7.widget.CardView')
+    package = 'androidx.cardview.widget'
+    __nativeclass__ = set_default('%s.CardView' % package)
     setCardBackgroundColor = JavaMethod('android.graphics.Color')
     setCardElevation = JavaMethod('float')
     setContentPadding = JavaMethod('int', 'int', 'int', 'int')

@@ -16,11 +16,12 @@ from .android_toolkit_object import AndroidToolkitObject
 
 
 class Snackbar(JavaBridgeObject):
+    package = 'com.google.android.material.snackbar'
     #: Show the view for the specified duration.
-    __nativeclass__ = set_default('android.support.design.widget.Snackbar')
+    __nativeclass__ = set_default('%s.Snackbar' % package)
     __signature__ = set_default(('android.content.Context',))
     make = JavaStaticMethod('android.view.View','java.lang.CharSequence','int',
-                           returns='android.support.design.widget.Snackbar')
+                            returns='%s.Snackbar' % package)
     show = JavaMethod()
     dismiss = JavaMethod()
     setDuration = JavaMethod('int')
@@ -28,10 +29,7 @@ class Snackbar(JavaBridgeObject):
     setAction = JavaMethod('java.lang.CharSequence',
                            'android.view.View$OnClickListener')
     setActionTextColor = JavaMethod('android.graphics.Color')
-    addCallback = JavaMethod(
-        'android.support.design.widget.BaseTransientBottomBar$BaseCallback')
-
-
+    addCallback = JavaMethod('%s.BaseTransientBottomBar$BaseCallback' % package)
 
     DISMISS_EVENT_SWIPE = 0
     DISMISS_EVENT_ACTION = 1
@@ -49,17 +47,15 @@ class Snackbar(JavaBridgeObject):
 
     #: Snackbar.Callback API
     onClick = JavaCallback('android.view.View')
-
-    onDismissed = JavaCallback('android.support.design.widget.Snackbar', 'int')
-    onShown = JavaCallback('android.support.design.widget.Snackbar')
+    onDismissed = JavaCallback('%s.Snackbar' % package, 'int')
+    onShown = JavaCallback('%s.Snackbar' % package)
 
 
 class BridgedSnackbarCallback(JavaBridgeObject):
-    __nativeclass__ = set_default(
-        'com.codelv.enamlnative.adapters.BridgedSnackbarCallback')
+    package = 'com.codelv.enamlnative.adapters'
+    __nativeclass__ = set_default('%s.BridgedSnackbarCallback' % package)
     setListener = JavaMethod(
-        'com.codelv.enamlnative.adapters.BridgedSnackbarCallback'
-        '$SnackbarListener')
+        '%s.BridgedSnackbarCallback$SnackbarListener' % package)
 
 
 class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
@@ -84,9 +80,9 @@ class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
                       0 if d.duration else -2).then(self.on_widget_created)
 
     def init_widget(self):
-        """ Our widget may not exist yet so we have to diverge from the normal 
+        """ Our widget may not exist yet so we have to diverge from the normal
         way of doing initialization. See `update_widget`
-        
+
         """
         if not self.widget:
             return
@@ -115,9 +111,9 @@ class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
             self.set_show(d.show)
 
     def on_widget_created(self, ref):
-        """ Using Snackbar.make returns async so we have to 
-        initialize it later. 
-        
+        """ Using Snackbar.make returns async so we have to
+        initialize it later.
+
         """
         d = self.declaration
         self.widget = Snackbar(__id__=ref)
@@ -144,7 +140,7 @@ class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
         d.clicked()
 
     def _refresh_show(self, dt):
-        """ While the `show` is true, keep calling .show() until the 
+        """ While the `show` is true, keep calling .show() until the
         duration `dt` expires.
 
         Parameters
@@ -181,9 +177,9 @@ class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
     def set_duration(self, duration):
         """ Android for whatever stupid reason doesn't let you set the time
         it only allows 1-long or 0-short. So we have to repeatedly call show
-        until the duration expires, hence this method does nothing see 
+        until the duration expires, hence this method does nothing see
         `set_show`.
-        
+
         """
         if duration == 0:
             self.widget.setDuration(-2) #: Infinite

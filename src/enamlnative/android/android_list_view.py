@@ -18,48 +18,25 @@ from .android_toolkit_object import AndroidToolkitObject
 from .android_view_group import AndroidViewGroup, ViewGroup
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, encode
 
-#from .android_adapter import AndroidAdapterView, AdapterView
-# class AbsListView(AdapterView):
-#     __nativeclass__ = set_default('android.widget.AbsListView')
-#     pointToPosition = JavaMethod('int', 'int')
-#     setAdapter = JavaMethod('android.widget.ListAdapter')
-#
-#
-# class ListView(AbsListView):
-#     __nativeclass__ = set_default('android.widget.ListView')
-#     setDividerHeight = JavaMethod('int')
-#     setFooterDividersEnabled = JavaMethod('boolean')
-#     setHeaderDividersEnabled = JavaMethod('boolean')
-#     setItemsCanFocus = JavaMethod('boolean')
-#     setSelection = JavaMethod('int')
-#     smoothScrollByOffset = JavaMethod('int')
-#     smoothScrollToPosition = JavaMethod('int')
-#
-#     # OnScrollListener API
-#     setOnScrollListener = JavaMethod(
-#         'android.widget.AbsListView$OnScrollListener')
-#     onScroll = JavaCallback('android.widget.AbsListView', 'int', 'int', 'int')
-#     onScrollStateChanged = JavaCallback('android.widget.AbsListView', 'int')
+
+package = 'androidx.recyclerview.widget'
 
 
 class RecylerView(ViewGroup):
-    __nativeclass__ = set_default('android.support.v7.widget.RecyclerView')
+    __nativeclass__ = set_default('%s.RecyclerView' % package)
     invalidate = JavaMethod()
     setHasFixedSize = JavaMethod('boolean')
     scrollTo = JavaMethod('int', 'int')
     scrollToPosition = JavaMethod('int')
     setItemViewCacheSize = JavaMethod('int')
-    setAdapter = JavaMethod('android.support.v7.widget.RecyclerView$Adapter')
+    setAdapter = JavaMethod('%s.RecyclerView$Adapter' % package)
     setHasFixedSize = JavaMethod('boolean')
-    setLayoutManager = JavaMethod(
-        'android.support.v7.widget.RecyclerView$LayoutManager')
+    setLayoutManager = JavaMethod('%s.RecyclerView$LayoutManager' % package)
 
-    setRecyclerListener = JavaMethod(
-        'android.support.v7.widget.RecyclerView$RecyclerListener')
+    setRecyclerListener = JavaMethod('%s.RecyclerView$RecyclerListener' % package)
 
     class LayoutManager(JavaBridgeObject):
-        __nativeclass__ = set_default(
-            'android.support.v7.widget.RecyclerView$LayoutManager')
+        __nativeclass__ = set_default('%s.RecyclerView$LayoutManager' % package)
         scrollToPosition = JavaMethod('int')
         setItemPrefetchEnabled = JavaMethod('boolean')
 
@@ -68,18 +45,15 @@ class RecylerView(ViewGroup):
 
 
 class StaggeredLayoutManager(RecylerView.LayoutManager):
-    __nativeclass__ = set_default(
-        'android.support.v7.widget.StaggeredLayoutManager')
+    __nativeclass__ = set_default('%s.StaggeredLayoutManager' % package)
     __signature__ = set_default(('int', 'int'))
     setOrientation = JavaMethod('int')
     setSpanCount = JavaMethod('int')
 
 
 class LinearLayoutManager(RecylerView.LayoutManager):
-    __nativeclass__ = set_default(
-        'android.support.v7.widget.LinearLayoutManager')
-    __signature__ = set_default(('android.content.Context', 'int',
-                                 'boolean'))
+    __nativeclass__ = set_default('%s.LinearLayoutManager' % package)
+    __signature__ = set_default(('android.content.Context', 'int', 'boolean'))
 
     scrollToPositionWithOffset = JavaMethod('int', 'int')
     setInitialPrefetchItemCount = JavaMethod('int')
@@ -91,8 +65,7 @@ class LinearLayoutManager(RecylerView.LayoutManager):
 
 
 class GridLayoutManager(LinearLayoutManager):
-    __nativeclass__ = set_default(
-        'android.support.v7.widget.GridLayoutManager')
+    __nativeclass__ = set_default('%s.GridLayoutManager' % package)
     __signature__ = set_default(('android.content.Context', 'int', 'int',
                                  'boolean'))
     setSpanCount = JavaMethod('int')
@@ -122,8 +95,7 @@ class BridgedRecyclerAdapter(JavaBridgeObject):
     """
     __nativeclass__ = set_default(
         'com.codelv.enamlnative.adapters.BridgedRecyclerAdapter')
-    __signature__ = set_default(
-        ('android.support.v7.widget.RecyclerView',))
+    __signature__ = set_default(('%s.RecyclerView' % package,))
     setRecyleListener = JavaMethod(
         'com.codelv.enamlnative.adapters.BridgedRecyclerAdapter'
         '$BridgedListAdapterListener'
@@ -200,7 +172,7 @@ class AndroidListView(AndroidViewGroup, ProxyListView):
 
     def get_declared_items(self):
         """ Override to do it manually
-        
+
         """
         for k, v in super(AndroidListView, self).get_declared_items():
             if k == 'layout':
@@ -267,7 +239,7 @@ class AndroidListView(AndroidViewGroup, ProxyListView):
     @observe('declaration.items')
     def _on_items_changed(self, change):
         """ Observe container events on the items list and update the
-        adapter appropriately. 
+        adapter appropriately.
         """
         if change['type'] != 'container':
             return

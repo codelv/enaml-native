@@ -15,9 +15,10 @@ from .android_dialog import Dialog, AndroidDialog
 
 
 class BottomSheetDialog(Dialog):
+    package = 'com.google.android.material.bottomsheet'
+
     #: Simply uses a different class
-    __nativeclass__ = set_default(
-        'android.support.design.widget.BottomSheetDialog')
+    __nativeclass__ = set_default('%s.BottomSheetDialog' % package)
 
 
 class AndroidBottomSheetDialog(AndroidDialog, ProxyBottomSheetDialog):

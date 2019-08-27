@@ -21,22 +21,25 @@ from .android_view_group import AndroidViewGroup, ViewGroup
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField
 
 
+package = 'androidx.viewpager.widget'
+
+
 class ViewPager(ViewGroup):
     __nativeclass__ = set_default(
         'com.codelv.enamlnative.adapters.BridgedViewPager')
     __signature__ = set_default(('android.content.Context',))
     addOnPageChangeListener = JavaMethod(
-        'android.support.v4.view.ViewPager$OnPageChangeListener')
+        '%s.ViewPager$OnPageChangeListener' % package)
     setCurrentItem = JavaMethod('int')
     setOffscreenPageLimit = JavaMethod('int')
     setPageMargin = JavaMethod('int')
-    setAdapter = JavaMethod('android.support.v4.view.PagerAdapter')
+    setAdapter = JavaMethod('%s.PagerAdapter' % package)
     onPageScrollStateChanged = JavaCallback('int')
     onPageScrolled = JavaCallback('int', 'float', 'int')
     onPageSelected = JavaCallback('int')
     setPagingEnabled = JavaMethod('boolean')
     setPageTransformer = JavaMethod(
-        'boolean', 'android.support.v4.view.ViewPager$PageTransformer')
+        'boolean', '%s.ViewPager$PageTransformer' % package)
 
 
 #: Create builtin ones
@@ -81,14 +84,13 @@ class PageTransformer(JavaBridgeObject):
 
 
 class ViewPagerLayoutParams(LayoutParams):
-    __nativeclass__ = set_default(
-        'android.support.v4.view.ViewPager$LayoutParams')
+    __nativeclass__ = set_default('%s.ViewPager$LayoutParams' % package)
     gravity = JavaField('int')
     isDecor = JavaField('boolean')
 
 
 class PagerTitleStrip(ViewGroup):
-    __nativeclass__ = set_default('android.support.v4.view.PagerTitleStrip')
+    __nativeclass__ = set_default('%s.PagerTitleStrip' % package)
     __signature__ = set_default(('android.content.Context',))
     setNonPrimaryAlpha = JavaMethod('float')
     setCurrentItem = JavaMethod('int')
@@ -100,7 +102,7 @@ class PagerTitleStrip(ViewGroup):
 
 
 class PagerTabStrip(PagerTitleStrip):
-    __nativeclass__ = set_default('android.support.v4.view.PagerTabStrip')
+    __nativeclass__ = set_default('%s.PagerTabStrip' % package)
     setTabIndicatorColor = JavaMethod('android.graphics.Color')
     setDrawFullUnderline = JavaMethod('boolean')
 
@@ -108,8 +110,8 @@ class PagerTabStrip(PagerTitleStrip):
 class BridgedFragmentStatePagerAdapter(JavaBridgeObject):
     __nativeclass__ = set_default(
         'com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter')
-    addFragment = JavaMethod('android.support.v4.app.Fragment')
-    removeFragment = JavaMethod('android.support.v4.app.Fragment')
+    addFragment = JavaMethod('androidx.fragment.app.Fragment')
+    removeFragment = JavaMethod('androidx.fragment.app.Fragment')
     setTitles = JavaMethod('[Ljava.lang.String;')
     clearTitles = JavaMethod()
     notifyDataSetChanged = JavaMethod()
@@ -213,15 +215,15 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
     # -------------------------------------------------------------------------
     def on_page_scroll_state_changed(self, state):
         pass
-    
+
     def on_page_scrolled(self, position, offset, offset_pixels):
         pass
-    
+
     def on_page_selected(self, position):
         d = self.declaration
         with self.widget.setCurrentItem.suppressed():
             d.current_index = position
-    
+
     # -------------------------------------------------------------------------
     # ProxyViewPager API
     # -------------------------------------------------------------------------
@@ -229,7 +231,7 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         """ We can only set the index once the page has been created.
         otherwise we get `FragmentManager is already executing transactions`
         errors in Java. To avoid this, we only call this once has been loaded.
-        
+
         """
         # d = self.declaration
         # #: We have to wait for the current_index to be ready before we can
@@ -255,7 +257,7 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
 
     def create_layout_params(self, child, layout):
         """ Override as there is no (width, height) constructor.
-        
+
         """
         from .android_fragment import AndroidFragment
         if isinstance(child, AndroidFragment):

@@ -27,16 +27,18 @@ from .bridge import (
 from enamlnative.widgets.notification import ProxyNotification
 
 
+package = 'androidx.core.app'
+
+
 # Android really messed this one up
 class NotificationManager(JavaBridgeObject):
-    """ Android NotificationManager. Use the `show_notification` and 
+    """ Android NotificationManager. Use the `show_notification` and
     `create_channel` class methods.
-    
+
     """
     #: Holds the singleton instance
     _instance = None
-    __nativeclass__ = set_default(
-        'android.support.v4.app.NotificationManagerCompat')
+    __nativeclass__ = set_default('%s.NotificationManagerCompat' % package)
 
     ACTION_BIND_SIDE_CHANNEL = "android.support.BIND_NOTIFICATION_SIDE_CHANNEL"
     EXTRA_USE_SIDE_CHANNEL = "android.support.useSideChannel"
@@ -55,29 +57,28 @@ class NotificationManager(JavaBridgeObject):
     notify = JavaMethod('int', 'android.app.Notification')
     notify_ = JavaMethod('java.lang.String', 'int', 'android.app.Notification')
 
-    from_ = JavaStaticMethod(
-        'android.content.Context',
-        returns='android.support.v4.app.NotificationManagerCompat')
+    from_ = JavaStaticMethod('android.content.Context',
+                             returns='%s.NotificationManagerCompat' % package)
 
     _receivers = List(BroadcastReceiver)
 
     @classmethod
     def instance(cls):
         """ Get an instance of this service if it was already requested.
-    
+
         You should request it first using `NotificationManager.get()`
-    
+
         __Example__
-    
+
             :::python
-    
+
             def on_manager(m):
                 #: Do stuff with it
                 assert m == NotificationManager.instance()
-    
+
             NotificationManager.get().then(on_manager)
-    
-    
+
+
         """
         return cls._instance
 
@@ -117,11 +118,11 @@ class NotificationManager(JavaBridgeObject):
     @classmethod
     def create_channel(cls, channel_id, name, importance=IMPORTANCE_DEFAULT,
                        description=""):
-        """ Before you can deliver the notification on Android 8.0 and higher, 
-        you must register your app's notification channel with the system by 
-        passing an instance of NotificationChannel 
+        """ Before you can deliver the notification on Android 8.0 and higher,
+        you must register your app's notification channel with the system by
+        passing an instance of NotificationChannel
         to createNotificationChannel().
-        
+
         Parameters
         ----------
         channel_id: String-
@@ -132,12 +133,12 @@ class NotificationManager(JavaBridgeObject):
             One of the IMPORTANCE levels
         description: String
             Channel description
-            
+
         Returns
         -------
         channel: NotificationChannel or None
             The channel that was created.
-        
+
         """
         app = AndroidApplication.instance()
         if app.api_level >= 26:
@@ -153,7 +154,7 @@ class NotificationManager(JavaBridgeObject):
     def show_notification(cls, channel_id, *args, **kwargs):
         """ Create and show a Notification. See `Notification.Builder.update`
         for a list of accepted parameters.
-        
+
         """
         app = AndroidApplication.instance()
         builder = Notification.Builder(app, channel_id)
@@ -163,14 +164,14 @@ class NotificationManager(JavaBridgeObject):
     @classmethod
     def cancel_notification(cls, notification_or_id, tag=None):
         """ Cancel the notification.
-         
+
         Parameters
         ----------
         notification_or_id: Notification.Builder or int
             The notification or id of a notification to clear
         tag: String
             The tag of the notification to clear
-        
+
         """
         def on_ready(mgr):
             if isinstance(notification_or_id, JavaBridgeObject):
@@ -186,29 +187,25 @@ class NotificationManager(JavaBridgeObject):
 
 class Notification(JavaBridgeObject):
     """ A wrapper for an Android's notification apis
-    
+
     """
-    __nativeclass__ = set_default('android.support.v4.app.NotificationCompat')
+    __nativeclass__ = set_default('%s.NotificationCompat' % package)
 
     class Builder(JavaBridgeObject):
         """ Builds a notification.
-        
+
         Notes
         ------
-        The constructor automatically sets the when field to 
+        The constructor automatically sets the when field to
         System.currentTimeMillis() and the audio stream to the STREAM_DEFAULT.
-        
+
         """
-        __nativeclass__ = set_default(
-            'android.support.v4.app.NotificationCompat$Builder')
-        __signature__ = set_default(('android.content.Context',
-                                     'java.lang.String'))
-        addAction = JavaMethod(
-            'android.support.v4.app.NotificationCompat$Action')
+        __nativeclass__ = set_default('%s.NotificationCompat$Builder' % package)
+        __signature__ = set_default(('android.content.Context', 'java.lang.String'))
+        addAction = JavaMethod('%s.NotificationCompat$Action' % package)
         addAction_ = JavaMethod('android.R', 'java.lang.CharSequence',
                                 'android.app.PendingIntent')
-        addInvisibleAction = JavaMethod(
-            'android.support.v4.app.NotificationCompat$Action')
+        addInvisibleAction = JavaMethod('%s.NotificationCompat$Action' % package)
         addInvisibleAction_ = JavaMethod('android.R', 'java.lang.CharSequence',
                                          'android.app.PendingIntent')
         addPerson = JavaMethod('java.lang.String')
@@ -255,8 +252,7 @@ class Notification(JavaBridgeObject):
         setSortKey = JavaMethod('java.lang.String')
         setSound = JavaMethod('android.net.Uri')
         setSound_ = JavaMethod('android.net.Uri', 'int')
-        setStyle = JavaMethod(
-            'android.support.v4.app.NotificationCompat$Style')
+        setStyle = JavaMethod('%s.NotificationCompat$Style' % package)
         setSubText = JavaMethod('java.lang.CharSequence')
         setTicker = JavaMethod('java.lang.CharSequence',
                                'android.widget.RemoteViews')
@@ -280,7 +276,7 @@ class Notification(JavaBridgeObject):
         def load_bitmap(self, src):
             r = RequestBuilder(__id__=self.manager.load(src)).asBitmap()
             return Bitmap(__id__=r.__id__)
-        
+
         def update(self, title="", text="", info="",
                    sub_text="", ticker="",
                    importance=NotificationManager.IMPORTANCE_DEFAULT,
@@ -298,51 +294,51 @@ class Notification(JavaBridgeObject):
                    badge_icon_type=None, only_alert_once=None,
                    notification_options=None, actions=None):
             """ Creates and shows a notification. On android 8+ the channel
-            must be created. 
-            
+            must be created.
+
             Parameters
             ----------
             badge_icon_type: Int
-                Sets which icon to display as a badge for this notification. 
+                Sets which icon to display as a badge for this notification.
             category: String
-                Set the notification category. 
+                Set the notification category.
             channel_id: String
                 The id of the channel this notification is displayed on
             color: String
                 A color string ex #F00 for red
             colorized: Bool
-                Set whether this notification should be colorized. 
+                Set whether this notification should be colorized.
             group: String
-                Set this notification to be part of a group of notifications 
-                sharing the same key. 
+                Set this notification to be part of a group of notifications
+                sharing the same key.
             group_summary: Bool
-                Set this notification to be the group summary for a group of 
-                notifications. 
+                Set this notification to be the group summary for a group of
+                notifications.
             group_alert_behavior: Int
-                Sets the group alert behavior for this notification. 
+                Sets the group alert behavior for this notification.
             title: String
-                Set the title (first row) of the notification, in a standard 
-                notification. 
+                Set the title (first row) of the notification, in a standard
+                notification.
             text: String
-                Set the text (second row) of the notification, in a standard 
+                Set the text (second row) of the notification, in a standard
                 notification.
             info: String
-                Set the large text at the right-hand side of the notification. 
+                Set the large text at the right-hand side of the notification.
             sub_text: String
-                Set the third line of text in the platform notification 
+                Set the third line of text in the platform notification
                 template.
             ticker: String
-                Sets the "ticker" text which is sent to accessibility services. 
+                Sets the "ticker" text which is sent to accessibility services.
             importance: Int
                 The importance or priority of the notification
             number: Int
-                Set the large number at the right-hand side of the 
-                notification. 
+                Set the large number at the right-hand side of the
+                notification.
             ongoing: Bool
                 Set whether this is an ongoing notification.
             local_only: Bool
-                Set whether or not this notification is only relevant to the 
-                current device. 
+                Set whether or not this notification is only relevant to the
+                current device.
             style: String
                 A style resource string
             small_icon: String
@@ -350,10 +346,10 @@ class Notification(JavaBridgeObject):
             large_icon: String
                 A resource that glide can load (file:// or http://) url
             show_when: Bool
-                Control whether the timestamp set with setWhen is shown in the 
-                content view.   
+                Control whether the timestamp set with setWhen is shown in the
+                content view.
             show_stopwatch: Bool
-                Show the when field as a stopwatch. 
+                Show the when field as a stopwatch.
             show_progress: Bool
                 Show a progressbar
             progress_current: Int
@@ -363,47 +359,47 @@ class Notification(JavaBridgeObject):
             progress_indeterminate: Bool
                 Progress should be indeterminate
             light_color: String
-                Set the argb value that you would like the LED on the device to 
+                Set the argb value that you would like the LED on the device to
                 blink
             light_on: Int
                 Set the on duration of the LED
             light_off: Int
-                Set the off duration of the LED    
+                Set the off duration of the LED
             auto_cancel: Bool
                 Close automatically when tapped
             only_alert_once: Bool
-                Set this flag if you would only like the sound, vibrate and 
+                Set this flag if you would only like the sound, vibrate and
                 ticker to be played if the notification is not already showing
             timeout_after: Long
-                Specifies the time at which this notification should be 
-                canceled, if it is not already canceled. 
+                Specifies the time at which this notification should be
+                canceled, if it is not already canceled.
             sort_key: String
-                Set a sort key that orders this notification among other 
+                Set a sort key that orders this notification among other
                 notifications from the same package.
             shortcut_id: String
-                If this notification is duplicative of a Launcher shortcut, 
-                sets the id of the shortcut, in case the Launcher wants to hide 
+                If this notification is duplicative of a Launcher shortcut,
+                sets the id of the shortcut, in case the Launcher wants to hide
                 the shortcut.
             sound: String
-               Set the Uri of the sound to play.  
+               Set the Uri of the sound to play.
             vibration_pattern: List of Long
                 Set the vibration pattern to use.
             notification_options: Int
-                Set the default notification options that will be used. 
+                Set the default notification options that will be used.
             actions: List
                 A list of actions to handle
-                
+
             Returns
             --------
             result: Future
                 A future that resolves with the builder of the notification
                 that was created.
-                
+
             References
             ----------
             - https://developer.android.com/guide/topics/ui/notifiers/notifications.html
             - https://developer.android.com/training/notify-user/build-notification.html
-                 
+
             """
             if title:
                 self.setContentTitle(title)
@@ -554,9 +550,9 @@ class AndroidNotification(AndroidToolkitObject, ProxyNotification):
             self.set_show(d.show)
 
     def destroy(self):
-        """ A reimplemented destructor that cancels 
-        the notification before destroying. 
-        
+        """ A reimplemented destructor that cancels
+        the notification before destroying.
+
         """
         builder = self.builder
         NotificationManager.cancel_notification(builder)
@@ -597,7 +593,7 @@ class AndroidNotification(AndroidToolkitObject, ProxyNotification):
     def get_declared_items(self):
         """ Get the members that were set in the enamldef block for this
         Declaration.
-        
+
         Returns
         -------
         result: List of (k,v) pairs that were defined for this widget in enaml

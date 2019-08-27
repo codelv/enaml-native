@@ -18,8 +18,8 @@ from .bridge import JavaMethod
 
 
 class CoordinatorLayout(FrameLayout):
-    __nativeclass__ = set_default(
-        'android.support.design.widget.CoordinatorLayout')
+    package = 'androidx.coordinatorlayout.widget'
+    __nativeclass__ = set_default('%s.CoordinatorLayout' % package)
 
 
 class AndroidCoordinatorLayout(AndroidFrameLayout, ProxyCoordinatorLayout):

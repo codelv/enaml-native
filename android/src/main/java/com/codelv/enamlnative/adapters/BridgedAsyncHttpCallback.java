@@ -1,6 +1,8 @@
 package com.codelv.enamlnative.adapters;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Map;
 
 import okhttp3.Call;
@@ -20,7 +22,7 @@ import okio.Source;
 /**
  * Created by jrm on 7/20/17.
  */
-public class BridgedAsyncHttpCallback implements Callback, Interceptor{
+public class BridgedAsyncHttpCallback implements Callback {
 
     private static final String TAG = "BridgeAsyncHttp";
     protected AsyncHttpResponseListener mListener;
@@ -42,79 +44,6 @@ public class BridgedAsyncHttpCallback implements Callback, Interceptor{
         mListener = listener;
         mStream = stream;
     }
-
-    /**
-     * Wraps the response body to retain the loopj api so we can stream callback data
-     * to python and also show progress.
-     */
-    @Override
-    public Response intercept(Chain chain) throws IOException {
-        Response originalResponse = chain.proceed(chain.request());
-        return originalResponse.newBuilder()
-                .body(new ProgressResponseBody(originalResponse.body()))
-                .build();
-    }
-
-    private class ProgressResponseBody extends ResponseBody {
-
-        private final ResponseBody mResponseBody;
-        private BufferedSource mBufferedSource;
-
-        ProgressResponseBody(ResponseBody responseBody) {
-            mResponseBody = responseBody;
-            onStart();
-        }
-
-        @Override
-        public MediaType contentType() {
-            return mResponseBody.contentType();
-        }
-
-        @Override
-        public long contentLength() {
-            return mResponseBody.contentLength();
-        }
-
-        @Override
-        public BufferedSource source() {
-            if (mBufferedSource == null) {
-                mBufferedSource = Okio.buffer(source(mResponseBody.source()));
-            }
-            return mBufferedSource;
-        }
-
-        /**
-         * Wraps the source and dispatches the data read
-         * @param source
-         * @return
-         */
-        private Source source(Source source) {
-            return new ForwardingSource(source) {
-                long totalBytesRead = 0L;
-
-                @Override
-                public long read(Buffer sink, long byteCount) throws IOException {
-                    long bytesRead;
-                    if (mStream) {
-                        byte[] responseData = sink.readByteArray(byteCount);
-                        onProgressData(responseData);
-                        bytesRead = responseData.length;
-                    } else {
-                        bytesRead = super.read(sink, byteCount);
-                    }
-
-                    // read() returns the number of bytes read, or -1 if this source is exhausted.
-                    totalBytesRead += bytesRead != -1 ? bytesRead : 0;
-
-                    // Dispatch progress
-                    onProgress(totalBytesRead, mResponseBody.contentLength());
-
-                    return bytesRead;
-                }
-            };
-        }
-    }
-
 
     /**
      * Fired when the request is started, override to handle in your own code
@@ -140,12 +69,12 @@ public class BridgedAsyncHttpCallback implements Callback, Interceptor{
     /**
      * Fired when the request progress, override to handle in your own code
      *
-     * @param responseBody stream data
+     * @param responseData stream data
      */
-    public void onProgressData(byte[] responseBody) {
-        mBytesSent += responseBody.length;
+    public void onProgressData(byte[] responseData) {
+        mBytesSent += responseData.length;
         if (mListener!=null && mStream) {
-            mListener.onProgressData(responseBody);
+            mListener.onProgressData(responseData);
         }
     }
 
@@ -180,9 +109,52 @@ public class BridgedAsyncHttpCallback implements Callback, Interceptor{
         if (mListener!=null) {
             String headerData = "";
             Headers headers = response.headers();
-            mListener.onSuccess(response.code(), headers.toMultimap(),
-                    (mStream)?null:response.body().bytes());
-            mListener.onFinish();
+            ResponseBody body = response.body();
+            mListener.onResponse(response.code(), headers.toMultimap(), (mStream)?null:body.bytes());
+
+            if (mStream) {
+                InputStream inputStream = null;
+                try {
+                    inputStream = body.byteStream();
+                    long totalBytesRead = 0;
+                    int chunkSize = 512*1024;
+                    long contentLength = body.contentLength();
+
+                    mListener.onProgress(0L, contentLength);
+                    while (true) {
+                        byte[] data = new byte[chunkSize];
+                        int n = inputStream.read(data);
+                        if (n == -1) {
+                            break;
+                        }
+                        totalBytesRead += n;
+                        if (n == chunkSize) {
+                            onProgressData(data);
+                        } else {
+                            onProgressData(Arrays.copyOf(data, n));
+                        }
+                        if (call.isCanceled()) {
+                            mListener.onCancel();
+                            break;
+                        }
+                        // Dispatch progress
+                        contentLength = body.contentLength();
+                        onProgress(totalBytesRead, contentLength);
+                    }
+                    // Dispatch progress
+                    onProgress(totalBytesRead, contentLength);
+                } catch (IOException e) {
+                    mListener.onFailure(response.code(), headers.toMultimap(),
+                            null, e.getMessage());
+                } finally {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                    mListener.onFinish();
+                }
+            } else {
+                mListener.onFinish();
+            }
         }
 
     }
@@ -198,7 +170,7 @@ public class BridgedAsyncHttpCallback implements Callback, Interceptor{
         void onFinish();
         void onRetry(int retryNo);
         void onCancel();
-        void onSuccess(int statusCode, Map headers, byte[] responseBody);
+        void onResponse(int statusCode, Map headers, byte[] responseBody);
         void onFailure(int statusCode, Map headers, byte[] responseBody, String error);
     }
 

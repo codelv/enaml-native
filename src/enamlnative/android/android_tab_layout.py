@@ -19,31 +19,31 @@ from .android_frame_layout import AndroidFrameLayout, FrameLayout
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
+package = 'com.google.android.material.tabs'
+
+
 class TabLayout(FrameLayout):
-    __nativeclass__ = set_default('android.support.design.widget.TabLayout')
-    addTab = JavaMethod('android.support.design.widget.TabLayout$Tab')
-    removeTab = JavaMethod('android.support.design.widget.TabLayout$Tab')
+    __nativeclass__ = set_default('%s.TabLayout' % package)
+    addTab = JavaMethod('%s.TabLayout$Tab' % package)
+    removeTab = JavaMethod('%s.TabLayout$Tab' % package)
     removeAllTabs = JavaMethod()
-    newTab = JavaMethod(returns='android.support.design.widget.TabLayout$Tab')
+    newTab = JavaMethod(returns='%s.TabLayout$Tab' % package)
 
     setSelectedTabIndicatorColor = JavaMethod('android.graphics.Color')
     setSelectedTabIndicatorHeight = JavaMethod('int')
     setTabGravity = JavaMethod('int')
     setTabMode = JavaMethod('int')
-    setTabTextColors = JavaMethod('android.graphics.Color',
-                                  'android.graphics.Color')
+    setTabTextColors = JavaMethod(
+        'android.graphics.Color', 'android.graphics.Color')
 
     setCurrentTab = JavaMethod('int')
     setCurrentTabByTag = JavaMethod('java.lang.String')
     addOnTabSelectedListener = JavaMethod(
-            'android.support.design.widget.TabLayout$OnTabSelectedListener')
+        '%s.TabLayout$OnTabSelectedListener' % package)
 
-    onTabReselected = JavaCallback(
-        'android.support.design.widget.TabLayout$Tab')
-    onTabSelected = JavaCallback(
-        'android.support.design.widget.TabLayout$Tab')
-    onTabUnselected = JavaCallback(
-        'android.support.design.widget.TabLayout$Tab')
+    onTabReselected = JavaCallback('%s.TabLayout$Tab' % package)
+    onTabSelected = JavaCallback('%s.TabLayout$Tab' % package)
+    onTabUnselected = JavaCallback('%s.TabLayout$Tab' % package)
 
     MODE_FIXED = 1
     MODE_SCROLLABLE = 0
@@ -52,8 +52,7 @@ class TabLayout(FrameLayout):
 
 
 class Tab(JavaBridgeObject):
-    __nativeclass__ = set_default(
-        'android.support.design.widget.TabLayout$Tab')
+    __nativeclass__ = set_default('%s.TabLayout$Tab' % package)
     setText = JavaMethod('java.lang.CharSequence')
     setIcon = JavaMethod('android.graphics.drawable.Drawable')
     # setContent = JavaMethod('int')
@@ -121,8 +120,8 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
         #d.current_tab = title
 
     def destroy(self):
-        """ Destroy all tabs when destroyed 
-        
+        """ Destroy all tabs when destroyed
+
         """
         super(AndroidTabLayout, self).destroy()
         if self.tabs:
@@ -165,6 +164,6 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
 
 
 class AndroidTabFragment(AndroidPagerFragment, ProxyTabFragment):
-    """ This is just an alias for future expansion. 
-    
+    """ This is just an alias for future expansion.
+
     """

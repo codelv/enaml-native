@@ -18,8 +18,8 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class SwipeRefreshLayout(ViewGroup):
-    __nativeclass__ = set_default(
-        'android.support.v4.widget.SwipeRefreshLayout')
+    package = 'androidx.swiperefreshlayout.widget'
+    __nativeclass__ = set_default('%s.SwipeRefreshLayout' % package)
     __signature__ = set_default(('android.content.Context', ))
     setDistanceToTriggerSync = JavaMethod('int')
     setRefreshing = JavaMethod('boolean')
@@ -27,9 +27,8 @@ class SwipeRefreshLayout(ViewGroup):
     setProgressBackgroundColorSchemeColor = JavaMethod(
         'android.graphics.Color')
     setColorSchemeColors = JavaMethod('[Landroid.graphics.Color;')
-
     setOnRefreshListener = JavaMethod(
-        'android.support.v4.widget.SwipeRefreshLayout$OnRefreshListener')
+        '%s.SwipeRefreshLayout$OnRefreshListener' % package)
     onRefresh = JavaCallback()
 
 

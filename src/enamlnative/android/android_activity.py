@@ -33,12 +33,12 @@ class Activity(Context):
     setView = JavaMethod('android.view.View')
     showLoading = JavaMethod('java.lang.String')
     setActionBar = JavaMethod('android.widget.Toolbar')
-    setSupportActionBar = JavaMethod('android.support.v7.widget.Toolbar')
+    setSupportActionBar = JavaMethod('androidx.appcompat.widget.Toolbar')
     setContentView = JavaMethod('android.view.View')
     getWindow = JavaMethod(returns='android.view.Window')
 
     getSupportFragmentManager = JavaMethod(
-        returns='android.support.v4.app.FragmentManager')
+        returns='androidx.fragment.app.FragmentManager')
     getBuildInfo = JavaMethod(returns='java.lang.HashMap')
 
     #: Permissions

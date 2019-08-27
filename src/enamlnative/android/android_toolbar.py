@@ -17,8 +17,11 @@ from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
 from .bridge import JavaMethod, JavaCallback, JavaField
 
 
+package = 'androidx.appcompat.widget'
+
+
 class Toolbar(ViewGroup):
-    __nativeclass__ = set_default('android.support.v7.widget.Toolbar')
+    __nativeclass__ = set_default('%s.Toolbar' % package)
     __signature__ = set_default(('android.content.Context',))
     setTitle = JavaMethod('java.lang.CharSequence')
     setSubtitle = JavaMethod('java.lang.CharSequence')
@@ -36,8 +39,7 @@ class Toolbar(ViewGroup):
 
 
 class ToolbarLayoutParams(MarginLayoutParams):
-    __nativeclass__ = set_default(
-        'android.support.v7.widget.Toolbar$LayoutParams')
+    __nativeclass__ = set_default('%s.Toolbar$LayoutParams' % package)
     gravity = JavaField('int')
 
 

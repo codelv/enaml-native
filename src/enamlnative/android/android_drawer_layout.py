@@ -16,13 +16,13 @@ from enamlnative.widgets.drawer_layout import ProxyDrawerLayout
 from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
 from .bridge import JavaMethod, JavaCallback, JavaField
 
+package = 'androidx.drawerlayout.widget'
 
 class DrawerLayout(ViewGroup):
-    __nativeclass__ = set_default('android.support.v4.widget.DrawerLayout')
+    __nativeclass__ = set_default('%s.DrawerLayout' % package)
     openDrawer = JavaMethod('android.view.View')
     closeDrawer = JavaMethod('android.view.View')
-    addDrawerListener = JavaMethod(
-        'android.support.v4.widget.DrawerLayout$DrawerListener')
+    addDrawerListener = JavaMethod('%s.DrawerLayout$DrawerListener' % package)
     onDrawerClosed = JavaCallback('android.view.View')
     onDrawerOpened = JavaCallback('android.view.View')
     onDrawerSlide = JavaCallback('android.view.View', 'float')
@@ -44,8 +44,7 @@ class DrawerLayout(ViewGroup):
 
 class DrawerLayoutParams(MarginLayoutParams):
     """ Update the child widget with the given params """
-    __nativeclass__ = set_default(
-        'android.support.v4.widget.DrawerLayout$LayoutParams')
+    __nativeclass__ = set_default('%s.DrawerLayout$LayoutParams' % package)
     gravity = JavaField('int')
 
 

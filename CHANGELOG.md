@@ -1,3 +1,13 @@
+# enaml-native 4.6.1 (unreleased)
+
+- Include version in build
+- Fix dev="server" development mode
+- Migrate to androidx instead of support libraries
+
+# enaml-native 4.6.0
+
+- Update to more recent gradle
+
 # enaml-native 4.5.2
 
 - Add long click listener
@@ -5,7 +15,7 @@
 
 # enaml-native 4.5.1
 
-- Fix NDK build warnings from not having the min sdk set and linking using `-l` instead of 
+- Fix NDK build warnings from not having the min sdk set and linking using `-l` instead of
 using LOCAL_SHARED_LIBRARIES
 - Fix reloading in Python 3
 - Add VideoView
@@ -30,7 +40,7 @@ operations (append, insert, remove, pop)
 
 # enaml-native 4.4.0
 
-- Add the `style` attribute for _all_ widgets that support it 
+- Add the `style` attribute for _all_ widgets that support it
 ex `style='@attr/borderlessButtonStyle'`
 - Add the `background_style` attribute so you can make an clickable view have touch animations
 by using `background_style='?attr/selectableItemBackground'`
@@ -66,9 +76,9 @@ by using `background_style='?attr/selectableItemBackground'`
 
 - [Glide](http://bumptech.github.io/glide/) is not added for loading images into ImageView's
 by default.
-- `JavaMethod` and `JavaStaticMethod` will now strip any trailing underscores from the name 
-allowing you to define multiple method with different signatures with the same name by 
-appending 1 or more '_'.  
+- `JavaMethod` and `JavaStaticMethod` will now strip any trailing underscores from the name
+allowing you to define multiple method with different signatures with the same name by
+appending 1 or more '_'.
 - Add files for building the conda recipe here
 
 # enaml-native 4.1.1
@@ -94,7 +104,7 @@ See the [supported tags](https://stackoverflow.com/questions/9754076/which-html-
 
 # enaml-native 4.0.0
 
-- Python-for-android and kivy-ios have been completely dropped in favor of 
+- Python-for-android and kivy-ios have been completely dropped in favor of
 [conda-mobile](https://github.com/codelv/conda-mobile)
 
 - Android updated to use api instead of compile
@@ -123,13 +133,13 @@ the number of checks required for initialization.
 - Refactor event loops to add `then` and `catch` in a much more efficient way
 
 - Refactor how events are batched together. It now will update as soon as control returns
-to the eventloop or after 5ms occurs. 
+to the eventloop or after 5ms occurs.
 
-- Fix a major layout issue where layout parameters were not properly applied based on the parent 
+- Fix a major layout issue where layout parameters were not properly applied based on the parent
 container. Now all `Flexbox` parameters (such as `align_self`, `min_width`, etc..) will work when
 a view is nested in a `Flexbox` layout.
 
-- Removed `AnalogClock`, `TabWidget` (not `TabLayout`), and `Spacer` widgets as they are rarely 
+- Removed `AnalogClock`, `TabWidget` (not `TabLayout`), and `Spacer` widgets as they are rarely
 ever used.
 
 - Scrollbars can now be hidden using `scrollbars = 'none'`
@@ -142,18 +152,18 @@ ever used.
 Migrating
 
 
-- `layout_width`, `layout_height`, and `layout_gravity` have been changed 
+- `layout_width`, `layout_height`, and `layout_gravity` have been changed
 to `width`, `height` and `gravity`. `width` and `height` are now coerced to an
-int so `100`, `'100'`, `match_parent`, and `wrap_content` are valid values. 
+int so `100`, `'100'`, `match_parent`, and `wrap_content` are valid values.
 
 - The `margins` attribute has been renamed to `margin` to match css
- 
-- The `layout` attribute has been removed and it's properties `align_self`, `min_width`, `max_width`, 
-`min_height`, `max_height`, and `flex_basis` are all now added to all Views 
+
+- The `layout` attribute has been removed and it's properties `align_self`, `min_width`, `max_width`,
+`min_height`, `max_height`, and `flex_basis` are all now added to all Views
 
 
 - ActivityIndicator `style` has been changed to `size`
 
-- Button `style` has been removed and replaced with `flat=True` to indicate a borderless or "Flat" 
+- Button `style` has been removed and replaced with `flat=True` to indicate a borderless or "Flat"
 Button.
 

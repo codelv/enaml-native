@@ -18,13 +18,14 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
 class ActionMenuView(LinearLayout):
-    __nativeclass__ = set_default('android.support.v7.widget.ActionMenuView')
+    package = 'androidx.appcompat.widget'
+    __nativeclass__ = set_default('%s.ActionMenuView' % package)
     getMenu = JavaMethod()
     showOverflowMenu = JavaMethod()
     hideOverflowMenu = JavaMethod()
     setOverflowIcon = JavaMethod('android.graphics.drawable')
     setOnMenuItemClickListener = JavaMethod(
-        'android.support.v7.widget.ActionMenuView$OnMenuItemClickListener')
+        '%s.ActionMenuView$OnMenuItemClickListener' % package)
 
     onMenuItemClick = JavaCallback('android.view.MenuItem', returns='boolean')
 

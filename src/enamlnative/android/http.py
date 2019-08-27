@@ -35,7 +35,7 @@ class BridgedAsyncHttpCallback(JavaBridgeObject):
     onFinish = JavaCallback()
     onRetry = JavaCallback('int')
     onCancel = JavaCallback()
-    onSuccess = JavaCallback('int', 'java.lang.String', '[B')
+    onResponse = JavaCallback('int', 'java.lang.String', '[B')
     onFailure = JavaCallback('int', 'java.lang.String', '[B',
                              'java.lang.Throwable')
 
@@ -54,10 +54,10 @@ class Interceptor(JavaBridgeObject):
 
 
 class OkHttpClient(JavaBridgeObject):
-    """ OkHttp performs best when you create a single OkHttpClient instance 
-    and reuse it for all of your HTTP calls. This is because each client holds 
-    its own connection pool and thread pools. Reusing connections and threads 
-    reduces latency and saves memory. Conversely, creating a client for each 
+    """ OkHttp performs best when you create a single OkHttpClient instance
+    and reuse it for all of your HTTP calls. This is because each client holds
+    its own connection pool and thread pools. Reusing connections and threads
+    reduces latency and saves memory. Conversely, creating a client for each
     request wastes resources on idle pools.
     """
     #: Shared instance
@@ -180,14 +180,14 @@ class AndroidHttpRequest(HttpRequest):
         handler.onFinish.connect(self.on_finish)
         handler.onProgress.connect(self.on_progress)
         handler.onProgressData.connect(self.on_progress_data)
-        handler.onSuccess.connect(self.on_success)
+        handler.onResponse.connect(self.on_response)
         handler.onRetry(self.on_retry)
 
         return handler
 
     def _default_body(self):
         """ If the body is not passed in by the user try to create one
-        using the given data parameters. 
+        using the given data parameters.
         """
         if not self.data:
             return ""
@@ -212,14 +212,14 @@ class AndroidHttpRequest(HttpRequest):
     def on_retry(self, retry):
         self.retries = retry
 
-    def on_success(self, status, headers, data):
+    def on_response(self, status, headers, data):
         r = self.response
         r.code = status
         if headers:
             r.headers = headers
         if data:
             r.body = data
-        r.progress = 100
+        #r.progress = 100
         r.ok = True
 
     def on_failure(self, status, headers, data, error):
@@ -243,8 +243,7 @@ class AndroidHttpRequest(HttpRequest):
 
     def on_progress(self, written, total):
         r = self.response
-        r.content_length = total
-        if total:
+        if total > 0:
             r.progress = int(100*written/total)
 
     def on_progress_data(self, data):
@@ -253,12 +252,12 @@ class AndroidHttpRequest(HttpRequest):
 
 
 class AsyncHttpClient(AbstractAsyncHttpClient):
-    """ An AsyncHttpClient that lets you fetch using a format similar to 
-    tornado's AsyncHTTPClient but using the Android native Loopj library. 
-    
+    """ An AsyncHttpClient that lets you fetch using a format similar to
+    tornado's AsyncHTTPClient but using the Android native Loopj library.
+
     This is done instead of using a python library so it handles all
     SSL stuff for us. Otherwise we have to compile and link all the SSL
-    libraries with python which makes the app huge (at least 5Mb in ssl 
+    libraries with python which makes the app huge (at least 5Mb in ssl
     libs alone) and the build process even more complicated.
 
     """

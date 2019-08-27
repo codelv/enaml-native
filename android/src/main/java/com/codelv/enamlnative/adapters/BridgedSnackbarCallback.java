@@ -1,6 +1,6 @@
 package com.codelv.enamlnative.adapters;
 
-import android.support.design.widget.Snackbar;
+import com.google.android.material.snackbar.Snackbar;
 
 /**
  * Add a listener interface to a Snackbar Callbacks
