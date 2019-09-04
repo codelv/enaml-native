@@ -18,7 +18,10 @@ from enamlnative.widgets.view import coerce_gravity, coerce_size
 
 from .android_view import LayoutParams
 from .android_view_group import AndroidViewGroup, ViewGroup
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField
+from .android_fragment import AndroidFragment
+from .bridge import (
+    JavaBridgeObject, JavaMethod, JavaCallback, JavaField, encode
+)
 
 
 package = 'androidx.viewpager.widget'
@@ -111,7 +114,9 @@ class BridgedFragmentStatePagerAdapter(JavaBridgeObject):
     __nativeclass__ = set_default(
         'com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter')
     addFragment = JavaMethod('androidx.fragment.app.Fragment')
+    addFragments = JavaMethod('[Landroidx.fragment.app.Fragment;')
     removeFragment = JavaMethod('androidx.fragment.app.Fragment')
+    removeFragments = JavaMethod('[Landroidx.fragment.app.Fragment;')
     setTitles = JavaMethod('[Ljava.lang.String;')
     clearTitles = JavaMethod()
     notifyDataSetChanged = JavaMethod()
@@ -154,8 +159,12 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         d = self.declaration
         w = self.widget
 
-        #: Set adapter
-        w.setAdapter(self.adapter)
+        # Add pages
+        adapter = self.adapter
+        adapter.addFragments([encode(c.fragment) for c in self.pages])
+
+        # Set adapter
+        w.setAdapter(adapter)
         w.addOnPageChangeListener(w.getId())
         w.onPageSelected.connect(self.on_page_selected)
 
@@ -163,28 +172,14 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
             self.set_current_index(d.current_index)
 
     def child_added(self, child):
-        """ When a child is added, schedule a data changed notification """
-        super(AndroidViewPager, self).child_added(child)
-        self._notify_count += 1
-        self.get_context().timed_call(
-            self._notify_delay, self._notify_change)
+        """ When a child is added, add it to the adapter. """
+        if isinstance(child, AndroidFragment):
+            self.adapter.addFragment(child.fragment)
 
     def child_removed(self, child):
-        """ When a child is removed, schedule a data changed notification """
-        super(AndroidViewPager, self).child_removed(child)
-        self._notify_count += 1
-        self.get_context().timed_call(
-            self._notify_delay, self._notify_change)
-
-    def _notify_change(self):
-        """ After all changes have settled, tell Java it changed """
-        d = self.declaration
-        self._notify_count -= 1
-        if self._notify_count == 0:
-            #: Tell the UI we made changes
-            self.adapter.notifyDataSetChanged(now=True)
-            self.get_context().timed_call(
-                500, self._queue_pending_calls)
+        """ When a child is removed, remove it from the adapter """
+        if isinstance(child, AndroidFragment):
+            self.adapter.removeFragment(child.fragment)
 
     def _queue_pending_calls(self):
         #: Now wait for current page to load, then invoke any pending calls
@@ -259,10 +254,9 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         """ Override as there is no (width, height) constructor.
 
         """
-        from .android_fragment import AndroidFragment
         if isinstance(child, AndroidFragment):
-            return super(AndroidViewPager, self).create_layout_params(child,
-                                                                      layout)
+            return super(AndroidViewPager, self).create_layout_params(
+                child, layout)
         # Only apply to decor views
         dp = self.dp
         w, h = (coerce_size(layout.get('width', 'match_parent')),

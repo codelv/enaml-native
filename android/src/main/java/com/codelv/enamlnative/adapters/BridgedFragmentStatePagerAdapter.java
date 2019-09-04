@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.util.Log;
 import com.codelv.enamlnative.EnamlActivity;
 
 import java.util.ArrayList;
@@ -32,31 +33,45 @@ public class BridgedFragmentStatePagerAdapter extends FragmentStatePagerAdapter 
         super(fm);
     }
 
+    public void addFragments(Fragment... fragments) {
+        for (Fragment fragment: fragments) {
+            mFragments.add(fragment);
+        }
+        notifyDataSetChanged();
+    }
+
+    public void removeFragments(Fragment... fragments) {
+        for (Fragment fragment: fragments) {
+            mFragments.remove(fragment);
+        }
+        notifyDataSetChanged();
+    }
+
     public void addFragment(Fragment fragment) {
         mFragments.add(fragment);
-        //notifyDataSetChanged();
+        notifyDataSetChanged();
     }
 
     public void removeFragment(Fragment fragment) {
         mFragments.remove(fragment);
-        //notifyDataSetChanged();
+        notifyDataSetChanged();
     }
 
     /**
      * A safe notify
-
+    */
     @Override
     public void notifyDataSetChanged() {
         try{
             super.notifyDataSetChanged();
         } catch (IllegalStateException e) {
             // Try again later
-            mHandler.post(()->{
-               notifyDataSetChanged();
-            });
+            //mHandler.post(()->{
+            //   notifyDataSetChanged();
+            //});
         }
     }
-     */
+
 
     @Override
     public int getCount() {

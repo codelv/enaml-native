@@ -16,7 +16,6 @@ from enamlnative.widgets.view_pager import ProxyPagerFragment
 
 from .android_toolkit_object import AndroidToolkitObject
 from .android_frame_layout import FrameLayout
-from .android_view_pager import BridgedFragmentStatePagerAdapter
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
@@ -53,9 +52,6 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
     #: A reference to the fragment created by the proxy.
     fragment = Typed(BridgedFragment)
 
-    #: Reference to the adapter
-    adapter = Typed(BridgedFragmentStatePagerAdapter)
-
     #: Future set when ready
     ready = Value()
 
@@ -81,19 +77,6 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
         f.onCreateView.connect(self.on_create_view)
         f.onDestroyView.connect(self.on_destroy_view)
 
-    def init_layout(self):
-        """ Initialize the layout of the toolkit widget.
-
-        This method is called during the bottom-up pass. This method
-        should initialize the layout of the widget. The child widgets
-        will be fully initialized and layed out when this is called.
-
-        """
-        parent = self.parent()
-        if parent is not None:
-            self.adapter = parent.adapter
-            self.adapter.addFragment(self.fragment)
-
     def destroy(self):
         """ Custom destructor that deletes the fragment and removes
         itself from the adapter it was added to.
@@ -102,13 +85,6 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
         #: Destroy fragment
         fragment = self.fragment
         if fragment:
-            #: Stop listening
-            fragment.setFragmentListener(None)
-
-            #: Cleanup from fragment
-            if self.adapter is not None:
-                self.adapter.removeFragment(self.fragment)
-
             del self.fragment
         super(AndroidFragment, self).destroy()
 
