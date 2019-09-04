@@ -16,6 +16,7 @@ from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 
 import iconify
+from iconify import material
 iconify.install()
 
 class AppState(Atom):

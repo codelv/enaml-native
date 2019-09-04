@@ -55,6 +55,7 @@ if 'src' not in sys.path:
     (["android"], 'sensors.enaml'),
     (["android"], 'snackbar.enaml'),
     (["android"], 'spinner.enaml'),
+    (["android"], 'statusbar.enaml'),
     (["android", "ios"], 'switch.enaml'),
     (["android"], 'swipe_refresh_layout.enaml'),
     (["android"], 'tabs.enaml'),
