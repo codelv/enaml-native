@@ -22,11 +22,11 @@ from time import time
 
 
 class Plugin(Atom):
-    """ Simplified way to load a plugin from an entry_point line. 
-    The enaml-native and p4a build process removes pkg_resources 
+    """ Simplified way to load a plugin from an entry_point line.
+    The enaml-native and p4a build process removes pkg_resources
     and all package related metadata this simply imports from an
     entry point string in the format "package.path.module:attr"
-    
+
     """
     name = Unicode()
     source = Unicode()
@@ -44,8 +44,8 @@ class Plugin(Atom):
 class BridgedApplication(Application):
     """ An abstract implementation of an Enaml application.
 
-    This serves as a base class for both Android and iOS applications and 
-    provides support for the python event loop, the development server 
+    This serves as a base class for both Android and iOS applications and
+    provides support for the python event loop, the development server
     and the bridge.
 
     """
@@ -53,6 +53,9 @@ class BridgedApplication(Application):
 
     #: Keep screen on by setting the WindowManager flag
     keep_screen_on = Bool()
+
+    #: Statusbar color
+    statusbar_color = Unicode()
 
     #: Application lifecycle state must be set by the implementation
     state = Enum('created', 'paused', 'resumed', 'stopped', 'destroyed')
@@ -102,10 +105,10 @@ class BridgedApplication(Application):
         return EventLoop.default()
 
     def _default_plugins(self):
-        """ Get entry points to load any plugins installed. 
+        """ Get entry points to load any plugins installed.
         The build process should create an "entry_points.json" file
         with all of the data from the installed entry points.
-        
+
         """
         plugins = {}
         try:
@@ -125,7 +128,7 @@ class BridgedApplication(Application):
     def __init__(self, *args, **kwargs):
         """ Initialize the event loop error handler.  Subclasses must properly
         initialize the proxy resolver.
-        
+
         """
         super(BridgedApplication, self).__init__(*args, **kwargs)
         if self.dev:
@@ -140,7 +143,7 @@ class BridgedApplication(Application):
     def start(self):
         """ Start the application's main event loop
         using either twisted or tornado.
-        
+
         """
         #: Schedule a load view if given and remote debugging is not active
         #: the remote debugging init call this after dev connection is ready
@@ -210,9 +213,9 @@ class BridgedApplication(Application):
         raise NotImplementedError
 
     def request_permissions(self, permissions):
-        """ Return a future that resolves with the result of the 
+        """ Return a future that resolves with the result of the
         permission request
-        
+
         """
         raise NotImplementedError
 
@@ -241,10 +244,10 @@ class BridgedApplication(Application):
         -----------
             future: Future or Deferred
                 Future implementation for the current EventLoop
-                
+
             callback: callable
                 Callback to invoke when the future is done
-                
+
         """
         if future is None:
             raise bridge.BridgeReferenceError(
@@ -259,7 +262,7 @@ class BridgedApplication(Application):
         -----------
             future: Future or Deferred
                 Future implementation for the current EventLoop
-                
+
             result: object
                 Result to set
         """
@@ -271,14 +274,14 @@ class BridgedApplication(Application):
     def show_view(self):
         """ Show the current `app.view`. This will fade out the previous
         with the new view.
-            
+
         """
         raise NotImplementedError
 
     def get_view(self):
         """ Get the root view to display. Make sure it is
         properly initialized.
-        
+
         """
         view = self.view
         if not view.is_initialized:
@@ -294,7 +297,7 @@ class BridgedApplication(Application):
         self.send_event(bridge.Command.ERROR, msg)
 
     def send_event(self, name, *args, **kwargs):
-        """ Send an event to the native handler. This call is queued and 
+        """ Send an event to the native handler. This call is queued and
         batched.
 
         Parameters
@@ -341,7 +344,7 @@ class BridgedApplication(Application):
         Parameters
         ----------
         now: boolean
-            Send all pending events now instead of waiting for deferred calls 
+            Send all pending events now instead of waiting for deferred calls
             to finish. Use this when you want to update the screen
 
         """
@@ -356,7 +359,7 @@ class BridgedApplication(Application):
 
     def dispatch_events(self, data):
         """ Send events to the bridge using the system specific implementation.
-        
+
         """
         raise NotImplementedError
 
@@ -376,7 +379,7 @@ class BridgedApplication(Application):
         """ When we get an 'event' type from the bridge
         handle it by invoking the handler and if needed
         sending back the result.
-        
+
         """
         result_id, ptr, method, args = event[1]
         obj = None
@@ -389,7 +392,7 @@ class BridgedApplication(Application):
             msg = "Error processing event: {} - {}".format(
                   event, e).encode("utf-8")
             print(msg)
-            self.show_error(msg)
+            #self.show_error(msg)
         except:
             #: Log the event, blow up in user's face
             msg = "Error processing event: {} - {}".format(
@@ -413,7 +416,7 @@ class BridgedApplication(Application):
     def handle_error(self, callback):
         """ Called when an error occurs in an event loop callback.
         By default, sets the error view.
-        
+
         """
         self.loop.log_error(callback)
         msg = "\n".join([
@@ -426,9 +429,9 @@ class BridgedApplication(Application):
     # AppEventListener API Implementation
     # -------------------------------------------------------------------------
     def on_events(self, data):
-        """ Called when the bridge sends an event. For instance the return 
+        """ Called when the bridge sends an event. For instance the return
         result of a method call or a callback from a widget event.
-        
+
         """
         #: Pass to event loop thread
         self.deferred_call(self.process_events, data)
@@ -460,7 +463,7 @@ class BridgedApplication(Application):
     def start_dev_session(self):
         """ Start a client that attempts to connect to the dev server
         running on the host `app.dev`
-        
+
         """
         try:
             from .dev import DevServerSession
@@ -476,15 +479,15 @@ class BridgedApplication(Application):
     # Plugin implementation
     # -------------------------------------------------------------------------
     def get_plugins(self, group):
-        """ Was going to use entry points but that requires a ton of stuff 
+        """ Was going to use entry points but that requires a ton of stuff
         which will be extremely slow.
-        
+
         """
         return self.plugins.get(group, [])
 
     def load_plugin_widgets(self):
-        """ Pull widgets added via plugins using the `enaml_native_widgets` 
-        entry point. The entry point function must return a dictionary of 
+        """ Pull widgets added via plugins using the `enaml_native_widgets`
+        entry point. The entry point function must return a dictionary of
         Widget declarations to add to the core api.
 
         def install():
@@ -503,9 +506,9 @@ class BridgedApplication(Application):
                 setattr(api, name, widget)
 
     def load_plugin_factories(self):
-        """ Pull widgets added via plugins using the 
-        `enaml_native_ios_factories` or `enaml_native_android_factories` 
-        entry points. The entry point function must return a dictionary of 
+        """ Pull widgets added via plugins using the
+        `enaml_native_ios_factories` or `enaml_native_android_factories`
+        entry points. The entry point function must return a dictionary of
         Widget declarations to add to the factories for this platform.
 
         def install():

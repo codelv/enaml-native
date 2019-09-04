@@ -24,3 +24,4 @@ class Window(JavaBridgeObject):
 
     addFlags = JavaMethod('int')
     clearFlags = JavaMethod('int')
+    setStatusBarColor = JavaMethod('android.graphics.Color')
