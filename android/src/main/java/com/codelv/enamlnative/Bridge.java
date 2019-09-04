@@ -620,19 +620,21 @@ public class Bridge implements PythonInterpreter.EventListener {
         }
 
         protected int parseColor(String color) {
-            if (color.length()==4) {
-                // #RGB
-                color = String.format("#%c%c%c%c%c%c",
-                        color.charAt(1),color.charAt(1), // R
-                        color.charAt(2),color.charAt(2), // G
-                        color.charAt(3),color.charAt(3)); // B
-            } else if (color.length()==5) {
-                // #ARGB
-                color = String.format("#%c%c%c%c%c%c%c%c",
-                        color.charAt(1),color.charAt(1), // A
-                        color.charAt(2),color.charAt(2), // R
-                        color.charAt(3),color.charAt(3), // G
-                        color.charAt(4),color.charAt(4)); // B
+            if (color.startsWith("#")) {
+                if (color.length() == 4) {
+                    // #RGB
+                    color = String.format("#%c%c%c%c%c%c",
+                            color.charAt(1), color.charAt(1), // R
+                            color.charAt(2), color.charAt(2), // G
+                            color.charAt(3), color.charAt(3)); // B
+                } else if (color.length() == 5) {
+                    // #ARGB
+                    color = String.format("#%c%c%c%c%c%c%c%c",
+                            color.charAt(1), color.charAt(1), // A
+                            color.charAt(2), color.charAt(2), // R
+                            color.charAt(3), color.charAt(3), // G
+                            color.charAt(4), color.charAt(4)); // B
+                }
             }
             return Color.parseColor(color);
         }
