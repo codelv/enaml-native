@@ -50,7 +50,7 @@ before_install:
   - conda install python -q
 
   # Install the cli
-  - pip install --user enaml-native git+https://github.com/codelv/enaml-native-cli.git
+  - pip install --user git+https://github.com/codelv/enaml-native-cli.git
 
   # Start the emulator
   - android list target
