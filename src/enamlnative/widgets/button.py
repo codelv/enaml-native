@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Enum, Float, Unicode, Bool, observe, set_default
+    Typed, ForwardTyped, Enum, Float, Str, Bool, observe, set_default
 )
 
 from enaml.core.declarative import d_
@@ -108,7 +108,7 @@ class FloatingActionButton(ImageButton):
     elevation = d_(Float())
 
     #: Color of the ripple touch effect
-    ripple_color = d_(Unicode())
+    ripple_color = d_(Str())
 
     #: Show or hide the button
     show = d_(Bool(True))

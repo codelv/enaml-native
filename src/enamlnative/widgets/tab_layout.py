@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Unicode, Int, Enum, observe, set_default
+    Typed, ForwardTyped, Str, Int, Enum, observe, set_default
 )
 
 from enaml.core.declarative import d_
@@ -66,16 +66,16 @@ class TabLayout(FrameLayout):
     tab_gravity = d_(Enum('fill', 'center'))
 
     #: Sets the tab indicator's color for the currently selected tab.
-    tab_indicator_color_selected = d_(Unicode())
+    tab_indicator_color_selected = d_(Str())
 
     #: Sets the tab indicator's height for the currently selected tab.
     tab_indicator_height = d_(Int())
 
     #: Tab normal color
-    tab_color = d_(Unicode())
+    tab_color = d_(Str())
 
     #: Tab color selected
-    tab_color_selected = d_(Unicode())
+    tab_color_selected = d_(Str())
 
     #: Currently selected tab title
     current_tab = d_(ForwardTyped(lambda: TabFragment))
