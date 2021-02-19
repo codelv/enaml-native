@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Int, Unicode, Bool, observe
+    Typed, ForwardTyped, Int, Str, Bool, observe
 )
 
 from enaml.core.declarative import d_
@@ -50,10 +50,10 @@ class ViewAnimator(FrameLayout):
     displayed_child = d_(Int(0))
     
     #: Specifies the animation used to animate a View that enters the screen.
-    in_animation = d_(Unicode())
+    in_animation = d_(Str())
     
     #: Specifies the animation used to animate a View that exit the screen.
-    out_animation = d_(Unicode())
+    out_animation = d_(Str())
 
     #: A reference to the ProxyViewAnimator object.
     proxy = Typed(ProxyViewAnimator)

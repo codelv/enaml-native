@@ -23,11 +23,11 @@ from atom.api import *
 SDK = os.path.expanduser('~/Android/Sdk/sources/android-27/')
 
 class RefType(Atom):
-    name = Unicode('JavaBridgeObject')
+    name = Str('JavaBridgeObject')
 
 class Import(Atom):
-    name = Unicode()
-    pkg = Unicode()
+    name = Str()
+    pkg = Str()
 
 
 def convert(path, node):

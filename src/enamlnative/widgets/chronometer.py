@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Long, Unicode, Enum, Bool, observe, set_default
+    Typed, ForwardTyped, Long, Str, Enum, Bool, observe, set_default
 )
 from datetime import datetime
 from enaml.core.declarative import d_
@@ -53,7 +53,7 @@ class Chronometer(TextView):
     ticks = d_(Long(), writable=False)
 
     #: Sets the format string used for display.
-    format = d_(Unicode())
+    format = d_(Str())
 
     #: Counting direction
     direction = d_(Enum('up', 'down'))

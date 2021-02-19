@@ -10,14 +10,14 @@ except ImportError:
     print("Warning: Install enaml-native-icons and rebuild for icons to work!")
 
 class User(Atom):
-    username = Unicode()
-    password = Unicode()
+    username = Str()
+    password = Str()
 
 
 class App(Atom):
     """ App state and controller """
 
-    theme_color = Unicode("#cab")
+    theme_color = Str("#cab")
 
     #: Define our "user database"
     users = List(User,default=[

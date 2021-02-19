@@ -10,7 +10,7 @@ Created on May 26, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Enum, Unicode, observe
+    Typed, ForwardTyped, Enum, Str, observe
 )
 
 from enaml.core.declarative import d_
@@ -40,7 +40,7 @@ class ActivityIndicator(View):
     size = d_(Enum('normal', 'small', 'large'))
 
     #: Sets the color of the indicator.
-    color = d_(Unicode())
+    color = d_(Str())
 
     #: A reference to the ProxyActivityIndicator object.
     proxy = Typed(ProxyActivityIndicator)

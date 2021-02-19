@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Coerced, Unicode, List, Int, Enum, observe
+    Typed, ForwardTyped, Coerced, Str, List, Int, Enum, observe
 )
 
 from enaml.core.declarative import d_
@@ -60,7 +60,7 @@ class Spinner(ViewGroup):
     mode = d_(Enum('dropdown', 'dialog'))
 
     #: Sets the prompt to display when the dialog is shown.
-    prompt = d_(Unicode())
+    prompt = d_(Str())
 
     #: Should the layout be a column or a row.
     selected = d_(Int(0))

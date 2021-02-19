@@ -10,7 +10,7 @@ The full license is in the file LICENSE, distributed with this software.
 """
 import ctypes
 from ctypes.util import find_library
-from atom.api import Atom, Float, Value, Unicode, Int, Typed
+from atom.api import Atom, Float, Value, Str, Int, Typed
 from enaml.application import ProxyResolver
 from . import factories
 from .bridge import ObjcBridgeObject, ObjcMethod

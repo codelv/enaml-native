@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Unicode, Enum, Bool, Int, observe, set_default
+    Typed, ForwardTyped, Str, Enum, Bool, Int, observe, set_default
 )
 
 from enaml.core.declarative import d_

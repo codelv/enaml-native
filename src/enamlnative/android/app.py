@@ -9,7 +9,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 """
 import nativehooks #: Created by the ndk-build in pybridge.c
-from atom.api import Float, Value, Int, List, Unicode, Typed, Dict, Event
+from atom.api import Float, Value, Int, List, Str, Typed, Dict, Event
 from enaml.application import ProxyResolver
 from . import factories
 from .android_activity import Activity
@@ -27,7 +27,7 @@ class AndroidApplication(BridgedApplication):
     """
 
     #: Attributes so it can be serialized over the bridge as a reference
-    __nativeclass__ = Unicode('android.content.Context')
+    __nativeclass__ = Str('android.content.Context')
 
     #: Bridge widget
     widget = Typed(Activity)

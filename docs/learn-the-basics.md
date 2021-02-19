@@ -61,17 +61,17 @@ Attempting to set an attribute that has not been defined by the component will t
 
 ```python
 from enamlnative.widgets.api import *
-from atom.api import Unicode
+from atom.api import Str
 
 enamldef ContentView(Flexbox):
     #: A new attribute with a default of 0
     attr count = 0
 
     #: A new attribute that is restricted to a given type
-    attr title: Unicode
+    attr title: Str
 
     #: A new attribute that is restricted to a given type with a default
-    attr caption: Unicode = "A caption"
+    attr caption: Str = "A caption"
 ```
 
 These custom attributes can then be used like any other enaml attribute.

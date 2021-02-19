@@ -10,7 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Unicode, Tuple, Enum, Event, Float, Int, Bool, observe
+    Typed, ForwardTyped, Str, Tuple, Enum, Event, Float, Int, Bool, observe
 )
 
 from enaml.core.declarative import d_
@@ -98,7 +98,7 @@ class TextView(View):
     #: Input type or types separated by "|"
     #: See https://developer.android.com/reference/android/widget/TextView.html
     #: attr_android:inputType
-    input_type = d_(Unicode())
+    input_type = d_(Str())
 
     INPUT_TYPES = (
         'date', 'datetime', 'number',
@@ -119,19 +119,19 @@ class TextView(View):
     )
 
     #: Font family
-    font_family = d_(Unicode())
+    font_family = d_(Str())
 
     #: Font style
     font_style = d_(Enum('normal', 'bold', 'italic', 'bold_italic'))
 
     #: Sets the color used to display the selection highlight.
-    highlight_color = d_(Unicode())
+    highlight_color = d_(Str())
 
     #: Sets the color of links in the text.
-    link_color = d_(Unicode())
+    link_color = d_(Str())
 
     #: The unicode text for the label.
-    text = d_(Unicode())
+    text = d_(Str())
 
     #: Text alignment
     text_alignment = d_(Enum('', 'left', 'right', 'center', 'justified',
@@ -139,7 +139,7 @@ class TextView(View):
 
     #: Sets the text color for all the states (normal, selected, focused)
     #: to be this color.
-    text_color = d_(Unicode())
+    text_color = d_(Str())
 
     #: Set the default text size to the given value, interpreted as
     #: "scaled pixel" units.

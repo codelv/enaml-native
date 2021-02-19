@@ -10,7 +10,7 @@ Created on Mar 17, 2018
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Unicode, Float, Coerced, Bool, Enum, observe,
+    Typed, ForwardTyped, Str, Float, Coerced, Bool, Enum, observe,
 )
 
 from enaml.core.declarative import d_
@@ -92,7 +92,7 @@ class PopupWindow(ToolkitObject):
     show = d_(Bool())
 
     #: Background color of the window (white by default)
-    background_color = d_(Unicode())
+    background_color = d_(Str())
 
     #: If relative, show as a dropdown on the parent view, otherwise
     #: show at the position given by `x` and `y`.
@@ -100,11 +100,11 @@ class PopupWindow(ToolkitObject):
 
     #: Animation style for the PopupWindow using the @style format
     #: (ex. @style/MyAnimation
-    animation = d_(Unicode())
+    animation = d_(Str())
 
     #: PopupWindow style using the @style format
     #: (ex. @style/Theme_Light_NoTitleBar_Fullscreen
-    style = d_(Unicode())
+    style = d_(Str())
 
     #: A reference to the proxy object.
     proxy = Typed(ProxyPopupWindow)
