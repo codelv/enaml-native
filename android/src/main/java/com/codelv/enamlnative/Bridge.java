@@ -620,6 +620,9 @@ public class Bridge implements PythonInterpreter.EventListener {
         }
 
         protected int parseColor(String color) {
+            if (color.length() == 0) {
+                return Color.BLACK;
+            }
             if (color.startsWith("#")) {
                 if (color.length() == 4) {
                     // #RGB

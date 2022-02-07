@@ -114,7 +114,7 @@ class BridgedApplication(Application):
     # -------------------------------------------------------------------------
     def _default_loop(self):
         """Get the event loop based on what libraries are available."""
-        return asyncio.get_event_loop()
+        return EventLoop.default() # asyncio.get_event_loop()
 
     def _default_plugins(self):
         """Get entry points to load any plugins installed.
