@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.os.Build;
 import android.content.Intent;
 import android.os.Handler;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -352,7 +351,7 @@ public class EnamlActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (mPermissionResultListener !=null) {
             mPermissionResultListener.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }

@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 export HOSTPYTHON=$PYTHON
 if [ "$PY3K" == "1" ]; then
-    export PY_LIB_VER="3.6m"
+    export PY_LIB_VER="3.10"
 else
     export PY_LIB_VER="2.7"
 fi
 
-# Copy 
+# Copy
 cp -Rf $RECIPE_DIR/src $SRC_DIR
 cp $RECIPE_DIR/README.md $SRC_DIR
 cp $RECIPE_DIR/setup.py $SRC_DIR
+
 
 # Build iOS
 export TARGETS=("iphoneos iphonesimulator")
@@ -20,46 +21,29 @@ do
     # Install actual
     mkdir -p $PREFIX/$TARGET/python/site-packages
     cp -RL src/enamlnative $PREFIX/$TARGET/python/site-packages
-    
+
     # Remove the android package
     rm -Rf $PREFIX/$TARGET/python/site-packages/enamlnative/android
-    
+
 done
 
 # Install ios lib
 # TODO....
 
 
-# Build android
-export ARCHS=("x86_64 x86 arm arm64")
-export NDK="$HOME/Android/Sdk/ndk-bundle"
+source $PREFIX/android/activate-ndk.sh
+
+# Clean
+rm -rf $RECIPE_DIR/android/.gradle
+rm -rf $RECIPE_DIR/android/.idea
+rm -rf $RECIPE_DIR/android/build/
 
 
 for ARCH in $ARCHS
 do
 
-    if [ "$ARCH" == "arm" ]; then
-        export TARGET_HOST="arm-linux-androideabi"
-        export TARGET_ABI="armeabi-v7a"
-    elif [ "$ARCH" == "arm64" ]; then
-        export TARGET_HOST="aarch64-linux-android"
-        export TARGET_ABI="arm64-v8a"
-    elif [ "$ARCH" == "x86" ]; then
-        export TARGET_HOST="i686-linux-android"
-        export TARGET_ABI="x86"
-    elif [ "$ARCH" == "x86_64" ]; then
-        export TARGET_HOST="x86_64-linux-android"
-        export TARGET_ABI="x86_64"
-    fi
-
-    export ANDROID_TOOLCHAIN="$NDK/standalone/$ARCH"
-    export APP_ROOT="$PREFIX/android/$ARCH"
-    export PATH="$PATH:$ANDROID_TOOLCHAIN/bin"
-    export AR="$TARGET_HOST-ar"
-    export CC="$TARGET_HOST-clang"
-    export CXX="$TARGET_HOST-clang++"
-    export LD="$TARGET_HOST-ld"
-    export STRIP="$TARGET_HOST-strip"
+    # Setup compiler for arch and target_api
+    activate-ndk-clang $ARCH 32
     export CFLAGS="-O3 -I$APP_ROOT/include/python$PY_LIB_VER"
     export LDFLAGS="-L$APP_ROOT/lib -lpython$PY_LIB_VER -landroid"
     export LDSHARED="$CXX -shared"

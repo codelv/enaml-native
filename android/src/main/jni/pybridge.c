@@ -283,11 +283,12 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
     Py_NoSiteFlag = 1;
     Py_Initialize();
 
+
+#if PY_MAJOR_VERSION < 3
     if (! PyEval_ThreadsInitialized()) {
         PyEval_InitThreads();
     }
 
-#if PY_MAJOR_VERSION < 3
     PyInit_NativeHooks();
 #endif
 
