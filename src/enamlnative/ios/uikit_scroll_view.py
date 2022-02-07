@@ -19,7 +19,7 @@ from .uikit_view import UIView, UiKitView
 
 class UIScrollView(UIView):
     #: Properties
-    contentSize = ObjcProperty('CGSize')
+    contentSize = ObjcProperty("CGSize")
 
     #: Added by UIScrollView+AutoResize
     fitToContents = ObjcMethod()
@@ -34,9 +34,7 @@ class UIScrollView(UIView):
 
 
 class UiKitScrollView(UiKitView, ProxyScrollView):
-    """ An UiKit implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit layout created by the proxy.
     widget = Typed(UIScrollView)
@@ -45,9 +43,7 @@ class UiKitScrollView(UiKitView, ProxyScrollView):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the widget
-
-        """
+        """Create the widget"""
         self.widget = UIScrollView()
 
     # def update_frame(self):
@@ -59,7 +55,7 @@ class UiKitScrollView(UiKitView, ProxyScrollView):
     #     # self.frame = (d.x,d.y,d.width,d.height)
 
     def init_layout(self):
-        super(UiKitScrollView, self).init_layout()
+        super().init_layout()
         for c in self.children():
             if c.frame:
                 self.widget.contentSize = c.frame[-2:]
@@ -71,7 +67,7 @@ class UiKitScrollView(UiKitView, ProxyScrollView):
     # ProxyScrollView API
     # -------------------------------------------------------------------------
     # def set_frame(self, change):
-    #     super(UiKitScrollView, self).set_frame(change)
+    #     super().set_frame(change)
     #     d = self.declaration
     #     self.widget.contentSize = (d.width, d.height)
 

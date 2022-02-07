@@ -16,9 +16,8 @@ from .view import coerce_gravity
 
 
 class ProxyFrameLayout(ProxyViewGroup):
-    """ The abstract definition of a proxy FrameLayout object.
+    """The abstract definition of a proxy FrameLayout object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: FrameLayout)
 
@@ -27,10 +26,11 @@ class ProxyFrameLayout(ProxyViewGroup):
 
 
 class FrameLayout(ViewGroup):
-    """ FrameLayout is a view group that displays
-        child views in relative positions.
+    """FrameLayout is a view group that displays
+    child views in relative positions.
 
     """
+
     #: Describes how the child views are positioned.
     #: Defaults to Gravity.START | Gravity.TOP.
     foreground_gravity = d_(Coerced(int, coercer=coerce_gravity))
@@ -41,10 +41,8 @@ class FrameLayout(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('foreground_gravity')
+    @observe("foreground_gravity")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(FrameLayout, self)._update_proxy(change)
+        super()._update_proxy(change)

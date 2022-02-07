@@ -18,28 +18,26 @@ from .uikit_control import UIControl, UiKitControl
 
 
 class UISwitch(UIControl):
-    """
-    """
+    """ """
+
     #: Properties
-    on = ObjcProperty('bool')
-    onTintColor = ObjcProperty('UIColor')
-    tintColor = ObjcProperty('UIColor')
-    thumbTintColor = ObjcProperty('UIColor')
-    onImage = ObjcProperty('UIImage')
-    offImage = ObjcProperty('UIImage')
+    on = ObjcProperty("bool")
+    onTintColor = ObjcProperty("UIColor")
+    tintColor = ObjcProperty("UIColor")
+    thumbTintColor = ObjcProperty("UIColor")
+    onImage = ObjcProperty("UIImage")
+    offImage = ObjcProperty("UIImage")
 
     #: Methods
     #: Works but then doesn't let you change it
-    setOn = ObjcMethod('bool', dict(animated='bool'))
+    setOn = ObjcMethod("bool", dict(animated="bool"))
 
     #: Callbacks
-    onValueChanged = ObjcCallback('bool')
+    onValueChanged = ObjcCallback("bool")
 
 
 class UiKitSwitch(UiKitControl, ProxySwitch):
-    """ An UiKit implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UISwitch)
@@ -48,13 +46,12 @@ class UiKitSwitch(UiKitControl, ProxySwitch):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the toolkit widget for the proxy object.
-        """
+        """Create the toolkit widget for the proxy object."""
         self.widget = UISwitch()
 
     def init_widget(self):
-        """ Bind the on property to the checked state """
-        super(UiKitSwitch, self).init_widget()
+        """Bind the on property to the checked state"""
+        super().init_widget()
 
         d = self.declaration
         if d.checked:
@@ -67,7 +64,7 @@ class UiKitSwitch(UiKitControl, ProxySwitch):
         #     forKeyPath="on",
         #     options=UISwitch.NSKeyValueObservingOptionNew|UISwitch.NSKeyValueObservingOptionOld,
         #     context=self.widget
-        #)
+        # )
 
         #: A really ugly way to add the target
         #: would be nice if we could just pass the block pointer here :)
@@ -76,13 +73,13 @@ class UiKitSwitch(UiKitControl, ProxySwitch):
             forControlEvents=UISwitch.UIControlEventValueChanged,
             andCallback=self.widget.getId(),
             usingMethod="onValueChanged",
-            withValues=["on"]#,"selected"]
+            withValues=["on"],  # ,"selected"]
         )
 
         self.widget.onValueChanged.connect(self.on_checked_changed)
 
     def on_checked_changed(self, on):
-        """ See https://stackoverflow.com/questions/19628310/ """
+        """See https://stackoverflow.com/questions/19628310/"""
         #: Since iOS decides to call this like 100 times for each defer it
         d = self.declaration
         with self.widget.setOn.suppressed():

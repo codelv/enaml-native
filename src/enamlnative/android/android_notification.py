@@ -9,36 +9,37 @@ Created on Apr 4, 2018
 
 @author: jrm
 """
-from atom.api import (
-    Typed, Instance, ForwardInstance, Int, Bool, List, set_default
-)
+from atom.api import Typed, Instance, ForwardInstance, Int, Bool, List
 
 from .app import AndroidApplication
 from .android_content import (
-    Context, SystemService, PendingIntent, Intent, BroadcastReceiver,
+    Context,
+    SystemService,
+    PendingIntent,
+    Intent,
+    BroadcastReceiver,
 )
 from .android_image_view import Bitmap, Glide, RequestManager, RequestBuilder
 from .android_toolkit_object import AndroidToolkitObject
 from .android_utils import Uri
-from .bridge import (
-    JavaBridgeObject, JavaStaticMethod, JavaCallback, JavaMethod
-)
+from .bridge import JavaBridgeObject, JavaStaticMethod, JavaCallback, JavaMethod
 
 from enamlnative.widgets.notification import ProxyNotification
 
 
-package = 'androidx.core.app'
+package = "androidx.core.app"
 
 
 # Android really messed this one up
 class NotificationManager(JavaBridgeObject):
-    """ Android NotificationManager. Use the `show_notification` and
+    """Android NotificationManager. Use the `show_notification` and
     `create_channel` class methods.
 
     """
+
     #: Holds the singleton instance
     _instance = None
-    __nativeclass__ = set_default('%s.NotificationManagerCompat' % package)
+    __nativeclass__ = f"{package}.NotificationManagerCompat"
 
     ACTION_BIND_SIDE_CHANNEL = "android.support.BIND_NOTIFICATION_SIDE_CHANNEL"
     EXTRA_USE_SIDE_CHANNEL = "android.support.useSideChannel"
@@ -50,21 +51,22 @@ class NotificationManager(JavaBridgeObject):
     IMPORTANCE_HIGH = 4
     IMPORTANCE_MAX = 5
 
-    cancel = JavaMethod('java.lang.String', 'int')
-    cancel_ = JavaMethod('int')
+    cancel = JavaMethod("java.lang.String", "int")
+    cancel_ = JavaMethod("int")
     cancelAll = JavaMethod()
 
-    notify = JavaMethod('int', 'android.app.Notification')
-    notify_ = JavaMethod('java.lang.String', 'int', 'android.app.Notification')
+    notify = JavaMethod("int", "android.app.Notification")
+    notify_ = JavaMethod("java.lang.String", "int", "android.app.Notification")
 
-    from_ = JavaStaticMethod('android.content.Context',
-                             returns='%s.NotificationManagerCompat' % package)
+    from_ = JavaStaticMethod(
+        "android.content.Context", returns=f"{package}.NotificationManagerCompat"
+    )
 
     _receivers = List(BroadcastReceiver)
 
     @classmethod
     def instance(cls):
-        """ Get an instance of this service if it was already requested.
+        """Get an instance of this service if it was already requested.
 
         You should request it first using `NotificationManager.get()`
 
@@ -84,7 +86,7 @@ class NotificationManager(JavaBridgeObject):
 
     @classmethod
     def get(cls):
-        """ Acquires the NotificationManager service async. """
+        """Acquires the NotificationManager service async."""
         app = AndroidApplication.instance()
         f = app.create_future()
 
@@ -105,20 +107,22 @@ class NotificationManager(JavaBridgeObject):
         return f
 
     def __init__(self, *args, **kwargs):
-        """ Force only one instance to exist """
+        """Force only one instance to exist"""
         cls = self.__class__
         if cls._instance is not None:
-            raise RuntimeError("Only one instance of {cls} can exist! "
-                               "Use {cls}.instance() instead!"
-                               "".format(cls=cls.__name__))
-        super(NotificationManager, self).__init__(*args, **kwargs)
+            raise RuntimeError(
+                "Only one instance of {cls} can exist! "
+                "Use {cls}.instance() instead!"
+                "".format(cls=cls.__name__)
+            )
+        super().__init__(*args, **kwargs)
         cls._instance = self
 
-
     @classmethod
-    def create_channel(cls, channel_id, name, importance=IMPORTANCE_DEFAULT,
-                       description=""):
-        """ Before you can deliver the notification on Android 8.0 and higher,
+    def create_channel(
+        cls, channel_id, name, importance=IMPORTANCE_DEFAULT, description=""
+    ):
+        """Before you can deliver the notification on Android 8.0 and higher,
         you must register your app's notification channel with the system by
         passing an instance of NotificationChannel
         to createNotificationChannel().
@@ -146,13 +150,14 @@ class NotificationManager(JavaBridgeObject):
             channel.setDescription(description)
 
             NotificationChannelManager.get().then(
-                lambda mgr: mgr.createNotificationChannel(channel))
+                lambda mgr: mgr.createNotificationChannel(channel)
+            )
 
             return channel
 
     @classmethod
     def show_notification(cls, channel_id, *args, **kwargs):
-        """ Create and show a Notification. See `Notification.Builder.update`
+        """Create and show a Notification. See `Notification.Builder.update`
         for a list of accepted parameters.
 
         """
@@ -163,7 +168,7 @@ class NotificationManager(JavaBridgeObject):
 
     @classmethod
     def cancel_notification(cls, notification_or_id, tag=None):
-        """ Cancel the notification.
+        """Cancel the notification.
 
         Parameters
         ----------
@@ -173,6 +178,7 @@ class NotificationManager(JavaBridgeObject):
             The tag of the notification to clear
 
         """
+
         def on_ready(mgr):
             if isinstance(notification_or_id, JavaBridgeObject):
                 nid = notification_or_id.__id__
@@ -182,17 +188,17 @@ class NotificationManager(JavaBridgeObject):
                 mgr.cancel_(nid)
             else:
                 mgr.cancel(tag, nid)
+
         cls.get().then(on_ready)
 
 
 class Notification(JavaBridgeObject):
-    """ A wrapper for an Android's notification apis
+    """A wrapper for an Android's notification apis"""
 
-    """
-    __nativeclass__ = set_default('%s.NotificationCompat' % package)
+    __nativeclass__ = f"{package}.NotificationCompat"
 
     class Builder(JavaBridgeObject):
-        """ Builds a notification.
+        """Builds a notification.
 
         Notes
         ------
@@ -200,68 +206,69 @@ class Notification(JavaBridgeObject):
         System.currentTimeMillis() and the audio stream to the STREAM_DEFAULT.
 
         """
-        __nativeclass__ = set_default('%s.NotificationCompat$Builder' % package)
-        __signature__ = set_default(('android.content.Context', 'java.lang.String'))
-        addAction = JavaMethod('%s.NotificationCompat$Action' % package)
-        addAction_ = JavaMethod('android.R', 'java.lang.CharSequence',
-                                'android.app.PendingIntent')
-        addInvisibleAction = JavaMethod('%s.NotificationCompat$Action' % package)
-        addInvisibleAction_ = JavaMethod('android.R', 'java.lang.CharSequence',
-                                         'android.app.PendingIntent')
-        addPerson = JavaMethod('java.lang.String')
 
-        build = JavaMethod(returns='android.app.Notification')
+        __nativeclass__ = f"{package}.NotificationCompat$Builder"
+        __signature__ = ("android.content.Context", "java.lang.String")
+        addAction = JavaMethod(f"{package}.NotificationCompat$Action")
+        addAction_ = JavaMethod(
+            "android.R", "java.lang.CharSequence", "android.app.PendingIntent"
+        )
+        addInvisibleAction = JavaMethod(f"{package}.NotificationCompat$Action")
+        addInvisibleAction_ = JavaMethod(
+            "android.R", "java.lang.CharSequence", "android.app.PendingIntent"
+        )
+        addPerson = JavaMethod("java.lang.String")
 
-        setAutoCancel = JavaMethod('boolean')
-        setBadgeIconType = JavaMethod('android.R')
-        setCategory = JavaMethod('java.lang.String')
-        setChannelId = JavaMethod('java.lang.String')
-        setColor = JavaMethod('android.graphics.Color')
-        setColorized = JavaMethod('boolean')
-        setContent = JavaMethod('android.widget.RemoteViews')
-        setContentInfo = JavaMethod('java.lang.CharSequence')
-        setContentIntent = JavaMethod('android.app.PendingIntent')
-        setContentText = JavaMethod('java.lang.CharSequence')
-        setContentTitle = JavaMethod('java.lang.CharSequence')
-        setCustomBigContentView = JavaMethod('android.widget.RemoteViews')
-        setCustomContentView = JavaMethod('android.widget.RemoteViews')
-        setCustomHeadsUpContentView = JavaMethod('android.widget.RemoteViews')
-        setDefaults = JavaMethod('int')
-        setDeleteIntent = JavaMethod('android.app.PendingIntent')
-        setExtras = JavaMethod('android.os.Bundle')
-        setFullScreenIntent = JavaMethod('android.app.PendingIntent',
-                                         'boolean')
+        build = JavaMethod(returns="android.app.Notification")
 
-        setGroup = JavaMethod('java.lang.String')
-        setGroupAlertBehavior = JavaMethod('int')
-        setGroupSummary = JavaMethod('boolean')
-        setLargeIcon = JavaMethod('android.graphics.Bitmap')
-        setLights = JavaMethod('android.graphics.Color', 'int', 'int')
-        setLocalOnly = JavaMethod('boolean')
-        setNumber = JavaMethod('int')
-        setOngoing = JavaMethod('boolean')
-        setOnlyAlertOnce = JavaMethod('boolean')
-        setPriority = JavaMethod('int')
-        setProgress = JavaMethod('int', 'int', 'boolean')
-        setPublicVersion = JavaMethod('android.app.Notification')
-        setRemoteInputHistory = JavaMethod('Landroid.app.Notification;[')
-        setShortcutId = JavaMethod('java.lang.String')
-        setShowWhen = JavaMethod('boolean')
-        setSmallIcon = JavaMethod('android.R')
-        setSmallIcon_ = JavaMethod('android.R', 'int')
-        setSortKey = JavaMethod('java.lang.String')
-        setSound = JavaMethod('android.net.Uri')
-        setSound_ = JavaMethod('android.net.Uri', 'int')
-        setStyle = JavaMethod('%s.NotificationCompat$Style' % package)
-        setSubText = JavaMethod('java.lang.CharSequence')
-        setTicker = JavaMethod('java.lang.CharSequence',
-                               'android.widget.RemoteViews')
-        setTicker_ = JavaMethod('java.lang.CharSequence')
-        setTimeoutAfter = JavaMethod('long')
-        setUsesChronometer = JavaMethod('boolean')
-        setVibrate = JavaMethod('J[')
-        setVisibility = JavaMethod('int')
-        setWhen = JavaMethod('long')
+        setAutoCancel = JavaMethod("boolean")
+        setBadgeIconType = JavaMethod("android.R")
+        setCategory = JavaMethod("java.lang.String")
+        setChannelId = JavaMethod("java.lang.String")
+        setColor = JavaMethod("android.graphics.Color")
+        setColorized = JavaMethod("boolean")
+        setContent = JavaMethod("android.widget.RemoteViews")
+        setContentInfo = JavaMethod("java.lang.CharSequence")
+        setContentIntent = JavaMethod("android.app.PendingIntent")
+        setContentText = JavaMethod("java.lang.CharSequence")
+        setContentTitle = JavaMethod("java.lang.CharSequence")
+        setCustomBigContentView = JavaMethod("android.widget.RemoteViews")
+        setCustomContentView = JavaMethod("android.widget.RemoteViews")
+        setCustomHeadsUpContentView = JavaMethod("android.widget.RemoteViews")
+        setDefaults = JavaMethod("int")
+        setDeleteIntent = JavaMethod("android.app.PendingIntent")
+        setExtras = JavaMethod("android.os.Bundle")
+        setFullScreenIntent = JavaMethod("android.app.PendingIntent", "boolean")
+
+        setGroup = JavaMethod("java.lang.String")
+        setGroupAlertBehavior = JavaMethod("int")
+        setGroupSummary = JavaMethod("boolean")
+        setLargeIcon = JavaMethod("android.graphics.Bitmap")
+        setLights = JavaMethod("android.graphics.Color", "int", "int")
+        setLocalOnly = JavaMethod("boolean")
+        setNumber = JavaMethod("int")
+        setOngoing = JavaMethod("boolean")
+        setOnlyAlertOnce = JavaMethod("boolean")
+        setPriority = JavaMethod("int")
+        setProgress = JavaMethod("int", "int", "boolean")
+        setPublicVersion = JavaMethod("android.app.Notification")
+        setRemoteInputHistory = JavaMethod("Landroid.app.Notification;[")
+        setShortcutId = JavaMethod("java.lang.String")
+        setShowWhen = JavaMethod("boolean")
+        setSmallIcon = JavaMethod("android.R")
+        setSmallIcon_ = JavaMethod("android.R", "int")
+        setSortKey = JavaMethod("java.lang.String")
+        setSound = JavaMethod("android.net.Uri")
+        setSound_ = JavaMethod("android.net.Uri", "int")
+        setStyle = JavaMethod(f"{package}.NotificationCompat$Style")
+        setSubText = JavaMethod("java.lang.CharSequence")
+        setTicker = JavaMethod("java.lang.CharSequence", "android.widget.RemoteViews")
+        setTicker_ = JavaMethod("java.lang.CharSequence")
+        setTimeoutAfter = JavaMethod("long")
+        setUsesChronometer = JavaMethod("boolean")
+        setVibrate = JavaMethod("J[")
+        setVisibility = JavaMethod("int")
+        setWhen = JavaMethod("long")
 
         #: Glide Manager for loading bitmaps
         manager = Instance(RequestManager)
@@ -277,23 +284,47 @@ class Notification(JavaBridgeObject):
             r = RequestBuilder(__id__=self.manager.load(src)).asBitmap()
             return Bitmap(__id__=r.__id__)
 
-        def update(self, title="", text="", info="",
-                   sub_text="", ticker="",
-                   importance=NotificationManager.IMPORTANCE_DEFAULT,
-                   group="", group_summary=None,
-                   group_alert_behavior=None,
-                   small_icon="@mipmap/ic_launcher", large_icon="",
-                   number=None, ongoing=None, local_only=None,
-                   style=None, color=None, colorized=None, sound=None,
-                   light_color="", light_on=500, light_off=500,
-                   show_when=None, show_stopwatch=False,
-                   show_progress=False, progress_max=100,
-                   progress_current=0,progress_indeterminate=False,
-                   auto_cancel=True, timeout_after=0, sort_key="",
-                   vibration_pattern=[], shortcut_id="", category="",
-                   badge_icon_type=None, only_alert_once=None,
-                   notification_options=None, actions=None):
-            """ Creates and shows a notification. On android 8+ the channel
+        def update(
+            self,
+            title="",
+            text="",
+            info="",
+            sub_text="",
+            ticker="",
+            importance=NotificationManager.IMPORTANCE_DEFAULT,
+            group="",
+            group_summary=None,
+            group_alert_behavior=None,
+            small_icon="@mipmap/ic_launcher",
+            large_icon="",
+            number=None,
+            ongoing=None,
+            local_only=None,
+            style=None,
+            color=None,
+            colorized=None,
+            sound=None,
+            light_color="",
+            light_on=500,
+            light_off=500,
+            show_when=None,
+            show_stopwatch=False,
+            show_progress=False,
+            progress_max=100,
+            progress_current=0,
+            progress_indeterminate=False,
+            auto_cancel=True,
+            timeout_after=0,
+            sort_key="",
+            vibration_pattern=[],
+            shortcut_id="",
+            category="",
+            badge_icon_type=None,
+            only_alert_once=None,
+            notification_options=None,
+            actions=None,
+        ):
+            """Creates and shows a notification. On android 8+ the channel
             must be created.
 
             Parameters
@@ -436,8 +467,11 @@ class Notification(JavaBridgeObject):
             if show_stopwatch:
                 self.setUsesChronometer(bool(show_stopwatch))
             if show_progress:
-                self.setProgress(int(progress_max), int(progress_current),
-                                    bool(progress_indeterminate))
+                self.setProgress(
+                    int(progress_max),
+                    int(progress_current),
+                    bool(progress_indeterminate),
+                )
             if timeout_after:
                 self.setTimeoutAfter(long(timeout_after))
             if category:
@@ -467,19 +501,21 @@ class Notification(JavaBridgeObject):
             if actions is not None:
                 app = AndroidApplication.instance()
                 for (action_icon, action_text, action_callback) in actions:
-                    action_key = "com.codelv.enamlnative.Notify{}".format(
-                        self.__id__)
+                    action_key = "com.codelv.enamlnative.Notify{}".format(self.__id__)
                     intent = Intent()
                     intent.setAction(action_key)
                     receiver = BroadcastReceiver.for_action(
-                        action_key, action_callback, single_shot=False)
+                        action_key, action_callback, single_shot=False
+                    )
                     self._receivers.append(receiver)
-                    self.addAction_("@mipmap/ic_launcher", action_text,
-                                    PendingIntent.getBroadcast(app, 0,
-                                                               intent, 0))
+                    self.addAction_(
+                        "@mipmap/ic_launcher",
+                        action_text,
+                        PendingIntent.getBroadcast(app, 0, intent, 0),
+                    )
 
         def show(self):
-            """ Build and show this notification """
+            """Build and show this notification"""
             app = AndroidApplication.instance()
             f = app.create_future()
 
@@ -494,39 +530,37 @@ class Notification(JavaBridgeObject):
                 notification = Notification(__id__=__id__)
                 mgr.notify(self.__id__, notification)
                 f.set_result(self)
+
             NotificationManager.get().then(on_ready)
             return f
 
 
 class NotificationChannel(JavaBridgeObject):
-    """ Required for android 26 and up. """
-    __nativeclass__ = set_default('android.app.NotificationChannel')
-    __signature__ = set_default(('java.lang.String',
-                                 'java.lang.CharSequence',
-                                 'int'))
-    setGroup = JavaMethod('java.lang.String')
-    setLightColor = JavaMethod('android.graphics.Color')
-    setBypassDnd = JavaMethod('boolean')
-    setDescription = JavaMethod('java.lang.String')
-    setImportance = JavaMethod('int')
-    setName = JavaMethod('java.lang.CharSequence')
-    showBadge = JavaMethod('boolean')
+    """Required for android 26 and up."""
 
-    setVibrationPattern = JavaMethod('J[')
+    __nativeclass__ = "android.app.NotificationChannel"
+    __signature__ = ("java.lang.String", "java.lang.CharSequence", "int")
+    setGroup = JavaMethod("java.lang.String")
+    setLightColor = JavaMethod("android.graphics.Color")
+    setBypassDnd = JavaMethod("boolean")
+    setDescription = JavaMethod("java.lang.String")
+    setImportance = JavaMethod("int")
+    setName = JavaMethod("java.lang.CharSequence")
+    showBadge = JavaMethod("boolean")
+
+    setVibrationPattern = JavaMethod("J[")
 
 
 class NotificationChannelManager(SystemService):
     SERVICE_TYPE = Context.NOTIFICATION_SERVICE
-    __nativeclass__ = set_default('android.app.NotificationManager')
+    __nativeclass__ = "android.app.NotificationManager"
 
     # This is not in the docs
-    createNotificationChannel = JavaMethod('android.app.NotificationChannel')
+    createNotificationChannel = JavaMethod("android.app.NotificationChannel")
 
 
 class AndroidNotification(AndroidToolkitObject, ProxyNotification):
-    """ An Android implementation of an Enaml ProxyNotification.
-
-    """
+    """An Android implementation of an Enaml ProxyNotification."""
 
     #: A reference to the widget created by the proxy.
     builder = Typed(Notification.Builder)
@@ -538,37 +572,35 @@ class AndroidNotification(AndroidToolkitObject, ProxyNotification):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ The notification is created in init_layout """
+        """The notification is created in init_layout"""
         pass
 
     def init_layout(self):
-        """ Create the notification in the top down pass if show = True
-        """
+        """Create the notification in the top down pass if show = True"""
         d = self.declaration
         self.create_notification()
         if d.show:
             self.set_show(d.show)
 
     def destroy(self):
-        """ A reimplemented destructor that cancels
+        """A reimplemented destructor that cancels
         the notification before destroying.
 
         """
         builder = self.builder
         NotificationManager.cancel_notification(builder)
         del self.builder
-        super(AndroidNotification, self).destroy()
+        super().destroy()
 
     # -------------------------------------------------------------------------
     # Notification API
     # -------------------------------------------------------------------------
     def create_notification(self):
-        """ Instead of the typical create_widget we use `create_notification`
+        """Instead of the typical create_widget we use `create_notification`
         because after it's closed it needs created again.
         """
         d = self.declaration
-        builder = self.builder = Notification.Builder(self.get_context(),
-                                                      d.channel_id)
+        builder = self.builder = Notification.Builder(self.get_context(), d.channel_id)
         d = self.declaration
 
         # Apply any custom settings
@@ -576,10 +608,10 @@ class AndroidNotification(AndroidToolkitObject, ProxyNotification):
             builder.update(**d.settings)
 
         for k, v in self.get_declared_items():
-            handler = getattr(self, 'set_{}'.format(k))
+            handler = getattr(self, "set_{}".format(k))
             handler(v)
 
-        builder.setSmallIcon(d.icon or '@mipmap/ic_launcher')
+        builder.setSmallIcon(d.icon or "@mipmap/ic_launcher")
         # app = self.get_context()
         # intent = Intent()
         # intent.setClass(app, )
@@ -591,7 +623,7 @@ class AndroidNotification(AndroidToolkitObject, ProxyNotification):
             break
 
     def get_declared_items(self):
-        """ Get the members that were set in the enamldef block for this
+        """Get the members that were set in the enamldef block for this
         Declaration.
 
         Returns
@@ -608,12 +640,12 @@ class AndroidNotification(AndroidToolkitObject, ProxyNotification):
                 if not h.read_pair:
                     continue
                 v = getattr(d, k)
-                if k in ('show', 'icon', 'settings'):
+                if k in ("show", "icon", "settings"):
                     continue  # We set these explicitly
                 yield (k, v)
 
     def refresh(self):
-        """ If the """
+        """If the"""
         if self.shown:
             self.builder.show()
 
@@ -649,11 +681,13 @@ class AndroidNotification(AndroidToolkitObject, ProxyNotification):
         self.refresh()
 
     def set_priority(self, priority):
-        self.builder.setPriority({
-            'low': NotificationManager.IMPORTANCE_LOW,
-            'normal': NotificationManager.IMPORTANCE_DEFAULT,
-            'high': NotificationManager.IMPORTANCE_HIGH,
-        }[priority])
+        self.builder.setPriority(
+            {
+                "low": NotificationManager.IMPORTANCE_LOW,
+                "normal": NotificationManager.IMPORTANCE_DEFAULT,
+                "high": NotificationManager.IMPORTANCE_HIGH,
+            }[priority]
+        )
         self.refresh()
 
     def set_show_progress(self, show):

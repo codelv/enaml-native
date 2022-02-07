@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Unicode, Int, Bool, Float, Tuple, observe
-)
+from atom.api import Typed, ForwardTyped, Str, Int, Bool, Float, Tuple, observe
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .frame_layout import FrameLayout, ProxyFrameLayout
 
 
 class ProxyCardView(ProxyFrameLayout):
-    """ The abstract definition of a proxy CardVew object.
+    """The abstract definition of a proxy CardVew object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: CardView)
 
@@ -36,9 +33,8 @@ class ProxyCardView(ProxyFrameLayout):
 
 
 class CardView(FrameLayout):
-    """ A simple control for displaying read-only text.
+    """A simple control for displaying read-only text."""
 
-    """
     #: Updates the corner radius of the CardView.
     elevation = d_(Float(-1))
 
@@ -51,11 +47,8 @@ class CardView(FrameLayout):
     #: A reference to the ProxyCardView object.
     proxy = Typed(ProxyCardView)
 
-    @observe('elevation', 'radius', 'content_padding')
+    @observe("elevation", "radius", "content_padding")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(CardView, self)._update_proxy(change)
-
+        super()._update_proxy(change)

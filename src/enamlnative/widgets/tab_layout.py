@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Str, Int, Enum, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Str, Int, Enum, observe, set_default
 
 from enaml.core.declarative import d_
 from .frame_layout import FrameLayout, ProxyFrameLayout
@@ -19,9 +17,8 @@ from .view_pager import PagerFragment, ProxyPagerFragment
 
 
 class ProxyTabLayout(ProxyFrameLayout):
-    """ The abstract definition of a proxy TabLayout object.
+    """The abstract definition of a proxy TabLayout object."""
 
-    """
     #: A reference to the declaration.
     declaration = ForwardTyped(lambda: TabLayout)
 
@@ -48,22 +45,20 @@ class ProxyTabLayout(ProxyFrameLayout):
 
 
 class ProxyTabFragment(ProxyPagerFragment):
-    """ The abstract definition of a proxy TabFragment object.
+    """The abstract definition of a proxy TabFragment object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: TabFragment)
 
 
 class TabLayout(FrameLayout):
-    """ A TabLayout contains a tab for each TabFragment child of a ViewPager
+    """A TabLayout contains a tab for each TabFragment child of a ViewPager"""
 
-    """
     #: Set the behavior mode for the Tabs in this layout.
-    tab_mode = d_(Enum('fixed', 'scrollable'))
+    tab_mode = d_(Enum("fixed", "scrollable"))
 
     #: Set the gravity to use when laying out the tabs.
-    tab_gravity = d_(Enum('fill', 'center'))
+    tab_gravity = d_(Enum("fill", "center"))
 
     #: Sets the tab indicator's color for the currently selected tab.
     tab_indicator_color_selected = d_(Str())
@@ -86,22 +81,24 @@ class TabLayout(FrameLayout):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('tabs', 'tab_mode', 'tab_gravity', 'current_tab',
-             'tab_indicator_color_selected', 'tab_indicator_height',
-             'tab_color', 'tab_color_selected')
+    @observe(
+        "tabs",
+        "tab_mode",
+        "tab_gravity",
+        "current_tab",
+        "tab_indicator_color_selected",
+        "tab_indicator_height",
+        "tab_color",
+        "tab_color_selected",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(TabLayout, self)._update_proxy(change)
+        super()._update_proxy(change)
 
 
 class TabFragment(PagerFragment):
-    """ A TabFragment alias for a PagerFragment
+    """A TabFragment alias for a PagerFragment"""
 
-    """
     #: A reference to the ProxyTabFragment object.
     proxy = Typed(ProxyTabFragment)
-
-

@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.compound_button import ProxyCompoundButton
 
@@ -18,17 +18,17 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class CompoundButton(Button):
-    __nativeclass__ = set_default('android.widget.CompoundButton')
-    setChecked = JavaMethod('boolean')
+    __nativeclass__ = "android.widget.CompoundButton"
+    setChecked = JavaMethod("boolean")
     setOnCheckedChangeListener = JavaMethod(
-        'android.widget.CompoundButton$OnCheckedChangeListener')
-    onCheckedChanged = JavaCallback('android.widget.CompoundButton', 'boolean')
+        "android.widget.CompoundButton$OnCheckedChangeListener"
+    )
+    onCheckedChanged = JavaCallback("android.widget.CompoundButton", "boolean")
 
 
 class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
-    """ An Android implementation of an Enaml ProxyCompoundButton.
+    """An Android implementation of an Enaml ProxyCompoundButton."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(CompoundButton)
 
@@ -36,16 +36,12 @@ class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         raise NotImplementedError
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidCompoundButton, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         w = self.widget
         w.setOnCheckedChangeListener(w.getId())
         w.onCheckedChanged.connect(self.on_checked)

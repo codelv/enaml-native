@@ -18,26 +18,25 @@ from .bridge import JavaMethod
 
 
 class AbsSpinner(AdapterView):
-    __nativeclass__ = set_default('android.widget.AbsSpinner')
-    pointToPosition = JavaMethod('int', 'int')
-    setAdapter = JavaMethod('android.widget.SpinnerAdapter')
+    __nativeclass__ = "android.widget.AbsSpinner"
+    pointToPosition = JavaMethod("int", "int")
+    setAdapter = JavaMethod("android.widget.SpinnerAdapter")
 
 
 class Spinner(AbsSpinner):
-    __nativeclass__ = set_default('android.widget.Spinner')
-    __signature__ = set_default(('android.content.Context', 'int'))
-    setDropDownHorizontalOffset = JavaMethod('int')
-    setDropDownVerticalOffset = JavaMethod('int')
-    setDropDownWidth = JavaMethod('int')
-    setEnabled = JavaMethod('boolean')
-    setGravity = JavaMethod('int')
-    setPrompt = JavaMethod('java.lang.CharSequence')
+    __nativeclass__ = "android.widget.Spinner"
+    __signature__ = ("android.content.Context", "int")
+    setDropDownHorizontalOffset = JavaMethod("int")
+    setDropDownVerticalOffset = JavaMethod("int")
+    setDropDownWidth = JavaMethod("int")
+    setEnabled = JavaMethod("boolean")
+    setGravity = JavaMethod("int")
+    setPrompt = JavaMethod("java.lang.CharSequence")
 
 
 class AndroidSpinner(AndroidAdapterView, ProxySpinner):
-    """ An Android implementation of an Enaml ProxySpinner.
+    """An Android implementation of an Enaml ProxySpinner."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(Spinner)
 
@@ -45,46 +44,42 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
     adapter = Typed(ArrayAdapter)
 
     #: Wrap content by default
-    default_layout = set_default({'height': 'wrap_content'})
+    default_layout = set_default({"height": "wrap_content"})
 
     # -------------------------------------------------------------------------
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying label widget.
-
-        """
+        """Create the underlying label widget."""
         d = self.declaration
-        mode = 1 if d.mode == 'dropdown' else 0
+        mode = 1 if d.mode == "dropdown" else 0
         self.widget = Spinner(self.get_context(), mode)
 
         # Create the adapter simple_spinner_item = 0x01090008
-        self.adapter = ArrayAdapter(self.get_context(),
-                                    '@layout/simple_spinner_dropdown_item')
+        self.adapter = ArrayAdapter(
+            self.get_context(), "@layout/simple_spinner_dropdown_item"
+        )
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
+        """Initialize the underlying widget."""
         w = self.widget
         # Selection listener
         w.setAdapter(self.adapter)
         w.setOnItemSelectedListener(w.getId())
         w.onItemSelected.connect(self.on_item_selected)
         w.onNothingSelected.connect(self.on_nothing_selected)
-        super(AndroidSpinner, self).init_widget()
+        super().init_widget()
 
     def init_layout(self):
         # Make sure the layout always exists
         if not self.layout_params:
             self.set_layout({})
-        super(AndroidSpinner, self).init_layout()
-
+        super().init_layout()
 
     def get_declared_items(self):
         selection = None
-        for k, v in super(AndroidSpinner, self).get_declared_items():
-            if k == 'selection':
+        for k, v in super().get_declared_items():
+            if k == "selection":
                 selection = (k, v)
             else:
                 yield (k, v)
@@ -113,9 +108,7 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
         self.widget.setSelection(selected)
 
     def set_items(self, items):
-        """ Generate the view cache
-
-        """
+        """Generate the view cache"""
         self.adapter.clear()
         self.adapter.addAll(items)
 
@@ -130,5 +123,3 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
 
     def set_drop_down_width(self, width):
         self.widget.setDropDownWidth(width)
-
-

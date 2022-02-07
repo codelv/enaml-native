@@ -12,66 +12,67 @@ Created on May 20, 2017
 from atom.api import Typed, Int, List, set_default
 
 from enamlnative.widgets.view_pager import (
-    ProxyViewPager, ProxyPagerTitleStrip, ProxyPagerTabStrip
+    ProxyViewPager,
+    ProxyPagerTitleStrip,
+    ProxyPagerTabStrip,
 )
 from enamlnative.widgets.view import coerce_gravity, coerce_size
 
 from .android_view import LayoutParams
 from .android_view_group import AndroidViewGroup, ViewGroup
 from .android_fragment import AndroidFragment
-from .bridge import (
-    JavaBridgeObject, JavaMethod, JavaCallback, JavaField, encode
-)
+from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField, encode
 
 
-package = 'androidx.viewpager.widget'
+package = "androidx.viewpager.widget"
 
 
 class ViewPager(ViewGroup):
-    __nativeclass__ = set_default(
-        'com.codelv.enamlnative.adapters.BridgedViewPager')
-    __signature__ = set_default(('android.content.Context',))
-    addOnPageChangeListener = JavaMethod(
-        '%s.ViewPager$OnPageChangeListener' % package)
-    setCurrentItem = JavaMethod('int')
-    setOffscreenPageLimit = JavaMethod('int')
-    setPageMargin = JavaMethod('int')
-    setAdapter = JavaMethod('%s.PagerAdapter' % package)
-    onPageScrollStateChanged = JavaCallback('int')
-    onPageScrolled = JavaCallback('int', 'float', 'int')
-    onPageSelected = JavaCallback('int')
-    setPagingEnabled = JavaMethod('boolean')
-    setPageTransformer = JavaMethod(
-        'boolean', '%s.ViewPager$PageTransformer' % package)
+    __nativeclass__ = "com.codelv.enamlnative.adapters.BridgedViewPager"
+    __signature__ = ("android.content.Context",)
+    addOnPageChangeListener = JavaMethod(f"{package}.ViewPager$OnPageChangeListener")
+    setCurrentItem = JavaMethod("int")
+    setOffscreenPageLimit = JavaMethod("int")
+    setPageMargin = JavaMethod("int")
+    setAdapter = JavaMethod(f"{package}.PagerAdapter")
+    onPageScrollStateChanged = JavaCallback("int")
+    onPageScrolled = JavaCallback("int", "float", "int")
+    onPageSelected = JavaCallback("int")
+    setPagingEnabled = JavaMethod("boolean")
+    setPageTransformer = JavaMethod("boolean", f"{package}.ViewPager$PageTransformer")
 
 
 #: Create builtin ones
 #: See https://github.com/geftimov/android-viewpager-transformers/wiki
-bundle_id = 'com.eftimoff.viewpagertransformers'
-TRANSFORMERS = {k: '{}.{}'.format(bundle_id, v) for k, v in [
-    ('accordion', 'AccordionTransformer'),
-    ('bg_to_fg', 'BackgroundToForegroundTransformer'),
-    ('cube_in', 'CubeInTransformer'),
-    ('cube_out', 'CubeOutTransformer'),
-    ('default', 'DefaultTransformer'),
-    ('depth_page', 'DepthPageTransformer'),
-    ('draw_from_back', 'DrawFromBackTransformer'),
-    ('flip_horizontal', 'FlipHorizontalTransformer'),
-    ('flip_vertical', 'FlipVerticalTransformer'),
-    ('fg_to_bg', 'ForegroundToBackgroundTransformer'),
-    ('parallax_page', 'ParallaxPageTransformer'),
-    ('rotate_down', 'RotateDownTransformer'),
-    ('rotate_up', 'RotateUpTransformer'),
-    ('stack', 'StackTransformer'),
-    ('tablet', 'TabletTransformer'),
-    ('zoom_in', 'ZoomInTransformer'),
-    ('zoom_out', 'ZoomOutTransformer'),
-    ('zoom_out_slide', 'ZoomOutSlideTransformer'),
-]}
+bundle_id = "com.eftimoff.viewpagertransformers"
+TRANSFORMERS = {
+    k: "{}.{}".format(bundle_id, v)
+    for k, v in [
+        ("accordion", "AccordionTransformer"),
+        ("bg_to_fg", "BackgroundToForegroundTransformer"),
+        ("cube_in", "CubeInTransformer"),
+        ("cube_out", "CubeOutTransformer"),
+        ("default", "DefaultTransformer"),
+        ("depth_page", "DepthPageTransformer"),
+        ("draw_from_back", "DrawFromBackTransformer"),
+        ("flip_horizontal", "FlipHorizontalTransformer"),
+        ("flip_vertical", "FlipVerticalTransformer"),
+        ("fg_to_bg", "ForegroundToBackgroundTransformer"),
+        ("parallax_page", "ParallaxPageTransformer"),
+        ("rotate_down", "RotateDownTransformer"),
+        ("rotate_up", "RotateUpTransformer"),
+        ("stack", "StackTransformer"),
+        ("tablet", "TabletTransformer"),
+        ("zoom_in", "ZoomInTransformer"),
+        ("zoom_out", "ZoomOutTransformer"),
+        ("zoom_out_slide", "ZoomOutSlideTransformer"),
+    ]
+}
 
 
 class PageTransformer(JavaBridgeObject):
-    """ A PageTransformer factory """
+    """A PageTransformer factory"""
+
     __cache__ = {}
 
     @classmethod
@@ -81,51 +82,50 @@ class PageTransformer(JavaBridgeObject):
             class_name = TRANSFORMERS.get(class_name, class_name)
 
             class Transformer(cls):
-                __nativeclass__ = set_default(class_name)
+                __nativeclass__ = class_name
+
             PageTransformer.__cache__[class_name] = Transformer
         return PageTransformer.__cache__[class_name]()
 
 
 class ViewPagerLayoutParams(LayoutParams):
-    __nativeclass__ = set_default('%s.ViewPager$LayoutParams' % package)
-    gravity = JavaField('int')
-    isDecor = JavaField('boolean')
+    __nativeclass__ = f"{package}.ViewPager$LayoutParams"
+    gravity = JavaField("int")
+    isDecor = JavaField("boolean")
 
 
 class PagerTitleStrip(ViewGroup):
-    __nativeclass__ = set_default('%s.PagerTitleStrip' % package)
-    __signature__ = set_default(('android.content.Context',))
-    setNonPrimaryAlpha = JavaMethod('float')
-    setCurrentItem = JavaMethod('int')
-    setTextColor = JavaMethod('android.graphics.Color')
-    setTextSize = JavaMethod('int', 'float')
-    setTextSpacing = JavaMethod('int')
+    __nativeclass__ = f"{package}.PagerTitleStrip"
+    __signature__ = ("android.content.Context",)
+    setNonPrimaryAlpha = JavaMethod("float")
+    setCurrentItem = JavaMethod("int")
+    setTextColor = JavaMethod("android.graphics.Color")
+    setTextSize = JavaMethod("int", "float")
+    setTextSpacing = JavaMethod("int")
     requestLayout = JavaMethod()
     COMPLEX_UNIT_SP = 2
 
 
 class PagerTabStrip(PagerTitleStrip):
-    __nativeclass__ = set_default('%s.PagerTabStrip' % package)
-    setTabIndicatorColor = JavaMethod('android.graphics.Color')
-    setDrawFullUnderline = JavaMethod('boolean')
+    __nativeclass__ = f"{package}.PagerTabStrip"
+    setTabIndicatorColor = JavaMethod("android.graphics.Color")
+    setDrawFullUnderline = JavaMethod("boolean")
 
 
 class BridgedFragmentStatePagerAdapter(JavaBridgeObject):
-    __nativeclass__ = set_default(
-        'com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter')
-    addFragment = JavaMethod('androidx.fragment.app.Fragment')
-    addFragments = JavaMethod('[Landroidx.fragment.app.Fragment;')
-    removeFragment = JavaMethod('androidx.fragment.app.Fragment')
-    removeFragments = JavaMethod('[Landroidx.fragment.app.Fragment;')
-    setTitles = JavaMethod('[Ljava.lang.String;')
+    __nativeclass__ = "com.codelv.enamlnative.adapters.BridgedFragmentStatePagerAdapter"
+    addFragment = JavaMethod("androidx.fragment.app.Fragment")
+    addFragments = JavaMethod("[Landroidx.fragment.app.Fragment;")
+    removeFragment = JavaMethod("androidx.fragment.app.Fragment")
+    removeFragments = JavaMethod("[Landroidx.fragment.app.Fragment;")
+    setTitles = JavaMethod("[Ljava.lang.String;")
     clearTitles = JavaMethod()
     notifyDataSetChanged = JavaMethod()
 
 
 class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
-    """ An Android implementation of an Enaml ProxyViewPager.
+    """An Android implementation of an Enaml ProxyViewPager."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(ViewPager)
 
@@ -139,7 +139,7 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
 
     @property
     def pages(self):
-        """ Get pages """
+        """Get pages"""
         #: Defer the import
         for p in self.declaration.pages:
             yield p.proxy
@@ -148,14 +148,12 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         self.widget = ViewPager(self.get_context())
         self.adapter = BridgedFragmentStatePagerAdapter()
 
     def init_layout(self):
-        super(AndroidViewPager, self).init_layout()
+        super().init_layout()
         d = self.declaration
         w = self.widget
 
@@ -172,12 +170,12 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
             self.set_current_index(d.current_index)
 
     def child_added(self, child):
-        """ When a child is added, add it to the adapter. """
+        """When a child is added, add it to the adapter."""
         if isinstance(child, AndroidFragment):
             self.adapter.addFragment(child.fragment)
 
     def child_removed(self, child):
-        """ When a child is removed, remove it from the adapter """
+        """When a child is removed, remove it from the adapter"""
         if isinstance(child, AndroidFragment):
             self.adapter.removeFragment(child.fragment)
 
@@ -223,7 +221,7 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
     # ProxyViewPager API
     # -------------------------------------------------------------------------
     def set_current_index(self, index):
-        """ We can only set the index once the page has been created.
+        """We can only set the index once the page has been created.
         otherwise we get `FragmentManager is already executing transactions`
         errors in Java. To avoid this, we only call this once has been loaded.
 
@@ -233,7 +231,8 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         # #: change pages
         if self._notify_count > 0:
             self._pending_calls.append(
-                lambda index=index: self.widget.setCurrentItem(index))
+                lambda index=index: self.widget.setCurrentItem(index)
+            )
         else:
             self.widget.setCurrentItem(index)
 
@@ -247,20 +246,18 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         self.widget.setPagingEnabled(enabled)
 
     def set_transition(self, transition):
-        self.widget.setPageTransformer(True,
-                                       PageTransformer.from_name(transition))
+        self.widget.setPageTransformer(True, PageTransformer.from_name(transition))
 
     def create_layout_params(self, child, layout):
-        """ Override as there is no (width, height) constructor.
-
-        """
+        """Override as there is no (width, height) constructor."""
         if isinstance(child, AndroidFragment):
-            return super(AndroidViewPager, self).create_layout_params(
-                child, layout)
+            return super().create_layout_params(child, layout)
         # Only apply to decor views
         dp = self.dp
-        w, h = (coerce_size(layout.get('width', 'match_parent')),
-                coerce_size(layout.get('height', 'wrap_content')))
+        w, h = (
+            coerce_size(layout.get("width", "match_parent")),
+            coerce_size(layout.get("height", "wrap_content")),
+        )
         w = w if w < 0 else int(w * dp)
         h = h if h < 0 else int(h * dp)
         # No (w,h) constructor
@@ -271,38 +268,33 @@ class AndroidViewPager(AndroidViewGroup, ProxyViewPager):
         return params
 
     def apply_layout(self, child, layout):
-        super(AndroidViewPager, self).apply_layout(child, layout)
-        if 'gravity' in layout:
-            child.layout_params.gravity = coerce_gravity(layout['gravity'])
+        super().apply_layout(child, layout)
+        if "gravity" in layout:
+            child.layout_params.gravity = coerce_gravity(layout["gravity"])
 
 
 class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):
-    """ An Android implementation of an Enaml ProxyPagerTitleStrip.
+    """An Android implementation of an Enaml ProxyPagerTitleStrip."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(PagerTitleStrip)
 
-    default_layout = set_default({
-        'width': 'match_parent',
-        'height': 'wrap_content',
-        'gravity': 'top'
-    })
+    default_layout = set_default(
+        {"width": "match_parent", "height": "wrap_content", "gravity": "top"}
+    )
 
     # -------------------------------------------------------------------------
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         self.widget = PagerTitleStrip(self.get_context())
 
     def init_layout(self):
         # Make sure the layout always exists
         if not self.layout_params:
             self.set_layout({})
-        super(AndroidPagerTitleStrip, self).init_layout()
+        super().init_layout()
 
     # -------------------------------------------------------------------------
     # ProxyPagerTitleStrip API
@@ -321,9 +313,8 @@ class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):
 
 
 class AndroidPagerTabStrip(AndroidPagerTitleStrip, ProxyPagerTabStrip):
-    """ An Android implementation of an Enaml ProxyViewPager.
+    """An Android implementation of an Enaml ProxyViewPager."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(PagerTabStrip)
 
@@ -331,9 +322,7 @@ class AndroidPagerTabStrip(AndroidPagerTitleStrip, ProxyPagerTabStrip):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         self.widget = PagerTabStrip(self.get_context())
 
     # -------------------------------------------------------------------------
@@ -344,5 +333,3 @@ class AndroidPagerTabStrip(AndroidPagerTitleStrip, ProxyPagerTabStrip):
 
     def set_tab_full_underline(self, enabled):
         self.widget.setDrawFullUnderline(enabled)
-
-

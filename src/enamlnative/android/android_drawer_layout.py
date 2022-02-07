@@ -9,49 +9,50 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, List, set_default
+from atom.api import Typed, List
 
 from enamlnative.widgets.drawer_layout import ProxyDrawerLayout
 
 from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
 from .bridge import JavaMethod, JavaCallback, JavaField
 
-package = 'androidx.drawerlayout.widget'
+package = "androidx.drawerlayout.widget"
+
 
 class DrawerLayout(ViewGroup):
-    __nativeclass__ = set_default('%s.DrawerLayout' % package)
-    openDrawer = JavaMethod('android.view.View')
-    closeDrawer = JavaMethod('android.view.View')
-    addDrawerListener = JavaMethod('%s.DrawerLayout$DrawerListener' % package)
-    onDrawerClosed = JavaCallback('android.view.View')
-    onDrawerOpened = JavaCallback('android.view.View')
-    onDrawerSlide = JavaCallback('android.view.View', 'float')
-    onDrawerStateChanged = JavaCallback('int')
+    __nativeclass__ = f"{package}.DrawerLayout"
+    openDrawer = JavaMethod("android.view.View")
+    closeDrawer = JavaMethod("android.view.View")
+    addDrawerListener = JavaMethod(f"{package}.DrawerLayout$DrawerListener")
+    onDrawerClosed = JavaCallback("android.view.View")
+    onDrawerOpened = JavaCallback("android.view.View")
+    onDrawerSlide = JavaCallback("android.view.View", "float")
+    onDrawerStateChanged = JavaCallback("int")
 
-    setDrawerElevation = JavaMethod('float')
-    setDrawerTitle = JavaMethod('int', 'java.lang.CharSequence')
-    setDrawerLockMode = JavaMethod('int')
-    setScrimColor = JavaMethod('android.graphics.Color')
-    setStatusBarBackgroundColor = JavaMethod('android.graphics.Color')
+    setDrawerElevation = JavaMethod("float")
+    setDrawerTitle = JavaMethod("int", "java.lang.CharSequence")
+    setDrawerLockMode = JavaMethod("int")
+    setScrimColor = JavaMethod("android.graphics.Color")
+    setStatusBarBackgroundColor = JavaMethod("android.graphics.Color")
 
     LOCK_MODES = {
-        'unlocked': 0,
-        'locked_closed': 1,
-        'locked_open': 2,
-        'undefined': 3,
+        "unlocked": 0,
+        "locked_closed": 1,
+        "locked_open": 2,
+        "undefined": 3,
     }
 
 
 class DrawerLayoutParams(MarginLayoutParams):
-    """ Update the child widget with the given params """
-    __nativeclass__ = set_default('%s.DrawerLayout$LayoutParams' % package)
-    gravity = JavaField('int')
+    """Update the child widget with the given params"""
+
+    __nativeclass__ = f"{package}.DrawerLayout$LayoutParams"
+    gravity = JavaField("int")
 
 
 class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
-    """ An Android implementation of an Enaml ProxyDrawerLayout.
+    """An Android implementation of an Enaml ProxyDrawerLayout."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(DrawerLayout)
 
@@ -65,17 +66,13 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
-        self.widget = DrawerLayout(self.get_context(),  None, d.style)
+        self.widget = DrawerLayout(self.get_context(), None, d.style)
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidDrawerLayout, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         if d.title:
             self.set_title(d.title)
@@ -89,7 +86,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
             self.set_status_bar_background_color(d.status_bar_background_color)
 
     def init_layout(self):
-        super(AndroidDrawerLayout, self).init_layout()
+        super().init_layout()
         d = self.declaration
         w = self.widget
 
@@ -115,8 +112,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
         with self.widget.openDrawer.suppressed():
             with self.widget.closeDrawer.suppressed():
                 #: Remove view from state
-                d.opened = [v for v in d.opened
-                                if v.proxy.widget.getId() != view]
+                d.opened = [v for v in d.opened if v.proxy.widget.getId() != view]
 
     def on_drawer_opened(self, view):
         d = self.declaration
@@ -138,15 +134,13 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     # ProxyDrawerLayout API
     # -------------------------------------------------------------------------
     def set_opened(self, opened):
-        """ Opened is a tuple of the drawer sides that are open
-
-        """
+        """Opened is a tuple of the drawer sides that are open"""
         self.drawer_state = opened
 
     def _observe_drawer_state(self, change):
         #: Diff old and new to find changes
-        old = set(change.get('oldvalue', []))
-        new = set(change.get('value', []))
+        old = set(change.get("oldvalue", []))
+        new = set(change.get("value", []))
 
         #: Closed
         for c in old.difference(new):
@@ -186,8 +180,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
         self.widget.setStatusBarBackgroundColor(color)
 
     def create_layout_params(self, child, layout):
-        params = super(AndroidDrawerLayout, self).create_layout_params(child,
-                                                                       layout)
-        if 'gravity' in layout:
-            params.gravity = layout['gravity']
+        params = super().create_layout_params(child, layout)
+        if "gravity" in layout:
+            params.gravity = layout["gravity"]
         return params

@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.relative_layout import ProxyRelativeLayout
 
@@ -18,15 +18,14 @@ from .bridge import JavaMethod
 
 
 class RelativeLayout(ViewGroup):
-    __nativeclass__ = set_default('android.widget.RelativeLayout')
-    setHorizontalGravity = JavaMethod('int')
-    setVerticalGravity = JavaMethod('int')
+    __nativeclass__ = "android.widget.RelativeLayout"
+    setHorizontalGravity = JavaMethod("int")
+    setVerticalGravity = JavaMethod("int")
 
 
 class AndroidRelativeLayout(AndroidViewGroup, ProxyRelativeLayout):
-    """ An Android implementation of an Enaml ProxyRelativeLayout.
+    """An Android implementation of an Enaml ProxyRelativeLayout."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(RelativeLayout)
 
@@ -34,17 +33,13 @@ class AndroidRelativeLayout(AndroidViewGroup, ProxyRelativeLayout):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
         self.widget = RelativeLayout(self.get_context(), None, d.style)
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidRelativeLayout, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         if d.gravity:
             self.set_gravity(d.gravity)

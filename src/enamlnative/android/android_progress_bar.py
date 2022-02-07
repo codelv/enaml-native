@@ -9,7 +9,7 @@ Created on May 26, 2017
 
 @author: jrm
 """
-from atom.api import Typed, Bool, set_default
+from atom.api import Typed, Bool
 from enamlnative.widgets.progress_bar import ProxyProgressBar
 
 from .android_view import AndroidView, View
@@ -17,35 +17,38 @@ from .bridge import JavaMethod
 
 
 class ProgressBar(View):
-    __nativeclass__ = set_default('android.widget.ProgressBar')
-    __signature__ = set_default(('android.content.Context',
-                                 'android.util.AttributeSet',
-                                 'android.R'))
-    setIndeterminate = JavaMethod('boolean')
-    setMax = JavaMethod('int')
-    setMin = JavaMethod('int')
-    setProgress = JavaMethod('int')#, 'boolean')
-    setSecondaryProgress = JavaMethod('int')
+    __nativeclass__ = "android.widget.ProgressBar"
+    __signature__ = (
+        "android.content.Context",
+        "android.util.AttributeSet",
+        "android.R",
+    )
+    setIndeterminate = JavaMethod("boolean")
+    setMax = JavaMethod("int")
+    setMin = JavaMethod("int")
+    setProgress = JavaMethod("int")  # , 'boolean')
+    setSecondaryProgress = JavaMethod("int")
 
-    STYLE_HORIZONTAL = '@attr/progressBarStyleHorizontal'
-    STYLE_INVERSE = '@attr/progressBarStyleInverse'
-    STYLE_LARGE = '@attr/progressBarStyleLarge'
-    STYLE_SMALL = '@attr/progressBarStyleSmall'
-    STYLE_NORMAL = '@attr/progressBarStyle'
+    STYLE_HORIZONTAL = "@attr/progressBarStyleHorizontal"
+    STYLE_INVERSE = "@attr/progressBarStyleInverse"
+    STYLE_LARGE = "@attr/progressBarStyleLarge"
+    STYLE_SMALL = "@attr/progressBarStyleSmall"
+    STYLE_NORMAL = "@attr/progressBarStyle"
 
     STYLES = {
-        'normal': STYLE_NORMAL,
-        'small': STYLE_SMALL,
-        'large': STYLE_LARGE,
+        "normal": STYLE_NORMAL,
+        "small": STYLE_SMALL,
+        "large": STYLE_LARGE,
     }
 
 
 class AndroidProgressBar(AndroidView, ProxyProgressBar):
-    """ An Android implementation of an Enaml ProxyProgressBar.
+    """An Android implementation of an Enaml ProxyProgressBar.
 
     For an indeterminate ProgressBar use the ActivityIndicator.
 
     """
+
     #: A reference to the widget created by the proxy.
     widget = Typed(ProgressBar)
 
@@ -56,9 +59,7 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
 
         if self.indeterminate:
@@ -69,10 +70,8 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
         self.widget = ProgressBar(self.get_context(), None, style)
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidProgressBar, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         self.set_indeterminate(self.indeterminate)
 
@@ -106,5 +105,5 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
         self.widget.setMin(value)
 
     def set_size(self, size):
-        """ Size cannot be changed dynamically. """
+        """Size cannot be changed dynamically."""
         pass

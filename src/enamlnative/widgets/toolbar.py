@@ -10,7 +10,15 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Unicode, Tuple, Int, Enum, Event, observe, set_default
+    Typed,
+    ForwardTyped,
+    Str,
+    Tuple,
+    Int,
+    Enum,
+    Event,
+    observe,
+    set_default,
 )
 
 from enaml.core.declarative import d_
@@ -19,9 +27,8 @@ from .view_group import ViewGroup, ProxyViewGroup
 
 
 class ProxyToolbar(ProxyViewGroup):
-    """ The abstract definition of a proxy Toolbar object.
+    """The abstract definition of a proxy Toolbar object."""
 
-    """
     #: A reference to the widget declaration.
     declaration = ForwardTyped(lambda: Toolbar)
 
@@ -45,27 +52,25 @@ class ProxyToolbar(ProxyViewGroup):
 
 
 class Toolbar(ViewGroup):
-    """ A standard toolbar for use within application content.
-
-    """
+    """A standard toolbar for use within application content."""
 
     #: Sets the content padding
     content_padding = d_(Tuple(int))
 
     #: Set the title of this toolbar.
-    title = d_(Unicode())
+    title = d_(Str())
 
     #: Set the subtitle of this toolbar
-    subtitle = d_(Unicode())
+    subtitle = d_(Str())
 
     #: Sets the title margin.
     title_margins = d_(Tuple(int))
 
     #: Sets the text color of the title, if present.
-    title_color = d_(Unicode())
+    title_color = d_(Str())
 
     #: Sets the text color of the subtitle, if present.
-    subtitle_color = d_(Unicode())
+    subtitle_color = d_(Str())
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyToolbar)
@@ -73,11 +78,15 @@ class Toolbar(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('content_padding', 'title', 'title_color', 'title_margins',
-             'subtitle', 'subtitle_color')
+    @observe(
+        "content_padding",
+        "title",
+        "title_color",
+        "title_margins",
+        "subtitle",
+        "subtitle_color",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(Toolbar, self)._update_proxy(change)
+        super()._update_proxy(change)

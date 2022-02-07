@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.auto_complete_text_view import ProxyAutoCompleteTextView
 
@@ -19,18 +19,17 @@ from .bridge import JavaMethod
 
 
 class AutoCompleteTextView(EditText):
-    __nativeclass__ = set_default('android.widget.AutoCompleteTextView')
-    setAdapter = JavaMethod('android.widget.ListAdapter')
-    setDropDownHeight = JavaMethod('int')
-    setDropDownWidth = JavaMethod('int')
-    setListSelection = JavaMethod('int')
-    setThreshold = JavaMethod('int')
+    __nativeclass__ = "android.widget.AutoCompleteTextView"
+    setAdapter = JavaMethod("android.widget.ListAdapter")
+    setDropDownHeight = JavaMethod("int")
+    setDropDownWidth = JavaMethod("int")
+    setListSelection = JavaMethod("int")
+    setThreshold = JavaMethod("int")
 
 
 class AndroidAutoCompleteTextView(AndroidEditText, ProxyAutoCompleteTextView):
-    """ An Android implementation of an Enaml ProxyAutoCompleteTextView.
+    """An Android implementation of an Enaml ProxyAutoCompleteTextView."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(AutoCompleteTextView)
 
@@ -41,20 +40,16 @@ class AndroidAutoCompleteTextView(AndroidEditText, ProxyAutoCompleteTextView):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         context = self.get_context()
         d = self.declaration
-        style = d.style or '@attr/autoCompleteTextViewStyle'
+        style = d.style or "@attr/autoCompleteTextViewStyle"
         self.widget = AutoCompleteTextView(context, None, style)
-        self.adapter = ArrayAdapter(context, '@layout/simple_list_item_1')
+        self.adapter = ArrayAdapter(context, "@layout/simple_list_item_1")
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidAutoCompleteTextView, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         self.widget.setAdapter(self.adapter)
 
     # -------------------------------------------------------------------------
@@ -75,5 +70,3 @@ class AndroidAutoCompleteTextView(AndroidEditText, ProxyAutoCompleteTextView):
 
     def set_threshold(self, threshold):
         self.widget.setThreshold(threshold)
-
-

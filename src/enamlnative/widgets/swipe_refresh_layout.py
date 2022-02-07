@@ -9,9 +9,7 @@ Created on Oct 22, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Unicode, Bool, Int, Event, observe
-)
+from atom.api import Typed, ForwardTyped, Str, Bool, Int, Event, observe
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .view_group import ViewGroup, ProxyViewGroup
 
 
 class ProxySwipeRefreshLayout(ProxyViewGroup):
-    """ The abstract definition of a proxy SwipeRefreshLayout object.
+    """The abstract definition of a proxy SwipeRefreshLayout object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: SwipeRefreshLayout)
 
@@ -39,18 +36,19 @@ class ProxySwipeRefreshLayout(ProxyViewGroup):
 
 
 class SwipeRefreshLayout(ViewGroup):
-    """ SwipeRefreshLayout is a view group that displays
-        child views in relative positions.
+    """SwipeRefreshLayout is a view group that displays
+    child views in relative positions.
 
     """
+
     #: Enabled
     enabled = d_(Bool(True))
 
     #: Must be a
-    indicator_color = d_(Unicode())
+    indicator_color = d_(Str())
 
     #: Must be a
-    indicator_background_color = d_(Unicode())
+    indicator_background_color = d_(Str())
 
     #: Set the distance to trigger a sync in dips
     trigger_distance = d_(Int())
@@ -64,13 +62,16 @@ class SwipeRefreshLayout(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('enabled', 'indicator_color', 'indicator_background_color',
-             'trigger_distance', 'refeshed')
+    @observe(
+        "enabled",
+        "indicator_color",
+        "indicator_background_color",
+        "trigger_distance",
+        "refeshed",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
-
-        """
-        if change['type'] == 'event':
+        """An observer which sends the state change to the proxy."""
+        if change["type"] == "event":
             self.proxy.set_refreshed(True)
         else:
-            super(SwipeRefreshLayout, self)._update_proxy(change)
+            super()._update_proxy(change)

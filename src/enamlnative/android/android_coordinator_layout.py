@@ -9,7 +9,7 @@ Created on Sept 18, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.coordinator_layout import ProxyCoordinatorLayout
 
@@ -18,14 +18,12 @@ from .bridge import JavaMethod
 
 
 class CoordinatorLayout(FrameLayout):
-    package = 'androidx.coordinatorlayout.widget'
-    __nativeclass__ = set_default('%s.CoordinatorLayout' % package)
+    __nativeclass__ = "androidx.coordinatorlayout.widget.CoordinatorLayout"
 
 
 class AndroidCoordinatorLayout(AndroidFrameLayout, ProxyCoordinatorLayout):
-    """ An Android implementation of an Enaml ProxyCoordinatorLayout.
+    """An Android implementation of an Enaml ProxyCoordinatorLayout."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(CoordinatorLayout)
 
@@ -33,8 +31,6 @@ class AndroidCoordinatorLayout(AndroidFrameLayout, ProxyCoordinatorLayout):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
         self.widget = CoordinatorLayout(self.get_context(), None, d.style)

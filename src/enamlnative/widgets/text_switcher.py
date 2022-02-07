@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Unicode, observe
-)
+from atom.api import Typed, ForwardTyped, Str, observe
 
 from enaml.core.declarative import d_
 
@@ -19,24 +17,20 @@ from .view_switcher import ViewSwitcher, ProxyViewSwitcher
 
 
 class ProxyTextSwitcher(ProxyViewSwitcher):
-    """ The abstract definition of a proxy TextSwitcher object.
+    """The abstract definition of a proxy TextSwitcher object."""
 
-    """
     #: A reference to the declaration.
     declaration = ForwardTyped(lambda: TextSwitcher)
 
 
 class TextSwitcher(ViewSwitcher):
-    """ A simple control for a TextSwitcher.
+    """A simple control for a TextSwitcher."""
 
-    """
-    
     #: Sets the text of the text view that is currently showing.
-    current_text = d_(Unicode())
-    
+    current_text = d_(Str())
+
     #: Sets the text of the next view and switches to the next view.
-    text = d_(Unicode())
+    text = d_(Str())
 
     #: A reference to the ProxyTextSwitcher object.
     proxy = Typed(ProxyTextSwitcher)
-

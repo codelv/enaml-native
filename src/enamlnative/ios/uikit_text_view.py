@@ -16,19 +16,24 @@ from enamlnative.widgets.text_view import ProxyTextView
 from .bridge import ObjcMethod, ObjcProperty
 from .uikit_view import NSObject, UIView, UiKitView
 
+
 class UIFont(NSObject):
-    __signature__ = set_default((dict(fontWithName="NSString",
-                                      systemFontOfSize="NSInteger"),
-                                 dict(size="NSInteger")))
+    __signature__ = set_default(
+        (
+            dict(fontWithName="NSString", systemFontOfSize="NSInteger"),
+            dict(size="NSInteger"),
+        )
+    )
 
 
 class UITextView(UIView):
-    """ Common text items """
+    """Common text items"""
+
     #: Properties
-    text = ObjcProperty('NSString')
-    textColor = ObjcProperty('UIColor')
-    textAlignment = ObjcProperty('enum')# NSTextAlignment
-    setFont = ObjcMethod('UIFont')
+    text = ObjcProperty("NSString")
+    textColor = ObjcProperty("UIColor")
+    textAlignment = ObjcProperty("enum")  # NSTextAlignment
+    setFont = ObjcMethod("UIFont")
 
     NSTextAlignmentLeft = 0
     NSTextAlignmentCenter = 1
@@ -37,23 +42,21 @@ class UITextView(UIView):
     NSTextAlignmentNatural = 4
 
     TEXT_ALIGNMENT = {
-        '': NSTextAlignmentNatural,
-        'left': NSTextAlignmentLeft,
-        'right': NSTextAlignmentRight,
-        'center': NSTextAlignmentCenter,
-        'justified': NSTextAlignmentJustified,
-        'natural': NSTextAlignmentNatural,
+        "": NSTextAlignmentNatural,
+        "left": NSTextAlignmentLeft,
+        "right": NSTextAlignmentRight,
+        "center": NSTextAlignmentCenter,
+        "justified": NSTextAlignmentJustified,
+        "natural": NSTextAlignmentNatural,
     }
 
 
 class UILabel(UITextView):
-    numberOfLines = ObjcProperty('NSInteger')
+    numberOfLines = ObjcProperty("NSInteger")
 
 
 class UiKitTextView(UiKitView, ProxyTextView):
-    """ An UiKit implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UILabel)
@@ -62,17 +65,16 @@ class UiKitTextView(UiKitView, ProxyTextView):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the toolkit widget for the proxy object.
-        """
+        """Create the toolkit widget for the proxy object."""
         self.widget = UILabel()
 
     def init_widget(self):
-        """ Init the text view fields """
-        super(UiKitTextView, self).init_widget()
+        """Init the text view fields"""
+        super().init_widget()
         self.init_text()
 
     def init_text(self):
-        """ Init text properties for this widget """
+        """Init text properties for this widget"""
         d = self.declaration
         if d.text:
             self.set_text(d.text)
@@ -82,7 +84,7 @@ class UiKitTextView(UiKitView, ProxyTextView):
             self.set_text_alignment(d.text_alignment)
         if d.font_family or d.text_size:
             self.refresh_font()
-        if hasattr(d, 'max_lines') and d.max_lines:
+        if hasattr(d, "max_lines") and d.max_lines:
             self.set_max_lines(d.max_lines)
 
     # -------------------------------------------------------------------------
@@ -93,10 +95,10 @@ class UiKitTextView(UiKitView, ProxyTextView):
         font_size = float(d.text_size or 17)  # Default is 17
         if d.font_family:
             self.widget.setFont((d.font_family, font_size))
-            #UIFont(fontWithName=d.font_family, size=font_size)
+            # UIFont(fontWithName=d.font_family, size=font_size)
         else:
             self.widget.setFont((font_size,))
-            #UIFont(systemFontOfSize=font_size)
+            # UIFont(systemFontOfSize=font_size)
 
     def set_text(self, text):
         self.widget.text = text

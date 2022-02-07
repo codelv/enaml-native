@@ -18,23 +18,21 @@ from .bridge import JavaMethod, JavaField
 
 
 class FrameLayout(ViewGroup):
-    __nativeclass__ = set_default('android.widget.FrameLayout')
-    setForegroundGravity = JavaMethod('int')
-    setMeasureAllChildren = JavaMethod('boolean')
+    __nativeclass__ = "android.widget.FrameLayout"
+    setForegroundGravity = JavaMethod("int")
+    setMeasureAllChildren = JavaMethod("boolean")
 
 
 class FrameLayoutParams(MarginLayoutParams):
-    """ Update the child widget with the given params 
-    
-    """
-    __nativeclass__ = set_default('android.widget.FrameLayout$LayoutParams')
-    gravity = JavaField('int')
+    """Update the child widget with the given params"""
+
+    __nativeclass__ = "android.widget.FrameLayout$LayoutParams"
+    gravity = JavaField("int")
 
 
 class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
-    """ An Android implementation of an Enaml ProxyFrameLayout.
+    """An Android implementation of an Enaml ProxyFrameLayout."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(FrameLayout)
 
@@ -45,9 +43,7 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
         self.widget = FrameLayout(self.get_context(), None, d.style)
 
@@ -58,8 +54,7 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
         self.widget.setForegroundGravity(gravity)
 
     def create_layout_params(self, child, layout):
-        params = super(AndroidFrameLayout, self).create_layout_params(child,
-                                                                      layout)
-        if 'gravity' in layout:
-            params.gravity = layout['gravity']
+        params = super().create_layout_params(child, layout)
+        if "gravity" in layout:
+            params.gravity = layout["gravity"]
         return params

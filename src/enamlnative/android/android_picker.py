@@ -9,7 +9,7 @@ Created on July 6, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.picker import ProxyPicker
 
@@ -18,24 +18,24 @@ from .bridge import JavaCallback, JavaMethod
 
 
 class Picker(LinearLayout):
-    __nativeclass__ = set_default('android.widget.NumberPicker')
+    __nativeclass__ = "android.widget.NumberPicker"
     #: TODO: How to do a list??
-    #setDisplayedValues = JavaMethod('java.lang.String[]')
-    setMaxValue = JavaMethod('int')
-    setMinValue = JavaMethod('int')
-    setValue = JavaMethod('int')
-    setOnLongPressUpdateInterval = JavaMethod('long')
+    # setDisplayedValues = JavaMethod('java.lang.String[]')
+    setMaxValue = JavaMethod("int")
+    setMinValue = JavaMethod("int")
+    setValue = JavaMethod("int")
+    setOnLongPressUpdateInterval = JavaMethod("long")
     setOnValueChangedListener = JavaMethod(
-        'android.widget.NumberPicker$OnValueChangeListener')
-    onValueChange = JavaCallback('android.widget.NumberPicker', 'int', 'int')
-    setDisplayedValues = JavaMethod('[Ljava.lang.String;')
-    setWrapSelectorWheel = JavaMethod('boolean')
+        "android.widget.NumberPicker$OnValueChangeListener"
+    )
+    onValueChange = JavaCallback("android.widget.NumberPicker", "int", "int")
+    setDisplayedValues = JavaMethod("[Ljava.lang.String;")
+    setWrapSelectorWheel = JavaMethod("boolean")
 
 
 class AndroidPicker(AndroidLinearLayout, ProxyPicker):
-    """ An Android implementation of an Enaml ProxyPicker.
+    """An Android implementation of an Enaml ProxyPicker."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(Picker)
 
@@ -43,19 +43,18 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
-        self.widget = Picker(self.get_context(), None,
-                             d.style or '@attr/numberPickerStyle')
+        self.widget = Picker(
+            self.get_context(), None, d.style or "@attr/numberPickerStyle"
+        )
 
     def init_widget(self):
-        """ Set the checked state after all children have
+        """Set the checked state after all children have
         been populated.
-        
+
         """
-        super(AndroidPicker, self).init_widget()
+        super().init_widget()
         d = self.declaration
         w = self.widget
         if d.items:
@@ -79,9 +78,9 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
     # OnValueChangeListener API
     # -------------------------------------------------------------------------
     def on_value_change(self, picker, old, new):
-        """ Set the checked property based on the checked state
+        """Set the checked property based on the checked state
         of all the children
-            
+
         """
         d = self.declaration
         with self.widget.setValue.suppressed():
@@ -109,4 +108,4 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
         w = self.widget
         w.setMinValue(0)
         w.setDisplayedValues(items)
-        w.setMaxValue(len(items)-1)  # max-min + 1 wtf
+        w.setMaxValue(len(items) - 1)  # max-min + 1 wtf

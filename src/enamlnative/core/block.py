@@ -14,7 +14,7 @@ from enaml.core.declarative import Declarative, d_
 
 
 class Block(Declarative):
-    """ An object which dynamically insert's its children into another block's 
+    """An object which dynamically insert's its children into another block's
     parent object.
 
     The 'Block' object is used to cleanly and easily insert it's children
@@ -29,33 +29,33 @@ class Block(Declarative):
     block = d_(ForwardInstance(lambda: Block))
 
     #: If replace, replace all parent's children (except the block of course)
-    mode = d_(Enum('replace', 'append'))
+    mode = d_(Enum("replace", "append"))
 
     def initialize(self):
-        """ A reimplemented initializer.
+        """A reimplemented initializer.
 
         This method will add the include objects to the parent of the
         include and ensure that they are initialized.
 
         """
-        super(Block, self).initialize()
+        super().initialize()
 
         block = self.block
 
-        if block: #: This block is setting the content of another block
+        if block:  #: This block is setting the content of another block
             #: Remove the existing blocks children
-            if self.mode == 'replace':
+            if self.mode == "replace":
                 #: Clear the blocks children
                 for c in block.children:
                     c.destroy()
             #: Add this blocks children to the other block
             block.insert_children(None, self.children)
 
-        else: #: This block is inserting it's children into it's parent
+        else:  #: This block is inserting it's children into it's parent
             self.parent.insert_children(self, self.children)
 
     def _observe_block(self, change):
-        """ A change handler for the 'objects' list of the Include.
+        """A change handler for the 'objects' list of the Include.
 
         If the object is initialized objects which are removed will be
         unparented and objects which are added will be reparented. Old
@@ -63,30 +63,30 @@ class Block(Declarative):
 
         """
         if self.is_initialized:
-            if change['type'] == 'update':
-                old_block = change['oldvalue']
+            if change["type"] == "update":
+                old_block = change["oldvalue"]
                 old_parent = old_block.parent
                 for c in self.children:
                     old_parent.child_removed(c)
-                new_block = change['value']
+                new_block = change["value"]
                 new_block.parent.insert_children(new_block, self.children)
 
     def _observe__children(self, change):
         if not self.is_initialized:
             return
         block = self.block
-        if change['type'] == 'update':
+        if change["type"] == "update":
             if block:
-                if self.mode == 'replace':
-                    block.children = change['value']
+                if self.mode == "replace":
+                    block.children = change["value"]
                 else:
-                    for c in change['oldvalue']:
+                    for c in change["oldvalue"]:
                         block.children.remove(c)
                         c.destroy()
                     before = block.children[-1] if block.children else None
-                    block.insert_children(before, change['value'])
+                    block.insert_children(before, change["value"])
             else:
-                for c in change['oldvalue']:
-                    if c not in change['value']:
+                for c in change["oldvalue"]:
+                    if c not in change["value"]:
                         c.destroy()
-                self.parent.insert_children(self, change['value'])
+                self.parent.insert_children(self, change["value"])

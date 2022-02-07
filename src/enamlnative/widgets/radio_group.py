@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Instance, observe
-)
+from atom.api import Typed, ForwardTyped, Instance, observe
 
 from enaml.core.declarative import d_
 
@@ -20,9 +18,8 @@ from .linear_layout import LinearLayout, ProxyLinearLayout
 
 
 class ProxyRadioGroup(ProxyLinearLayout):
-    """ The abstract definition of a proxy RadioGroup object.
+    """The abstract definition of a proxy RadioGroup object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: RadioGroup)
 
@@ -31,9 +28,7 @@ class ProxyRadioGroup(ProxyLinearLayout):
 
 
 class RadioGroup(LinearLayout):
-    """ A simple control for displaying a RadioGroup.
-
-    """
+    """A simple control for displaying a RadioGroup."""
 
     #: Reference to the checked radio button or None
     checked = d_(Instance(RadioButton))
@@ -46,12 +41,8 @@ class RadioGroup(LinearLayout):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('checked')
+    @observe("checked")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(RadioGroup, self)._update_proxy(change)
-
-
+        super()._update_proxy(change)

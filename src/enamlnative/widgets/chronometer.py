@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Long, Str, Enum, Bool, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Int, Str, Enum, Bool, observe, set_default
 from datetime import datetime
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .text_view import TextView, ProxyTextView
 
 
 class ProxyChronometer(ProxyTextView):
-    """ The abstract definition of a proxy Chronometer object.
+    """The abstract definition of a proxy Chronometer object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Chronometer)
 
@@ -42,26 +39,24 @@ class ProxyChronometer(ProxyTextView):
 
 
 class Chronometer(TextView):
-    """ A simple control for displaying read-only text.
-
-    """
+    """A simple control for displaying read-only text."""
 
     #: Set the time that the count-up timer is in reference to.
     base = d_(Typed(datetime, factory=datetime.now))
 
     #: Tick counter
-    ticks = d_(Long(), writable=False)
+    ticks = d_(Int(), writable=False)
 
     #: Sets the format string used for display.
     format = d_(Str())
 
     #: Counting direction
-    direction = d_(Enum('up', 'down'))
+    direction = d_(Enum("up", "down"))
 
     #: Defines the behavior when restarting
     #: If mode is resume it will continue otherwise
     #: it will reset the count.
-    mode = d_(Enum('resume', 'reset', 'manual'))
+    mode = d_(Enum("resume", "reset", "manual"))
 
     #: Start / stop the counter
     running = d_(Bool())
@@ -69,10 +64,8 @@ class Chronometer(TextView):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyChronometer)
 
-    @observe('base', 'direction', 'format', 'running', 'mode')
+    @observe("base", "direction", "format", "running", "mode")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(Chronometer, self)._update_proxy(change)
+        super()._update_proxy(change)

@@ -18,15 +18,13 @@ from .yoga import Yoga
 
 
 class UIFlexbox(UIView):
-    """ Adds yoga as a nested object
-    """
+    """Adds yoga as a nested object"""
+
     __nativeclass__ = set_default("UIView")
 
 
 class UiKitFlexbox(UiKitView, ProxyFlexbox):
-    """ An UiKit implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit layout created by the proxy.
     widget = Typed(UIFlexbox)
@@ -38,7 +36,7 @@ class UiKitFlexbox(UiKitView, ProxyFlexbox):
         self.widget = UIFlexbox()
 
     def init_layout(self):
-        super(UiKitFlexbox, self).init_layout()
+        super().init_layout()
 
         if self.parent() is None:
             self.widget.yoga.applyLayoutPreservingOrigin(True)
@@ -60,4 +58,3 @@ class UiKitFlexbox(UiKitView, ProxyFlexbox):
 
     def set_justify_content(self, justify):
         self.widget.yoga.justifyContent = Yoga.JUSTIFY_CONTENT[justify]
-

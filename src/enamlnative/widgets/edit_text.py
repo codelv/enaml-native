@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Tuple, Unicode, Enum, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Tuple, Str, Enum, observe, set_default
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .text_view import TextView, ProxyTextView
 
 
 class ProxyEditText(ProxyTextView):
-    """ The abstract definition of a proxy EditText object.
+    """The abstract definition of a proxy EditText object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: EditText)
 
@@ -36,29 +33,25 @@ class ProxyEditText(ProxyTextView):
 
 
 class EditText(TextView):
-    """ A simple control for displaying read-only text.
-
-    """
+    """A simple control for displaying read-only text."""
 
     #: Text selection
     selection = d_(Tuple(int))
 
     #: Make editable by default
-    input_type = set_default('text')
+    input_type = set_default("text")
 
     #: Placeholder text
-    placeholder = d_(Unicode())
+    placeholder = d_(Str())
 
     #: Style (iOS)
-    style = d_(Enum('', 'line', 'bezel', 'rounded_rect'))
+    style = d_(Enum("", "line", "bezel", "rounded_rect"))
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyEditText)
 
-    @observe('selection', 'placeholder', 'style')
+    @observe("selection", "placeholder", "style")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(EditText, self)._update_proxy(change)
+        super()._update_proxy(change)

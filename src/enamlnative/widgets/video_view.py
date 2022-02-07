@@ -9,38 +9,38 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Event, Enum, Unicode, Bool, observe
+from atom.api import Typed, ForwardTyped, Event, Enum, Str, Bool, observe
 from .surface_view import SurfaceView, ProxySurfaceView
 from enaml.core.declarative import d_
 
 
 class ProxyVideoView(ProxySurfaceView):
-    """ The abstract definition of a proxy video view object.
+    """The abstract definition of a proxy video view object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: VideoView)
 
     def seek_to(self, t):
         raise NotImplementedError
-    
+
     def set_control(self, control):
         raise NotImplementedError
 
 
 class VideoView(SurfaceView):
-    """ VideoView displays a video file
+    """VideoView displays a video file"""
 
-    """
     #: Source of the video file or URI
-    src = d_(Unicode())
-    
+    src = d_(Str())
+
     #: Player actions
-    control = d_(Enum('play', 'stop', 'pause'))
-    
+    control = d_(Enum("play", "stop", "pause"))
+
     #: State
-    state = d_(Enum('idle', 'stopped', 'paused', 'loading', 'complete',
-                    'playing', 'error'), writable=False)
+    state = d_(
+        Enum("idle", "stopped", "paused", "loading", "complete", "playing", "error"),
+        writable=False,
+    )
 
     #: Error event
     error = d_(Event(dict), writable=False)
@@ -51,12 +51,10 @@ class VideoView(SurfaceView):
     #: A reference to the ProxyViewGroup object.
     proxy = Typed(ProxyVideoView)
 
-    @observe('src', 'src', 'control')
+    @observe("src", "src", "control")
     def _update_proxy(self, change):
-        super(VideoView, self)._update_proxy(change)
-        
+        super()._update_proxy(change)
+
     def seek_to(self, ms):
-        """ Seek to the given time.
-        
-        """
+        """Seek to the given time."""
         self.proxy.seek_to(ms)

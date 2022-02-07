@@ -18,15 +18,14 @@ from .bridge import JavaMethod
 
 
 class ToggleButton(CompoundButton):
-    __nativeclass__ = set_default('android.widget.ToggleButton')
-    setTextOff = JavaMethod('java.lang.CharSequence')
-    setTextOn = JavaMethod('java.lang.CharSequence')
+    __nativeclass__ = set_default("android.widget.ToggleButton")
+    setTextOff = JavaMethod("java.lang.CharSequence")
+    setTextOn = JavaMethod("java.lang.CharSequence")
 
 
 class AndroidToggleButton(AndroidCompoundButton, ProxyToggleButton):
-    """ An Android implementation of an Enaml ProxyToggleButton.
+    """An Android implementation of an Enaml ProxyToggleButton."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(ToggleButton)
 
@@ -34,12 +33,11 @@ class AndroidToggleButton(AndroidCompoundButton, ProxyToggleButton):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
-        self.widget = ToggleButton(self.get_context(), None,
-                                   d.style or "@attr/buttonStyleToggle")
+        self.widget = ToggleButton(
+            self.get_context(), None, d.style or "@attr/buttonStyleToggle"
+        )
 
     # -------------------------------------------------------------------------
     # ProxyToggleButton API

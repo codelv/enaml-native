@@ -12,18 +12,23 @@ Created on June 21, 2017
 from atom.api import Atom, Int
 from ..core import bridge
 from ..core.bridge import (
-    Command, msgpack_encoder,
-    BridgeMethod, BridgeField, BridgeCallback, BridgeObject, NestedBridgeObject
+    Command,
+    msgpack_encoder,
+    BridgeMethod,
+    BridgeField,
+    BridgeCallback,
+    BridgeObject,
+    NestedBridgeObject,
 )
 
 
 class ObjcMethod(BridgeMethod):
-    """ Description of a method of a View (or subclass) in Objc. When called, 
-    this serializes the call, packs the arguments, and delegates handling to a 
+    """Description of a method of a View (or subclass) in Objc. When called,
+    this serializes the call, packs the arguments, and delegates handling to a
     bridge in Objc.
 
-    To keep method calling similar to Swift instead of defining a method 
-    matching the signature with underscores like pyobjc and pyobjus the 
+    To keep method calling similar to Swift instead of defining a method
+    matching the signature with underscores like pyobjc and pyobjus the
     signature should be defined as follows:
 
     1. The first argument, if any, should be a string.
@@ -56,8 +61,9 @@ class ObjcMethod(BridgeMethod):
         view.insertSubview(subview, aboveSubview=above_view)
 
     """
+
     def pack_args(self, obj, *args, **kwargs):
-        """ Arguments must be packed according to the kwargs passed and
+        """Arguments must be packed according to the kwargs passed and
         the signature defined.
 
         """
@@ -85,33 +91,34 @@ class ObjcMethod(BridgeMethod):
                     break
             if not found:
                 #: If we get here something is wrong
-                raise ValueError("Unexpected or missing argument at index {}. "
-                                 "Expected {}".format(i, sig))
+                raise ValueError(
+                    "Unexpected or missing argument at index {}. "
+                    "Expected {}".format(i, sig)
+                )
 
         return ("".join(method_name), bridge_args)
 
 
 class ObjcProperty(BridgeField):
-    """ The superclass implementation is sufficient
-
-    """
+    """The superclass implementation is sufficient"""
 
 
 class ObjcCallback(BridgeCallback, ObjcMethod):
-    """ Description of a callback method of a View (or subclass) in Objc. 
-    When called, it fires the connected callback. This is triggered when it 
+    """Description of a callback method of a View (or subclass) in Objc.
+    When called, it fires the connected callback. This is triggered when it
     receives an event from the bridge indicating the call has occured.
-    
+
     """
+
     def pack_args(self, obj, *args, **kwargs):
         return ObjcMethod.pack_args(self, obj, *args, **kwargs)
 
 
 class ObjcBridgeObject(BridgeObject):
-    """ A proxy to a class in java. This sends the commands over
+    """A proxy to a class in java. This sends the commands over
     the bridge for execution.  The object is stored in a map
     with the given id and is valid until this object is deleted.
-    
+
     Parameters
     ----------
     __id__: Int
@@ -122,12 +129,12 @@ class ObjcBridgeObject(BridgeObject):
     """
 
     def _default___nativeclass__(self):
-        """ Use the class name by default as everything should be unique. """
+        """Use the class name by default as everything should be unique."""
         return self.__class__.__name__
 
     def __init__(self, *args, **kwargs):
-        """ Sends the event to create this View in Java """
-        __id__ = kwargs.get('__id__', None)
+        """Sends the event to create this View in Java"""
+        __id__ = kwargs.get("__id__", None)
 
         #: Note: We SKIP the superclass here!
         if __id__ is not None:
@@ -147,7 +154,7 @@ class ObjcBridgeObject(BridgeObject):
             )
 
     def _pack_args(self, *args, **kwargs):
-        """ Arguments must be packed according to the kwargs passed and
+        """Arguments must be packed according to the kwargs passed and
         the signature defined.
 
         """
@@ -160,7 +167,7 @@ class ObjcBridgeObject(BridgeObject):
         method_name = []
         bridge_args = []
         for i, sig in enumerate(signature):
-            #if i == 0:
+            # if i == 0:
             #    method_name.append(":")
             #    bridge_args.append(msgpack_encoder(sig, args[0]))
             #    continue
@@ -175,7 +182,9 @@ class ObjcBridgeObject(BridgeObject):
                     break
             if not found:
                 #: If we get here something is wrong
-                raise ValueError("Unexpected or missing argument at index {}. "
-                                 "Expected {}".format(i, sig))
+                raise ValueError(
+                    "Unexpected or missing argument at index {}. "
+                    "Expected {}".format(i, sig)
+                )
 
         return ("".join(method_name), bridge_args)

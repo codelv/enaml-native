@@ -9,7 +9,7 @@ Created on June 7, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.switch import ProxySwitch
 
@@ -18,17 +18,16 @@ from .bridge import JavaMethod
 
 
 class Switch(CompoundButton):
-    __nativeclass__ = set_default('android.widget.Switch')
-    setShowText = JavaMethod('boolean')
-    setSplitTrack = JavaMethod('boolean')
-    setTextOff = JavaMethod('java.lang.CharSequence')
-    setTextOn = JavaMethod('java.lang.CharSequence')
+    __nativeclass__ = "android.widget.Switch"
+    setShowText = JavaMethod("boolean")
+    setSplitTrack = JavaMethod("boolean")
+    setTextOff = JavaMethod("java.lang.CharSequence")
+    setTextOn = JavaMethod("java.lang.CharSequence")
 
 
 class AndroidSwitch(AndroidCompoundButton, ProxySwitch):
-    """ An Android implementation of an Enaml ProxySwitch.
+    """An Android implementation of an Enaml ProxySwitch."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(Switch)
 
@@ -36,18 +35,13 @@ class AndroidSwitch(AndroidCompoundButton, ProxySwitch):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
-        self.widget = Switch(self.get_context(), None,
-                             d.style or '@attr/switchStyle')
+        self.widget = Switch(self.get_context(), None, d.style or "@attr/switchStyle")
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidSwitch, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         self.set_show_text(d.show_text)
         if d.split_track:

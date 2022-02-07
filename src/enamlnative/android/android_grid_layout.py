@@ -18,37 +18,34 @@ from .bridge import JavaMethod
 
 
 class GridLayout(ViewGroup):
-    __nativeclass__ = set_default('android.widget.GridLayout')
-    setOrientation = JavaMethod('int')
-    setAlignmentMode = JavaMethod('int')
-    setColumnCount = JavaMethod('int')
-    setColumnOrderPreserved = JavaMethod('boolean')
-    setRowCount = JavaMethod('int')
-    setRowOrderPreserved = JavaMethod('boolean')
-    setUseDefaultMargins = JavaMethod('boolean')
+    __nativeclass__ = set_default("android.widget.GridLayout")
+    setOrientation = JavaMethod("int")
+    setAlignmentMode = JavaMethod("int")
+    setColumnCount = JavaMethod("int")
+    setColumnOrderPreserved = JavaMethod("boolean")
+    setRowCount = JavaMethod("int")
+    setRowOrderPreserved = JavaMethod("boolean")
+    setUseDefaultMargins = JavaMethod("boolean")
 
 
 class GridLayoutParams(ViewGroup):
-    __nativeclass__ = set_default('android.widget.GridLayout$LayoutParams')
+    __nativeclass__ = set_default("android.widget.GridLayout$LayoutParams")
 
 
 class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
-    """ An Android implementation of an Enaml ProxyGridLayout.
+    """An Android implementation of an Enaml ProxyGridLayout."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(GridLayout)
 
     #: Update default
-    #layout_param_type = set_default(GridLayoutParams)
+    # layout_param_type = set_default(GridLayoutParams)
 
     # -------------------------------------------------------------------------
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
         self.widget = GridLayout(self.get_context(), None, d.style)
 
@@ -56,10 +53,10 @@ class AndroidGridLayout(AndroidViewGroup, ProxyGridLayout):
     # ProxyGridLayout API
     # -------------------------------------------------------------------------
     def set_orientation(self, orientation):
-        self.widget.setOrientation(0 if orientation == 'horizontal' else 1)
+        self.widget.setOrientation(0 if orientation == "horizontal" else 1)
 
     def set_alignment_mode(self, mode):
-        self.widget.setAlignmentMode(1 if mode == 'margins' else 0)
+        self.widget.setAlignmentMode(1 if mode == "margins" else 0)
 
     def set_columns(self, columns):
         self.widget.setColumnCount(columns)

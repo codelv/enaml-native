@@ -9,9 +9,7 @@ Created on May 26, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Int, observe
-)
+from atom.api import Typed, ForwardTyped, Int, observe
 
 from enaml.core.declarative import d_
 
@@ -19,16 +17,15 @@ from .view import View, ProxyView
 
 
 class ProxyProgressBar(ProxyView):
-    """ The abstract definition of a proxy ProgressBar object.
+    """The abstract definition of a proxy ProgressBar object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: ProgressBar)
 
     def set_progress(self, progress):
         raise NotImplementedError
 
-    #def set_indeterminate(self, indeterminate):
+    # def set_indeterminate(self, indeterminate):
     #    raise NotImplementedError
 
     def set_secondary_progress(self, progress):
@@ -42,9 +39,8 @@ class ProxyProgressBar(ProxyView):
 
 
 class ProgressBar(View):
-    """ A simple control for displaying a ProgressBar.
+    """A simple control for displaying a ProgressBar."""
 
-    """
     #: Sets the current progress to the specified value.
     progress = d_(Int())
 
@@ -67,10 +63,8 @@ class ProgressBar(View):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('progress', 'secondary_progress', 'max', 'min')
+    @observe("progress", "secondary_progress", "max", "min")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(ProgressBar, self)._update_proxy(change)
+        super()._update_proxy(change)

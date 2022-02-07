@@ -16,9 +16,7 @@ from .bridge import ObjcBridgeObject
 
 
 class UiKitToolkitObject(ProxyToolkitObject):
-    """ An UiKit implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(ObjcBridgeObject)
@@ -27,7 +25,7 @@ class UiKitToolkitObject(ProxyToolkitObject):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the toolkit widget for the proxy object.
+        """Create the toolkit widget for the proxy object.
 
         This method is called during the top-down pass, just before the
         'init_widget()' method is called. This method should create the
@@ -37,7 +35,7 @@ class UiKitToolkitObject(ProxyToolkitObject):
         self.widget = ObjcBridgeObject()
 
     def init_widget(self):
-        """ Initialize the state of the toolkit widget.
+        """Initialize the state of the toolkit widget.
 
         This method is called during the top-down pass, just after the
         'create_widget()' method is called. This method should init the
@@ -47,7 +45,7 @@ class UiKitToolkitObject(ProxyToolkitObject):
         widget = self.widget
 
     def init_layout(self):
-        """ Initialize the layout of the toolkit widget.
+        """Initialize the layout of the toolkit widget.
 
         This method is called during the bottom-up pass. This method
         should initialize the layout of the widget. The child widgets
@@ -57,30 +55,25 @@ class UiKitToolkitObject(ProxyToolkitObject):
         pass
 
     def get_app(self):
-        """ Get the app of the View.
-
-        """
+        """Get the app of the View."""
         from .app import IPhoneApplication
+
         return IPhoneApplication.instance()
 
     # -------------------------------------------------------------------------
     # ProxyToolkitObject API
     # -------------------------------------------------------------------------
     def activate_top_down(self):
-        """ Activate the proxy for the top-down pass.
-
-        """
+        """Activate the proxy for the top-down pass."""
         self.create_widget()
         self.init_widget()
 
     def activate_bottom_up(self):
-        """ Activate the proxy tree for the bottom-up pass.
-
-        """
+        """Activate the proxy tree for the bottom-up pass."""
         self.init_layout()
 
     def destroy(self):
-        """ A reimplemented destructor.
+        """A reimplemented destructor.
 
         This destructor will clear the reference to the toolkit widget
         and set its parent to None.
@@ -89,13 +82,13 @@ class UiKitToolkitObject(ProxyToolkitObject):
         widget = self.widget
         if widget is not None:
             del self.widget
-        super(UiKitToolkitObject, self).destroy()
+        super().destroy()
 
     # -------------------------------------------------------------------------
     # Public API
     # -------------------------------------------------------------------------
     def parent_widget(self):
-        """ Get the parent toolkit widget for this object.
+        """Get the parent toolkit widget for this object.
 
         Returns
         -------
@@ -109,7 +102,7 @@ class UiKitToolkitObject(ProxyToolkitObject):
             return parent.widget
 
     def child_widgets(self):
-        """ Get the child toolkit widgets for this object.
+        """Get the child toolkit widgets for this object.
 
         Returns
         -------

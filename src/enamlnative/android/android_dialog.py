@@ -9,7 +9,7 @@ Created on Sept 21, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 from enamlnative.android.bridge import JavaBridgeObject, JavaMethod, JavaCallback
 from enamlnative.android.android_toolkit_object import AndroidToolkitObject
 from enamlnative.widgets.dialog import ProxyDialog
@@ -17,32 +17,29 @@ from enamlnative.widgets.dialog import ProxyDialog
 
 class Dialog(JavaBridgeObject):
     #: Show the view for the specified duration.
-    __nativeclass__ = set_default('android.app.Dialog')
-    __signature__ = set_default(('android.content.Context', 'android.R'))
+    __nativeclass__ = "android.app.Dialog"
+    __signature__ = ("android.content.Context", "android.R")
     show = JavaMethod()
     dismiss = JavaMethod()
-    setCancelable = JavaMethod('boolean')
-    setCanceledOnTouchOutside = JavaMethod('boolean')
-    setContentView = JavaMethod('android.view.View')
-    setTitle = JavaMethod('java.lang.CharSequence')
+    setCancelable = JavaMethod("boolean")
+    setCanceledOnTouchOutside = JavaMethod("boolean")
+    setContentView = JavaMethod("android.view.View")
+    setTitle = JavaMethod("java.lang.CharSequence")
 
     setOnDismissListener = JavaMethod(
-        'android.content.DialogInterface$OnDismissListener')
-    onDismiss = JavaCallback('android.app.Dialog')
+        "android.content.DialogInterface$OnDismissListener"
+    )
+    onDismiss = JavaCallback("android.app.Dialog")
 
-    setOnCancelListener = JavaMethod(
-        'android.content.DialogInterface$OnCancelListener')
-    onCancel = JavaCallback('android.app.Dialog')
+    setOnCancelListener = JavaMethod("android.content.DialogInterface$OnCancelListener")
+    onCancel = JavaCallback("android.app.Dialog")
 
-    setOnKeyListener = JavaMethod(
-        'android.content.DialogInterface$OnKeyListener')
-    onKey = JavaCallback('android.app.Dialog', 'int', 'android.view.KeyEvent')
+    setOnKeyListener = JavaMethod("android.content.DialogInterface$OnKeyListener")
+    onKey = JavaCallback("android.app.Dialog", "int", "android.view.KeyEvent")
 
 
 class AndroidDialog(AndroidToolkitObject, ProxyDialog):
-    """ An Android implementation of an Enaml ProxyDialog.
-
-    """
+    """An Android implementation of an Enaml ProxyDialog."""
 
     #: A reference to the widget created by the proxy.
     dialog = Typed(Dialog)
@@ -51,7 +48,7 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
+        """Create the underlying widget.
 
         A dialog is not a subclass of view, hence we don't set name as widget
         or children will try to use it as their parent.
@@ -61,21 +58,18 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
         self.dialog = Dialog(self.get_context(), d.style)
 
     def init_widget(self):
-        """ Set the listeners
-        """
+        """Set the listeners"""
         w = self.dialog
         # Listen for events
         w.setOnDismissListener(w.getId())
         w.onDismiss.connect(self.on_dismiss)
         w.setOnCancelListener(w.getId())
         w.onCancel.connect(self.on_cancel)
-        super(AndroidDialog, self).init_widget()
+        super().init_widget()
 
     def init_layout(self):
-        """ If a view is given show it 
-        
-        """
-        super(AndroidDialog, self).init_layout()
+        """If a view is given show it"""
+        super().init_layout()
 
         #: Set the content
         for view in self.child_widgets():
@@ -88,15 +82,15 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
             self.set_show(d.show)
 
     def child_added(self, child):
-        """ Overwrite the content view """
+        """Overwrite the content view"""
         view = child.widget
         if view is not None:
             self.dialog.setContentView(view)
-            
+
     def destroy(self):
-        """ A reimplemented destructor that cancels 
-        the dialog before destroying. 
-        
+        """A reimplemented destructor that cancels
+        the dialog before destroying.
+
         """
         dialog = self.dialog
         if dialog:
@@ -105,7 +99,7 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
             dialog.setOnDismissListener(None)
             dialog.dismiss()
             del self.dialog
-        super(AndroidDialog, self).destroy()
+        super().destroy()
 
     # -------------------------------------------------------------------------
     # Dialog API
@@ -124,7 +118,7 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
     # OnKeyListener API
     # -------------------------------------------------------------------------
     def on_key(self, dialog, key, event):
-        """ Trigger the key event
+        """Trigger the key event
 
         Parameters
         ----------
@@ -137,9 +131,9 @@ class AndroidDialog(AndroidToolkitObject, ProxyDialog):
 
         """
         d = self.declaration
-        r = {'key': key, 'result': False}
+        r = {"key": key, "result": False}
         d.key_event(r)
-        return r['result']
+        return r["result"]
 
     # -------------------------------------------------------------------------
     # ProxyDialog API

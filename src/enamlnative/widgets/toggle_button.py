@@ -9,9 +9,7 @@ Created on June 7, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Unicode, observe
-)
+from atom.api import Typed, ForwardTyped, Str, observe
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .compound_button import CompoundButton, ProxyCompoundButton
 
 
 class ProxyToggleButton(ProxyCompoundButton):
-    """ The abstract definition of a proxy ToggleButton object.
+    """The abstract definition of a proxy ToggleButton object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: ToggleButton)
 
@@ -33,15 +30,13 @@ class ProxyToggleButton(ProxyCompoundButton):
 
 
 class ToggleButton(CompoundButton):
-    """ A simple control for displaying a ToggleButton.
-
-    """
+    """A simple control for displaying a ToggleButton."""
 
     #: Sets the text for when the button is not in the checked state.
-    text_off = d_(Unicode())
+    text_off = d_(Str())
 
     #: Sets the text for when the button is in the checked state.
-    text_on = d_(Unicode())
+    text_on = d_(Str())
 
     #: A reference to the ProxyToggleButton object.
     proxy = Typed(ProxyToggleButton)
@@ -49,12 +44,8 @@ class ToggleButton(CompoundButton):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('text_off', 'text_on')
+    @observe("text_off", "text_on")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(ToggleButton, self)._update_proxy(change)
-
-
+        super()._update_proxy(change)

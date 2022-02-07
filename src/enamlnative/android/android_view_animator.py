@@ -18,13 +18,12 @@ from .android_frame_layout import AndroidFrameLayout, FrameLayout
 
 
 class ViewAnimator(FrameLayout):
-    __nativeclass__ = set_default('android.widget.ViewAnimator')
+    __nativeclass__ = set_default("android.widget.ViewAnimator")
 
 
 class AndroidViewAnimator(AndroidFrameLayout, ProxyViewAnimator):
-    """ An Android implementation of an Enaml ProxyViewAnimator.
+    """An Android implementation of an Enaml ProxyViewAnimator."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(ViewAnimator)
 
@@ -32,9 +31,7 @@ class AndroidViewAnimator(AndroidFrameLayout, ProxyViewAnimator):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         self.widget = ViewAnimator(self.get_context())
 
     # -------------------------------------------------------------------------

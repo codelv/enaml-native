@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Int, Instance, Range, Bool, observe
-)
+from atom.api import Typed, ForwardTyped, Int, Instance, Range, Bool, observe
 
 from datetime import datetime
 from enaml.core.declarative import d_
@@ -20,9 +18,8 @@ from .frame_layout import FrameLayout, ProxyFrameLayout
 
 
 class ProxyDatePicker(ProxyFrameLayout):
-    """ The abstract definition of a proxy Label object.
+    """The abstract definition of a proxy Label object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: DatePicker)
 
@@ -40,9 +37,8 @@ class ProxyDatePicker(ProxyFrameLayout):
 
 
 class DatePicker(FrameLayout):
-    """ A simple control for displaying read-only text.
+    """A simple control for displaying read-only text."""
 
-    """
     #: Update the current year.
     date = d_(Instance(datetime, factory=datetime.now))
 
@@ -63,10 +59,8 @@ class DatePicker(FrameLayout):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('date', 'min_date', 'max_date', 'first_day_of_week')
+    @observe("date", "min_date", "max_date", "first_day_of_week")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(DatePicker, self)._update_proxy(change)
+        super()._update_proxy(change)

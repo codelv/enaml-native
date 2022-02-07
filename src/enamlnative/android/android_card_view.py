@@ -9,7 +9,7 @@ Created on June 7, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.card_view import ProxyCardView
 
@@ -18,21 +18,20 @@ from .bridge import JavaMethod
 
 
 class CardView(FrameLayout):
-    package = 'androidx.cardview.widget'
-    __nativeclass__ = set_default('%s.CardView' % package)
-    setCardBackgroundColor = JavaMethod('android.graphics.Color')
-    setCardElevation = JavaMethod('float')
-    setContentPadding = JavaMethod('int', 'int', 'int', 'int')
-    setMaxCardElevation = JavaMethod('float')
-    setPreventCornerOverlap = JavaMethod('boolean')
-    setRadius = JavaMethod('float')
-    setUseCompatPadding = JavaMethod('boolean')
+    package = "androidx.cardview.widget"
+    __nativeclass__ = f"{package}.CardView"
+    setCardBackgroundColor = JavaMethod("android.graphics.Color")
+    setCardElevation = JavaMethod("float")
+    setContentPadding = JavaMethod("int", "int", "int", "int")
+    setMaxCardElevation = JavaMethod("float")
+    setPreventCornerOverlap = JavaMethod("boolean")
+    setRadius = JavaMethod("float")
+    setUseCompatPadding = JavaMethod("boolean")
 
 
 class AndroidCardView(AndroidFrameLayout, ProxyCardView):
-    """ An Android implementation of an Enaml ProxyCardView.
+    """An Android implementation of an Enaml ProxyCardView."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(CardView)
 
@@ -40,9 +39,7 @@ class AndroidCardView(AndroidFrameLayout, ProxyCardView):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
         self.widget = CardView(self.get_context(), None, d.style)
 
@@ -58,6 +55,6 @@ class AndroidCardView(AndroidFrameLayout, ProxyCardView):
     def set_content_padding(self, padding):
         dp = self.dp
         l, t, r, b = padding
-        self.widget.setContentPadding(int(l*dp), int(t*dp),
-                                      int(r*dp), int(b*dp))
-
+        self.widget.setContentPadding(
+            int(l * dp), int(t * dp), int(r * dp), int(b * dp)
+        )

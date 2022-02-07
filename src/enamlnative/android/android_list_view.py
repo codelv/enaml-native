@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, Instance, Property, Dict, set_default, observe
+from atom.api import Typed, Instance, Property, Dict, observe
 
 from enamlnative.widgets.list_view import ProxyListView, ProxyListItem
 
@@ -19,63 +19,62 @@ from .android_view_group import AndroidViewGroup, ViewGroup
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, encode
 
 
-package = 'androidx.recyclerview.widget'
+package = "androidx.recyclerview.widget"
 
 
 class RecylerView(ViewGroup):
-    __nativeclass__ = set_default('%s.RecyclerView' % package)
+    __nativeclass__ = f"{package}.RecyclerView"
     invalidate = JavaMethod()
-    setHasFixedSize = JavaMethod('boolean')
-    scrollTo = JavaMethod('int', 'int')
-    scrollToPosition = JavaMethod('int')
-    setItemViewCacheSize = JavaMethod('int')
-    setAdapter = JavaMethod('%s.RecyclerView$Adapter' % package)
-    setHasFixedSize = JavaMethod('boolean')
-    setLayoutManager = JavaMethod('%s.RecyclerView$LayoutManager' % package)
+    setHasFixedSize = JavaMethod("boolean")
+    scrollTo = JavaMethod("int", "int")
+    scrollToPosition = JavaMethod("int")
+    setItemViewCacheSize = JavaMethod("int")
+    setAdapter = JavaMethod(f"{package}.RecyclerView$Adapter")
+    setHasFixedSize = JavaMethod("boolean")
+    setLayoutManager = JavaMethod(f"{package}.RecyclerView$LayoutManager")
 
-    setRecyclerListener = JavaMethod('%s.RecyclerView$RecyclerListener' % package)
+    setRecyclerListener = JavaMethod(f"{package}.RecyclerView$RecyclerListener")
 
     class LayoutManager(JavaBridgeObject):
-        __nativeclass__ = set_default('%s.RecyclerView$LayoutManager' % package)
-        scrollToPosition = JavaMethod('int')
-        setItemPrefetchEnabled = JavaMethod('boolean')
+        __nativeclass__ = f"{package}.RecyclerView$LayoutManager"
+        scrollToPosition = JavaMethod("int")
+        setItemPrefetchEnabled = JavaMethod("boolean")
 
         HORIZONTAL = 0
         VERTICAL = 1
 
 
 class StaggeredLayoutManager(RecylerView.LayoutManager):
-    __nativeclass__ = set_default('%s.StaggeredLayoutManager' % package)
-    __signature__ = set_default(('int', 'int'))
-    setOrientation = JavaMethod('int')
-    setSpanCount = JavaMethod('int')
+    __nativeclass__ = f"{package}.StaggeredLayoutManager"
+    __signature__ = ("int", "int")
+    setOrientation = JavaMethod("int")
+    setSpanCount = JavaMethod("int")
 
 
 class LinearLayoutManager(RecylerView.LayoutManager):
-    __nativeclass__ = set_default('%s.LinearLayoutManager' % package)
-    __signature__ = set_default(('android.content.Context', 'int', 'boolean'))
+    __nativeclass__ = f"{package}.LinearLayoutManager"
+    __signature__ = ("android.content.Context", "int", "boolean")
 
-    scrollToPositionWithOffset = JavaMethod('int', 'int')
-    setInitialPrefetchItemCount = JavaMethod('int')
-    setOrientation = JavaMethod('int')
-    setRecycleChildrenOnDetach = JavaMethod('boolean')
-    setReverseLayout = JavaMethod('boolean')
-    setSmoothScrollbarEnabled = JavaMethod('boolean')
-    setStackFromEnd = JavaMethod('boolean')
+    scrollToPositionWithOffset = JavaMethod("int", "int")
+    setInitialPrefetchItemCount = JavaMethod("int")
+    setOrientation = JavaMethod("int")
+    setRecycleChildrenOnDetach = JavaMethod("boolean")
+    setReverseLayout = JavaMethod("boolean")
+    setSmoothScrollbarEnabled = JavaMethod("boolean")
+    setStackFromEnd = JavaMethod("boolean")
 
 
 class GridLayoutManager(LinearLayoutManager):
-    __nativeclass__ = set_default('%s.GridLayoutManager' % package)
-    __signature__ = set_default(('android.content.Context', 'int', 'int',
-                                 'boolean'))
-    setSpanCount = JavaMethod('int')
+    __nativeclass__ = f"{package}.GridLayoutManager"
+    __signature__ = ("android.content.Context", "int", "int", "boolean")
+    setSpanCount = JavaMethod("int")
+
 
 # class BridgedListAdapter(JavaBridgeObject):
 #     """ An adapter that implements a recycleview pattern.
 #
 #     """
-#     __nativeclass__ = set_default(
-#         'com.codelv.enamlnative.adapters.BridgedListAdapter')
+#     __nativeclass__ = 'com.codelv.enamlnative.adapters.BridgedListAdapter'
 #     setListView = JavaMethod('android.widget.ListView',
 #                              'com.codelv.enamlnative.adapters.'
 #                              'BridgedListAdapter$BridgedListAdapterListener')
@@ -90,38 +89,35 @@ class GridLayoutManager(LinearLayoutManager):
 
 
 class BridgedRecyclerAdapter(JavaBridgeObject):
-    """ An adapter that implements a recycleview pattern.
+    """An adapter that implements a recycleview pattern."""
 
-    """
-    __nativeclass__ = set_default(
-        'com.codelv.enamlnative.adapters.BridgedRecyclerAdapter')
-    __signature__ = set_default(('%s.RecyclerView' % package,))
+    __nativeclass__ = "com.codelv.enamlnative.adapters.BridgedRecyclerAdapter"
+    __signature__ = (f"{package}.RecyclerView",)
     setRecyleListener = JavaMethod(
-        'com.codelv.enamlnative.adapters.BridgedRecyclerAdapter'
-        '$BridgedListAdapterListener'
+        "com.codelv.enamlnative.adapters.BridgedRecyclerAdapter"
+        "$BridgedListAdapterListener"
     )
-    setItemCount = JavaMethod('int')
-    setRecycleViews = JavaMethod('[Landroid.view.View;')
+    setItemCount = JavaMethod("int")
+    setRecycleViews = JavaMethod("[Landroid.view.View;")
     clearRecycleViews = JavaMethod()
 
     #: BridgedListAdapterListener API
-    onRecycleView = JavaCallback('int', 'int')
-    onVisibleCountChanged = JavaCallback('int', 'int')
-    onScrollStateChanged = JavaCallback('android.widget.AbsListView','int')
+    onRecycleView = JavaCallback("int", "int")
+    onVisibleCountChanged = JavaCallback("int", "int")
+    onScrollStateChanged = JavaCallback("android.widget.AbsListView", "int")
 
     notifyDataSetChanged = JavaMethod()
-    notifyItemChanged = JavaMethod('int')
-    notifyItemInserted = JavaMethod('int')
-    notifyItemRemoved = JavaMethod('int')
-    notifyItemRangeChanged = JavaMethod('int', 'int')
-    notifyItemRangeInserted = JavaMethod('int', 'int')
-    notifyItemRangeRemoved = JavaMethod('int', 'int')
+    notifyItemChanged = JavaMethod("int")
+    notifyItemInserted = JavaMethod("int")
+    notifyItemRemoved = JavaMethod("int")
+    notifyItemRangeChanged = JavaMethod("int", "int")
+    notifyItemRangeInserted = JavaMethod("int", "int")
+    notifyItemRangeRemoved = JavaMethod("int", "int")
 
 
 class AndroidListView(AndroidViewGroup, ProxyListView):
-    """ An Android implementation of an Enaml ProxyListView.
+    """An Android implementation of an Enaml ProxyListView."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(RecylerView)
 
@@ -144,16 +140,12 @@ class AndroidListView(AndroidViewGroup, ProxyListView):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         self.widget = RecylerView(self.get_context())
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidListView, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         self.set_arrangement(d.arrangement)
 
@@ -162,28 +154,24 @@ class AndroidListView(AndroidViewGroup, ProxyListView):
         # w.setOnItemLongClickListener(w.getId())
         # w.onItemClick.connect(self.on_item_click)
         # w.onItemLongClick.connect(self.on_item_long_click)
-        #self.widget.setOnScrollListener(self.widget.getId())
-        #self.widget.onScroll.connect(self.on_scroll)
+        # self.widget.setOnScrollListener(self.widget.getId())
+        # self.widget.onScroll.connect(self.on_scroll)
 
         #: Selection listener
-        #self.widget.setOnItemSelectedListener(self.widget.getId())
-        #self.widget.onItemSelected.connect(self.on_item_selected)
-        #self.widget.onNothingSelected.connect(self.on_nothing_selected)
+        # self.widget.setOnItemSelectedListener(self.widget.getId())
+        # self.widget.onItemSelected.connect(self.on_item_selected)
+        # self.widget.onNothingSelected.connect(self.on_nothing_selected)
 
     def get_declared_items(self):
-        """ Override to do it manually
-
-        """
-        for k, v in super(AndroidListView, self).get_declared_items():
-            if k == 'layout':
+        """Override to do it manually"""
+        for k, v in super().get_declared_items():
+            if k == "layout":
                 yield k, v
                 break
 
     def init_layout(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidListView, self).init_layout()
+        """Initialize the underlying widget."""
+        super().init_layout()
         d = self.declaration
         w = self.widget
 
@@ -193,19 +181,18 @@ class AndroidListView(AndroidViewGroup, ProxyListView):
         # I'm sure this will make someone upset haha
         adapter.setRecyleListener(adapter.getId())
         adapter.onRecycleView.connect(self.on_recycle_view)
-        #adapter.onVisibleCountChanged.connect(self.on_visible_count_changed)
-        #adapter.onScrollStateChanged.connect(self.on_scroll_state_changed)
+        # adapter.onVisibleCountChanged.connect(self.on_visible_count_changed)
+        # adapter.onScrollStateChanged.connect(self.on_scroll_state_changed)
         self.set_items(d.items)
         w.setAdapter(adapter)
-        #self.set_selected(d.selected)
+        # self.set_selected(d.selected)
         self.refresh_views()
 
     # -------------------------------------------------------------------------
     # BridgedListAdapterListener API
     # -------------------------------------------------------------------------
     def on_recycle_view(self, index, position):
-        """ Update the item the view at the given index should display
-        """
+        """Update the item the view at the given index should display"""
         item = self.list_items[index]
         self.item_mapping[position] = item
         item.recycle_view(position)
@@ -217,7 +204,7 @@ class AndroidListView(AndroidViewGroup, ProxyListView):
     # ProxyListView API
     # -------------------------------------------------------------------------
     def refresh_views(self, change=None):
-        """ Set the views that the adapter will cycle through. """
+        """Set the views that the adapter will cycle through."""
         adapter = self.adapter
 
         # Set initial ListItem state
@@ -227,37 +214,36 @@ class AndroidListView(AndroidViewGroup, ProxyListView):
             item.recycle_view(i)
 
         if adapter:
-           adapter.clearRecycleViews()
-           adapter.setRecycleViews(
-                [encode(li.get_view()) for li in self.list_items])
+            adapter.clearRecycleViews()
+            adapter.setRecycleViews([encode(li.get_view()) for li in self.list_items])
 
     def set_items(self, items):
         adapter = self.adapter
         adapter.setItemCount(len(items))
         adapter.notifyDataSetChanged()
 
-    @observe('declaration.items')
+    @observe("declaration.items")
     def _on_items_changed(self, change):
-        """ Observe container events on the items list and update the
+        """Observe container events on the items list and update the
         adapter appropriately.
         """
-        if change['type'] != 'container':
+        if change["type"] != "container":
             return
-        op = change['operation']
-        if op == 'append':
-            i = len(change['value'])-1
+        op = change["operation"]
+        if op == "append":
+            i = len(change["value"]) - 1
             self.adapter.notifyItemInserted(i)
-        elif op == 'insert':
-            self.adapter.notifyItemInserted(change['index'])
-        elif op in ('pop', '__delitem__'):
-            self.adapter.notifyItemRemoved(change['index'])
-        elif op == '__setitem__':
-            self.adapter.notifyItemChanged(change['index'])
-        elif op == 'extend':
-            n = len(change['items'])
-            i = len(change['value'])-n
+        elif op == "insert":
+            self.adapter.notifyItemInserted(change["index"])
+        elif op in ("pop", "__delitem__"):
+            self.adapter.notifyItemRemoved(change["index"])
+        elif op == "__setitem__":
+            self.adapter.notifyItemChanged(change["index"])
+        elif op == "extend":
+            n = len(change["items"])
+            i = len(change["value"]) - n
             self.adapter.notifyItemRangeInserted(i, n)
-        elif op in ('remove', 'reverse', 'sort'):
+        elif op in ("remove", "reverse", "sort"):
             # Reset everything for these
             self.adapter.notifyDataSetChanged()
 
@@ -266,14 +252,15 @@ class AndroidListView(AndroidViewGroup, ProxyListView):
         d = self.declaration
         reverse = False
         orientation = (
-            LinearLayoutManager.VERTICAL if d.orientation == 'vertical'
-            else LinearLayoutManager.HORIZONTAL)
-        if arrangement == 'linear':
+            LinearLayoutManager.VERTICAL
+            if d.orientation == "vertical"
+            else LinearLayoutManager.HORIZONTAL
+        )
+        if arrangement == "linear":
             manager = LinearLayoutManager(ctx, orientation, reverse)
-        elif arrangement == 'grid':
-            manager = GridLayoutManager(ctx, d.span_count, orientation,
-                                        reverse)
-        elif arrangement == 'staggered':
+        elif arrangement == "grid":
+            manager = GridLayoutManager(ctx, d.span_count, orientation, reverse)
+        elif arrangement == "staggered":
             manager = StaggeredLayoutManager(d.span_count, orientation)
         self.layout_manager = manager
         self.widget.setLayoutManager(manager)
@@ -287,8 +274,10 @@ class AndroidListView(AndroidViewGroup, ProxyListView):
         if not self.layout_manager:
             return
         orientation = (
-            LinearLayoutManager.VERTICAL if orientation == 'vertical'
-            else LinearLayoutManager.HORIZONTAL)
+            LinearLayoutManager.VERTICAL
+            if orientation == "vertical"
+            else LinearLayoutManager.HORIZONTAL
+        )
         self.layout_manager.setOrientation(orientation)
 
     def set_selected(self, index):
@@ -307,21 +296,21 @@ class AndroidListItem(AndroidToolkitObject, ProxyListItem):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ The list item has no widget, it's a placeholder. """
+        """The list item has no widget, it's a placeholder."""
         pass
 
     def init_widget(self):
-        """ The list item has no widget, it's a placeholder. """
+        """The list item has no widget, it's a placeholder."""
 
     def init_layout(self):
-        """ The list item has no widget, it's a placeholder. """
+        """The list item has no widget, it's a placeholder."""
         pass
 
     # -------------------------------------------------------------------------
     # ListAdapter API
     # -------------------------------------------------------------------------
     def recycle_view(self, position):
-        """ Tell the view to render the item at the given position """
+        """Tell the view to render the item at the given position"""
         d = self.declaration
 
         if position < len(d.parent.items):
@@ -332,6 +321,6 @@ class AndroidListItem(AndroidToolkitObject, ProxyListItem):
             d.item = None
 
     def get_view(self):
-        """ Return the view for this item (first child widget) """
+        """Return the view for this item (first child widget)"""
         for w in self.child_widgets():
             return w

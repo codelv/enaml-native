@@ -18,25 +18,24 @@ from .uikit_view_group import UIView, UiKitViewGroup
 
 
 class UIStackView(UIView):
-    """ From:
+    """From:
     https://developer.apple.com/documentation/uikit/uistackview?language=objc
-    
+
     """
+
     #: Properties
-    axis = ObjcProperty('UILayoutConstraintAxis')
-    #setProgress = ObjcMethod('float', dict(animated='bool'))
-    addArrangedSubview = ObjcMethod('UIView')
-    insertArrangedSubview = ObjcMethod('UIView', dict(atIndex='NSInteger'))
-    removeArrangedSubview = ObjcMethod('UIView')
+    axis = ObjcProperty("UILayoutConstraintAxis")
+    # setProgress = ObjcMethod('float', dict(animated='bool'))
+    addArrangedSubview = ObjcMethod("UIView")
+    insertArrangedSubview = ObjcMethod("UIView", dict(atIndex="NSInteger"))
+    removeArrangedSubview = ObjcMethod("UIView")
 
     UILayoutConstraintAxisHorizontal = 0
     UILayoutConstraintAxisVertical = 1
 
 
 class UiKitLinearLayout(UiKitViewGroup, ProxyLinearLayout):
-    """ An UiKit implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit layout created by the proxy.
     layout = Typed(UIStackView)
@@ -45,7 +44,7 @@ class UiKitLinearLayout(UiKitViewGroup, ProxyLinearLayout):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_layout(self):
-        """ Create the layout widget for arranging child proxy objects.
+        """Create the layout widget for arranging child proxy objects.
 
         This method is called during the top-down pass, just before the
         'init_widget()' method is called. This method should create the
@@ -58,7 +57,7 @@ class UiKitLinearLayout(UiKitViewGroup, ProxyLinearLayout):
     # ProxyLinearLayout API
     # -------------------------------------------------------------------------
     def set_orientation(self, orientation):
-        if orientation == 'horizontal':
+        if orientation == "horizontal":
             self.layout.axis = UIStackView.UILayoutConstraintAxisHorizontal
         else:
             self.layout.axis = UIStackView.UILayoutConstraintAxisVertical

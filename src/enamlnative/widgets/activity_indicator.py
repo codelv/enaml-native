@@ -9,18 +9,15 @@ Created on May 26, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Enum, Str, observe
-)
+from atom.api import Typed, ForwardTyped, Enum, Str, observe
 
 from enaml.core.declarative import d_
 from .view import View, ProxyView
 
 
 class ProxyActivityIndicator(ProxyView):
-    """ The abstract definition of a proxy ActivityIndicator object.
+    """The abstract definition of a proxy ActivityIndicator object."""
 
-    """
     #: A reference to the declaration.
     declaration = ForwardTyped(lambda: ActivityIndicator)
 
@@ -32,12 +29,10 @@ class ProxyActivityIndicator(ProxyView):
 
 
 class ActivityIndicator(View):
-    """ A simple control for displaying an ActivityIndicator.
-
-    """
+    """A simple control for displaying an ActivityIndicator."""
 
     #: Style for indeterminate
-    size = d_(Enum('normal', 'small', 'large'))
+    size = d_(Enum("normal", "small", "large"))
 
     #: Sets the color of the indicator.
     color = d_(Str())
@@ -48,10 +43,8 @@ class ActivityIndicator(View):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('size', 'color')
+    @observe("size", "color")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(ActivityIndicator, self)._update_proxy(change)
+        super()._update_proxy(change)

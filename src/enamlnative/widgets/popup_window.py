@@ -10,7 +10,14 @@ Created on Mar 17, 2018
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Str, Float, Coerced, Bool, Enum, observe,
+    Typed,
+    ForwardTyped,
+    Str,
+    Float,
+    Coerced,
+    Bool,
+    Enum,
+    observe,
 )
 
 from enaml.core.declarative import d_
@@ -19,9 +26,8 @@ from .view import coerce_size, coerce_gravity
 
 
 class ProxyPopupWindow(ProxyToolkitObject):
-    """ The abstract definition of a proxy dialgo object.
+    """The abstract definition of a proxy dialgo object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: PopupWindow)
 
@@ -63,9 +69,7 @@ class ProxyPopupWindow(ProxyToolkitObject):
 
 
 class PopupWindow(ToolkitObject):
-    """ A popup window that may contain a view.
-    
-    """
+    """A popup window that may contain a view."""
 
     #: Width and height or a string "match_parent" or "fill_parent"
     width = d_(Coerced(int, coercer=coerce_size))
@@ -96,7 +100,7 @@ class PopupWindow(ToolkitObject):
 
     #: If relative, show as a dropdown on the parent view, otherwise
     #: show at the position given by `x` and `y`.
-    position = d_(Enum('relative', 'absolute'))
+    position = d_(Enum("relative", "absolute"))
 
     #: Animation style for the PopupWindow using the @style format
     #: (ex. @style/MyAnimation
@@ -112,23 +116,32 @@ class PopupWindow(ToolkitObject):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('width', 'height', 'x', 'y', 'position', 'focusable', 'touchable',
-             'outside_touchable', 'show', 'animation', 'style',
-             'background_color')
+    @observe(
+        "width",
+        "height",
+        "x",
+        "y",
+        "position",
+        "focusable",
+        "touchable",
+        "outside_touchable",
+        "show",
+        "animation",
+        "style",
+        "background_color",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(PopupWindow, self)._update_proxy(change)
+        super()._update_proxy(change)
 
     def popup(self):
-        """ Show the window from code. This will initialize and activate
+        """Show the window from code. This will initialize and activate
         if needed.
-        
+
         Examples
         --------
-        
+
         >>> enamldef ContextMenu(PopupWindow): popup:
               attr result: lambda text: None
               Button:
@@ -144,19 +157,15 @@ class PopupWindow(ToolkitObject):
             def on_result(value):
               print("User clicked: {}".format(value))
             ContextMenu(result=on_result).popup()
-        
+
         Notes
         ------
         This does NOT block. Callbacks should be used to handle click events
         or the `show` state should be observed to know when it is closed.
-         
+
         """
         if not self.is_initialized:
             self.initialize()
         if not self.proxy_is_active:
             self.activate_proxy()
         self.show = True
-
-
-
-

@@ -9,7 +9,7 @@ Created on Nov 18, 2017
 
 @author: jrm
 """
-from atom.api import List, set_default
+from atom.api import List
 
 from .bridge import JavaBridgeObject, JavaMethod, JavaField
 from .android_activity import Activity
@@ -18,14 +18,14 @@ from .app import AndroidApplication
 
 
 class WifiConfiguration(JavaBridgeObject):
-    __nativeclass__ = set_default('android.net.wifi.WifiConfiguration')
-    BSSID = JavaField('java.lang.String')
-    FQDN = JavaField('java.lang.String')
-    SSID = JavaField('java.lang.String')
-    hiddenSSID = JavaField('boolean')
-    networkId = JavaField('int')
-    preSharedKey = JavaField('java.lang.String')
-    status = JavaField('int')
+    __nativeclass__ = "android.net.wifi.WifiConfiguration"
+    BSSID = JavaField("java.lang.String")
+    FQDN = JavaField("java.lang.String")
+    SSID = JavaField("java.lang.String")
+    hiddenSSID = JavaField("boolean")
+    networkId = JavaField("int")
+    preSharedKey = JavaField("java.lang.String")
+    status = JavaField("int")
 
     STATUS_CURRENT = 0x0
     STATUS_DISABLED = 0x1
@@ -33,61 +33,59 @@ class WifiConfiguration(JavaBridgeObject):
 
 
 class WifiManager(SystemService):
-    """ Access android's WifiManager. Use the static class methods.
-    
-    To Get networks use: 
-        
-        WifiManager.get_networks().then(on_results)
-        
-    It will request and enable if wifi allowed. Returns None if access is 
-    denied otherwise the list of networks.
-    
-    To check if wifi is enabled use:
-    
-        WifiManager.is_wifi_enabled().then(on_result)
-    
-    Returns None if access is denied otherwise the result
-    
-    
-    To set wifi enabled use:
-        
-        WifiManager.set_wifi_enabled(state=True).then(on_result)
-        
-    Returns None if access is denied otherwise the result
-    
-    """
-    SERVICE_TYPE = Activity.WIFI_SERVICE
-    __nativeclass__ = set_default('android.new.wifi.WifiManager')
+    """Access android's WifiManager. Use the static class methods.
 
-    PERMISSION_ACCESS_FINE_LOCATION = 'android.permission.' \
-                                      'ACCESS_FINE_LOCATION'
-    PERMISSION_ACCESS_COARSE_LOCATION = 'android.permission.' \
-                                        'ACCESS_COARSE_LOCATION'
-    PERMISSION_ACCESS_WIFI_STATE = 'android.permission.ACCESS_WIFI_STATE'
-    PERMISSION_CHANGE_WIFI_STATE = 'android.permission.CHANGE_WIFI_STATE'
+    To Get networks use:
+
+        WifiManager.get_networks().then(on_results)
+
+    It will request and enable if wifi allowed. Returns None if access is
+    denied otherwise the list of networks.
+
+    To check if wifi is enabled use:
+
+        WifiManager.is_wifi_enabled().then(on_result)
+
+    Returns None if access is denied otherwise the result
+
+
+    To set wifi enabled use:
+
+        WifiManager.set_wifi_enabled(state=True).then(on_result)
+
+    Returns None if access is denied otherwise the result
+
+    """
+
+    SERVICE_TYPE = Activity.WIFI_SERVICE
+    __nativeclass__ = "android.new.wifi.WifiManager"
+
+    PERMISSION_ACCESS_FINE_LOCATION = "android.permission." "ACCESS_FINE_LOCATION"
+    PERMISSION_ACCESS_COARSE_LOCATION = "android.permission." "ACCESS_COARSE_LOCATION"
+    PERMISSION_ACCESS_WIFI_STATE = "android.permission.ACCESS_WIFI_STATE"
+    PERMISSION_CHANGE_WIFI_STATE = "android.permission.CHANGE_WIFI_STATE"
 
     PERMISSIONS_REQUIRED = [
-        #PERMISSION_ACCESS_FINE_LOCATION,
+        # PERMISSION_ACCESS_FINE_LOCATION,
         PERMISSION_ACCESS_COARSE_LOCATION,
         PERMISSION_ACCESS_WIFI_STATE,
-        PERMISSION_CHANGE_WIFI_STATE
+        PERMISSION_CHANGE_WIFI_STATE,
     ]
 
-    SCAN_RESULTS_AVAILABLE_ACTION = 'android.net.wifi.SCAN_RESULTS'
+    SCAN_RESULTS_AVAILABLE_ACTION = "android.net.wifi.SCAN_RESULTS"
 
-    getScanResults = JavaMethod(returns='java.util.List')
-    setWifiEnabled = JavaMethod('boolean', returns='boolean')
-    isWifiEnabled = JavaMethod(returns='boolean')
-    startScan = JavaMethod(returns='boolean')
-    reassociate = JavaMethod(returns='boolean')
-    reconnect = JavaMethod(returns='boolean')
-    removeNetwork = JavaMethod('int', returns='boolean')
-    addNetwork = JavaMethod('android.net.wifi.WifiConfiguration',
-                            returns='int')
-    enableNetwork = JavaMethod('int', 'boolean', returns='boolean')
-    disconnect_ = JavaMethod(returns='boolean')
-    getConnectionInfo = JavaMethod(returns='android.net.wifi.WifiInfo')
-    getDhcpInfo = JavaMethod(returns='android.net.DhcpInfo')
+    getScanResults = JavaMethod(returns="java.util.List")
+    setWifiEnabled = JavaMethod("boolean", returns="boolean")
+    isWifiEnabled = JavaMethod(returns="boolean")
+    startScan = JavaMethod(returns="boolean")
+    reassociate = JavaMethod(returns="boolean")
+    reconnect = JavaMethod(returns="boolean")
+    removeNetwork = JavaMethod("int", returns="boolean")
+    addNetwork = JavaMethod("android.net.wifi.WifiConfiguration", returns="int")
+    enableNetwork = JavaMethod("int", "boolean", returns="boolean")
+    disconnect_ = JavaMethod(returns="boolean")
+    getConnectionInfo = JavaMethod(returns="android.net.wifi.WifiInfo")
+    getDhcpInfo = JavaMethod(returns="android.net.DhcpInfo")
 
     #: List of receivers
     _receivers = List(BroadcastReceiver)
@@ -97,8 +95,8 @@ class WifiManager(SystemService):
     # -------------------------------------------------------------------------
     @classmethod
     def is_wifi_enabled(cls):
-        """ Check if wifi is currently enabled.
-        
+        """Check if wifi is currently enabled.
+
         Returns
         --------
             result: future
@@ -119,15 +117,15 @@ class WifiManager(SystemService):
             WifiManager.get().then(on_ready)
 
         #: Check permission
-        WifiManager.request_permission([
-            WifiManager.PERMISSION_ACCESS_WIFI_STATE
-        ]).then(on_permission_result)
+        WifiManager.request_permission([WifiManager.PERMISSION_ACCESS_WIFI_STATE]).then(
+            on_permission_result
+        )
         return f
 
     @classmethod
     def set_wifi_enabled(cls, state=True):
-        """ Set the wifi enabled state.
-        
+        """Set the wifi enabled state.
+
         Returns
         --------
             result: future
@@ -149,15 +147,15 @@ class WifiManager(SystemService):
             WifiManager.get().then(on_ready)
 
         #: Check permission
-        WifiManager.request_permission([
-            WifiManager.PERMISSION_CHANGE_WIFI_STATE
-        ]).then(on_permission_result)
+        WifiManager.request_permission([WifiManager.PERMISSION_CHANGE_WIFI_STATE]).then(
+            on_permission_result
+        )
         return f
 
     @classmethod
     def get_networks(cls):
-        """ Get the wifi networks currently available. 
-        
+        """Get the wifi networks currently available.
+
         Returns
         --------
             result: future
@@ -208,9 +206,9 @@ class WifiManager(SystemService):
 
                     #: Register the receiver
                     intent_filter = IntentFilter(
-                        WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-                    activity.registerReceiver(receiver,
-                                              intent_filter)
+                        WifiManager.SCAN_RESULTS_AVAILABLE_ACTION
+                    )
+                    activity.registerReceiver(receiver, intent_filter)
 
                     #: Trigger a scan (which "should" eventually
                     #: call the on on_scan_complete)
@@ -223,22 +221,23 @@ class WifiManager(SystemService):
             WifiManager.get().then(on_ready)
 
         #: Request permissions
-        WifiManager.request_permission(
-            WifiManager.PERMISSIONS_REQUIRED).then(on_permission_result)
+        WifiManager.request_permission(WifiManager.PERMISSIONS_REQUIRED).then(
+            on_permission_result
+        )
 
         return f
 
     @classmethod
     def disconnect(cls):
-        """ Disconnect from the current network (if connected).
-         
-         Returns
-         --------
-             result: future
-                 A future that resolves to true if the disconnect was 
-                 successful. Will be set to None if the change network 
-                 permission is denied.
- 
+        """Disconnect from the current network (if connected).
+
+        Returns
+        --------
+            result: future
+                A future that resolves to true if the disconnect was
+                successful. Will be set to None if the change network
+                permission is denied.
+
         """
         app = AndroidApplication.instance()
         f = app.create_future()
@@ -255,16 +254,16 @@ class WifiManager(SystemService):
             WifiManager.get().then(on_ready)
 
         #: Request permissions
-        WifiManager.request_permission([
-            WifiManager.PERMISSION_CHANGE_WIFI_STATE
-        ]).then(on_permission_result)
+        WifiManager.request_permission([WifiManager.PERMISSION_CHANGE_WIFI_STATE]).then(
+            on_permission_result
+        )
 
         return f
 
     @classmethod
     def connect(cls, ssid, key=None, **kwargs):
-        """ Connect to the given ssid using the key (if given).
-        
+        """Connect to the given ssid using the key (if given).
+
         Returns
         --------
             result: future
@@ -289,7 +288,6 @@ class WifiManager(SystemService):
                 return
 
             def on_ready(mgr):
-
                 def on_disconnect(result):
                     if not result:
                         f.set_result(None)
@@ -306,8 +304,10 @@ class WifiManager(SystemService):
                 def on_network_added(net_id):
                     if net_id == -1:
                         f.set_result(False)
-                        print("Warning: Invalid network "
-                              "configuration id {}".format(net_id))
+                        print(
+                            "Warning: Invalid network "
+                            "configuration id {}".format(net_id)
+                        )
                         return
                     mgr.enableNetwork(net_id, True).then(on_network_enabled)
 
@@ -327,22 +327,23 @@ class WifiManager(SystemService):
             WifiManager.get().then(on_ready)
 
         #: Request permissions
-        WifiManager.request_permission(
-            WifiManager.PERMISSIONS_REQUIRED).then(on_permission_result)
+        WifiManager.request_permission(WifiManager.PERMISSIONS_REQUIRED).then(
+            on_permission_result
+        )
         return f
 
     @classmethod
     def get_connection_info(cls):
-        """ Get info about current wifi connection (if any). Returns
-        info such as the IP address, BSSID, link speed, signal, etc.. 
-         
+        """Get info about current wifi connection (if any). Returns
+        info such as the IP address, BSSID, link speed, signal, etc..
+
          Returns
          --------
              result: future
                  A future that resolves with a dict of the connection info
                  or None if an error occurred (ie permission denied).s
- 
-         """
+
+        """
         app = AndroidApplication.instance()
         f = app.create_future()
 
@@ -358,23 +359,23 @@ class WifiManager(SystemService):
             WifiManager.get().then(on_ready)
 
         #: Request permissions
-        WifiManager.request_permission([
-            WifiManager.PERMISSION_ACCESS_WIFI_STATE
-        ]).then(on_permission_result)
+        WifiManager.request_permission([WifiManager.PERMISSION_ACCESS_WIFI_STATE]).then(
+            on_permission_result
+        )
 
         return f
 
     @classmethod
     def get_dhcp_info(cls):
-        """ Get info about current DHCP configuration such as DNS servers,
+        """Get info about current DHCP configuration such as DNS servers,
         IP address, and lease duration.
-         
+
         Returns
         --------
              result: future
                  A future that resolves with a dict of the DHCP info
                  or None if an error occured (ie permission denied).s
- 
+
         """
         app = AndroidApplication.instance()
         f = app.create_future()
@@ -391,17 +392,17 @@ class WifiManager(SystemService):
             WifiManager.get().then(on_ready)
 
         #: Request permissions
-        WifiManager.request_permission([
-            WifiManager.PERMISSION_ACCESS_WIFI_STATE
-        ]).then(on_permission_result)
+        WifiManager.request_permission([WifiManager.PERMISSION_ACCESS_WIFI_STATE]).then(
+            on_permission_result
+        )
 
         return f
 
     @classmethod
     def request_permission(cls, permissions):
-        """ Requests permission and returns an future result that returns a 
+        """Requests permission and returns an future result that returns a
         boolean indicating if all the given permission were granted or denied.
-         
+
         """
         app = AndroidApplication.instance()
         f = app.create_future()
@@ -417,10 +418,9 @@ class WifiManager(SystemService):
         return f
 
     def __del__(self):
-        """ Remove any receivers before destroying """
+        """Remove any receivers before destroying"""
         app = AndroidApplication.instance()
         activity = app.widget
         for r in self._receivers:
             activity.unregisterReceiver(r)
-        super(WifiManager, self).__del__()
-
+        super().__del__()

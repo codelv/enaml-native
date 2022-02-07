@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Int, Unicode, Bool, Event, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Int, Str, Bool, Event, observe, set_default
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .view import View, ProxyView
 
 
 class ProxyImageView(ProxyView):
-    """ The abstract definition of a proxy relative layout object.
+    """The abstract definition of a proxy relative layout object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: ImageView)
 
@@ -36,9 +33,7 @@ class ProxyImageView(ProxyView):
 
 
 class ImageView(View):
-    """ Displays image resources
-
-    """
+    """Displays image resources"""
 
     #: Set the offset of the widget's text baseline from the widget's
     #: top boundary.
@@ -49,7 +44,7 @@ class ImageView(View):
     # crop_to_padding = d_(Bool())
 
     #: Sets a drawable as the content of this ImageView.
-    src = d_(Unicode())
+    src = d_(Str())
 
     #: An optional argument to supply a maximum height for this view.
     max_height = d_(Int())
@@ -63,10 +58,8 @@ class ImageView(View):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('src', 'max_height', 'max_width')
+    @observe("src", "max_height", "max_width")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(ImageView, self)._update_proxy(change)
+        super()._update_proxy(change)

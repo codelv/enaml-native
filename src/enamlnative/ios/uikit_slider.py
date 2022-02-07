@@ -18,31 +18,29 @@ from .uikit_control import UIControl, UiKitControl
 
 
 class UISlider(UIControl):
-    """
-    """
+    """ """
+
     #: Properties
-    minimumValue = ObjcProperty('float')
-    maximumValue = ObjcProperty('float')
-    continuous = ObjcProperty('bool')
-    value = ObjcProperty('float')
-    onTintColor = ObjcProperty('UIColor')
-    tintColor = ObjcProperty('UIColor')
-    thumbTintColor = ObjcProperty('UIColor')
-    onImage = ObjcProperty('UIImage')
-    offImage = ObjcProperty('UIImage')
+    minimumValue = ObjcProperty("float")
+    maximumValue = ObjcProperty("float")
+    continuous = ObjcProperty("bool")
+    value = ObjcProperty("float")
+    onTintColor = ObjcProperty("UIColor")
+    tintColor = ObjcProperty("UIColor")
+    thumbTintColor = ObjcProperty("UIColor")
+    onImage = ObjcProperty("UIImage")
+    offImage = ObjcProperty("UIImage")
 
     #: Methods
     #: Works but then doesn't let you change it
-    setValue = ObjcMethod('float', dict(animated='bool'))
+    setValue = ObjcMethod("float", dict(animated="bool"))
 
     #: Callbacks
-    onValueChanged = ObjcCallback('float')
+    onValueChanged = ObjcCallback("float")
 
 
 class UiKitSlider(UiKitControl, ProxySeekBar):
-    """ An UiKit implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UISlider)
@@ -51,14 +49,12 @@ class UiKitSlider(UiKitControl, ProxySeekBar):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the toolkit widget for the proxy object.
-        
-        """
+        """Create the toolkit widget for the proxy object."""
         self.widget = UISlider()
 
     def init_widget(self):
-        """ Bind the on property to the checked state """
-        super(UiKitSlider, self).init_widget()
+        """Bind the on property to the checked state"""
+        super().init_widget()
 
         d = self.declaration
         if d.min:
@@ -75,17 +71,17 @@ class UiKitSlider(UiKitControl, ProxySeekBar):
             forControlEvents=UISlider.UIControlEventValueChanged,
             andCallback=self.widget.getId(),
             usingMethod="onValueChanged",
-            withValues=["value"]#,"selected"]
+            withValues=["value"],  # ,"selected"]
         )
 
         self.widget.onValueChanged.connect(self.on_checked_changed)
 
     def init_text(self):
-        """ A slider has no text!"""
+        """A slider has no text!"""
         pass
 
     def on_checked_changed(self, value):
-        """ See https://stackoverflow.com/questions/19628310/ """
+        """See https://stackoverflow.com/questions/19628310/"""
         #: Since iOS decides to call this like 100 times for each defer it
         d = self.declaration
         with self.widget.setValue.suppressed():

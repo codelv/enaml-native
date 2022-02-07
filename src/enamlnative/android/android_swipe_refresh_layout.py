@@ -9,7 +9,7 @@ Created on Oct 22, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.swipe_refresh_layout import ProxySwipeRefreshLayout
 
@@ -18,24 +18,21 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class SwipeRefreshLayout(ViewGroup):
-    package = 'androidx.swiperefreshlayout.widget'
-    __nativeclass__ = set_default('%s.SwipeRefreshLayout' % package)
-    __signature__ = set_default(('android.content.Context', ))
-    setDistanceToTriggerSync = JavaMethod('int')
-    setRefreshing = JavaMethod('boolean')
-    setEnabled = JavaMethod('boolean')
-    setProgressBackgroundColorSchemeColor = JavaMethod(
-        'android.graphics.Color')
-    setColorSchemeColors = JavaMethod('[Landroid.graphics.Color;')
-    setOnRefreshListener = JavaMethod(
-        '%s.SwipeRefreshLayout$OnRefreshListener' % package)
+    package = "androidx.swiperefreshlayout.widget"
+    __nativeclass__ = f"{package}.SwipeRefreshLayout"
+    __signature__ = ("android.content.Context",)
+    setDistanceToTriggerSync = JavaMethod("int")
+    setRefreshing = JavaMethod("boolean")
+    setEnabled = JavaMethod("boolean")
+    setProgressBackgroundColorSchemeColor = JavaMethod("android.graphics.Color")
+    setColorSchemeColors = JavaMethod("[Landroid.graphics.Color;")
+    setOnRefreshListener = JavaMethod(f"{package}.SwipeRefreshLayout$OnRefreshListener")
     onRefresh = JavaCallback()
 
 
 class AndroidSwipeRefreshLayout(AndroidViewGroup, ProxySwipeRefreshLayout):
-    """ An Android implementation of an Enaml ProxySwipeRefreshLayout.
+    """An Android implementation of an Enaml ProxySwipeRefreshLayout."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(SwipeRefreshLayout)
 
@@ -43,16 +40,12 @@ class AndroidSwipeRefreshLayout(AndroidViewGroup, ProxySwipeRefreshLayout):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         self.widget = SwipeRefreshLayout(self.get_context())
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidSwipeRefreshLayout, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         w = self.widget
         if not d.enabled:

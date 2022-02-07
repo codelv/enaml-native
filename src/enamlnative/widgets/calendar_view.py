@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Range, Instance, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Range, Instance, observe, set_default
 from datetime import datetime
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .frame_layout import FrameLayout, ProxyFrameLayout
 
 
 class ProxyCalendarView(ProxyFrameLayout):
-    """ The abstract definition of a proxy relative layout object.
+    """The abstract definition of a proxy relative layout object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: CalendarView)
 
@@ -39,10 +36,11 @@ class ProxyCalendarView(ProxyFrameLayout):
 
 
 class CalendarView(FrameLayout):
-    """ CalendarView is a view group that displays
+    """CalendarView is a view group that displays
     child views in relative positions.
 
     """
+
     #: Selected date
     date = d_(Instance(datetime, factory=datetime.now))
 
@@ -61,10 +59,8 @@ class CalendarView(FrameLayout):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('date', 'max_date', 'min_date', 'first_day_of_week')
+    @observe("date", "max_date", "min_date", "first_day_of_week")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(CalendarView, self)._update_proxy(change)
+        super()._update_proxy(change)

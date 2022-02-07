@@ -9,19 +9,15 @@ Created on May 9, 2018
 
 @author: jrm
 """
-from atom.api import Typed, List, Bool, set_default
+from atom.api import Typed, List, Bool
 
-from .bridge import (
-    JavaBridgeObject, JavaMethod, JavaCallback, JavaStaticMethod
-)
+from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaStaticMethod
 from .android_activity import Activity
 from .android_content import SystemService
 from .app import AndroidApplication
 from enamlnative.widgets.camera_view import ProxyCameraView
 
-from .android_texture_view import (
-    AndroidTextureView, TextureView, AndroidView
-)
+from .android_texture_view import AndroidTextureView, TextureView, AndroidView
 
 
 # class ImageReader(JavaBridgeObject):
@@ -125,36 +121,36 @@ from .android_texture_view import (
 #                                  'BridgedCameraAdapter$CameraListener')
 #
 
-class CameraManager(SystemService):
-    """ Access android's CameraManager. Use the static class methods.
-    
-    """
-    SERVICE_TYPE = Activity.CAMERA_SERVICE
-    __nativeclass__ = set_default('android.hardware.camera2.CameraManager')
-    
-    getCameraCharacteristics = JavaMethod(
-        'java.lang.String', 
-        returns='android.hardware.camera2.CameraCharacteristics')
-    getCameraIdList = JavaMethod(returns='[java.lang.String;')
-    openCamera = JavaMethod(
-        'java.lang.String', 
-        'android.hardware.camera2.CameraDevice$StateCallback',
-        'android.os.Handler'
-    )
-    setTorchMode = JavaMethod('java.lang.String', 'boolean')
 
-    CAMERA_PERMISSION = 'android.permission.CAMERA'
-    
+class CameraManager(SystemService):
+    """Access android's CameraManager. Use the static class methods."""
+
+    SERVICE_TYPE = Activity.CAMERA_SERVICE
+    __nativeclass__ = "android.hardware.camera2.CameraManager"
+
+    getCameraCharacteristics = JavaMethod(
+        "java.lang.String", returns="android.hardware.camera2.CameraCharacteristics"
+    )
+    getCameraIdList = JavaMethod(returns="[java.lang.String;")
+    openCamera = JavaMethod(
+        "java.lang.String",
+        "android.hardware.camera2.CameraDevice$StateCallback",
+        "android.os.Handler",
+    )
+    setTorchMode = JavaMethod("java.lang.String", "boolean")
+
+    CAMERA_PERMISSION = "android.permission.CAMERA"
+
     permissions = (CAMERA_PERMISSION,)
-    
+
     # -------------------------------------------------------------------------
     # Public api
     # -------------------------------------------------------------------------
     @classmethod
     def request_permission(cls):
-        """ Requests permission and returns an future result that returns a 
+        """Requests permission and returns an future result that returns a
         boolean indicating if all the given permission were granted or denied.
-         
+
         """
         app = AndroidApplication.instance()
         f = app.create_future()
@@ -166,16 +162,15 @@ class CameraManager(SystemService):
             if result:
                 f.set_result(True)
             else:
-                app.request_permissions(
-                    (cls.CAMERA_PERMISSION,)).then(on_result)
+                app.request_permissions((cls.CAMERA_PERMISSION,)).then(on_result)
+
         app.has_permission(cls.CAMERA_PERMISSION).then(on_has_perm)
 
         return f
-    
+
     @classmethod
     def get_cameras(cls):
-        """ Return the list of cameras this device supports
-        """
+        """Return the list of cameras this device supports"""
         app = AndroidApplication.instance()
         f = app.create_future()
 
@@ -184,6 +179,7 @@ class CameraManager(SystemService):
 
         cls.get().then(on_result)
         return f
+
 
 # class Surface(JavaBridgeObject):
 #     __nativeclass__ = set_default('android.view.Surface')
@@ -195,26 +191,26 @@ class CameraManager(SystemService):
 #     setPolyToPoly = JavaMethod('[f', 'int', '[f', 'int', 'int')
 #     posteRotate = JavaMethod('float', 'float', 'float')
 #
-#class Camera:
+# class Camera:
 #    #: TODO: Create a cython wrapper for the Android NDK camera
 
 
 class CameraPackage(JavaBridgeObject):
-    __nativeclass__ = set_default(
-        'com.codelv.enamlnative.packages.CameraPackage')
+    __nativeclass__ = "com.codelv.enamlnative.packages.CameraPackage"
     getInstance = JavaStaticMethod(
-        returns='com.codelv.enamlnative.packages.CameraPackage')
+        returns="com.codelv.enamlnative.packages.CameraPackage"
+    )
     startCapturePreview = JavaMethod(
-        'android.view.TextureView',
-        'com.codelv.enamlnative.packages.CameraPackage$CameraListener')
+        "android.view.TextureView",
+        "com.codelv.enamlnative.packages.CameraPackage$CameraListener",
+    )
     stopCapturePreview = JavaMethod()
-    takePicture = JavaMethod('java.lang.String')
+    takePicture = JavaMethod("java.lang.String")
 
 
 class AndroidCameraView(AndroidTextureView, ProxyCameraView):
-    """ An Android implementation of an Enaml ProxySurfaceView
+    """An Android implementation of an Enaml ProxySurfaceView"""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(TextureView)
 
@@ -223,16 +219,16 @@ class AndroidCameraView(AndroidTextureView, ProxyCameraView):
 
     #: Permission granted
     allowed = Bool()
-    
+
     def init_widget(self):
-        # Skip the Texture view
+        # NOTE: Skip the Texture view
         super(AndroidView, self).init_widget()
         d = self.declaration
         if d.preview:
             self.set_preview(d.preview)
 
     def destroy(self):
-        super(AndroidCameraView, self).destroy()
+        super().destroy()
         if self.api:
             self.stop_camera_preview()
 
@@ -245,8 +241,9 @@ class AndroidCameraView(AndroidTextureView, ProxyCameraView):
     def start_camera_preview(self):
         def on_allowed(camera):
             if camera is None:
-                raise RuntimeError("You must add the CameraPackage to your "
-                                   "apps MainActiviy")
+                raise RuntimeError(
+                    "You must add the CameraPackage to your " "apps MainActiviy"
+                )
             api = self.api = CameraPackage(__id__=camera)
             api.startCapturePreview(self.widget, camera)
 
@@ -273,13 +270,13 @@ class AndroidCameraView(AndroidTextureView, ProxyCameraView):
     # def on_surface_texture_available(self, surface, width, height):
     #     """ Based on the android NDK camera example
     #     """
-    #     super(AndroidCameraView, self).on_surface_texture_available(
+    #     super().on_surface_texture_available(
     #         surface, width, height)
     #     if self.allowed:
     #         self.start_camera_preview()
     #
     # def on_surface_texture_destroyed(self, surface):
-    #     super(AndroidCameraView, self).on_surface_texture_destroyed(surface)
+    #     super().on_surface_texture_destroyed(surface)
     #     del self.camera
     #     del self.surface
     #     return True
@@ -423,4 +420,3 @@ class AndroidCameraView(AndroidTextureView, ProxyCameraView):
     #
     #
     #
-

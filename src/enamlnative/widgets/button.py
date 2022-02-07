@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Enum, Float, Str, Bool, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Enum, Float, Str, Bool, observe, set_default
 
 from enaml.core.declarative import d_
 
@@ -20,9 +18,8 @@ from .image_view import ImageView, ProxyImageView
 
 
 class ProxyButton(ProxyTextView):
-    """ The abstract definition of a proxy Button object.
+    """The abstract definition of a proxy Button object."""
 
-    """
     #: A reference to the widget declaration.
     declaration = ForwardTyped(lambda: Button)
 
@@ -31,17 +28,15 @@ class ProxyButton(ProxyTextView):
 
 
 class ProxyImageButton(ProxyImageView):
-    """ The abstract definition of a proxy ImageButton object.
+    """The abstract definition of a proxy ImageButton object."""
 
-    """
     #: A reference to the widget declaration.
     declaration = ForwardTyped(lambda: ImageButton)
 
 
 class ProxyFloatingActionButton(ProxyImageButton):
-    """ The abstract definition of a proxy FloatingActionButton object.
+    """The abstract definition of a proxy FloatingActionButton object."""
 
-    """
     #: A reference to the widget declaration.
     declaration = ForwardTyped(lambda: FloatingActionButton)
 
@@ -59,34 +54,30 @@ class ProxyFloatingActionButton(ProxyImageButton):
 
 
 class Button(TextView):
-    """ A simple control for displaying a button.
+    """A simple control for displaying a button."""
 
-    """
     #: Button is clickable by default
     clickable = set_default(True)
 
     #: Use a flat style
     flat = d_(Bool())
-    
+
     #: A reference to the proxy object.
     proxy = Typed(ProxyButton)
 
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('flat')
+    @observe("flat")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(Button, self)._update_proxy(change)
+        super()._update_proxy(change)
 
 
 class ImageButton(ImageView):
-    """ A simple control for displaying a button with an Image.
+    """A simple control for displaying a button with an Image."""
 
-    """
     #: ImageButton is clickable by default
     clickable = set_default(True)
 
@@ -95,14 +86,13 @@ class ImageButton(ImageView):
 
 
 class FloatingActionButton(ImageButton):
-    """ A simple control for displaying a floating button with an Image.
+    """A simple control for displaying a floating button with an Image."""
 
-    """
     #: A reference to the proxy object.
     proxy = Typed(ProxyFloatingActionButton)
 
     #: Size of the button. Auto will resize to mini for small screens
-    size = d_(Enum('normal', 'auto', 'mini'))
+    size = d_(Enum("normal", "auto", "mini"))
 
     #: Elevation to use
     elevation = d_(Float())

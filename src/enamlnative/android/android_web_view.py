@@ -4,12 +4,12 @@ Copyright (c) 2017, Jairus Martin.
 Distributed under the terms of the MIT License.
 
 The full license is in the file LICENSE, distributed with this software.
-    
+
 Created on July 7, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.web_view import ProxyWebView
 
@@ -18,16 +18,17 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
 class WebView(ViewGroup):
-    __nativeclass__ = set_default('android.webkit.WebView')
-    loadUrl = JavaMethod('java.lang.String')
-    loadData = JavaMethod('java.lang.String', 'java.lang.String',
-                          'java.lang.String')
-    loadDataWithBaseURL = JavaMethod('java.lang.String',
-                                     'java.lang.String',
-                                     'java.lang.String',
-                                     'java.lang.String',
-                                     'java.lang.String')
-    setWebViewClient = JavaMethod('android.webkit.WebViewClient')
+    __nativeclass__ = "android.webkit.WebView"
+    loadUrl = JavaMethod("java.lang.String")
+    loadData = JavaMethod("java.lang.String", "java.lang.String", "java.lang.String")
+    loadDataWithBaseURL = JavaMethod(
+        "java.lang.String",
+        "java.lang.String",
+        "java.lang.String",
+        "java.lang.String",
+        "java.lang.String",
+    )
+    setWebViewClient = JavaMethod("android.webkit.WebViewClient")
     reload = JavaMethod()
     goBack = JavaMethod()
     goForward = JavaMethod()
@@ -36,29 +37,29 @@ class WebView(ViewGroup):
 
 
 class BridgedWebViewClient(JavaBridgeObject):
-    __nativeclass__ = set_default(
-        'com.codelv.enamlnative.adapters.BridgedWebViewClient')
+    __nativeclass__ = "com.codelv.enamlnative.adapters.BridgedWebViewClient"
     setWebView = JavaMethod(
-        'android.webkit.WebView',
-        'com.codelv.enamlnative.adapters.BridgedWebViewClient$WebViewListener')
-    setJavaScriptEnabled = JavaMethod('boolean')
-    onLoadResource = JavaCallback('android.webkit.WebView', 'java.lang.String')
-    onPageStarted = JavaCallback('android.webkit.WebView', 'java.lang.String',
-                                 'android.graphics.Bitmap')
-    onPageFinished = JavaCallback('android.webkit.WebView', 'java.lang.String')
-    onScaleChanged = JavaCallback('android.webkit.WebView', 'float', 'float')
-    onReceivedError = JavaCallback('android.webkit.WebView', 'int',
-                                   'java.lang.String', 'java.lang.String')
+        "android.webkit.WebView",
+        "com.codelv.enamlnative.adapters.BridgedWebViewClient$WebViewListener",
+    )
+    setJavaScriptEnabled = JavaMethod("boolean")
+    onLoadResource = JavaCallback("android.webkit.WebView", "java.lang.String")
+    onPageStarted = JavaCallback(
+        "android.webkit.WebView", "java.lang.String", "android.graphics.Bitmap"
+    )
+    onPageFinished = JavaCallback("android.webkit.WebView", "java.lang.String")
+    onScaleChanged = JavaCallback("android.webkit.WebView", "float", "float")
+    onReceivedError = JavaCallback(
+        "android.webkit.WebView", "int", "java.lang.String", "java.lang.String"
+    )
 
-    onProgressChanged = JavaCallback('android.webkit.WebView', 'int')
-    onReceivedTitle = JavaCallback('android.webkit.WebView',
-                                   'java.lang.String')
+    onProgressChanged = JavaCallback("android.webkit.WebView", "int")
+    onReceivedTitle = JavaCallback("android.webkit.WebView", "java.lang.String")
 
 
 class AndroidWebView(AndroidViewGroup, ProxyWebView):
-    """ An Android implementation of an Enaml ProxyWebView.
+    """An Android implementation of an Enaml ProxyWebView."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(WebView)
 
@@ -69,16 +70,12 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
         self.widget = WebView(self.get_context(), None, d.style)
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
+        """Initialize the underlying widget."""
         # Create and init the client
         c = self.client = BridgedWebViewClient()
         c.setWebView(self.widget, c.getId())
@@ -90,17 +87,15 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
         c.onProgressChanged.connect(self.on_progress_changed)
         c.onReceivedTitle.connect(self.on_page_title_changed)
 
-        super(AndroidWebView, self).init_widget()
+        super().init_widget()
 
     def destroy(self):
-        """ Destroy the client
-
-        """
+        """Destroy the client"""
         if self.client:
             #: Stop listening
             self.client.setWebView(self.widget, None)
             del self.client
-        super(AndroidWebView, self).destroy()
+        super().destroy()
 
     # -------------------------------------------------------------------------
     # WebViewClient API
@@ -143,12 +138,11 @@ class AndroidWebView(AndroidViewGroup, ProxyWebView):
         self.widget.loadUrl(url)
 
     def set_source(self, source):
-        """ Set the raw HTML of this page to load. For loading from
+        """Set the raw HTML of this page to load. For loading from
         a file or http resource use the `url` instead.
-        
+
         """
-        self.widget.loadDataWithBaseURL(
-            None, source, 'text/html', "utf-8", None)
+        self.widget.loadDataWithBaseURL(None, source, "text/html", "utf-8", None)
 
     def set_javascript_enabled(self, enabled):
         self.client.setJavaScriptEnabled(enabled)

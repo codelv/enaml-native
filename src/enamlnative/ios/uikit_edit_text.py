@@ -34,18 +34,17 @@ class UIKeyboard(NestedBridgeObject):
     UIKeyboardTypeAlphabet = UIKeyboardTypeASCIICapable
 
 
-
 class UITextField(UIControl):
-    """
-    """
+    """ """
+
     #: Properties
-    placeholder = ObjcProperty('NSString')
+    placeholder = ObjcProperty("NSString")
 
     #:
-    borderStyle = ObjcProperty('enum')  # UITextBorderStyle
+    borderStyle = ObjcProperty("enum")  # UITextBorderStyle
 
     #: Callback
-    onValueChanged = ObjcCallback('NSString')
+    onValueChanged = ObjcCallback("NSString")
 
     UITextBorderStyleNone = 0
     UITextBorderStyleLine = 1
@@ -53,17 +52,15 @@ class UITextField(UIControl):
     UITextBorderStyleRoundedRect = 3
 
     STYLES = {
-        '': UITextBorderStyleNone,
-        'line': UITextBorderStyleLine,
-        'bezel': UITextBorderStyleBezel,
-        'rounded_rect': UITextBorderStyleRoundedRect
+        "": UITextBorderStyleNone,
+        "line": UITextBorderStyleLine,
+        "bezel": UITextBorderStyleBezel,
+        "rounded_rect": UITextBorderStyleRoundedRect,
     }
 
 
 class UiKitEditText(UiKitControl, ProxyEditText):
-    """ An UiKit implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UITextField)
@@ -72,13 +69,12 @@ class UiKitEditText(UiKitControl, ProxyEditText):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the toolkit widget for the proxy object.
-        """
+        """Create the toolkit widget for the proxy object."""
         self.widget = UITextField()
 
     def init_widget(self):
-        """ Bind the on property to the checked state """
-        super(UiKitEditText, self).init_widget()
+        """Bind the on property to the checked state"""
+        super().init_widget()
 
         #: Init font properties etc...
         self.init_text()
@@ -86,7 +82,7 @@ class UiKitEditText(UiKitControl, ProxyEditText):
         d = self.declaration
         if d.placeholder:
             self.set_placeholder(d.placeholder)
-        if d.input_type != 'text':
+        if d.input_type != "text":
             self.set_input_type(d.input_type)
         if d.style:
             self.set_style(d.style)
@@ -98,15 +94,15 @@ class UiKitEditText(UiKitControl, ProxyEditText):
             forControlEvents=UITextField.UIControlEventEditingChanged,
             andCallback=self.widget.getId(),
             usingMethod="onValueChanged",
-            withValues=["text"]#,"selected"]
+            withValues=["text"],  # ,"selected"]
         )
 
         self.widget.onValueChanged.connect(self.on_value_changed)
 
     def on_value_changed(self, text):
-        """ Update text field """
+        """Update text field"""
         d = self.declaration
-        with self.widget.get_member('text').suppressed(self.widget):
+        with self.widget.get_member("text").suppressed(self.widget):
             d.text = text
 
     # -------------------------------------------------------------------------
@@ -116,7 +112,7 @@ class UiKitEditText(UiKitControl, ProxyEditText):
         pass
 
     def set_input_type(self, input_type):
-        """ Set keyboard type """
+        """Set keyboard type"""
         #: TODO...
         pass
 

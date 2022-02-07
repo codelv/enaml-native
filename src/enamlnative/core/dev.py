@@ -17,12 +17,20 @@ import inspect
 import traceback
 import enamlnative
 from atom.api import (
-    Atom, Instance, List, Subclass, ForwardInstance, Enum, Unicode, Int, Bool
+    Atom,
+    Instance,
+    List,
+    Subclass,
+    ForwardInstance,
+    Enum,
+    Str,
+    Int,
+    Bool,
 )
 from contextlib import contextmanager
 from .bridge import Command
 
-if sys.version_info.major>2:
+if sys.version_info.major > 2:
     from importlib import reload
 
 
@@ -279,38 +287,39 @@ FILE_TMPL = """
 
 def get_app():
     from .app import BridgedApplication
+
     return BridgedApplication
 
 
 class DevClient(Atom):
-    """ Abstract dev client. Override `start` to implement """
+    """Abstract dev client. Override `start` to implement"""
 
     #: Current websocket connection
     connection = Instance(object)
 
     #: Mode of operation
-    mode = Enum('client', 'remote')
+    mode = Enum("client", "remote")
 
     @classmethod
     def available(cls):
-        """ Return True if this dev client impl can be used. """
+        """Return True if this dev client impl can be used."""
         return False
 
     def start(self, session):
         raise NotImplementedError
 
     def write_message(self, data, binary=False):
-        """ Write a message to the client """
+        """Write a message to the client"""
         raise NotImplementedError
 
 
 class TornadoDevClient(DevClient):
-
     @classmethod
     def available(cls):
-        """ Return True if this dev client impl can be used. """
+        """Return True if this dev client impl can be used."""
         try:
             import tornado
+
             return True
         except ImportError:
             return False
@@ -333,14 +342,14 @@ class TornadoDevClient(DevClient):
                 self.connection = conn
 
                 #: Start remote debugger
-                if mode == 'remote':
+                if mode == "remote":
                     app.load_view(app)
 
                 while True:
                     msg = yield conn.read_message()
                     if msg is None:
                         break
-                    if mode == 'remote':
+                    if mode == "remote":
                         process_events(msg)
                     else:
                         r = session.handle_message(msg)
@@ -349,7 +358,7 @@ class TornadoDevClient(DevClient):
             except Exception as e:
                 print("Dev client connection dropped: {}".format(e))
             finally:
-                if mode == 'remote':
+                if mode == "remote":
                     session.app.stop()
                 else:
                     #: Try again in a few seconds
@@ -359,16 +368,17 @@ class TornadoDevClient(DevClient):
         session.app.deferred_call(run)
 
     def write_message(self, data, binary=False):
-        """ Write a message to the client """
+        """Write a message to the client"""
         self.connection.write_message(data, binary)
 
 
 class TwistedDevClient(DevClient):
     @classmethod
     def available(cls):
-        """ Return True if this dev client impl can be used. """
+        """Return True if this dev client impl can be used."""
         try:
             from autobahn.twisted import websocket
+
             return True
         except ImportError:
             return False
@@ -377,8 +387,10 @@ class TwistedDevClient(DevClient):
         from twisted.internet import reactor
         from twisted.internet.defer import inlineCallbacks
         from autobahn.twisted.websocket import (
-            WebSocketClientProtocol, WebSocketClientFactory
+            WebSocketClientProtocol,
+            WebSocketClientFactory,
         )
+
         client = self
 
         #: Create local references
@@ -393,26 +405,27 @@ class TwistedDevClient(DevClient):
                 client.connection = self
 
                 #: Start remote debugger
-                if mode == 'remote':
+                if mode == "remote":
                     app.load_view(app)
 
             def onOpen(self):
                 pass
 
             def onMessage(self, payload, isBinary):
-                if mode == 'remote':
+                if mode == "remote":
                     process_events(payload)
                 else:
                     r = session.handle_message(payload)
                     self.sendMessage(json.dumps(r))
 
             def onClose(self, wasClean, code, reason):
-                print("Dev client disconnected: {} {} {}".format(
-                    wasClean, code, reason))
+                print(
+                    "Dev client disconnected: {} {} {}".format(wasClean, code, reason)
+                )
                 session.connected = False
 
                 # Stop the app if remote debugging
-                if mode == 'remote':
+                if mode == "remote":
                     session.app.stop()
                 else:
                     #: Try again in a few seconds
@@ -435,16 +448,16 @@ class TwistedDevClient(DevClient):
         session.app.deferred_call(run)
 
     def write_message(self, data, binary=False):
-        """ Write a message to the client """
+        """Write a message to the client"""
         self.connection.sendMessage(data, binary)
 
 
 class DevServer(Atom):
-    """ Abstract dev server. Override `start` to implement """
+    """Abstract dev server. Override `start` to implement"""
 
     @classmethod
     def available(cls):
-        """ Return True if this dev server impl can be used. """
+        """Return True if this dev server impl can be used."""
         return False
 
     def get_component_members(self, declaration):
@@ -458,7 +471,7 @@ class DevServer(Atom):
             class_members = [m for m in members if m.name not in inherited]
 
             #: If not a direct subclass of View, show the parent members
-            if not class_members and parent.__name__ != 'View':
+            if not class_members and parent.__name__ != "View":
                 #: Try again one more time
                 parent = parent.__mro__[1]
                 inherited = parent.members().keys()
@@ -477,22 +490,21 @@ class DevServer(Atom):
         #: Build items
         items = []
         if isinstance(member, Enum):
-            items = ["<li><a href='#1'>{}</a></li>".format(it)
-                     for it in member.items]
+            items = ["<li><a href='#1'>{}</a></li>".format(it) for it in member.items]
         #: TODO: show instance types for instances, tuples, lists, etc..
-        #elif isinstance(member, )
+        # elif isinstance(member, )
 
         #: Render dropdown if needed
         if items:
-            return DROPDOWN_TMPL.format(id=node_id, name=node_type,
-                                        items="".join(items))
+            return DROPDOWN_TMPL.format(
+                id=node_id, name=node_type, items="".join(items)
+            )
         return "{}".format(node_type)
 
     def render_files(self, root=None):
-        """ Render the file path as accordions
-        """
+        """Render the file path as accordions"""
         if root is None:
-            tmp =  os.environ.get('TMP')
+            tmp = os.environ.get("TMP")
             root = sys.path[1 if tmp and tmp in sys.path else 0]
         items = []
         for filename in os.listdir(root):
@@ -503,22 +515,19 @@ class DevServer(Atom):
             #         id=path,
             #         items=self.render_files(path)
             #     ))
-            #for filename in filenames:
-            f,ext = os.path.splitext(filename)
-            if ext in ['.py', '.enaml']:
-                items.append(FILE_TMPL.format(
-                    name=filename,
-                    id=filename
-                ))
+            # for filename in filenames:
+            f, ext = os.path.splitext(filename)
+            if ext in [".py", ".enaml"]:
+                items.append(FILE_TMPL.format(name=filename, id=filename))
 
         return "".join(items)
 
     def render_code(self):
-        """ Try to load the previous code (if we had a crash or something)
-            I should allow saving.
+        """Try to load the previous code (if we had a crash or something)
+        I should allow saving.
         """
-        tmp_dir = os.environ.get('TMP','')
-        view_code = os.path.join(tmp_dir,'view.enaml')
+        tmp_dir = os.environ.get("TMP", "")
+        view_code = os.path.join(tmp_dir, "view.enaml")
         if os.path.exists(view_code):
             try:
                 with open(view_code) as f:
@@ -528,70 +537,86 @@ class DevServer(Atom):
         return DEFAULT_CODE
 
     def render_component(self, declaration):
-        """ Render a row of all the attributes """
-        items = ["""<tr><td>{name}</td><td>{type}</td></tr>"""
-                 .format(name=m.name,
-                         type=self.render_component_types(declaration, m))
-                 for m in self.get_component_members(declaration)]
+        """Render a row of all the attributes"""
+        items = [
+            """<tr><td>{name}</td><td>{type}</td></tr>""".format(
+                name=m.name, type=self.render_component_types(declaration, m)
+            )
+            for m in self.get_component_members(declaration)
+        ]
 
         info = []
         parent = declaration.__mro__[1]
         #: Superclass
-        info.append("<tr><td>extends component</td>"
-                    "<td><a href='#component-{id}'>{name}</a></td></td>"
-                    .format(id=parent.__name__.lower(), name=parent.__name__))
+        info.append(
+            "<tr><td>extends component</td>"
+            "<td><a href='#component-{id}'>{name}</a></td></td>".format(
+                id=parent.__name__.lower(), name=parent.__name__
+            )
+        )
 
         #: Source and example, only works with enamlnative builtins
-        source_path = inspect.getfile(declaration).replace(
-                        ".pyo", ".py").replace(".pyc", ".py")
-        if 'enamlnative' in source_path:
-            assets_path = os.environ.get('ASSETS', 'assets/python/')
-            cache_path = os.environ.get('CACHE', 'cache/')
+        source_path = (
+            inspect.getfile(declaration).replace(".pyo", ".py").replace(".pyc", ".py")
+        )
+        if "enamlnative" in source_path:
+            assets_path = os.environ.get("ASSETS", "assets/python/")
+            cache_path = os.environ.get("CACHE", "cache/")
             if assets_path in source_path:
                 url = source_path.split(assets_path)[-1]
             elif cache_path in source_path:
                 url = source_path.split(cache_path)[-1]
             else:
                 # Cant find the full path probably will be a dead link
-                url = 'enamlnative/{}'.format(
-                    source_path.split('enamlnative')[-1])
-            source_link = "https://github.com/codelv/" \
-                          "enaml-native/tree/master/src/{}".format(url)
-            info.append("<tr><td>source code</td>"
-                        "<td><a href='{}' target='_blank'>show</a></td></td>"
-                        .format(source_link))
+                url = "enamlnative/{}".format(source_path.split("enamlnative")[-1])
+            source_link = (
+                "https://github.com/codelv/"
+                "enaml-native/tree/master/src/{}".format(url)
+            )
+            info.append(
+                "<tr><td>source code</td>"
+                "<td><a href='{}' target='_blank'>show</a></td></td>".format(
+                    source_link
+                )
+            )
 
             #: Examples link
-            example_link = "https://codelv.com/projects/" \
-                           "enaml-native/docs/components#{}" \
-                .format(declaration.__name__.lower())
-            info.append("<tr><td>example usage</td>"
-                        "<td><a href='{}' target='_blank'>view</a></td></td>"
-                        .format(example_link))
+            example_link = (
+                "https://codelv.com/projects/"
+                "enaml-native/docs/components#{}".format(declaration.__name__.lower())
+            )
+            info.append(
+                "<tr><td>example usage</td>"
+                "<td><a href='{}' target='_blank'>view</a></td></td>".format(
+                    example_link
+                )
+            )
 
-        return COMPONENT_TMPL.format(id=declaration.__name__.lower(),
-                                     name=declaration.__name__,
-                                     info="".join(info),
-                                     items="".join(items))
+        return COMPONENT_TMPL.format(
+            id=declaration.__name__.lower(),
+            name=declaration.__name__,
+            info="".join(info),
+            items="".join(items),
+        )
 
     def render_editor(self):
         from enaml.widgets.toolkit_object import ToolkitObject
         from enamlnative.widgets import api
 
         #: Get all declared widgets
-        widgets = [obj for (n, obj) in inspect.getmembers(api)
-                   if inspect.isclass(obj)
-                   and issubclass(obj, ToolkitObject)]
+        widgets = [
+            obj
+            for (n, obj) in inspect.getmembers(api)
+            if inspect.isclass(obj) and issubclass(obj, ToolkitObject)
+        ]
         #: Render to html
         components = "\n".join([self.render_component(w) for w in widgets])
 
         #: Just a little hackish, but hey it works
-        return INDEX_PAGE.replace(
-            "${components}", components
-        ).replace(
-            "${code}", self.render_code()
-        ).replace(
-            "${files}", self.render_files()
+        return (
+            INDEX_PAGE.replace("${components}", components)
+            .replace("${code}", self.render_code())
+            .replace("${files}", self.render_files())
         )
 
     def start(self, session):
@@ -599,12 +624,12 @@ class DevServer(Atom):
 
 
 class TornadoDevServer(DevServer):
-
     @classmethod
     def available(cls):
-        """ Return True if this dev server impl can be used. """
+        """Return True if this dev server impl can be used."""
         try:
             import tornado
+
             return True
         except ImportError:
             return False
@@ -639,14 +664,18 @@ class TornadoDevServer(DevServer):
                 r = session.handle_message(self.request.body)
                 self.write(json.dumps(r))
 
-        app = tornado.web.Application([
-            (r"/", MainHandler),
-            (r"/dev", DevWebSocketHandler),
-            (r"/tmp/(.*)", tornado.web.StaticFileHandler, {
-                'path': os.environ.get('TMP', sys.path[0])}),
-            (r"/source/(.*)", tornado.web.StaticFileHandler, {
-                'path': sys.path[0]}),
-        ])
+        app = tornado.web.Application(
+            [
+                (r"/", MainHandler),
+                (r"/dev", DevWebSocketHandler),
+                (
+                    r"/tmp/(.*)",
+                    tornado.web.StaticFileHandler,
+                    {"path": os.environ.get("TMP", sys.path[0])},
+                ),
+                (r"/source/(.*)", tornado.web.StaticFileHandler, {"path": sys.path[0]}),
+            ]
+        )
 
         #: Start listening
         app.listen(session.port)
@@ -654,13 +683,13 @@ class TornadoDevServer(DevServer):
 
 
 class TwistedDevServer(DevServer):
-
     @classmethod
     def available(cls):
-        """ Return True if this dev server impl can be used. """
+        """Return True if this dev server impl can be used."""
         try:
             import twisted
             import autobahn
+
             return True
         except ImportError:
             return False
@@ -673,7 +702,8 @@ class TwistedDevServer(DevServer):
             from twisted.web.static import File
             from twisted.web.server import Site
             from autobahn.twisted.websocket import (
-                WebSocketServerFactory, WebSocketServerProtocol
+                WebSocketServerFactory,
+                WebSocketServerProtocol,
             )
             from autobahn.twisted.resource import WebSocketResource
 
@@ -700,24 +730,23 @@ class TwistedDevServer(DevServer):
                 r = session.handle_message(req.content.getvalue())
                 return json.dumps(r)
 
-        factory = WebSocketServerFactory(
-            u"ws://0.0.0.0:{}".format(session.port))
+        factory = WebSocketServerFactory("ws://0.0.0.0:{}".format(session.port))
         factory.protocol = DevWebSocketHandler
         root = resource.Resource()
         root.putChild("", MainHandler())
         root.putChild("dev", WebSocketResource(factory))
         root.putChild("source", File(sys.path[0]))
-        root.putChild("tmp", File(os.environ.get('TMP',sys.path[0])))
+        root.putChild("tmp", File(os.environ.get("TMP", sys.path[0])))
         site = Site(root)
         reactor.listenTCP(session.port, site)
         print("Twisted dev server started on {}".format(session.port))
 
 
 class DevServerSession(Atom):
-    """ Connect to a dev server running on the LAN
-        or if host is 0.0.0.0 server a page to let
-        code be pasted in. Note this should NEVER be used
-        in a released app!
+    """Connect to a dev server running on the LAN
+    or if host is 0.0.0.0 server a page to let
+    code be pasted in. Note this should NEVER be used
+    in a released app!
     """
 
     #: Singleton Instance of this class
@@ -728,38 +757,44 @@ class DevServerSession(Atom):
 
     #: Host to connect to (in client mode) or
     #: if set to "server" it will enable "server" mode
-    host = Unicode()
+    host = Str()
 
     #: Port to serve on (in server mode) or port to connect to (in client mode)
     port = Int(8888)
 
     #: URL to connect to (in client mode)
-    url = Unicode('ws://192.168.21.119:8888/dev')
+    url = Str("ws://192.168.21.119:8888/dev")
 
     #: Websocket connection state
     connected = Bool()
 
     #: Message buffer
-    buf = Unicode()
+    buf = Str()
 
     #: Dev session mode
-    mode = Enum('client', 'server', 'remote')
+    mode = Enum("client", "server", "remote")
 
     #: Hotswap support class
     hotswap = Instance(Hotswapper)
 
     #: Delegate dev server
-    servers = List(Subclass(DevServer), default=[
-        TornadoDevServer,
-        TwistedDevServer,
-    ])
+    servers = List(
+        Subclass(DevServer),
+        default=[
+            TornadoDevServer,
+            TwistedDevServer,
+        ],
+    )
     server = Instance(DevServer)
 
     #: Delegate dev client
-    clients = List(Subclass(DevClient), default=[
-        TornadoDevClient,
-        TwistedDevClient,
-    ])
+    clients = List(
+        Subclass(DevClient),
+        default=[
+            TornadoDevClient,
+            TwistedDevClient,
+        ],
+    )
     client = Instance(DevClient)
 
     # -------------------------------------------------------------------------
@@ -767,7 +802,7 @@ class DevServerSession(Atom):
     # -------------------------------------------------------------------------
     @classmethod
     def initialize(cls, *args, **kwargs):
-        """ Create an instance of this class. """
+        """Create an instance of this class."""
         try:
             return DevServerSession(*args, **kwargs)
         except ImportError:
@@ -775,20 +810,18 @@ class DevServerSession(Atom):
 
     @classmethod
     def instance(cls):
-        """ Get the singleton instance  """
+        """Get the singleton instance"""
         return cls._instance
 
     def __init__(self, *args, **kwargs):
-        """ Overridden constructor that forces only one instance to ever exist.
-
-        """
+        """Overridden constructor that forces only one instance to ever exist."""
         if self.instance() is not None:
             raise RuntimeError("A DevServerClient instance already exists!")
-        super(DevServerSession, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         DevServerSession._instance = self
 
     def start(self):
-        """ Start the dev session. Attempt to use tornado first, then try
+        """Start the dev session. Attempt to use tornado first, then try
         twisted
 
         """
@@ -798,7 +831,7 @@ class DevServerSession(Atom):
         #: Initialize the hotswapper
         self.hotswap = Hotswapper(debug=False)
 
-        if self.mode == 'server':
+        if self.mode == "server":
             self.server.start(self)
         else:
             self.client.start(self)
@@ -807,21 +840,21 @@ class DevServerSession(Atom):
     # Defaults
     # -------------------------------------------------------------------------
     def _default_mode(self):
-        """ If host is set to server then serve it from the app! """
+        """If host is set to server then serve it from the app!"""
         host = self.host
-        if host == 'server':
-            return 'server'
-        elif host == 'remote':
-            return 'remote'
-        return 'client'
+        if host == "server":
+            return "server"
+        elif host == "remote":
+            return "remote"
+        return "client"
 
     def _default_url(self):
-        """ Websocket URL to connect to and listen for reload requests """
-        host = 'localhost' if self.mode == 'remote' else self.host
-        return 'ws://{}:{}/dev'.format(host, self.port)
+        """Websocket URL to connect to and listen for reload requests"""
+        host = "localhost" if self.mode == "remote" else self.host
+        return "ws://{}:{}/dev".format(host, self.port)
 
     def _default_app(self):
-        """ Application instance """
+        """Application instance"""
         return get_app().instance()
 
     def _default_server(self):
@@ -830,7 +863,8 @@ class DevServerSession(Atom):
                 return Server()
         raise NotImplementedError(
             "No dev servers are available! "
-            "Include tornado or twisted in your requirements!")
+            "Include tornado or twisted in your requirements!"
+        )
 
     def _default_client(self):
         for Client in self.clients:
@@ -838,57 +872,59 @@ class DevServerSession(Atom):
                 return Client()
         raise NotImplementedError(
             "No dev clients are available! "
-            "Include tornado or twisted in your requirements!")
+            "Include tornado or twisted in your requirements!"
+        )
 
     def _observe_connected(self, change):
-        """ Log connection state changes """
-        print("Dev session {}".format("connected"
-                                     if self.connected else "disconnected"))
+        """Log connection state changes"""
+        print(
+            "Dev session {}".format("connected" if self.connected else "disconnected")
+        )
 
     # -------------------------------------------------------------------------
     # Dev Session API
     # -------------------------------------------------------------------------
     def write_message(self, data, binary=False):
-        """ Write a message to the active client
-
-        """
+        """Write a message to the active client"""
         self.client.write_message(data, binary=binary)
 
     def handle_message(self, data):
-        """ When we get a message """
+        """When we get a message"""
         msg = json.loads(data)
         print("Dev server message: {}".format(msg))
-        handler_name = 'do_{}'.format(msg['type'])
+        handler_name = "do_{}".format(msg["type"])
         if hasattr(self, handler_name):
             handler = getattr(self, handler_name)
             result = handler(msg)
-            return {'ok': True, 'result': result}
+            return {"ok": True, "result": result}
         else:
             err = "Warning: Unhandled message: {}".format(msg)
             print(err)
-            return {'ok': False, 'message': err}
+            return {"ok": False, "message": err}
 
     # -------------------------------------------------------------------------
     # Message handling API
     # -------------------------------------------------------------------------
     def do_reload(self, msg):
-        """ Called when the dev server wants to reload the view. """
+        """Called when the dev server wants to reload the view."""
         #: TODO: This should use the autorelaoder
         app = self.app
 
         #: Show loading screen
         try:
             self.app.widget.showLoading("Reloading... Please wait.", now=True)
-            #self.app.widget.restartPython(now=True)
-            #sys.exit(0)
+            # self.app.widget.restartPython(now=True)
+            # sys.exit(0)
         except:
             #: TODO: Implement for iOS...
             pass
         self.save_changed_files(msg)
 
         if app.load_view is None:
-            print("Warning: Reloading the view is not implemented. "
-                  "Please set `app.load_view` to support this.")
+            print(
+                "Warning: Reloading the view is not implemented. "
+                "Please set `app.load_view` to support this."
+            )
             return
         if app.view is not None:
             try:
@@ -903,12 +939,13 @@ class DevServerSession(Atom):
                 except:
                     #: Display the error
                     app.send_event(Command.ERROR, traceback.format_exc())
+
             return safe_reload
 
         app.deferred_call(wrapped(app.load_view), app)
 
     def do_hotswap(self, msg):
-        """ Attempt to hotswap the code """
+        """Attempt to hotswap the code"""
         #: Show hotswap tooltip
         try:
             self.app.widget.showTooltip("Hot swapping...", now=True)
@@ -931,24 +968,25 @@ class DevServerSession(Atom):
     # -------------------------------------------------------------------------
     def save_changed_files(self, msg):
         #: On iOS we can't write in the app bundle
-        if os.environ.get('TMP'):
-            tmp_dir = os.environ['TMP']
+        if os.environ.get("TMP"):
+            tmp_dir = os.environ["TMP"]
             if not os.path.exists(tmp_dir):
                 os.makedirs(tmp_dir)
             if tmp_dir not in sys.path:
                 sys.path.insert(0, tmp_dir)
 
                 import site
+
                 reload(site)
 
         with cd(sys.path[0]):
             #: Clear cache
-            if os.path.exists('__enamlcache__'):
-                shutil.rmtree('__enamlcache__')
-            for fn in msg['files']:
+            if os.path.exists("__enamlcache__"):
+                shutil.rmtree("__enamlcache__")
+            for fn in msg["files"]:
                 print("Updating {}".format(fn))
                 folder = os.path.dirname(fn)
                 if folder and not os.path.exists(folder):
                     os.makedirs(folder)
-                with open(fn, 'wb') as f:
-                    f.write(msg['files'][fn].encode('utf-8'))
+                with open(fn, "wb") as f:
+                    f.write(msg["files"][fn].encode("utf-8"))

@@ -21,18 +21,16 @@ from .uikit_text_view import UITextView, UiKitTextView
 class UIControl(UITextView):
 
     #: Properties
-    enabled = ObjcProperty('bool')
-    selected = ObjcProperty('bool')
-    highlighted = ObjcProperty('bool')
-    contentVerticalAlignment = ObjcProperty(
-        'UIControlContentVerticalAlignment')
-    contentHorizontalAlignment = ObjcProperty(
-        'UIControlContentHorizontalAlignment')
+    enabled = ObjcProperty("bool")
+    selected = ObjcProperty("bool")
+    highlighted = ObjcProperty("bool")
+    contentVerticalAlignment = ObjcProperty("UIControlContentVerticalAlignment")
+    contentHorizontalAlignment = ObjcProperty("UIControlContentHorizontalAlignment")
 
-    #setProgress = ObjcMethod('float', dict(animated='bool'))
-    addTarget = ObjcMethod('id',
-                           dict(action="SEL"),
-                           dict(forControlEvents="enum"))#""UIControlEvents"))
+    # setProgress = ObjcMethod('float', dict(animated='bool'))
+    addTarget = ObjcMethod(
+        "id", dict(action="SEL"), dict(forControlEvents="enum")
+    )  # ""UIControlEvents"))
 
     onClicked = ObjcCallback()
 
@@ -68,9 +66,7 @@ class UIControl(UITextView):
 
 
 class UiKitControl(UiKitTextView, ProxyCompoundButton):
-    """ A UiKitControl helper class.
-
-    """
+    """A UiKitControl helper class."""
 
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UIControl)
@@ -79,13 +75,11 @@ class UiKitControl(UiKitTextView, ProxyCompoundButton):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the toolkit widget for the proxy object.
-        
-        """
+        """Create the toolkit widget for the proxy object."""
         self.widget = UIControl()
 
     def init_widget(self):
-        """ Initialize the state of the toolkit widget.
+        """Initialize the state of the toolkit widget.
 
         This method is called during the top-down pass, just after the
         'create_widget()' method is called. This method should init the
@@ -94,7 +88,7 @@ class UiKitControl(UiKitTextView, ProxyCompoundButton):
         Note: This does NOT initialize text properties by default!
 
         """
-        super(UiKitControl, self).init_widget()
+        super().init_widget()
 
         d = self.declaration
         if d.clickable:
@@ -105,7 +99,7 @@ class UiKitControl(UiKitTextView, ProxyCompoundButton):
                 forControlEvents=UIControl.UIControlEventTouchUpInside,
                 andCallback=self.widget.getId(),
                 usingMethod="onClicked",
-                withValues=[]
+                withValues=[],
             )
 
             self.widget.onClicked.connect(self.on_clicked)
@@ -116,4 +110,3 @@ class UiKitControl(UiKitTextView, ProxyCompoundButton):
     def on_clicked(self):
         d = self.declaration
         d.clicked()
-

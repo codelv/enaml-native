@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Str, Enum, Bool, Int, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Str, Enum, Bool, Int, observe, set_default
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .view_group import ViewGroup, ProxyViewGroup
 
 
 class ProxyGridLayout(ProxyViewGroup):
-    """ The abstract definition of a proxy GridLayout object.
+    """The abstract definition of a proxy GridLayout object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: GridLayout)
 
@@ -48,15 +45,14 @@ class ProxyGridLayout(ProxyViewGroup):
 
 
 class GridLayout(ViewGroup):
-    """ A layout that places its children in a rectangular grid.
+    """A layout that places its children in a rectangular grid."""
 
-    """
     #: Should the layout be a column or a row.
-    orientation = d_(Enum('horizontal', 'vertical'))
+    orientation = d_(Enum("horizontal", "vertical"))
 
     #: Sets the alignment mode to be used for all of the alignments
     #: between the children of this container.
-    alignment_mode = d_(Enum('margins', 'bounds'))
+    alignment_mode = d_(Enum("margins", "bounds"))
 
     #: ColumnCount is used only to generate default column/column
     #: indices when they are not specified by a component's layout parameters.
@@ -86,12 +82,16 @@ class GridLayout(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('orientation', 'alignment_mode', 'columns',
-             'column_order_preserved', 'rows', 'row_order_preserved',
-             'use_default_margins')
+    @observe(
+        "orientation",
+        "alignment_mode",
+        "columns",
+        "column_order_preserved",
+        "rows",
+        "row_order_preserved",
+        "use_default_margins",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(GridLayout, self)._update_proxy(change)
+        super()._update_proxy(change)

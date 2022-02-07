@@ -11,7 +11,7 @@ Created on June 21, 2017
 """
 import msgpack
 import functools
-from atom.api import Atom, Property, Instance, ForwardInstance, Dict, Unicode, Tuple, Int
+from atom.api import Atom, Property, Instance, ForwardInstance, Dict, Str, Tuple, Int
 from weakref import WeakValueDictionary
 from contextlib import contextmanager
 
@@ -41,32 +41,32 @@ class ExtType:
 
 
 def generate_id():
-    """ Generate an id for an object """
+    """Generate an id for an object"""
     global __global_id__
     __global_id__ += 1
     return __global_id__
 
 
 def generate_property_id():
-    """ Generate an id for an object """
+    """Generate an id for an object"""
     global __property_id__
     __property_id__ += 1
     return __property_id__
 
 
 def tag_object_with_id(obj):
-    """ Generate and assign a id for the object"""
+    """Generate and assign a id for the object"""
     obj.__id__ = generate_id()
     CACHE[obj.__id__] = obj
 
 
 def get_object_with_id(id):
-    """ Get the object with the given id in the cache """
+    """Get the object with the given id in the cache"""
     return CACHE[id]
 
 
 def _cleanup_id(obj):
-    """ Removes the object from the """
+    """Removes the object from the"""
     try:
         del CACHE[obj.__id__]
     except KeyError:
@@ -74,40 +74,40 @@ def _cleanup_id(obj):
 
 
 def get_app_class():
-    """ Avoid circular import. Probably indicates a
-        poor design...
+    """Avoid circular import. Probably indicates a
+    poor design...
     """
     from .app import BridgedApplication
+
     return BridgedApplication
 
 
 def encode(obj):
-    """ Encode an object for proper decoding by Java or ObjC
-    """
-    if hasattr(obj, '__id__'):
+    """Encode an object for proper decoding by Java or ObjC"""
+    if hasattr(obj, "__id__"):
         return msgpack.ExtType(ExtType.REF, msgpack.packb(obj.__id__))
     return obj
 
 
 def msgpack_encoder(sig, obj):
-    """ When passing a BridgeObject encode it in a special way so
-        it can properly be interpreted as a reference.
+    """When passing a BridgeObject encode it in a special way so
+    it can properly be interpreted as a reference.
 
-        TODO: This should use the object hooks for doing this automatically
+    TODO: This should use the object hooks for doing this automatically
     """
-    #if isinstance(obj, (list, tuple)):
+    # if isinstance(obj, (list, tuple)):
     #    return sig, [encode(o) for o in obj]
     return sig, encode(obj)
 
 
 def dumps(data):
-    """ Encodes events for sending over the bridge """
+    """Encodes events for sending over the bridge"""
     return msgpack.dumps(data)
 
 
 def loads(data):
-    """ Decodes and processes events received from the bridge """
-    #if not data:
+    """Decodes and processes events received from the bridge"""
+    # if not data:
     #    raise ValueError("Tried to load empty data!")
     return msgpack.loads(data, use_list=False, raw=False)
 
@@ -117,20 +117,19 @@ class BridgeReferenceError(ReferenceError):
 
 
 def get_handler(ptr, method):
-    """ Dereference the pointer and return the handler method. """
+    """Dereference the pointer and return the handler method."""
     obj = CACHE.get(ptr, None)
     if obj is None:
         raise BridgeReferenceError(
-            "Reference id={} never existed or has already been destroyed"
-            .format(ptr))
+            "Reference id={} never existed or has already been destroyed".format(ptr)
+        )
     elif not hasattr(obj, method):
-        raise NotImplementedError("{}.{} is not implemented.".format(obj,
-                                                                     method))
+        raise NotImplementedError("{}.{} is not implemented.".format(obj, method))
     return obj, getattr(obj, method)
 
 
 class BridgeMethod(Property):
-    """ A method that is callable via the bridge.
+    """A method that is callable via the bridge.
     When called, this serializes the call, packs the arguments,
     and delegates handling to a bridge in native code.
 
@@ -146,18 +145,19 @@ class BridgeMethod(Property):
     view.addView(view2)
 
     """
-    __slots__ = ('__signature__', '__returns__', '__cache__', '__bridge_id__')
+
+    __slots__ = ("__signature__", "__returns__", "__cache__", "__bridge_id__")
 
     def __init__(self, *args, **kwargs):
-        self.__returns__ = kwargs.get('returns', None)
+        self.__returns__ = kwargs.get("returns", None)
         self.__signature__ = args
         self.__cache__ = {}  # Result cache otherwise gc cleans up
         self.__bridge_id__ = generate_property_id()
-        super(BridgeMethod, self).__init__(self.__fget__)
+        super().__init__(self.__fget__)
 
     @contextmanager
     def suppressed(self, obj):
-        """ Suppress calls within this context to avoid feedback loops"""
+        """Suppress calls within this context to avoid feedback loops"""
         obj.__suppressed__[self.name] = True
         yield
         obj.__suppressed__[self.name] = False
@@ -168,7 +168,7 @@ class BridgeMethod(Property):
         return f
 
     def __call__(self, obj, *args, **kwargs):
-        """ The Swift like syntax is used"""
+        """The Swift like syntax is used"""
         if obj.__suppressed__.get(self.name):
             return
 
@@ -202,16 +202,16 @@ class BridgeMethod(Property):
         return result
 
     def pack_args(self, obj, *args, **kwargs):
-        """ Subclasses should implement this to pack args as needed
+        """Subclasses should implement this to pack args as needed
         for the native bridge implementation. Must return a tuple containing
         ("methodName", [list, of, encoded, args])
-        
+
         """
         raise NotImplementedError
 
 
 class BridgeStaticMethod(Property):
-    """ A method that is callable via the bridge.
+    """A method that is callable via the bridge.
     When called, this serializes the call, packs the arguments,
     and delegates handling to a bridge in native code.
 
@@ -223,22 +223,28 @@ class BridgeStaticMethod(Property):
     result = Toast.makeToast(*args)
 
     """
-    __slots__ = ('__signature__', '__returns__', '__cache__', '__owner__',
-                 '__bridge_id__')
+
+    __slots__ = (
+        "__signature__",
+        "__returns__",
+        "__cache__",
+        "__owner__",
+        "__bridge_id__",
+    )
 
     def __init__(self, *args, **kwargs):
-        self.__returns__ = kwargs.get('returns', None)
+        self.__returns__ = kwargs.get("returns", None)
         self.__signature__ = args
         self.__owner__ = None
         self.__cache__ = {}  # Result cache otherwise gc cleans up
         self.__bridge_id__ = generate_property_id()
-        super(BridgeStaticMethod, self).__init__()
+        super().__init__()
 
     def __get__(self, instance, owner):
         #: Save the object this class references
         if self.__owner__ is None:
             self.__owner__ = owner
-        return super(BridgeStaticMethod, self).__get__(instance, owner)
+        return super().__get__(instance, owner)
 
     def __call__(self, *args, **kwargs):
         #: Format the args as needed
@@ -273,16 +279,16 @@ class BridgeStaticMethod(Property):
         return result
 
     def pack_args(self, obj, *args, **kwargs):
-        """ Subclasses should implement this to pack args as needed
+        """Subclasses should implement this to pack args as needed
         for the native bridge implementation. Must return a tuple containing
         ("methodName", [list, of, encoded, args])
-        
+
         """
         raise NotImplementedError
 
 
 class BridgeField(Property):
-    """ Allows you to set fields or properties over the bridge using normal 
+    """Allows you to set fields or properties over the bridge using normal
     python syntax.
 
     #: Define it
@@ -296,17 +302,18 @@ class BridgeField(Property):
     view.width = 200
 
     """
-    __slots__ = ('__signature__', '__bridge_id__', '__bridge_cached_')
+
+    __slots__ = ("__signature__", "__bridge_id__", "__bridge_cached_")
 
     def __init__(self, arg):
         self.__signature__ = arg
         self.__bridge_id__ = generate_property_id()
         self.__bridge_cached_ = False
-        super(BridgeField, self).__init__(self.__fget__, self.__fset__)
+        super().__init__(self.__fget__, self.__fset__)
 
     @contextmanager
     def suppressed(self, obj):
-        """ Suppress calls within this context to avoid feedback loops"""
+        """Suppress calls within this context to avoid feedback loops"""
         obj.__suppressed__[self.name] = True
         yield
         obj.__suppressed__[self.name] = False
@@ -319,23 +326,23 @@ class BridgeField(Property):
             obj.__id__,
             self.__bridge_id__,
             obj.__prefix__ + self.name,  #: method name
-            [msgpack_encoder(self.__signature__, arg)]  #: args
+            [msgpack_encoder(self.__signature__, arg)],  #: args
         )
         self.__bridge_cached_ = True
 
     def __fget__(self, obj):
-        """ Return an object that can be used to retrieve the value. """
+        """Return an object that can be used to retrieve the value."""
         raise NotImplementedError("Reading attributes is not yet supported")
 
 
 class BridgeCallback(BridgeMethod):
-    """ Description of a callback method of a View (or subclass) in 
-    Objc or Java. When called,it fires the connected callback. If no callback 
-    is connected it will try to lookup a default callback implementation 
-    matching the name `_impl_<name>`. If that does not exist, it will simply 
+    """Description of a callback method of a View (or subclass) in
+    Objc or Java. When called,it fires the connected callback. If no callback
+    is connected it will try to lookup a default callback implementation
+    matching the name `_impl_<name>`. If that does not exist, it will simply
     do nothing.
 
-    This is triggered when it receives an event from the bridge indicating the 
+    This is triggered when it receives an event from the bridge indicating the
     call has occurred.
 
 
@@ -353,8 +360,8 @@ class BridgeCallback(BridgeMethod):
         view.onClick.connect(on_click)
 
 
-    You can define a "default" callback implementation by implementing the 
-    method with name of `_impl_<name>`. Connecting a callback will override 
+    You can define a "default" callback implementation by implementing the
+    method with name of `_impl_<name>`. Connecting a callback will override
     this behavior.
 
     #: Define it
@@ -367,20 +374,20 @@ class BridgeCallback(BridgeMethod):
     """
 
     def __fget__(self, obj):
-        f = super(BridgeCallback, self).__fget__(obj)
+        f = super().__fget__(obj)
         #: Add a method so it can be connected like in Qt
         f.connect = functools.partial(self.connect, obj)
         f.disconnect = functools.partial(self.disconnect, obj)
         return f
 
     def __call__(self, obj, *args):
-        """ Fire the callback if one is connected """
+        """Fire the callback if one is connected"""
         if obj.__suppressed__.get(self.name):
             return
         callback = obj.__callbacks__.get(self.name)
         if not callback:
             #: Try to get the default callback
-            key = '_impl_{}'.format(self.name)
+            key = "_impl_{}".format(self.name)
             if hasattr(obj, key):
                 callback = getattr(obj, key)
 
@@ -388,11 +395,11 @@ class BridgeCallback(BridgeMethod):
             return callback(*args)
 
     def connect(self, obj, callback):
-        """ Set the callback to be fired when the event occurs. """
+        """Set the callback to be fired when the event occurs."""
         obj.__callbacks__[self.name] = callback
 
     def disconnect(self, obj, callback):
-        """ Remove the callback to be fired when the event occurs. """
+        """Remove the callback to be fired when the event occurs."""
         del obj.__callbacks__[self.name]
 
 
@@ -402,29 +409,30 @@ def tag_property(cls):
 
 
 class BridgeObject(Atom):
-    """ A proxy to a class in java. This sends the commands over
+    """A proxy to a class in java. This sends the commands over
     the bridge for execution.  The object is stored in a map
     with the given id and is valid until this object is deleted.
-    
+
     Parameters
     ----------
     __id__: Int, Future, or None
         If an __id__ keyword argument is passed during creation, then
-            
-            If the __id__ is an int, this will assume the object was already 
-            created and only a reference to the object with the given id is 
+
+            If the __id__ is an int, this will assume the object was already
+            created and only a reference to the object with the given id is
             needed.
-            
-            If the __id__ is a Future (as specified by the app event loop),  
-            then the __id__ of he future will be used. When the future 
+
+            If the __id__ is a Future (as specified by the app event loop),
+            then the __id__ of he future will be used. When the future
             completes this object will then be put into the cache. This allows
             passing results directly instead of using the `.then()` method.
 
     """
-    __slots__ = ('__weakref__', )
+
+    __slots__ = ("__weakref__",)
 
     #: Native Class name
-    __nativeclass__ = Unicode()
+    __nativeclass__ = Str()
 
     #: Constructor signature
     __signature__ = Tuple()
@@ -443,7 +451,7 @@ class BridgeObject(Atom):
 
     #: Prefix to add to all names used during method and property calls
     #: used for nested objects
-    __prefix__ = Unicode()
+    __prefix__ = Str()
 
     #: Bridge
     __app__ = ForwardInstance(get_app_class)
@@ -461,14 +469,14 @@ class BridgeObject(Atom):
         return self.__id__
 
     def __init__(self, *args, **kwargs):
-        """ Sends the event to create this object in Java. """
+        """Sends the event to create this object in Java."""
 
         #: Send the event over the bridge to construct the view
-        __id__ = kwargs.pop('__id__', None)
+        __id__ = kwargs.pop("__id__", None)
         cache = True
         if __id__ is not None:
             if isinstance(__id__, int):
-                kwargs['__id__'] = __id__
+                kwargs["__id__"] = __id__
             elif isinstance(__id__, self.__app__.loop.future):
                 #: If a future is given don't store this object in the cache
                 #: until after the future completes
@@ -476,18 +484,20 @@ class BridgeObject(Atom):
                 f.then(lambda *args, **kwargs: CACHE.update({f.__id__: self}))
 
                 #: The future is used to return the result
-                kwargs['__id__'] = f.__id__
+                kwargs["__id__"] = f.__id__
 
                 #: Save it into the cache when the result from the future
                 #: arrives over the bridge.
                 cache = False
             else:
-                raise TypeError("Invalid __id__ reference, expected an int or"
-                                "a future/deferred object, got: "
-                                "{}".format(__id__))
+                raise TypeError(
+                    "Invalid __id__ reference, expected an int or"
+                    "a future/deferred object, got: "
+                    "{}".format(__id__)
+                )
 
         #: Construct the object
-        super(BridgeObject, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         if cache:
             CACHE[self.__id__] = self
@@ -498,12 +508,14 @@ class BridgeObject(Atom):
                 self.__id__,  #: id to assign in bridge cache
                 self.__bridge_id__,
                 self.__nativeclass__,
-                [msgpack_encoder(sig, arg)
-                 for sig, arg in zip(self.__signature__, args)],
+                [
+                    msgpack_encoder(sig, arg)
+                    for sig, arg in zip(self.__signature__, args)
+                ],
             )
 
     def __del__(self):
-        """ Destroy this object and send a command to destroy the actual object
+        """Destroy this object and send a command to destroy the actual object
         reference the bridge implementation holds (allowing it to be released).
         """
         self.__app__.send_event(
@@ -514,30 +526,31 @@ class BridgeObject(Atom):
 
 
 class NestedBridgeObject(BridgeObject):
-    """ A nested object allows you to invoke methods and set properties
+    """A nested object allows you to invoke methods and set properties
     of an object that is a property of another object using the dot notation.
 
-    Useful for setting nested properties without needing to first create a 
-    reference bridge object (thus saving the time waiting for the bridge to 
+    Useful for setting nested properties without needing to first create a
+    reference bridge object (thus saving the time waiting for the bridge to
     reply) for example:
 
         UIView view = [UIView new];
                 view.yoga.width = YES;
 
-    Would require to create a reference to the "yoga" object first but instead 
-    we just add our nested object's prefix and let the bridge resolve the 
-    actual property. It works like a regular BridgeObject but appends the 
+    Would require to create a reference to the "yoga" object first but instead
+    we just add our nested object's prefix and let the bridge resolve the
+    actual property. It works like a regular BridgeObject but appends the
     "name'.
 
     This object is NOT in the cache on either side of the bridge.
 
     """
+
     #: Reference to the object this is referenced under
     __root__ = Instance(BridgeObject)
 
     def __init__(self, root, attr, **kwargs):
-        kwargs['__id__'] = root.getId()
-        kwargs['__prefix__'] = attr + "."
+        kwargs["__id__"] = root.getId()
+        kwargs["__prefix__"] = attr + "."
         Atom.__init__(self, **kwargs)
 
     def __del__(self):

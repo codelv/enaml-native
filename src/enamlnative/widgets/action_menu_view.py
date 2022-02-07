@@ -9,9 +9,7 @@ Created on June 10, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Unicode, Event, observe
-)
+from atom.api import Typed, ForwardTyped, Str, Event, observe
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .linear_layout import LinearLayout, ProxyLinearLayout
 
 
 class ProxyActionMenuView(ProxyLinearLayout):
-    """ The abstract definition of a proxy ActionMenuView object.
+    """The abstract definition of a proxy ActionMenuView object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: ActionMenuView)
 
@@ -33,12 +30,10 @@ class ProxyActionMenuView(ProxyLinearLayout):
 
 
 class ActionMenuView(LinearLayout):
-    """ A simple control for displaying a ActionMenuView.
-
-    """
+    """A simple control for displaying a ActionMenuView."""
 
     #: Reference to the checked radio button or None
-    overflow_icon = d_(Unicode())
+    overflow_icon = d_(Str())
 
     #: Show menu
     show = d_(Event())
@@ -54,12 +49,10 @@ class ActionMenuView(LinearLayout):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('show', 'hide', 'overflow_icon')
+    @observe("show", "hide", "overflow_icon")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
-
-        """
-        if change['type'] == 'event' and self.proxy_is_active:
-            self.proxy.set_opened(change['name'] == 'show')
+        """An observer which sends the state change to the proxy."""
+        if change["type"] == "event" and self.proxy_is_active:
+            self.proxy.set_opened(change["name"] == "show")
         else:
-            super(ActionMenuView, self)._update_proxy(change)
+            super()._update_proxy(change)

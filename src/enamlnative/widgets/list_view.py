@@ -10,7 +10,15 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Value, Bool, Int, Enum, ContainerList, Event, observe
+    Typed,
+    ForwardTyped,
+    Value,
+    Bool,
+    Int,
+    Enum,
+    ContainerList,
+    Event,
+    observe,
 )
 
 from enaml.core.declarative import d_
@@ -19,9 +27,8 @@ from .view_group import ViewGroup, ProxyViewGroup
 
 
 class ProxyListView(ProxyViewGroup):
-    """ The abstract definition of a proxy ListView object.
+    """The abstract definition of a proxy ListView object."""
 
-    """
     #: A reference to the widget declaration.
     declaration = ForwardTyped(lambda: ListView)
 
@@ -56,9 +63,7 @@ class ProxyListItem(ProxyToolkitObject):
 
 
 class ListView(ViewGroup):
-    """ A widget for displaying a large scrollable list of items.
-
-    """
+    """A widget for displaying a large scrollable list of items."""
 
     #: List of items to display
     items = d_(ContainerList())
@@ -68,10 +73,10 @@ class ListView(ViewGroup):
     fixed_size = d_(Bool())
 
     #: Layout manager to use
-    arrangement = d_(Enum('linear', 'grid', 'staggered'))
+    arrangement = d_(Enum("linear", "grid", "staggered"))
 
     #: Orientation
-    orientation = d_(Enum('vertical', 'horizontal'))
+    orientation = d_(Enum("vertical", "horizontal"))
 
     #: Span count (only for grid and staggered)
     span_count = d_(Int())
@@ -82,32 +87,23 @@ class ListView(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('items', 'arrangement',  'orientation', 'span_count',
-             'fixed_size')
+    @observe("items", "arrangement", "orientation", "span_count", "fixed_size")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(ListView, self)._update_proxy(change)
+        super()._update_proxy(change)
 
     def scroll_to(self, x, y):
-        """ Scroll to the given x,y coordinates within the list
-        
-        """
+        """Scroll to the given x,y coordinates within the list"""
         self.proxy.scroll_to(x, y)
 
     def scroll_to_position(self, position):
-        """ Scroll to the given position in the list
-        
-        """
+        """Scroll to the given position in the list"""
         self.proxy.scroll_to_position(position)
 
 
 class ListItem(ToolkitObject):
-    """ A holder for a View within a ListItem.
-
-    """
+    """A holder for a View within a ListItem."""
 
     #: The item this view should render
     item = d_(Value(), writable=False)

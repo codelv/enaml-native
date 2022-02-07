@@ -15,19 +15,18 @@ from enaml.core.declarative import d_
 
 
 class ProxyTextureView(ProxyView):
-    """ The abstract definition of a proxy surface object.
+    """The abstract definition of a proxy surface object."""
 
-    """
     #: A reference to the declaration.
     declaration = ForwardTyped(lambda: TextureView)
 
 
 class TextureView(View):
-    """ A TextureView can be used to display a content stream. Such a content 
-    stream can for instance be a video or an OpenGL scene. The content stream 
+    """A TextureView can be used to display a content stream. Such a content
+    stream can for instance be a video or an OpenGL scene. The content stream
     can come from the application's process as well as a remote process.
 
     """
-    
+
     #: A reference to the ProxyViewGroup object.
     proxy = Typed(ProxyTextureView)

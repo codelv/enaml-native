@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Unicode, Int, Event, Bool, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Str, Int, Event, Bool, observe, set_default
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .view_group import ViewGroup, ProxyViewGroup
 
 
 class ProxyWebView(ProxyViewGroup):
-    """ The abstract definition of a proxy WebView object.
+    """The abstract definition of a proxy WebView object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: WebView)
 
@@ -48,9 +45,7 @@ class ProxyWebView(ProxyViewGroup):
 
 
 class WebView(ViewGroup):
-    """ A layout that places its children in a rectangular grid.
-
-    """
+    """A layout that places its children in a rectangular grid."""
 
     #: Page load error occurred
     error = d_(Bool(), writable=False)
@@ -59,13 +54,13 @@ class WebView(ViewGroup):
     error_code = d_(Int(), writable=False)
 
     #: Error message
-    error_message = d_(Unicode(), writable=False)
+    error_message = d_(Str(), writable=False)
 
     #: Enable javascript
     javascript_enabled = d_(Bool(True))
 
     #: Read only title from the loaded page
-    title = d_(Unicode(), writable=False)
+    title = d_(Str(), writable=False)
 
     #: Read only loading progress
     progress = d_(Int(), writable=False)
@@ -74,10 +69,10 @@ class WebView(ViewGroup):
     loading = d_(Bool(), writable=False)
 
     #: Loads the URL (if given)
-    url = d_(Unicode())
+    url = d_(Str())
 
     #: Loads the source (if given)
-    source = d_(Unicode())
+    source = d_(Str())
 
     #: Reloads the current URL.
     reload = d_(Event())
@@ -100,16 +95,22 @@ class WebView(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('javascript_enabled', 'url', 'reload', 'source',
-             'go_forward', 'go_back', 'zoom_in', 'zoom_out')
+    @observe(
+        "javascript_enabled",
+        "url",
+        "reload",
+        "source",
+        "go_forward",
+        "go_back",
+        "zoom_in",
+        "zoom_out",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
-
-        """
-        if change['type'] == 'event':
-            name = 'do_'+change['name']
+        """An observer which sends the state change to the proxy."""
+        if change["type"] == "event":
+            name = "do_" + change["name"]
             if hasattr(self.proxy, name):
                 handler = getattr(self.proxy, name)
                 handler()
         else:
-            super(WebView, self)._update_proxy(change)
+            super()._update_proxy(change)

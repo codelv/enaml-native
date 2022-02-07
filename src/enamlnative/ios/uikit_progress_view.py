@@ -18,18 +18,17 @@ from .uikit_view import UIView, UiKitView
 
 
 class UIProgressView(UIView):
-    """ From:
-        https://developer.apple.com/documentation/uikit/uiview?language=objc
+    """From:
+    https://developer.apple.com/documentation/uikit/uiview?language=objc
     """
+
     #: Properties
-    progress = ObjcProperty('float')
-    setProgress = ObjcMethod('float', dict(animated='bool'))
+    progress = ObjcProperty("float")
+    setProgress = ObjcMethod("float", dict(animated="bool"))
 
 
 class UiKitProgressView(UiKitView, ProxyProgressBar):
-    """ An UiKit implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UIProgressView)
@@ -38,19 +37,18 @@ class UiKitProgressView(UiKitView, ProxyProgressBar):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the toolkit widget for the proxy object.
-        """
+        """Create the toolkit widget for the proxy object."""
         self.widget = UIProgressView()
 
     def init_widget(self):
-        """ Initialize the state of the toolkit widget.
+        """Initialize the state of the toolkit widget.
 
         This method is called during the top-down pass, just after the
         'create_widget()' method is called. This method should init the
         state of the widget. The child widgets will not yet be created.
 
         """
-        super(UiKitProgressView, self).init_widget()
+        super().init_widget()
 
         d = self.declaration
         if d.progress:
@@ -60,4 +58,4 @@ class UiKitProgressView(UiKitView, ProxyProgressBar):
     # ProxyProgressBar API
     # -------------------------------------------------------------------------
     def set_progress(self, progress):
-        self.widget.progress = progress/100.0
+        self.widget.progress = progress / 100.0

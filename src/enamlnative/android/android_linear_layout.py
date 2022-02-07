@@ -18,21 +18,20 @@ from .bridge import JavaMethod, JavaField
 
 
 class LinearLayout(ViewGroup):
-    __nativeclass__ = set_default('android.widget.LinearLayout')
-    setOrientation = JavaMethod('int')
-    setGravity = JavaMethod('int')
+    __nativeclass__ = "android.widget.LinearLayout"
+    setOrientation = JavaMethod("int")
+    setGravity = JavaMethod("int")
 
 
 class LinearLayoutParams(MarginLayoutParams):
-    __nativeclass__ = set_default('android.widget.LinearLayout$LayoutParams')
-    gravity = JavaField('int')
-    weight = JavaField('int')
+    __nativeclass__ = "android.widget.LinearLayout$LayoutParams"
+    gravity = JavaField("int")
+    weight = JavaField("int")
 
 
 class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
-    """ An Android implementation of an Enaml ProxyLinearLayout.
+    """An Android implementation of an Enaml ProxyLinearLayout."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(LinearLayout)
 
@@ -43,9 +42,7 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
         self.widget = LinearLayout(self.get_context(), None, d.style)
 
@@ -53,14 +50,11 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
     # ProxyLinearLayout API
     # -------------------------------------------------------------------------
     def set_orientation(self, orientation):
-        """ Set the text in the widget.
-
-        """
-        self.widget.setOrientation(0 if orientation == 'horizontal' else 1)
+        """Set the text in the widget."""
+        self.widget.setOrientation(0 if orientation == "horizontal" else 1)
 
     def create_layout_params(self, child, layout):
-        params = super(AndroidLinearLayout, self).create_layout_params(child,
-                                                                       layout)
-        if 'gravity' in layout:
-            params.gravity = layout['gravity']
+        params = super().create_layout_params(child, layout)
+        if "gravity" in layout:
+            params.gravity = layout["gravity"]
         return params

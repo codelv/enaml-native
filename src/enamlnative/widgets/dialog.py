@@ -9,18 +9,15 @@ Created on Sept 21, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Unicode, Bool, Event, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Str, Bool, Event, observe, set_default
 
 from enaml.core.declarative import d_
 from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
 
 
 class ProxyDialog(ProxyToolkitObject):
-    """ The abstract definition of a proxy dialgo object.
+    """The abstract definition of a proxy dialgo object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Dialog)
 
@@ -44,9 +41,7 @@ class ProxyDialog(ProxyToolkitObject):
 
 
 class Dialog(ToolkitObject):
-    """ A popup dialog that may contain a view.
-    
-    """
+    """A popup dialog that may contain a view."""
 
     #: Sets whether this dialog is cancelable with the BACK key.
     cancel_on_back = d_(Bool(True))
@@ -62,14 +57,14 @@ class Dialog(ToolkitObject):
     key_pressed = d_(Event(dict), writable=False)
 
     #: Set the title text for this dialog's window.
-    title = d_(Unicode())
+    title = d_(Str())
 
     #: Start the dialog and display it on screen (or hide if False)
     show = d_(Bool())
 
     #: Dialog style using the @style format
     #: (ex. @style/Theme_Light_NoTitleBar_Fullscreen
-    style = d_(Unicode())
+    style = d_(Str())
 
     #: A reference to the proxy object.
     proxy = Typed(ProxyDialog)
@@ -77,22 +72,26 @@ class Dialog(ToolkitObject):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('cancel_on_back', 'cancel_on_touch_outside', 'key_events',
-             'title', 'show', 'style')
+    @observe(
+        "cancel_on_back",
+        "cancel_on_touch_outside",
+        "key_events",
+        "title",
+        "show",
+        "style",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(Dialog, self)._update_proxy(change)
+        super()._update_proxy(change)
 
     def popup(self):
-        """ Show the dialog from code. This will initialize and activate
+        """Show the dialog from code. This will initialize and activate
         if needed.
-        
+
         Examples
         --------
-        
+
         >>> enamldef AlertDialog(Dialog): dialog:
               attr result: lambda text: None
               TextView:
@@ -110,19 +109,15 @@ class Dialog(ToolkitObject):
             def on_result(value):
               print("User clicked: {}".format(value))
             AlertDialog(result=on_result).popup()
-        
+
         Notes
         ------
         This does NOT block. Callbacks should be used to handle click events
         or the `show` state should be observed to know when it is closed.
-         
+
         """
         if not self.is_initialized:
             self.initialize()
         if not self.proxy_is_active:
             self.activate_proxy()
         self.show = True
-
-
-
-

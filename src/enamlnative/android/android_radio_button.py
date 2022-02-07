@@ -17,13 +17,12 @@ from .android_compound_button import AndroidCompoundButton, CompoundButton
 
 
 class RadioButton(CompoundButton):
-    __nativeclass__ = set_default('android.widget.RadioButton')
+    __nativeclass__ = set_default("android.widget.RadioButton")
 
 
 class AndroidRadioButton(AndroidCompoundButton, ProxyRadioButton):
-    """ An Android implementation of an Enaml ProxyRadioButton.
+    """An Android implementation of an Enaml ProxyRadioButton."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(RadioButton)
 
@@ -31,9 +30,8 @@ class AndroidRadioButton(AndroidCompoundButton, ProxyRadioButton):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
-        self.widget = RadioButton(self.get_context(), None,
-                                  d.style or '@attr/radioButtonStyle')
+        self.widget = RadioButton(
+            self.get_context(), None, d.style or "@attr/radioButtonStyle"
+        )

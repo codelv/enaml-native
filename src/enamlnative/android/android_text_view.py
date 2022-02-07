@@ -9,91 +9,85 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.text_view import ProxyTextView
 
 from .android_view import AndroidView, View
-from .bridge import (
-    JavaMethod, JavaCallback, JavaStaticMethod, JavaBridgeObject
-)
+from .bridge import JavaMethod, JavaCallback, JavaStaticMethod, JavaBridgeObject
 
 
 class TextView(View):
-    __nativeclass__ = set_default('android.widget.TextView')
-    setAllCaps = JavaMethod('boolean')
-    setAutoLinkMask = JavaMethod('int')
-    setText = JavaMethod('java.lang.CharSequence')
-    setTextKeepState = JavaMethod('java.lang.CharSequence')
-    setTextColor = JavaMethod('android.graphics.Color')
-    setTextIsSelectable = JavaMethod('boolean')
-    setHighlightColor = JavaMethod('android.graphics.Color')
-    setLinkTextColor = JavaMethod('android.graphics.Color')
-    setGravity = JavaMethod('int')
-    setTextSize = JavaMethod('float')
-    setTypeface = JavaMethod('android.graphics.Typeface', 'int')
-    setLines = JavaMethod('int')
-    setLineSpacing = JavaMethod('float', 'float')
-    setLetterSpacing = JavaMethod('float')
-    setMaxLines = JavaMethod('int')
+    __nativeclass__ = "android.widget.TextView"
+    setAllCaps = JavaMethod("boolean")
+    setAutoLinkMask = JavaMethod("int")
+    setText = JavaMethod("java.lang.CharSequence")
+    setTextKeepState = JavaMethod("java.lang.CharSequence")
+    setTextColor = JavaMethod("android.graphics.Color")
+    setTextIsSelectable = JavaMethod("boolean")
+    setHighlightColor = JavaMethod("android.graphics.Color")
+    setLinkTextColor = JavaMethod("android.graphics.Color")
+    setGravity = JavaMethod("int")
+    setTextSize = JavaMethod("float")
+    setTypeface = JavaMethod("android.graphics.Typeface", "int")
+    setLines = JavaMethod("int")
+    setLineSpacing = JavaMethod("float", "float")
+    setLetterSpacing = JavaMethod("float")
+    setMaxLines = JavaMethod("int")
     setOnEditorActionListener = JavaMethod(
-        'android.widget.TextView$OnEditorActionListener')
-    setInputType = JavaMethod('int')
-    addTextChangedListener = JavaMethod('android.text.TextWatcher')
-    removeTextChangedListener = JavaMethod('android.text.TextWatcher')
+        "android.widget.TextView$OnEditorActionListener"
+    )
+    setInputType = JavaMethod("int")
+    addTextChangedListener = JavaMethod("android.text.TextWatcher")
+    removeTextChangedListener = JavaMethod("android.text.TextWatcher")
 
-    append = JavaMethod('java.lang.CharSequence')
+    append = JavaMethod("java.lang.CharSequence")
 
     #: TextWatcher API
-    afterTextChanged = JavaCallback('android.text.Editable')
-    beforeTextChanged = JavaCallback('java.lang.CharSequence', 'int', 'int',
-                                     'int')
-    onTextChanged = JavaCallback('java.lang.CharSequence', 'int', 'int', 'int')
+    afterTextChanged = JavaCallback("android.text.Editable")
+    beforeTextChanged = JavaCallback("java.lang.CharSequence", "int", "int", "int")
+    onTextChanged = JavaCallback("java.lang.CharSequence", "int", "int", "int")
 
     #: EditorAction API
-    onEditorAction = JavaCallback('android.view.TextView', 'int',
-                                  'android.view.KeyEvent', returns='boolean')
+    onEditorAction = JavaCallback(
+        "android.view.TextView", "int", "android.view.KeyEvent", returns="boolean"
+    )
 
-    FONT_STYLES = {
-        'bold': 1,
-        'bold_italic': 3,
-        'normal': 0,
-        'italic': 2
-    }
+    FONT_STYLES = {"bold": 1, "bold_italic": 3, "normal": 0, "italic": 2}
 
     INPUT_TYPES = {
-        '': 0,
-        'date': 0x14,
-        'datetime': 0x4,
-        'number': 0x2,
-        'number_decimal': 0x2002,
-        'number_password': 0x12,
-        'number_signed': 0x1002,
-        'phone': 0x3,
-        'text': 0x1,
-        'text_auto_complete': 0x10001,
-        'text_auto_correct': 0x8001,
-        'text_cap_characters': 0x1001,
-        'text_cap_sentences': 0x4001,
-        'text_cap_words': 0x2001,
-        'text_email_address': 0x21,
-        'text_email_subject': 0x31,
-        'text_filter': 0xb1,
-        'text_ime_multi_line': 0x40001,
-        'text_long_message': 0x51,
-        'text_multi_line': 0x20001,
-        'text_no_suggestions': 0x80001,
-        'text_password': 0x81,
-        'text_person_name': 0x61,
-        'text_phonetic': 0xc1,
-        'text_postal_address': 0x71,
-        'text_short_message': 0x41,
-        'text_uri': 0x11,
-        'text_visible_password': 0x91,
-        'text_web_edit_text': 0xa1,
-        'text_web_email_address': 0xd1,
-        'text_web_password': 0xe1,
-        'time': 24,
+        "": 0,
+        "date": 0x14,
+        "datetime": 0x4,
+        "number": 0x2,
+        "number_decimal": 0x2002,
+        "number_password": 0x12,
+        "number_signed": 0x1002,
+        "phone": 0x3,
+        "text": 0x1,
+        "text_auto_complete": 0x10001,
+        "text_auto_correct": 0x8001,
+        "text_cap_characters": 0x1001,
+        "text_cap_sentences": 0x4001,
+        "text_cap_words": 0x2001,
+        "text_email_address": 0x21,
+        "text_email_subject": 0x31,
+        "text_filter": 0xB1,
+        "text_ime_multi_line": 0x40001,
+        "text_long_message": 0x51,
+        "text_multi_line": 0x20001,
+        "text_no_suggestions": 0x80001,
+        "text_password": 0x81,
+        "text_person_name": 0x61,
+        "text_phonetic": 0xC1,
+        "text_postal_address": 0x71,
+        "text_short_message": 0x41,
+        "text_uri": 0x11,
+        "text_visible_password": 0x91,
+        "text_web_edit_text": 0xA1,
+        "text_web_email_address": 0xD1,
+        "text_web_password": 0xE1,
+        "time": 24,
     }
 
     TEXT_ALIGNMENT_INHERIT = 0
@@ -103,30 +97,28 @@ class TextView(View):
     TEXT_ALIGNMENT_VIEW_START = 5
 
     TEXT_ALIGNMENT = {
-        '': TEXT_ALIGNMENT_INHERIT,
-        'left': TEXT_ALIGNMENT_TEXT_START,
-        'right': TEXT_ALIGNMENT_TEXT_END,
-        'center': TEXT_ALIGNMENT_CENTER,
-        'justified': TEXT_ALIGNMENT_INHERIT,
-        'natural': TEXT_ALIGNMENT_VIEW_START
+        "": TEXT_ALIGNMENT_INHERIT,
+        "left": TEXT_ALIGNMENT_TEXT_START,
+        "right": TEXT_ALIGNMENT_TEXT_END,
+        "center": TEXT_ALIGNMENT_CENTER,
+        "justified": TEXT_ALIGNMENT_INHERIT,
+        "natural": TEXT_ALIGNMENT_VIEW_START,
     }
 
 
 class Spanned(JavaBridgeObject):
-    __nativeclass__ = set_default('android.text.Spanned')
+    __nativeclass__ = "android.text.Spanned"
 
 
 class Html(JavaBridgeObject):
-    __nativeclass__ = set_default('android.text.Html')
+    __nativeclass__ = "android.text.Html"
 
-    fromHtml = JavaStaticMethod('java.lang.String',
-                                returns='android.text.Spanned')
+    fromHtml = JavaStaticMethod("java.lang.String", returns="android.text.Spanned")
 
 
 class AndroidTextView(AndroidView, ProxyTextView):
-    """ An Android implementation of an Enaml ProxyTextView.
+    """An Android implementation of an Enaml ProxyTextView."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(TextView)
 
@@ -134,18 +126,15 @@ class AndroidTextView(AndroidView, ProxyTextView):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
-        self.widget = TextView(self.get_context(), None,
-                               d.style or '@attr/textViewStyle')
+        self.widget = TextView(
+            self.get_context(), None, d.style or "@attr/textViewStyle"
+        )
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidTextView, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         w = self.widget
         if d.input_type:
@@ -166,9 +155,9 @@ class AndroidTextView(AndroidView, ProxyTextView):
     # -------------------------------------------------------------------------
     def on_editor_action(self, view, key, key_event):
         d = self.declaration
-        r = {'key': key, 'result': False}
+        r = {"key": key, "result": False}
         d.editor_action(r)
-        return bool(r['result'])  # Apparently not not is faster than bool
+        return bool(r["result"])  # Apparently not not is faster than bool
 
     # -------------------------------------------------------------------------
     # ProxyTextView API
@@ -195,23 +184,21 @@ class AndroidTextView(AndroidView, ProxyTextView):
 
     def update_font(self):
         d = self.declaration
-        font_style = TextView.FONT_STYLES[d.font_style or 'normal']
+        font_style = TextView.FONT_STYLES[d.font_style or "normal"]
         self.widget.setTypeface(d.font_family, font_style)
 
     def set_input_type(self, input_type):
         it = 0
-        if input_type == 'html':
+        if input_type == "html":
             return  # Special case
         for t in input_type.split("|"):
             it |= TextView.INPUT_TYPES[t]
         self.widget.setInputType(it)
 
     def set_text(self, text):
-        """ Set the text in the widget.
-
-        """
+        """Set the text in the widget."""
         d = self.declaration
-        if d.input_type == 'html':
+        if d.input_type == "html":
             text = Spanned(__id__=Html.fromHtml(text))
         self.widget.setTextKeepState(text)
 

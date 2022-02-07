@@ -9,9 +9,7 @@ Created on June 7, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Float, Int, Bool, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Float, Int, Bool, observe, set_default
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .progress_bar import ProgressBar, ProxyProgressBar
 
 
 class ProxyRatingBar(ProxyProgressBar):
-    """ The abstract definition of a proxy RatingBar object.
+    """The abstract definition of a proxy RatingBar object."""
 
-    """
     #: A reference to the RatingBar declaration.
     declaration = ForwardTyped(lambda: RatingBar)
 
@@ -39,9 +36,7 @@ class ProxyRatingBar(ProxyProgressBar):
 
 
 class RatingBar(ProgressBar):
-    """ A simple control for displaying read-only text.
-
-    """
+    """A simple control for displaying read-only text."""
 
     #: Whether this rating bar should only be an indicator
     #: (thus non-changeable by the user).
@@ -62,10 +57,8 @@ class RatingBar(ProgressBar):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('is_indicator', 'num_stars', 'rating', 'step_size')
+    @observe("is_indicator", "num_stars", "rating", "step_size")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(RatingBar, self)._update_proxy(change)
+        super()._update_proxy(change)

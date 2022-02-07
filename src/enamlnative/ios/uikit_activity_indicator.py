@@ -19,16 +19,14 @@ from .uikit_view import UIView, UiKitView
 
 class UIActivityIndicatorView(UIView):
     #: Properties
-    color = ObjcProperty('UIColor')
-    activityIndicatorViewStyle = ObjcProperty('UIActivityIndicatorViewStyle')
+    color = ObjcProperty("UIColor")
+    activityIndicatorViewStyle = ObjcProperty("UIActivityIndicatorViewStyle")
     startAnimating = ObjcMethod()
     stopAnimating = ObjcMethod()
 
 
 class UiKitActivityIndicator(UiKitView, ProxyActivityIndicator):
-    """ An UiKit implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UIActivityIndicatorView)
@@ -37,22 +35,21 @@ class UiKitActivityIndicator(UiKitView, ProxyActivityIndicator):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the toolkit widget for the proxy object.
-        """
+        """Create the toolkit widget for the proxy object."""
         self.widget = UIActivityIndicatorView()
 
     def init_widget(self):
-        """ Initialize the state of the toolkit widget.
+        """Initialize the state of the toolkit widget.
 
         This method is called during the top-down pass, just after the
         'create_widget()' method is called. This method should init the
         state of the widget. The child widgets will not yet be created.
 
         """
-        super(UiKitActivityIndicator, self).init_widget()
+        super().init_widget()
 
         d = self.declaration
-        if d.size != 'normal':
+        if d.size != "normal":
             self.set_size(d.size)
         if d.color:
             self.set_color(d.color)
@@ -65,7 +62,7 @@ class UiKitActivityIndicator(UiKitView, ProxyActivityIndicator):
     # -------------------------------------------------------------------------
     def set_size(self, size):
         pass
-        #self.widget.activityIndicatorViewStyle = style
+        # self.widget.activityIndicatorViewStyle = style
 
     def set_color(self, color):
         self.widget.color = color

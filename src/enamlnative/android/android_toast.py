@@ -9,7 +9,7 @@ Created on Sept 18, 2017
 
 @author: jrm
 """
-from atom.api import Typed, Bool, set_default
+from atom.api import Typed, Bool
 from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
 from enamlnative.widgets.toast import ProxyToast
 from .android_toolkit_object import AndroidToolkitObject
@@ -17,23 +17,25 @@ from .android_toolkit_object import AndroidToolkitObject
 
 class Toast(JavaBridgeObject):
     #: Show the view for the specified duration.
-    __nativeclass__ = set_default('android.widget.Toast')
-    __signature__ = set_default(('android.content.Context',))
-    makeText = JavaStaticMethod('android.content.Context',
-                                'java.lang.CharSequence', 'int',
-                                returns='android.widget.Toast')
+    __nativeclass__ = "android.widget.Toast"
+    __signature__ = ("android.content.Context",)
+    makeText = JavaStaticMethod(
+        "android.content.Context",
+        "java.lang.CharSequence",
+        "int",
+        returns="android.widget.Toast",
+    )
     show = JavaMethod()
     cancel = JavaMethod()
-    setDuration = JavaMethod('int')
-    setGravity = JavaMethod('int', 'int', 'int')
-    setText = JavaMethod('java.lang.CharSequence')
-    setView = JavaMethod('android.view.View')
+    setDuration = JavaMethod("int")
+    setGravity = JavaMethod("int", "int", "int")
+    setText = JavaMethod("java.lang.CharSequence")
+    setView = JavaMethod("android.view.View")
 
 
 class AndroidToast(AndroidToolkitObject, ProxyToast):
-    """ An Android implementation of an Enaml ProxyToast.
+    """An Android implementation of an Enaml ProxyToast."""
 
-    """
     #: A reference to the widget created by the proxy.
     toast = Typed(Toast)
 
@@ -46,7 +48,7 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
+        """Create the underlying widget.
 
         A toast is not a subclass of view, hence we don't set name as widget
         or children will try to use it as their parent (which crashes).
@@ -54,20 +56,19 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
         """
         d = self.declaration
         if d.text:
-            Toast.makeText(self.get_context(),
-                           d.text, 1).then(self.on_make_toast)
+            Toast.makeText(self.get_context(), d.text, 1).then(self.on_make_toast)
             self.made_toast = True
         else:
             self.toast = Toast(self.get_context())
 
     def init_widget(self):
-        """ Our widget may not exist yet so we have to diverge from the normal 
+        """Our widget may not exist yet so we have to diverge from the normal
         way of doing initialization. See `update_widget`
-        
+
         """
         if not self.toast:
             return
-        super(AndroidToast, self).init_widget()
+        super().init_widget()
 
         d = self.declaration
         if not self.made_toast:
@@ -79,30 +80,30 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
             self.set_show(d.show)
 
     def init_layout(self):
-        """ If a view is given show it """
-        super(AndroidToast, self).init_layout()
+        """If a view is given show it"""
+        super().init_layout()
         if not self.made_toast:
             for view in self.child_widgets():
                 self.toast.setView(view)
                 break
 
     def child_added(self, child):
-        """ Overwrite the view """
+        """Overwrite the view"""
         view = child.widget
         if view is not None:
             self.toast.setView(view)
 
     def on_make_toast(self, ref):
-        """ Using Toast.makeToast returns async so we have to initialize it 
-        later. 
-        
+        """Using Toast.makeToast returns async so we have to initialize it
+        later.
+
         """
         d = self.declaration
         self.toast = Toast(__id__=ref)
         self.init_widget()
 
     def _refresh_show(self, dt):
-        """ While the toast.show is true, keep calling .show() until the 
+        """While the toast.show is true, keep calling .show() until the
         duration `dt` expires.
 
         Parameters
@@ -121,7 +122,7 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
 
             t = min(1000, dt)
             app = self.get_context()
-            app.timed_call(t, self._refresh_show, dt-t)
+            app.timed_call(t, self._refresh_show, dt - t)
 
     # -------------------------------------------------------------------------
     # ProxyToast API
@@ -132,11 +133,11 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
             self.toast.setText(text)
 
     def set_duration(self, duration):
-        """ Android for whatever stupid reason doesn't let you set the time
+        """Android for whatever stupid reason doesn't let you set the time
         it only allows 1-long or 0-short. So we have to repeatedly call show
-        until the duration expires, hence this method does nothing see 
+        until the duration expires, hence this method does nothing see
         `set_show`.
-        
+
         """
         pass
 
@@ -148,7 +149,7 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
             #: Get app
             app = self.get_context()
             t = min(1000, d.duration)
-            app.timed_call(t, self._refresh_show, d.duration-t)
+            app.timed_call(t, self._refresh_show, d.duration - t)
         else:
             self.toast.cancel()
 

@@ -17,36 +17,35 @@ from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
 from .bridge import JavaMethod, JavaCallback, JavaField
 
 
-package = 'androidx.appcompat.widget'
+package = "androidx.appcompat.widget"
 
 
 class Toolbar(ViewGroup):
-    __nativeclass__ = set_default('%s.Toolbar' % package)
-    __signature__ = set_default(('android.content.Context',))
-    setTitle = JavaMethod('java.lang.CharSequence')
-    setSubtitle = JavaMethod('java.lang.CharSequence')
-    setSubtitleTextColor = JavaMethod('android.graphics.Color')
-    setTitleMargin = JavaMethod('int', 'int', 'int', 'int')
-    setTitleTextColor = JavaMethod('android.graphics.Color')
-    setNavigationOnClickListener = JavaMethod(
-        'android.view.View$OnClickListener')
+    __nativeclass__ = set_default(f"{package}.Toolbar")
+    __signature__ = set_default(("android.content.Context",))
+    setTitle = JavaMethod("java.lang.CharSequence")
+    setSubtitle = JavaMethod("java.lang.CharSequence")
+    setSubtitleTextColor = JavaMethod("android.graphics.Color")
+    setTitleMargin = JavaMethod("int", "int", "int", "int")
+    setTitleTextColor = JavaMethod("android.graphics.Color")
+    setNavigationOnClickListener = JavaMethod("android.view.View$OnClickListener")
     setOnMenuItemClickListener = JavaMethod(
-        'android.widget.Toolbar$OnMenuItemClickListener')
-    setContentInsetsAbsolute = JavaMethod('int', 'int')
-    setContentInsetsRelative = JavaMethod('int', 'int')
-    onNavigationClick = JavaCallback('android.view.View')
-    onMenuItemClick = JavaCallback('android.view.MenuItem')
+        "android.widget.Toolbar$OnMenuItemClickListener"
+    )
+    setContentInsetsAbsolute = JavaMethod("int", "int")
+    setContentInsetsRelative = JavaMethod("int", "int")
+    onNavigationClick = JavaCallback("android.view.View")
+    onMenuItemClick = JavaCallback("android.view.MenuItem")
 
 
 class ToolbarLayoutParams(MarginLayoutParams):
-    __nativeclass__ = set_default('%s.Toolbar$LayoutParams' % package)
-    gravity = JavaField('int')
+    __nativeclass__ = set_default(f"{package}.Toolbar$LayoutParams")
+    gravity = JavaField("int")
 
 
 class AndroidToolbar(AndroidViewGroup, ProxyToolbar):
-    """ An Android implementation of an Enaml ProxyToolbar.
+    """An Android implementation of an Enaml ProxyToolbar."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(Toolbar)
 
@@ -54,9 +53,7 @@ class AndroidToolbar(AndroidViewGroup, ProxyToolbar):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         self.widget = Toolbar(self.get_context())
 
     # -------------------------------------------------------------------------

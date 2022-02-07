@@ -16,9 +16,7 @@ from .bridge import JavaBridgeObject
 
 
 class AndroidToolkitObject(ProxyToolkitObject):
-    """ An Android implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An Android implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(JavaBridgeObject)
@@ -27,7 +25,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the toolkit widget for the proxy object.
+        """Create the toolkit widget for the proxy object.
 
         This method is called during the top-down pass, just before the
         'init_widget()' method is called. This method should create the
@@ -37,7 +35,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
         raise NotImplementedError
 
     def init_widget(self):
-        """ Initialize the state of the toolkit widget.
+        """Initialize the state of the toolkit widget.
 
         This method is called during the top-down pass, just after the
         'create_widget()' method is called. This method should init the
@@ -47,7 +45,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
         pass
 
     def init_layout(self):
-        """ Initialize the layout of the toolkit widget.
+        """Initialize the layout of the toolkit widget.
 
         This method is called during the bottom-up pass. This method
         should initialize the layout of the widget. The child widgets
@@ -57,30 +55,25 @@ class AndroidToolkitObject(ProxyToolkitObject):
         pass
 
     def get_context(self):
-        """ Get the context of the View.
-
-        """
+        """Get the context of the View."""
         from .app import AndroidApplication
+
         return AndroidApplication.instance()
 
     # -------------------------------------------------------------------------
     # ProxyToolkitObject API
     # -------------------------------------------------------------------------
     def activate_top_down(self):
-        """ Activate the proxy for the top-down pass.
-
-        """
+        """Activate the proxy for the top-down pass."""
         self.create_widget()
         self.init_widget()
 
     def activate_bottom_up(self):
-        """ Activate the proxy tree for the bottom-up pass.
-
-        """
+        """Activate the proxy tree for the bottom-up pass."""
         self.init_layout()
 
     def destroy(self):
-        """ A reimplemented destructor.
+        """A reimplemented destructor.
 
         This destructor will clear the reference to the toolkit widget
         and set its parent to None.
@@ -92,13 +85,13 @@ class AndroidToolkitObject(ProxyToolkitObject):
             if parent is not None:
                 parent.removeView(widget)
             del self.widget
-        super(AndroidToolkitObject, self).destroy()
+        super().destroy()
 
     # -------------------------------------------------------------------------
     # Public API
     # -------------------------------------------------------------------------
     def parent_widget(self):
-        """ Get the parent toolkit widget for this object.
+        """Get the parent toolkit widget for this object.
 
         Returns
         -------
@@ -112,7 +105,7 @@ class AndroidToolkitObject(ProxyToolkitObject):
             return parent.widget
 
     def child_widgets(self):
-        """ Get the child toolkit widgets for this object.
+        """Get the child toolkit widgets for this object.
 
         Returns
         -------

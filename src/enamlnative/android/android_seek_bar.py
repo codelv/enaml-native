@@ -18,48 +18,42 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class SeekBar(ProgressBar):
-    __nativeclass__ = set_default('android.widget.SeekBar')
-    __signature__ = set_default(('android.content.Context',
-                                 'android.util.AttributeSet', 'android.R'))
-    setSplitTrack = JavaMethod('boolean')
+    __nativeclass__ = "android.widget.SeekBar"
+    __signature__ = (
+        "android.content.Context",
+        "android.util.AttributeSet",
+        "android.R",
+    )
+    setSplitTrack = JavaMethod("boolean")
     setOnSeekBarChangeListener = JavaMethod(
-        'android.widget.SeekBar$OnSeekBarChangeListener')
-    setKeyProgressIncrement = JavaMethod('int')
+        "android.widget.SeekBar$OnSeekBarChangeListener"
+    )
+    setKeyProgressIncrement = JavaMethod("int")
 
-    onProgressChanged = JavaCallback('android.widget.SeekBar', 'int',
-                                     'boolean')
-    onStartTrackingTouch = JavaCallback('android.widget.SeekBar')
-    onStopTrackingTouch = JavaCallback('android.widget.SeekBar')
+    onProgressChanged = JavaCallback("android.widget.SeekBar", "int", "boolean")
+    onStartTrackingTouch = JavaCallback("android.widget.SeekBar")
+    onStopTrackingTouch = JavaCallback("android.widget.SeekBar")
 
 
 class AndroidSeekBar(AndroidProgressBar, ProxySeekBar):
-    """ An Android implementation of an Enaml ProxySeekBar.
+    """An Android implementation of an Enaml ProxySeekBar."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(SeekBar)
 
-    default_layout = set_default({
-        'width': 'wrap_content',
-        'height': 'wrap_content'
-    })
+    default_layout = set_default({"width": "wrap_content", "height": "wrap_content"})
 
     # -------------------------------------------------------------------------
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
-        self.widget = SeekBar(self.get_context(), None,
-                              d.style or '@attr/seekBarStyle')
+        self.widget = SeekBar(self.get_context(), None, d.style or "@attr/seekBarStyle")
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidSeekBar, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         w = self.widget
 
         #: Setup listener

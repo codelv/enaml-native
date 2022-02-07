@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Unicode, Int, Enum, Event, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Enum, observe
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .view_group import ViewGroup, ProxyViewGroup
 
 
 class ProxyLinearLayout(ProxyViewGroup):
-    """ The abstract definition of a proxy Label object.
+    """The abstract definition of a proxy Label object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: LinearLayout)
 
@@ -30,11 +27,10 @@ class ProxyLinearLayout(ProxyViewGroup):
 
 
 class LinearLayout(ViewGroup):
-    """ A simple control for displaying read-only text.
+    """A simple control for displaying read-only text."""
 
-    """
     #: Should the layout be a column or a row.
-    orientation = d_(Enum('horizontal', 'vertical'))
+    orientation = d_(Enum("horizontal", "vertical"))
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyLinearLayout)
@@ -42,10 +38,8 @@ class LinearLayout(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('orientation')
+    @observe("orientation")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(LinearLayout, self)._update_proxy(change)
+        super()._update_proxy(change)

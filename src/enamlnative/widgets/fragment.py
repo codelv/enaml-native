@@ -16,9 +16,8 @@ from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
 
 
 class ProxyFragment(ProxyToolkitObject):
-    """ The abstract definition of a proxy fragment object.
+    """The abstract definition of a proxy fragment object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Fragment)
 
@@ -30,11 +29,11 @@ class ProxyFragment(ProxyToolkitObject):
 
 
 class Fragment(Conditional, ToolkitObject):
-    """ Fragment a "sub" activity with a lifecycle,  view, and state.
+    """Fragment a "sub" activity with a lifecycle,  view, and state.
     A fragment has no "widget" but it can have child
     widgets that will define it's view.  The children are rendered
     when the fragment's view is requested.
-    
+
     """
 
     #: A reference to the proxy object.
@@ -47,7 +46,7 @@ class Fragment(Conditional, ToolkitObject):
     defer_loading = d_(Bool(True))
 
     def refresh_items(self):
-        """ Refresh the items of the pattern.
+        """Refresh the items of the pattern.
         This method destroys the old items and creates and initializes
         the new items.
 
@@ -71,11 +70,11 @@ class Fragment(Conditional, ToolkitObject):
                 old.destroy()
 
         #: Insert items into THIS node, NOT the PARENT
-        #if len(items) > 0:
+        # if len(items) > 0:
         #    self.parent.insert_children(self, items)
         self.items = items
 
-    @observe('cached', 'defer_loading')
+    @observe("cached", "defer_loading")
     def _update_proxy(self, change):
-        """ Update the proxy """
-        super(Fragment, self)._update_proxy(change)
+        """Update the proxy"""
+        super()._update_proxy(change)

@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.chronometer import ProxyChronometer
 
@@ -22,22 +22,22 @@ UTC_START = datetime(1970, 1, 1)
 
 
 class Chronometer(TextView):
-    __nativeclass__ = set_default('android.widget.Chronometer')
+    __nativeclass__ = "android.widget.Chronometer"
 
-    setBase = JavaMethod('long')
-    setCountDown = JavaMethod('boolean')
-    setFormat = JavaMethod('java.lang.String')
+    setBase = JavaMethod("long")
+    setCountDown = JavaMethod("boolean")
+    setFormat = JavaMethod("java.lang.String")
     setOnChronometerTickListener = JavaMethod(
-        'android.widget.Chronometer$OnChronometerTickListener')
-    onChronometerTick = JavaCallback('android.widget.Chronometer')
+        "android.widget.Chronometer$OnChronometerTickListener"
+    )
+    onChronometerTick = JavaCallback("android.widget.Chronometer")
     start = JavaMethod()
     stop = JavaMethod()
 
 
 class AndroidChronometer(AndroidTextView, ProxyChronometer):
-    """ An Android implementation of an Enaml ProxyChronometer.
+    """An Android implementation of an Enaml ProxyChronometer."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(Chronometer)
 
@@ -45,17 +45,13 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
         self.widget = Chronometer(self.get_context(), None, d.style)
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidChronometer, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         w = self.widget
         w.setOnChronometerTickListener(w.getId())
         w.onChronometerTick.connect(self.on_chronometer_tick)
@@ -73,7 +69,7 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
     def set_base(self, base, shift=0):
         #: TODO: This is wrong becuase it uses system uptime
         #: instead of the actual time
-        s = long((base - UTC_START).total_seconds())-shift
+        s = long((base - UTC_START).total_seconds()) - shift
         self.widget.setBase(s)
 
     def set_format(self, format):
@@ -83,17 +79,17 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
         pass
 
     def set_direction(self, direction):
-        self.widget.setCountDown(direction == 'down')
+        self.widget.setCountDown(direction == "down")
 
     def set_running(self, running):
         if running:
             d = self.declaration
-            if d.mode == 'reset':
+            if d.mode == "reset":
                 d.ticks = 0
-                #self.set_base(datetime.now())
-            elif d.mode == 'resume':
+                # self.set_base(datetime.now())
+            elif d.mode == "resume":
                 # Shift the date by now - ticks
-                #self.set_base(datetime.now(), shift=d.ticks*1000)
+                # self.set_base(datetime.now(), shift=d.ticks*1000)
                 pass
             self.widget.start()
         else:

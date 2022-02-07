@@ -15,9 +15,8 @@ from enaml.core.declarative import d_
 
 
 class ProxySurfaceView(ProxyView):
-    """ The abstract definition of a proxy surface object.
+    """The abstract definition of a proxy surface object."""
 
-    """
     #: A reference to the declaration.
     declaration = ForwardTyped(lambda: SurfaceView)
 
@@ -26,22 +25,21 @@ class ProxySurfaceView(ProxyView):
 
 
 class SurfaceView(View):
-    """ SurfaceView provides a dedicated drawing surface embedded inside 
-    of a view hierarchy. You can control the format of this surface and, 
-    if you like, its size; the SurfaceView takes care of placing the 
+    """SurfaceView provides a dedicated drawing surface embedded inside
+    of a view hierarchy. You can control the format of this surface and,
+    if you like, its size; the SurfaceView takes care of placing the
     surface at the correct location on the screen
 
     """
-    
-    #: Control whether the surface view's content should be treated as 
-    #: secure, preventing it from appearing in screenshots or from being 
+
+    #: Control whether the surface view's content should be treated as
+    #: secure, preventing it from appearing in screenshots or from being
     #: viewed on non-secure displays.
     secure = d_(Bool())
 
     #: A reference to the ProxyViewGroup object.
     proxy = Typed(ProxySurfaceView)
 
-    @observe('secure')
+    @observe("secure")
     def _update_proxy(self, change):
-        super(SurfaceView, self)._update_proxy(change)
-
+        super()._update_proxy(change)

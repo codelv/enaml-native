@@ -22,9 +22,7 @@ from .autoreload import isinstance2
 
 
 class EnamlReloader(autoreload.ModuleReloader):
-    """ A ModuleReloader that supports reloading `.enaml` files.
-
-    """
+    """A ModuleReloader that supports reloading `.enaml` files."""
 
     #: Whether this reloader is enabled
     enabled = set_default(True)
@@ -33,16 +31,16 @@ class EnamlReloader(autoreload.ModuleReloader):
     check_all = set_default(True)
 
     #: Add enaml as a source file type
-    source_exts = set_default(['.py', '.enaml'])
+    source_exts = set_default([".py", ".enaml"])
 
     def check(self, check_all=True, do_reload=True):
         """Check whether some modules need to be reloaded."""
         with enaml.imports():
-            super(EnamlReloader, self).check(check_all=check_all, do_reload=do_reload)
+            super().check(check_all=check_all, do_reload=do_reload)
 
 
 def update_atom_members(old, new):
-    """ Update an atom member """
+    """Update an atom member"""
     old_keys = old.members().keys()
     new_keys = new.members().keys()
     for key in old_keys:
@@ -69,7 +67,7 @@ def update_atom_members(old, new):
             pass  # skip non-writable attributes
 
     #: Add any new members
-    for key in set(new_keys)-set(old_keys):
+    for key in set(new_keys) - set(old_keys):
         try:
             setattr(old, key, getattr(new, key))
         except (AttributeError, TypeError):
@@ -77,37 +75,41 @@ def update_atom_members(old, new):
 
 
 def update_class_by_type(old, new):
-    """ Update declarative classes or fallback on default """
+    """Update declarative classes or fallback on default"""
     autoreload.update_class(old, new)
     if isinstance2(old, new, AtomMeta):
         update_atom_members(old, new)
 
 
 #: Add new rules for enaml
-autoreload.UPDATE_RULES[0] = (lambda a, b: isinstance2(a, b, type), update_class_by_type)
+autoreload.UPDATE_RULES[0] = (
+    lambda a, b: isinstance2(a, b, type),
+    update_class_by_type,
+)
 
 
 class Hotswapper(autoreload.Autoreloader):
-    """ A reloader that can update an enaml declarative view with a reloaded
-        version.
+    """A reloader that can update an enaml declarative view with a reloaded
+    version.
 
-        When a change occurs on a file use:
+    When a change occurs on a file use:
 
-        Example
-        -----------
+    Example
+    -----------
 
-        hotswap = Hotswapper()
+    hotswap = Hotswapper()
 
-        #: Make a change before entering active state
-        #: --- some source file change occurs here ---
+    #: Make a change before entering active state
+    #: --- some source file change occurs here ---
 
-        #: Then run
-        with hotswap.active():
-            hotswap.update(view)
+    #: Then run
+    with hotswap.active():
+        hotswap.update(view)
 
 
 
     """
+
     #: Print debug statements
     debug = Bool()
 
@@ -115,9 +117,9 @@ class Hotswapper(autoreload.Autoreloader):
         #: Initial check
         return EnamlReloader(check_all=False, debug=self.debug)
 
-    def __init__(self, mode='2', **kwargs):
-        """ Initialize the reloader then configure autoreload right away"""
-        super(Hotswapper, self).__init__(**kwargs)
+    def __init__(self, mode="2", **kwargs):
+        """Initialize the reloader then configure autoreload right away"""
+        super().__init__(**kwargs)
         self.autoreload(mode)
 
     @contextmanager
@@ -127,7 +129,7 @@ class Hotswapper(autoreload.Autoreloader):
         self.post_execute()
 
     def update(self, old, new=None):
-        """ Update given view declaration with new declaration
+        """Update given view declaration with new declaration
 
         Parameters
         -----------
@@ -143,7 +145,7 @@ class Hotswapper(autoreload.Autoreloader):
         if not new:
             new = type(old)()
             if not new.is_initialized:
-                 new.initialize()
+                new.initialize()
         if self.debug:
             print("Updating {} with {}".format(old, new))
 
@@ -159,8 +161,8 @@ class Hotswapper(autoreload.Autoreloader):
         self.update_children(old, new)
 
     def find_best_matching_node(self, new, old_nodes):
-        """ Find the node that best matches the new node given the old nodes. If no
-            good match exists return `None`.
+        """Find the node that best matches the new node given the old nodes. If no
+        good match exists return `None`.
 
         """
         name = new.__class__.__name__
@@ -183,7 +185,11 @@ class Hotswapper(autoreload.Autoreloader):
 
     def update_pattern_node(self, old, new):
         if self.debug:
-            print("Updating {} pattern nodes {} with {}".format(old, old.pattern_nodes, new.pattern_nodes))
+            print(
+                "Updating {} pattern nodes {} with {}".format(
+                    old, old.pattern_nodes, new.pattern_nodes
+                )
+            )
 
         if isinstance(old, Conditional):
             self.update_conditional_items(old, new)
@@ -224,7 +230,11 @@ class Hotswapper(autoreload.Autoreloader):
         old_children = old.children[:]
 
         if self.debug:
-            print("Updating {} children nodes {} with {}".format(old, old.children, new.children))
+            print(
+                "Updating {} children nodes {} with {}".format(
+                    old, old.children, new.children
+                )
+            )
 
         #: Add or remove any children
         for i, new_child in enumerate(new.children):
@@ -246,14 +256,14 @@ class Hotswapper(autoreload.Autoreloader):
                 c.destroy()
 
     def update_attrs(self, old, new):
-        """ Update any `attr` members.
+        """Update any `attr` members.
 
-            Parameters
-            -----------
-            old: Declarative
-                The existing view instance that needs to be updated
-            new: Declarative
-                The new view instance that should be used for updating
+        Parameters
+        -----------
+        old: Declarative
+            The existing view instance that needs to be updated
+        new: Declarative
+            The new view instance that should be used for updating
 
         """
         #: Copy in storage from new node
@@ -262,30 +272,30 @@ class Hotswapper(autoreload.Autoreloader):
         #: TODO: Cannot add new attrs!
 
     def update_funcs(self, old, new):
-        """ Update any `func` definitions.
+        """Update any `func` definitions.
 
-            Parameters
-            -----------
-            old: Declarative
-                The existing view instance that needs to be updated
-            new: Declarative
-                The new view instance that should be used for updating
+        Parameters
+        -----------
+        old: Declarative
+            The existing view instance that needs to be updated
+        new: Declarative
+            The new view instance that should be used for updating
 
         """
         pass
-        #print("TODO: Update funcs {} {}".format(old, new))
-        #if new._d_storage:
+        # print("TODO: Update funcs {} {}".format(old, new))
+        # if new._d_storage:
         #    old._d_storage = new._d_storage
 
     def update_bindings(self, old, new):
-        """ Update any enaml operator bindings.
+        """Update any enaml operator bindings.
 
-            Parameters
-            -----------
-            old: Declarative
-                The existing view instance that needs to be updated
-            new: Declarative
-                The new view instance that should be used for updating
+        Parameters
+        -----------
+        old: Declarative
+            The existing view instance that needs to be updated
+        new: Declarative
+            The new view instance that should be used for updating
 
         """
         #: Copy the Expression Engine
@@ -302,6 +312,3 @@ class Hotswapper(autoreload.Autoreloader):
                     if self.debug:
                         print(traceback.format_exc())
                     pass
-
-
-

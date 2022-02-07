@@ -13,7 +13,7 @@ import sys
 from .block import Block
 from enaml.core.api import *
 
-if sys.platform == 'darwin':
+if sys.platform == "darwin":
     pass  #: iOS
 else:
     from enamlnative.android.http import AsyncHttpClient

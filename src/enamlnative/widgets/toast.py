@@ -9,9 +9,7 @@ Created on Sept 18, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Unicode, Int, Bool, Coerced, observe
-)
+from atom.api import Typed, ForwardTyped, Str, Int, Bool, Coerced, observe
 
 from enaml.core.declarative import d_
 from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
@@ -19,9 +17,8 @@ from .view import coerce_gravity
 
 
 class ProxyToast(ProxyToolkitObject):
-    """ The abstract definition of a proxy toast object.
+    """The abstract definition of a proxy toast object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Toast)
 
@@ -36,13 +33,11 @@ class ProxyToast(ProxyToolkitObject):
 
 
 class Toast(ToolkitObject):
-    """ A toast is a view containing a quick little message for the user.
-    
-    """
+    """A toast is a view containing a quick little message for the user."""
 
     #: Text to display
     #: if this node has a child view this is ignored
-    text = d_(Unicode())
+    text = d_(Str())
 
     #: Duration to display in ms
     duration = d_(Int(1000))
@@ -65,13 +60,8 @@ class Toast(ToolkitObject):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('text', 'duration', 'show', 'gravity', 'x', 'y')
+    @observe("text", "duration", "show", "gravity", "x", "y")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(Toast, self)._update_proxy(change)
-
-
-
+        super()._update_proxy(change)

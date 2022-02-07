@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.radio_group import ProxyRadioGroup
 
@@ -18,20 +18,20 @@ from .bridge import JavaCallback, JavaMethod
 
 
 class RadioGroup(LinearLayout):
-    __nativeclass__ = set_default('android.widget.RadioGroup')
-    __signature__ = set_default(('android.content.Context',))
+    __nativeclass__ = "android.widget.RadioGroup"
+    __signature__ = ("android.content.Context",)
 
-    check = JavaMethod('int')
+    check = JavaMethod("int")
     clearCheck = JavaMethod()
     setOnCheckedChangeListener = JavaMethod(
-        'android.widget.RadioGroup$OnCheckedChangeListener')
-    onCheckedChanged = JavaCallback('android.widget.RadioGroup', 'int')
+        "android.widget.RadioGroup$OnCheckedChangeListener"
+    )
+    onCheckedChanged = JavaCallback("android.widget.RadioGroup", "int")
 
 
 class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
-    """ An Android implementation of an Enaml ProxyLinearLayout.
+    """An Android implementation of an Enaml ProxyLinearLayout."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(RadioGroup)
 
@@ -39,17 +39,15 @@ class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         self.widget = RadioGroup(self.get_context())
 
     def init_layout(self):
-        """ Set the checked state after all children have
+        """Set the checked state after all children have
         been populated.
-        
+
         """
-        super(AndroidRadioGroup, self).init_layout()
+        super().init_layout()
         d = self.declaration
         w = self.widget
         if d.checked:
@@ -67,9 +65,9 @@ class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
     # OnCheckedChangeListener API
     # -------------------------------------------------------------------------
     def on_checked_changed(self, group, checked_id):
-        """ Set the checked property based on the checked state
+        """Set the checked property based on the checked state
         of all the children
-        
+
         """
         d = self.declaration
         if checked_id < 0:
@@ -87,9 +85,7 @@ class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):
     # ProxyRadioGroup API
     # -------------------------------------------------------------------------
     def set_checked(self, checked):
-        """ Properly check the correct radio button.
-
-        """
+        """Properly check the correct radio button."""
         if not checked:
             self.widget.clearCheck()
         else:

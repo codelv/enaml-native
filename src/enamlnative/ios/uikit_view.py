@@ -20,16 +20,20 @@ from .yoga import Yoga
 
 class NSObject(ObjcBridgeObject):
 
-    addObserver = ObjcMethod('NSObject',
-                             dict(forKeyPath="NSString"),
-                             dict(options="NSKeyValueObservingOptions"),
-                             dict(context="void*"))
-    removeObserver = ObjcMethod('NSObject', dict(forKeyPath="NSString"))
+    addObserver = ObjcMethod(
+        "NSObject",
+        dict(forKeyPath="NSString"),
+        dict(options="NSKeyValueObservingOptions"),
+        dict(context="void*"),
+    )
+    removeObserver = ObjcMethod("NSObject", dict(forKeyPath="NSString"))
 
-    observeValueForKeyPath = ObjcCallback('NSString',
-                                          dict(ofObject="id"),
-                                          dict(change="NSDictionary"),
-                                          dict(context="void*"))
+    observeValueForKeyPath = ObjcCallback(
+        "NSString",
+        dict(ofObject="id"),
+        dict(change="NSDictionary"),
+        dict(context="void*"),
+    )
 
     NSKeyValueObservingOptionNew = 0x01
     NSKeyValueObservingOptionOld = 0x02
@@ -42,54 +46,55 @@ class UIResponder(NSObject):
 
 
 class UIView(UIResponder):
-    """ From:
-        https://developer.apple.com/documentation/uikit/uiview?language=objc
+    """From:
+    https://developer.apple.com/documentation/uikit/uiview?language=objc
     """
+
     yoga = Typed(Yoga)
 
     def _default_yoga(self):
-        return Yoga(self, 'yoga')
+        return Yoga(self, "yoga")
 
     #: Properties
-    backgroundColor = ObjcProperty('UIColor')
-    hidden = ObjcProperty('bool')
-    alpha = ObjcProperty('float')
-    opaque = ObjcProperty('bool')
-    tintColor = ObjcProperty('UIColor')
-    tintAdjustmentMode = ObjcProperty('UIViewTintAdjustmentMode')
-    clipsToBounds = ObjcProperty('bool')
-    clearsContextBeforeDrawing = ObjcProperty('bool')
-    maskView = ObjcProperty('UIView')
-    userInteractionEnabled = ObjcProperty('bool')
-    multipleTouchEnabled = ObjcProperty('bool')
-    exclusiveTouch = ObjcProperty('bool')
+    backgroundColor = ObjcProperty("UIColor")
+    hidden = ObjcProperty("bool")
+    alpha = ObjcProperty("float")
+    opaque = ObjcProperty("bool")
+    tintColor = ObjcProperty("UIColor")
+    tintAdjustmentMode = ObjcProperty("UIViewTintAdjustmentMode")
+    clipsToBounds = ObjcProperty("bool")
+    clearsContextBeforeDrawing = ObjcProperty("bool")
+    maskView = ObjcProperty("UIView")
+    userInteractionEnabled = ObjcProperty("bool")
+    multipleTouchEnabled = ObjcProperty("bool")
+    exclusiveTouch = ObjcProperty("bool")
 
-    frame = ObjcProperty('CGRect')
-    bounds = ObjcProperty('CGRect')
-    center = ObjcProperty('CGPoint')
-    transform = ObjcProperty('CGAffineTransform')
+    frame = ObjcProperty("CGRect")
+    bounds = ObjcProperty("CGRect")
+    center = ObjcProperty("CGPoint")
+    transform = ObjcProperty("CGAffineTransform")
 
-    layoutMargins = ObjcProperty('UIEdgeInserts')
-    preservesSuperviewLayoutMargins = ObjcProperty('bool')
+    layoutMargins = ObjcProperty("UIEdgeInserts")
+    preservesSuperviewLayoutMargins = ObjcProperty("bool")
 
     #: Methods
-    addSubview = ObjcMethod('UIView')
-    bringSubviewToFront = ObjcMethod('UIView')
-    sendSubviewToBack = ObjcMethod('UIView')
+    addSubview = ObjcMethod("UIView")
+    bringSubviewToFront = ObjcMethod("UIView")
+    sendSubviewToBack = ObjcMethod("UIView")
     removeFromSuperview = ObjcMethod()
-    insertSubview = ObjcMethod('UIView', dict(atIndex='NSInteger',
-                                              aboveSubview='UIView',
-                                              belowSubview='UIView'))
-    exchangeSubviewAtIndex = ObjcMethod('NSInteger',
-                                        dict(withSubviewAtIndex='NSInteger'))
+    insertSubview = ObjcMethod(
+        "UIView",
+        dict(atIndex="NSInteger", aboveSubview="UIView", belowSubview="UIView"),
+    )
+    exchangeSubviewAtIndex = ObjcMethod(
+        "NSInteger", dict(withSubviewAtIndex="NSInteger")
+    )
 
     #:
 
 
 class UiKitView(UiKitToolkitObject, ProxyView):
-    """ An UiKit implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UIView)
@@ -101,17 +106,17 @@ class UiKitView(UiKitToolkitObject, ProxyView):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the toolkit widget for the proxy object.
+        """Create the toolkit widget for the proxy object.
 
         This method is called during the top-down pass, just before the
         'init_widget()' method is called. This method should create the
         toolkit widget and assign it to the 'widget' attribute.
 
         """
-        self.widget = UIView()#initWithFrame=frame)
+        self.widget = UIView()  # initWithFrame=frame)
 
     def init_widget(self):
-        """ Initialize the underlying widget.
+        """Initialize the underlying widget.
 
         This reads all items declared in the enamldef block for this node
         and sets only the values that have been specified. All other values
@@ -123,7 +128,7 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         to return an empty list.
 
         """
-        super(UiKitView, self).init_widget()
+        super().init_widget()
 
         self.widget.yoga.isEnabled = True
 
@@ -131,12 +136,12 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         # have read expressions declared. This saves a lot of time and
         # simplifies widget initialization code
         for k, v in self.get_declared_items():
-            handler = getattr(self, 'set_'+k, None)
+            handler = getattr(self, "set_" + k, None)
             if handler:
                 handler(v)
 
     def get_declared_items(self):
-        """ Get the members that were set in the enamldef block for this
+        """Get the members that were set in the enamldef block for this
         Declaration. Layout keys are grouped together until the end so as
         to avoid triggering multiple updates.
 
@@ -157,28 +162,27 @@ class UiKitView(UiKitToolkitObject, ProxyView):
                 yield (k, v)
 
     def init_layout(self):
-        """ Initialize the layout of the toolkit widget.
+        """Initialize the layout of the toolkit widget.
 
-         This method is called during the bottom-up pass. This method
-         should initialize the layout of the widget. The child widgets
-         will be fully initialized and layed out when this is called.
+        This method is called during the bottom-up pass. This method
+        should initialize the layout of the widget. The child widgets
+        will be fully initialized and layed out when this is called.
 
-         """
+        """
         widget = self.widget
         for child_widget in self.child_widgets():
             widget.addSubview(child_widget)
 
     def update_frame(self):
-        """ Define the view frame for this widgets"""
+        """Define the view frame for this widgets"""
         d = self.declaration
         if d.x or d.y or d.width or d.height:
             self.frame = (d.x, d.y, d.width, d.height)
 
     def get_app(self):
-        """ Get the app of the View.
-
-        """
+        """Get the app of the View."""
         from .app import IPhoneApplication
+
         return IPhoneApplication.instance()
 
     # -------------------------------------------------------------------------
@@ -186,13 +190,13 @@ class UiKitView(UiKitToolkitObject, ProxyView):
     # -------------------------------------------------------------------------
 
     def child_added(self, child):
-        """ Handle the child added event from the declaration.
+        """Handle the child added event from the declaration.
 
         This handler will unparent the child toolkit widget. Subclasses
         which need more control should reimplement this method.
 
         """
-        super(UiKitView, self).child_added(child)
+        super().child_added(child)
 
         widget = self.widget
         #: TODO: Should index be cached?
@@ -201,28 +205,26 @@ class UiKitView(UiKitToolkitObject, ProxyView):
                 widget.insertSubview(child_widget, atIndex=i)
 
     def child_moved(self, child):
-        """ Handle the child moved event from the declaration.
-
-        """
-        super(UiKitView, self).child_moved(child)
+        """Handle the child moved event from the declaration."""
+        super().child_moved(child)
         #: Remove and re-add in correct spot
         #: TODO: Should use exchangeSubviewAtIndex
         self.child_removed(child)
         self.child_added(child)
 
     def child_removed(self, child):
-        """ Handle the child removed event from the declaration.
+        """Handle the child removed event from the declaration.
 
         This handler will unparent the child toolkit widget. Subclasses
         which need more control should reimplement this method.
 
         """
-        super(UiKitView, self).child_removed(child)
+        super().child_removed(child)
         if child.widget is not None:
             child.widget.removeFromSuperview()
 
     def destroy(self):
-        """ A reimplemented destructor.
+        """A reimplemented destructor.
 
         This destructor will remove itself from the superview.
 
@@ -230,12 +232,12 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         widget = self.widget
         if widget is not None:
             widget.removeFromSuperview()
-        super(UiKitView, self).destroy()
+        super().destroy()
 
     # -------------------------------------------------------------------------
     # ProxyView API
     # -------------------------------------------------------------------------
-    @observe('frame')
+    @observe("frame")
     def set_frame(self, change):
         if self.frame:
             self.widget.frame = self.frame
@@ -303,11 +305,10 @@ class UiKitView(UiKitToolkitObject, ProxyView):
         self.widget.yoga.flexGrow = flex_grow
 
     def set_flex_basis(self, basis):
-        self.widget.yoga.flexBasis = int(basis*100)
+        self.widget.yoga.flexBasis = int(basis * 100)
 
     def set_flex_shrink(self, flex_shrink):
         self.widget.yoga.flexShrink = flex_shrink
 
     def set_align_self(self, align_self):
         self.widget.yoga.alignSelf = Yoga.ALIGN_SELF[align_self]
-

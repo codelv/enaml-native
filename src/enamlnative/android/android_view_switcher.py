@@ -17,28 +17,22 @@ from enamlnative.widgets.view_animator import ProxyViewAnimator
 from .android_frame_layout import AndroidFrameLayout
 
 
-
 class AndroidViewAnimator(AndroidFrameLayout, ProxyViewAnimator):
-    """ An Android implementation of an Enaml ProxyViewAnimator.
+    """An Android implementation of an Enaml ProxyViewAnimator."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(ViewAnimator)
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization API
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying Android widget.
-
-        """
+        """Create the underlying Android widget."""
         self.widget = ViewAnimator(self.get_context())
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidViewAnimator, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         if d.animate_first_view:
             self.set_animate_first_view(d.animate_first_view)

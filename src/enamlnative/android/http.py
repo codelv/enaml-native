@@ -11,68 +11,84 @@ Created on July 18, 2017
 """
 
 import time
-from atom.api import (Atom, Callable, Dict, List, ForwardInstance, Int,
-                      Float, Bool, Unicode, Instance, set_default)
-from .bridge import (JavaBridgeObject, JavaMethod, JavaCallback,
-                     JavaStaticMethod)
-from ..core.http import (HttpRequest, HttpError, AbstractAsyncHttpClient,
-                         AbstractWebsocketClient)
+from atom.api import (
+    Atom,
+    Callable,
+    Dict,
+    List,
+    ForwardInstance,
+    Int,
+    Float,
+    Bool,
+    Str,
+    Instance,
+    set_default,
+)
+from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaStaticMethod
+from ..core.http import (
+    HttpRequest,
+    HttpError,
+    AbstractAsyncHttpClient,
+    AbstractWebsocketClient,
+)
 
 
 class BridgedAsyncHttpCallback(JavaBridgeObject):
-    __nativeclass__ = set_default(
-        'com.codelv.enamlnative.adapters.BridgedAsyncHttpCallback')
+    __nativeclass__ = "com.codelv.enamlnative.adapters.BridgedAsyncHttpCallback"
     setAsyncHttpResponseListener = JavaMethod(
-        'com.codelv.enamlnative.adapters.BridgedAsyncHttpCallback'
-        '$AsyncHttpResponseListener', 'boolean')
+        "com.codelv.enamlnative.adapters.BridgedAsyncHttpCallback"
+        "$AsyncHttpResponseListener",
+        "boolean",
+    )
 
     # -------------------------------------------------------------------------
     # AsyncHttpResponseHandler API
     # -------------------------------------------------------------------------
     onStart = JavaCallback()
-    onProgress = JavaCallback('int', 'int')
-    onProgressData = JavaCallback('[B')
+    onProgress = JavaCallback("int", "int")
+    onProgressData = JavaCallback("[B")
     onFinish = JavaCallback()
-    onRetry = JavaCallback('int')
+    onRetry = JavaCallback("int")
     onCancel = JavaCallback()
-    onResponse = JavaCallback('int', 'java.lang.String', '[B')
-    onFailure = JavaCallback('int', 'java.lang.String', '[B',
-                             'java.lang.Throwable')
+    onResponse = JavaCallback("int", "java.lang.String", "[B")
+    onFailure = JavaCallback("int", "java.lang.String", "[B", "java.lang.Throwable")
 
 
 class Call(JavaBridgeObject):
-    __nativeclass__ = set_default('okhttp3.Call')
+    __nativeclass__ = "okhttp3.Call"
     cancel = JavaMethod()
     clone = JavaMethod()
-    enqueue = JavaMethod('okhttp3.Callback')
-    execute = JavaMethod(returns='okhttp3.Response')
-    request = JavaMethod('okhttp3.Request')
+    enqueue = JavaMethod("okhttp3.Callback")
+    execute = JavaMethod(returns="okhttp3.Response")
+    request = JavaMethod("okhttp3.Request")
 
 
 class Interceptor(JavaBridgeObject):
-    __nativeclass__ = set_default('okhttp3.Interceptor')
+    __nativeclass__ = "okhttp3.Interceptor"
 
 
 class OkHttpClient(JavaBridgeObject):
-    """ OkHttp performs best when you create a single OkHttpClient instance
+    """OkHttp performs best when you create a single OkHttpClient instance
     and reuse it for all of your HTTP calls. This is because each client holds
     its own connection pool and thread pools. Reusing connections and threads
     reduces latency and saves memory. Conversely, creating a client for each
     request wastes resources on idle pools.
     """
+
     #: Shared instance
     _instance = None
 
-    __nativeclass__ = set_default('okhttp3.OkHttpClient')
+    __nativeclass__ = "okhttp3.OkHttpClient"
 
-    newCall = JavaMethod('okhttp3.Request', returns='okhttp3.Call')
-    newWebSocket = JavaMethod('okhttp3.Request', 'okhttp3.WebSocketListener',
-                              returns='okhttp3.WebSocket')
+    newCall = JavaMethod("okhttp3.Request", returns="okhttp3.Call")
+    newWebSocket = JavaMethod(
+        "okhttp3.Request", "okhttp3.WebSocketListener", returns="okhttp3.WebSocket"
+    )
 
     class Builder(JavaBridgeObject):
-        __nativeclass__ = set_default('okhttp3.OkHttpClient$Builder')
-        addNetworkInterceptor = JavaMethod('okhttp3.Interceptor')
-        build = JavaMethod(returns='okhttp3.OkHttpClient')
+        __nativeclass__ = "okhttp3.OkHttpClient$Builder"
+        addNetworkInterceptor = JavaMethod("okhttp3.Interceptor")
+        build = JavaMethod(returns="okhttp3.OkHttpClient")
 
     @classmethod
     def instance(cls):
@@ -81,49 +97,50 @@ class OkHttpClient(JavaBridgeObject):
         return cls._instance
 
     def __init__(self, *args, **kwargs):
-        """ Implement a singleton pattern """
+        """Implement a singleton pattern"""
         if OkHttpClient._instance is not None:
-            raise RuntimeError(
-                "Only one instance of OkHttpClient should be used!")
-        super(OkHttpClient, self).__init__(*args, **kwargs)
+            raise RuntimeError("Only one instance of OkHttpClient should be used!")
+        super().__init__(*args, **kwargs)
         OkHttpClient._instance = self
 
 
 class MediaType(JavaBridgeObject):
-    __nativeclass__ = set_default('okhttp3.MediaType')
-    parse = JavaStaticMethod('java.lang.String', returns='okhttp3.MediaType')
+    __nativeclass__ = "okhttp3.MediaType"
+    parse = JavaStaticMethod("java.lang.String", returns="okhttp3.MediaType")
 
 
 class RequestBody(JavaBridgeObject):
-    __nativeclass__ = set_default('okhttp3.RequestBody')
-    create = JavaStaticMethod('okhttp3.MediaType', 'java.lang.String',
-                              # TODO: Should support '[B',
-                              returns='okhttp3.RequestBody')
+    __nativeclass__ = "okhttp3.RequestBody"
+    create = JavaStaticMethod(
+        "okhttp3.MediaType",
+        "java.lang.String",
+        # TODO: Should support '[B',
+        returns="okhttp3.RequestBody",
+    )
 
 
 class Request(JavaBridgeObject):
-    __nativeclass__ = set_default('okhttp3.Request')
+    __nativeclass__ = "okhttp3.Request"
 
     class Builder(JavaBridgeObject):
-        __nativeclass__ = set_default('okhttp3.Request$Builder')
-        url = JavaMethod('java.lang.String')
-        addHeader = JavaMethod('java.lang.String', 'java.lang.String')
-        method = JavaMethod('java.lang.String', 'okhttp3.RequestBody')
+        __nativeclass__ = "okhttp3.Request$Builder"
+        url = JavaMethod("java.lang.String")
+        addHeader = JavaMethod("java.lang.String", "java.lang.String")
+        method = JavaMethod("java.lang.String", "okhttp3.RequestBody")
         get = JavaMethod()
         put = JavaMethod()
         delete = JavaMethod()
-        build = JavaMethod(returns='okhttp3.Request')
+        build = JavaMethod(returns="okhttp3.Request")
 
 
 class WebSocketListener(JavaBridgeObject):
-    __nativeclass__ = set_default(
-        'com.codelv.enamlnative.adapters.BridgedWebsocketListener')
+    __nativeclass__ = "com.codelv.enamlnative.adapters.BridgedWebsocketListener"
 
-    onClosed = JavaCallback('WebSocket webSocket', 'int code', 'String reason')
-    onClosing = JavaCallback('WebSocket webSocket, int code, String reason')
-    onFailure = JavaCallback('WebSocket webSocket, Throwable t, Response response')
-    onMessage = JavaCallback('WebSocket webSocket', 'bytes or string')
-    onOpen = JavaCallback('WebSocket webSocket', 'Response response')
+    onClosed = JavaCallback("WebSocket webSocket", "int code", "String reason")
+    onClosing = JavaCallback("WebSocket webSocket, int code, String reason")
+    onFailure = JavaCallback("WebSocket webSocket, Throwable t, Response response")
+    onMessage = JavaCallback("WebSocket webSocket", "bytes or string")
+    onOpen = JavaCallback("WebSocket webSocket", "Response response")
 
 
 class AndroidHttpRequest(HttpRequest):
@@ -138,7 +155,7 @@ class AndroidHttpRequest(HttpRequest):
     handler = Instance(BridgedAsyncHttpCallback)
 
     def init_request(self):
-        """ Init the native request using the okhttp3.Request.Builder """
+        """Init the native request using the okhttp3.Request.Builder"""
 
         #: Build the request
         builder = Request.Builder()
@@ -153,18 +170,17 @@ class AndroidHttpRequest(HttpRequest):
 
         if body:
             #: Create the request body
-            media_type = MediaType(
-                __id__=MediaType.parse(self.content_type))
-            request_body = RequestBody(
-                __id__=RequestBody.create(media_type, body))
+            media_type = MediaType(__id__=MediaType.parse(self.content_type))
+            request_body = RequestBody(__id__=RequestBody.create(media_type, body))
             #: Set the request method
             builder.method(self.method, request_body)
-        elif self.method in ['get', 'delete', 'head']:
+        elif self.method in ["get", "delete", "head"]:
             #: Set the method
             getattr(builder, self.method)()
         else:
-            raise ValueError("Cannot do a '{}' request "
-                             "without a body".format(self.method))
+            raise ValueError(
+                "Cannot do a '{}' request " "without a body".format(self.method)
+            )
 
         #: Save the okhttp request
         self.request = Request(__id__=builder.build())
@@ -172,8 +188,8 @@ class AndroidHttpRequest(HttpRequest):
     def _default_handler(self):
         handler = BridgedAsyncHttpCallback()
         handler.setAsyncHttpResponseListener(
-            handler.getId(),
-            self.streaming_callback is not None)
+            handler.getId(), self.streaming_callback is not None
+        )
         handler.onStart.connect(self.on_start)
         handler.onCancel.connect(self.on_cancel)
         handler.onFailure.connect(self.on_failure)
@@ -186,16 +202,18 @@ class AndroidHttpRequest(HttpRequest):
         return handler
 
     def _default_body(self):
-        """ If the body is not passed in by the user try to create one
+        """If the body is not passed in by the user try to create one
         using the given data parameters.
         """
         if not self.data:
             return ""
-        if self.content_type == 'application/json':
+        if self.content_type == "application/json":
             import json
+
             return json.dumps(self.data)
-        elif self.content_type == 'application/x-www-form-urlencoded':
+        elif self.content_type == "application/x-www-form-urlencoded":
             import urllib
+
             return urllib.urlencode(self.data)
         else:
             raise NotImplementedError(
@@ -219,7 +237,6 @@ class AndroidHttpRequest(HttpRequest):
             r.headers = headers
         if data:
             r.body = data
-        #r.progress = 100
         r.ok = True
 
     def on_failure(self, status, headers, data, error):
@@ -235,7 +252,7 @@ class AndroidHttpRequest(HttpRequest):
         r.ok = False
 
     def on_finish(self):
-        """ Called regardless of success or failure """
+        """Called regardless of success or failure"""
         r = self.response
         r.request_time = time.time() - self.start_time
         if self.callback:
@@ -244,7 +261,7 @@ class AndroidHttpRequest(HttpRequest):
     def on_progress(self, written, total):
         r = self.response
         if total > 0:
-            r.progress = int(100*written/total)
+            r.progress = int(100 * written / total)
 
     def on_progress_data(self, data):
         if self.streaming_callback:
@@ -252,7 +269,7 @@ class AndroidHttpRequest(HttpRequest):
 
 
 class AsyncHttpClient(AbstractAsyncHttpClient):
-    """ An AsyncHttpClient that lets you fetch using a format similar to
+    """An AsyncHttpClient that lets you fetch using a format similar to
     tornado's AsyncHTTPClient but using the Android native Loopj library.
 
     This is done instead of using a python library so it handles all
@@ -273,7 +290,7 @@ class AsyncHttpClient(AbstractAsyncHttpClient):
         return OkHttpClient.instance()
 
     def _fetch(self, request):
-        """ Fetch using the OkHttpClient """
+        """Fetch using the OkHttpClient"""
         client = self.client
 
         #: Dispatch the async call

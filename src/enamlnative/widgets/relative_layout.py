@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Int, Enum, Event, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Int, Enum, Event, observe, set_default
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .view_group import ViewGroup, ProxyViewGroup
 
 
 class ProxyRelativeLayout(ProxyViewGroup):
-    """ The abstract definition of a proxy relative layout object.
+    """The abstract definition of a proxy relative layout object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: RelativeLayout)
 
@@ -36,10 +33,11 @@ class ProxyRelativeLayout(ProxyViewGroup):
 
 
 class RelativeLayout(ViewGroup):
-    """ RelativeLayout is a view group that displays
-        child views in relative positions.
+    """RelativeLayout is a view group that displays
+    child views in relative positions.
 
     """
+
     #: Describes how the child views are positioned.
     #: Defaults to Gravity.START | Gravity.TOP.
     gravity = d_(Int())
@@ -56,10 +54,8 @@ class RelativeLayout(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('gravity', 'horizontal_gravity', 'vertical_gravity')
+    @observe("gravity", "horizontal_gravity", "vertical_gravity")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(RelativeLayout, self)._update_proxy(change)
+        super()._update_proxy(change)

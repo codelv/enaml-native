@@ -10,7 +10,15 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Bool, Tuple, Float, Int, Enum, observe, set_default
+    Typed,
+    ForwardTyped,
+    Bool,
+    Tuple,
+    Float,
+    Int,
+    Enum,
+    observe,
+    set_default,
 )
 
 from enaml.core.declarative import d_
@@ -19,9 +27,8 @@ from .view_group import ViewGroup, ProxyViewGroup
 
 
 class ProxyFlexbox(ProxyViewGroup):
-    """ The abstract definition of a proxy Flexbox object.
+    """The abstract definition of a proxy Flexbox object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Flexbox)
 
@@ -99,7 +106,7 @@ class ProxyFlexbox(ProxyViewGroup):
 
     def set_margin_end(self, end):
         raise NotImplementedError
-    
+
     def set_margin(self, margin):
         raise NotImplementedError
 
@@ -147,11 +154,12 @@ class ProxyFlexbox(ProxyViewGroup):
 
 
 class Flexbox(ViewGroup):
-    """ A layout widget implementing flexbox's layout.
+    """A layout widget implementing flexbox's layout.
 
-        This uses Facebook's yoga.
+    This uses Facebook's yoga.
 
     """
+
     # #: Default is to stretch so fill the parent
     # layout_width = set_default('match_parent')
     #
@@ -159,19 +167,19 @@ class Flexbox(ViewGroup):
     # layout_height = set_default('match_parent')
 
     #: How to align children along the cross axis of their container
-    align_items = d_(Enum('stretch', 'flex_start', 'flex_end', 'center'))
+    align_items = d_(Enum("stretch", "flex_start", "flex_end", "center"))
 
     #: How to align children along the cross axis of their container
-    #align_self = d_(Enum('stretch', 'flex_start', 'flex_end', 'center'))
+    # align_self = d_(Enum('stretch', 'flex_start', 'flex_end', 'center'))
 
     #: Control how multiple lines of content are aligned within a
     #: container which uses FlexWrap
-    align_content = d_(Enum('flex_start', 'flex_end', 'center',
-                            'space_between', 'space_around'))
+    align_content = d_(
+        Enum("flex_start", "flex_end", "center", "space_between", "space_around")
+    )
 
     #: Should the layout be a column or a row.
-    flex_direction = d_(Enum('row', 'column', 'row_reversed',
-                             'column_reversed'))
+    flex_direction = d_(Enum("row", "column", "row_reversed", "column_reversed"))
 
     #: The FlexBasis property is an axis-independent way of providing the default size of an item
     #: on the main axis. Setting the FlexBasis of a child is similar to setting the Width of that
@@ -192,11 +200,12 @@ class Flexbox(ViewGroup):
     # flex_shrink = d_(Float(strict=False))
     #
     #: Wrap or nowrap
-    flex_wrap = d_(Enum('nowrap', 'wrap', 'wrap_reverse'))
+    flex_wrap = d_(Enum("nowrap", "wrap", "wrap_reverse"))
 
     #: How to align children within the main axis of a container
-    justify_content = d_(Enum('flex_start', 'flex_end', 'center',
-                              'space_between', 'space_around'))
+    justify_content = d_(
+        Enum("flex_start", "flex_end", "center", "space_between", "space_around")
+    )
 
     # #: The Position property tells Flexbox how you want your item to be positioned within its
     # #: parent.
@@ -245,21 +254,50 @@ class Flexbox(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('align_items', 'align_content', 'align_self',
-             'flex_direction', 'flex_wrap', 'flex_grow', 'flex_shrink',
-             'flex_basis',
-             'left', 'top', 'right', 'bottom', 'start', 'end',
-             'margin_left', 'margin_top', 'margin_right', 'margin_bottom',
-             'margin_start', 'margin_end', 'margin',
-             'border_left', 'border_top', 'border_right', 'border_bottom',
-             'border_start', 'border_end', 'border',
-             'padding_left', 'padding_top', 'padding_right', 'padding_bottom',
-             'padding_start', 'padding_end', 'padding',
-             'min_width', 'min_height', 'max_width', 'max_height',
-             'justify_content', 'position')
+    @observe(
+        "align_items",
+        "align_content",
+        "align_self",
+        "flex_direction",
+        "flex_wrap",
+        "flex_grow",
+        "flex_shrink",
+        "flex_basis",
+        "left",
+        "top",
+        "right",
+        "bottom",
+        "start",
+        "end",
+        "margin_left",
+        "margin_top",
+        "margin_right",
+        "margin_bottom",
+        "margin_start",
+        "margin_end",
+        "margin",
+        "border_left",
+        "border_top",
+        "border_right",
+        "border_bottom",
+        "border_start",
+        "border_end",
+        "border",
+        "padding_left",
+        "padding_top",
+        "padding_right",
+        "padding_bottom",
+        "padding_start",
+        "padding_end",
+        "padding",
+        "min_width",
+        "min_height",
+        "max_width",
+        "max_height",
+        "justify_content",
+        "position",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(Flexbox, self)._update_proxy(change)
+        super()._update_proxy(change)

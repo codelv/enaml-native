@@ -18,46 +18,42 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class RatingBar(ProgressBar):
-    __nativeclass__ = set_default('android.widget.RatingBar')
-    setIsIndicator = JavaMethod('boolean')
-    setMax = JavaMethod('int')
-    setNumStars = JavaMethod('int')
+    __nativeclass__ = "android.widget.RatingBar"
+    setIsIndicator = JavaMethod("boolean")
+    setMax = JavaMethod("int")
+    setNumStars = JavaMethod("int")
     setOnRatingBarChangeListener = JavaMethod(
-        'android.widget.RatingBar$OnRatingBarChangeListener')
-    setRating = JavaMethod('float')
-    setStepSize = JavaMethod('float')
-    onRatingChanged = JavaCallback('android.widget.RatingBar', 'float',
-                                   'boolean')
+        "android.widget.RatingBar$OnRatingBarChangeListener"
+    )
+    setRating = JavaMethod("float")
+    setStepSize = JavaMethod("float")
+    onRatingChanged = JavaCallback("android.widget.RatingBar", "float", "boolean")
 
 
 class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
-    """ An Android implementation of an Enaml ProxyRatingBar.
+    """An Android implementation of an Enaml ProxyRatingBar."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(RatingBar)
 
     #: The number of stars set (via setNumStars(int) or in an XML layout)
     #: will be shown when the layout width is set to wrap content
     #: (if another layout width is set, the results may be unpredictable).
-    default_layout = set_default({'width': 'wrap_content'})
+    default_layout = set_default({"width": "wrap_content"})
 
     # -------------------------------------------------------------------------
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
-        self.widget = RatingBar(self.get_context(), None,
-                                d.style or '@attr/ratingBarStyle')
+        self.widget = RatingBar(
+            self.get_context(), None, d.style or "@attr/ratingBarStyle"
+        )
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidRatingBar, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         self.set_rating(d.rating)
         w = self.widget
@@ -68,7 +64,7 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
         # Make sure the layout always exists
         if not self.layout_params:
             self.set_layout({})
-        super(AndroidRatingBar, self).init_layout()
+        super().init_layout()
 
     # -------------------------------------------------------------------------
     # OnRatingBarChangeListener API

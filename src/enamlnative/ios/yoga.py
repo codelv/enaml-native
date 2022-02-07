@@ -13,62 +13,62 @@ from .bridge import NestedBridgeObject, ObjcMethod, ObjcProperty
 
 
 class Yoga(NestedBridgeObject):
-    isEnabled = ObjcProperty('bool')
+    isEnabled = ObjcProperty("bool")
 
-    flexDirection = ObjcProperty('YGFlexDirection')
-    justifyContent = ObjcProperty('YGJustify')
-    alignContent = ObjcProperty('YGAlign')
-    alignItems = ObjcProperty('YGAlign')
-    alignSelf = ObjcProperty('YGAlign')
-    overflow = ObjcProperty('YGOverflow')
-    display = ObjcProperty('YGDisplay')
+    flexDirection = ObjcProperty("YGFlexDirection")
+    justifyContent = ObjcProperty("YGJustify")
+    alignContent = ObjcProperty("YGAlign")
+    alignItems = ObjcProperty("YGAlign")
+    alignSelf = ObjcProperty("YGAlign")
+    overflow = ObjcProperty("YGOverflow")
+    display = ObjcProperty("YGDisplay")
 
-    flexWrap = ObjcProperty('YGWrap')
-    flexGrow = ObjcProperty('CGFloat')
-    flexShrink = ObjcProperty('CGFloat')
-    flexBasis = ObjcProperty('YGValue')
+    flexWrap = ObjcProperty("YGWrap")
+    flexGrow = ObjcProperty("CGFloat")
+    flexShrink = ObjcProperty("CGFloat")
+    flexBasis = ObjcProperty("YGValue")
 
-    left = ObjcProperty('YGValue')
-    top = ObjcProperty('YGValue')
-    right = ObjcProperty('YGValue')
-    bottom = ObjcProperty('YGValue')
-    start = ObjcProperty('YGValue')
-    end = ObjcProperty('YGValue')
+    left = ObjcProperty("YGValue")
+    top = ObjcProperty("YGValue")
+    right = ObjcProperty("YGValue")
+    bottom = ObjcProperty("YGValue")
+    start = ObjcProperty("YGValue")
+    end = ObjcProperty("YGValue")
 
-    marginLeft = ObjcProperty('YGValue')
-    marginTop = ObjcProperty('YGValue')
-    marginRight = ObjcProperty('YGValue')
-    marginBottom = ObjcProperty('YGValue')
-    marginStart = ObjcProperty('YGValue')
-    marginEnd = ObjcProperty('YGValue')
-    margin = ObjcProperty('YGValue')
+    marginLeft = ObjcProperty("YGValue")
+    marginTop = ObjcProperty("YGValue")
+    marginRight = ObjcProperty("YGValue")
+    marginBottom = ObjcProperty("YGValue")
+    marginStart = ObjcProperty("YGValue")
+    marginEnd = ObjcProperty("YGValue")
+    margin = ObjcProperty("YGValue")
 
-    paddingLeft = ObjcProperty('YGValue')
-    paddingTop = ObjcProperty('YGValue')
-    paddingRight = ObjcProperty('YGValue')
-    paddingBottom = ObjcProperty('YGValue')
-    paddingStart = ObjcProperty('YGValue')
-    paddingEnd = ObjcProperty('YGValue')
-    padding = ObjcProperty('YGValue')
+    paddingLeft = ObjcProperty("YGValue")
+    paddingTop = ObjcProperty("YGValue")
+    paddingRight = ObjcProperty("YGValue")
+    paddingBottom = ObjcProperty("YGValue")
+    paddingStart = ObjcProperty("YGValue")
+    paddingEnd = ObjcProperty("YGValue")
+    padding = ObjcProperty("YGValue")
 
-    borderLeftWidth = ObjcProperty('YGValue')
-    borderTopWidth = ObjcProperty('YGValue')
-    borderRightWidth = ObjcProperty('YGValue')
-    borderBottomWidth = ObjcProperty('YGValue')
-    borderStartWidth = ObjcProperty('YGValue')
-    borderEndWidth = ObjcProperty('YGValue')
-    borderWidth = ObjcProperty('YGValue')
+    borderLeftWidth = ObjcProperty("YGValue")
+    borderTopWidth = ObjcProperty("YGValue")
+    borderRightWidth = ObjcProperty("YGValue")
+    borderBottomWidth = ObjcProperty("YGValue")
+    borderStartWidth = ObjcProperty("YGValue")
+    borderEndWidth = ObjcProperty("YGValue")
+    borderWidth = ObjcProperty("YGValue")
 
-    width = ObjcProperty('YGValue')
-    height = ObjcProperty('YGValue')
-    minWidth = ObjcProperty('YGValue')
-    maxWidth = ObjcProperty('YGValue')
-    minHeight = ObjcProperty('YGValue')
-    maxHeight = ObjcProperty('YGValue')
+    width = ObjcProperty("YGValue")
+    height = ObjcProperty("YGValue")
+    minWidth = ObjcProperty("YGValue")
+    maxWidth = ObjcProperty("YGValue")
+    minHeight = ObjcProperty("YGValue")
+    maxHeight = ObjcProperty("YGValue")
 
     markDirty = ObjcMethod()
 
-    applyLayoutPreservingOrigin = ObjcMethod('bool')
+    applyLayoutPreservingOrigin = ObjcMethod("bool")
 
     YGAlignAuto = 0
     YGAlignFlexStart = 1
@@ -106,48 +106,48 @@ class Yoga(NestedBridgeObject):
     YGWrapWrapReverse = 2
 
     FLEX_DIRECTION = {
-        'row': YGFlexDirectionRow,
-        'row_reverse': YGFlexDirectionRowReverse,
-        'column': YGFlexDirectionColumn,
-        'column_reverse': YGFlexDirectionColumnReverse
+        "row": YGFlexDirectionRow,
+        "row_reverse": YGFlexDirectionRowReverse,
+        "column": YGFlexDirectionColumn,
+        "column_reverse": YGFlexDirectionColumnReverse,
     }
 
     FLEX_WRAP = {
-        'nowrap': YGWrapNoWrap,
-        'wrap': YGWrapWrap,
-        'wrap_reverse': YGWrapWrapReverse,
+        "nowrap": YGWrapNoWrap,
+        "wrap": YGWrapWrap,
+        "wrap_reverse": YGWrapWrapReverse,
     }
 
     JUSTIFY_CONTENT = {
-        'flex_start': YGJustifyFlexStart,
-        'flex_end': YGJustifyFlexEnd,
-        'center': YGJustifyCenter,
-        'space_between': YGJustifySpaceBetween,
-        'space_around': YGJustifySpaceAround
+        "flex_start": YGJustifyFlexStart,
+        "flex_end": YGJustifyFlexEnd,
+        "center": YGJustifyCenter,
+        "space_between": YGJustifySpaceBetween,
+        "space_around": YGJustifySpaceAround,
     }
 
     ALIGN_ITEMS = {
-        'flex_start': YGAlignFlexStart,
-        'flex_end': YGAlignFlexEnd,
-        'center': YGAlignCenter,
-        'baseline': YGAlignBaseline,
-        'stretch': YGAlignStretch
+        "flex_start": YGAlignFlexStart,
+        "flex_end": YGAlignFlexEnd,
+        "center": YGAlignCenter,
+        "baseline": YGAlignBaseline,
+        "stretch": YGAlignStretch,
     }
 
     ALIGN_CONTENT = {
-        'flex_start': YGAlignFlexStart,
-        'flex_end': YGAlignFlexEnd,
-        'center': YGAlignCenter,
-        'space_between': YGAlignSpaceBetween,
-        'space_around': YGAlignSpaceAround,
-        'stretch': YGAlignStretch,
+        "flex_start": YGAlignFlexStart,
+        "flex_end": YGAlignFlexEnd,
+        "center": YGAlignCenter,
+        "space_between": YGAlignSpaceBetween,
+        "space_around": YGAlignSpaceAround,
+        "stretch": YGAlignStretch,
     }
 
     ALIGN_SELF = {
-        'auto':YGAlignAuto,
-        'flex_start': YGAlignFlexStart,
-        'flex_end': YGAlignFlexEnd,
-        'center': YGAlignCenter,
-        'baseline': YGAlignBaseline,
-        'stretch': YGAlignStretch
+        "auto": YGAlignAuto,
+        "flex_start": YGAlignFlexStart,
+        "flex_end": YGAlignFlexEnd,
+        "center": YGAlignCenter,
+        "baseline": YGAlignBaseline,
+        "stretch": YGAlignStretch,
     }

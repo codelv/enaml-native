@@ -9,20 +9,16 @@ Created on July 6, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, List, Int, Bool, observe
-)
+from atom.api import Typed, ForwardTyped, List, Int, Bool, observe
 
 from enaml.core.declarative import d_
-from enaml.compat import str
 
 from .linear_layout import LinearLayout, ProxyLinearLayout
 
 
 class ProxyPicker(ProxyLinearLayout):
-    """ The abstract definition of a proxy Picker object.
+    """The abstract definition of a proxy Picker object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Picker)
 
@@ -46,9 +42,7 @@ class ProxyPicker(ProxyLinearLayout):
 
 
 class Picker(LinearLayout):
-    """ A simple control for displaying a Picker.
-
-    """
+    """A simple control for displaying a Picker."""
 
     #: Formatter, hmm?
 
@@ -78,13 +72,15 @@ class Picker(LinearLayout):
     # --------------------------------------------------------------------------
     # Observers
     # --------------------------------------------------------------------------
-    @observe('max_value', 'min_value', 'value', 'items',
-             'long_press_update_interval', 'wraps')
+    @observe(
+        "max_value",
+        "min_value",
+        "value",
+        "items",
+        "long_press_update_interval",
+        "wraps",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(Picker, self)._update_proxy(change)
-
-
+        super()._update_proxy(change)

@@ -15,9 +15,8 @@ from .linear_layout import LinearLayout, ProxyLinearLayout
 
 
 class ProxyAppBarLayout(ProxyLinearLayout):
-    """ The abstract definition of a proxy AppBarLayout object.
+    """The abstract definition of a proxy AppBarLayout object."""
 
-    """
     #: A reference to the AppBarLayout declaration.
     declaration = ForwardTyped(lambda: AppBarLayout)
 
@@ -26,13 +25,13 @@ class ProxyAppBarLayout(ProxyLinearLayout):
 
 
 class AppBarLayout(LinearLayout):
-    """ AppBarLayout is a vertical LinearLayout which implements many of the 
-    features of material designs app bar concept, namely scrolling gestures. 
+    """AppBarLayout is a vertical LinearLayout which implements many of the
+    features of material designs app bar concept, namely scrolling gestures.
 
     """
 
     #: A reference to the ProxyAppBarLayout object.
-    proxy = Typed(ProxyAppBarLayout)   
+    proxy = Typed(ProxyAppBarLayout)
 
     #: Sets whether this AppBarLayout is expanded or not, animating if it has
     #: already been laid out.
@@ -41,6 +40,6 @@ class AppBarLayout(LinearLayout):
     #: The vertical offset for the parent AppBarLayout, in px
     vertical_offset = d_(Int(), writable=False)
 
-    @observe('expanded')
+    @observe("expanded")
     def _update_proxy(self, change):
-        super(AppBarLayout, self)._update_proxy(change)
+        super()._update_proxy(change)

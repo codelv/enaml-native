@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.edit_text import ProxyEditText
 
@@ -18,17 +18,16 @@ from .bridge import JavaMethod
 
 
 class EditText(TextView):
-    __nativeclass__ = set_default('android.widget.EditText')
-    setSelection = JavaMethod('int', 'int')
+    __nativeclass__ = "android.widget.EditText"
+    setSelection = JavaMethod("int", "int")
     selectAll = JavaMethod()
-    extendSelection = JavaMethod('int')
-    setHint = JavaMethod('java.lang.CharSequence')
+    extendSelection = JavaMethod("int")
+    setHint = JavaMethod("java.lang.CharSequence")
 
 
 class AndroidEditText(AndroidTextView, ProxyEditText):
-    """ An Android implementation of an Enaml ProxyEditText.
+    """An Android implementation of an Enaml ProxyEditText."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(EditText)
 
@@ -36,12 +35,11 @@ class AndroidEditText(AndroidTextView, ProxyEditText):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
-        self.widget = EditText(self.get_context(), None,
-                               d.style or "@attr/editTextStyle")
+        self.widget = EditText(
+            self.get_context(), None, d.style or "@attr/editTextStyle"
+        )
 
     # -------------------------------------------------------------------------
     # ProxyEditText API
@@ -51,5 +49,3 @@ class AndroidEditText(AndroidTextView, ProxyEditText):
 
     def set_placeholder(self, placeholder):
         self.widget.setHint(placeholder)
-
-

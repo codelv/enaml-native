@@ -15,9 +15,8 @@ from enaml.core.declarative import d_
 
 
 class ProxyViewGroup(ProxyView):
-    """ The abstract definition of a proxy relative layout object.
+    """The abstract definition of a proxy relative layout object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: ViewGroup)
 
@@ -26,17 +25,17 @@ class ProxyViewGroup(ProxyView):
 
 
 class ViewGroup(View):
-    """ ViewGroup is a view group that displays
+    """ViewGroup is a view group that displays
     child views in relative positions.
 
     """
+
     # A layout transition for when children are added or removed
-    transition = d_(Enum('', 'default'))
+    transition = d_(Enum("", "default"))
 
     #: A reference to the ProxyViewGroup object.
     proxy = Typed(ProxyViewGroup)
 
-    @observe('transition')
+    @observe("transition")
     def _update_proxy(self, change):
-        super(ViewGroup, self)._update_proxy(change)
-
+        super()._update_proxy(change)

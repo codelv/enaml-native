@@ -9,7 +9,7 @@ Created on May 25, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.time_picker import ProxyTimePicker
 
@@ -18,22 +18,22 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class TimePicker(FrameLayout):
-    __nativeclass__ = set_default('android.widget.TimePicker')
-    onTimeChanged = JavaCallback('android.widget.TimePicker', 'int', 'int')
-    setHour = JavaMethod('int')
-    setMinute = JavaMethod('int')
-    setCurrentHour = JavaMethod('java.lang.Integer')
-    setCurrentMinute = JavaMethod('java.lang.Integer')
-    setEnabled = JavaMethod('boolean')
-    setIs24HourView = JavaMethod('java.lang.Boolean')
+    __nativeclass__ = "android.widget.TimePicker"
+    onTimeChanged = JavaCallback("android.widget.TimePicker", "int", "int")
+    setHour = JavaMethod("int")
+    setMinute = JavaMethod("int")
+    setCurrentHour = JavaMethod("java.lang.Integer")
+    setCurrentMinute = JavaMethod("java.lang.Integer")
+    setEnabled = JavaMethod("boolean")
+    setIs24HourView = JavaMethod("java.lang.Boolean")
     setOnTimeChangedListener = JavaMethod(
-        'android.widget.TimePicker$OnTimeChangedListener')
+        "android.widget.TimePicker$OnTimeChangedListener"
+    )
 
 
 class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
-    """ An Android implementation of an Enaml ProxyTimePicker.
+    """An Android implementation of an Enaml ProxyTimePicker."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(TimePicker)
 
@@ -41,18 +41,15 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
-        self.widget = TimePicker(self.get_context(), None,
-                                 d.style or '@attr/timePickerStyle')
+        self.widget = TimePicker(
+            self.get_context(), None, d.style or "@attr/timePickerStyle"
+        )
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidTimePicker, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         w = self.widget
         self.set_hour(d.hour)
@@ -88,4 +85,4 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
             self.widget.setMinute(minute)
 
     def set_hour_mode(self, mode):
-        self.widget.setIs24HourView(mode == '24')
+        self.widget.setIs24HourView(mode == "24")

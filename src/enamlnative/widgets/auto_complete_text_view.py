@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, List, Int, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, List, Int, observe, set_default
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .edit_text import EditText, ProxyEditText
 
 
 class ProxyAutoCompleteTextView(ProxyEditText):
-    """ The abstract definition of a proxy AutoCompleteTextView object.
+    """The abstract definition of a proxy AutoCompleteTextView object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: AutoCompleteTextView)
 
@@ -42,9 +39,7 @@ class ProxyAutoCompleteTextView(ProxyEditText):
 
 
 class AutoCompleteTextView(EditText):
-    """ A simple control for displaying read-only text.
-
-    """
+    """A simple control for displaying read-only text."""
 
     #: Auto complete choices
     choices = d_(List())
@@ -65,11 +60,13 @@ class AutoCompleteTextView(EditText):
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyAutoCompleteTextView)
 
-    @observe('choices', 'drop_down_height', 'drop_down_width'
-             'list_selection', 'threshold',)
+    @observe(
+        "choices",
+        "drop_down_height",
+        "drop_down_width" "list_selection",
+        "threshold",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(AutoCompleteTextView, self)._update_proxy(change)
+        super()._update_proxy(change)

@@ -15,12 +15,11 @@ from enaml.core.declarative import d_
 
 
 class ProxyCameraView(ProxyTextureView):
-    """ The abstract definition of a proxy surface object.
+    """The abstract definition of a proxy surface object."""
 
-    """
     #: A reference to the declaration.
     declaration = ForwardTyped(lambda: CameraView)
-    
+
     def set_preview(self, show):
         raise NotImplementedError
 
@@ -29,24 +28,19 @@ class ProxyCameraView(ProxyTextureView):
 
 
 class CameraView(TextureView):
-    """ A helper view to tie in a camera.
+    """A helper view to tie in a camera."""
 
-    """
-    
     #: Display a preview
     preview = d_(Bool())
-    
+
     #: A reference to the ProxyCameraView object.
     proxy = Typed(ProxyCameraView)
-    
-    @observe('preview')
-    def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
 
-        """
-        # The superclass implementation is sufficient.
-        super(CameraView, self)._update_proxy(change)
+    @observe("preview")
+    def _update_proxy(self, change):
+        """An observer which sends the state change to the proxy."""
+
+        super()._update_proxy(change)
 
     def take_picture(self):
         self.proxy.take_picture()
-

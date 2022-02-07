@@ -9,7 +9,7 @@ Created on Mar 13, 2018
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.app_bar_layout import ProxyAppBarLayout
 
@@ -18,25 +18,26 @@ from .bridge import JavaMethod, JavaCallback
 
 
 class AppBarLayout(LinearLayout):
-    package = 'com.google.android.material.appbar'
+    package = "com.google.android.material.appbar"
 
-    __nativeclass__ = set_default('%s.AppBarLayout' % package)
-    __signature__ = set_default(('android.content.Context',))
+    __nativeclass__ = f"{package}.AppBarLayout"
+    __signature__ = ("android.content.Context",)
 
     addOnOffsetChangedListener = JavaMethod(
-        '%s.AppBarLayout$OnOffsetChangedListener' % package)
+        f"{package}.AppBarLayout$OnOffsetChangedListener"
+    )
     removeOnOffsetChangedListener = JavaMethod(
-        '%s.AppBarLayout$OnOffsetChangedListener' % package)
+        f"{package}.AppBarLayout$OnOffsetChangedListener"
+    )
 
-    setExpanded = JavaMethod('boolean')
+    setExpanded = JavaMethod("boolean")
 
-    onOffsetChanged = JavaCallback('%s.AppBarLayout' % package, 'int')
+    onOffsetChanged = JavaCallback(f"{package}.AppBarLayout", "int")
 
 
 class AndroidAppBarLayout(AndroidLinearLayout, ProxyAppBarLayout):
-    """ An Android implementation of an Enaml ProxyAppBarLayout.
+    """An Android implementation of an Enaml ProxyAppBarLayout."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(AppBarLayout)
 
@@ -44,13 +45,11 @@ class AndroidAppBarLayout(AndroidLinearLayout, ProxyAppBarLayout):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         self.widget = AppBarLayout(self.get_context())
 
     def init_widget(self):
-        super(AndroidAppBarLayout, self).init_widget()
+        super().init_widget()
         w = self.widget
         w.addOnOffsetChangedListener(w.getId())
         w.onOffsetChanged.connect(self.on_offset_changed)

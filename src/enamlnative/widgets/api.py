@@ -28,9 +28,10 @@ from .calendar_view import CalendarView
 from .text_view import TextView
 from .scroll_view import ScrollView
 from .card_view import CardView
-#from .view_animator import ViewAnimator
-#from .view_switcher import ViewSwitcher
-#from .text_switcher import TextSwitcher
+
+# from .view_animator import ViewAnimator
+# from .view_switcher import ViewSwitcher
+# from .text_switcher import TextSwitcher
 from .image_view import ImageView
 from .web_view import WebView
 from .list_view import ListView, ListItem
@@ -38,11 +39,12 @@ from .surface_view import SurfaceView
 from .texture_view import TextureView
 from .video_view import VideoView
 from .camera_view import CameraView
-#from .map_view import MapView, MapMarker, MapCircle, MapPolyline, MapPolygon
-#from .chart_view import DataSet, LineChart, BarChart, ScatterChart, PieChart
+
+# from .map_view import MapView, MapMarker, MapCircle, MapPolyline, MapPolygon
+# from .chart_view import DataSet, LineChart, BarChart, ScatterChart, PieChart
 
 #: Controls
-from .button import  Button, ImageButton, FloatingActionButton
+from .button import Button, ImageButton, FloatingActionButton
 from .compound_button import CompoundButton
 from .checkbox import CheckBox
 from .switch import Switch

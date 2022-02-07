@@ -9,7 +9,7 @@ Created on July 7, 2017
 
 @author: jrm
 """
-from atom.api import Atom, Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.action_menu_view import ProxyActionMenuView
 
@@ -18,34 +18,33 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
 class ActionMenuView(LinearLayout):
-    package = 'androidx.appcompat.widget'
-    __nativeclass__ = set_default('%s.ActionMenuView' % package)
+    package = "androidx.appcompat.widget"
+    __nativeclass__ = f"{package}.ActionMenuView"
     getMenu = JavaMethod()
     showOverflowMenu = JavaMethod()
     hideOverflowMenu = JavaMethod()
-    setOverflowIcon = JavaMethod('android.graphics.drawable')
+    setOverflowIcon = JavaMethod("android.graphics.drawable")
     setOnMenuItemClickListener = JavaMethod(
-        '%s.ActionMenuView$OnMenuItemClickListener' % package)
-
-    onMenuItemClick = JavaCallback('android.view.MenuItem', returns='boolean')
+        f"{package}.ActionMenuView$OnMenuItemClickListener"
+    )
+    onMenuItemClick = JavaCallback("android.view.MenuItem", returns="boolean")
 
 
 class Menu(JavaBridgeObject):
-    __nativeclass__ = set_default('android.view.Menu')
+    __nativeclass__ = "android.view.Menu"
 
     def __init__(self):
         #: Menu is an Interface, we can't create it
-        super(Atom, self).__init__()
+        super().__init__()
 
 
 class MenuItem(JavaBridgeObject):
-    __nativeclass__ = set_default('android.view.MenuItem')
+    __nativeclass__ = "android.view.MenuItem"
 
 
 class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
-    """ An Android implementation of an Enaml ProxyActionMenuView.
+    """An Android implementation of an Enaml ProxyActionMenuView."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(ActionMenuView)
 
@@ -53,16 +52,12 @@ class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         self.widget = ActionMenuView(self.get_context())
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidActionMenuView, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         w = self.widget
 
@@ -86,6 +81,6 @@ class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
     # -------------------------------------------------------------------------
     def set_opened(self, opened):
         if opened:
-           self.widget.showOverflowMenu()
+            self.widget.showOverflowMenu()
         else:
             self.widget.hideOverflowMenu()

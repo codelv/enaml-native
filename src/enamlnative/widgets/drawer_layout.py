@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, List, Unicode, Float, Int, Bool, Enum, observe
-)
+from atom.api import Typed, ForwardTyped, List, Str, Float, Int, Bool, Enum, observe
 
 from enaml.core.declarative import d_
 
@@ -20,9 +18,8 @@ from .view_group import ViewGroup, ProxyViewGroup
 
 
 class ProxyDrawerLayout(ProxyViewGroup):
-    """ The abstract definition of a proxy DrawerLayout object.
+    """The abstract definition of a proxy DrawerLayout object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: DrawerLayout)
 
@@ -55,9 +52,8 @@ class ProxyDrawerLayout(ProxyViewGroup):
 
 
 class DrawerLayout(ViewGroup):
-    """ A simple control for displaying a drawer
+    """A simple control for displaying a drawer"""
 
-    """
     #: List of opened drawers
     opened = d_(List(View))
 
@@ -65,7 +61,7 @@ class DrawerLayout(ViewGroup):
     drawer_width = d_(Int(200))
 
     #: Title of drawer
-    title = d_(Unicode())
+    title = d_(Str())
 
     #: Gravity of title
     title_gravity = d_(Int())
@@ -74,14 +70,14 @@ class DrawerLayout(ViewGroup):
     drawer_elevation = d_(Float())
 
     #: Set lock mode
-    lock_mode = d_(Enum('unlocked', 'locked_closed', 'locked_open'))
+    lock_mode = d_(Enum("unlocked", "locked_closed", "locked_open"))
 
     #: Set a color to use for the scrim that obscures primary content
     #: while a drawer is open.
-    scrim_color = d_(Unicode())
+    scrim_color = d_(Str())
 
     #: Statusbar background color
-    status_bar_background_color = d_(Unicode())
+    status_bar_background_color = d_(Str())
 
     #: A reference to the ProxyLabel object.
     proxy = Typed(ProxyDrawerLayout)
@@ -89,12 +85,17 @@ class DrawerLayout(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('opened', 'drawer_width', 'title', 'title_gravity',
-             'drawer_elevation', 'drawer_lock_mode', 'scrim_color',
-             'status_bar_background_color')
+    @observe(
+        "opened",
+        "drawer_width",
+        "title",
+        "title_gravity",
+        "drawer_elevation",
+        "drawer_lock_mode",
+        "scrim_color",
+        "status_bar_background_color",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(DrawerLayout, self)._update_proxy(change)
+        super()._update_proxy(change)

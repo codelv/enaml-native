@@ -9,9 +9,7 @@ Created on June 7, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Float, Int, Bool, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Float, Int, Bool, observe, set_default
 
 from enaml.core.declarative import d_
 
@@ -19,9 +17,8 @@ from .progress_bar import ProgressBar, ProxyProgressBar
 
 
 class ProxySeekBar(ProxyProgressBar):
-    """ The abstract definition of a proxy SeekBar object.
+    """The abstract definition of a proxy SeekBar object."""
 
-    """
     #: A reference to the SeekBar declaration.
     declaration = ForwardTyped(lambda: SeekBar)
 
@@ -33,9 +30,7 @@ class ProxySeekBar(ProxyProgressBar):
 
 
 class SeekBar(ProgressBar):
-    """ A simple control for displaying read-only text.
-
-    """
+    """A simple control for displaying read-only text."""
 
     #: Sets the amount of progress changed via the arrow keys.
     key_progress_increment = d_(Int())
@@ -49,10 +44,8 @@ class SeekBar(ProgressBar):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('key_progress_increment', 'split_track')
+    @observe("key_progress_increment", "split_track")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(SeekBar, self)._update_proxy(change)
+        super()._update_proxy(change)

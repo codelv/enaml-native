@@ -9,9 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Coerced, Str, List, Int, Enum, observe
-)
+from atom.api import Typed, ForwardTyped, Coerced, Str, List, Int, Enum, observe
 
 from enaml.core.declarative import d_
 
@@ -20,9 +18,8 @@ from .view import coerce_gravity
 
 
 class ProxySpinner(ProxyViewGroup):
-    """ The abstract definition of a proxy Spinner object.
+    """The abstract definition of a proxy Spinner object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Spinner)
 
@@ -50,14 +47,12 @@ class ProxySpinner(ProxyViewGroup):
     def set_drop_down_width(self, width):
         raise NotImplementedError
 
-    
-class Spinner(ViewGroup):
-    """ A simple control for displaying read-only text.
 
-    """
+class Spinner(ViewGroup):
+    """A simple control for displaying read-only text."""
 
     #: Set the mode
-    mode = d_(Enum('dropdown', 'dialog'))
+    mode = d_(Enum("dropdown", "dialog"))
 
     #: Sets the prompt to display when the dialog is shown.
     prompt = d_(Str())
@@ -88,12 +83,17 @@ class Spinner(ViewGroup):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('mode', 'prompt', 'selected', 'items', 'item_gravity',
-             'drop_down_horizontal_offset', 'drop_down_vertical_offset',
-             'drop_down_width')
+    @observe(
+        "mode",
+        "prompt",
+        "selected",
+        "items",
+        "item_gravity",
+        "drop_down_horizontal_offset",
+        "drop_down_vertical_offset",
+        "drop_down_width",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(Spinner, self)._update_proxy(change)
+        super()._update_proxy(change)

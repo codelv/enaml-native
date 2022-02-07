@@ -15,41 +15,43 @@ from .android_content import Context, SystemService
 
 
 class UsbDevice(JavaBridgeObject):
-    __nativeclass__ = set_default('android.hardware.usb.UsbDevice')
+    __nativeclass__ = set_default("android.hardware.usb.UsbDevice")
     info = Dict()
-    getDeviceName = JavaMethod(returns='java.lang.String')
-    getDeviceId = JavaMethod(returns='int')
-    getInterface = JavaMethod('int',
-                              returns='android.hardware.usb.UsbInterface')
+    getDeviceName = JavaMethod(returns="java.lang.String")
+    getDeviceId = JavaMethod(returns="int")
+    getInterface = JavaMethod("int", returns="android.hardware.usb.UsbInterface")
     getConfiguration = JavaMethod(
-        'int', returns='android.hardware.usb.UsbConfiguration')
+        "int", returns="android.hardware.usb.UsbConfiguration"
+    )
 
 
 class UsbDeviceConnection(JavaBridgeObject):
-    __signature__ = set_default('android.hardware.usb.UsbDeviceConnection')
+    __signature__ = set_default("android.hardware.usb.UsbDeviceConnection")
     close = JavaMethod()
 
 
 class UsbManager(SystemService):
-    """ Use UsbManger.get().then(on_ready) to get an instance.
-    
-    """
-    SERVICE_TYPE = Context.USB_SERVICE
-    __nativeclass__ = set_default('android.hardware.usb.UsbManager')
+    """Use UsbManger.get().then(on_ready) to get an instance."""
 
-    getAccessoryList = JavaMethod(returns='android.hardware.usb.UsbAccessory[')
-    getDeviceList = JavaMethod(returns='java.util.HashMap')
-    openAccessory = JavaMethod('android.hardware.usb.UsbAccessory',
-                               returns='android.os.ParcelFileDescriptor')
-    openDevice = JavaMethod('android.hardware.usb.UsbDevice',
-                            returns='android.hardware.usb.UsbDeviceConnection')
-    hasPermission = JavaMethod('android.hardware.usb.UsbDevice',
-                               returns='boolean')
-    requestPermission = JavaMethod('android.hardware.usb.UsbDevice',
-                                   'android.app.PendingIntent')
+    SERVICE_TYPE = Context.USB_SERVICE
+    __nativeclass__ = set_default("android.hardware.usb.UsbManager")
+
+    getAccessoryList = JavaMethod(returns="android.hardware.usb.UsbAccessory[")
+    getDeviceList = JavaMethod(returns="java.util.HashMap")
+    openAccessory = JavaMethod(
+        "android.hardware.usb.UsbAccessory", returns="android.os.ParcelFileDescriptor"
+    )
+    openDevice = JavaMethod(
+        "android.hardware.usb.UsbDevice",
+        returns="android.hardware.usb.UsbDeviceConnection",
+    )
+    hasPermission = JavaMethod("android.hardware.usb.UsbDevice", returns="boolean")
+    requestPermission = JavaMethod(
+        "android.hardware.usb.UsbDevice", "android.app.PendingIntent"
+    )
 
     #: These names are changed to support both signatures
-    hasPermission_ = JavaMethod('android.hardware.usb.UsbAccessory',
-                                returns='boolean')
-    requestPermission_ = JavaMethod('android.hardware.usb.UsbAccessory',
-                                    'android.app.PendingIntent')
+    hasPermission_ = JavaMethod("android.hardware.usb.UsbAccessory", returns="boolean")
+    requestPermission_ = JavaMethod(
+        "android.hardware.usb.UsbAccessory", "android.app.PendingIntent"
+    )

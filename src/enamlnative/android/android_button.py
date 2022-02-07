@@ -9,10 +9,12 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.button import (
-    ProxyButton, ProxyImageButton, ProxyFloatingActionButton
+    ProxyButton,
+    ProxyImageButton,
+    ProxyFloatingActionButton,
 )
 
 from .bridge import JavaMethod
@@ -22,48 +24,46 @@ from .android_image_view import AndroidImageView, ImageView
 
 
 class Button(TextView):
-    __nativeclass__ = set_default('android.widget.Button')
-    __signature__ = set_default(('android.content.Context',
-                                 'android.util.AttributeSet', 'android.R'))
+    __nativeclass__ = "android.widget.Button"
+    __signature__ = (
+        "android.content.Context",
+        "android.util.AttributeSet",
+        "android.R",
+    )
     STYLE_NORMAL = 0x01010048
-    STYLE_FLAT = 0x0101032b
+    STYLE_FLAT = 0x0101032B
     STYLES = {
-        '': STYLE_NORMAL,
-        'borderless': STYLE_FLAT,
-        'inset': 0x0101004a,
-        'small': 0x01010049,
+        "": STYLE_NORMAL,
+        "borderless": STYLE_FLAT,
+        "inset": 0x0101004A,
+        "small": 0x01010049,
     }
 
 
 class ImageButton(ImageView):
-    __nativeclass__ = set_default('android.widget.ImageButton')
+    __nativeclass__ = "android.widget.ImageButton"
 
 
 class FloatingActionButton(ImageButton):
-    package = 'com.google.android.material.floatingactionbutton'
-    __nativeclass__ = set_default('%s.FloatingActionButton' % package)
+    package = "com.google.android.material.floatingactionbutton"
+    __nativeclass__ = f"{package}.FloatingActionButton"
 
     SIZE_NORMAL = 0
     SIZE_MINI = 1
     SIZE_AUTO = -1
 
-    SIZES = {
-        'normal': SIZE_NORMAL,
-        'mini': SIZE_MINI,
-        'auto': SIZE_AUTO
-    }
+    SIZES = {"normal": SIZE_NORMAL, "mini": SIZE_MINI, "auto": SIZE_AUTO}
 
-    setSize = JavaMethod('int')
-    setRippleColor = JavaMethod('android.graphics.Color')
-    setCompatElevation = JavaMethod('float')
+    setSize = JavaMethod("int")
+    setRippleColor = JavaMethod("android.graphics.Color")
+    setCompatElevation = JavaMethod("float")
     show = JavaMethod()
     hide = JavaMethod()
 
 
 class AndroidButton(AndroidTextView, ProxyButton):
-    """ An Android implementation of an Enaml ProxyButton.
+    """An Android implementation of an Enaml ProxyButton."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(Button)
 
@@ -71,16 +71,17 @@ class AndroidButton(AndroidTextView, ProxyButton):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
-        style = d.style if d.style else (
-            '@attr/borderlessButtonStyle' if d.flat else '@attr/buttonStyle')
+        style = (
+            d.style
+            if d.style
+            else ("@attr/borderlessButtonStyle" if d.flat else "@attr/buttonStyle")
+        )
         self.widget = Button(self.get_context(), None, style)
 
     def init_widget(self):
-        super(AndroidButton, self).init_widget()
+        super().init_widget()
 
         w = self.widget
         w.setOnClickListener(w.getId())
@@ -94,9 +95,8 @@ class AndroidButton(AndroidTextView, ProxyButton):
 
 
 class AndroidImageButton(AndroidImageView, ProxyImageButton):
-    """ An Android implementation of an Enaml ProxyImageButton.
+    """An Android implementation of an Enaml ProxyImageButton."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(ImageButton)
 
@@ -104,24 +104,20 @@ class AndroidImageButton(AndroidImageView, ProxyImageButton):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         self.widget = ImageButton(self.get_context())
 
     def init_widget(self):
-        super(AndroidImageButton, self).init_widget()
+        super().init_widget()
 
         w = self.widget
         w.setOnClickListener(w.getId())
         w.onClick.connect(self.on_click)
 
 
-class AndroidFloatingActionButton(AndroidImageButton,
-                                  ProxyFloatingActionButton):
-    """ An Android implementation of an Enaml ProxyImageButton.
+class AndroidFloatingActionButton(AndroidImageButton, ProxyFloatingActionButton):
+    """An Android implementation of an Enaml ProxyImageButton."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(FloatingActionButton)
 
@@ -129,9 +125,7 @@ class AndroidFloatingActionButton(AndroidImageButton,
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
         self.widget = FloatingActionButton(self.get_context(), None, d.style)
 
@@ -152,4 +146,3 @@ class AndroidFloatingActionButton(AndroidImageButton,
             self.widget.show()
         else:
             self.widget.hide()
-

@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.text_clock import ProxyTextClock
 
@@ -18,16 +18,15 @@ from .bridge import JavaMethod
 
 
 class TextClock(TextView):
-    __nativeclass__ = set_default('android.widget.TextClock')
-    setFormat24Hour = JavaMethod('java.lang.CharSequence')
-    setFormat24Hour = JavaMethod('java.lang.CharSequence')
-    setTimeZone = JavaMethod('java.lang.String')
+    __nativeclass__ = "android.widget.TextClock"
+    setFormat24Hour = JavaMethod("java.lang.CharSequence")
+    setFormat24Hour = JavaMethod("java.lang.CharSequence")
+    setTimeZone = JavaMethod("java.lang.String")
 
 
 class AndroidTextClock(AndroidTextView, ProxyTextClock):
-    """ An Android implementation of an Enaml ProxyTextClock.
+    """An Android implementation of an Enaml ProxyTextClock."""
 
-    """
     #: A reference to the widget created by the proxy.
     widget = Typed(TextClock)
 
@@ -35,17 +34,13 @@ class AndroidTextClock(AndroidTextView, ProxyTextClock):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         d = self.declaration
         self.widget = TextClock(self.get_context(), None, d.style)
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidTextClock, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         if d.format_12_hour:
             self.set_format_12_hour(d.format_12_hour)
@@ -65,5 +60,3 @@ class AndroidTextClock(AndroidTextView, ProxyTextClock):
 
     def set_time_zone(self, time_zone):
         self.widget.setTimeZone(time_zone)
-
-

@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, Value, set_default
+from atom.api import Typed, Value
 
 from enamlnative.widgets.fragment import ProxyFragment
 from enamlnative.widgets.view_pager import ProxyPagerFragment
@@ -19,36 +19,35 @@ from .android_frame_layout import FrameLayout
 from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
 
 
-package = 'androidx.fragment.app'
+package = "androidx.fragment.app"
 
 
 class FragmentManager(JavaBridgeObject):
-    __nativeclass__ = set_default('%s.FragmentManager' % package)
-    beginTransaction = JavaMethod(returns='%s.FragmentTransaction' % package)
+    __nativeclass__ = f"{package}.FragmentManager"
+    beginTransaction = JavaMethod(returns=f"{package}.FragmentTransaction")
 
 
 class FragmentTransaction(JavaBridgeObject):
-    __nativeclass__ = set_default('%s.FragmentTransaction' % package)
-    commit = JavaMethod(returns='int')
-    add = JavaMethod('int', '%s.Fragment' % package)
-    replace = JavaMethod('int', '%s.Fragment' % package)
+    __nativeclass__ = f"{package}.FragmentTransaction"
+    commit = JavaMethod(returns="int")
+    add = JavaMethod("int", f"{package}.Fragment")
+    replace = JavaMethod("int", f"{package}.Fragment")
 
 
 class BridgedFragment(JavaBridgeObject):
-    package = 'com.codelv.enamlnative.adapters'
-    __nativeclass__ = set_default(
-        '%s.BridgedFragmentStatePagerAdapter$BridgedFragment' % package)
-    setTitle = JavaMethod('java.lang.String')
+    package = "com.codelv.enamlnative.adapters"
+    __nativeclass__ = f"{package}.BridgedFragmentStatePagerAdapter$BridgedFragment"
+    setTitle = JavaMethod("java.lang.String")
     setFragmentListener = JavaMethod(
-        '%s.BridgedFragmentStatePagerAdapter$FragmentListener' % package)
-    onCreateView = JavaCallback(returns='android.view.View')
+        f"{package}.BridgedFragmentStatePagerAdapter$FragmentListener"
+    )
+    onCreateView = JavaCallback(returns="android.view.View")
     onDestroyView = JavaCallback()
 
 
 class AndroidFragment(AndroidToolkitObject, ProxyFragment):
-    """ An Android implementation of an Enaml ProxyFragment.
+    """An Android implementation of an Enaml ProxyFragment."""
 
-    """
     #: A reference to the fragment created by the proxy.
     fragment = Typed(BridgedFragment)
 
@@ -62,23 +61,19 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the underlying widget.
-
-        """
+        """Create the underlying widget."""
         self.fragment = BridgedFragment()
 
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidFragment, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         f = self.fragment
         f.setFragmentListener(f.getId())
         f.onCreateView.connect(self.on_create_view)
         f.onDestroyView.connect(self.on_destroy_view)
 
     def destroy(self):
-        """ Custom destructor that deletes the fragment and removes
+        """Custom destructor that deletes the fragment and removes
         itself from the adapter it was added to.
 
         """
@@ -86,15 +81,13 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
         fragment = self.fragment
         if fragment:
             del self.fragment
-        super(AndroidFragment, self).destroy()
+        super().destroy()
 
     # -------------------------------------------------------------------------
     # FragmentListener API
     # -------------------------------------------------------------------------
     def on_create_view(self):
-        """ Trigger the click
-
-        """
+        """Trigger the click"""
         d = self.declaration
         changed = not d.condition
         if changed:
@@ -125,7 +118,7 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
     # ProxyFragment API
     # -------------------------------------------------------------------------
     def get_view(self):
-        """ Get the page to display. If a view has already been created and
+        """Get the page to display. If a view has already been created and
         is cached, use that otherwise initialize the view and proxy. If defer
         loading is used, wrap the view in a FrameLayout and defer add view
         until later.
@@ -135,10 +128,9 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
         if d.cached and self.widget:
             return self.widget
         if d.defer_loading:
-             self.widget = FrameLayout(self.get_context())
-             app = self.get_context()
-             app.deferred_call(
-                 lambda: self.widget.addView(self.load_view(), 0))
+            self.widget = FrameLayout(self.get_context())
+            app = self.get_context()
+            app.deferred_call(lambda: self.widget.addView(self.load_view(), 0))
         else:
             self.widget = self.load_view()
         return self.widget
@@ -160,14 +152,11 @@ class AndroidFragment(AndroidToolkitObject, ProxyFragment):
 
 
 class AndroidPagerFragment(AndroidFragment, ProxyPagerFragment):
-    """ An Android implementation of an Enaml ProxyPagerFragment.
+    """An Android implementation of an Enaml ProxyPagerFragment."""
 
-    """
     def init_widget(self):
-        """ Initialize the underlying widget.
-
-        """
-        super(AndroidPagerFragment, self).init_widget()
+        """Initialize the underlying widget."""
+        super().init_widget()
         d = self.declaration
         if d.title:
             self.set_title(d.title)
@@ -182,4 +171,4 @@ class AndroidPagerFragment(AndroidFragment, ProxyPagerFragment):
 
     def set_icon(self, icon):
         pass
-        #self.adapter.setPageIcon(self.widget, icon)
+        # self.adapter.setPageIcon(self.widget, icon)

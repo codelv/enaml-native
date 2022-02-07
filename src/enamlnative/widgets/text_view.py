@@ -10,7 +10,16 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Str, Tuple, Enum, Event, Float, Int, Bool, observe
+    Typed,
+    ForwardTyped,
+    Str,
+    Tuple,
+    Enum,
+    Event,
+    Float,
+    Int,
+    Bool,
+    observe,
 )
 
 from enaml.core.declarative import d_
@@ -19,9 +28,8 @@ from .view import View, ProxyView
 
 
 class ProxyTextView(View):
-    """ The abstract definition of a proxy Label object.
+    """The abstract definition of a proxy Label object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: TextView)
 
@@ -78,9 +86,7 @@ class ProxyTextView(View):
 
 
 class TextView(View):
-    """ A simple control for displaying read-only text.
-
-    """
+    """A simple control for displaying read-only text."""
 
     #: Sets the properties of this field to transform input to
     #: ALL CAPS display.
@@ -101,28 +107,44 @@ class TextView(View):
     input_type = d_(Str())
 
     INPUT_TYPES = (
-        'date', 'datetime', 'number',
-        'number_decimal', 'number_password',
-        'number_signed', 'phone', 'text',
-        'text_auto_complete', 'text_auto_correct',
-        'text_cap_characters', 'text_cap_sentences',
-        'text_cap_words',
-        'text_email_address', 'text_email_subject',
-        'text_filter', 'text_ime_multi_line',
-        'text_long_message', 'text_multi_line',
-        'text_no_suggestions', 'text_password',
-        'text_person_name', 'text_phonetic',
-        'text_postal_address', 'text_short_message',
-        'text_uri', 'text_visible_password',
-        'text_web_edit_text', 'text_web_email_address',
-        'text_web_password', 'time',
+        "date",
+        "datetime",
+        "number",
+        "number_decimal",
+        "number_password",
+        "number_signed",
+        "phone",
+        "text",
+        "text_auto_complete",
+        "text_auto_correct",
+        "text_cap_characters",
+        "text_cap_sentences",
+        "text_cap_words",
+        "text_email_address",
+        "text_email_subject",
+        "text_filter",
+        "text_ime_multi_line",
+        "text_long_message",
+        "text_multi_line",
+        "text_no_suggestions",
+        "text_password",
+        "text_person_name",
+        "text_phonetic",
+        "text_postal_address",
+        "text_short_message",
+        "text_uri",
+        "text_visible_password",
+        "text_web_edit_text",
+        "text_web_email_address",
+        "text_web_password",
+        "time",
     )
 
     #: Font family
     font_family = d_(Str())
 
     #: Font style
-    font_style = d_(Enum('normal', 'bold', 'italic', 'bold_italic'))
+    font_style = d_(Enum("normal", "bold", "italic", "bold_italic"))
 
     #: Sets the color used to display the selection highlight.
     highlight_color = d_(Str())
@@ -134,8 +156,7 @@ class TextView(View):
     text = d_(Str())
 
     #: Text alignment
-    text_alignment = d_(Enum('', 'left', 'right', 'center', 'justified',
-                             'natural'))
+    text_alignment = d_(Enum("", "left", "right", "center", "justified", "natural"))
 
     #: Sets the text color for all the states (normal, selected, focused)
     #: to be this color.
@@ -166,23 +187,32 @@ class TextView(View):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('all_caps', 'auto_link_mask', 'input_type',
-             'font_family', 'font_style', 'text_selectable',
-             'text', 'text_color', 'text_size', 'text_alignment',
-             'link_color', 'highlight_color',
-             'lines', 'max_lines', 'line_spacing', 'letter_spacing')
+    @observe(
+        "all_caps",
+        "auto_link_mask",
+        "input_type",
+        "font_family",
+        "font_style",
+        "text_selectable",
+        "text",
+        "text_color",
+        "text_size",
+        "text_alignment",
+        "link_color",
+        "highlight_color",
+        "lines",
+        "max_lines",
+        "line_spacing",
+        "letter_spacing",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(TextView, self)._update_proxy(change)
+        super()._update_proxy(change)
 
     # -------------------------------------------------------------------------
     # TextView API
     # -------------------------------------------------------------------------
     def append_text(self, text):
-        """ Add text to the existing text 
-        
-        """
+        """Add text to the existing text"""
         self.proxy.append_text(text)

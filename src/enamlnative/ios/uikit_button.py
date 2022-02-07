@@ -18,19 +18,19 @@ from .uikit_control import UIControl, UiKitControl
 
 
 class UIButton(UIControl):
-    """
-    """
+    """ """
+
     __signature__ = set_default((dict(buttonWithType="enum"),))
     #: Properties
-    on = ObjcProperty('bool')
-    onTintColor = ObjcProperty('UIColor')
-    tintColor = ObjcProperty('UIColor')
-    thumbTintColor = ObjcProperty('UIColor')
-    onImage = ObjcProperty('UIImage')
-    offImage = ObjcProperty('UIImage')
+    on = ObjcProperty("bool")
+    onTintColor = ObjcProperty("UIColor")
+    tintColor = ObjcProperty("UIColor")
+    thumbTintColor = ObjcProperty("UIColor")
+    onImage = ObjcProperty("UIImage")
+    offImage = ObjcProperty("UIImage")
 
     #: Methods
-    setTitle = ObjcMethod('NSString', dict(forState='enum'))
+    setTitle = ObjcMethod("NSString", dict(forState="enum"))
 
     #: Type Enum
     UIButtonTypeCustom = 0
@@ -43,9 +43,7 @@ class UIButton(UIControl):
 
 
 class UiKitButton(UiKitControl, ProxyButton):
-    """ An UiKit implementation of an Enaml ProxyToolkitObject.
-
-    """
+    """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(UIButton)
@@ -54,14 +52,15 @@ class UiKitButton(UiKitControl, ProxyButton):
     # Initialization API
     # -------------------------------------------------------------------------
     def create_widget(self):
-        """ Create the toolkit widget for the proxy object.
-        """
+        """Create the toolkit widget for the proxy object."""
         d = self.declaration
-        button_type = UIButton.UIButtonTypeSystem if d.flat else UIButton.UIButtonTypeRoundedRect
+        button_type = (
+            UIButton.UIButtonTypeSystem if d.flat else UIButton.UIButtonTypeRoundedRect
+        )
         self.widget = UIButton(buttonWithType=button_type)
 
     def init_widget(self):
-        super(UiKitButton, self).init_widget()
+        super().init_widget()
         d = self.declaration
         self.init_text()
 
@@ -72,4 +71,4 @@ class UiKitButton(UiKitControl, ProxyButton):
         self.widget.setTitle(text, forState=UIButton.UIControlStateNormal)
 
     def set_style(self, style):
-        pass #: Cannot be changed once set!
+        pass  #: Cannot be changed once set!

@@ -9,19 +9,15 @@ Created on Sept 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Unicode, Int, Bool, Event, observe
-)
+from atom.api import Typed, ForwardTyped, Str, Int, Bool, Event, observe
 
 from enaml.core.declarative import d_
-from enaml.compat import str
 from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
 
 
 class ProxySnackbar(ProxyToolkitObject):
-    """ The abstract definition of a proxy Snackbar object.
+    """The abstract definition of a proxy Snackbar object."""
 
-    """
     #: A reference to the declaration.
     declaration = ForwardTyped(lambda: Snackbar)
 
@@ -42,18 +38,17 @@ class ProxySnackbar(ProxyToolkitObject):
 
 
 class Snackbar(ToolkitObject):
-    """ A toast is a view containing a quick little message for the user.
-    """
+    """A toast is a view containing a quick little message for the user."""
 
     #: Text to display
     #: if this node has a child view this is ignored
-    text = d_(Unicode())
+    text = d_(Str())
 
     #: Text to display in the action button
-    action_text = d_(Unicode())
+    action_text = d_(Str())
 
     #: Color for the action text button
-    action_text_color = d_(Unicode())
+    action_text_color = d_(Str())
 
     #: Duration to display in ms or 0 for infinite
     duration = d_(Int(3000))
@@ -73,13 +68,8 @@ class Snackbar(ToolkitObject):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('text', 'duration', 'action_text', 'action_text_color', 'show')
+    @observe("text", "duration", "action_text", "action_text_color", "show")
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(Snackbar, self)._update_proxy(change)
-
-
-
+        super()._update_proxy(change)

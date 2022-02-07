@@ -9,9 +9,7 @@ Created on July 8, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed, ForwardTyped, Constant, Unicode, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Constant, Str, observe, set_default
 
 from .text_view import TextView, ProxyTextView
 from .button import Button, ProxyButton
@@ -19,9 +17,8 @@ from .toggle_button import ToggleButton, ProxyToggleButton
 
 
 class ProxyIcon(ProxyTextView):
-    """ The abstract definition of a proxy Icon object.
+    """The abstract definition of a proxy Icon object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Icon)
 
@@ -37,9 +34,8 @@ class ProxyIconToggleButton(ProxyToggleButton):
 
 
 class Icon(TextView):
-    """ A simple control for displaying a Icon.
+    """A simple control for displaying a Icon."""
 
-    """
     #: A reference to the ProxyIcon object.
     proxy = Typed(ProxyIcon)
 

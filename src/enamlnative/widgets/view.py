@@ -10,8 +10,17 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed, ForwardTyped, Coerced, Bool, Int, Tuple, Event, Float, Unicode,
-    Enum, observe
+    Typed,
+    ForwardTyped,
+    Coerced,
+    Bool,
+    Int,
+    Tuple,
+    Event,
+    Float,
+    Str,
+    Enum,
+    observe,
 )
 
 from enaml.core.declarative import d_
@@ -19,33 +28,38 @@ from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
 
 
 LAYOUT_GRAVITIES = {
-    'top', 'left', 'right',
-    'bottom', 'center',
-    'end', 'start', 'no_gravity',
-    'fill_horizontal'
+    "top",
+    "left",
+    "right",
+    "bottom",
+    "center",
+    "end",
+    "start",
+    "no_gravity",
+    "fill_horizontal",
 }
 
 LAYOUT_GRAVITIES = {
-    'no_gravity': 0,
-    'center_horizontal': 1,
-    'center_vertical': 16,
-    'center': 11,
-    'fill': 119,
-    'fill_horizontal': 7,
-    'fill_vertical': 112,
-    'top': 48,
-    'bottom': 80,
-    'left': 3,
-    'right': 5,
-    'start': 8388611,
-    'end': 8388613
+    "no_gravity": 0,
+    "center_horizontal": 1,
+    "center_vertical": 16,
+    "center": 11,
+    "fill": 119,
+    "fill_horizontal": 7,
+    "fill_vertical": 112,
+    "top": 48,
+    "bottom": 80,
+    "left": 3,
+    "right": 5,
+    "start": 8388611,
+    "end": 8388613,
 }
 
 
 def coerce_size(v):
-    if v == 'match_parent':
+    if v == "match_parent":
         return -1
-    elif v == 'wrap_content':
+    elif v == "wrap_content":
         return -2
     return int(v)
 
@@ -60,9 +74,8 @@ def coerce_gravity(v):
 
 
 class ProxyView(ProxyToolkitObject):
-    """ The abstract definition of a proxy relative layout object.
+    """The abstract definition of a proxy relative layout object."""
 
-    """
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: View)
 
@@ -146,10 +159,11 @@ class ProxyView(ProxyToolkitObject):
 
 
 class View(ToolkitObject):
-    """ View is a view group that displays
-        child views in relative positions.
+    """View is a view group that displays
+    child views in relative positions.
 
     """
+
     #: Widget is enabled
     enabled = d_(Bool(True))
 
@@ -194,13 +208,13 @@ class View(ToolkitObject):
     alpha = d_(Float(1.0, strict=False))
 
     #: Initial widget style
-    style = d_(Unicode())
+    style = d_(Str())
 
     #: Background style
-    background_style = d_(Unicode())
+    background_style = d_(Str())
 
     #: Background color
-    background_color = d_(Unicode())
+    background_color = d_(Str())
 
     # -------------------------------------------------------------------------
     # Layout
@@ -232,11 +246,10 @@ class View(ToolkitObject):
 
     #: The Position property tells Flexbox how you want your item to be
     #: positioned within its parent.
-    position = d_(Enum('relative', 'absolute'))
+    position = d_(Enum("relative", "absolute"))
 
     #: How to align children along the cross axis of their container
-    align_self = d_(Enum('auto', 'stretch', 'flex_start',
-                         'flex_end', 'center'))
+    align_self = d_(Enum("auto", "stretch", "flex_start", "flex_end", "center"))
 
     #: The FlexBasis property is an axis-independent way of providing the
     #: default size of an item on the main axis. Setting the FlexBasis of a
@@ -255,16 +268,42 @@ class View(ToolkitObject):
     # -------------------------------------------------------------------------
     # Observers
     # -------------------------------------------------------------------------
-    @observe('enabled', 'clickable', 'long_clickable', 'focusable',
-             'animate', 'animations', 'key_events', 'touch_events', 'visible',
-             'background_color', 'alpha', 'width', 'height', 'min_height', 
-             'min_width', 'max_height', 'max_width', 'x', 'y', 'z', 'gravity', 
-             'top', 'bottom', 'right', 'left', 'margin', 'padding', 
-             'flex_basis', 'flex_grow', 'flex_shrink', 'align_self',
-             'position', 'background_style')
+    @observe(
+        "enabled",
+        "clickable",
+        "long_clickable",
+        "focusable",
+        "animate",
+        "animations",
+        "key_events",
+        "touch_events",
+        "visible",
+        "background_color",
+        "alpha",
+        "width",
+        "height",
+        "min_height",
+        "min_width",
+        "max_height",
+        "max_width",
+        "x",
+        "y",
+        "z",
+        "gravity",
+        "top",
+        "bottom",
+        "right",
+        "left",
+        "margin",
+        "padding",
+        "flex_basis",
+        "flex_grow",
+        "flex_shrink",
+        "align_self",
+        "position",
+        "background_style",
+    )
     def _update_proxy(self, change):
-        """ An observer which sends the state change to the proxy.
+        """An observer which sends the state change to the proxy."""
 
-        """
-        # The superclass implementation is sufficient.
-        super(View, self)._update_proxy(change)
+        super()._update_proxy(change)
