@@ -224,8 +224,8 @@ public class AssetExtractor {
             //LZ4Factory factory = LZ4Factory.fastestInstance();
             //LZ4FastDecompressor decompressor = factory.fastDecompressor();
             File tarFile = new File(asset);
-            String extractDir = mContext.getCacheDir().getPath();
-            //String extractDir = (tarFile).getParent();
+            //String extractDir = mContext.getCacheDir().getPath();
+            String extractDir = (tarFile).getParent();
             // Create a TarInputStream
             TarInputStream tis = new TarInputStream(new FileInputStream(tarFile));
             TarEntry entry;

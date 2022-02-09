@@ -7,7 +7,7 @@
     debug the Python code running on the Android device using logcat.
 
 */
-
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <jni.h>
 #include <android/log.h>
@@ -25,7 +25,7 @@ static PyObject* mImpLoadDynamic;
 static PyObject* mNativehooksModule;
 static int pfd[2];
 static pthread_t mLogThread;
-static const char *tag = "pybridge";
+static const char *tag = "py";
 #define LOG(x) __android_log_write(ANDROID_LOG_INFO, tag, (x))
 
 /**
@@ -266,7 +266,7 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
     // Build paths for the Python interpreter
     char paths[512];
     // Remove extra paths, the smaller the search path the faster the import
-    snprintf(paths, sizeof(paths),"%s:%s/site-packages", cachepath, cachepath);
+    snprintf(paths, sizeof(paths),"%s:%s/site-packages", assetspath, assetspath);
 
     // Set JNI path
     setenv("ASSETS", assetspath, 1);

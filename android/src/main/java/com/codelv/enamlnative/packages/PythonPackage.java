@@ -75,6 +75,10 @@ public class PythonPackage implements EnamlPackage {
             //protected String doInBackground(String... dirs) {
             // Extract python files from assets
             String path = "python";
+            // Get the extracted assets directory
+            String assetsPath = mActivity.getApplicationInfo().dataDir + "/assets/"+ path;
+            String cachePath = mActivity.getCacheDir().getPath();
+            String nativePath = mActivity.getApplicationInfo().nativeLibraryDir;
 
             AssetExtractor assetExtractor = new AssetExtractor(mActivity);
 
@@ -88,8 +92,8 @@ public class PythonPackage implements EnamlPackage {
                 e.printStackTrace();
             }
 
-            File pyc = new File(mActivity.getCacheDir().getPath()+"/main.pyc");
-            File py = new File(mActivity.getCacheDir().getPath()+"/main.py");
+            File pyc = new File(assetsPath + "/main.pyc");
+            File py = new File(assetsPath + "/main.py");
 
             // If assets version changed, remove the old, and copy the new ones
             if (assetExtractor.getAssetsVersion() != installTime || !(pyc.exists()||py.exists())) {
@@ -105,12 +109,6 @@ public class PythonPackage implements EnamlPackage {
                 // Start the Python interpreter
                 //publishProgress("Loading... Please wait.");
             }
-
-
-            // Get the extracted assets directory
-            String assetsPath = mActivity.getApplicationInfo().dataDir + "/assets/"+ path;
-            String cachePath = mActivity.getCacheDir().getPath();
-            String nativePath = mActivity.getApplicationInfo().nativeLibraryDir;
 
             // Initialize python
             // Note: This must be NOT done in the UI thread!
