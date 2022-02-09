@@ -9,7 +9,7 @@ Created on July 6, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.image_view import ProxyImageView
 
@@ -18,7 +18,7 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaStaticMethod
 
 
 class ImageView(View):
-    __nativeclass__ = set_default("android.widget.ImageView")
+    __nativeclass__ = "android.widget.ImageView"
     setImageAlpha = JavaMethod("int")
     setColorFilter = JavaMethod("int")
     setCropToPadding = JavaMethod("boolean")
@@ -35,16 +35,16 @@ class ImageView(View):
 
 
 class Drawable(JavaBridgeObject):
-    __nativeclass__ = set_default("android.graphics.drawable.Drawable")
+    __nativeclass__ = "android.graphics.drawable.Drawable"
     onDrawableLoaded = JavaCallback("android.graphics.drawable.Drawable")
 
 
 class Bitmap(JavaBridgeObject):
-    __nativeclass__ = set_default("android.graphics.Bitmap")
+    __nativeclass__ = "android.graphics.Bitmap"
 
 
 class Icon(JavaBridgeObject):
-    __nativeclass__ = set_default("android.graphics.drawable.Icon")
+    __nativeclass__ = "android.graphics.drawable.Icon"
     createWithFilePath = JavaMethod(
         "java.lang.String", returns="android.graphics.drawable.Icon"
     )
@@ -54,7 +54,7 @@ class Icon(JavaBridgeObject):
 
 
 class Glide(JavaBridgeObject):
-    __nativeclass__ = set_default("com.bumptech.glide.Glide")
+    __nativeclass__ = "com.bumptech.glide.Glide"
 
     with_ = JavaStaticMethod(
         "android.view.View", returns="com.bumptech.glide.RequestManager"
@@ -65,12 +65,12 @@ class Glide(JavaBridgeObject):
 
 
 class RequestManager(JavaBridgeObject):
-    __nativeclass__ = set_default("com.bumptech.glide.RequestManager")
+    __nativeclass__ = "com.bumptech.glide.RequestManager"
     load = JavaMethod("java.lang.String", returns="com.bumptech.glide.RequestBuilder")
 
 
 class RequestBuilder(JavaBridgeObject):
-    __nativeclass__ = set_default("com.bumptech.glide.RequestBuilder")
+    __nativeclass__ = "com.bumptech.glide.RequestBuilder"
     asBitmap = JavaMethod(returns="android.graphics.Bitmap")
     into = JavaMethod("android.widget.ImageView")
 

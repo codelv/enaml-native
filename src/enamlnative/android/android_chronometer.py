@@ -69,7 +69,7 @@ class AndroidChronometer(AndroidTextView, ProxyChronometer):
     def set_base(self, base, shift=0):
         #: TODO: This is wrong becuase it uses system uptime
         #: instead of the actual time
-        s = long((base - UTC_START).total_seconds()) - shift
+        s = int((base - UTC_START).total_seconds()) - shift
         self.widget.setBase(s)
 
     def set_format(self, format):

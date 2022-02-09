@@ -11,7 +11,9 @@ Created on June 21, 2017
 """
 import msgpack
 import functools
-from atom.api import Atom, Property, Instance, ForwardInstance, Dict, Str, Tuple, Int
+import asyncio
+from typing import ClassVar
+from atom.api import Atom, Property, Instance, ForwardInstance, Dict, Str, Int
 from weakref import WeakValueDictionary
 from contextlib import contextmanager
 
@@ -176,28 +178,32 @@ class BridgeMethod(Property):
         method_name, method_args = self.pack_args(obj, *args, **kwargs)
 
         #: Create a future to retrieve the result if needed
-        result = obj.__app__.create_future() if self.__returns__ else None
-
-        if result:
+        app = obj.__app__
+        if self.__returns__:
+            result = app.create_future()
             #: Store in local cache or global cache (weakref) removes it
             #: resulting in a Reference error when the result is returned
-            self.__cache__[result.__id__] = result
+            result_id = result.__id__
+            self.__cache__[result_id] = result
 
-            def resolve(r, f=result):
+            def resolve(r):
                 #: Remove from local cache to free future
-                del self.__cache__[f.__id__]
+                del self.__cache__[result_id]
 
             #: Delete from the local cache once resolved.
-            result.then(resolve)
+            result.add_done_callback(resolve)
+        else:
+            result = None
+            result_id = 0
 
-        obj.__app__.send_event(
+        app.send_event(
             Command.METHOD,  #: method
             obj.__id__,
-            result.__id__ if result else 0,
+            result_id,
             self.__bridge_id__,
-            obj.__prefix__ + method_name,  #: method name
+            f"{obj.__prefix__}{method_name}",  #: method name
             method_args,  #: args
-            **kwargs  #: kwargs to send_event
+            **kwargs,  #: kwargs to send_event
         )
         return result
 
@@ -253,28 +259,31 @@ class BridgeStaticMethod(Property):
         app = get_app_class().instance()
 
         #: Create a future to retrieve the result if needed
-        result = app.create_future() if self.__returns__ else None
-
-        if result:
+        if self.__returns__:
+            result = app.create_future()
+            result_id = result.__id__
             #: Store in local cache or global cache (weakref) removes it
             #: resulting in a Reference error when the result is returned
-            self.__cache__[result.__id__] = result
+            self.__cache__[result_id] = result
 
-            def resolve(r, f=result):
+            def resolve(r):
                 #: Remove from local cache to free future
-                del self.__cache__[f.__id__]
+                del self.__cache__[result_id]
 
             #: Delete from the local cache once resolved.
-            result.then(resolve)
+            result.add_done_callback(resolve)
+        else:
+            result = None
+            result_id = 0
 
         app.send_event(
             Command.STATIC_METHOD,  #: method
-            self.__owner__.__nativeclass__.default_value_mode[1],
-            result.__id__ if result else 0,
+            self.__owner__.__nativeclass__,
+            result_id,
             self.__bridge_id__,
             method_name,  #: method name
             method_args,  #: args
-            **kwargs  #: kwargs to send_event
+            **kwargs,  #: kwargs to send_event
         )
         return result
 
@@ -325,7 +334,7 @@ class BridgeField(Property):
             Command.FIELD,  #: method
             obj.__id__,
             self.__bridge_id__,
-            obj.__prefix__ + self.name,  #: method name
+            f"{obj.__prefix__}{self.name}",  #: method name
             [msgpack_encoder(self.__signature__, arg)],  #: args
         )
         self.__bridge_cached_ = True
@@ -387,9 +396,7 @@ class BridgeCallback(BridgeMethod):
         callback = obj.__callbacks__.get(self.name)
         if not callback:
             #: Try to get the default callback
-            key = "_impl_{}".format(self.name)
-            if hasattr(obj, key):
-                callback = getattr(obj, key)
+            callback = getattr(obj, f"_impl_{self.name}", None)
 
         if callback:
             return callback(*args)
@@ -432,10 +439,10 @@ class BridgeObject(Atom):
     __slots__ = ("__weakref__",)
 
     #: Native Class name
-    __nativeclass__ = Str()
+    __nativeclass__: ClassVar[str] = ""
 
     #: Constructor signature
-    __signature__ = Tuple()
+    __signature__: ClassVar[tuple[str]]
 
     #: Suppressed methods / fields
     __suppressed__ = Dict()
@@ -477,11 +484,15 @@ class BridgeObject(Atom):
         if __id__ is not None:
             if isinstance(__id__, int):
                 kwargs["__id__"] = __id__
-            elif isinstance(__id__, self.__app__.loop.future):
+            elif isinstance(__id__, asyncio.Future):
                 #: If a future is given don't store this object in the cache
                 #: until after the future completes
                 f = __id__
-                f.then(lambda *args, **kwargs: CACHE.update({f.__id__: self}))
+
+                def set_result(f):
+                    CACHE[f.__id__] = self
+
+                f.add_done_callback(set_result)
 
                 #: The future is used to return the result
                 kwargs["__id__"] = f.__id__
@@ -492,8 +503,7 @@ class BridgeObject(Atom):
             else:
                 raise TypeError(
                     "Invalid __id__ reference, expected an int or"
-                    "a future/deferred object, got: "
-                    "{}".format(__id__)
+                    f"a future/deferred object, got: {__id__}"
                 )
 
         #: Construct the object
@@ -518,11 +528,12 @@ class BridgeObject(Atom):
         """Destroy this object and send a command to destroy the actual object
         reference the bridge implementation holds (allowing it to be released).
         """
-        self.__app__.send_event(
-            Command.DELETE,  #: method
-            self.__id__,  #: id to assign in java
-        )
-        _cleanup_id(self)
+        ref = self.__id__
+        self.__app__.send_event(Command.DELETE, ref)
+        try:
+            del CACHE[ref]
+        except KeyError as e:
+            pass
 
 
 class NestedBridgeObject(BridgeObject):
@@ -550,7 +561,7 @@ class NestedBridgeObject(BridgeObject):
 
     def __init__(self, root, attr, **kwargs):
         kwargs["__id__"] = root.getId()
-        kwargs["__prefix__"] = attr + "."
+        kwargs["__prefix__"] = f"{attr}."
         Atom.__init__(self, **kwargs)
 
     def __del__(self):

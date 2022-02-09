@@ -19,7 +19,6 @@ from atom.api import (
     Event,
     Enum,
     observe,
-    set_default,
 )
 
 from enaml.core.declarative import d_

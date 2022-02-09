@@ -147,38 +147,24 @@ class CameraManager(SystemService):
     # Public api
     # -------------------------------------------------------------------------
     @classmethod
-    def request_permission(cls):
+    async def request_permission(cls) -> bool:
         """Requests permission and returns an future result that returns a
         boolean indicating if all the given permission were granted or denied.
 
         """
         app = AndroidApplication.instance()
-        f = app.create_future()
-
-        def on_result(perms):
-            f.set_result(perms.get(cls.CAMERA_PERMISSION, False))
-
-        def on_has_perm(result):
-            if result:
-                f.set_result(True)
-            else:
-                app.request_permissions((cls.CAMERA_PERMISSION,)).then(on_result)
-
-        app.has_permission(cls.CAMERA_PERMISSION).then(on_has_perm)
-
-        return f
+        has_perm = await app.has_permission(cls.CAMERA_PERMISSION)
+        if has_perm:
+            return True
+        perms = await app.request_permissions(cls.CAMERA_PERMISSION)
+        return perms.get(cls.CAMERA_PERMISSION) is True
 
     @classmethod
-    def get_cameras(cls):
+    async def get_cameras(cls) -> list:
         """Return the list of cameras this device supports"""
         app = AndroidApplication.instance()
-        f = app.create_future()
-
-        def on_result(mgr):
-            mgr.getCameraIdList().then(f.set_result)
-
-        cls.get().then(on_result)
-        return f
+        mgr = await cls.get()
+        return await mgr.getCameraIdList()
 
 
 # class Surface(JavaBridgeObject):
@@ -234,25 +220,22 @@ class AndroidCameraView(AndroidTextureView, ProxyCameraView):
 
     def set_preview(self, show):
         if show:
-            self.start_camera_preview()
+            app = AndroidApplication.instance()
+            app.deferred_call(self.start_camera_preview)
         else:
             self.stop_camera_preview()
 
-    def start_camera_preview(self):
-        def on_allowed(camera):
-            if camera is None:
-                raise RuntimeError(
-                    "You must add the CameraPackage to your " "apps MainActiviy"
-                )
-            api = self.api = CameraPackage(__id__=camera)
-            api.startCapturePreview(self.widget, camera)
-
-        def on_result(allowed):
-            self.allowed = allowed
-            if allowed:
-                CameraPackage.getInstance().then(on_allowed)
-
-        CameraManager.request_permission().then(on_result)
+    async def start_camera_preview(self):
+        allowed = self.allowed = await CameraManager.request_permission()
+        if not allowed:
+            return
+        camera_id = await CameraPackage.getInstance()
+        if camera_id is None:
+            raise RuntimeError(
+                "You must add the CameraPackage to your apps MainActiviy"
+            )
+        api = self.api = CameraPackage(__id__=camera_id)
+        api.startCapturePreview(self.widget, camera_id)
 
     def stop_camera_preview(self):
         if self.api:

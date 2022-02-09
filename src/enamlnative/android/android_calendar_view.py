@@ -75,17 +75,17 @@ class AndroidCalendarView(AndroidFrameLayout, ProxyCalendarView):
     # -------------------------------------------------------------------------
     def set_date(self, date):
         #: Convert date tuple to long
-        s = long((date - UTC_START).total_seconds() * 1000)
+        s = int((date - UTC_START).total_seconds() * 1000)
         self.widget.setDate(s)
 
     def set_min_date(self, date):
         #: Convert to long
-        s = long((date - UTC_START).total_seconds() * 1000)
+        s = int((date - UTC_START).total_seconds() * 1000)
         self.widget.setMinDate(s)
 
     def set_max_date(self, date):
         #: Convert to long
-        s = long((date - UTC_START).total_seconds() * 1000)
+        s = int((date - UTC_START).total_seconds() * 1000)
         self.widget.setMaxDate(s)
 
     def set_first_day_of_week(self, day):

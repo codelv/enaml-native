@@ -218,7 +218,7 @@ class AndroidHttpRequest(HttpRequest):
         else:
             raise NotImplementedError(
                 "You must manually encode the request "
-                "body for '{}'".format(self.content_type)
+                f"body for '{self.conntent_type}'"
             )
 
     def on_start(self):

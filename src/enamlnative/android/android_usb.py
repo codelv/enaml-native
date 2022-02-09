@@ -9,13 +9,13 @@ Created on Feb 11, 2018
 
 @author: jrm
 """
-from atom.api import Dict, set_default
+from atom.api import Dict
 from .bridge import JavaBridgeObject, JavaMethod
 from .android_content import Context, SystemService
 
 
 class UsbDevice(JavaBridgeObject):
-    __nativeclass__ = set_default("android.hardware.usb.UsbDevice")
+    __nativeclass__ = "android.hardware.usb.UsbDevice"
     info = Dict()
     getDeviceName = JavaMethod(returns="java.lang.String")
     getDeviceId = JavaMethod(returns="int")
@@ -26,7 +26,7 @@ class UsbDevice(JavaBridgeObject):
 
 
 class UsbDeviceConnection(JavaBridgeObject):
-    __signature__ = set_default("android.hardware.usb.UsbDeviceConnection")
+    __signature__ = "android.hardware.usb.UsbDeviceConnection"
     close = JavaMethod()
 
 
@@ -34,7 +34,7 @@ class UsbManager(SystemService):
     """Use UsbManger.get().then(on_ready) to get an instance."""
 
     SERVICE_TYPE = Context.USB_SERVICE
-    __nativeclass__ = set_default("android.hardware.usb.UsbManager")
+    __nativeclass__ = "android.hardware.usb.UsbManager"
 
     getAccessoryList = JavaMethod(returns="android.hardware.usb.UsbAccessory[")
     getDeviceList = JavaMethod(returns="java.util.HashMap")

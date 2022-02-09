@@ -79,9 +79,8 @@ class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
 
         """
         d = self.declaration
-        Snackbar.make(self.parent_widget(), d.text, 0 if d.duration else -2).then(
-            self.on_widget_created
-        )
+        f = Snackbar.make(self.parent_widget(), d.text, 0 if d.duration else -2)
+        f.add_done_callback(self.on_widget_created)
 
     def init_widget(self):
         """Our widget may not exist yet so we have to diverge from the normal
@@ -113,13 +112,14 @@ class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
         if d.show:
             self.set_show(d.show)
 
-    def on_widget_created(self, ref):
+    def on_widget_created(self, f):
         """Using Snackbar.make returns async so we have to
         initialize it later.
 
         """
+        snackbar_id = f.result()
         d = self.declaration
-        self.widget = Snackbar(__id__=ref)
+        self.widget = Snackbar(__id__=snackbar_id)
         self.init_widget()
 
     def on_shown(self, view):

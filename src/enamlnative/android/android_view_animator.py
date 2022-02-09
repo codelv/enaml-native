@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-import jnius
-from atom.api import Typed, set_default
+# import jnius
+from atom.api import Typed
 
 from enamlnative.widgets.view_animator import ProxyViewAnimator
 
@@ -18,7 +18,7 @@ from .android_frame_layout import AndroidFrameLayout, FrameLayout
 
 
 class ViewAnimator(FrameLayout):
-    __nativeclass__ = set_default("android.widget.ViewAnimator")
+    __nativeclass__ = "android.widget.ViewAnimator"
 
 
 class AndroidViewAnimator(AndroidFrameLayout, ProxyViewAnimator):

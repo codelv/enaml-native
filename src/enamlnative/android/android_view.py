@@ -171,7 +171,7 @@ class AndroidView(AndroidToolkitObject, ProxyView):
         # have read expressions declared. This saves a lot of time and
         # simplifies widget initialization code
         for k, v in self.get_declared_items():
-            handler = getattr(self, "set_" + k, None)
+            handler = getattr(self, f"set_{k}", None)
             if handler:
                 handler(v)
 

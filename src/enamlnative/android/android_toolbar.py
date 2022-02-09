@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.toolbar import ProxyToolbar
 
@@ -21,8 +21,8 @@ package = "androidx.appcompat.widget"
 
 
 class Toolbar(ViewGroup):
-    __nativeclass__ = set_default(f"{package}.Toolbar")
-    __signature__ = set_default(("android.content.Context",))
+    __nativeclass__ = f"{package}.Toolbar"
+    __signature__ = ("android.content.Context",)
     setTitle = JavaMethod("java.lang.CharSequence")
     setSubtitle = JavaMethod("java.lang.CharSequence")
     setSubtitleTextColor = JavaMethod("android.graphics.Color")
@@ -39,7 +39,7 @@ class Toolbar(ViewGroup):
 
 
 class ToolbarLayoutParams(MarginLayoutParams):
-    __nativeclass__ = set_default(f"{package}.Toolbar$LayoutParams")
+    __nativeclass__ = f"{package}.Toolbar$LayoutParams"
     gravity = JavaField("int")
 
 

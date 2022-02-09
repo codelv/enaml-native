@@ -167,7 +167,7 @@ class Flexbox(ViewGroup):
     # layout_height = set_default('match_parent')
 
     #: How to align children along the cross axis of their container
-    align_items = d_(Enum("stretch", "flex_start", "flex_end", "center"))
+    align_items = d_(Enum("flex_start", "flex_end", "center", "stretch"))
 
     #: How to align children along the cross axis of their container
     # align_self = d_(Enum('stretch', 'flex_start', 'flex_end', 'center'))

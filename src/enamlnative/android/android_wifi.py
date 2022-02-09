@@ -94,7 +94,7 @@ class WifiManager(SystemService):
     # Public api
     # -------------------------------------------------------------------------
     @classmethod
-    def is_wifi_enabled(cls):
+    async def is_wifi_enabled(cls):
         """Check if wifi is currently enabled.
 
         Returns
@@ -104,26 +104,19 @@ class WifiManager(SystemService):
 
         """
         app = AndroidApplication.instance()
-        f = app.create_future()
 
-        def on_permission_result(result):
-            if not result:
-                f.set_result(None)
-                return
-
-            def on_ready(m):
-                m.isWifiEnabled().then(f.set_result)
-
-            WifiManager.get().then(on_ready)
-
-        #: Check permission
-        WifiManager.request_permission([WifiManager.PERMISSION_ACCESS_WIFI_STATE]).then(
-            on_permission_result
+        has_perm = await WifiManager.request_permission(
+            WifiManager.PERMISSION_ACCESS_WIFI_STATE
         )
-        return f
+
+        if not has_perm:
+            raise RuntimeError("Wifi permission denied")
+
+        mgr = await WifiManager.get()
+        return await mgr.isWifiEnabled()
 
     @classmethod
-    def set_wifi_enabled(cls, state=True):
+    async def set_wifi_enabled(cls, state=True):
         """Set the wifi enabled state.
 
         Returns
@@ -133,27 +126,17 @@ class WifiManager(SystemService):
 
         """
         app = AndroidApplication.instance()
-        f = app.create_future()
-
-        def on_permission_result(result):
-            if not result:
-                #: Permission denied
-                f.set_result(None)
-                return
-
-            def on_ready(m):
-                m.setWifiEnabled(state).then(f.set_result)
-
-            WifiManager.get().then(on_ready)
-
-        #: Check permission
-        WifiManager.request_permission([WifiManager.PERMISSION_CHANGE_WIFI_STATE]).then(
-            on_permission_result
+        allowed = await WifiManager.request_permission(
+            WifiManager.PERMISSION_CHANGE_WIFI_STATE
         )
-        return f
+        if not allowed:
+            raise RuntimeError("Permission to change wifi state is not allowed")
+
+        mgr = await WifiManager.get()
+        return await m.setWifiEnabled(state)
 
     @classmethod
-    def get_networks(cls):
+    async def get_networks(cls):
         """Get the wifi networks currently available.
 
         Returns
@@ -165,70 +148,48 @@ class WifiManager(SystemService):
 
         """
         app = AndroidApplication.instance()
+        allowed = await WifiManager.request_permission(WifiManager.PERMISSIONS_REQUIRED)
+        if not allowed:
+            raise RuntimeError("Permission to get networks is not allowed")
+
+        mgr = await WifiManager.get()
+
+        # Enable if needed
+        enabled = await mgr.setWifiEnabled(True)
+        if not enabled:
+            raise RuntimeError("Could not enable wifi")
+
+        # Register a receiver so we know when the scan
+        # is complete
+        receiver = BroadcastReceiver()
+        receiver.setReceiver(receiver.getId())
+
+        scan_results = app.create_future()
+
+        def on_scan_ready(f):
+            scan_results.set_result(f.result())
+
+        def on_scan_complete(context, intent):
+            # Finally, pull the scan results
+            mgr.getScanResults().add_done_callback(on_scan_ready)
+
+        # Hook up a callback that's fired when the scan
+        # results are ready
+        receiver.onReceive.connect(on_scan_complete)
+
+        # Register the receiver
+        intent_filter = IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
         activity = app.widget
-        f = app.create_future()
-
-        def on_permission_result(result):
-            if not result:
-                f.set_result(None)
-                return
-
-            def on_ready(mgr):
-                #: Register a receiver so we know when the scan
-                #: is complete
-                receiver = BroadcastReceiver()
-                receiver.setReceiver(receiver.getId())
-
-                def on_scan_complete(context, intent):
-                    #: Finally, pull the scan results
-                    mgr.getScanResults().then(f.set_result)
-
-                    #: Cleanup receiver
-                    mgr._receivers.remove(receiver)
-                    activity.unregisterReceiver(receiver)
-
-                def on_wifi_enabled(enabled):
-                    if not enabled:
-                        #: Access denied or failed to enable
-                        f.set_result(None)
-
-                        #: Cleanup receiver
-                        mgr._receivers.remove(receiver)
-                        activity.unregisterReceiver(receiver)
-                        return
-
-                    #: Hook up a callback that's fired when the scan
-                    #: results are ready
-                    receiver.onReceive.connect(on_scan_complete)
-
-                    #: Save a reference as this must stay alive
-                    mgr._receivers.append(receiver)
-
-                    #: Register the receiver
-                    intent_filter = IntentFilter(
-                        WifiManager.SCAN_RESULTS_AVAILABLE_ACTION
-                    )
-                    activity.registerReceiver(receiver, intent_filter)
-
-                    #: Trigger a scan (which "should" eventually
-                    #: call the on on_scan_complete)
-                    mgr.startScan()
-
-                #: Enable if needed
-                mgr.setWifiEnabled(True).then(on_wifi_enabled)
-
-            #: Get the service
-            WifiManager.get().then(on_ready)
-
-        #: Request permissions
-        WifiManager.request_permission(WifiManager.PERMISSIONS_REQUIRED).then(
-            on_permission_result
-        )
-
-        return f
+        activity.registerReceiver(receiver, intent_filter)
+        try:
+            # Trigger a scan which "should" eventually call on_scan_complete
+            mgr.startScan()
+            return await scan_results
+        finally:
+            activity.unregisterReceiver(receiver)
 
     @classmethod
-    def disconnect(cls):
+    async def disconnect(cls):
         """Disconnect from the current network (if connected).
 
         Returns
@@ -239,29 +200,16 @@ class WifiManager(SystemService):
                 permission is denied.
 
         """
-        app = AndroidApplication.instance()
-        f = app.create_future()
-
-        def on_permission_result(result):
-            if not result:
-                f.set_result(None)
-                return
-
-            def on_ready(mgr):
-                mgr.disconnect().then(f.set_result)
-
-            #: Get the service
-            WifiManager.get().then(on_ready)
-
-        #: Request permissions
-        WifiManager.request_permission([WifiManager.PERMISSION_CHANGE_WIFI_STATE]).then(
-            on_permission_result
+        allowed = await WifiManager.request_permission(
+            WifiManager.PERMISSION_CHANGE_WIFI_STATE
         )
-
-        return f
+        if not allowed:
+            raise RuntimeError("Permission to toggle wifi state not allowed")
+        mgr = await WifiManager.get()
+        return await mgr.disconnect()
 
     @classmethod
-    def connect(cls, ssid, key=None, **kwargs):
+    async def connect(cls, ssid, key=None, **kwargs):
         """Connect to the given ssid using the key (if given).
 
         Returns
@@ -271,69 +219,39 @@ class WifiManager(SystemService):
 
         """
         app = AndroidApplication.instance()
-        f = app.create_future()
+        allowed = await WifiManager.request_permission(WifiManager.PERMISSIONS_REQUIRED)
+        if not allowed:
+            raise RuntimeError("Permission to toggle wifi state not allowed")
 
         config = WifiConfiguration()
-        config.SSID = '"{}"'.format(ssid)
+        config.SSID = f'"{ssid}"'
         if key is not None:
-            config.preSharedKey = '"{}"'.format(key)
+            config.preSharedKey = f'"{ssid}"'
 
         #: Set any other parameters
         for k, v in kwargs.items():
             setattr(config, k, v)
 
-        def on_permission_result(result):
-            if not result:
-                f.set_result(None)
-                return
+        mgr = await WifiManager.get()
 
-            def on_ready(mgr):
-                def on_disconnect(result):
-                    if not result:
-                        f.set_result(None)
-                        return  #: Done
-                    mgr.setWifiEnabled(True).then(on_wifi_enabled)
+        #: Enable if needed
+        disconnected = await mgr.disconnect_()
+        if not disconnected:
+            raise RuntimeError("Could not disconnect wifi")
 
-                def on_wifi_enabled(enabled):
-                    if not enabled:
-                        #: Access denied or failed to enable
-                        f.set_result(None)
-                        return
-                    mgr.addNetwork(config).then(on_network_added)
+        enabled = await mgr.setWifiEnabled(True)
+        if not enabled:
+            raise RuntimeError("Could not enable wifi")
 
-                def on_network_added(net_id):
-                    if net_id == -1:
-                        f.set_result(False)
-                        print(
-                            "Warning: Invalid network "
-                            "configuration id {}".format(net_id)
-                        )
-                        return
-                    mgr.enableNetwork(net_id, True).then(on_network_enabled)
+        net_id = await mgr.addNetwork(config)
+        if net_id == -1:
+            raise ValueError(f"Warning: Invalid network configuration")
 
-                def on_network_enabled(result):
-                    if not result:
-                        #: TODO: Should probably say
-                        #: which state it failed at...
-                        f.set_result(None)
-                        return
-
-                    mgr.reconnect().then(f.set_result)
-
-                #: Enable if needed
-                mgr.disconnect_().then(on_disconnect)
-
-            #: Get the service
-            WifiManager.get().then(on_ready)
-
-        #: Request permissions
-        WifiManager.request_permission(WifiManager.PERMISSIONS_REQUIRED).then(
-            on_permission_result
-        )
-        return f
+        net_enabled = await mgr.enableNetwork(net_id, True)
+        return await mgr.reconnect()
 
     @classmethod
-    def get_connection_info(cls):
+    async def get_connection_info(cls):
         """Get info about current wifi connection (if any). Returns
         info such as the IP address, BSSID, link speed, signal, etc..
 
@@ -345,28 +263,17 @@ class WifiManager(SystemService):
 
         """
         app = AndroidApplication.instance()
-        f = app.create_future()
-
-        def on_permission_result(result):
-            if not result:
-                f.set_result(None)
-                return
-
-            def on_ready(mgr):
-                mgr.getConnectionInfo().then(f.set_result)
-
-            #: Get the service
-            WifiManager.get().then(on_ready)
-
-        #: Request permissions
-        WifiManager.request_permission([WifiManager.PERMISSION_ACCESS_WIFI_STATE]).then(
-            on_permission_result
+        allowed = await WifiManager.request_permission(
+            WifiManager.PERMISSION_ACCESS_WIFI_STATE
         )
 
-        return f
+        if not allowed:
+            raise RuntimeError("Access wifi state permission not allowed")
+        mgr = await WifiManager.get()
+        return await mgr.getConnectionInfo()
 
     @classmethod
-    def get_dhcp_info(cls):
+    async def get_dhcp_info(cls):
         """Get info about current DHCP configuration such as DNS servers,
         IP address, and lease duration.
 
@@ -378,44 +285,26 @@ class WifiManager(SystemService):
 
         """
         app = AndroidApplication.instance()
-        f = app.create_future()
-
-        def on_permission_result(result):
-            if not result:
-                f.set_result(None)
-                return
-
-            def on_ready(mgr):
-                mgr.getDhcpInfo().then(f.set_result)
-
-            #: Get the service
-            WifiManager.get().then(on_ready)
-
-        #: Request permissions
-        WifiManager.request_permission([WifiManager.PERMISSION_ACCESS_WIFI_STATE]).then(
-            on_permission_result
+        allowed = await WifiManager.request_permission(
+            WifiManager.PERMISSION_ACCESS_WIFI_STATE
         )
-
-        return f
+        if not allowed:
+            raise RuntimeError("Access wifi state permission not allowed")
+        mgr = await WifiManager.get()
+        return await mgr.getDhcpInfo()
 
     @classmethod
-    def request_permission(cls, permissions):
+    async def request_permission(cls, *permissions) -> bool:
         """Requests permission and returns an future result that returns a
         boolean indicating if all the given permission were granted or denied.
 
         """
         app = AndroidApplication.instance()
-        f = app.create_future()
-
-        def on_result(perms):
-            allowed = True
-            for p in permissions:
-                allowed = allowed and perms.get(p, False)
-            f.set_result(allowed)
-
-        app.request_permissions(permissions).then(on_result)
-
-        return f
+        perms = await app.request_permissions(*permissions)
+        for p in permissions:
+            if not perms.get(p, False):
+                return False
+        return True
 
     def __del__(self):
         """Remove any receivers before destroying"""

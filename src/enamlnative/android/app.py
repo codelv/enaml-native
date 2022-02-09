@@ -9,6 +9,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 """
 import nativehooks  #: Created by the ndk-build in pybridge.c
+from asyncio import Future
 from atom.api import Float, Value, Int, List, Str, Typed, Dict, Event
 from enaml.application import ProxyResolver
 from . import factories
@@ -16,6 +17,8 @@ from .android_activity import Activity
 from .android_window import Window
 from ..core.app import BridgedApplication
 from ..core import bridge
+
+ORIENTATIONS = ("square", "portrait", "landscape")
 
 
 class AndroidApplication(BridgedApplication):
@@ -58,7 +61,7 @@ class AndroidApplication(BridgedApplication):
     _permission_code = Int()
 
     #: Pending permission request listeners
-    _permission_requests = Dict()
+    _permission_requests = Dict(int, Future)
 
     # -------------------------------------------------------------------------
     # Defaults
@@ -93,11 +96,12 @@ class AndroidApplication(BridgedApplication):
         activity.addConfigurationChangedListener(activity.getId())
         activity.onConfigurationChanged.connect(self.on_configuration_changed)
 
-        activity.getWindow().then(self.init_window)
+        self.deferred_call(self.init_window)
 
-    def init_window(self, window):
+    async def init_window(self):
         """ """
-        self.window = Window(__id__=window)
+        window_id = await activity.getWindow()
+        self.window = Window(__id__=window_id)
         self.set_keep_screen_on(self.keep_screen_on)
         if self.statusbar_color:
             self.set_statusbar_color(self.statusbar_color)
@@ -105,59 +109,42 @@ class AndroidApplication(BridgedApplication):
     # -------------------------------------------------------------------------
     # App API Implementation
     # -------------------------------------------------------------------------
-    def has_permission(self, permission):
+    async def has_permission(self, permission: str) -> bool:
         """Return a future that resolves with the result of the permission"""
-        f = self.create_future()
-
-        #: Old versions of android did permissions at install time
+        # Old versions of android did permissions at install time
         if self.api_level < 23:
-            f.set_result(True)
-            return f
+            return True
+        result = await self.widget.checkSelfPermission(permission)
+        return result == Activity.PERMISSION_DENIED
 
-        def on_result(allowed):
-            result = allowed == Activity.PERMISSION_GRANTED
-            self.set_future_result(f, result)
-
-        self.widget.checkSelfPermission(permission).then(on_result)
-
-        return f
-
-    def request_permissions(self, permissions):
+    async def request_permissions(self, *permissions) -> dict[str, bool]:
         """Return a future that resolves with the results
         of the permission requests
 
         """
-        f = self.create_future()
-
-        #: Old versions of android did permissions at install time
+        # Old versions of android did permissions at install time
         if self.api_level < 23:
-            f.set_result({p: True for p in permissions})
-            return f
+            return {p: True for p in permissions}
 
         w = self.widget
         request_code = self._permission_code
         self._permission_code += 1  #: So next call has a unique code
 
-        #: On first request, setup our listener, and request the permission
+        # On first request, setup our listener, and request the permission
         if request_code == 0:
             w.setPermissionResultListener(w.getId())
             w.onRequestPermissionsResult.connect(self._on_permission_result)
 
-        def on_results(code, perms, results):
-            #: Check permissions
-            f.set_result(
-                {p: r == Activity.PERMISSION_GRANTED for (p, r) in zip(perms, results)}
-            )
-
         #: Save a reference
-        self._permission_requests[request_code] = on_results
+        f = self.widget.requestPermissions(permissions, request_code)
+        self._permission_requests[request_code] = f
 
         #: Send out the request
-        self.widget.requestPermissions(permissions, request_code)
+        code, perms, results = await f
+        granted = Activity.PERMISSION_GRANTED
+        return {p: r == granted for p, r in zip(perms, results)}
 
-        return f
-
-    def show_toast(self, msg, long=True):
+    async def show_toast(self, msg, long=True):
         """Show a toast message for the given duration.
         This is an android specific api.
 
@@ -171,11 +158,9 @@ class AndroidApplication(BridgedApplication):
         """
         from .android_toast import Toast
 
-        def on_toast(ref):
-            t = Toast(__id__=ref)
-            t.show()
-
-        Toast.makeText(self, msg, 1 if long else 0).then(on_toast)
+        toast_id = await Toast.makeText(self, msg, 1 if long else 0)
+        t = Toast(__id__=toast_id)
+        t.show()
 
     def on_activity_lifecycle_changed(self, state):
         """Update the state when the android app is paused, resumed, etc..
@@ -206,7 +191,7 @@ class AndroidApplication(BridgedApplication):
         """Handles a screen configuration change."""
         self.width = config["width"]
         self.height = config["height"]
-        self.orientation = ("square", "portrait", "landscape")[config["orientation"]]
+        self.orientation = ORIENTATIONS[config["orientation"]]
 
     # --------------------------------------------------------------------------
     # Bridge API Implementation
@@ -218,23 +203,22 @@ class AndroidApplication(BridgedApplication):
         """
         if not self.build_info:
 
-            def on_build_info(info):
+            def on_build_info(f):
                 """Make sure the build info is ready before we
                 display the view
 
                 """
+                info = f.result()
                 self.dp = info["DISPLAY_DENSITY"]
                 self.width = info["DISPLAY_WIDTH"]
                 self.height = info["DISPLAY_HEIGHT"]
-                self.orientation = ("square", "portrait", "landscape")[
-                    info["DISPLAY_ORIENTATION"]
-                ]
+                self.orientation = ORIENTATIONS[info["DISPLAY_ORIENTATION"]]
                 self.api_level = info["SDK_INT"]
                 self.build_info = info
                 self._show_view()
 
             self.init_widget()
-            self.widget.getBuildInfo().then(on_build_info)
+            self.widget.getBuildInfo().add_done_callback(on_build_info)
         else:
             self._show_view()
 
@@ -255,12 +239,10 @@ class AndroidApplication(BridgedApplication):
 
         """
         #: Get the handler for this request
-        handler = self._permission_requests.get(code, None)
-        if handler is not None:
-            del self._permission_requests[code]
-
+        f = self._permission_requests.pop(code, None)
+        if f is not None:
             #: Invoke that handler with the permission request response
-            handler(code, perms, results)
+            f.set_result((code, perms, results))
 
     def _observe_keep_screen_on(self, change):
         """Sets or clears the flag to keep the screen on."""
@@ -287,12 +269,16 @@ class AndroidApplication(BridgedApplication):
             return
         window.setStatusBarColor(color)
 
-    def get_system_service(self, service):
+    async def get_system_service(self, cls):
         """Wrapper for getSystemService. You MUST
         wrap the class with the appropriate object.
 
         """
-        return self.widget.getSystemService(service)
+        service = cls.instance()
+        if service:
+            return service
+        service_id = await self.widget.getSystemService(cls.SERVICE_TYPE)
+        return cls(__id__=service_id)
 
     # -------------------------------------------------------------------------
     # Plugin API Implementation

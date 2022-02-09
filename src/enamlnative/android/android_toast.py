@@ -56,7 +56,8 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
         """
         d = self.declaration
         if d.text:
-            Toast.makeText(self.get_context(), d.text, 1).then(self.on_make_toast)
+            f = Toast.makeText(self.get_context(), d.text, 1)
+            f.add_done_callback(self.on_make_toast)
             self.made_toast = True
         else:
             self.toast = Toast(self.get_context())
@@ -93,13 +94,14 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
         if view is not None:
             self.toast.setView(view)
 
-    def on_make_toast(self, ref):
+    def on_make_toast(self, f):
         """Using Toast.makeToast returns async so we have to initialize it
         later.
 
         """
+        toast_id = f.result()
         d = self.declaration
-        self.toast = Toast(__id__=ref)
+        self.toast = Toast(__id__=toast_id)
         self.init_widget()
 
     def _refresh_show(self, dt):

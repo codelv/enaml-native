@@ -9,7 +9,7 @@ Created on Jan 28, 2018
 
 @author: jrm
 """
-from atom.api import ForwardInstance, Int, set_default
+from atom.api import ForwardInstance, Int
 
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 from .android_content import Context, SystemService
@@ -37,7 +37,7 @@ class Sensor(JavaBridgeObject):
 
     """
 
-    __nativeclass__ = set_default("android.hardware.Sensor")
+    __nativeclass__ = "android.hardware.Sensor"
 
     #: Reference to the sensor manager
     manager = ForwardInstance(lambda: SensorManager)
@@ -99,7 +99,7 @@ class Sensor(JavaBridgeObject):
     onAccuracyChanged = JavaCallback("android.hardware.Sensor", "int")
 
     @classmethod
-    def get(cls, sensor_type):
+    async def get(cls, sensor_type):
         """Shortcut that acquires the default Sensor of a given type.
 
         Parameters
@@ -115,21 +115,11 @@ class Sensor(JavaBridgeObject):
 
         """
         app = AndroidApplication.instance()
-        f = app.create_future()
-
-        def on_sensor(sid, mgr):
-            if sid is None:
-                f.set_result(None)
-            else:
-                f.set_result(Sensor(__id__=sid, manager=mgr, type=sensor_type))
-
-        SensorManager.get().then(
-            lambda sm: sm.getDefaultSensor(sensor_type).then(
-                lambda sid, sm=sm: on_sensor(sid, sm)
-            )
-        )
-
-        return f
+        mgr = await SensorManager.get()
+        sensor_id = await mgr.getDefaultSensor(sensor_type)
+        if not sensor_id:
+            return
+        return Sensor(__id__=sid, manager=mgr, type=sensor_type)
 
     def start(self, callback, rate=SENSOR_DELAY_NORMAL):
         """Start listening to sensor events. Sensor event data depends
@@ -165,7 +155,7 @@ class Sensor(JavaBridgeObject):
 
 class SensorManager(SystemService):
     SERVICE_TYPE = Context.SENSOR_SERVICE
-    __nativeclass__ = set_default("android.hardware.SensorManager")
+    __nativeclass__ = "android.hardware.SensorManager"
 
     registerListener = JavaMethod(
         "android.hardware.SensorEventListener",

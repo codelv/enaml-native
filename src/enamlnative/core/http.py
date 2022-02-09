@@ -149,7 +149,7 @@ class AbstractAsyncHttpClient(Atom):
     #: Pending requests
     requests = List(HttpRequest)
 
-    def fetch(self, url, callback=None, raise_error=True, **kwargs):
+    async def fetch(self, url, raise_error=True, **kwargs):
         """Fetch the given url and fire the callback when ready. Optionally
         pass a `streaming_callback` to handle data from large requests.
 
@@ -173,10 +173,6 @@ class AbstractAsyncHttpClient(Atom):
         """
         app = BridgedApplication.instance()
         f = app.create_future()
-
-        #: Set callback for when response is in
-        if callback is not None:
-            f.then(callback)
 
         def handle_response(response):
             """Callback when the request is complete."""

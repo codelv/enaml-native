@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, set_default
+from atom.api import Typed
 
 from enamlnative.widgets.iconify import (
     ProxyIcon,
@@ -24,20 +24,20 @@ from .android_toggle_button import AndroidToggleButton, ToggleButton
 
 
 class IconDrawable(JavaBridgeObject):
-    __nativeclass__ = set_default("com.joanzapata.iconify.IconDrawable")
-    __signature__ = set_default(("android.content.Context", "java.lang.String"))
+    __nativeclass__ = "com.joanzapata.iconify.IconDrawable"
+    __signature__ = ("android.content.Context", "java.lang.String")
 
 
 class Icon(TextView):
-    __nativeclass__ = set_default("com.joanzapata.iconify.widget.IconTextView")
+    __nativeclass__ = "com.joanzapata.iconify.widget.IconTextView"
 
 
 class IconButton(Button):
-    __nativeclass__ = set_default("com.joanzapata.iconify.widget.IconButton")
+    __nativeclass__ = "com.joanzapata.iconify.widget.IconButton"
 
 
 class IconToggleButton(ToggleButton):
-    __nativeclass__ = set_default("com.joanzapata.iconify.widget.IconToggleButton")
+    __nativeclass__ = "com.joanzapata.iconify.widget.IconToggleButton"
 
 
 class AndroidIcon(AndroidTextView, ProxyIcon):

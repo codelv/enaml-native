@@ -58,7 +58,7 @@ class LocationManager(SystemService):
     listeners = List(LocationListener)
 
     @classmethod
-    def start(cls, callback, provider="gps", min_time=1000, min_distance=0):
+    async def start(cls, callback, provider="gps", min_time=1000, min_distance=0):
         """Convenience method that checks and requests permission if necessary
         and if successful calls the callback with a populated `Location`
         instance on updates.
@@ -68,40 +68,24 @@ class LocationManager(SystemService):
 
         """
         app = AndroidApplication.instance()
-        f = app.create_future()
+        request_fine = provider == "gps"
+        has_perm = await LocationManager.check_permission(fine=request_fine)
 
-        def on_success(lm):
-            #: When we have finally have permission
-            lm.onLocationChanged.connect(callback)
+        if not has_perm:
+            has_perm = await LocationManager.request_permission(fine=request_fine)
 
-            #: Save a reference to our listener
-            #: because we may want to stop updates
-            listener = LocationManager.LocationListener(lm)
-            lm.listeners.append(listener)
+        if not has_perm:
+            raise RuntimeError("Location permission denied")
+        mgr = await LocationManager.get()
 
-            lm.requestLocationUpdates(provider, min_time, min_distance, listener)
-            app.set_future_result(f, True)
+        #: When we have finally have permission
+        mgr.onLocationChanged.connect(callback)
 
-        def on_perm_request_result(allowed):
-            #: When our permission request is accepted or decliend.
-            if allowed:
-                LocationManager.get().then(on_success)
-            else:
-                #: Access denied
-                app.set_future_result(f, False)
-
-        def on_perm_check(allowed):
-            if allowed:
-                LocationManager.get().then(on_success)
-            else:
-                LocationManager.request_permission(fine=provider == "gps").then(
-                    on_perm_request_result
-                )
-
-        #: Check permission
-        LocationManager.check_permission(fine=provider == "gps").then(on_perm_check)
-
-        return f
+        #: Save a reference to our listener
+        #: because we may want to stop updates
+        listener = LocationManager.LocationListener(mgr)
+        mgr.listeners.append(listener)
+        mgr.requestLocationUpdates(provider, min_time, min_distance, listener)
 
     @classmethod
     def stop(cls):
@@ -113,36 +97,32 @@ class LocationManager(SystemService):
             manager.listeners = []
 
     @classmethod
-    def check_permission(cls, fine=True):
+    async def check_permission(cls, fine=True) -> bool:
         """Returns a future that returns a boolean indicating if permission
         is currently granted or denied. If permission is denied, you can
         request using `LocationManager.request_permission()` below.
 
         """
         app = AndroidApplication.instance()
-        permission = (
-            cls.ACCESS_FINE_PERMISSION if fine else cls.ACCESS_COARSE_PERMISSION
-        )
-        return app.has_permission(permission)
+        if fine:
+            permission = cls.ACCESS_FINE_PERMISSION
+        else:
+            permission = cls.ACCESS_COARSE_PERMISSION
+        return await app.has_permission(permission)
 
     @classmethod
-    def request_permission(cls, fine=True):
+    async def request_permission(cls, fine=True) -> bool:
         """Requests permission and returns an async result that returns
         a boolean indicating if the permission was granted or denied.
 
         """
         app = AndroidApplication.instance()
-        permission = (
-            cls.ACCESS_FINE_PERMISSION if fine else cls.ACCESS_COARSE_PERMISSION
-        )
-        f = app.create_future()
-
-        def on_result(perms):
-            app.set_future_result(f, perms[permission])
-
-        app.request_permissions([permission]).then(on_result)
-
-        return f
+        if fine:
+            permission = cls.ACCESS_FINE_PERMISSION
+        else:
+            permission = cls.ACCESS_COARSE_PERMISSION
+        perms = await app.request_permissions(permission)
+        return perms.get(permission)
 
     def __del__(self):
         """Remove any listeners before destroying"""

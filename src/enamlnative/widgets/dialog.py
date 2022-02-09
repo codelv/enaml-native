@@ -9,7 +9,7 @@ Created on Sept 21, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Str, Bool, Event, observe, set_default
+from atom.api import Typed, ForwardTyped, Str, Bool, Event, observe
 
 from enaml.core.declarative import d_
 from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject

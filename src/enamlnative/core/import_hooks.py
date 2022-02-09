@@ -15,7 +15,7 @@ import imp
 from glob import glob
 
 
-class ExtensionImporter(object):
+class ExtensionImporter:
     """Loads renamed extensions files from the app's lib folder"""
 
     extension_modules = {}
@@ -32,7 +32,7 @@ class ExtensionImporter(object):
         lib_dir = os.environ.get("PY_LIB_DIR", ".")
         # print("Loading {} extensions from {}".format(ext_type, lib_dir))
 
-        for lib in glob("{}/{}*.{}".format(lib_dir, prefix, ext_type)):
+        for lib in glob(f"{lib_dir}/{prefix}*.{ext_type}"):
             name = lib.split("/")[-1]  # Lib filename
             mod = ".".join(name.split(".")[start:-1])  # Strip lib and so
             self.extension_modules[mod] = lib

@@ -46,7 +46,7 @@ class ViewPager(ViewGroup):
 #: See https://github.com/geftimov/android-viewpager-transformers/wiki
 bundle_id = "com.eftimoff.viewpagertransformers"
 TRANSFORMERS = {
-    k: "{}.{}".format(bundle_id, v)
+    k: f"{bundle_id}.{v}"
     for k, v in [
         ("accordion", "AccordionTransformer"),
         ("bg_to_fg", "BackgroundToForegroundTransformer"),

@@ -9,7 +9,7 @@ Created on June 21, 2017
 
 @author: jrm
 """
-from atom.api import Atom, Int, set_default
+from atom.api import Atom
 from ..core import bridge
 from ..core.bridge import (
     Command,
@@ -127,7 +127,7 @@ class JavaBridgeObject(BridgeObject):
 
     def _impl_toString(self):
         #: Add a default callback for toString
-        return "{}".format(self)
+        return f"{self}"
 
     def _impl_equals(self, other):
         #: Add a default callback for toString

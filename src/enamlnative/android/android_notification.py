@@ -10,7 +10,7 @@ Created on Apr 4, 2018
 @author: jrm
 """
 from atom.api import Typed, Instance, ForwardInstance, Int, Bool, List
-
+from enaml.AndroidApplication import deferred_call
 from .app import AndroidApplication
 from .android_content import (
     Context,
@@ -74,52 +74,35 @@ class NotificationManager(JavaBridgeObject):
 
             :::python
 
-            def on_manager(m):
-                #: Do stuff with it
-                assert m == NotificationManager.instance()
-
-            NotificationManager.get().then(on_manager)
+            await NotificationManager.get()
 
 
         """
         return cls._instance
 
     @classmethod
-    def get(cls):
+    async def get(cls):
         """Acquires the NotificationManager service async."""
         app = AndroidApplication.instance()
-        f = app.create_future()
-
         if cls._instance:
-            f.set_result(cls._instance)
-            return f
-
-        def on_service(obj_id):
-            #: Create the manager
-            if not cls.instance():
-                m = cls(__id__=obj_id)
-            else:
-                m = cls.instance()
-            f.set_result(m)
-
-        cls.from_(app).then(on_service)
-
-        return f
+            return cls._instance
+        obj_id = await cls.from_(app)
+        return cls(__id__=obj_id)
 
     def __init__(self, *args, **kwargs):
         """Force only one instance to exist"""
         cls = self.__class__
         if cls._instance is not None:
+            name = cls.__name__
             raise RuntimeError(
-                "Only one instance of {cls} can exist! "
-                "Use {cls}.instance() instead!"
-                "".format(cls=cls.__name__)
+                f"Only one instance of {name} can exist! "
+                f"Use {name}.instance() instead!"
             )
         super().__init__(*args, **kwargs)
         cls._instance = self
 
     @classmethod
-    def create_channel(
+    async def create_channel(
         cls, channel_id, name, importance=IMPORTANCE_DEFAULT, description=""
     ):
         """Before you can deliver the notification on Android 8.0 and higher,
@@ -148,11 +131,8 @@ class NotificationManager(JavaBridgeObject):
         if app.api_level >= 26:
             channel = NotificationChannel(channel_id, name, importance)
             channel.setDescription(description)
-
-            NotificationChannelManager.get().then(
-                lambda mgr: mgr.createNotificationChannel(channel)
-            )
-
+            mgr = await NotificationChannelManager.get()
+            mgr.createNotificationChannel(channel)
             return channel
 
     @classmethod
@@ -167,7 +147,7 @@ class NotificationManager(JavaBridgeObject):
         return builder.show()
 
     @classmethod
-    def cancel_notification(cls, notification_or_id, tag=None):
+    async def cancel_notification(cls, notification_or_id, tag=None):
         """Cancel the notification.
 
         Parameters
@@ -178,18 +158,15 @@ class NotificationManager(JavaBridgeObject):
             The tag of the notification to clear
 
         """
-
-        def on_ready(mgr):
-            if isinstance(notification_or_id, JavaBridgeObject):
-                nid = notification_or_id.__id__
-            else:
-                nid = notification_or_id
-            if tag is None:
-                mgr.cancel_(nid)
-            else:
-                mgr.cancel(tag, nid)
-
-        cls.get().then(on_ready)
+        mgr = await cls.get()
+        if isinstance(notification_or_id, JavaBridgeObject):
+            nid = notification_or_id.__id__
+        else:
+            nid = notification_or_id
+        if tag is None:
+            mgr.cancel_(nid)
+        else:
+            mgr.cancel(tag, nid)
 
 
 class Notification(JavaBridgeObject):
@@ -473,7 +450,7 @@ class Notification(JavaBridgeObject):
                     bool(progress_indeterminate),
                 )
             if timeout_after:
-                self.setTimeoutAfter(long(timeout_after))
+                self.setTimeoutAfter(int(timeout_after))
             if category:
                 self.setCategory(category)
             if group:
@@ -493,7 +470,7 @@ class Notification(JavaBridgeObject):
             if sound:
                 self.setSound(Uri.parse(sound))
             if vibration_pattern:
-                self.setVibrate([long(i) for i in vibration_pattern])
+                self.setVibrate([int(i) for i in vibration_pattern])
             if badge_icon_type is not None:
                 self.setBadgeIconType(int(badge_icon_type))
             if notification_options is not None:
@@ -501,7 +478,7 @@ class Notification(JavaBridgeObject):
             if actions is not None:
                 app = AndroidApplication.instance()
                 for (action_icon, action_text, action_callback) in actions:
-                    action_key = "com.codelv.enamlnative.Notify{}".format(self.__id__)
+                    action_key = f"com.codelv.enamlnative.Notify{self.__id__}"
                     intent = Intent()
                     intent.setAction(action_key)
                     receiver = BroadcastReceiver.for_action(
@@ -514,25 +491,13 @@ class Notification(JavaBridgeObject):
                         PendingIntent.getBroadcast(app, 0, intent, 0),
                     )
 
-        def show(self):
+        async def show(self):
             """Build and show this notification"""
             app = AndroidApplication.instance()
-            f = app.create_future()
-
-            # Build and show it
-            def on_ready(mgr):
-                if not mgr:
-                    f.set_result(None)
-                    return
-                self.build().then(lambda r, mgr=mgr: on_built(r, mgr))
-
-            def on_built(__id__, mgr):
-                notification = Notification(__id__=__id__)
-                mgr.notify(self.__id__, notification)
-                f.set_result(self)
-
-            NotificationManager.get().then(on_ready)
-            return f
+            mgr = await NotificationManager.get()
+            notificaion_id = await self.build()
+            notification = Notification(__id__=notificaion_id)
+            mgr.notify(self.__id__, notification)
 
 
 class NotificationChannel(JavaBridgeObject):
@@ -588,8 +553,12 @@ class AndroidNotification(AndroidToolkitObject, ProxyNotification):
 
         """
         builder = self.builder
-        NotificationManager.cancel_notification(builder)
-        del self.builder
+
+        async def cancel_notification():
+            await NotificationManager.cancel_notification(builder)
+            del self.builder
+
+        deferred_call(cancel_notification)
         super().destroy()
 
     # -------------------------------------------------------------------------
@@ -608,7 +577,7 @@ class AndroidNotification(AndroidToolkitObject, ProxyNotification):
             builder.update(**d.settings)
 
         for k, v in self.get_declared_items():
-            handler = getattr(self, "set_{}".format(k))
+            handler = getattr(self, f"set_{k}")
             handler(v)
 
         builder.setSmallIcon(d.icon or "@mipmap/ic_launcher")

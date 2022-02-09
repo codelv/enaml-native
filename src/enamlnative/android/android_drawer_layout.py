@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, List
+from atom.api import Typed, List, set_default
 
 from enamlnative.widgets.drawer_layout import ProxyDrawerLayout
 

@@ -10,7 +10,7 @@ Created on Aug 25, 2017
 @author: jrm
 """
 
-from atom.api import Typed, set_default
+from atom.api import Typed
 from enamlnative.widgets.button import ProxyButton
 
 from .bridge import ObjcMethod, ObjcProperty
@@ -20,7 +20,7 @@ from .uikit_control import UIControl, UiKitControl
 class UIButton(UIControl):
     """ """
 
-    __signature__ = set_default((dict(buttonWithType="enum"),))
+    __signature__ = ({"buttonWithType": "enum"},)
     #: Properties
     on = ObjcProperty("bool")
     onTintColor = ObjcProperty("UIColor")
@@ -30,7 +30,7 @@ class UIButton(UIControl):
     offImage = ObjcProperty("UIImage")
 
     #: Methods
-    setTitle = ObjcMethod("NSString", dict(forState="enum"))
+    setTitle = ObjcMethod("NSString", {"forState": "enum"})
 
     #: Type Enum
     UIButtonTypeCustom = 0

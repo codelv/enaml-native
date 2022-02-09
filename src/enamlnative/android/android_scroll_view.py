@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Instance, set_default
+from atom.api import Instance
 
 from enamlnative.widgets.scroll_view import ProxyScrollView
 
@@ -18,7 +18,7 @@ from .bridge import JavaMethod
 
 
 class ScrollView(FrameLayout):
-    __nativeclass__ = set_default("android.widget.ScrollView")
+    __nativeclass__ = "android.widget.ScrollView"
     smoothScrollBy = JavaMethod("int", "int")
     smoothScrollTo = JavaMethod("int", "int")
     fullScroll = JavaMethod("int")
@@ -31,7 +31,7 @@ class ScrollView(FrameLayout):
 
 
 class HorizontalScrollView(ScrollView):
-    __nativeclass__ = set_default("android.widget.HorizontalScrollView")
+    __nativeclass__ = "android.widget.HorizontalScrollView"
 
 
 class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):

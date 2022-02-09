@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Str, Int, Event, Bool, observe, set_default
+from atom.api import Typed, ForwardTyped, Str, Int, Event, Bool, observe
 
 from enaml.core.declarative import d_
 
@@ -108,7 +108,7 @@ class WebView(ViewGroup):
     def _update_proxy(self, change):
         """An observer which sends the state change to the proxy."""
         if change["type"] == "event":
-            name = "do_" + change["name"]
+            name = f"do_{change['name']}"
             if hasattr(self.proxy, name):
                 handler = getattr(self.proxy, name)
                 handler()

@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Str, Int, Enum, observe, set_default
+from atom.api import Typed, ForwardTyped, Str, Int, Enum, observe
 
 from enaml.core.declarative import d_
 from .frame_layout import FrameLayout, ProxyFrameLayout

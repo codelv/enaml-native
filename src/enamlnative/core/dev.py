@@ -372,86 +372,6 @@ class TornadoDevClient(DevClient):
         self.connection.write_message(data, binary)
 
 
-class TwistedDevClient(DevClient):
-    @classmethod
-    def available(cls):
-        """Return True if this dev client impl can be used."""
-        try:
-            from autobahn.twisted import websocket
-
-            return True
-        except ImportError:
-            return False
-
-    def start(self, session):
-        from twisted.internet import reactor
-        from twisted.internet.defer import inlineCallbacks
-        from autobahn.twisted.websocket import (
-            WebSocketClientProtocol,
-            WebSocketClientFactory,
-        )
-
-        client = self
-
-        #: Create local references
-        mode = session.mode
-        app = session.app
-        process_events = session.app.process_events
-
-        class DevClient(WebSocketClientProtocol):
-            def onConnect(self, response=None):
-                print("Dev client connected!")
-                session.connected = True
-                client.connection = self
-
-                #: Start remote debugger
-                if mode == "remote":
-                    app.load_view(app)
-
-            def onOpen(self):
-                pass
-
-            def onMessage(self, payload, isBinary):
-                if mode == "remote":
-                    process_events(payload)
-                else:
-                    r = session.handle_message(payload)
-                    self.sendMessage(json.dumps(r))
-
-            def onClose(self, wasClean, code, reason):
-                print(
-                    "Dev client disconnected: {} {} {}".format(wasClean, code, reason)
-                )
-                session.connected = False
-
-                # Stop the app if remote debugging
-                if mode == "remote":
-                    session.app.stop()
-                else:
-                    #: Try again in a few seconds
-                    session.app.timed_call(1000, run)
-
-        factory = WebSocketClientFactory(session.url)
-        factory.protocol = DevClient
-
-        def run():
-            host = session.host
-            port = session.port
-            if mode == "remote":
-                host = session.url.split("/")[2]
-                if ":" in host:
-                    host, port = host.split(":")
-            print("Starting websocket client...")
-            reactor.connectTCP(host, int(port), factory)
-
-        #: Start
-        session.app.deferred_call(run)
-
-    def write_message(self, data, binary=False):
-        """Write a message to the client"""
-        self.connection.sendMessage(data, binary)
-
-
 class DevServer(Atom):
     """Abstract dev server. Override `start` to implement"""
 
@@ -682,66 +602,6 @@ class TornadoDevServer(DevServer):
         print("Tornado dev server started on {}".format(session.port))
 
 
-class TwistedDevServer(DevServer):
-    @classmethod
-    def available(cls):
-        """Return True if this dev server impl can be used."""
-        try:
-            import twisted
-            import autobahn
-
-            return True
-        except ImportError:
-            return False
-
-    def start(self, session):
-        server = self
-        with enamlnative.imports():
-            from twisted.internet import reactor
-            from twisted.web import resource
-            from twisted.web.static import File
-            from twisted.web.server import Site
-            from autobahn.twisted.websocket import (
-                WebSocketServerFactory,
-                WebSocketServerProtocol,
-            )
-            from autobahn.twisted.resource import WebSocketResource
-
-        class DevWebSocketHandler(WebSocketServerProtocol):
-            def onConnect(self, request):
-                print("Client connecting: {}".format(request.peer))
-
-            def onOpen(self):
-                print("WebSocket connection open.")
-
-            def onMessage(self, payload, isBinary):
-                r = session.handle_message(payload)
-                self.sendMessage(json.dumps(r))
-
-            def onClose(self, wasClean, code, reason):
-                print("WebSocket connection closed: {}".format(reason))
-
-        class MainHandler(resource.Resource):
-            def render_GET(self, req):
-                return server.render_editor()
-
-            def render_POST(self, req):
-                #: Allow posting events
-                r = session.handle_message(req.content.getvalue())
-                return json.dumps(r)
-
-        factory = WebSocketServerFactory("ws://0.0.0.0:{}".format(session.port))
-        factory.protocol = DevWebSocketHandler
-        root = resource.Resource()
-        root.putChild("", MainHandler())
-        root.putChild("dev", WebSocketResource(factory))
-        root.putChild("source", File(sys.path[0]))
-        root.putChild("tmp", File(os.environ.get("TMP", sys.path[0])))
-        site = Site(root)
-        reactor.listenTCP(session.port, site)
-        print("Twisted dev server started on {}".format(session.port))
-
-
 class DevServerSession(Atom):
     """Connect to a dev server running on the LAN
     or if host is 0.0.0.0 server a page to let
@@ -782,7 +642,6 @@ class DevServerSession(Atom):
         Subclass(DevServer),
         default=[
             TornadoDevServer,
-            TwistedDevServer,
         ],
     )
     server = Instance(DevServer)
@@ -792,7 +651,6 @@ class DevServerSession(Atom):
         Subclass(DevClient),
         default=[
             TornadoDevClient,
-            TwistedDevClient,
         ],
     )
     client = Instance(DevClient)

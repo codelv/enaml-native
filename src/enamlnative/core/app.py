@@ -12,6 +12,7 @@ The full license is in the file LICENSE, distributed with this software.
 import json
 import asyncio
 import traceback
+from functools import partial
 from atom.api import (
     Atom,
     Enum,
@@ -27,7 +28,6 @@ from atom.api import (
 )
 from enaml.application import Application
 from . import bridge
-from .loop import EventLoop
 from time import time
 
 
@@ -44,7 +44,7 @@ class Plugin(Atom):
 
     def load(self):
         """Load the object defined by the plugin entry point"""
-        print("[DEBUG] Loading plugin {} from {}".format(self.name, self.source))
+        print(f"[DEBUG] Loading plugin {self.name} from {self.source}")
         import pydoc
 
         path, attr = self.source.split(":")
@@ -97,6 +97,8 @@ class BridgedApplication(Application):
     #: Event loop
     loop = Value()
 
+    _stop_event = Typed(asyncio.Future, ())
+
     #: Events to send to the bridge
     _bridge_queue = List()
 
@@ -114,7 +116,7 @@ class BridgedApplication(Application):
     # -------------------------------------------------------------------------
     def _default_loop(self):
         """Get the event loop based on what libraries are available."""
-        return EventLoop.default() # asyncio.get_event_loop()
+        return asyncio.get_event_loop()
 
     def _default_plugins(self):
         """Get entry points to load any plugins installed.
@@ -131,7 +133,7 @@ class BridgedApplication(Application):
                 for name, src in obj.items():
                     plugins[ep].append(Plugin(name=name, source=src))
         except Exception as e:
-            print("Failed to load entry points {}".format(e))
+            print(f"Failed to load entry points {e}")
         return plugins
 
     # -------------------------------------------------------------------------
@@ -153,20 +155,21 @@ class BridgedApplication(Application):
     # Abstract API Implementation
     # -------------------------------------------------------------------------
     def start(self):
-        """Start the application's main event loop
-        using either twisted or tornado.
-
-        """
+        """Start the application event loop"""
         #: Schedule a load view if given and remote debugging is not active
         #: the remote debugging init call this after dev connection is ready
         if self.load_view and self.dev != "remote":
             self.deferred_call(self.load_view, self)
 
-        self.loop.start()
+        self._stop_event = asyncio.Future()
+        self.loop.run_until_complete(self.run)
+
+    async def run(self):
+        await self._stop_event
 
     def stop(self):
         """Stop the application's main event loop."""
-        self.loop.stop()
+        self._stop_event.set_result(True)
 
     def deferred_call(self, callback, *args, **kwargs):
         """Invoke a callable on the next cycle of the main event loop
@@ -182,7 +185,10 @@ class BridgedApplication(Application):
             the callback.
 
         """
-        return self.loop.deferred_call(callback, *args, **kwargs)
+        if kwargs:
+            self.loop.call_soon(partial(callback, *args, **kwargs))
+        else:
+            self.loop.call_soon(callback, *args)
 
     def timed_call(self, ms, callback, *args, **kwargs):
         """Invoke a callable on the main event loop thread at a
@@ -202,7 +208,11 @@ class BridgedApplication(Application):
             the callback.
 
         """
-        return self.loop.timed_call(ms, callback, *args, **kwargs)
+        t = ms / 1000
+        if kwargs:
+            self.loop.call_later(t, partial(callback, *args, **kwargs))
+        else:
+            self.loop.call_later(t, callback, *args)
 
     def is_main_thread(self):
         """Indicates whether the caller is on the main gui thread.
@@ -218,11 +228,11 @@ class BridgedApplication(Application):
     # -------------------------------------------------------------------------
     # App API Implementation
     # -------------------------------------------------------------------------
-    def has_permission(self, permission):
+    async def has_permission(self, permission):
         """Return a future that resolves with the result of the permission"""
         raise NotImplementedError
 
-    def request_permissions(self, permissions):
+    async def request_permissions(self, permissions):
         """Return a future that resolves with the result of the
         permission request
 
@@ -238,44 +248,9 @@ class BridgedApplication(Application):
 
     def create_future(self):
         """Create a future object using the EventLoop implementation"""
-        return self.loop.create_future()
-
-    def run_iteration(self):
-        """Run an iteration of the event loop"""
-        return self.loop.run_iteration()
-
-    def add_done_callback(self, future, callback):
-        """Add a callback on a future object put here so it can be
-        implemented with different event loops.
-
-        Parameters
-        -----------
-            future: Future or Deferred
-                Future implementation for the current EventLoop
-
-            callback: callable
-                Callback to invoke when the future is done
-
-        """
-        if future is None:
-            raise bridge.BridgeReferenceError(
-                "Tried to add a callback to a nonexistent Future. "
-                "Make sure you pass the `returns` argument to your JavaMethod"
-            )
-        return self.loop.add_done_callback(future, callback)
-
-    def set_future_result(self, future, result):
-        """Set the result of the future
-
-        Parameters
-        -----------
-            future: Future or Deferred
-                Future implementation for the current EventLoop
-
-            result: object
-                Result to set
-        """
-        return self.loop.set_future_result(future, result)
+        f = asyncio.Future()
+        f.__id__ = bridge.generate_id()
+        return f
 
     # -------------------------------------------------------------------------
     # Bridge API Implementation
@@ -391,17 +366,15 @@ class BridgedApplication(Application):
         result = None
         try:
             obj, handler = bridge.get_handler(ptr, method)
-            result = handler(*[v for t, v in args])
+            result = handler(*(v for t, v in args))
         except bridge.BridgeReferenceError as e:
             #: Log the event, don't blow up here
-            msg = "Error processing event: {} - {}".format(event, e).encode("utf-8")
-            print(msg)
+            print(f"Error processing event: {event} - {e}")
             # self.show_error(msg)
-        except:
+        except Exception as e:
             #: Log the event, blow up in user's face
-            msg = "Error processing event: {} - {}".format(
-                event, traceback.format_exc()
-            ).encode("utf-8")
+            err = traceback.format_exc()
+            msg = f"Error processing event: {event} - {err}"
             print(msg)
             self.show_error(msg)
             raise
@@ -423,7 +396,7 @@ class BridgedApplication(Application):
         By default, sets the error view.
 
         """
-        self.loop.log_error(callback)
+        # self.loop.log_error(callback)
         msg = "\n".join(["Exception in callback %r" % callback, traceback.format_exc()])
         self.show_error(msg.encode("utf-8"))
 

@@ -259,47 +259,28 @@ class SystemService(JavaBridgeObject):
 
             :::python
 
-            def on_manager(m):
-                #: Do stuff with it
-                assert m == UsbManager.instance()
-
-            UsbManager.get().then(on_manager)
+            mgr = await UsbManager.get()
 
 
         """
         return cls._instance
 
     @classmethod
-    def get(cls):
+    async def get(cls):
         """Acquires the WifiManager service async."""
         from .app import AndroidApplication
 
         app = AndroidApplication.instance()
-        f = app.create_future()
-
-        if cls._instance:
-            f.set_result(cls._instance)
-            return f
-
-        def on_service(obj_id):
-            #: Create the manager
-            if not cls.instance():
-                m = cls(__id__=obj_id)
-            else:
-                m = cls.instance()
-            f.set_result(m)
-
-        app.get_system_service(cls.SERVICE_TYPE).then(on_service)
-
-        return f
+        return await app.get_system_service(cls)
 
     def __init__(self, *args, **kwargs):
         """Force only one instance to exist"""
         cls = self.__class__
         if cls._instance is not None:
+            service_name = cls.__name__
             raise RuntimeError(
-                "Only one instance of {cls} can exist! "
-                "Use {cls}.instance() instead!".format(cls=cls.__name__)
+                f"Only one instance of {service_name} can exist! "
+                f"Use {service_name}.instance() instead!"
             )
         super().__init__(*args, **kwargs)
         cls._instance = self

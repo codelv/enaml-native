@@ -10,7 +10,7 @@ Created on July 7, 2017
 @author: jrm
 """
 from atom.api import Typed
-
+from enaml.application import deferred_call
 from enamlnative.widgets.action_menu_view import ProxyActionMenuView
 
 from .android_linear_layout import AndroidLinearLayout, LinearLayout
@@ -48,6 +48,9 @@ class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
     #: A reference to the widget created by the proxy.
     widget = Typed(ActionMenuView)
 
+    #: Menu created
+    menu = Typed(Menu)
+
     # -------------------------------------------------------------------------
     # Initialization API
     # -------------------------------------------------------------------------
@@ -62,13 +65,13 @@ class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
         w = self.widget
 
         #: Kinda hackish, but when we get the menu back, load it
-        w.getMenu().then(self.on_menu)
+        deferred_call(self.init_menu)
         w.setOnMenuItemClickListener(w.getId())
         w.onMenuItemClick.connect(self.on_menu_item_click)
 
-    def on_menu(self, menu):
-        """ """
-        Menu(__id__=menu)
+    async def init_menu(self):
+        menu_id = await self.widget.getMenu()
+        self.menu = Menu(__id__=menu_id)
 
     # -------------------------------------------------------------------------
     # OnMenuItemClickListener API

@@ -162,16 +162,16 @@ class IPhoneApplication(BridgedApplication):
         """Sets or clears the flag to keep the screen on."""
         raise NotImplementedError
 
-        def set_screen_on(window):
+        def set_screen_on(f):
             from .ios_window import Window
 
-            window = Window(__id__=window)
+            window = Window(__id__=f.result())
             if self.keep_screen_on:
                 window.addFlags(Window.FLAG_KEEP_SCREEN_ON)
             else:
                 window.clearFlags(Window.FLAG_KEEP_SCREEN_ON)
 
-        self.widget.getWindow().then(set_screen_on)
+        self.widget.getWindow().add_done_callback(set_screen_on)
 
     # -------------------------------------------------------------------------
     # Plugin API Implementation

@@ -159,7 +159,7 @@ class AndroidVideoView(AndroidSurfaceView, ProxyVideoView):
             if extra:
                 error = MediaPlayer.ERROR.get(extra)
                 if error:
-                    msg += " {}".format(error)
+                    msg += f" {error}"
             d.info({"type": what, "extra": extra, "message": msg})
         finally:
             return True

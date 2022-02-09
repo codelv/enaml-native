@@ -9,13 +9,12 @@ Created on Nov 29, 2017
 
 @author: jrm
 """
-from atom.api import set_default
 from .bridge import JavaBridgeObject, JavaMethod
 from .android_view_group import ViewGroup, LayoutParams
 
 
 class YogaNode(JavaBridgeObject):
-    __nativeclass__ = set_default("com.facebook.yoga.YogaNode")
+    __nativeclass__ = "com.facebook.yoga.YogaNode"
     reset = JavaMethod()
     addChildAt = JavaMethod("com.facebook.yoga.YogaNode", "int")
     removeChildAt = JavaMethod("int", returns="com.facebook.yoga.YogaNode")
@@ -70,8 +69,8 @@ class YogaNode(JavaBridgeObject):
 
 
 class YogaLayoutParams(LayoutParams):
-    __nativeclass__ = set_default("com.facebook.yoga.YogaLayout$LayoutParams")
+    __nativeclass__ = "com.facebook.yoga.YogaLayout$LayoutParams"
 
 
 class YogaLayout(ViewGroup):
-    __nativeclass__ = set_default("com.facebook.yoga.android.YogaLayout")
+    __nativeclass__ = "com.facebook.yoga.android.YogaLayout"
