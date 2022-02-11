@@ -25,13 +25,13 @@ def rain_percent(weather):
 
 
 class Theme(Atom):
-    name = Unicode()
-    bg = Unicode("#eee")
-    card = Unicode("#fff")
-    text = Unicode("#333")
-    text_light = Unicode("#999")
-    icon = Unicode("#004981")
-    drawer = Unicode("#004981")
+    name = Str()
+    bg = Str("#eee")
+    card = Str("#fff")
+    text = Str("#333")
+    text_light = Str("#999")
+    icon = Str("#004981")
+    drawer = Str("#004981")
 
 
 class Weather(Atom):
@@ -43,10 +43,10 @@ class Weather(Atom):
     outdated = Bool(True)
 
     #: Weather fetching settings
-    url = Unicode("http://api.openweathermap.org/data/2.5/{mode}?units=metric&zip={zip}&appid={key}")
+    url = Str("http://api.openweathermap.org/data/2.5/{mode}?units=metric&zip={zip}&appid={key}")
     client = Instance(AsyncHttpClient,())
-    api_key = Unicode("9a225bbabfc3ef64bcbf023c4b5359b9")
-    location = Unicode("18092")
+    api_key = Str("9a225bbabfc3ef64bcbf023c4b5359b9")
+    location = Str("18092")
 
     #: Map weather icons ID to an Icon
     icons = Dict(default={

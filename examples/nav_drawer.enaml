@@ -3,14 +3,14 @@ Example demonstrates a more complex drawer layout commonly seen
 in a typical app with a user login.
 
 """
-from atom.api import Atom, Unicode
+from atom.api import Atom, Str
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 
 
 class AppState(Atom):
     _instance = None
-    page = Unicode("Inbox")
+    page = Str("Inbox")
 
     @classmethod
     def instance(cls):

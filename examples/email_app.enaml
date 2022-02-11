@@ -12,17 +12,17 @@ import iconify
 iconify.install('iconify.fontawesome')
 
 class Message(Atom):
-    name = Unicode()
-    subject = Unicode()
-    message = Unicode()
+    name = Str()
+    subject = Str()
+    message = Str()
 
 class Folder(Atom):
-    name = Unicode()
+    name = Str()
     messages = List(Message)
 
 class User(Atom):
-    name = Unicode()
-    email = Unicode()
+    name = Str()
+    email = Str()
 
 class App(Atom):
     #: Our user

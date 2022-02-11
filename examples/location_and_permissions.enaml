@@ -21,8 +21,8 @@ class LocationManager(JavaBridgeObject):
     onStatusChanged = JavaCallback('java.lang.String','int','android.os.Bundle')
     
 class Location(Atom):
-    location = Unicode()
-    status = Unicode()
+    location = Str()
+    status = Str()
 
 enamldef ContentView(Flexbox): view:
     flex_direction = "column"

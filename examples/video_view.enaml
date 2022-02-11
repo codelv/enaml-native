@@ -3,7 +3,7 @@
 Demonstrates using a VideoView
 
 """
-from atom.api import Atom, Unicode, List, Bool
+from atom.api import Atom, Str, List, Bool
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 from enamlnative.android.app import AndroidApplication
@@ -13,7 +13,7 @@ app = AndroidApplication.instance()
 class AppState(Atom):
     _instance = None
 
-    current_video = Unicode()
+    current_video = Str()
     videos = List(default=[
         'https://archive.org/download/MIT6.858F14/MIT6_858F14_lec{i:02d}_300k.mp4'.format(i=i)
         for i in range(1,30)

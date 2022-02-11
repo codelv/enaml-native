@@ -10,9 +10,9 @@ The full license is in the file LICENSE, distributed with this software.
 
 """
 import json
-import asyncio
 import traceback
 from functools import partial
+from asyncio import Future
 from atom.api import (
     Atom,
     Enum,
@@ -29,7 +29,7 @@ from atom.api import (
 from enaml.application import Application
 from . import bridge
 from time import time
-
+from tornado.ioloop import IOLoop
 
 class Plugin(Atom):
     """Simplified way to load a plugin from an entry_point line.
@@ -95,9 +95,7 @@ class BridgedApplication(Application):
     _dev_session = Value()
 
     #: Event loop
-    loop = Value()
-
-    _stop_event = Typed(asyncio.Future, ())
+    loop = Instance(IOLoop)
 
     #: Events to send to the bridge
     _bridge_queue = List()
@@ -116,7 +114,7 @@ class BridgedApplication(Application):
     # -------------------------------------------------------------------------
     def _default_loop(self):
         """Get the event loop based on what libraries are available."""
-        return asyncio.get_event_loop()
+        return IOLoop.current()
 
     def _default_plugins(self):
         """Get entry points to load any plugins installed.
@@ -161,15 +159,12 @@ class BridgedApplication(Application):
         if self.load_view and self.dev != "remote":
             self.deferred_call(self.load_view, self)
 
-        self._stop_event = asyncio.Future()
-        self.loop.run_until_complete(self.run)
+        self.loop.start()
 
-    async def run(self):
-        await self._stop_event
 
     def stop(self):
         """Stop the application's main event loop."""
-        self._stop_event.set_result(True)
+        self.loop.stop()
 
     def deferred_call(self, callback, *args, **kwargs):
         """Invoke a callable on the next cycle of the main event loop
@@ -185,10 +180,7 @@ class BridgedApplication(Application):
             the callback.
 
         """
-        if kwargs:
-            self.loop.call_soon(partial(callback, *args, **kwargs))
-        else:
-            self.loop.call_soon(callback, *args)
+        self.loop.add_callback(callback, *args, **kwargs)
 
     def timed_call(self, ms, callback, *args, **kwargs):
         """Invoke a callable on the main event loop thread at a
@@ -208,11 +200,7 @@ class BridgedApplication(Application):
             the callback.
 
         """
-        t = ms / 1000
-        if kwargs:
-            self.loop.call_later(t, partial(callback, *args, **kwargs))
-        else:
-            self.loop.call_later(t, callback, *args)
+        self.loop.call_later(ms / 1000, callback, *args, **kwargs)
 
     def is_main_thread(self):
         """Indicates whether the caller is on the main gui thread.
@@ -244,13 +232,11 @@ class BridgedApplication(Application):
     # -------------------------------------------------------------------------
     def init_error_handler(self):
         """When an error occurs, set the error view in the App"""
-        self.loop.set_error_handler(self.handle_error)
+        self.loop.handle_callback_exception = self.handle_error
 
     def create_future(self):
         """Create a future object using the EventLoop implementation"""
-        f = asyncio.Future()
-        f.__id__ = bridge.generate_id()
-        return f
+        return bridge.tag_object_with_id(Future())
 
     # -------------------------------------------------------------------------
     # Bridge API Implementation
@@ -396,9 +382,8 @@ class BridgedApplication(Application):
         By default, sets the error view.
 
         """
-        # self.loop.log_error(callback)
-        msg = "\n".join(["Exception in callback %r" % callback, traceback.format_exc()])
-        self.show_error(msg.encode("utf-8"))
+        msg = f"Exception in callback {callback}: {traceback.format_exc()}"
+        self.show_error(msg.encode('utf-8'))
 
     # -------------------------------------------------------------------------
     # AppEventListener API Implementation

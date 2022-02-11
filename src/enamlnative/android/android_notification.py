@@ -10,7 +10,7 @@ Created on Apr 4, 2018
 @author: jrm
 """
 from atom.api import Typed, Instance, ForwardInstance, Int, Bool, List
-from enaml.AndroidApplication import deferred_call
+from enaml.application import deferred_call
 from .app import AndroidApplication
 from .android_content import (
     Context,

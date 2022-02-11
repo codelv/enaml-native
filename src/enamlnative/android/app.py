@@ -100,7 +100,7 @@ class AndroidApplication(BridgedApplication):
 
     async def init_window(self):
         """ """
-        window_id = await activity.getWindow()
+        window_id = await self.widget.getWindow()
         self.window = Window(__id__=window_id)
         self.set_keep_screen_on(self.keep_screen_on)
         if self.statusbar_color:

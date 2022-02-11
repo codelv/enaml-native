@@ -11,7 +11,7 @@ enaml-native install enaml-native-icons
 enaml-native run-android
 
 """
-from atom.api import Atom, Unicode, List, Bool
+from atom.api import Atom, Str, List, Bool
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 
@@ -22,7 +22,7 @@ iconify.install()
 class AppState(Atom):
     _instance = None
 
-    search = Unicode()
+    search = Str()
     data = List()
     show_search = Bool()
 

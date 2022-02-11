@@ -58,8 +58,9 @@ def generate_property_id():
 
 def tag_object_with_id(obj):
     """Generate and assign a id for the object"""
-    obj.__id__ = generate_id()
-    CACHE[obj.__id__] = obj
+    obj_id = obj.__id__ = generate_id()
+    CACHE[obj_id] = obj
+    return obj
 
 
 def get_object_with_id(id):
@@ -442,7 +443,7 @@ class BridgeObject(Atom):
     __nativeclass__: ClassVar[str] = ""
 
     #: Constructor signature
-    __signature__: ClassVar[tuple[str]]
+    __signature__: ClassVar[tuple[str]] = ()
 
     #: Suppressed methods / fields
     __suppressed__ = Dict()
