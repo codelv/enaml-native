@@ -144,7 +144,7 @@ class AndroidApplication(BridgedApplication):
         granted = Activity.PERMISSION_GRANTED
         return {p: r == granted for p, r in zip(perms, results)}
 
-    async def show_toast(self, msg, long=True):
+    def show_toast(self, msg, long=True):
         """Show a toast message for the given duration.
         This is an android specific api.
 
@@ -158,9 +158,12 @@ class AndroidApplication(BridgedApplication):
         """
         from .android_toast import Toast
 
-        toast_id = await Toast.makeText(self, msg, 1 if long else 0)
-        t = Toast(__id__=toast_id)
-        t.show()
+        async def show_toast():
+            toast_id = await Toast.makeText(self, msg, 1 if long else 0)
+            t = Toast(__id__=toast_id)
+            t.show()
+
+        self.deferred_call(show_toast)
 
     def on_activity_lifecycle_changed(self, state):
         """Update the state when the android app is paused, resumed, etc..

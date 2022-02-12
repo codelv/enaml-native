@@ -31,6 +31,7 @@ from . import bridge
 from time import time
 from tornado.ioloop import IOLoop
 
+
 class Plugin(Atom):
     """Simplified way to load a plugin from an entry_point line.
     The enaml-native and p4a build process removes pkg_resources
@@ -160,7 +161,6 @@ class BridgedApplication(Application):
             self.deferred_call(self.load_view, self)
 
         self.loop.start()
-
 
     def stop(self):
         """Stop the application's main event loop."""
@@ -383,7 +383,7 @@ class BridgedApplication(Application):
 
         """
         msg = f"Exception in callback {callback}: {traceback.format_exc()}"
-        self.show_error(msg.encode('utf-8'))
+        self.show_error(msg.encode("utf-8"))
 
     # -------------------------------------------------------------------------
     # AppEventListener API Implementation

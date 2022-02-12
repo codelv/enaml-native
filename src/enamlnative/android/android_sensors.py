@@ -119,7 +119,7 @@ class Sensor(JavaBridgeObject):
         sensor_id = await mgr.getDefaultSensor(sensor_type)
         if not sensor_id:
             return
-        return Sensor(__id__=sid, manager=mgr, type=sensor_type)
+        return Sensor(__id__=sensor_id, manager=mgr, type=sensor_type)
 
     def start(self, callback, rate=SENSOR_DELAY_NORMAL):
         """Start listening to sensor events. Sensor event data depends
