@@ -184,6 +184,7 @@ class AndroidApplication(BridgedApplication):
             self.back_pressed(event)
             return bool(event.get("handled", False))
         except Exception as e:
+            self.show_error(f"Error handling back press: {e}")
             #: Must return a boolean or we will cause android to abort
             return False
 
