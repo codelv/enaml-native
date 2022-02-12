@@ -295,13 +295,16 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
     // Inject  bootstrap code to redirect python stdin/stdout
     // to the androidlog module
     // then add the custom import hook loader
+    // Strip off /usr/local sys paths
     // and run main() from bootstrap.py
     int result = PyRun_SimpleString(
         "try:\n"\
         "    import nativehooks\n"\
         "    import sys\n"\
-        "    if sys.version_info.major > 2:\n"\
-        "       from importlib import reload\n"\
+        "    import os\n"\
+        "    sys.path = [p for p in sys.path if not p.startswith('/usr/local')] \n"\
+        "    print(f'Sys path: {sys.path}')\n"\
+        "    print(f'Environ: {os.environ}')\n"\
         "    print('Launching main.py...')\n"\
         "    from main import main\n" \
         "    main()\n" \
@@ -312,6 +315,7 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
         "    except:\n"\
         "        print(e)\n" \
     );
+
 
     // Cleanup
     (*env)->ReleaseStringUTFChars(env, assets_path, assetspath);
