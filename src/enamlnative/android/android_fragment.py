@@ -10,14 +10,11 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed, Value
-
 from enamlnative.widgets.fragment import ProxyFragment
 from enamlnative.widgets.view_pager import ProxyPagerFragment
-
-from .android_toolkit_object import AndroidToolkitObject
 from .android_frame_layout import FrameLayout
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
-
+from .android_toolkit_object import AndroidToolkitObject
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 package = "androidx.fragment.app"
 

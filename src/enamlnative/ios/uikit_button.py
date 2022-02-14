@@ -12,7 +12,6 @@ Created on Aug 25, 2017
 
 from atom.api import Typed
 from enamlnative.widgets.button import ProxyButton
-
 from .bridge import ObjcMethod, ObjcProperty
 from .uikit_control import UIControl, UiKitControl
 

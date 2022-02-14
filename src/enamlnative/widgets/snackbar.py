@@ -9,10 +9,9 @@ Created on Sept 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Str, Int, Bool, Event, observe
-
+from atom.api import Bool, Event, ForwardTyped, Int, Str, Typed, observe
 from enaml.core.declarative import d_
-from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
+from enaml.widgets.toolkit_object import ProxyToolkitObject, ToolkitObject
 
 
 class ProxySnackbar(ProxyToolkitObject):

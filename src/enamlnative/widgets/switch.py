@@ -9,10 +9,8 @@ Created on June 7, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Str, Bool, observe
-
+from atom.api import Bool, ForwardTyped, Str, Typed, observe
 from enaml.core.declarative import d_
-
 from .compound_button import CompoundButton, ProxyCompoundButton
 
 

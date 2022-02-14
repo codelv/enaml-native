@@ -12,14 +12,14 @@ Created on June 21, 2017
 from atom.api import Atom
 from ..core import bridge
 from ..core.bridge import (
-    Command,
-    msgpack_encoder,
-    BridgeMethod,
-    BridgeStaticMethod,
-    BridgeField,
     BridgeCallback,
+    BridgeField,
+    BridgeMethod,
     BridgeObject,
+    BridgeStaticMethod,
+    Command,
     encode,
+    msgpack_encoder,
 )
 
 

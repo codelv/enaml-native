@@ -10,11 +10,9 @@ Created on Mar 13, 2018
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.app_bar_layout import ProxyAppBarLayout
-
 from .android_linear_layout import AndroidLinearLayout, LinearLayout
-from .bridge import JavaMethod, JavaCallback
+from .bridge import JavaCallback, JavaMethod
 
 
 class AppBarLayout(LinearLayout):

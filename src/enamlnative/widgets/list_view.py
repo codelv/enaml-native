@@ -10,20 +10,19 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed,
-    ForwardTyped,
-    Value,
     Bool,
-    Int,
-    Enum,
     ContainerList,
+    Enum,
     Event,
+    ForwardTyped,
+    Int,
+    Typed,
+    Value,
     observe,
 )
-
 from enaml.core.declarative import d_
-from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
-from .view_group import ViewGroup, ProxyViewGroup
+from enaml.widgets.toolkit_object import ProxyToolkitObject, ToolkitObject
+from .view_group import ProxyViewGroup, ViewGroup
 
 
 class ProxyListView(ProxyViewGroup):

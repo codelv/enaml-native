@@ -10,10 +10,8 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed, set_default
-
 from enamlnative.widgets.view_group import ProxyViewGroup
-
-from .android_view import AndroidView, View, LayoutParams
+from .android_view import AndroidView, LayoutParams, View
 from .bridge import JavaBridgeObject, JavaMethod
 
 

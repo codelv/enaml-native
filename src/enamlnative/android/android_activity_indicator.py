@@ -11,10 +11,9 @@ Created on Aug 22, 2017
 """
 from atom.api import ForwardTyped, set_default
 from enamlnative.widgets.activity_indicator import (
-    ProxyActivityIndicator,
     ActivityIndicator,
+    ProxyActivityIndicator,
 )
-
 from .android_progress_bar import AndroidProgressBar
 
 

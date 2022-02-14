@@ -9,7 +9,7 @@ Created on Apr 15, 2017
 
 @author: jrm
 """
-from atom.api import ForwardInstance, Enum
+from atom.api import Enum, ForwardInstance
 from enaml.core.declarative import Declarative, d_
 
 

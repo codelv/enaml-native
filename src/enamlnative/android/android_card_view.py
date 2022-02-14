@@ -10,9 +10,7 @@ Created on June 7, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.card_view import ProxyCardView
-
 from .android_frame_layout import AndroidFrameLayout, FrameLayout
 from .bridge import JavaMethod
 

@@ -10,10 +10,9 @@ Created on Aug 3, 2017
 @author: jrm
 """
 
-from atom.api import Typed, Tuple, observe
+from atom.api import Tuple, Typed, observe
 from enamlnative.widgets.view import ProxyView
-
-from .bridge import ObjcBridgeObject, ObjcMethod, ObjcProperty, ObjcCallback
+from .bridge import ObjcBridgeObject, ObjcCallback, ObjcMethod, ObjcProperty
 from .uikit_toolkit_object import UiKitToolkitObject
 from .yoga import Yoga
 

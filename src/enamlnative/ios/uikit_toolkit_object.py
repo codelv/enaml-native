@@ -11,7 +11,6 @@ Created on May 20, 2017
 """
 from atom.api import Typed
 from enaml.widgets.toolkit_object import ProxyToolkitObject
-
 from .bridge import ObjcBridgeObject
 
 

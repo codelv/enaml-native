@@ -9,12 +9,10 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, List, set_default
-
+from atom.api import List, Typed, set_default
 from enamlnative.widgets.drawer_layout import ProxyDrawerLayout
-
-from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
-from .bridge import JavaMethod, JavaCallback, JavaField
+from .android_view_group import AndroidViewGroup, MarginLayoutParams, ViewGroup
+from .bridge import JavaCallback, JavaField, JavaMethod
 
 package = "androidx.drawerlayout.widget"
 

@@ -9,10 +9,9 @@ Created on Sept 18, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Str, Int, Bool, Coerced, observe
-
+from atom.api import Bool, Coerced, ForwardTyped, Int, Str, Typed, observe
 from enaml.core.declarative import d_
-from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
+from enaml.widgets.toolkit_object import ProxyToolkitObject, ToolkitObject
 from .view import coerce_gravity
 
 

@@ -9,10 +9,8 @@ Created on July 6, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, List, Int, Bool, observe
-
+from atom.api import Bool, ForwardTyped, Int, List, Typed, observe
 from enaml.core.declarative import d_
-
 from .linear_layout import LinearLayout, ProxyLinearLayout
 
 

@@ -10,11 +10,10 @@ Created on Nov 18, 2017
 @author: jrm
 """
 from atom.api import List
-
-from .bridge import JavaBridgeObject, JavaMethod, JavaField
 from .android_activity import Activity
-from .android_content import SystemService, BroadcastReceiver, IntentFilter
+from .android_content import BroadcastReceiver, IntentFilter, SystemService
 from .app import AndroidApplication
+from .bridge import JavaBridgeObject, JavaField, JavaMethod
 
 
 class WifiConfiguration(JavaBridgeObject):

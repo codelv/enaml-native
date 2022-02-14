@@ -11,7 +11,7 @@ Created on July 24, 2017
 """
 
 from atom.api import Atom, Int
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaStaticMethod
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
 
 
 class Context(JavaBridgeObject):

@@ -12,8 +12,7 @@ Created on Aug 3, 2017
 
 from atom.api import Instance, observe
 from enamlnative.widgets.view_group import ProxyViewGroup
-
-from .uikit_view import UIView, UiKitView
+from .uikit_view import UiKitView, UIView
 
 
 class UiKitViewGroup(UiKitView, ProxyViewGroup):

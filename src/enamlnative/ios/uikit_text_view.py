@@ -12,9 +12,8 @@ Created on Aug 3, 2017
 
 from atom.api import Typed, set_default
 from enamlnative.widgets.text_view import ProxyTextView
-
 from .bridge import ObjcMethod, ObjcProperty
-from .uikit_view import NSObject, UIView, UiKitView
+from .uikit_view import NSObject, UiKitView, UIView
 
 
 class UIFont(NSObject):

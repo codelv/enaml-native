@@ -10,11 +10,9 @@ Created on July 7, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.web_view import ProxyWebView
-
-from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .android_view_group import AndroidViewGroup, MarginLayoutParams, ViewGroup
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 
 class WebView(ViewGroup):

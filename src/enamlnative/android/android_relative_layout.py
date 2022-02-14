@@ -10,9 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.relative_layout import ProxyRelativeLayout
-
 from .android_view_group import AndroidViewGroup, ViewGroup
 from .bridge import JavaMethod
 

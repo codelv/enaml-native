@@ -10,8 +10,8 @@ Created on Feb 11, 2018
 @author: jrm
 """
 from atom.api import Dict
-from .bridge import JavaBridgeObject, JavaMethod
 from .android_content import Context, SystemService
+from .bridge import JavaBridgeObject, JavaMethod
 
 
 class UsbDevice(JavaBridgeObject):

@@ -12,9 +12,8 @@ Created on Aug 3, 2017
 
 from atom.api import Typed
 from enamlnative.widgets.scroll_view import ProxyScrollView
-
 from .bridge import ObjcMethod, ObjcProperty
-from .uikit_view import UIView, UiKitView
+from .uikit_view import UiKitView, UIView
 
 
 class UIScrollView(UIView):

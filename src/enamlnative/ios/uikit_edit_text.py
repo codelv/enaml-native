@@ -12,8 +12,7 @@ Created on Aug 25, 2017
 
 from atom.api import Typed
 from enamlnative.widgets.edit_text import ProxyEditText
-
-from .bridge import ObjcMethod, ObjcProperty, ObjcCallback, NestedBridgeObject
+from .bridge import NestedBridgeObject, ObjcCallback, ObjcMethod, ObjcProperty
 from .uikit_control import UIControl, UiKitControl
 
 

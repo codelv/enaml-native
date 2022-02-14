@@ -10,8 +10,8 @@ Created on Sept 21, 2017
 @author: jrm
 """
 from atom.api import Typed
-from enamlnative.android.bridge import JavaBridgeObject, JavaMethod, JavaCallback
 from enamlnative.android.android_toolkit_object import AndroidToolkitObject
+from enamlnative.android.bridge import JavaBridgeObject, JavaCallback, JavaMethod
 from enamlnative.widgets.dialog import ProxyDialog
 
 

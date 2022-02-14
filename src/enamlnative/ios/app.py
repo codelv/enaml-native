@@ -10,11 +10,11 @@ The full license is in the file LICENSE, distributed with this software.
 """
 import ctypes
 from ctypes.util import find_library
-from atom.api import Atom, Float, Value, Str, Int, Typed
+from atom.api import Atom, Float, Int, Str, Typed, Value
 from enaml.application import ProxyResolver
+from ..core.app import BridgedApplication
 from . import factories
 from .bridge import ObjcBridgeObject, ObjcMethod
-from ..core.app import BridgedApplication
 
 
 class ENBridge(ObjcBridgeObject):

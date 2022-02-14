@@ -10,9 +10,7 @@ Created on June 7, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.toggle_button import ProxyToggleButton
-
 from .android_compound_button import AndroidCompoundButton, CompoundButton
 from .bridge import JavaMethod
 

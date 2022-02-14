@@ -9,15 +9,11 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, Instance, Property, Dict, observe
-
-from enamlnative.widgets.list_view import ProxyListView, ProxyListItem
-
+from atom.api import Dict, Instance, Property, Typed, observe
+from enamlnative.widgets.list_view import ProxyListItem, ProxyListView
 from .android_toolkit_object import AndroidToolkitObject
-
 from .android_view_group import AndroidViewGroup, ViewGroup
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, encode
-
 
 package = "androidx.recyclerview.widget"
 

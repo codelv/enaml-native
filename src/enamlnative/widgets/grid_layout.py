@@ -9,11 +9,9 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Str, Enum, Bool, Int, observe
-
+from atom.api import Bool, Enum, ForwardTyped, Int, Str, Typed, observe
 from enaml.core.declarative import d_
-
-from .view_group import ViewGroup, ProxyViewGroup
+from .view_group import ProxyViewGroup, ViewGroup
 
 
 class ProxyGridLayout(ProxyViewGroup):

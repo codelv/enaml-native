@@ -10,10 +10,8 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed, set_default
-
 from enamlnative.widgets.flexbox import ProxyFlexbox
-
-from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
+from .android_view_group import AndroidViewGroup, MarginLayoutParams, ViewGroup
 from .bridge import JavaMethod
 
 

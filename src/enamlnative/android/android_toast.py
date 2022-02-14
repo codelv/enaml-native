@@ -9,10 +9,10 @@ Created on Sept 18, 2017
 
 @author: jrm
 """
-from atom.api import Typed, Bool
-from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
+from atom.api import Bool, Typed
 from enamlnative.widgets.toast import ProxyToast
 from .android_toolkit_object import AndroidToolkitObject
+from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
 
 
 class Toast(JavaBridgeObject):

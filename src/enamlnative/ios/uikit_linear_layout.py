@@ -12,9 +12,8 @@ Created on Aug 3, 2017
 
 from atom.api import Typed, set_default
 from enamlnative.widgets.linear_layout import ProxyLinearLayout
-
 from .bridge import ObjcMethod, ObjcProperty
-from .uikit_view_group import UIView, UiKitViewGroup
+from .uikit_view_group import UiKitViewGroup, UIView
 
 
 class UIStackView(UIView):

@@ -10,9 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.checkbox import ProxyCheckBox
-
 from .android_compound_button import AndroidCompoundButton, CompoundButton
 
 

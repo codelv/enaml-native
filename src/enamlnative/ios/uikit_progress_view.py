@@ -12,9 +12,8 @@ Created on Aug 3, 2017
 
 from atom.api import Typed, set_default
 from enamlnative.widgets.progress_bar import ProxyProgressBar
-
 from .bridge import ObjcMethod, ObjcProperty
-from .uikit_view import UIView, UiKitView
+from .uikit_view import UiKitView, UIView
 
 
 class UIProgressView(UIView):

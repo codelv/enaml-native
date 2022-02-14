@@ -10,14 +10,11 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import List, Typed, set_default
-
-from enamlnative.widgets.tab_layout import ProxyTabLayout, ProxyTabFragment
-
-from .android_view_pager import ViewPagerLayoutParams, LayoutParams
+from enamlnative.widgets.tab_layout import ProxyTabFragment, ProxyTabLayout
 from .android_fragment import AndroidPagerFragment
 from .android_frame_layout import AndroidFrameLayout, FrameLayout
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
-
+from .android_view_pager import LayoutParams, ViewPagerLayoutParams
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 package = "com.google.android.material.tabs"
 

@@ -10,9 +10,8 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from .android_view_group import AndroidViewGroup, ViewGroup
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 
 class ArrayAdapter(JavaBridgeObject):

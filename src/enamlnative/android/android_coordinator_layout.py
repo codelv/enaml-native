@@ -10,9 +10,7 @@ Created on Sept 18, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.coordinator_layout import ProxyCoordinatorLayout
-
 from .android_frame_layout import AndroidFrameLayout, FrameLayout
 from .bridge import JavaMethod
 

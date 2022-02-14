@@ -9,14 +9,13 @@ Created on Sept 10, 2017
 
 @author: jrm
 """
-import enaml
 import traceback
+import enaml
+from contextlib import contextmanager
 from atom.api import AtomMeta, Bool, set_default
+from enaml.core.api import *
 from enaml.core.declarative import Declarative
 from enaml.core.pattern import Pattern
-from enaml.core.api import *
-from contextlib import contextmanager
-
 from . import autoreload
 from .autoreload import isinstance2
 

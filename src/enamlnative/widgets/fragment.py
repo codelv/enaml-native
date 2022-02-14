@@ -9,10 +9,10 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Bool, observe
-from enaml.core.declarative import d_
+from atom.api import Bool, ForwardTyped, Typed, observe
 from enaml.core.conditional import Conditional, new_scope
-from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
+from enaml.core.declarative import d_
+from enaml.widgets.toolkit_object import ProxyToolkitObject, ToolkitObject
 
 
 class ProxyFragment(ProxyToolkitObject):

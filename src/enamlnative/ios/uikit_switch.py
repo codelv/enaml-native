@@ -10,10 +10,9 @@ Created on Aug 25, 2017
 @author: jrm
 """
 
-from atom.api import Typed, Bool
+from atom.api import Bool, Typed
 from enamlnative.widgets.switch import ProxySwitch
-
-from .bridge import ObjcMethod, ObjcProperty, ObjcCallback
+from .bridge import ObjcCallback, ObjcMethod, ObjcProperty
 from .uikit_control import UIControl, UiKitControl
 
 

@@ -9,7 +9,7 @@ Created on Mar 13, 2018
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Bool, Int, observe
+from atom.api import Bool, ForwardTyped, Int, Typed, observe
 from enaml.core.declarative import d_
 from .linear_layout import LinearLayout, ProxyLinearLayout
 

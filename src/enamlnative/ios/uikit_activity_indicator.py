@@ -12,9 +12,8 @@ Created on Aug 3, 2017
 
 from atom.api import Typed
 from enamlnative.widgets.activity_indicator import ProxyActivityIndicator
-
 from .bridge import ObjcMethod, ObjcProperty
-from .uikit_view import UIView, UiKitView
+from .uikit_view import UiKitView, UIView
 
 
 class UIActivityIndicatorView(UIView):

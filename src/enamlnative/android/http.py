@@ -13,24 +13,24 @@ Created on July 18, 2017
 import time
 from atom.api import (
     Atom,
+    Bool,
     Callable,
     Dict,
-    List,
-    ForwardInstance,
-    Int,
     Float,
-    Bool,
-    Str,
+    ForwardInstance,
     Instance,
+    Int,
+    List,
+    Str,
     set_default,
 )
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaStaticMethod
 from ..core.http import (
-    HttpRequest,
-    HttpError,
     AbstractAsyncHttpClient,
     AbstractWebsocketClient,
+    HttpError,
+    HttpRequest,
 )
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
 
 
 class BridgedAsyncHttpCallback(JavaBridgeObject):

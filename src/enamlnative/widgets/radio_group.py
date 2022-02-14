@@ -9,12 +9,10 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Instance, observe
-
+from atom.api import ForwardTyped, Instance, Typed, observe
 from enaml.core.declarative import d_
-
-from .radio_button import RadioButton
 from .linear_layout import LinearLayout, ProxyLinearLayout
+from .radio_button import RadioButton
 
 
 class ProxyRadioGroup(ProxyLinearLayout):

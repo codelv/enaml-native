@@ -9,11 +9,10 @@ Created on Sept 5, 2017
 
 @author: jrm
 """
-from atom.api import Atom, List, Float, Str
-
-from .bridge import JavaCallback, JavaMethod, JavaProxy
+from atom.api import Atom, Float, List, Str
 from .android_content import Context, SystemService
 from .app import AndroidApplication
+from .bridge import JavaCallback, JavaMethod, JavaProxy
 
 
 class LocationAccessDenied(RuntimeError):

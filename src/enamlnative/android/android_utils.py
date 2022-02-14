@@ -9,9 +9,9 @@ Created on May 20, 2017
 
 @author: jrm
 """
+from .android_content import Context, SystemService
 from .app import AndroidApplication
-from .bridge import JavaMethod, JavaBridgeObject, JavaStaticMethod
-from .android_content import SystemService, Context
+from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
 
 
 class ArrayList(JavaBridgeObject):

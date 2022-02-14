@@ -18,15 +18,15 @@ else:
 
 from atom.api import (
     Atom,
-    List,
     Bool,
-    Str,
+    Callable,
     Dict,
-    Int,
+    Float,
     ForwardInstance,
     Instance,
-    Float,
-    Callable,
+    Int,
+    List,
+    Str,
     Subclass,
 )
 from .app import BridgedApplication

@@ -12,13 +12,13 @@ Created on June 21, 2017
 from atom.api import Atom, Int
 from ..core import bridge
 from ..core.bridge import (
-    Command,
-    msgpack_encoder,
-    BridgeMethod,
-    BridgeField,
     BridgeCallback,
+    BridgeField,
+    BridgeMethod,
     BridgeObject,
+    Command,
     NestedBridgeObject,
+    msgpack_encoder,
 )
 
 

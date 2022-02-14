@@ -130,8 +130,8 @@ import sys
 import traceback
 import types
 import weakref
-from importlib import import_module
 from imp import reload
+from importlib import import_module
 from atom.api import Atom, Bool, Dict, Instance, List
 from . import openpy
 

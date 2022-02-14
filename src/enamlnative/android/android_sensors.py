@@ -10,10 +10,9 @@ Created on Jan 28, 2018
 @author: jrm
 """
 from atom.api import ForwardInstance, Int
-
-from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 from .android_content import Context, SystemService
 from .app import AndroidApplication
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 
 class Sensor(JavaBridgeObject):

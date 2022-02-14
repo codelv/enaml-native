@@ -9,9 +9,9 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Enum, observe
-from .view import View, ProxyView
+from atom.api import Enum, ForwardTyped, Typed, observe
 from enaml.core.declarative import d_
+from .view import ProxyView, View
 
 
 class ProxyViewGroup(ProxyView):

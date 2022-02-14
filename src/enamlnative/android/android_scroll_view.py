@@ -10,9 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Instance
-
 from enamlnative.widgets.scroll_view import ProxyScrollView
-
 from .android_frame_layout import AndroidFrameLayout, FrameLayout
 from .bridge import JavaMethod
 

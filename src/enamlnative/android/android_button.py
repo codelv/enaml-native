@@ -10,17 +10,14 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.button import (
     ProxyButton,
-    ProxyImageButton,
     ProxyFloatingActionButton,
+    ProxyImageButton,
 )
-
-from .bridge import JavaMethod
-
-from .android_text_view import AndroidTextView, TextView
 from .android_image_view import AndroidImageView, ImageView
+from .android_text_view import AndroidTextView, TextView
+from .bridge import JavaMethod
 
 
 class Button(TextView):

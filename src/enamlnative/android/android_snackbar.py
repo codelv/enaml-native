@@ -9,16 +9,16 @@ Created on Sept 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, Bool
-from .bridge import (
-    JavaBridgeObject,
-    JavaMethod,
-    JavaStaticMethod,
-    JavaCallback,
-    JavaProxy,
-)
+from atom.api import Bool, Typed
 from enamlnative.widgets.snackbar import ProxySnackbar
 from .android_toolkit_object import AndroidToolkitObject
+from .bridge import (
+    JavaBridgeObject,
+    JavaCallback,
+    JavaMethod,
+    JavaProxy,
+    JavaStaticMethod,
+)
 
 
 class Snackbar(JavaBridgeObject):

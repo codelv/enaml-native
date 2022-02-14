@@ -12,9 +12,8 @@ Created on July 7, 2017
 from atom.api import Typed
 from enaml.application import deferred_call
 from enamlnative.widgets.action_menu_view import ProxyActionMenuView
-
 from .android_linear_layout import AndroidLinearLayout, LinearLayout
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 
 class ActionMenuView(LinearLayout):

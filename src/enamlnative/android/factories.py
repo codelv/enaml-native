@@ -11,6 +11,12 @@ Created on May 20, 2017
 """
 
 
+def activity_factory():
+    from .android_activity import AndroidActivity
+
+    return AndroidActivity
+
+
 def activity_indicator_factory():
     from .android_activity_indicator import AndroidActivityIndicator
 
@@ -371,7 +377,14 @@ def web_view_factory():
     return AndroidWebView
 
 
+def window_factory():
+    from .android_window import AndroidWindow
+
+    return AndroidWindow
+
+
 ANDROID_FACTORIES = {
+    "Activity": activity_factory,
     "ActivityIndicator": activity_indicator_factory,
     "AppBarLayout": app_bar_layout_factory,
     "AutoCompleteTextView": auto_complete_text_view_factory,
@@ -432,4 +445,5 @@ ANDROID_FACTORIES = {
     "View": view_factory,
     "ViewPager": view_pager_factory,
     "WebView": web_view_factory,
+    "Window": window_factory,
 }

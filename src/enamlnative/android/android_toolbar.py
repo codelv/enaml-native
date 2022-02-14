@@ -10,12 +10,9 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.toolbar import ProxyToolbar
-
-from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
-from .bridge import JavaMethod, JavaCallback, JavaField
-
+from .android_view_group import AndroidViewGroup, MarginLayoutParams, ViewGroup
+from .bridge import JavaCallback, JavaField, JavaMethod
 
 package = "androidx.appcompat.widget"
 

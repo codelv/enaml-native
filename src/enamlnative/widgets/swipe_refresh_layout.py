@@ -9,11 +9,9 @@ Created on Oct 22, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Str, Bool, Int, Event, observe
-
+from atom.api import Bool, Event, ForwardTyped, Int, Str, Typed, observe
 from enaml.core.declarative import d_
-
-from .view_group import ViewGroup, ProxyViewGroup
+from .view_group import ProxyViewGroup, ViewGroup
 
 
 class ProxySwipeRefreshLayout(ProxyViewGroup):

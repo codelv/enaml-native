@@ -10,17 +10,15 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.iconify import (
     ProxyIcon,
     ProxyIconButton,
     ProxyIconToggleButton,
 )
-from .bridge import JavaBridgeObject
-
-from .android_text_view import AndroidTextView, TextView
 from .android_button import AndroidButton, Button
+from .android_text_view import AndroidTextView, TextView
 from .android_toggle_button import AndroidToggleButton, ToggleButton
+from .bridge import JavaBridgeObject
 
 
 class IconDrawable(JavaBridgeObject):

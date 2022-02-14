@@ -10,22 +10,20 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed,
-    ForwardTyped,
-    Str,
-    List,
-    Float,
-    Int,
     Bool,
     Enum,
+    Float,
+    ForwardTyped,
+    Int,
+    List,
+    Str,
+    Typed,
     observe,
     set_default,
 )
-
 from enaml.core.declarative import d_
-
-from .view_group import ViewGroup, ProxyViewGroup
 from .fragment import Fragment, ProxyFragment
+from .view_group import ProxyViewGroup, ViewGroup
 
 
 class ProxyViewPager(ProxyViewGroup):

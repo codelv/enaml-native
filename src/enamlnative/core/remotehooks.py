@@ -10,9 +10,9 @@ Created on Dec 11, 2017
 @author jrm
 
 """
+import logging
 import os
 import sys
-import logging
 
 
 def init():

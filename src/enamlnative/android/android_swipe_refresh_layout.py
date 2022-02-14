@@ -10,11 +10,9 @@ Created on Oct 22, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.swipe_refresh_layout import ProxySwipeRefreshLayout
-
 from .android_view_group import AndroidViewGroup, ViewGroup
-from .bridge import JavaMethod, JavaCallback
+from .bridge import JavaCallback, JavaMethod
 
 
 class SwipeRefreshLayout(ViewGroup):

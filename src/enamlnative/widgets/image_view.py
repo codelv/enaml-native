@@ -9,11 +9,9 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Int, Str, Bool, Event, observe
-
+from atom.api import Bool, Event, ForwardTyped, Int, Str, Typed, observe
 from enaml.core.declarative import d_
-
-from .view import View, ProxyView
+from .view import ProxyView, View
 
 
 class ProxyImageView(ProxyView):

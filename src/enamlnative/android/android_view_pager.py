@@ -9,20 +9,17 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, Int, List, set_default
-
-from enamlnative.widgets.view_pager import (
-    ProxyViewPager,
-    ProxyPagerTitleStrip,
-    ProxyPagerTabStrip,
-)
+from atom.api import Int, List, Typed, set_default
 from enamlnative.widgets.view import coerce_gravity, coerce_size
-
+from enamlnative.widgets.view_pager import (
+    ProxyPagerTabStrip,
+    ProxyPagerTitleStrip,
+    ProxyViewPager,
+)
+from .android_fragment import AndroidFragment
 from .android_view import LayoutParams
 from .android_view_group import AndroidViewGroup, ViewGroup
-from .android_fragment import AndroidFragment
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField, encode
-
+from .bridge import JavaBridgeObject, JavaCallback, JavaField, JavaMethod, encode
 
 package = "androidx.viewpager.widget"
 

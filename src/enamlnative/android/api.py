@@ -10,8 +10,8 @@ Created on July 24, 2017
 @author: jrm
 """
 from .android_location import LocationManager
+from .android_notification import NotificationManager
+from .android_sensors import Sensor, SensorManager
+from .android_usb import UsbDevice, UsbManager
 from .android_utils import InputMethodManager
 from .android_wifi import WifiManager
-from .android_sensors import SensorManager, Sensor
-from .android_usb import UsbManager, UsbDevice
-from .android_notification import NotificationManager

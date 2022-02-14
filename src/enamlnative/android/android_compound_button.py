@@ -10,11 +10,9 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.compound_button import ProxyCompoundButton
-
 from .android_button import AndroidButton, Button
-from .bridge import JavaMethod, JavaCallback
+from .bridge import JavaCallback, JavaMethod
 
 
 class CompoundButton(Button):

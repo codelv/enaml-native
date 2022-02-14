@@ -12,7 +12,6 @@ Created on May 20, 2017
 import sys
 from contextlib import contextmanager
 
-
 version = "5.0.0"
 
 

@@ -10,9 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.radio_group import ProxyRadioGroup
-
 from .android_linear_layout import AndroidLinearLayout, LinearLayout
 from .bridge import JavaCallback, JavaMethod
 

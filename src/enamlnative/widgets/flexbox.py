@@ -10,20 +10,18 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed,
-    ForwardTyped,
     Bool,
-    Tuple,
-    Float,
-    Int,
     Enum,
+    Float,
+    ForwardTyped,
+    Int,
+    Tuple,
+    Typed,
     observe,
     set_default,
 )
-
 from enaml.core.declarative import d_
-
-from .view_group import ViewGroup, ProxyViewGroup
+from .view_group import ProxyViewGroup, ViewGroup
 
 
 class ProxyFlexbox(ProxyViewGroup):

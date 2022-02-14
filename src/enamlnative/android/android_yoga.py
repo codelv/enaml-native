@@ -9,8 +9,8 @@ Created on Nov 29, 2017
 
 @author: jrm
 """
+from .android_view_group import LayoutParams, ViewGroup
 from .bridge import JavaBridgeObject, JavaMethod
-from .android_view_group import ViewGroup, LayoutParams
 
 
 class YogaNode(JavaBridgeObject):

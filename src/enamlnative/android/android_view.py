@@ -9,13 +9,10 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, Dict, Instance, Subclass, Float
-
-from .android_toolkit_object import AndroidToolkitObject
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaField
-
+from atom.api import Dict, Float, Instance, Subclass, Typed
 from enamlnative.widgets.view import ProxyView, coerce_size
-
+from .android_toolkit_object import AndroidToolkitObject
+from .bridge import JavaBridgeObject, JavaCallback, JavaField, JavaMethod
 
 LAYOUT_KEYS = (
     "x",
@@ -142,7 +139,7 @@ class AndroidView(AndroidToolkitObject, ProxyView):
     default_layout = Dict(default={"width": "wrap_content", "height": "wrap_content"})
 
     def _default_dp(self):
-        return self.get_context().dp
+        return self.get_context().activity.dp
 
     # -------------------------------------------------------------------------
     # Initialization API

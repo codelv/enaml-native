@@ -9,12 +9,10 @@ Created on May 9, 2018
 
 @author: jrm
 """
-from atom.api import Typed, Bool, Int, set_default
-
+from atom.api import Bool, Int, Typed, set_default
 from enamlnative.widgets.view import ProxyView
-
 from .android_view import AndroidView, View
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, bridge
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, bridge
 
 
 class SurfaceTexture(JavaBridgeObject):

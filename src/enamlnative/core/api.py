@@ -10,8 +10,9 @@ Created on Apr 15, 2017
 @author: jrm
 """
 import sys
-from .block import Block
+from enaml.application import Application
 from enaml.core.api import *
+from .block import Block
 
 if sys.platform == "darwin":
     pass  #: iOS

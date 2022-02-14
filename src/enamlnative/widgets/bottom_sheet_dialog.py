@@ -9,7 +9,7 @@ Created on Jan 29, 2018
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped
+from atom.api import ForwardTyped, Typed
 from .dialog import Dialog, ProxyDialog
 
 

@@ -9,11 +9,9 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Tuple, Str, Enum, observe, set_default
-
+from atom.api import Enum, ForwardTyped, Str, Tuple, Typed, observe, set_default
 from enaml.core.declarative import d_
-
-from .text_view import TextView, ProxyTextView
+from .text_view import ProxyTextView, TextView
 
 
 class ProxyEditText(ProxyTextView):

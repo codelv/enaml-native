@@ -11,7 +11,7 @@ Created on Jan 29, 2018
 """
 from atom.api import Typed
 from enamlnative.widgets.bottom_sheet_dialog import ProxyBottomSheetDialog
-from .android_dialog import Dialog, AndroidDialog
+from .android_dialog import AndroidDialog, Dialog
 
 
 class BottomSheetDialog(Dialog):

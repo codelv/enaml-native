@@ -10,11 +10,9 @@ Created on July 6, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.image_view import ProxyImageView
-
 from .android_view import AndroidView, View
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaStaticMethod
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
 
 
 class ImageView(View):

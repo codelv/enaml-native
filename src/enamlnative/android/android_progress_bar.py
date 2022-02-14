@@ -9,9 +9,8 @@ Created on May 26, 2017
 
 @author: jrm
 """
-from atom.api import Typed, Bool
+from atom.api import Bool, Typed
 from enamlnative.widgets.progress_bar import ProxyProgressBar
-
 from .android_view import AndroidView, View
 from .bridge import JavaMethod
 

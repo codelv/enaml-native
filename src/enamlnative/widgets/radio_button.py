@@ -9,8 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped
-
+from atom.api import ForwardTyped, Typed
 from .compound_button import CompoundButton, ProxyCompoundButton
 
 

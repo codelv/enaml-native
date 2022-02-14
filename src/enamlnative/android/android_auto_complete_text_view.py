@@ -10,9 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.auto_complete_text_view import ProxyAutoCompleteTextView
-
 from .android_adapter import ArrayAdapter
 from .android_edit_text import AndroidEditText, EditText
 from .bridge import JavaMethod

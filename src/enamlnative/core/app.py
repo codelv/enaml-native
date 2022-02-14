@@ -11,25 +11,26 @@ The full license is in the file LICENSE, distributed with this software.
 """
 import json
 import traceback
-from functools import partial
 from asyncio import Future
+from functools import partial
+from time import time
 from atom.api import (
     Atom,
-    Enum,
-    Callable,
-    List,
-    Instance,
-    Value,
-    Int,
-    Str,
     Bool,
+    Callable,
     Dict,
+    Enum,
     Float,
+    Instance,
+    Int,
+    List,
+    Str,
+    Value,
 )
 from enaml.application import Application
-from . import bridge
-from time import time
 from tornado.ioloop import IOLoop
+from enamlnative.core import bridge
+from enamlnative.widgets.activity import Activity
 
 
 class Plugin(Atom):
@@ -64,29 +65,11 @@ class BridgedApplication(Application):
 
     __id__ = Int(-1)
 
-    #: Keep screen on by setting the WindowManager flag
-    keep_screen_on = Bool()
-
-    #: Statusbar color
-    statusbar_color = Str()
-
-    #: Application lifecycle state must be set by the implementation
-    state = Enum("created", "paused", "resumed", "stopped", "destroyed")
-
-    #: Width of the screen in dp
-    width = Float(strict=False)
-
-    #: Height of the screen in dp
-    height = Float(strict=False)
-
-    #: Screen orientation
-    orientation = Enum("portrait", "landscape", "square")
-
     #: View to display within the activity
-    view = Value()
+    activity = Instance(Activity)
 
-    #: Factory to create and show the view. It takes the app as the first arg
-    load_view = Callable()
+    #: Function to reload the view
+    on_reload = Callable()
 
     #: If true, debug bridge statements
     debug = Bool()
@@ -96,7 +79,7 @@ class BridgedApplication(Application):
     _dev_session = Value()
 
     #: Event loop
-    loop = Instance(IOLoop)
+    loop = Instance(IOLoop, factory=IOLoop.current)
 
     #: Events to send to the bridge
     _bridge_queue = List()
@@ -113,10 +96,6 @@ class BridgedApplication(Application):
     # -------------------------------------------------------------------------
     # Defaults
     # -------------------------------------------------------------------------
-    def _default_loop(self):
-        """Get the event loop based on what libraries are available."""
-        return IOLoop.current()
-
     def _default_plugins(self):
         """Get entry points to load any plugins installed.
         The build process should create an "entry_points.json" file
@@ -157,9 +136,8 @@ class BridgedApplication(Application):
         """Start the application event loop"""
         #: Schedule a load view if given and remote debugging is not active
         #: the remote debugging init call this after dev connection is ready
-        if self.load_view and self.dev != "remote":
-            self.deferred_call(self.load_view, self)
-
+        if self.dev != "remote":
+            self.deferred_call(self.activity.start)
         self.loop.start()
 
     def stop(self):
@@ -241,25 +219,6 @@ class BridgedApplication(Application):
     # -------------------------------------------------------------------------
     # Bridge API Implementation
     # -------------------------------------------------------------------------
-    def show_view(self):
-        """Show the current `app.view`. This will fade out the previous
-        with the new view.
-
-        """
-        raise NotImplementedError
-
-    def get_view(self):
-        """Get the root view to display. Make sure it is
-        properly initialized.
-
-        """
-        view = self.view
-        if not view.is_initialized:
-            view.initialize()
-        if not view.proxy_is_active:
-            view.activate_proxy()
-        return view.proxy.widget
-
     def show_error(self, msg):
         """Show the error view with the given message on the UI."""
         self.send_event(bridge.Command.ERROR, msg)
@@ -398,16 +357,16 @@ class BridgedApplication(Application):
 
     def on_pause(self):
         """Called when the app is paused."""
-        pass
+        self.activity.paused()
 
     def on_resume(self):
         """Called when the app is resumed."""
-        pass
+        self.activity.resumed()
 
     def on_stop(self):
         """Called when the app is stopped."""
         #: Called from thread, make sure the correct thread detaches
-        pass
+        self.activity.stopped()
 
     def on_destroy(self):
         """Called when the app is destroyed."""

@@ -9,9 +9,9 @@ Created on May 10, 2018
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Bool, observe
-from .texture_view import TextureView, ProxyTextureView
+from atom.api import Bool, ForwardTyped, Typed, observe
 from enaml.core.declarative import d_
+from .texture_view import ProxyTextureView, TextureView
 
 
 class ProxyCameraView(ProxyTextureView):

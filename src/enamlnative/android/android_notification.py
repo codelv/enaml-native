@@ -9,23 +9,21 @@ Created on Apr 4, 2018
 
 @author: jrm
 """
-from atom.api import Typed, Instance, ForwardInstance, Int, Bool, List
+from atom.api import Bool, ForwardInstance, Instance, Int, List, Typed
 from enaml.application import deferred_call
-from .app import AndroidApplication
+from enamlnative.widgets.notification import ProxyNotification
 from .android_content import (
-    Context,
-    SystemService,
-    PendingIntent,
-    Intent,
     BroadcastReceiver,
+    Context,
+    Intent,
+    PendingIntent,
+    SystemService,
 )
-from .android_image_view import Bitmap, Glide, RequestManager, RequestBuilder
+from .android_image_view import Bitmap, Glide, RequestBuilder, RequestManager
 from .android_toolkit_object import AndroidToolkitObject
 from .android_utils import Uri
-from .bridge import JavaBridgeObject, JavaStaticMethod, JavaCallback, JavaMethod
-
-from enamlnative.widgets.notification import ProxyNotification
-
+from .app import AndroidApplication
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
 
 package = "androidx.core.app"
 

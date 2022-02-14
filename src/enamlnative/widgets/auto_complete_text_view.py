@@ -9,10 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, List, Int, observe, set_default
-
+from atom.api import ForwardTyped, Int, List, Typed, observe, set_default
 from enaml.core.declarative import d_
-
 from .edit_text import EditText, ProxyEditText
 
 

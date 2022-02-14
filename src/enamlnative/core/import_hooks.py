@@ -9,9 +9,9 @@ Created on July 10, 2017
 
 @author: jrm
 """
+import imp
 import os
 import sys
-import imp
 from glob import glob
 
 

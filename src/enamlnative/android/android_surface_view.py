@@ -10,11 +10,9 @@ Created on May 9, 2018
 @author: jrm
 """
 from atom.api import Typed, set_default
-
 from enamlnative.widgets.surface_view import ProxySurfaceView
-
 from .android_view import AndroidView, View
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 
 class SurfaceView(View):

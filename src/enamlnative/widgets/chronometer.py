@@ -9,11 +9,10 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Int, Str, Enum, Bool, observe
 from datetime import datetime
+from atom.api import Bool, Enum, ForwardTyped, Int, Str, Typed, observe
 from enaml.core.declarative import d_
-
-from .text_view import TextView, ProxyTextView
+from .text_view import ProxyTextView, TextView
 
 
 class ProxyChronometer(ProxyTextView):

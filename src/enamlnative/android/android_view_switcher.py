@@ -11,9 +11,7 @@ Created on May 20, 2017
 """
 import jnius
 from atom.api import Typed
-
 from enamlnative.widgets.view_animator import ProxyViewAnimator
-
 from .android_frame_layout import AndroidFrameLayout
 
 

@@ -11,11 +11,9 @@ Created on Aug 25, 2017
 """
 
 from atom.api import Typed
-
 from enamlnative.widgets.compound_button import ProxyCompoundButton
-
-from .bridge import ObjcMethod, ObjcProperty, ObjcCallback
-from .uikit_text_view import UITextView, UiKitTextView
+from .bridge import ObjcCallback, ObjcMethod, ObjcProperty
+from .uikit_text_view import UiKitTextView, UITextView
 
 
 class UIControl(UITextView):

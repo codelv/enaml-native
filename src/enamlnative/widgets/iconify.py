@@ -9,11 +9,10 @@ Created on July 8, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Constant, Str, observe
-
-from .text_view import TextView, ProxyTextView
+from atom.api import Constant, ForwardTyped, Str, Typed, observe
 from .button import Button, ProxyButton
-from .toggle_button import ToggleButton, ProxyToggleButton
+from .text_view import ProxyTextView, TextView
+from .toggle_button import ProxyToggleButton, ToggleButton
 
 
 class ProxyIcon(ProxyTextView):

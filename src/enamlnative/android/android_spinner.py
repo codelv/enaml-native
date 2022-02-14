@@ -9,11 +9,9 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, List, set_default
-
+from atom.api import List, Typed, set_default
 from enamlnative.widgets.spinner import ProxySpinner
-
-from .android_adapter import ArrayAdapter, AndroidAdapterView, AdapterView
+from .android_adapter import AdapterView, AndroidAdapterView, ArrayAdapter
 from .bridge import JavaMethod
 
 

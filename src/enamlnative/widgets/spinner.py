@@ -9,12 +9,10 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Coerced, Str, List, Int, Enum, observe
-
+from atom.api import Coerced, Enum, ForwardTyped, Int, List, Str, Typed, observe
 from enaml.core.declarative import d_
-
-from .view_group import ViewGroup, ProxyViewGroup
 from .view import coerce_gravity
+from .view_group import ProxyViewGroup, ViewGroup
 
 
 class ProxySpinner(ProxyViewGroup):

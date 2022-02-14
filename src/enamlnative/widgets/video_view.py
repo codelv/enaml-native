@@ -9,9 +9,9 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Event, Enum, Str, Bool, observe
-from .surface_view import SurfaceView, ProxySurfaceView
+from atom.api import Bool, Enum, Event, ForwardTyped, Str, Typed, observe
 from enaml.core.declarative import d_
+from .surface_view import ProxySurfaceView, SurfaceView
 
 
 class ProxyVideoView(ProxySurfaceView):

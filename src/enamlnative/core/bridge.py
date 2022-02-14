@@ -9,13 +9,13 @@ Created on June 21, 2017
 
 @author: jrm
 """
-import msgpack
-import functools
 import asyncio
-from typing import ClassVar
-from atom.api import Atom, Property, Instance, ForwardInstance, Dict, Str, Int
-from weakref import WeakValueDictionary
+import functools
+import msgpack
 from contextlib import contextmanager
+from typing import ClassVar
+from weakref import WeakValueDictionary
+from atom.api import Atom, Dict, ForwardInstance, Instance, Int, Property, Str
 
 CACHE = WeakValueDictionary()
 PROXY_CACHE = WeakValueDictionary()

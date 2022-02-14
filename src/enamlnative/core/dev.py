@@ -9,29 +9,28 @@ The full license is in the file LICENSE, distributed with this software.
 @author jrm
 
 """
-import os
-import sys
-import json
-import shutil
 import inspect
+import json
+import os
+import shutil
+import sys
 import traceback
+import enaml
 import enamlnative
+from contextlib import contextmanager
 from atom.api import (
     Atom,
-    Instance,
-    List,
-    Subclass,
-    ForwardInstance,
-    Enum,
-    Str,
-    Int,
     Bool,
+    Enum,
+    ForwardInstance,
+    Instance,
+    Int,
+    List,
+    Str,
+    Subclass,
 )
-from contextlib import contextmanager
 from .bridge import Command
-
-if sys.version_info.major > 2:
-    from importlib import reload
+from importlib import reload
 
 
 with enamlnative.imports():
@@ -54,10 +53,11 @@ DEFAULT_CODE = """
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 
-
-enamldef ContentView(Flexbox):
-    TextView:
-        text = "Hello world!"
+enamldef MainWindow(Window):
+    Flexbox:
+        flex_direction = "column"
+        TextView:
+            text = "Hello world!"
 """
 
 INDEX_PAGE = """<html>
@@ -325,8 +325,8 @@ class TornadoDevClient(DevClient):
             return False
 
     def start(self, session):
-        from tornado.websocket import websocket_connect
         from tornado import gen
+        from tornado.websocket import websocket_connect
 
         @gen.coroutine
         def run():
@@ -767,40 +767,14 @@ class DevServerSession(Atom):
         """Called when the dev server wants to reload the view."""
         #: TODO: This should use the autorelaoder
         app = self.app
-
-        #: Show loading screen
-        try:
-            self.app.widget.showLoading("Reloading... Please wait.", now=True)
-            # self.app.widget.restartPython(now=True)
-            # sys.exit(0)
-        except:
-            #: TODO: Implement for iOS...
-            pass
+        app.activity.show_loading("Reloading...")
         self.save_changed_files(msg)
-
-        if app.load_view is None:
-            print(
-                "Warning: Reloading the view is not implemented. "
-                "Please set `app.load_view` to support this."
-            )
-            return
-        if app.view is not None:
-            try:
-                app.view.destroy()
-            except:
-                pass
-
-        def wrapped(f):
-            def safe_reload(*args, **kwargs):
-                try:
-                    return f(*args, **kwargs)
-                except:
-                    #: Display the error
-                    app.send_event(Command.ERROR, traceback.format_exc())
-
-            return safe_reload
-
-        app.deferred_call(wrapped(app.load_view), app)
+        try:
+            with enaml.imports():
+                app.activity.on_reload()
+        except Exception as e:
+            #: Display the error
+            app.send_event(Command.ERROR, traceback.format_exc())
 
     def do_hotswap(self, msg):
         """Attempt to hotswap the code"""

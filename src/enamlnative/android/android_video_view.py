@@ -10,12 +10,10 @@ Created on May 9, 2018
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.video_view import ProxyVideoView
-
 from .android_surface_view import AndroidSurfaceView, SurfaceView
 from .android_utils import Uri
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 
 class MediaPlayer(JavaBridgeObject):

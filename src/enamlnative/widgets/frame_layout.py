@@ -9,10 +9,10 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Coerced, Bool, observe
+from atom.api import Bool, Coerced, ForwardTyped, Typed, observe
 from enaml.core.declarative import d_
-from .view_group import ViewGroup, ProxyViewGroup
 from .view import coerce_gravity
+from .view_group import ProxyViewGroup, ViewGroup
 
 
 class ProxyFrameLayout(ProxyViewGroup):

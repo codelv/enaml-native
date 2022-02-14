@@ -10,21 +10,19 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed,
-    ForwardTyped,
-    Str,
-    Tuple,
+    Bool,
     Enum,
     Event,
     Float,
+    ForwardTyped,
     Int,
-    Bool,
+    Str,
+    Tuple,
+    Typed,
     observe,
 )
-
 from enaml.core.declarative import d_
-
-from .view import View, ProxyView
+from .view import ProxyView, View
 
 
 class ProxyTextView(View):

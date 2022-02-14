@@ -9,14 +9,11 @@ Created on May 20, 2017
 
 @author: jrm
 """
+from datetime import datetime, timedelta
 from atom.api import Typed
-
 from enamlnative.widgets.chronometer import ProxyChronometer
-
 from .android_text_view import AndroidTextView, TextView
 from .bridge import JavaCallback, JavaMethod
-from datetime import datetime, timedelta
-
 
 UTC_START = datetime(1970, 1, 1)
 

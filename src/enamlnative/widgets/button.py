@@ -9,12 +9,10 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Enum, Float, Str, Bool, observe, set_default
-
+from atom.api import Bool, Enum, Float, ForwardTyped, Str, Typed, observe, set_default
 from enaml.core.declarative import d_
-
-from .text_view import TextView, ProxyTextView
 from .image_view import ImageView, ProxyImageView
+from .text_view import ProxyTextView, TextView
 
 
 class ProxyButton(ProxyTextView):

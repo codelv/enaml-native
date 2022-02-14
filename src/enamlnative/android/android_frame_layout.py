@@ -10,11 +10,9 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed, set_default
-
 from enamlnative.widgets.frame_layout import ProxyFrameLayout
-
-from .android_view_group import AndroidViewGroup, ViewGroup, MarginLayoutParams
-from .bridge import JavaMethod, JavaField
+from .android_view_group import AndroidViewGroup, MarginLayoutParams, ViewGroup
+from .bridge import JavaField, JavaMethod
 
 
 class FrameLayout(ViewGroup):

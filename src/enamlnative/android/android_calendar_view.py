@@ -9,13 +9,11 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Typed
-
 from datetime import datetime
+from atom.api import Typed
 from enamlnative.widgets.calendar_view import ProxyCalendarView
-
 from .android_frame_layout import AndroidFrameLayout, FrameLayout
-from .bridge import JavaMethod, JavaCallback
+from .bridge import JavaCallback, JavaMethod
 
 
 class CalendarView(FrameLayout):

@@ -12,8 +12,7 @@ Created on Aug 3, 2017
 
 from atom.api import Typed, set_default
 from enamlnative.widgets.flexbox import ProxyFlexbox
-
-from .uikit_view import UIView, UiKitView
+from .uikit_view import UiKitView, UIView
 from .yoga import Yoga
 
 

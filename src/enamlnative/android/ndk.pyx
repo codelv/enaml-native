@@ -9,18 +9,21 @@ Created on May 10, 2018
 
 @author: jrm
 """
-from libc.stdint cimport uint8_t, uint32_t, int32_t, int64_t
+from libc.stdint cimport int32_t, int64_t, uint8_t, uint32_t
 from libcpp cimport bool
-from libcpp.string cimport string
 from libcpp.map cimport map
-from enamlnative.android.jni cimport (
-    jint, jobject, JNIEnv
-)
+from libcpp.string cimport string
+from enamlnative.android.jni cimport JNIEnv, jint, jobject
 from enamlnative.android.ndk cimport (
-    ACameraManager, ACameraDevice, ACaptureSessionOutputContainer, 
-    ACameraManager_create, ACameraCaptureSession, CaptureSessionState,
-    acamera_metadata_enum_android_lens_facing_t
+    ACameraCaptureSession,
+    ACameraDevice,
+    ACameraManager,
+    ACameraManager_create,
+    ACaptureSessionOutputContainer,
+    CaptureSessionState,
+    acamera_metadata_enum_android_lens_facing_t,
 )
+
 
 cdef const uint64_t kMinExposureTime = 1000000
 cdef const uint64_t kMaxExposureTime = 250000000

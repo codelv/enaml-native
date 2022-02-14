@@ -10,11 +10,9 @@ Created on June 7, 2017
 @author: jrm
 """
 from atom.api import Typed, set_default
-
 from enamlnative.widgets.rating_bar import ProxyRatingBar
-
 from .android_progress_bar import AndroidProgressBar, ProgressBar
-from .bridge import JavaMethod, JavaCallback
+from .bridge import JavaCallback, JavaMethod
 
 
 class RatingBar(ProgressBar):

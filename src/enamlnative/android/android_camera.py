@@ -9,16 +9,13 @@ Created on May 9, 2018
 
 @author: jrm
 """
-from atom.api import Typed, List, Bool
-
-from .bridge import JavaBridgeObject, JavaMethod, JavaCallback, JavaStaticMethod
+from atom.api import Bool, List, Typed
+from enamlnative.widgets.camera_view import ProxyCameraView
 from .android_activity import Activity
 from .android_content import SystemService
+from .android_texture_view import AndroidTextureView, AndroidView, TextureView
 from .app import AndroidApplication
-from enamlnative.widgets.camera_view import ProxyCameraView
-
-from .android_texture_view import AndroidTextureView, TextureView, AndroidView
-
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
 
 # class ImageReader(JavaBridgeObject):
 #     __nativeclass__ = set_default('android.media.ImageReader')

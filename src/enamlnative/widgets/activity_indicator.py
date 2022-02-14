@@ -9,10 +9,9 @@ Created on May 26, 2017
 
 @author: jrm
 """
-from atom.api import Typed, ForwardTyped, Enum, Str, observe
-
+from atom.api import Enum, ForwardTyped, Str, Typed, observe
 from enaml.core.declarative import d_
-from .view import View, ProxyView
+from .view import ProxyView, View
 
 
 class ProxyActivityIndicator(ProxyView):

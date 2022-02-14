@@ -9,20 +9,9 @@ Created on Sept 21, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Typed,
-    ForwardTyped,
-    Str,
-    Dict,
-    Bool,
-    Int,
-    Event,
-    Enum,
-    observe,
-)
-
+from atom.api import Bool, Dict, Enum, Event, ForwardTyped, Int, Str, Typed, observe
 from enaml.core.declarative import d_
-from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
+from enaml.widgets.toolkit_object import ProxyToolkitObject, ToolkitObject
 
 
 class ProxyNotification(ProxyToolkitObject):

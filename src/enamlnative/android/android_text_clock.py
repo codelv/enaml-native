@@ -10,9 +10,7 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.text_clock import ProxyTextClock
-
 from .android_text_view import AndroidTextView, TextView
 from .bridge import JavaMethod
 

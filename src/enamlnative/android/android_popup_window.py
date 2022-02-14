@@ -9,9 +9,9 @@ Created on Mar 17, 2018
 
 @author: jrm
 """
-from atom.api import Typed, Bool
-from enamlnative.android.bridge import JavaBridgeObject, JavaMethod, JavaCallback
+from atom.api import Bool, Typed
 from enamlnative.android.android_toolkit_object import AndroidToolkitObject
+from enamlnative.android.bridge import JavaBridgeObject, JavaCallback, JavaMethod
 from enamlnative.widgets.popup_window import ProxyPopupWindow
 from .android_utils import ColorDrawable
 

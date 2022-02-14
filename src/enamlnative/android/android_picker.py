@@ -10,9 +10,7 @@ Created on July 6, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.picker import ProxyPicker
-
 from .android_linear_layout import AndroidLinearLayout, LinearLayout
 from .bridge import JavaCallback, JavaMethod
 

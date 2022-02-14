@@ -10,11 +10,9 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed
-
 from enamlnative.widgets.text_view import ProxyTextView
-
 from .android_view import AndroidView, View
-from .bridge import JavaMethod, JavaCallback, JavaStaticMethod, JavaBridgeObject
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
 
 
 class TextView(View):

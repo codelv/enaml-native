@@ -10,22 +10,20 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import (
-    Typed,
-    ForwardTyped,
-    Coerced,
     Bool,
-    Int,
-    Tuple,
+    Coerced,
+    Enum,
     Event,
     Float,
+    ForwardTyped,
+    Int,
     Str,
-    Enum,
+    Tuple,
+    Typed,
     observe,
 )
-
 from enaml.core.declarative import d_
-from enaml.widgets.toolkit_object import ToolkitObject, ProxyToolkitObject
-
+from enaml.widgets.toolkit_object import ProxyToolkitObject, ToolkitObject
 
 LAYOUT_GRAVITIES = {
     "top",
