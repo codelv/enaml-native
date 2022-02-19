@@ -49,6 +49,5 @@ class TextClock(TextView):
 
     @observe("format_12_hour", "format_24_hour", "time_zone")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

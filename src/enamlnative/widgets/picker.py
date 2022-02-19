@@ -79,6 +79,5 @@ class Picker(LinearLayout):
         "wraps",
     )
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

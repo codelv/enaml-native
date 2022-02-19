@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Bool, Event, ForwardTyped, Int, Str, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import ForwardTyped, Int, Str, Typed
+from enaml.core.declarative import d_, observe
 from .view import ProxyView, View
 
 
@@ -20,13 +20,13 @@ class ProxyImageView(ProxyView):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: ImageView)
 
-    def set_src(self, src):
+    def set_src(self, src: str):
         raise NotImplementedError
 
-    def set_max_height(self, height):
+    def set_max_height(self, height: int):
         raise NotImplementedError
 
-    def set_max_width(self, width):
+    def set_max_width(self, width: int):
         raise NotImplementedError
 
 
@@ -58,6 +58,5 @@ class ImageView(View):
     # -------------------------------------------------------------------------
     @observe("src", "max_height", "max_width")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

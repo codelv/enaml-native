@@ -9,6 +9,7 @@ Created on Sept 18, 2017
 
 @author: jrm
 """
+from asyncio import Future
 from atom.api import Bool, Typed
 from enamlnative.widgets.toast import ProxyToast
 from .android_toolkit_object import AndroidToolkitObject
@@ -94,17 +95,16 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
         if view is not None:
             self.toast.setView(view)
 
-    def on_make_toast(self, f):
+    def on_make_toast(self, f: Future):
         """Using Toast.makeToast returns async so we have to initialize it
         later.
 
         """
         toast_id = f.result()
-        d = self.declaration
         self.toast = Toast(__id__=toast_id)
         self.init_widget()
 
-    def _refresh_show(self, dt):
+    def _refresh_show(self, dt: int):
         """While the toast.show is true, keep calling .show() until the
         duration `dt` expires.
 
@@ -129,12 +129,12 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
     # -------------------------------------------------------------------------
     # ProxyToast API
     # -------------------------------------------------------------------------
-    def set_text(self, text):
+    def set_text(self, text: str):
         #: Only possible if a custom view is not used
         if self.made_toast:
             self.toast.setText(text)
 
-    def set_duration(self, duration):
+    def set_duration(self, duration: int):
         """Android for whatever stupid reason doesn't let you set the time
         it only allows 1-long or 0-short. So we have to repeatedly call show
         until the duration expires, hence this method does nothing see
@@ -143,7 +143,7 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
         """
         pass
 
-    def set_show(self, show):
+    def set_show(self, show: bool):
         if show:
             d = self.declaration
             self.toast.show()
@@ -158,6 +158,6 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
     def set_layout(self, layout):
         pass
 
-    def set_gravity(self, gravity):
+    def set_gravity(self, gravity: int):
         d = self.declaration
         self.toast.setGravity(gravity, int(d.x), int(d.y))

@@ -26,7 +26,7 @@ class UsbDevice(JavaBridgeObject):
 
 
 class UsbDeviceConnection(JavaBridgeObject):
-    __signature__ = "android.hardware.usb.UsbDeviceConnection"
+    __nativeclass__ = "android.hardware.usb.UsbDeviceConnection"
     close = JavaMethod()
 
 

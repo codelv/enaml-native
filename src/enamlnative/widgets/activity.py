@@ -6,18 +6,7 @@ Distributed under the terms of the MIT License.
 The full license is in the file LICENSE, distributed with this software.
 
 """
-from atom.api import (
-    Dict,
-    Enum,
-    Event,
-    Float,
-    ForwardTyped,
-    Instance,
-    Int,
-    Str,
-    Typed,
-    observe,
-)
+from atom.api import Dict, Enum, Event, Float, ForwardTyped, Instance, Int, Typed
 from enaml.application import Application
 from enaml.core.declarative import d_, d_func
 from enaml.widgets.toolkit_object import ProxyToolkitObject, ToolkitObject
@@ -31,7 +20,7 @@ class ProxyActivity(ProxyToolkitObject):
     async def start(self):
         raise NotImplementedError()
 
-    def show_loading(self, message):
+    def show_loading(self, message: str):
         raise NotImplementedError()
 
 
@@ -81,7 +70,9 @@ class Activity(ToolkitObject):
             super().activate_proxy()
 
     def show_loading(self, message: str):
-        self.proxy.show_loading(message)
+        proxy = self.proxy
+        assert proxy is not None
+        proxy.show_loading(message)
 
     def _default_app(self):
         return Application.instance()

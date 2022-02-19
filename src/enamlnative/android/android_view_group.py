@@ -45,10 +45,10 @@ class AndroidViewGroup(AndroidView, ProxyViewGroup):
     widget = Typed(ViewGroup)
 
     #: Layout type
-    layout_param_type = set_default(MarginLayoutParams)
+    layout_param_type = set_default(MarginLayoutParams)  # type: ignore
 
     #: Default layout params
-    default_layout = set_default({"width": "match_parent", "height": "match_parent"})
+    default_layout = set_default({"width": "match_parent", "height": "match_parent"})  # type: ignore
 
     # -------------------------------------------------------------------------
     # Initialization API

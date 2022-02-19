@@ -10,10 +10,10 @@ Created on July 24, 2017
 @author: jrm
 """
 
-from atom.api import Int, Typed
+from atom.api import Int, Typed, Instance
 from enamlnative.widgets.activity import ProxyActivity
 from .android_content import Context
-from .android_window import Window
+from .android_view import View
 from .bridge import JavaCallback, JavaMethod
 
 
@@ -112,17 +112,18 @@ class AndroidActivity(ProxyActivity):
     #: Default window id
     window_id = Int()
 
+    #: View currently displayed
+    view = Instance(View)
+
     def create_widget(self):
         self.widget = Activity(__id__=-1)
 
     def init_widget(self):
-        """ Initialize on the first call
-        """
+        """Initialize on the first call"""
         #: Add a ActivityLifecycleListener to update the application state
         activity = self.widget
         activity.addActivityLifecycleListener(activity.getId())
-        activity.onActivityLifecycleChanged.connect(
-            self.on_activity_lifecycle_changed)
+        activity.onActivityLifecycleChanged.connect(self.on_activity_lifecycle_changed)
 
         #: Add BackPressedListener to trigger the event
         activity.addBackPressedListener(activity.getId())
@@ -160,7 +161,7 @@ class AndroidActivity(ProxyActivity):
     def reload_view(self):
         activity = self.widget
         window = next(self.children())
-        view = next(window.child_widgets())
+        view = self.view = next(window.child_widgets())
         activity.setView(view)
 
     def show_loading(self, message):
@@ -173,8 +174,9 @@ class AndroidActivity(ProxyActivity):
         to app lifecycle changes.
 
         """
-        self.state = state
+
         d = self.declaration
+        d.state = state
         if state == "started":
             d.started()
         elif state == "paused":

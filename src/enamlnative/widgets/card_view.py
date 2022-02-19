@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Bool, Float, ForwardTyped, Int, Str, Tuple, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import Float, ForwardTyped, Tuple, Typed
+from enaml.core.declarative import d_, observe
 from .frame_layout import FrameLayout, ProxyFrameLayout
 
 
@@ -20,13 +20,13 @@ class ProxyCardView(ProxyFrameLayout):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: CardView)
 
-    def set_elevation(self, elevation):
+    def set_elevation(self, elevation: float):
         raise NotImplementedError
 
-    def set_radius(self, radius):
+    def set_radius(self, radius: float):
         raise NotImplementedError
 
-    def set_content_padding(self, padding):
+    def set_content_padding(self, padding: tuple[int, ...]):
         raise NotImplementedError
 
 
@@ -47,6 +47,5 @@ class CardView(FrameLayout):
 
     @observe("elevation", "radius", "content_padding")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

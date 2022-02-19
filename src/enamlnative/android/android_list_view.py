@@ -127,7 +127,7 @@ class AndroidListView(AndroidViewGroup, ProxyListView):
         return [c for c in self.children() if isinstance(c, AndroidListItem)]
 
     #: List items
-    list_items = Property(lambda self: self._get_list_items(), cached=True)
+    list_items = Property(cached=True)
 
     #: List mapping from index to view
     item_mapping = Dict()

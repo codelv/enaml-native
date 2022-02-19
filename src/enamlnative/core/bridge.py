@@ -9,17 +9,16 @@ Created on June 21, 2017
 
 @author: jrm
 """
-import asyncio
 import functools
 import msgpack
+from asyncio import Future
 from contextlib import contextmanager
-from typing import ClassVar
+from typing import ClassVar, Optional, Union
 from weakref import WeakValueDictionary
 from atom.api import Atom, Dict, ForwardInstance, Instance, Int, Property, Str
 
-CACHE = WeakValueDictionary()
-PROXY_CACHE = WeakValueDictionary()
-CLASS_CACHE = {}
+CACHE: WeakValueDictionary[int, "BridgeObject"] = WeakValueDictionary()
+CLASS_CACHE: dict[type, int] = {}
 __global_id__ = 0
 __proxy_id__ = 0
 __property_id__ = 0
@@ -119,16 +118,172 @@ class BridgeReferenceError(ReferenceError):
     pass
 
 
-def get_handler(ptr, method):
+def get_handler(ptr: int, method: str):
     """Dereference the pointer and return the handler method."""
     obj = CACHE.get(ptr, None)
     if obj is None:
-        raise BridgeReferenceError(
-            "Reference id={} never existed or has already been destroyed".format(ptr)
-        )
-    elif not hasattr(obj, method):
-        raise NotImplementedError("{}.{} is not implemented.".format(obj, method))
-    return obj, getattr(obj, method)
+        msg = f"Reference id={ptr} never existed or has already been destroyed"
+        raise BridgeReferenceError(msg)
+    handler = getattr(obj, method, None)
+    if handler is None:
+        raise NotImplementedError(f"{obj}.{method} is not implemented.")
+    return obj, handler
+
+
+class BridgeObject(Atom):
+    """A proxy to a class in java. This sends the commands over
+    the bridge for execution.  The object is stored in a map
+    with the given id and is valid until this object is deleted.
+
+    Parameters
+    ----------
+    __id__: Int, Future, or None
+        If an __id__ keyword argument is passed during creation, then
+
+            If the __id__ is an int, this will assume the object was already
+            created and only a reference to the object with the given id is
+            needed.
+
+            If the __id__ is a Future (as specified by the app event loop),
+            then the __id__ of he future will be used. When the future
+            completes this object will then be put into the cache. This allows
+            passing results directly instead of using the `.then()` method.
+
+    """
+
+    __slots__ = ("__weakref__",)
+
+    #: Native Class name
+    __nativeclass__: ClassVar[str] = ""
+
+    #: Constructor signature
+    __signature__: ClassVar[tuple[Union[dict, str], ...]] = ()
+
+    #: Suppressed methods / fields
+    __suppressed__ = Dict()
+
+    #: Callbacks
+    __callbacks__ = Dict()
+
+    #: Bridge object ID
+    __id__ = Int(0, factory=generate_id)
+
+    #: ID of this class
+    __bridge_id__ = Int()
+
+    #: Prefix to add to all names used during method and property calls
+    #: used for nested objects
+    __prefix__ = Str()
+
+    #: Bridge
+    __app__ = ForwardInstance(get_app_class)
+
+    def _default___app__(self):
+        return get_app_class().instance()
+
+    def _default___bridge_id__(self):
+        cls = self.__class__
+        try:
+            return CLASS_CACHE[cls]
+        except KeyError:
+            type_id = CLASS_CACHE[cls] = generate_property_id()
+            return type_id
+
+    def getId(self):
+        return self.__id__
+
+    def __init__(self, *args, **kwargs):
+        """Sends the event to create this object in Java."""
+
+        #: Send the event over the bridge to construct the view
+        __id__ = kwargs.pop("__id__", None)
+        cache = True
+        if __id__ is not None:
+            if isinstance(__id__, int):
+                kwargs["__id__"] = __id__
+            elif isinstance(__id__, Future):
+                #: If a future is given don't store this object in the cache
+                #: until after the future completes
+                f = __id__
+
+                def set_result(f):
+                    CACHE[f.__id__] = self
+
+                f.add_done_callback(set_result)
+
+                #: The future is used to return the result
+                kwargs["__id__"] = f.__id__
+
+                #: Save it into the cache when the result from the future
+                #: arrives over the bridge.
+                cache = False
+            else:
+                raise TypeError(
+                    "Invalid __id__ reference, expected an int or"
+                    f"a future/deferred object, got: {__id__}"
+                )
+
+        #: Construct the object
+        super().__init__(**kwargs)
+
+        if cache:
+            CACHE[self.__id__] = self
+
+        if __id__ is None:
+            self.__app__.send_event(
+                Command.CREATE,  #: method
+                self.__id__,  #: id to assign in bridge cache
+                self.__bridge_id__,
+                self.__nativeclass__,
+                [
+                    msgpack_encoder(sig, arg)
+                    for sig, arg in zip(self.__signature__, args)
+                ],
+            )
+
+    def __del__(self):
+        """Destroy this object and send a command to destroy the actual object
+        reference the bridge implementation holds (allowing it to be released).
+        """
+        ref = self.__id__
+        self.__app__.send_event(Command.DELETE, ref)
+        try:
+            del CACHE[ref]
+        except KeyError:
+            pass
+
+
+class NestedBridgeObject(BridgeObject):
+    """A nested object allows you to invoke methods and set properties
+    of an object that is a property of another object using the dot notation.
+
+    Useful for setting nested properties without needing to first create a
+    reference bridge object (thus saving the time waiting for the bridge to
+    reply) for example:
+
+        UIView view = [UIView new];
+                view.yoga.width = YES;
+
+    Would require to create a reference to the "yoga" object first but instead
+    we just add our nested object's prefix and let the bridge resolve the
+    actual property. It works like a regular BridgeObject but appends the
+    "name'.
+
+    This object is NOT in the cache on either side of the bridge.
+
+    """
+
+    #: Reference to the object this is referenced under
+    __root__ = Instance(BridgeObject)
+
+    def __init__(self, root, attr, **kwargs):
+        kwargs["__id__"] = root.getId()
+        kwargs["__prefix__"] = f"{attr}."
+        Atom.__init__(self, **kwargs)
+
+    def __del__(self):
+        # Not necessary, it's not in the cache
+        pass
 
 
 class BridgeMethod(Property):
@@ -152,14 +307,14 @@ class BridgeMethod(Property):
     __slots__ = ("__signature__", "__returns__", "__cache__", "__bridge_id__")
 
     def __init__(self, *args, **kwargs):
-        self.__returns__ = kwargs.get("returns", None)
-        self.__signature__ = args
-        self.__cache__ = {}  # Result cache otherwise gc cleans up
-        self.__bridge_id__ = generate_property_id()
+        self.__returns__: Optional[str] = kwargs.get("returns", None)
+        self.__signature__: tuple[str, ...] = args
+        self.__cache__: dict[int, Future] = {}  # Result cache otherwise gc cleans up
+        self.__bridge_id__: int = generate_property_id()
         super().__init__(self.__fget__)
 
     @contextmanager
-    def suppressed(self, obj):
+    def suppressed(self, obj: BridgeObject):
         """Suppress calls within this context to avoid feedback loops"""
         obj.__suppressed__[self.name] = True
         yield
@@ -406,7 +561,7 @@ class BridgeCallback(BridgeMethod):
         """Set the callback to be fired when the event occurs."""
         obj.__callbacks__[self.name] = callback
 
-    def disconnect(self, obj, callback):
+    def disconnect(self, obj, callback=None):
         """Remove the callback to be fired when the event occurs."""
         del obj.__callbacks__[self.name]
 
@@ -414,157 +569,3 @@ class BridgeCallback(BridgeMethod):
 def tag_property(cls):
     cls.__bridge_id__ = generate_property_id()
     return cls
-
-
-class BridgeObject(Atom):
-    """A proxy to a class in java. This sends the commands over
-    the bridge for execution.  The object is stored in a map
-    with the given id and is valid until this object is deleted.
-
-    Parameters
-    ----------
-    __id__: Int, Future, or None
-        If an __id__ keyword argument is passed during creation, then
-
-            If the __id__ is an int, this will assume the object was already
-            created and only a reference to the object with the given id is
-            needed.
-
-            If the __id__ is a Future (as specified by the app event loop),
-            then the __id__ of he future will be used. When the future
-            completes this object will then be put into the cache. This allows
-            passing results directly instead of using the `.then()` method.
-
-    """
-
-    __slots__ = ("__weakref__",)
-
-    #: Native Class name
-    __nativeclass__: ClassVar[str] = ""
-
-    #: Constructor signature
-    __signature__: ClassVar[tuple[str]] = ()
-
-    #: Suppressed methods / fields
-    __suppressed__ = Dict()
-
-    #: Callbacks
-    __callbacks__ = Dict()
-
-    #: Bridge object ID
-    __id__ = Int(0, factory=generate_id)
-
-    #: ID of this class
-    __bridge_id__ = Int()
-
-    #: Prefix to add to all names used during method and property calls
-    #: used for nested objects
-    __prefix__ = Str()
-
-    #: Bridge
-    __app__ = ForwardInstance(get_app_class)
-
-    def _default___app__(self):
-        return get_app_class().instance()
-
-    def _default___bridge_id__(self):
-        cls = self.__class__
-        if cls not in CLASS_CACHE:
-            CLASS_CACHE[cls] = generate_property_id()
-        return CLASS_CACHE[cls]
-
-    def getId(self):
-        return self.__id__
-
-    def __init__(self, *args, **kwargs):
-        """Sends the event to create this object in Java."""
-
-        #: Send the event over the bridge to construct the view
-        __id__ = kwargs.pop("__id__", None)
-        cache = True
-        if __id__ is not None:
-            if isinstance(__id__, int):
-                kwargs["__id__"] = __id__
-            elif isinstance(__id__, asyncio.Future):
-                #: If a future is given don't store this object in the cache
-                #: until after the future completes
-                f = __id__
-
-                def set_result(f):
-                    CACHE[f.__id__] = self
-
-                f.add_done_callback(set_result)
-
-                #: The future is used to return the result
-                kwargs["__id__"] = f.__id__
-
-                #: Save it into the cache when the result from the future
-                #: arrives over the bridge.
-                cache = False
-            else:
-                raise TypeError(
-                    "Invalid __id__ reference, expected an int or"
-                    f"a future/deferred object, got: {__id__}"
-                )
-
-        #: Construct the object
-        super().__init__(**kwargs)
-
-        if cache:
-            CACHE[self.__id__] = self
-
-        if __id__ is None:
-            self.__app__.send_event(
-                Command.CREATE,  #: method
-                self.__id__,  #: id to assign in bridge cache
-                self.__bridge_id__,
-                self.__nativeclass__,
-                [
-                    msgpack_encoder(sig, arg)
-                    for sig, arg in zip(self.__signature__, args)
-                ],
-            )
-
-    def __del__(self):
-        """Destroy this object and send a command to destroy the actual object
-        reference the bridge implementation holds (allowing it to be released).
-        """
-        ref = self.__id__
-        self.__app__.send_event(Command.DELETE, ref)
-        try:
-            del CACHE[ref]
-        except KeyError as e:
-            pass
-
-
-class NestedBridgeObject(BridgeObject):
-    """A nested object allows you to invoke methods and set properties
-    of an object that is a property of another object using the dot notation.
-
-    Useful for setting nested properties without needing to first create a
-    reference bridge object (thus saving the time waiting for the bridge to
-    reply) for example:
-
-        UIView view = [UIView new];
-                view.yoga.width = YES;
-
-    Would require to create a reference to the "yoga" object first but instead
-    we just add our nested object's prefix and let the bridge resolve the
-    actual property. It works like a regular BridgeObject but appends the
-    "name'.
-
-    This object is NOT in the cache on either side of the bridge.
-
-    """
-
-    #: Reference to the object this is referenced under
-    __root__ = Instance(BridgeObject)
-
-    def __init__(self, root, attr, **kwargs):
-        kwargs["__id__"] = root.getId()
-        kwargs["__prefix__"] = f"{attr}."
-        Atom.__init__(self, **kwargs)
-
-    def __del__(self):
-        # Not necessary, it's not in the cache
-        pass

@@ -9,6 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
+from typing import Union
 from atom.api import (
     Bool,
     Coerced,
@@ -20,22 +21,9 @@ from atom.api import (
     Str,
     Tuple,
     Typed,
-    observe,
 )
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 from enaml.widgets.toolkit_object import ProxyToolkitObject, ToolkitObject
-
-LAYOUT_GRAVITIES = {
-    "top",
-    "left",
-    "right",
-    "bottom",
-    "center",
-    "end",
-    "start",
-    "no_gravity",
-    "fill_horizontal",
-}
 
 LAYOUT_GRAVITIES = {
     "no_gravity": 0,
@@ -54,7 +42,7 @@ LAYOUT_GRAVITIES = {
 }
 
 
-def coerce_size(v):
+def coerce_size(v: str) -> int:
     if v == "match_parent":
         return -1
     elif v == "wrap_content":
@@ -62,7 +50,7 @@ def coerce_size(v):
     return int(v)
 
 
-def coerce_gravity(v):
+def coerce_gravity(v: Union[str, int]) -> int:
     if isinstance(v, int):
         return v
     g = 0
@@ -77,19 +65,19 @@ class ProxyView(ProxyToolkitObject):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: View)
 
-    def set_clickable(self, clickable):
+    def set_clickable(self, clickable: bool):
         raise NotImplementedError
 
-    def set_long_clickable(self, clickable):
+    def set_long_clickable(self, clickable: bool):
         raise NotImplementedError
 
-    def set_focusable(self, focusable):
+    def set_focusable(self, focusable: bool):
         raise NotImplementedError
 
-    def set_key_events(self, focusable):
+    def set_key_events(self, focusable: bool):
         raise NotImplementedError
 
-    def set_animations(self, animations):
+    def set_animations(self, animations: bool):
         raise NotImplementedError
 
     def set_style(self, style):
@@ -122,37 +110,37 @@ class ProxyView(ProxyToolkitObject):
     def set_z(self, z):
         raise NotImplementedError
 
-    def set_margin(self, margin):
+    def set_margin(self, margin: tuple[int, ...]):
         raise NotImplementedError
 
-    def set_padding(self, padding):
+    def set_padding(self, padding: tuple[int, ...]):
         raise NotImplementedError
 
-    def set_gravity(self, gravity):
+    def set_gravity(self, gravity: int):
         raise NotImplementedError
 
-    def set_min_height(self, min_height):
+    def set_min_height(self, min_height: int):
         raise NotImplementedError
 
-    def set_max_height(self, max_height):
+    def set_max_height(self, max_height: int):
         raise NotImplementedError
 
-    def set_min_width(self, min_width):
+    def set_min_width(self, min_width: int):
         raise NotImplementedError
 
-    def set_max_width(self, max_width):
+    def set_max_width(self, max_width: int):
         raise NotImplementedError
 
-    def set_flex_grow(self, flex_grow):
+    def set_flex_grow(self, flex_grow: str):
         raise NotImplementedError
 
-    def set_flex_basis(self, flex_basis):
+    def set_flex_basis(self, flex_basis: str):
         raise NotImplementedError
 
-    def set_flex_shrink(self, flex_shrink):
+    def set_flex_shrink(self, flex_shrink: str):
         raise NotImplementedError
 
-    def set_align_self(self, align_self):
+    def set_align_self(self, align_self: str):
         raise NotImplementedError
 
 
@@ -194,6 +182,9 @@ class View(ToolkitObject):
 
     #: Called when a touch event occurs
     touch_event = d_(Event(dict), writable=False)
+
+    #: Called when the view is about to be destroyed
+    deactivated = d_(Event(), writable=False)
 
     #: Animations
     animations = d_(Typed(dict))
@@ -302,6 +293,10 @@ class View(ToolkitObject):
         "background_style",
     )
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)
+
+    def destroy(self):
+        """Trigger the deactivated event"""
+        self.deactivated()
+        super().destroy()

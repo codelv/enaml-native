@@ -1,5 +1,4 @@
 import os
-import sys
 
 _PYCACHE = "__pycache__"
 _OPT = "opt-"
@@ -7,6 +6,8 @@ _OPT = "opt-"
 SOURCE_SUFFIXES = [".py"]  # _setup() adds .pyw as needed.
 
 # Code for going between .py files and cached .pyc files ----------------------
+
+
 def source_from_cache(path):
     """Given the path to a .pyc. file, return the path to its .py file.
     The .pyc file does not need to exist; this simply returns the path to
@@ -35,7 +36,8 @@ def source_from_cache(path):
                 "optimization portion of filename does not start "
                 "with {!r}".format(_OPT)
             )
-        opt_level = optimization[len(_OPT) :]
+        n = len(_OPT)
+        opt_level = optimization[n:]
         if not opt_level.isalnum():
             raise ValueError(
                 "optimization level {!r} is not an alphanumeric "

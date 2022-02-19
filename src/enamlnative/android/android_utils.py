@@ -78,7 +78,7 @@ class InputMethodManager(SystemService):
         """
         ims = await cls.get()
         app = AndroidApplication.instance()
-        view = app.view.proxy.widget
+        view = app.activity.proxy.view
         obj_id = await view.getWindowToken()
         token = JavaBridgeObject(__id__=obj_id)
         return await ims.hideSoftInputFromWindow(token, 0)

@@ -60,6 +60,5 @@ class CalendarView(FrameLayout):
     # -------------------------------------------------------------------------
     @observe("date", "max_date", "min_date", "first_day_of_week")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

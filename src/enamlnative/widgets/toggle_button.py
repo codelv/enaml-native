@@ -9,8 +9,8 @@ Created on June 7, 2017
 
 @author: jrm
 """
-from atom.api import ForwardTyped, Str, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import ForwardTyped, Str, Typed
+from enaml.core.declarative import d_, observe
 from .compound_button import CompoundButton, ProxyCompoundButton
 
 
@@ -44,6 +44,5 @@ class ToggleButton(CompoundButton):
     # -------------------------------------------------------------------------
     @observe("text_off", "text_on")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

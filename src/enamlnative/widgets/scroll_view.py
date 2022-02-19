@@ -56,7 +56,7 @@ class ScrollView(FrameLayout):
     # -------------------------------------------------------------------------
     @observe("orientation", "scroll_to", "scroll_by", "scrollbars")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
+
         if change["type"] in ["event", "update"] and self.proxy_is_active:
             handler = getattr(self.proxy, f"set_{change['name']}", None)
             if handler is not None:

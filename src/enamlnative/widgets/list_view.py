@@ -9,18 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Bool,
-    ContainerList,
-    Enum,
-    Event,
-    ForwardTyped,
-    Int,
-    Typed,
-    Value,
-    observe,
-)
-from enaml.core.declarative import d_
+from atom.api import Bool, ContainerList, Enum, ForwardTyped, Int, Typed, Value
+from enaml.core.declarative import d_, observe
 from enaml.widgets.toolkit_object import ProxyToolkitObject, ToolkitObject
 from .view_group import ProxyViewGroup, ViewGroup
 
@@ -31,28 +21,28 @@ class ProxyListView(ProxyViewGroup):
     #: A reference to the widget declaration.
     declaration = ForwardTyped(lambda: ListView)
 
-    def set_items(self, items):
+    def set_items(self, items: list):
         raise NotImplementedError
 
-    def set_span_count(self, count):
+    def set_span_count(self, count: int):
         raise NotImplementedError
 
-    def set_orientation(self, orientation):
+    def set_orientation(self, orientation: str):
         raise NotImplementedError
 
-    def set_arrangement(self, arrangement):
+    def set_arrangement(self, arrangement: str):
         raise NotImplementedError
 
-    def set_selected(self, index):
+    def set_selected(self, index: int):
         raise NotImplementedError
 
-    def set_fixed_size(self, fixed_size):
+    def set_fixed_size(self, fixed_size: bool):
         raise NotImplementedError
 
-    def scroll_to(self, x, y):
+    def scroll_to(self, x: int, y: int):
         raise NotImplementedError
 
-    def scroll_to_position(self, position):
+    def scroll_to_position(self, position: int):
         raise NotImplementedError
 
 
@@ -67,7 +57,7 @@ class ListView(ViewGroup):
     #: List of items to display
     items = d_(ContainerList())
 
-    #:  use this setting to improve performance if you know that changes
+    #: use this setting to improve performance if you know that changes
     #: in content do not change the layout size of the RecyclerView
     fixed_size = d_(Bool())
 
@@ -88,15 +78,14 @@ class ListView(ViewGroup):
     # -------------------------------------------------------------------------
     @observe("items", "arrangement", "orientation", "span_count", "fixed_size")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)
 
-    def scroll_to(self, x, y):
+    def scroll_to(self, x: int, y: int):
         """Scroll to the given x,y coordinates within the list"""
         self.proxy.scroll_to(x, y)
 
-    def scroll_to_position(self, position):
+    def scroll_to_position(self, position: int):
         """Scroll to the given position in the list"""
         self.proxy.scroll_to_position(position)
 

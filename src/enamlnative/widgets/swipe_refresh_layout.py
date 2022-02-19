@@ -68,7 +68,7 @@ class SwipeRefreshLayout(ViewGroup):
         "refeshed",
     )
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
+
         if change["type"] == "event":
             self.proxy.set_refreshed(True)
         else:

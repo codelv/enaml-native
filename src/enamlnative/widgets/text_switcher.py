@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import ForwardTyped, Str, Typed, observe
+from atom.api import ForwardTyped, Str, Typed
 from enaml.core.declarative import d_
 from .view_switcher import ProxyViewSwitcher, ViewSwitcher
 

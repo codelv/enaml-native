@@ -60,13 +60,12 @@ class UiKitButton(UiKitControl, ProxyButton):
 
     def init_widget(self):
         super().init_widget()
-        d = self.declaration
         self.init_text()
 
     # -------------------------------------------------------------------------
     # ProxyButton API
     # -------------------------------------------------------------------------
-    def set_text(self, text):
+    def set_text(self, text: str):
         self.widget.setTitle(text, forState=UIButton.UIControlStateNormal)
 
     def set_style(self, style):

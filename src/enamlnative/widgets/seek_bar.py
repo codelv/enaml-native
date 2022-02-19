@@ -9,8 +9,8 @@ Created on June 7, 2017
 
 @author: jrm
 """
-from atom.api import Bool, Float, ForwardTyped, Int, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import Bool, ForwardTyped, Int, Typed
+from enaml.core.declarative import d_, observe
 from .progress_bar import ProgressBar, ProxyProgressBar
 
 
@@ -20,10 +20,10 @@ class ProxySeekBar(ProxyProgressBar):
     #: A reference to the SeekBar declaration.
     declaration = ForwardTyped(lambda: SeekBar)
 
-    def set_key_progress_increment(self, value):
+    def set_key_progress_increment(self, value: int):
         raise NotImplementedError
 
-    def set_split_track(self, split):
+    def set_split_track(self, split: bool):
         raise NotImplementedError
 
 
@@ -44,6 +44,5 @@ class SeekBar(ProgressBar):
     # -------------------------------------------------------------------------
     @observe("key_progress_increment", "split_track")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

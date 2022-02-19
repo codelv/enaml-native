@@ -9,7 +9,7 @@ Created on Sept 5, 2017
 
 @author: jrm
 """
-from atom.api import Atom, Float, List, Str
+from atom.api import List
 from .android_content import Context, SystemService
 from .app import AndroidApplication
 from .bridge import JavaCallback, JavaMethod, JavaProxy
@@ -66,7 +66,6 @@ class LocationManager(SystemService):
         will be denied immediately.
 
         """
-        app = AndroidApplication.instance()
         request_fine = provider == "gps"
         has_perm = await LocationManager.check_permission(fine=request_fine)
 
@@ -90,9 +89,9 @@ class LocationManager(SystemService):
     def stop(cls):
         """Stops location updates if currently updating."""
         manager = LocationManager.instance()
-        if manager:
-            for l in manager.listeners:
-                manager.removeUpdates(l)
+        if manager is not None:
+            for listener in manager.listeners:
+                manager.removeUpdates(listener)
             manager.listeners = []
 
     @classmethod

@@ -9,15 +9,14 @@ Created on June 21, 2017
 
 @author: jrm
 """
-from atom.api import Atom, Int
-from ..core import bridge
-from ..core.bridge import (
+from atom.api import Atom
+from enamlnative.core.bridge import (
     BridgeCallback,
     BridgeField,
     BridgeMethod,
     BridgeObject,
     Command,
-    NestedBridgeObject,
+    CACHE,
     msgpack_encoder,
 )
 
@@ -143,7 +142,7 @@ class ObjcBridgeObject(BridgeObject):
             super(Atom, self).__init__()
 
         #: Send the event over the bridge to construct the view
-        bridge.CACHE[self.__id__] = self
+        CACHE[self.__id__] = self
         if __id__ is None:
             self.__app__.send_event(
                 Command.CREATE,  #: method

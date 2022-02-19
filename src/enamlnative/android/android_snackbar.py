@@ -9,16 +9,11 @@ Created on Sept 20, 2017
 
 @author: jrm
 """
-from atom.api import Bool, Typed
+from asyncio import Future
+from atom.api import Typed
 from enamlnative.widgets.snackbar import ProxySnackbar
 from .android_toolkit_object import AndroidToolkitObject
-from .bridge import (
-    JavaBridgeObject,
-    JavaCallback,
-    JavaMethod,
-    JavaProxy,
-    JavaStaticMethod,
-)
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
 
 
 class Snackbar(JavaBridgeObject):
@@ -112,13 +107,12 @@ class AndroidSnackbar(AndroidToolkitObject, ProxySnackbar):
         if d.show:
             self.set_show(d.show)
 
-    def on_widget_created(self, f):
+    def on_widget_created(self, f: Future):
         """Using Snackbar.make returns async so we have to
         initialize it later.
 
         """
         snackbar_id = f.result()
-        d = self.declaration
         self.widget = Snackbar(__id__=snackbar_id)
         self.init_widget()
 

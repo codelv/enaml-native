@@ -9,7 +9,7 @@ Created on July 8, 2017
 
 @author: jrm
 """
-from atom.api import Constant, ForwardTyped, Str, Typed, observe
+from atom.api import ForwardTyped, Typed
 from .button import Button, ProxyButton
 from .text_view import ProxyTextView, TextView
 from .toggle_button import ProxyToggleButton, ToggleButton

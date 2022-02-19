@@ -12,9 +12,8 @@ Created on Sept 10, 2017
 import traceback
 import enaml
 from contextlib import contextmanager
-from atom.api import AtomMeta, Bool, set_default
-from enaml.core.api import *
-from enaml.core.declarative import Declarative
+from atom.api import Atom, AtomMeta, Bool
+from enaml.core.api import Conditional
 from enaml.core.pattern import Pattern
 from . import autoreload
 from .autoreload import isinstance2
@@ -23,22 +22,17 @@ from .autoreload import isinstance2
 class EnamlReloader(autoreload.ModuleReloader):
     """A ModuleReloader that supports reloading `.enaml` files."""
 
-    #: Whether this reloader is enabled
-    enabled = set_default(True)
-
-    #: Autoreload all modules, not just those listed in 'modules'
-    check_all = set_default(True)
-
     #: Add enaml as a source file type
-    source_exts = set_default([".py", ".enaml"])
+    def _default_source_exts(self):
+        return [".py", ".enaml"]
 
-    def check(self, check_all=True, do_reload=True):
+    def check(self, check_all: bool = True, do_reload: bool = True):
         """Check whether some modules need to be reloaded."""
         with enaml.imports():
             super().check(check_all=check_all, do_reload=do_reload)
 
 
-def update_atom_members(old, new):
+def update_atom_members(old: Atom, new: Atom):
     """Update an atom member"""
     old_keys = old.members().keys()
     new_keys = new.members().keys()
@@ -307,7 +301,6 @@ class Hotswapper(autoreload.Autoreloader):
             for k in engine._handlers.keys():
                 try:
                     engine.update(old, k)
-                except:
+                except Exception:
                     if self.debug:
                         print(traceback.format_exc())
-                    pass

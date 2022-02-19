@@ -11,25 +11,8 @@ Created on July 18, 2017
 """
 
 import time
-from atom.api import (
-    Atom,
-    Bool,
-    Callable,
-    Dict,
-    Float,
-    ForwardInstance,
-    Instance,
-    Int,
-    List,
-    Str,
-    set_default,
-)
-from ..core.http import (
-    AbstractAsyncHttpClient,
-    AbstractWebsocketClient,
-    HttpError,
-    HttpRequest,
-)
+from atom.api import Instance
+from enamlnative.core.http import AbstractAsyncHttpClient, HttpError, HttpRequest
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
 
 
@@ -283,7 +266,8 @@ class AsyncHttpClient(AbstractAsyncHttpClient):
     client = Instance(OkHttpClient)
 
     #: Set this as the request factory
-    request_factory = set_default(AndroidHttpRequest)
+    def _default_request_factory(self):
+        return AndroidHttpRequest
 
     def _default_client(self):
         #: Get existing or create a new client

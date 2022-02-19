@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Bool, Event, ForwardTyped, Int, Str, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import Bool, Event, ForwardTyped, Int, Str, Typed
+from enaml.core.declarative import d_, observe
 from .view_group import ProxyViewGroup, ViewGroup
 
 
@@ -104,7 +104,7 @@ class WebView(ViewGroup):
         "zoom_out",
     )
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
+
         if change["type"] == "event":
             name = f"do_{change['name']}"
             if hasattr(self.proxy, name):

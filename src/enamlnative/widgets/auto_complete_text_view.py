@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import ForwardTyped, Int, List, Typed, observe, set_default
-from enaml.core.declarative import d_
+from atom.api import ForwardTyped, Int, List, Typed
+from enaml.core.declarative import d_, observe
 from .edit_text import EditText, ProxyEditText
 
 
@@ -20,19 +20,19 @@ class ProxyAutoCompleteTextView(ProxyEditText):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: AutoCompleteTextView)
 
-    def set_choices(self, choices):
+    def set_choices(self, choices: list):
         raise NotImplementedError
 
-    def set_drop_down_height(self, height):
+    def set_drop_down_height(self, height: int):
         raise NotImplementedError
 
-    def set_drop_down_width(self, width):
+    def set_drop_down_width(self, width: int):
         raise NotImplementedError
 
-    def set_list_selection(self, index):
+    def set_list_selection(self, index: int):
         raise NotImplementedError
 
-    def set_threshold(self, threshold):
+    def set_threshold(self, threshold: int):
         raise NotImplementedError
 
 
@@ -61,10 +61,10 @@ class AutoCompleteTextView(EditText):
     @observe(
         "choices",
         "drop_down_height",
-        "drop_down_width" "list_selection",
+        "drop_down_width",
+        "list_selection",
         "threshold",
     )
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

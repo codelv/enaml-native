@@ -106,7 +106,7 @@ class AndroidFlexbox(AndroidViewGroup, ProxyFlexbox):
     widget = Typed(Flexbox)
 
     #: Update default
-    layout_param_type = set_default(FlexboxLayoutParams)
+    layout_param_type = set_default(FlexboxLayoutParams)  # type: ignore
 
     # -------------------------------------------------------------------------
     # Initialization API

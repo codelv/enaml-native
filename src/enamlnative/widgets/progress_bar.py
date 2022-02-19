@@ -63,6 +63,5 @@ class ProgressBar(View):
     # -------------------------------------------------------------------------
     @observe("progress", "secondary_progress", "max", "min")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

@@ -9,18 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Bool,
-    Enum,
-    Float,
-    ForwardTyped,
-    Int,
-    Tuple,
-    Typed,
-    observe,
-    set_default,
-)
-from enaml.core.declarative import d_
+from atom.api import Enum, ForwardTyped, Typed
+from enaml.core.declarative import d_, observe
 from .view_group import ProxyViewGroup, ViewGroup
 
 
@@ -167,9 +157,6 @@ class Flexbox(ViewGroup):
     #: How to align children along the cross axis of their container
     align_items = d_(Enum("flex_start", "flex_end", "center", "stretch"))
 
-    #: How to align children along the cross axis of their container
-    # align_self = d_(Enum('stretch', 'flex_start', 'flex_end', 'center'))
-
     #: Control how multiple lines of content are aligned within a
     #: container which uses FlexWrap
     align_content = d_(
@@ -255,47 +242,44 @@ class Flexbox(ViewGroup):
     @observe(
         "align_items",
         "align_content",
-        "align_self",
         "flex_direction",
         "flex_wrap",
-        "flex_grow",
-        "flex_shrink",
-        "flex_basis",
-        "left",
-        "top",
-        "right",
-        "bottom",
-        "start",
-        "end",
-        "margin_left",
-        "margin_top",
-        "margin_right",
-        "margin_bottom",
-        "margin_start",
-        "margin_end",
-        "margin",
-        "border_left",
-        "border_top",
-        "border_right",
-        "border_bottom",
-        "border_start",
-        "border_end",
-        "border",
-        "padding_left",
-        "padding_top",
-        "padding_right",
-        "padding_bottom",
-        "padding_start",
-        "padding_end",
-        "padding",
-        "min_width",
-        "min_height",
-        "max_width",
-        "max_height",
         "justify_content",
-        "position",
+        # "flex_grow",
+        # "flex_shrink",
+        # "flex_basis",
+        # "left",
+        # "top",
+        # "right",
+        # "bottom",
+        # "start",
+        # "end",
+        # "margin_left",
+        # "margin_top",
+        # "margin_right",
+        # "margin_bottom",
+        # "margin_start",
+        # "margin_end",
+        # "margin",
+        # "border_left",
+        # "border_top",
+        # "border_right",
+        # "border_bottom",
+        # "border_start",
+        # "border_end",
+        # "border",
+        # "padding_left",
+        # "padding_top",
+        # "padding_right",
+        # "padding_bottom",
+        # "padding_start",
+        # "padding_end",
+        # "padding",
+        # "min_width",
+        # "min_height",
+        # "max_width",
+        # "max_height",
     )
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

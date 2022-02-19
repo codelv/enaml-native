@@ -9,9 +9,8 @@ Created on Jan 28, 2018
 
 @author: jrm
 """
-from atom.api import ForwardInstance, Int
+from atom.api import ForwardInstance, Int, Bool
 from .android_content import Context, SystemService
-from .app import AndroidApplication
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 
@@ -97,6 +96,9 @@ class Sensor(JavaBridgeObject):
     onSensorChanged = JavaCallback("android.hardware.SensorEvent")
     onAccuracyChanged = JavaCallback("android.hardware.Sensor", "int")
 
+    #: Sensor state
+    started = Bool()
+
     @classmethod
     async def get(cls, sensor_type):
         """Shortcut that acquires the default Sensor of a given type.
@@ -113,7 +115,6 @@ class Sensor(JavaBridgeObject):
                 if the sensor is not present or access is not allowed.
 
         """
-        app = AndroidApplication.instance()
         mgr = await SensorManager.get()
         sensor_id = await mgr.getDefaultSensor(sensor_type)
         if not sensor_id:
@@ -143,13 +144,20 @@ class Sensor(JavaBridgeObject):
         if not self.manager:
             raise RuntimeError("Cannot start a sensor without a SensorManager!")
         self.onSensorChanged.connect(callback)
+        self.started = True
         return self.manager.registerListener(self.getId(), self, rate)
 
     def stop(self):
         """Stop listening to sensor events. This should be done in
         on resume.
         """
+        self.started = False
         self.manager.unregisterListener(self.getId(), self)
+
+    def __del__(self):
+        if self.started:
+            self.stop()
+        super().__del__()
 
 
 class SensorManager(SystemService):

@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Bool, Enum, ForwardTyped, Int, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import Bool, Enum, ForwardTyped, Int, Typed
+from enaml.core.declarative import d_, observe
 from .frame_layout import FrameLayout, ProxyFrameLayout
 
 
@@ -57,6 +57,5 @@ class TimePicker(FrameLayout):
     # -------------------------------------------------------------------------
     @observe("enabled", "hour", "minute", "hour_mode")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

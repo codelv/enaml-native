@@ -9,6 +9,7 @@ Created on July 24, 2017
 
 @author: jrm
 """
+# flake8: noqa F401
 from .android_location import LocationManager
 from .android_notification import NotificationManager
 from .android_sensors import Sensor, SensorManager

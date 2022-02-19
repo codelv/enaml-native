@@ -50,6 +50,5 @@ class EditText(TextView):
 
     @observe("selection", "placeholder", "style")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

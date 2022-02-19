@@ -10,7 +10,7 @@ Created on Aug 3, 2017
 @author: jrm
 """
 
-from atom.api import Instance, observe
+from atom.api import Typed, observe
 from enamlnative.widgets.view_group import ProxyViewGroup
 from .uikit_view import UiKitView, UIView
 
@@ -19,7 +19,7 @@ class UiKitViewGroup(UiKitView, ProxyViewGroup):
     """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit widget created by the proxy.
-    layout = Instance(UIView)
+    layout = Typed(UIView)
 
     # -------------------------------------------------------------------------
     # Initialization API

@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Bool, Enum, Float, ForwardTyped, Int, List, Str, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import Enum, Float, ForwardTyped, Int, List, Str, Typed
+from enaml.core.declarative import d_, observe
 from .view import View
 from .view_group import ProxyViewGroup, ViewGroup
 
@@ -94,6 +94,5 @@ class DrawerLayout(ViewGroup):
         "status_bar_background_color",
     )
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

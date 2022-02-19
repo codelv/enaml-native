@@ -49,7 +49,7 @@ class ActionMenuView(LinearLayout):
     # -------------------------------------------------------------------------
     @observe("show", "hide", "overflow_icon")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
+
         if change["type"] == "event" and self.proxy_is_active:
             self.proxy.set_opened(change["name"] == "show")
         else:

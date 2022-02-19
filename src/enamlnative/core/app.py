@@ -12,21 +12,8 @@ The full license is in the file LICENSE, distributed with this software.
 import json
 import traceback
 from asyncio import Future
-from functools import partial
 from time import time
-from atom.api import (
-    Atom,
-    Bool,
-    Callable,
-    Dict,
-    Enum,
-    Float,
-    Instance,
-    Int,
-    List,
-    Str,
-    Value,
-)
+from atom.api import Atom, Bool, Callable, Dict, Float, Instance, Int, List, Str, Value
 from enaml.application import Application
 from tornado.ioloop import IOLoop
 from enamlnative.core import bridge
@@ -316,7 +303,7 @@ class BridgedApplication(Application):
             #: Log the event, don't blow up here
             print(f"Error processing event: {event} - {e}")
             # self.show_error(msg)
-        except Exception as e:
+        except Exception:
             #: Log the event, blow up in user's face
             err = traceback.format_exc()
             msg = f"Error processing event: {event} - {err}"
@@ -388,7 +375,7 @@ class BridgedApplication(Application):
 
             #: Save a reference
             self._dev_session = session
-        except:
+        except Exception:
             self.show_error(traceback.format_exc())
 
     # -------------------------------------------------------------------------

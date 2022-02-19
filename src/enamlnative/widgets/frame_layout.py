@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Bool, Coerced, ForwardTyped, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import Coerced, ForwardTyped, Typed
+from enaml.core.declarative import d_, observe
 from .view import coerce_gravity
 from .view_group import ProxyViewGroup, ViewGroup
 
@@ -43,6 +43,5 @@ class FrameLayout(ViewGroup):
     # -------------------------------------------------------------------------
     @observe("foreground_gravity")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

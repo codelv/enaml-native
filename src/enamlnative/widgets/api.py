@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-
+# flake8: noqa F401
 from .activity import Activity
 from .activity_indicator import ActivityIndicator
 from .app_bar_layout import AppBarLayout

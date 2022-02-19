@@ -2,5 +2,6 @@
 
 """
 
+
 def publish(data):
     pass

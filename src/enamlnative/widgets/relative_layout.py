@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Enum, Event, ForwardTyped, Int, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import ForwardTyped, Int, Typed
+from enaml.core.declarative import d_, observe
 from .view_group import ProxyViewGroup, ViewGroup
 
 
@@ -20,13 +20,13 @@ class ProxyRelativeLayout(ProxyViewGroup):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: RelativeLayout)
 
-    def set_gravity(self, gravity):
+    def set_gravity(self, gravity: int):
         raise NotImplementedError
 
-    def set_horizontal_gravity(self, gravity):
+    def set_horizontal_gravity(self, gravity: int):
         raise NotImplementedError
 
-    def set_vertical_gravity(self, gravity):
+    def set_vertical_gravity(self, gravity: int):
         raise NotImplementedError
 
 
@@ -54,6 +54,5 @@ class RelativeLayout(ViewGroup):
     # -------------------------------------------------------------------------
     @observe("gravity", "horizontal_gravity", "vertical_gravity")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

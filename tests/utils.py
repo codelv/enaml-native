@@ -1,25 +1,25 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright (c) 2017, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
 # The full license is in the file LICENSE, distributed with this software.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 import os
 import sh
 from contextlib import contextmanager
+from textwrap import dedent
 from enaml.core.enaml_compiler import EnamlCompiler
 from enaml.core.parser import parse
-from textwrap import dedent
 
 
 def load(source):
-    """ Load a ContentView from a source string """
-    return compile_source(dedent(source), 'ContentView')
+    """Load a ContentView from a source string"""
+    return compile_source(dedent(source), "ContentView")
 
 
-def compile_source(source, item, filename='<test>'):
-    """ Compile Enaml source code and return the target item.
+def compile_source(source, item, filename="<test>"):
+    """Compile Enaml source code and return the target item.
     Parameters
     ----------
     source : str
@@ -37,7 +37,7 @@ def compile_source(source, item, filename='<test>'):
     ast = parse(source, filename)
     code = EnamlCompiler.compile(ast, filename)
     namespace = {}
-    exec code in namespace
+    exec(code, {}, namespace)
     return namespace[item]
 
 
@@ -59,12 +59,13 @@ def source_activated(venv, command):
 
     def cmd(*args):
         #: Make a wrapper to a that runs it in the venv
-        return sh.bash('-c', 'source {venv}/bin/activate && {cmd} {args}'.format(
-            venv=venv, cmd=command, args=" ".join(args)
-        ))
+        return sh.bash(
+            "-c",
+            "source {venv}/bin/activate && {cmd} {args}".format(
+                venv=venv, cmd=command, args=" ".join(args)
+            ),
+        )
 
     yield cmd
 
     print("[DEBUG]: Deactivating {} for {}".format(venv, command))
-
-

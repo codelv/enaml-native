@@ -9,77 +9,66 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import (
-    Bool,
-    Enum,
-    Event,
-    Float,
-    ForwardTyped,
-    Int,
-    Str,
-    Tuple,
-    Typed,
-    observe,
-)
-from enaml.core.declarative import d_
+from atom.api import Bool, Enum, Event, Float, ForwardTyped, Int, Str, Tuple, Typed
+from enaml.core.declarative import d_, observe
 from .view import ProxyView, View
 
 
-class ProxyTextView(View):
+class ProxyTextView(ProxyView):
     """The abstract definition of a proxy Label object."""
 
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: TextView)
 
-    def set_all_caps(self, enabled):
+    def set_all_caps(self, enabled: bool):
         raise NotImplementedError
 
-    def set_auto_link_mask(self, mask):
+    def set_auto_link_mask(self, mask: int):
         raise NotImplementedError
 
-    def set_input_type(self, input_type):
+    def set_input_type(self, input_type: str):
         raise NotImplementedError
 
-    def set_font_family(self, family):
+    def set_font_family(self, family: str):
         raise NotImplementedError
 
-    def set_font_style(self, style):
+    def set_font_style(self, style: str):
         raise NotImplementedError
 
-    def set_text(self, text):
+    def set_text(self, text: str):
         raise NotImplementedError
 
-    def set_text_color(self, color):
+    def set_text_color(self, color: str):
         raise NotImplementedError
 
-    def set_text_alignment(self, alignment):
+    def set_text_alignment(self, alignment: str):
         raise NotImplementedError
 
-    def set_highlight_color(self, color):
+    def set_highlight_color(self, color: str):
         raise NotImplementedError
 
-    def set_link_color(self, color):
+    def set_link_color(self, color: str):
         raise NotImplementedError
 
-    def set_text_size(self, size):
+    def set_text_size(self, size: float):
         raise NotImplementedError
 
-    def set_lines(self, lines):
+    def set_lines(self, lines: int):
         raise NotImplementedError
 
-    def set_line_spacing(self, spacing):
+    def set_line_spacing(self, spacing: tuple[float, ...]):
         raise NotImplementedError
 
-    def set_letter_spacing(self, spacing):
+    def set_letter_spacing(self, spacing: float):
         raise NotImplementedError
 
-    def set_max_lines(self, lines):
+    def set_max_lines(self, lines: int):
         raise NotImplementedError
 
-    def set_text_selectable(self, selectable):
+    def set_text_selectable(self, selectable: bool):
         raise NotImplementedError
 
-    def append_text(self, text):
+    def append_text(self, text: str):
         raise NotImplementedError
 
 
@@ -204,7 +193,6 @@ class TextView(View):
         "letter_spacing",
     )
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)
 

@@ -11,7 +11,6 @@ Created on Dec 11, 2017
 
 """
 import logging
-import os
 import sys
 
 

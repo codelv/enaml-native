@@ -9,7 +9,7 @@ Created on Apr 4, 2018
 
 @author: jrm
 """
-from atom.api import Bool, ForwardInstance, Instance, Int, List, Typed
+from atom.api import Bool, Instance, List, Typed
 from enaml.application import deferred_call
 from enamlnative.widgets.notification import ProxyNotification
 from .android_content import (
@@ -23,7 +23,7 @@ from .android_image_view import Bitmap, Glide, RequestBuilder, RequestManager
 from .android_toolkit_object import AndroidToolkitObject
 from .android_utils import Uri
 from .app import AndroidApplication
-from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
+from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
 
 package = "androidx.core.app"
 
@@ -53,7 +53,7 @@ class NotificationManager(JavaBridgeObject):
     cancel_ = JavaMethod("int")
     cancelAll = JavaMethod()
 
-    notify = JavaMethod("int", "android.app.Notification")
+    notify = JavaMethod("int", "android.app.Notification")  # type: ignore
     notify_ = JavaMethod("java.lang.String", "int", "android.app.Notification")
 
     from_ = JavaStaticMethod(
@@ -171,6 +171,12 @@ class Notification(JavaBridgeObject):
     """A wrapper for an Android's notification apis"""
 
     __nativeclass__ = f"{package}.NotificationCompat"
+
+    PRIORITIES = {
+        "low": NotificationManager.IMPORTANCE_LOW,
+        "normal": NotificationManager.IMPORTANCE_DEFAULT,
+        "high": NotificationManager.IMPORTANCE_HIGH,
+    }
 
     class Builder(JavaBridgeObject):
         """Builds a notification.
@@ -491,7 +497,6 @@ class Notification(JavaBridgeObject):
 
         async def show(self):
             """Build and show this notification"""
-            app = AndroidApplication.instance()
             mgr = await NotificationManager.get()
             notificaion_id = await self.build()
             notification = Notification(__id__=notificaion_id)
@@ -643,18 +648,8 @@ class AndroidNotification(AndroidToolkitObject, ProxyNotification):
         self.builder.setSubText(sub_text)
         self.refresh()
 
-    def set_info(self, info):
-        self.builder.setContentInfo(info)
-        self.refresh()
-
     def set_priority(self, priority):
-        self.builder.setPriority(
-            {
-                "low": NotificationManager.IMPORTANCE_LOW,
-                "normal": NotificationManager.IMPORTANCE_DEFAULT,
-                "high": NotificationManager.IMPORTANCE_HIGH,
-            }[priority]
-        )
+        self.builder.setPriority(Notification.PRIORITIES[priority])
         self.refresh()
 
     def set_show_progress(self, show):

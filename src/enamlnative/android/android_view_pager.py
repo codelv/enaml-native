@@ -276,7 +276,7 @@ class AndroidPagerTitleStrip(AndroidViewGroup, ProxyPagerTitleStrip):
     #: A reference to the widget created by the proxy.
     widget = Typed(PagerTitleStrip)
 
-    default_layout = set_default(
+    default_layout = set_default(  # type: ignore
         {"width": "match_parent", "height": "wrap_content", "gravity": "top"}
     )
 

@@ -41,7 +41,7 @@ class UiKitToolkitObject(ProxyToolkitObject):
         state of the widget. The child widgets will not yet be created.
 
         """
-        widget = self.widget
+        pass
 
     def init_layout(self):
         """Initialize the layout of the toolkit widget.

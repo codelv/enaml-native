@@ -9,8 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import ForwardTyped, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import ForwardTyped, Typed
 from .view_animator import ProxyViewAnimator, ViewAnimator
 
 

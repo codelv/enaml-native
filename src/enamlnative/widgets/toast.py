@@ -9,8 +9,8 @@ Created on Sept 18, 2017
 
 @author: jrm
 """
-from atom.api import Bool, Coerced, ForwardTyped, Int, Str, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import Bool, Coerced, ForwardTyped, Int, Str, Typed
+from enaml.core.declarative import d_, observe
 from enaml.widgets.toolkit_object import ProxyToolkitObject, ToolkitObject
 from .view import coerce_gravity
 
@@ -61,6 +61,5 @@ class Toast(ToolkitObject):
     # -------------------------------------------------------------------------
     @observe("text", "duration", "show", "gravity", "x", "y")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

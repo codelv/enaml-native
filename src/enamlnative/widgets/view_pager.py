@@ -15,13 +15,12 @@ from atom.api import (
     Float,
     ForwardTyped,
     Int,
-    List,
     Str,
     Typed,
-    observe,
+    Property,
     set_default,
 )
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 from .fragment import Fragment, ProxyFragment
 from .view_group import ProxyViewGroup, ViewGroup
 
@@ -32,19 +31,19 @@ class ProxyViewPager(ProxyViewGroup):
     #: A reference to the ViewPager declaration.
     declaration = ForwardTyped(lambda: ViewPager)
 
-    def set_current_index(self, index):
+    def set_current_index(self, index: int):
         raise NotImplementedError
 
-    def set_offscreen_page_limit(self, limit):
+    def set_offscreen_page_limit(self, limit: int):
         raise NotImplementedError
 
-    def set_page_margin(self, margin):
+    def set_page_margin(self, margin: int):
         raise NotImplementedError
 
-    def set_paging_enabled(self, enabled):
+    def set_paging_enabled(self, enabled: bool):
         raise NotImplementedError
 
-    def set_transition(self, transition):
+    def set_transition(self, transition: str):
         raise NotImplementedError
 
 
@@ -54,19 +53,19 @@ class ProxyPagerTitleStrip(ProxyViewGroup):
     #: A reference to the declaration.
     declaration = ForwardTyped(lambda: PagerTitleStrip)
 
-    def set_titles(self, titles):
+    def set_titles(self, titles: list[str]):
         raise NotImplementedError
 
-    def set_inactive_alpha(self, alpha):
+    def set_inactive_alpha(self, alpha: float):
         raise NotImplementedError
 
-    def set_text_color(self, color):
+    def set_text_color(self, color: str):
         raise NotImplementedError
 
-    def set_text_size(self, size):
+    def set_text_size(self, size: int):
         raise NotImplementedError
 
-    def set_text_spacing(self, spacing):
+    def set_text_spacing(self, spacing: int):
         raise NotImplementedError
 
 
@@ -76,10 +75,10 @@ class ProxyPagerTabStrip(ProxyPagerTitleStrip):
     #: A reference to the declaration.
     declaration = ForwardTyped(lambda: PagerTabStrip)
 
-    def set_tab_indicator_color(self, color):
+    def set_tab_indicator_color(self, color: str):
         raise NotImplementedError
 
-    def set_tab_full_underline(self, enabled):
+    def set_tab_full_underline(self, enabled: bool):
         raise NotImplementedError
 
 
@@ -89,10 +88,10 @@ class ProxyPagerFragment(ProxyFragment):
     #: A reference to the declaration.
     declaration = ForwardTyped(lambda: PagerFragment)
 
-    def set_title(self, title):
+    def set_title(self, title: str):
         raise NotImplementedError
 
-    def set_icon(self, icon):
+    def set_icon(self, icon: str):
         raise NotImplementedError
 
 
@@ -116,9 +115,10 @@ class ViewPager(ViewGroup):
     page_margin = d_(Int(-1))
 
     #: Read only list of pages
-    pages = property(
-        lambda self: [c for c in self._children if isinstance(c, Fragment)]
-    )
+    pages = Property()
+
+    def _get_pages(self):
+        return [c for c in self._children if isinstance(c, Fragment)]
 
     #: Transition
     transition = d_(
@@ -158,7 +158,6 @@ class ViewPager(ViewGroup):
         "transition",
     )
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)
 
@@ -184,7 +183,6 @@ class PagerTitleStrip(ViewGroup):
     # -------------------------------------------------------------------------
     @observe("text_color", "text_size", "text_spacing")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)
 
@@ -203,7 +201,6 @@ class PagerTabStrip(PagerTitleStrip):
     # -------------------------------------------------------------------------
     @observe("tab_indicator_color", "tab_full_underline")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)
 
@@ -225,6 +222,5 @@ class PagerFragment(Fragment):
     # -------------------------------------------------------------------------
     @observe("title", "icon")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

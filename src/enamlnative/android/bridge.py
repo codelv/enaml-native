@@ -10,15 +10,14 @@ Created on June 21, 2017
 @author: jrm
 """
 from atom.api import Atom
-from ..core import bridge
-from ..core.bridge import (
+from enamlnative.core.bridge import (
     BridgeCallback,
     BridgeField,
     BridgeMethod,
     BridgeObject,
     BridgeStaticMethod,
     Command,
-    encode,
+    CACHE,
     msgpack_encoder,
 )
 
@@ -114,7 +113,7 @@ class JavaBridgeObject(BridgeObject):
     """
 
     #: Java Class name
-    __nativeclass__: str = "java.lang.Object"
+    __nativeclass__ = "java.lang.Object"
 
     #: A callback with an implementation built in
     hashCode = JavaCallback(returns="int")
@@ -161,7 +160,7 @@ class JavaProxy(JavaBridgeObject):
 
         #: Send the event over the bridge to construct the view
         __id__ = kwargs.get("__id__", None)
-        bridge.CACHE[self.__id__] = self
+        CACHE[self.__id__] = self
         if __id__ is None:
             self.__app__.send_event(
                 Command.PROXY,  #: method

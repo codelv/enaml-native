@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Enum, ForwardTyped, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import Enum, ForwardTyped, Typed
+from enaml.core.declarative import d_, observe
 from .view_group import ProxyViewGroup, ViewGroup
 
 
@@ -38,6 +38,5 @@ class LinearLayout(ViewGroup):
     # -------------------------------------------------------------------------
     @observe("orientation")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

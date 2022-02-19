@@ -60,7 +60,6 @@ class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
     def init_widget(self):
         """Initialize the underlying widget."""
         super().init_widget()
-        d = self.declaration
         w = self.widget
 
         #: Kinda hackish, but when we get the menu back, load it

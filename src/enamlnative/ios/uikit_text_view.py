@@ -10,18 +10,16 @@ Created on Aug 3, 2017
 @author: jrm
 """
 
-from atom.api import Typed, set_default
+from atom.api import Typed
 from enamlnative.widgets.text_view import ProxyTextView
 from .bridge import ObjcMethod, ObjcProperty
 from .uikit_view import NSObject, UiKitView, UIView
 
 
 class UIFont(NSObject):
-    __signature__ = set_default(
-        (
-            dict(fontWithName="NSString", systemFontOfSize="NSInteger"),
-            dict(size="NSInteger"),
-        )
+    __signature__ = (
+        dict(fontWithName="NSString", systemFontOfSize="NSInteger"),
+        dict(size="NSInteger"),
     )
 
 

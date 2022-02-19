@@ -18,7 +18,7 @@ from glob import glob
 class ExtensionImporter:
     """Loads renamed extensions files from the app's lib folder"""
 
-    extension_modules = {}
+    extension_modules: dict[str, str] = {}
 
     def __init__(self):
         #: On iOS extensions are built as dylibs

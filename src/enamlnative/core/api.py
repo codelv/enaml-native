@@ -9,9 +9,10 @@ Created on Apr 15, 2017
 
 @author: jrm
 """
+# flake8: noqa F401
 import sys
 from enaml.application import Application
-from enaml.core.api import *
+from enaml.core.api import Conditional, Include, Looper
 from .block import Block
 
 if sys.platform == "darwin":

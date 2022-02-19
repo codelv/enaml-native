@@ -13,6 +13,16 @@ Created Sept 7, 2017
 @author jrm
 
 """
+import os
+import sys
+import traceback
+import types
+import weakref
+from imp import reload
+from importlib import import_module
+from atom.api import Atom, Bool, Dict, Instance, List
+from . import openpy
+
 """IPython extension to reload modules before executing user code.
 
 ``autoreload`` reloads modules automatically before entering the execution of
@@ -124,16 +134,6 @@ skip_doctest = True
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
-
-import os
-import sys
-import traceback
-import types
-import weakref
-from imp import reload
-from importlib import import_module
-from atom.api import Atom, Bool, Dict, Instance, List
-from . import openpy
 
 # ------------------------------------------------------------------------------
 # Autoreload functionality
@@ -275,7 +275,7 @@ class ModuleReloader(Atom):
                     superreload(m, reload, self.old_objects)
                     if py_filename in self.failed:
                         del self.failed[py_filename]
-                except Exception as e:
+                except Exception:
                     exc = traceback.format_exc(10)
                     print(f"[autoreload of {modname} failed: {exc}]")
                     self.failed[py_filename] = pymtime
@@ -407,7 +407,7 @@ def superreload(module, reload=reload, old_objects={}):
 
     try:
         module = reload(module)
-    except:
+    except Exception:
         # restore module dictionary on failed reload
         module.__dict__.update(old_dict)
         raise
@@ -544,10 +544,11 @@ class Autoreloader(Atom):
                 self.shell.push({top_name: top_module})
 
     def pre_run_cell(self):
-        if self._reloader.enabled:
+        reloader = self._reloader
+        if reloader.enabled:
             try:
-                self._reloader.check()
-            except:
+                reloader.check()
+            except Exception:
                 pass
 
     def post_execute(self):

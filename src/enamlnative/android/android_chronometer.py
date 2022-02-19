@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from datetime import datetime, timedelta
+from datetime import datetime
 from atom.api import Typed
 from enamlnative.widgets.chronometer import ProxyChronometer
 from .android_text_view import AndroidTextView, TextView

@@ -10,7 +10,7 @@ Created on Aug 25, 2017
 @author: jrm
 """
 
-from atom.api import Bool, Typed
+from atom.api import Typed
 from enamlnative.widgets.seek_bar import ProxySeekBar
 from .bridge import ObjcCallback, ObjcMethod, ObjcProperty
 from .uikit_control import UIControl, UiKitControl

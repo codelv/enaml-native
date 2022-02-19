@@ -13,7 +13,6 @@ from atom.api import List, Typed, set_default
 from enamlnative.widgets.tab_layout import ProxyTabFragment, ProxyTabLayout
 from .android_fragment import AndroidPagerFragment
 from .android_frame_layout import AndroidFrameLayout, FrameLayout
-from .android_view_pager import LayoutParams, ViewPagerLayoutParams
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 package = "com.google.android.material.tabs"
@@ -64,7 +63,7 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
     #: Save created tab spec references
     tabs = List(Tab)
 
-    default_layout = set_default(
+    default_layout = set_default(  # type: ignore
         {"width": "match_parent", "height": "wrap_content", "gravity": "top"}
     )
 
@@ -98,13 +97,14 @@ class AndroidTabLayout(AndroidFrameLayout, ProxyTabLayout):
         self.tabs.append(tab)
 
     def on_tab_selected(self, tab):
-        d = self.declaration
-
+        pass
+        # d = self.declaration
         # with self.widget.setCurrentTab.suppressed():
         #    d.current_tab = title
 
     def on_tab_unselected(self, tab):
-        d = self.declaration
+        pass
+        # d = self.declaration
         # d.current_tab = title
 
     def destroy(self):

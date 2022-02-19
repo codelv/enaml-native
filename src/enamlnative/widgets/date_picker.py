@@ -10,8 +10,8 @@ Created on May 20, 2017
 @author: jrm
 """
 from datetime import datetime
-from atom.api import Bool, ForwardTyped, Instance, Int, Range, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import ForwardTyped, Instance, Range, Typed
+from enaml.core.declarative import d_, observe
 from .frame_layout import FrameLayout, ProxyFrameLayout
 
 
@@ -59,6 +59,5 @@ class DatePicker(FrameLayout):
     # -------------------------------------------------------------------------
     @observe("date", "min_date", "max_date", "first_day_of_week")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

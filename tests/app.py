@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (c) 2017, Jairus Martin.
 
 Distributed under the terms of the MIT License.
@@ -8,14 +8,14 @@ The full license is in the file LICENSE, distributed with this software.
 Created on Oct 3, 2017
 
 @author: jrm
-'''
+"""
 import sys
 import time
 import pstats
-from atom.api import *
 from cProfile import Profile
+from atom.api import *
 
-sys.path.append('src')
+sys.path.append("src")
 
 from enaml.application import ProxyResolver
 from enamlnative.core.app import BridgedApplication
@@ -39,7 +39,7 @@ class TestBridge(Atom):
         self.app.set_future_result(self.data, data)
 
     def addTarget(self, *args, **kwargs):
-        """ For iOS tests... """
+        """For iOS tests..."""
         pass
 
 
@@ -55,7 +55,7 @@ class MockApplication(BridgedApplication):
     done = Value()
 
     __id__ = Int(-1)
-    __nativeclass__ = Unicode('com.enaml.MainApplication')
+    __nativeclass__ = Unicode("com.enaml.MainApplication")
 
     dp = Float(1)
     api_level = Int(25)
@@ -69,6 +69,7 @@ class MockApplication(BridgedApplication):
     @classmethod
     def instance(cls, platform=None):
         from enaml.application import Application
+
         Application._instance = None
         app = cls()
         if platform:
@@ -77,36 +78,43 @@ class MockApplication(BridgedApplication):
 
     def __init__(self, platform="ios"):
         self.resolver = ProxyResolver()
-        self.reset(platform) # Default
+        self.reset(platform)  # Default
         self.debug = True
         super(MockApplication, self).__init__()
 
-    def reset(self, platform, eventloop='builtin'):
-        if eventloop == 'builtin':
+    def reset(self, platform, eventloop="builtin"):
+        if eventloop == "builtin":
             from enamlnative.core.loop import BuiltinEventLoop
+
             self.loop = BuiltinEventLoop()
-        elif eventloop == 'twisted':
+        elif eventloop == "twisted":
             from enamlnative.core.loop import TwistedEventLoop
+
             self.loop = TwistedEventLoop()
-        elif eventloop == 'tornado':
+        elif eventloop == "tornado":
             from enamlnative.core.loop import TornadoEventLoop
+
             self.loop = TornadoEventLoop()
 
         #: Clear it again
         from enaml.application import Application
+
         Application._instance = None
 
         #: Update resolver
-        if platform == 'ios':
+        if platform == "ios":
             from enamlnative.ios.app import IPhoneApplication
 
             app = IPhoneApplication()
             from enamlnative.ios.factories import IOS_FACTORIES
+
             self.resolver.factories = IOS_FACTORIES
         else:
             from enamlnative.android.app import AndroidApplication
+
             app = AndroidApplication()
             from enamlnative.android.factories import ANDROID_FACTORIES
+
             self.resolver.factories = ANDROID_FACTORIES
 
         #: Clear state
@@ -129,39 +137,39 @@ class MockApplication(BridgedApplication):
             result = e
 
         if self.done.done():
-            raise# self.done.result()
+            raise  # self.done.result()
         else:
             self.set_future_result(self.done, result)
 
     def dispatch_events(self, data):
-        print("Dispatch {} kbytes".format(len(data)/1000))
+        print("Dispatch {} kbytes".format(len(data) / 1000))
         self.bridge.process_events(data)
 
     def load_plugin_factories(self):
         pass
 
     def stop(self):
-        """ Stop the profiler, print some info and the profiler stats"""
+        """Stop the profiler, print some info and the profiler stats"""
         if self.profile:
             self.profiler.disable()
         self.stopped = time.time()
         super(MockApplication, self).stop()
 
     def run(self):
-        """ Start and run intl the events are processed """
+        """Start and run intl the events are processed"""
 
         def stop(result):
             if isinstance(result, Exception):
                 self.error = result
             self.stop()
-            #for e in events[0:100]:
+            # for e in events[0:100]:
             #    print(e)
-            dt = (self.stopped-self.started)*1000
+            dt = (self.stopped - self.started) * 1000
             print("Took {}ms".format(dt))
-            #print("Events: {}").format(len(events))
+            # print("Events: {}").format(len(events))
             if self.profile:
                 stats = pstats.Stats(self.profiler)
-                for sort in ['tottime','cumtime']:
+                for sort in ["tottime", "cumtime"]:
                     stats.sort_stats(sort)
                     stats.print_stats(0.1)
 
@@ -170,6 +178,3 @@ class MockApplication(BridgedApplication):
         self.start()
         if self.error:
             raise self.error
-
-
-

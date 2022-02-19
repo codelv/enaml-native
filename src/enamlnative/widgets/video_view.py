@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Bool, Enum, Event, ForwardTyped, Str, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import Enum, Event, ForwardTyped, Str, Typed
+from enaml.core.declarative import d_, observe
 from .surface_view import ProxySurfaceView, SurfaceView
 
 
@@ -20,10 +20,10 @@ class ProxyVideoView(ProxySurfaceView):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: VideoView)
 
-    def seek_to(self, t):
+    def seek_to(self, ms: int):
         raise NotImplementedError
 
-    def set_control(self, control):
+    def set_control(self, control: str):
         raise NotImplementedError
 
 
@@ -51,10 +51,10 @@ class VideoView(SurfaceView):
     #: A reference to the ProxyViewGroup object.
     proxy = Typed(ProxyVideoView)
 
-    @observe("src", "src", "control")
+    @observe("src", "control")
     def _update_proxy(self, change):
         super()._update_proxy(change)
 
-    def seek_to(self, ms):
+    def seek_to(self, ms: int):
         """Seek to the given time."""
         self.proxy.seek_to(ms)

@@ -12,14 +12,18 @@ Created on Jan 18, 2018
 import hashlib
 from textwrap import dedent
 from enamlnative.android.bridge import (
-    JavaBridgeObject, JavaMethod, JavaStaticMethod, JavaField, JavaCallback,
-    JavaProxy
+    JavaBridgeObject,
+    JavaMethod,
+    JavaStaticMethod,
+    JavaField,
+    JavaCallback,
+    JavaProxy,
 )
 
 
 def get_member_id(cls, m):
     """
-    
+
     Parameters
     ----------
     cls
@@ -29,12 +33,14 @@ def get_member_id(cls, m):
     -------
 
     """
-    return hashlib.
+    input = f"{cls.__nativeclass__}.{m.name}".encode()
+    return hashlib.sha256(input).hexdigest()
+
 
 def find_java_classes(cls):
-    """ Find all java classes. Pulled from
-    
-    
+    """Find all java classes. Pulled from
+
+
     Parameters
     ----------
     cls: Type or Class
@@ -44,7 +50,7 @@ def find_java_classes(cls):
     -------
     result: List
         All of subclasses of the given class
-    
+
     References
     -----------
     - https://stackoverflow.com/questions/3862310/
@@ -60,9 +66,9 @@ def find_java_classes(cls):
 
 
 def generate_source(cls):
-    """ Generate java source to decode and use the object directly without 
+    """Generate java source to decode and use the object directly without
     reflection.
-    
+
     Parameters
     ----------
     cls: JavaBridgeObject
@@ -75,39 +81,41 @@ def generate_source(cls):
     #: Java class name
     classname = cls.__nativeclass__.default_value_mode[-1]
 
-    source = dedent("""
+    source = dedent(
+        """
     package com.codelv.enamlnative.gen;
-    
+
     class Bridge{classname} implements BridgeInterface {{
-        
+
         public {classname} createObject(int constructorId, Value[] args) {{
             switch (constructorId) {{
                 {constructors}
             }}
         }}
-        
+
         public Object invokeStatic(int methodId, Value[] args) {{
             switch (methodId) {{
                 {staticmethods}
             }}
         }}
-        
+
         public Object invokeMethod(Object objRef, int methodId, Value[] args) {{
             switch (methodId) {{
                 {methods}
             }}
         }}
-        
+
         public void setField(Object objRef, int fieldId, Value[] args) {{
             {classname} obj = ({classname}) objRef;
             switch (fieldId) {{
                 {fields}
             }}
         }}
-    
+
     }}
-    
-    """)
+
+    """
+    )
 
     #: Find all java fields, methods, etc...
     methods = []
@@ -116,52 +124,75 @@ def generate_source(cls):
     for m in cls.members().values():
         if isinstance(m, JavaMethod):
             if m.__returns__:
-                methods.append(dedent("""
+                methods.append(
+                    dedent(
+                        """
                 case {id}:
                     return obj.{m.name}({method_args});
-                """))
+                """
+                    )
+                )
             else:
-                methods.append(dedent("""
+                methods.append(
+                    dedent(
+                        """
                 case {id}:
                     obj.{m.name}({method_args});
                     break;
-                """))
+                """
+                    )
+                )
 
         elif isinstance(m, JavaField):
-            fields.append(dedent("""
+            fields.append(
+                dedent(
+                    """
                 case {id}:
                     obj.{m.name} = {value};
                     break;
-                """).format(m=m, id=get_member_id(cls, m)))
+                """
+                ).format(m=m, id=get_member_id(cls, m))
+            )
 
         elif isinstance(m, JavaStaticMethod):
             if m.__returns__:
-                static_methods.append(dedent("""
+                static_methods.append(
+                    dedent(
+                        """
                 case {id}:
                     return obj.{m.name}({method_args});
-                """))
+                """
+                    )
+                )
         else:
-            static_methods.append(dedent("""
+            static_methods.append(
+                dedent(
+                    """
                 case {method_id}:
                     obj.{method_name}({method_args});
                     break;
-                """))
+                """
+                )
+            )
 
     #: Return the rendered source
-    return source.format(classname=classname,
-                         methods="\n        ".join(methods),
-                         static_methods="\n        ".join(static_methods),
-                         fields="\n        ".join(fields))
+    return source.format(
+        classname=classname,
+        methods="\n        ".join(methods),
+        static_methods="\n        ".join(static_methods),
+        fields="\n        ".join(fields),
+    )
 
 
 def generate():
-    """ Generate the Java source used to eliminate the need for using
+    """Generate the Java source used to eliminate the need for using
     reflection over the bridge.
-    
+
     """
     #: Import all the classes first
     from enamlnative.android import api
     from enamlnative.android.factories import ANDROID_FACTORIES
+
     for name, factory in ANDROID_FACTORIES.items():
         factory()
 

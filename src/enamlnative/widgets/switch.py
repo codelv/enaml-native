@@ -56,6 +56,5 @@ class Switch(CompoundButton):
     # -------------------------------------------------------------------------
     @observe("show_text", "split_track", "text_off", "text_on")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

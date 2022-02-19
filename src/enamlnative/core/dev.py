@@ -18,23 +18,12 @@ import traceback
 import enaml
 import enamlnative
 from contextlib import contextmanager
-from atom.api import (
-    Atom,
-    Bool,
-    Enum,
-    ForwardInstance,
-    Instance,
-    Int,
-    List,
-    Str,
-    Subclass,
-)
-from .bridge import Command
 from importlib import reload
-
+from atom.api import Atom, Bool, Enum, ForwardInstance, Instance, Int, Str
+from .bridge import Command
 
 with enamlnative.imports():
-    from .hotswap.api import Hotswapper
+    from .hotswap.core import Hotswapper
 
 
 @contextmanager
@@ -318,7 +307,7 @@ class TornadoDevClient(DevClient):
     def available(cls):
         """Return True if this dev client impl can be used."""
         try:
-            import tornado
+            import tornado  # noqa: F401
 
             return True
         except ImportError:
@@ -398,7 +387,7 @@ class DevServer(Atom):
                 class_members = [m for m in members if m.name not in inherited]
 
             members = class_members
-        except:
+        except Exception:
             pass
 
         return [m for m in members if not m.name.startswith("_")]
@@ -452,7 +441,7 @@ class DevServer(Atom):
             try:
                 with open(view_code) as f:
                     return f.read()
-            except:
+            except Exception:
                 pass
         return DEFAULT_CODE
 
@@ -548,7 +537,7 @@ class TornadoDevServer(DevServer):
     def available(cls):
         """Return True if this dev server impl can be used."""
         try:
-            import tornado
+            import tornado  # noqa: F401
 
             return True
         except ImportError:
@@ -559,7 +548,6 @@ class TornadoDevServer(DevServer):
             import tornado.ioloop
             import tornado.web
             import tornado.websocket
-        ioloop = tornado.ioloop.IOLoop.current()
         server = self
 
         class DevWebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -638,21 +626,9 @@ class DevServerSession(Atom):
     hotswap = Instance(Hotswapper)
 
     #: Delegate dev server
-    servers = List(
-        Subclass(DevServer),
-        default=[
-            TornadoDevServer,
-        ],
-    )
     server = Instance(DevServer)
 
-    #: Delegate dev client
-    clients = List(
-        Subclass(DevClient),
-        default=[
-            TornadoDevClient,
-        ],
-    )
+    #: Delegate client
     client = Instance(DevClient)
 
     # -------------------------------------------------------------------------
@@ -716,18 +692,16 @@ class DevServerSession(Atom):
         return get_app().instance()
 
     def _default_server(self):
-        for Server in self.servers:
-            if Server.available():
-                return Server()
+        if TornadoDevServer.available():
+            return TornadoDevServer()
         raise NotImplementedError(
             "No dev servers are available! "
             "Include tornado or twisted in your requirements!"
         )
 
     def _default_client(self):
-        for Client in self.clients:
-            if Client.available():
-                return Client()
+        if TornadoDevClient.available():
+            return TornadoDevClient()
         raise NotImplementedError(
             "No dev clients are available! "
             "Include tornado or twisted in your requirements!"
@@ -735,9 +709,8 @@ class DevServerSession(Atom):
 
     def _observe_connected(self, change):
         """Log connection state changes"""
-        print(
-            "Dev session {}".format("connected" if self.connected else "disconnected")
-        )
+        state = "connected" if self.connected else "disconnected"
+        print(f"Dev session {state}")
 
     # -------------------------------------------------------------------------
     # Dev Session API
@@ -772,7 +745,7 @@ class DevServerSession(Atom):
         try:
             with enaml.imports():
                 app.activity.on_reload()
-        except Exception as e:
+        except Exception:
             #: Display the error
             app.send_event(Command.ERROR, traceback.format_exc())
 
@@ -781,7 +754,7 @@ class DevServerSession(Atom):
         #: Show hotswap tooltip
         try:
             self.app.widget.showTooltip("Hot swapping...", now=True)
-        except:
+        except Exception:
             pass
         self.save_changed_files(msg)
 
@@ -791,7 +764,7 @@ class DevServerSession(Atom):
             print("Attempting hotswap....")
             with hotswap.active():
                 hotswap.update(app.view)
-        except:
+        except Exception:
             #: Display the error
             app.send_event(Command.ERROR, traceback.format_exc())
 

@@ -8,14 +8,12 @@ The full license is in the file LICENSE, distributed with this software.
 @author jrm
 
 """
-import nativehooks  # : Created by the ndk-build in pybridge.c
+import nativehooks
 from asyncio import Future
-from atom.api import Dict, Event, Float, Int, List, Str, Typed, Value
+from atom.api import Dict, Int
 from enaml.application import ProxyResolver
 from enamlnative.android import factories
-from enamlnative.core import bridge
 from enamlnative.core.app import BridgedApplication
-from enamlnative.widgets.activity import Activity
 
 
 class AndroidApplication(BridgedApplication):
@@ -45,10 +43,16 @@ class AndroidApplication(BridgedApplication):
     async def has_permission(self, permission: str) -> bool:
         """Return a future that resolves with the result of the permission"""
         # Old versions of android did permissions at install time
-        if self.activity.api_level < 23:
+        d = self.activity
+        assert d is not None
+        if d.api_level < 23:
             return True
-        result = await self.activity.checkSelfPermission(permission)
-        return result == Activity.PERMISSION_DENIED
+        proxy = d.proxy
+        assert proxy is not None
+        activity = proxy.widget
+        assert activity is not None
+        result = await activity.checkSelfPermission(permission)
+        return result == activity.PERMISSION_DENIED
 
     async def request_permissions(self, *permissions) -> dict[str, bool]:
         """Return a future that resolves with the results
@@ -56,28 +60,34 @@ class AndroidApplication(BridgedApplication):
 
         """
         # Old versions of android did permissions at install time
-        if self.activity.api_level < 23:
+        d = self.activity
+        assert d is not None
+        if d.api_level < 23:
             return {p: True for p in permissions}
 
-        w = self.activity
         request_code = self._permission_code
         self._permission_code += 1  #: So next call has a unique code
 
         # On first request, setup our listener, and request the permission
+        proxy = d.proxy
+        assert proxy is not None
+        activity = proxy.widget
+        assert activity is not None
         if request_code == 0:
-            w.setPermissionResultListener(w.getId())
-            w.onRequestPermissionsResult.connect(self._on_permission_result)
+            activity.setPermissionResultListener(activity.getId())
+            activity.onRequestPermissionsResult.connect(self._on_permission_result)
 
         #: Save a reference
-        f = self.widget.requestPermissions(permissions, request_code)
+        f = self.create_future()
+        activity.requestPermissions(permissions, request_code)
         self._permission_requests[request_code] = f
 
         #: Send out the request
         code, perms, results = await f
-        granted = Activity.PERMISSION_GRANTED
+        granted = activity.PERMISSION_GRANTED
         return {p: r == granted for p, r in zip(perms, results)}
 
-    def show_toast(self, msg, long=True):
+    def show_toast(self, msg: str, long: bool = True):
         """Show a toast message for the given duration.
         This is an android specific api.
 
@@ -89,6 +99,8 @@ class AndroidApplication(BridgedApplication):
             Display for a long or short (system defined) duration
 
         """
+        if not msg:
+            return
         from .android_toast import Toast
 
         async def show_toast():
@@ -127,7 +139,13 @@ class AndroidApplication(BridgedApplication):
         service = cls.instance()
         if service:
             return service
-        service_id = await self.widget.getSystemService(cls.SERVICE_TYPE)
+        d = self.activity
+        assert d is not None
+        proxy = d.proxy
+        assert proxy is not None
+        activity = proxy.widget
+        assert activity is not None
+        service_id = await activity.getSystemService(cls.SERVICE_TYPE)
         return cls(__id__=service_id)
 
     # -------------------------------------------------------------------------

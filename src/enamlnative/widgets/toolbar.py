@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Enum, Event, ForwardTyped, Int, Str, Tuple, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import ForwardTyped, Str, Tuple, Typed
+from enaml.core.declarative import d_, observe
 from .view_group import ProxyViewGroup, ViewGroup
 
 
@@ -20,22 +20,22 @@ class ProxyToolbar(ProxyViewGroup):
     #: A reference to the widget declaration.
     declaration = ForwardTyped(lambda: Toolbar)
 
-    def set_content_padding(self, padding):
+    def set_content_padding(self, padding: tuple[int, ...]):
         raise NotImplementedError
 
-    def set_title(self, text):
+    def set_title(self, text: str):
         raise NotImplementedError
 
-    def set_subtitle(self, text):
+    def set_subtitle(self, text: str):
         raise NotImplementedError
 
-    def set_title_margins(self, margins):
+    def set_title_margins(self, margins: tuple[int, ...]):
         raise NotImplementedError
 
-    def set_title_color(self, color):
+    def set_title_color(self, color: str):
         raise NotImplementedError
 
-    def set_subtitle_color(self, color):
+    def set_subtitle_color(self, color: str):
         raise NotImplementedError
 
 
@@ -75,6 +75,5 @@ class Toolbar(ViewGroup):
         "subtitle_color",
     )
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

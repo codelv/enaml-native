@@ -10,7 +10,7 @@ Created on Aug 3, 2017
 @author: jrm
 """
 
-from atom.api import Typed, set_default
+from atom.api import Typed
 from enamlnative.widgets.flexbox import ProxyFlexbox
 from .uikit_view import UiKitView, UIView
 from .yoga import Yoga
@@ -19,7 +19,7 @@ from .yoga import Yoga
 class UIFlexbox(UIView):
     """Adds yoga as a nested object"""
 
-    __nativeclass__ = set_default("UIView")
+    __nativeclass__ = "UIView"
 
 
 class UiKitFlexbox(UiKitView, ProxyFlexbox):

@@ -9,13 +9,13 @@ Created on May 9, 2018
 
 @author: jrm
 """
-from atom.api import Bool, List, Typed
+from atom.api import Bool, Typed
 from enamlnative.widgets.camera_view import ProxyCameraView
 from .android_activity import Activity
 from .android_content import SystemService
 from .android_texture_view import AndroidTextureView, AndroidView, TextureView
 from .app import AndroidApplication
-from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
+from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
 
 # class ImageReader(JavaBridgeObject):
 #     __nativeclass__ = set_default('android.media.ImageReader')
@@ -159,18 +159,17 @@ class CameraManager(SystemService):
     @classmethod
     async def get_cameras(cls) -> list:
         """Return the list of cameras this device supports"""
-        app = AndroidApplication.instance()
         mgr = await cls.get()
         return await mgr.getCameraIdList()
 
 
 # class Surface(JavaBridgeObject):
-#     __nativeclass__ = set_default('android.view.Surface')
-#     __signature__ = set_default(('android.graphics.SurfaceTexture',))
+#     __nativeclass__ = 'android.view.Surface'
+#     __signature__ = ('android.graphics.SurfaceTexture',)
 #
 #
 # class Matrix(JavaBridgeObject):
-#     __nativeclass__ = set_default('android.graphics.Matrix')
+#     __nativeclass__ = 'android.graphics.Matrix'
 #     setPolyToPoly = JavaMethod('[f', 'int', '[f', 'int', 'int')
 #     posteRotate = JavaMethod('float', 'float', 'float')
 #

@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Bool, ForwardTyped, Int, Str, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import Bool, ForwardTyped, Int, Str, Typed
+from enaml.core.declarative import d_, observe
 from .frame_layout import FrameLayout, ProxyFrameLayout
 
 
@@ -57,6 +57,5 @@ class ViewAnimator(FrameLayout):
     # -------------------------------------------------------------------------
     @observe("animate_first_view", "displayed_child", "in_animation", "out_animation")
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

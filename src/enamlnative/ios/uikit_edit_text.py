@@ -12,7 +12,7 @@ Created on Aug 25, 2017
 
 from atom.api import Typed
 from enamlnative.widgets.edit_text import ProxyEditText
-from .bridge import NestedBridgeObject, ObjcCallback, ObjcMethod, ObjcProperty
+from .bridge import NestedBridgeObject, ObjcCallback, ObjcProperty
 from .uikit_control import UIControl, UiKitControl
 
 
@@ -98,7 +98,7 @@ class UiKitEditText(UiKitControl, ProxyEditText):
 
         self.widget.onValueChanged.connect(self.on_value_changed)
 
-    def on_value_changed(self, text):
+    def on_value_changed(self, text: str):
         """Update text field"""
         d = self.declaration
         with self.widget.get_member("text").suppressed(self.widget):
@@ -115,8 +115,8 @@ class UiKitEditText(UiKitControl, ProxyEditText):
         #: TODO...
         pass
 
-    def set_style(self, style):
+    def set_style(self, style: str):
         self.widget.borderStyle = UITextField.STYLES[style]
 
-    def set_placeholder(self, placeholder):
+    def set_placeholder(self, placeholder: str):
         self.widget.placeholder = placeholder

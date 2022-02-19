@@ -166,6 +166,8 @@ class AndroidVideoView(AndroidSurfaceView, ProxyVideoView):
     # ProxyVideoView API
     # -------------------------------------------------------------------------
     def set_src(self, src):
+        if not src:
+            return
         self.widget.setVideoURI(Uri.parse(src))
         d = self.declaration
         d.state = "loading"

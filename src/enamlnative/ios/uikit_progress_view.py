@@ -10,7 +10,7 @@ Created on Aug 3, 2017
 @author: jrm
 """
 
-from atom.api import Typed, set_default
+from atom.api import Typed
 from enamlnative.widgets.progress_bar import ProxyProgressBar
 from .bridge import ObjcMethod, ObjcProperty
 from .uikit_view import UiKitView, UIView

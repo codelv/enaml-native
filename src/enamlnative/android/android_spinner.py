@@ -9,7 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import List, Typed, set_default
+from atom.api import Typed, set_default
 from enamlnative.widgets.spinner import ProxySpinner
 from .android_adapter import AdapterView, AndroidAdapterView, ArrayAdapter
 from .bridge import JavaMethod
@@ -42,7 +42,7 @@ class AndroidSpinner(AndroidAdapterView, ProxySpinner):
     adapter = Typed(ArrayAdapter)
 
     #: Wrap content by default
-    default_layout = set_default({"height": "wrap_content"})
+    default_layout = set_default({"height": "wrap_content"})  # type: ignore
 
     # -------------------------------------------------------------------------
     # Initialization API

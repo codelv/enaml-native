@@ -9,8 +9,8 @@ Created on May 20, 2017
 
 @author: jrm
 """
-from atom.api import Bool, Enum, ForwardTyped, Int, Str, Typed, observe
-from enaml.core.declarative import d_
+from atom.api import Bool, Enum, ForwardTyped, Int, Typed
+from enaml.core.declarative import d_, observe
 from .view_group import ProxyViewGroup, ViewGroup
 
 
@@ -20,25 +20,25 @@ class ProxyGridLayout(ProxyViewGroup):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: GridLayout)
 
-    def set_orientation(self, orientation):
+    def set_orientation(self, orientation: str):
         raise NotImplementedError
 
-    def set_alignment_mode(self, mode):
+    def set_alignment_mode(self, mode: str):
         raise NotImplementedError
 
-    def set_columns(self, columns):
+    def set_columns(self, columns: int):
         raise NotImplementedError
 
-    def set_column_order_preserved(self, preserved):
+    def set_column_order_preserved(self, preserved: bool):
         raise NotImplementedError
 
-    def set_rows(self, rows):
+    def set_rows(self, rows: int):
         raise NotImplementedError
 
-    def set_row_order_preserved(self, preserved):
+    def set_row_order_preserved(self, preserved: bool):
         raise NotImplementedError
 
-    def set_use_default_margins(self, use_default):
+    def set_use_default_margins(self, use_default: bool):
         raise NotImplementedError
 
 
@@ -90,6 +90,5 @@ class GridLayout(ViewGroup):
         "use_default_margins",
     )
     def _update_proxy(self, change):
-        """An observer which sends the state change to the proxy."""
 
         super()._update_proxy(change)

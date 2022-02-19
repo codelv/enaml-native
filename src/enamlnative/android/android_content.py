@@ -10,7 +10,7 @@ Created on July 24, 2017
 @author: jrm
 """
 
-from atom.api import Atom, Int
+from typing import ClassVar
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
 
 
@@ -226,7 +226,7 @@ class BroadcastReceiver(JavaBridgeObject):
 
         """
         receiver = cls()
-        activity = receiver.__app__.widget
+        activity = receiver.__app__.activity.widget
         receiver.setReceiver(receiver.getId())
 
         def on_receive(ctx, intent):
@@ -238,7 +238,7 @@ class BroadcastReceiver(JavaBridgeObject):
 
     def __del__(self):
         """Unregister automatically"""
-        activity = self.__app__.widget
+        activity = self.__app__.activity.widget
         activity.unregisterReceiver(self)
         super().__del__()
 
@@ -246,7 +246,7 @@ class BroadcastReceiver(JavaBridgeObject):
 class SystemService(JavaBridgeObject):
     """A common api for system services as singletons"""
 
-    SERVICE_TYPE = None
+    SERVICE_TYPE: ClassVar[str] = ""
     _instance = None
 
     @classmethod

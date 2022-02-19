@@ -93,17 +93,15 @@ class WifiManager(SystemService):
     # Public api
     # -------------------------------------------------------------------------
     @classmethod
-    async def is_wifi_enabled(cls):
+    async def is_wifi_enabled(cls) -> bool:
         """Check if wifi is currently enabled.
 
         Returns
         --------
-            result: future
-              A future that resolves with the value.
+            result: bool
+              Whether wifi is enabled
 
         """
-        app = AndroidApplication.instance()
-
         has_perm = await WifiManager.request_permission(
             WifiManager.PERMISSION_ACCESS_WIFI_STATE
         )
@@ -115,16 +113,15 @@ class WifiManager(SystemService):
         return await mgr.isWifiEnabled()
 
     @classmethod
-    async def set_wifi_enabled(cls, state=True):
+    async def set_wifi_enabled(cls, state: bool = True) -> bool:
         """Set the wifi enabled state.
 
         Returns
         --------
-            result: future
-              A future that resolves with whether the operation succeeded.
+            enabled: bool
+              Whether the operation succeeded.
 
         """
-        app = AndroidApplication.instance()
         allowed = await WifiManager.request_permission(
             WifiManager.PERMISSION_CHANGE_WIFI_STATE
         )
@@ -132,7 +129,7 @@ class WifiManager(SystemService):
             raise RuntimeError("Permission to change wifi state is not allowed")
 
         mgr = await WifiManager.get()
-        return await m.setWifiEnabled(state)
+        return await mgr.setWifiEnabled(state)
 
     @classmethod
     async def get_networks(cls):
@@ -147,7 +144,9 @@ class WifiManager(SystemService):
 
         """
         app = AndroidApplication.instance()
-        allowed = await WifiManager.request_permission(WifiManager.PERMISSIONS_REQUIRED)
+        allowed = await WifiManager.request_permission(
+            *WifiManager.PERMISSIONS_REQUIRED
+        )
         if not allowed:
             raise RuntimeError("Permission to get networks is not allowed")
 
@@ -217,8 +216,9 @@ class WifiManager(SystemService):
                 A future that resolves with the result of the connect
 
         """
-        app = AndroidApplication.instance()
-        allowed = await WifiManager.request_permission(WifiManager.PERMISSIONS_REQUIRED)
+        allowed = await WifiManager.request_permission(
+            *WifiManager.PERMISSIONS_REQUIRED
+        )
         if not allowed:
             raise RuntimeError("Permission to toggle wifi state not allowed")
 
@@ -244,9 +244,11 @@ class WifiManager(SystemService):
 
         net_id = await mgr.addNetwork(config)
         if net_id == -1:
-            raise ValueError(f"Warning: Invalid network configuration")
+            raise ValueError("Warning: Invalid network configuration")
 
         net_enabled = await mgr.enableNetwork(net_id, True)
+        if not net_enabled:
+            raise RuntimeError("Could not enable network")
         return await mgr.reconnect()
 
     @classmethod
@@ -261,7 +263,6 @@ class WifiManager(SystemService):
                  or None if an error occurred (ie permission denied).s
 
         """
-        app = AndroidApplication.instance()
         allowed = await WifiManager.request_permission(
             WifiManager.PERMISSION_ACCESS_WIFI_STATE
         )
@@ -283,7 +284,6 @@ class WifiManager(SystemService):
                  or None if an error occured (ie permission denied).s
 
         """
-        app = AndroidApplication.instance()
         allowed = await WifiManager.request_permission(
             WifiManager.PERMISSION_ACCESS_WIFI_STATE
         )
