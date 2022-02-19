@@ -19,7 +19,7 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
 class Toast(JavaBridgeObject):
     #: Show the view for the specified duration.
     __nativeclass__ = "android.widget.Toast"
-    __signature__ = ("android.content.Context",)
+    __signature__ = ["android.content.Context"]
     makeText = JavaStaticMethod(
         "android.content.Context",
         "java.lang.CharSequence",
@@ -93,7 +93,9 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
         """Overwrite the view"""
         view = child.widget
         if view is not None:
-            self.toast.setView(view)
+            toast = self.toast
+            assert toast is not None
+            toast.setView(view)
 
     def on_make_toast(self, f: Future):
         """Using Toast.makeToast returns async so we have to initialize it
@@ -115,12 +117,15 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
 
         """
         d = self.declaration
+        assert d is not None
         if dt <= 0:
             #: Done, hide
             d.show = False
         elif d.show:
             #: If user didn't cancel it, keep it alive
-            self.toast.show()
+            toast = self.toast
+            assert toast is not None
+            toast.show()
 
             t = min(1000, dt)
             app = self.get_context()
@@ -132,7 +137,9 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
     def set_text(self, text: str):
         #: Only possible if a custom view is not used
         if self.made_toast:
-            self.toast.setText(text)
+            toast = self.toast
+            assert toast is not None
+            toast.setText(text)
 
     def set_duration(self, duration: int):
         """Android for whatever stupid reason doesn't let you set the time
@@ -144,20 +151,26 @@ class AndroidToast(AndroidToolkitObject, ProxyToast):
         pass
 
     def set_show(self, show: bool):
+        toast = self.toast
+        assert toast is not None
         if show:
             d = self.declaration
-            self.toast.show()
+            assert d is not None
+            toast.show()
 
             #: Get app
             app = self.get_context()
             t = min(1000, d.duration)
             app.timed_call(t, self._refresh_show, d.duration - t)
         else:
-            self.toast.cancel()
+            toast.cancel()
 
     def set_layout(self, layout):
         pass
 
     def set_gravity(self, gravity: int):
         d = self.declaration
-        self.toast.setGravity(gravity, int(d.x), int(d.y))
+        assert d is not None
+        toast = self.toast
+        assert toast is not None
+        toast.setGravity(gravity, int(d.x), int(d.y))

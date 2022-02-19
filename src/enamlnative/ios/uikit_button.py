@@ -19,7 +19,7 @@ from .uikit_control import UIControl, UiKitControl
 class UIButton(UIControl):
     """ """
 
-    __signature__ = ({"buttonWithType": "enum"},)
+    __signature__ = [{"buttonWithType": "enum"}]
     #: Properties
     on = ObjcProperty("bool")
     onTintColor = ObjcProperty("UIColor")
@@ -66,7 +66,9 @@ class UiKitButton(UiKitControl, ProxyButton):
     # ProxyButton API
     # -------------------------------------------------------------------------
     def set_text(self, text: str):
-        self.widget.setTitle(text, forState=UIButton.UIControlStateNormal)
+        w = self.widget
+        assert w is not None
+        w.setTitle(text, forState=UIButton.UIControlStateNormal)
 
     def set_style(self, style):
         pass  #: Cannot be changed once set!

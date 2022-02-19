@@ -41,11 +41,11 @@ LAYOUT_KEYS = (
 
 class View(JavaBridgeObject):
     __nativeclass__ = "android.view.View"
-    __signature__ = (
+    __signature__ = [
         "android.content.Context",
         "android.util.AttributeSet",
         "android.R",
-    )
+    ]
 
     VISIBILITY_VISIBLE = 0
     VISIBILITY_INVISIBLE = 4

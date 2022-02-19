@@ -35,7 +35,7 @@ class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):
     widget = Typed(FrameLayout)
 
     #: Update default
-    layout_param_type = set_default(FrameLayoutParams)
+    layout_param_type = set_default(FrameLayoutParams)  # type: ignore
 
     # -------------------------------------------------------------------------
     # Initialization API

@@ -11,8 +11,9 @@ Created on May 9, 2018
 """
 from atom.api import Bool, Int, Typed, set_default
 from enamlnative.widgets.view import ProxyView
+from enamlnative.core.bridge import generate_id
 from .android_view import AndroidView, View
-from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, bridge
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 
 class SurfaceTexture(JavaBridgeObject):
@@ -33,7 +34,7 @@ class SurfaceTexture(JavaBridgeObject):
 
 class TextureView(View):
     __nativeclass__ = "android.view.TextureView"
-    __signature__ = ("android.content.Context",)
+    __signature__ = ["android.content.Context"]  # type: ignore
     getSurfaceTexture = JavaMethod(returns="android.graphics.SurfaceTexture")
     setTransform = JavaMethod("android.graphics.Matrix")
     setDefaultBufferSize = JavaMethod("int", "int")
@@ -56,7 +57,7 @@ class AndroidTextureView(AndroidView, ProxyView):
     height = Int()
 
     #: Default layout params
-    default_layout = set_default({"width": "match_parent", "height": "match_parent"})
+    default_layout = set_default({"width": "match_parent", "height": "match_parent"})  # type: ignore
 
     # -------------------------------------------------------------------------
     # Initialization API
@@ -72,7 +73,7 @@ class AndroidTextureView(AndroidView, ProxyView):
 
         # Create a new reference because it creates passes a new texture in
         # the callback
-        tid = bridge.generate_id()
+        tid = generate_id()
         t = self.texture = SurfaceTexture(__id__=tid)
         w.setSurfaceTextureListener(tid)
 

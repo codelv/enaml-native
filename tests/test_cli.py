@@ -1,7 +1,6 @@
 import os
 import time
 import sh
-import pytest
 from os.path import exists
 from utils import cd, source_activated
 

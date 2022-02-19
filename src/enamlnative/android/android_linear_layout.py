@@ -34,7 +34,7 @@ class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):
     widget = Typed(LinearLayout)
 
     #: Use LinearLayout params
-    layout_param_type = set_default(LinearLayoutParams)
+    layout_param_type = set_default(LinearLayoutParams)  # type: ignore
 
     # -------------------------------------------------------------------------
     # Initialization API

@@ -17,10 +17,10 @@ from .uikit_view import NSObject, UiKitView, UIView
 
 
 class UIFont(NSObject):
-    __signature__ = (
+    __signature__ = [
         dict(fontWithName="NSString", systemFontOfSize="NSInteger"),
         dict(size="NSInteger"),
-    )
+    ]
 
 
 class UITextView(UIView):
@@ -56,7 +56,7 @@ class UiKitTextView(UiKitView, ProxyTextView):
     """An UiKit implementation of an Enaml ProxyToolkitObject."""
 
     #: A reference to the toolkit widget created by the proxy.
-    widget = Typed(UILabel)
+    widget = Typed(UITextView)
 
     # -------------------------------------------------------------------------
     # Initialization API

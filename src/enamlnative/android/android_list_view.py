@@ -11,9 +11,10 @@ Created on May 20, 2017
 """
 from atom.api import Dict, Instance, Property, Typed, observe
 from enamlnative.widgets.list_view import ProxyListItem, ProxyListView
+from enamlnative.core.bridge import encode
 from .android_toolkit_object import AndroidToolkitObject
 from .android_view_group import AndroidViewGroup, ViewGroup
-from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, encode
+from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 package = "androidx.recyclerview.widget"
 
@@ -42,14 +43,14 @@ class RecylerView(ViewGroup):
 
 class StaggeredLayoutManager(RecylerView.LayoutManager):
     __nativeclass__ = f"{package}.StaggeredLayoutManager"
-    __signature__ = ("int", "int")
+    __signature__ = ["int", "int"]
     setOrientation = JavaMethod("int")
     setSpanCount = JavaMethod("int")
 
 
 class LinearLayoutManager(RecylerView.LayoutManager):
     __nativeclass__ = f"{package}.LinearLayoutManager"
-    __signature__ = ("android.content.Context", "int", "boolean")
+    __signature__ = ["android.content.Context", "int", "boolean"]
 
     scrollToPositionWithOffset = JavaMethod("int", "int")
     setInitialPrefetchItemCount = JavaMethod("int")
@@ -62,7 +63,7 @@ class LinearLayoutManager(RecylerView.LayoutManager):
 
 class GridLayoutManager(LinearLayoutManager):
     __nativeclass__ = f"{package}.GridLayoutManager"
-    __signature__ = ("android.content.Context", "int", "int", "boolean")
+    __signature__ = ["android.content.Context", "int", "int", "boolean"]
     setSpanCount = JavaMethod("int")
 
 
@@ -88,7 +89,7 @@ class BridgedRecyclerAdapter(JavaBridgeObject):
     """An adapter that implements a recycleview pattern."""
 
     __nativeclass__ = "com.codelv.enamlnative.adapters.BridgedRecyclerAdapter"
-    __signature__ = (f"{package}.RecyclerView",)
+    __signature__ = [f"{package}.RecyclerView"]
     setRecyleListener = JavaMethod(
         "com.codelv.enamlnative.adapters.BridgedRecyclerAdapter"
         "$BridgedListAdapterListener"

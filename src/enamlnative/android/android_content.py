@@ -189,7 +189,7 @@ class PendingIntent(JavaBridgeObject):
 
 class IntentFilter(JavaBridgeObject):
     __nativeclass__ = "android.content.IntentFilter"
-    __signature__ = ("java.lang.String",)
+    __signature__ = ["java.lang.String"]
 
 
 class BroadcastReceiver(JavaBridgeObject):

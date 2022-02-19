@@ -19,7 +19,7 @@ package = "androidx.appcompat.widget"
 
 class Toolbar(ViewGroup):
     __nativeclass__ = f"{package}.Toolbar"
-    __signature__ = ("android.content.Context",)
+    __signature__ = ["android.content.Context"]  # type: ignore
     setTitle = JavaMethod("java.lang.CharSequence")
     setSubtitle = JavaMethod("java.lang.CharSequence")
     setSubtitleTextColor = JavaMethod("android.graphics.Color")

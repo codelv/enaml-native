@@ -10,9 +10,11 @@ Created on Aug 25, 2017
 @author: jrm
 """
 
+from typing import cast
 from atom.api import Typed
 from enamlnative.widgets.edit_text import ProxyEditText
-from .bridge import NestedBridgeObject, ObjcCallback, ObjcProperty
+from enamlnative.core.bridge import NestedBridgeObject
+from .bridge import ObjcCallback, ObjcProperty
 from .uikit_control import UIControl, UiKitControl
 
 
@@ -101,8 +103,13 @@ class UiKitEditText(UiKitControl, ProxyEditText):
     def on_value_changed(self, text: str):
         """Update text field"""
         d = self.declaration
-        with self.widget.get_member("text").suppressed(self.widget):
-            d.text = text
+        assert d is not None
+        w = self.widget
+        assert w is not None
+        m = cast(ObjcProperty, w.get_member("text"))
+        if m is not None:
+            with m.suppressed(w):
+                d.text = text
 
     # -------------------------------------------------------------------------
     # ProxyEditText API
@@ -116,7 +123,9 @@ class UiKitEditText(UiKitControl, ProxyEditText):
         pass
 
     def set_style(self, style: str):
+        assert self.widget is not None
         self.widget.borderStyle = UITextField.STYLES[style]
 
     def set_placeholder(self, placeholder: str):
+        assert self.widget is not None
         self.widget.placeholder = placeholder

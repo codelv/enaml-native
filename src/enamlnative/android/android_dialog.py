@@ -18,7 +18,7 @@ from enamlnative.widgets.dialog import ProxyDialog
 class Dialog(JavaBridgeObject):
     #: Show the view for the specified duration.
     __nativeclass__ = "android.app.Dialog"
-    __signature__ = ("android.content.Context", "android.R")
+    __signature__ = ["android.content.Context", "android.R"]
     show = JavaMethod()
     dismiss = JavaMethod()
     setCancelable = JavaMethod("boolean")

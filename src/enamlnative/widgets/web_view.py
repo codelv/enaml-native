@@ -20,10 +20,10 @@ class ProxyWebView(ProxyViewGroup):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: WebView)
 
-    def set_url(self, url):
+    def set_url(self, url: str):
         raise NotImplementedError
 
-    def set_source(self, source):
+    def set_source(self, source: str):
         raise NotImplementedError
 
     def do_reload(self):
@@ -104,11 +104,8 @@ class WebView(ViewGroup):
         "zoom_out",
     )
     def _update_proxy(self, change):
-
         if change["type"] == "event":
-            name = f"do_{change['name']}"
-            if hasattr(self.proxy, name):
-                handler = getattr(self.proxy, name)
+            if handler := getattr(self.proxy, f"do_{change['name']}", None):
                 handler()
         else:
             super()._update_proxy(change)

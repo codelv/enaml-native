@@ -164,6 +164,10 @@ def generate_source(cls):
                 """
                     )
                 )
+        elif isinstance(m, JavaCallback):
+            raise NotImplementedError()
+        elif isinstance(m, JavaProxy):
+            raise NotImplementedError()
         else:
             static_methods.append(
                 dedent(
@@ -190,7 +194,6 @@ def generate():
 
     """
     #: Import all the classes first
-    from enamlnative.android import api
     from enamlnative.android.factories import ANDROID_FACTORIES
 
     for name, factory in ANDROID_FACTORIES.items():

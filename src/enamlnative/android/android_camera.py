@@ -165,7 +165,7 @@ class CameraManager(SystemService):
 
 # class Surface(JavaBridgeObject):
 #     __nativeclass__ = 'android.view.Surface'
-#     __signature__ = ('android.graphics.SurfaceTexture',)
+#     __signature__ = ['android.graphics.SurfaceTexture']
 #
 #
 # class Matrix(JavaBridgeObject):

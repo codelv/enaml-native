@@ -9,6 +9,7 @@ Created on May 20, 2017
 
 @author: jrm
 """
+from typing import ClassVar
 from atom.api import Int, List, Typed, set_default
 from enamlnative.widgets.view import coerce_gravity, coerce_size
 from enamlnative.widgets.view_pager import (
@@ -16,17 +17,18 @@ from enamlnative.widgets.view_pager import (
     ProxyPagerTitleStrip,
     ProxyViewPager,
 )
+from enamlnative.core.bridge import encode
 from .android_fragment import AndroidFragment
 from .android_view import LayoutParams
 from .android_view_group import AndroidViewGroup, ViewGroup
-from .bridge import JavaBridgeObject, JavaCallback, JavaField, JavaMethod, encode
+from .bridge import JavaBridgeObject, JavaCallback, JavaField, JavaMethod
 
 package = "androidx.viewpager.widget"
 
 
 class ViewPager(ViewGroup):
     __nativeclass__ = "com.codelv.enamlnative.adapters.BridgedViewPager"
-    __signature__ = ("android.content.Context",)
+    __signature__ = ["android.content.Context"]
     addOnPageChangeListener = JavaMethod(f"{package}.ViewPager$OnPageChangeListener")
     setCurrentItem = JavaMethod("int")
     setOffscreenPageLimit = JavaMethod("int")
@@ -70,7 +72,7 @@ TRANSFORMERS = {
 class PageTransformer(JavaBridgeObject):
     """A PageTransformer factory"""
 
-    __cache__ = {}
+    __cache__: ClassVar[dict[str, "PageTransformer"]] = {}
 
     @classmethod
     def from_name(cls, class_name):
@@ -93,7 +95,7 @@ class ViewPagerLayoutParams(LayoutParams):
 
 class PagerTitleStrip(ViewGroup):
     __nativeclass__ = f"{package}.PagerTitleStrip"
-    __signature__ = ("android.content.Context",)
+    __signature__ = ["android.content.Context"]
     setNonPrimaryAlpha = JavaMethod("float")
     setCurrentItem = JavaMethod("int")
     setTextColor = JavaMethod("android.graphics.Color")

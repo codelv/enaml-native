@@ -37,7 +37,7 @@ class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):
     #: The number of stars set (via setNumStars(int) or in an XML layout)
     #: will be shown when the layout width is set to wrap content
     #: (if another layout width is set, the results may be unpredictable).
-    default_layout = set_default({"width": "wrap_content"})
+    default_layout = set_default({"width": "wrap_content"})  # type: ignore
 
     # -------------------------------------------------------------------------
     # Initialization API

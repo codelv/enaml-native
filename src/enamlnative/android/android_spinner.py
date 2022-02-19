@@ -23,7 +23,7 @@ class AbsSpinner(AdapterView):
 
 class Spinner(AbsSpinner):
     __nativeclass__ = "android.widget.Spinner"
-    __signature__ = ("android.content.Context", "int")
+    __signature__ = ["android.content.Context", "int"]
     setDropDownHorizontalOffset = JavaMethod("int")
     setDropDownVerticalOffset = JavaMethod("int")
     setDropDownWidth = JavaMethod("int")

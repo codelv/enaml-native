@@ -9,7 +9,8 @@ Created on Aug 3, 2017
 
 @author: jrm
 """
-from .bridge import NestedBridgeObject, ObjcMethod, ObjcProperty
+from enamlnative.core.bridge import NestedBridgeObject
+from .bridge import ObjcMethod, ObjcProperty
 
 
 class Yoga(NestedBridgeObject):

@@ -57,4 +57,6 @@ class VideoView(SurfaceView):
 
     def seek_to(self, ms: int):
         """Seek to the given time."""
-        self.proxy.seek_to(ms)
+        proxy = self.proxy
+        assert proxy is not None
+        proxy.seek_to(ms)

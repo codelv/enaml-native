@@ -20,7 +20,7 @@ class Snackbar(JavaBridgeObject):
     package = "com.google.android.material.snackbar"
     #: Show the view for the specified duration.
     __nativeclass__ = f"{package}.Snackbar"
-    __signature__ = ("android.content.Context",)
+    __signature__ = ["android.content.Context"]
     make = JavaStaticMethod(
         "android.view.View",
         "java.lang.CharSequence",

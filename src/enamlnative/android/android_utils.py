@@ -35,7 +35,7 @@ class Executors(JavaBridgeObject):
 
 class ColorDrawable(JavaBridgeObject):
     __nativeclass__ = "android.graphics.drawable.ColorDrawable"
-    __signature__ = ("android.graphics.Color",)
+    __signature__ = ["android.graphics.Color"]
 
 
 class InputMethodManager(SystemService):
@@ -91,12 +91,12 @@ class Uri(JavaBridgeObject):
 
 class Handler(JavaBridgeObject):
     __nativeclass__ = "android.os.Handler"
-    __signature__ = ("android.os.Looper",)
+    __signature__ = ["android.os.Looper"]
 
 
 class HandlerThread(JavaBridgeObject):
     __nativeclass__ = "android.os.HandlerThread"
-    __signature__ = ("java.lang.String",)
+    __signature__ = ["java.lang.String"]
     getLooper = JavaMethod(returns="android.os.Looper")
     getThreadId = JavaMethod("int")
     quit = JavaMethod(returns="boolean")

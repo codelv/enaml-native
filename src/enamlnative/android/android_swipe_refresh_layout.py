@@ -18,7 +18,7 @@ from .bridge import JavaCallback, JavaMethod
 class SwipeRefreshLayout(ViewGroup):
     package = "androidx.swiperefreshlayout.widget"
     __nativeclass__ = f"{package}.SwipeRefreshLayout"
-    __signature__ = ("android.content.Context",)
+    __signature__ = ["android.content.Context"]
     setDistanceToTriggerSync = JavaMethod("int")
     setRefreshing = JavaMethod("boolean")
     setEnabled = JavaMethod("boolean")

@@ -9,17 +9,12 @@ Created on Oct 3, 2017
 
 @author: jrm
 """
-import sys
 import time
 import pstats
 from cProfile import Profile
-from atom.api import *
-
-sys.path.append("src")
-
-from enaml.application import ProxyResolver
+from atom.api import Atom, List, ForwardInstance, Instance, Bool, Value, Int, Float
+from enaml.application import ProxyResolver, Application
 from enamlnative.core.app import BridgedApplication
-from enamlnative.core import bridge
 
 
 class TestBridge(Atom):
@@ -54,8 +49,7 @@ class MockApplication(BridgedApplication):
     #: Events
     done = Value()
 
-    __id__ = Int(-1)
-    __nativeclass__ = Unicode("com.enaml.MainApplication")
+    __nativeclass__ = "com.enaml.MainApplication"
 
     dp = Float(1)
     api_level = Int(25)
@@ -68,8 +62,6 @@ class MockApplication(BridgedApplication):
 
     @classmethod
     def instance(cls, platform=None):
-        from enaml.application import Application
-
         Application._instance = None
         app = cls()
         if platform:

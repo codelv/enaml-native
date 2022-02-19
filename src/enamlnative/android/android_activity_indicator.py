@@ -24,4 +24,4 @@ class AndroidActivityIndicator(AndroidProgressBar, ProxyActivityIndicator):
     declaration = ForwardTyped(lambda: ActivityIndicator)
 
     #: Set it to be an indeterminate progress bar
-    indeterminate = set_default(True)
+    indeterminate = set_default(True)  # type: ignore

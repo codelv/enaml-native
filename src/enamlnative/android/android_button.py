@@ -22,11 +22,11 @@ from .bridge import JavaMethod
 
 class Button(TextView):
     __nativeclass__ = "android.widget.Button"
-    __signature__ = (
+    __signature__ = [
         "android.content.Context",
         "android.util.AttributeSet",
         "android.R",
-    )
+    ]
     STYLE_NORMAL = 0x01010048
     STYLE_FLAT = 0x0101032B
     STYLES = {

@@ -83,11 +83,13 @@ class ListView(ViewGroup):
 
     def scroll_to(self, x: int, y: int):
         """Scroll to the given x,y coordinates within the list"""
-        self.proxy.scroll_to(x, y)
+        if proxy := self.proxy:
+            proxy.scroll_to(x, y)
 
     def scroll_to_position(self, position: int):
         """Scroll to the given position in the list"""
-        self.proxy.scroll_to_position(position)
+        if proxy := self.proxy:
+            proxy.scroll_to_position(position)
 
 
 class ListItem(ToolkitObject):

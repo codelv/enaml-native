@@ -58,7 +58,7 @@ class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):
     drawer_state = List()
 
     #: Children use DrawerLayoutParams
-    layout_param_type = set_default(DrawerLayoutParams)
+    layout_param_type = set_default(DrawerLayoutParams)  # type: ignore
 
     # -------------------------------------------------------------------------
     # Initialization API

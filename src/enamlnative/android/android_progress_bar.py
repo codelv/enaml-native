@@ -17,11 +17,11 @@ from .bridge import JavaMethod
 
 class ProgressBar(View):
     __nativeclass__ = "android.widget.ProgressBar"
-    __signature__ = (
+    __signature__ = [
         "android.content.Context",
         "android.util.AttributeSet",
         "android.R",
-    )
+    ]
     setIndeterminate = JavaMethod("boolean")
     setMax = JavaMethod("int")
     setMin = JavaMethod("int")

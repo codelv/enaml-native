@@ -29,7 +29,7 @@ class ViewGroup(View):
 
 class MarginLayoutParams(LayoutParams):
     __nativeclass__ = "android.view.ViewGroup$MarginLayoutParams"
-    __signature__ = ("int", "int")
+    __signature__ = ["int", "int"]
     setMargins = JavaMethod("int", "int", "int", "int")
     setLayoutDirection = JavaMethod("int")
 

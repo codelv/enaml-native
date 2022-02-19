@@ -19,7 +19,7 @@ class AppBarLayout(LinearLayout):
     package = "com.google.android.material.appbar"
 
     __nativeclass__ = f"{package}.AppBarLayout"
-    __signature__ = ("android.content.Context",)
+    __signature__ = ["android.content.Context"]
 
     addOnOffsetChangedListener = JavaMethod(
         f"{package}.AppBarLayout$OnOffsetChangedListener"

@@ -381,7 +381,7 @@ class BridgedApplication(Application):
     # -------------------------------------------------------------------------
     # Plugin implementation
     # -------------------------------------------------------------------------
-    def get_plugins(self, group):
+    def get_plugins(self, group: str) -> list[Plugin]:
         """Was going to use entry points but that requires a ton of stuff
         which will be extremely slow.
 

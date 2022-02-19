@@ -157,7 +157,7 @@ class BridgeObject(Atom):
     __nativeclass__: ClassVar[str] = ""
 
     #: Constructor signature
-    __signature__: ClassVar[tuple[Union[dict, str], ...]] = ()
+    __signature__: ClassVar[list[Union[dict, str]]] = []
 
     #: Suppressed methods / fields
     __suppressed__ = Dict()

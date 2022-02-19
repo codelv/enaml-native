@@ -189,7 +189,7 @@ class Notification(JavaBridgeObject):
         """
 
         __nativeclass__ = f"{package}.NotificationCompat$Builder"
-        __signature__ = ("android.content.Context", "java.lang.String")
+        __signature__ = ["android.content.Context", "java.lang.String"]
         addAction = JavaMethod(f"{package}.NotificationCompat$Action")
         addAction_ = JavaMethod(
             "android.R", "java.lang.CharSequence", "android.app.PendingIntent"
@@ -507,7 +507,7 @@ class NotificationChannel(JavaBridgeObject):
     """Required for android 26 and up."""
 
     __nativeclass__ = "android.app.NotificationChannel"
-    __signature__ = ("java.lang.String", "java.lang.CharSequence", "int")
+    __signature__ = ["java.lang.String", "java.lang.CharSequence", "int"]
     setGroup = JavaMethod("java.lang.String")
     setLightColor = JavaMethod("android.graphics.Color")
     setBypassDnd = JavaMethod("boolean")

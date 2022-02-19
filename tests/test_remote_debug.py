@@ -11,6 +11,7 @@ Created on Oct 4, 2017
 """
 import sys
 import sh
+from importlib import reload
 
 
 def main():

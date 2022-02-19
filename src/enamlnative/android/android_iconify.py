@@ -23,7 +23,7 @@ from .bridge import JavaBridgeObject
 
 class IconDrawable(JavaBridgeObject):
     __nativeclass__ = "com.joanzapata.iconify.IconDrawable"
-    __signature__ = ("android.content.Context", "java.lang.String")
+    __signature__ = ["android.content.Context", "java.lang.String"]
 
 
 class Icon(TextView):

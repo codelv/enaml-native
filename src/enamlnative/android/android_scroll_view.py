@@ -36,7 +36,7 @@ class AndroidScrollView(AndroidFrameLayout, ProxyScrollView):
     """An Android implementation of an Enaml ProxyFrameLayout."""
 
     #: A reference to the widget created by the proxy.
-    widget = Instance(ScrollView)
+    widget = Instance(ScrollView)  # type: ignore
 
     # -------------------------------------------------------------------------
     # Initialization API

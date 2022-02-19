@@ -17,7 +17,7 @@ from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 class SurfaceView(View):
     __nativeclass__ = "android.view.SurfaceView"
-    __signature__ = ("android.content.Context",)
+    __signature__ = ["android.content.Context"]  # type: ignore
     setSecure = JavaMethod("boolean")
     getHolder = JavaMethod(returns="android.view.SurfaceHolder")
 
@@ -42,7 +42,7 @@ class SurfaceHolder(JavaBridgeObject):
 
 class Surface(JavaBridgeObject):
     __nativeclass__ = "android.view.Surface"
-    __signature__ = ("android.graphics.SurfaceTexture",)
+    __signature__ = ["android.graphics.SurfaceTexture"]
 
 
 class AndroidSurfaceView(AndroidView, ProxySurfaceView):
@@ -52,7 +52,9 @@ class AndroidSurfaceView(AndroidView, ProxySurfaceView):
     widget = Typed(SurfaceView)
 
     #: Default layout params
-    default_layout = set_default({"width": "match_parent", "height": "match_parent"})
+    default_layout = set_default(  # type: ignore
+        {"width": "match_parent", "height": "match_parent"}
+    )
 
     # -------------------------------------------------------------------------
     # Initialization API

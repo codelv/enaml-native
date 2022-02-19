@@ -19,12 +19,12 @@ from .android_utils import ColorDrawable
 class PopupWindow(JavaBridgeObject):
     #: Show the view for the specified duration.
     __nativeclass__ = "android.widget.PopupWindow"
-    __signature__ = (
+    __signature__ = [
         "android.content.Context",
         "android.util.AttributeSet",
         "int",
         "android.R",
-    )
+    ]
     dismiss = JavaMethod()
     setContentView = JavaMethod("android.view.View")
     setAnimationStyle = JavaMethod("int")
