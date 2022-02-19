@@ -13,7 +13,7 @@ import json
 import traceback
 from asyncio import Future
 from time import time
-from atom.api import Atom, Bool, Callable, Dict, Float, Instance, Int, List, Str, Value
+from atom.api import Atom, Bool, Dict, Float, Instance, Int, List, Str, Value
 from enaml.application import Application
 from tornado.ioloop import IOLoop
 from enamlnative.core import bridge
@@ -54,9 +54,6 @@ class BridgedApplication(Application):
 
     #: View to display within the activity
     activity = Instance(Activity)
-
-    #: Function to reload the view
-    on_reload = Callable()
 
     #: If true, debug bridge statements
     debug = Bool()
