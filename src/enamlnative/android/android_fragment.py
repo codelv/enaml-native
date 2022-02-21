@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -14,31 +14,32 @@ from enamlnative.widgets.fragment import ProxyFragment
 from enamlnative.widgets.view_pager import ProxyPagerFragment
 from .android_frame_layout import FrameLayout
 from .android_toolkit_object import AndroidToolkitObject
+from .android_view import View
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 package = "androidx.fragment.app"
 
 
-class FragmentManager(JavaBridgeObject):
-    __nativeclass__ = f"{package}.FragmentManager"
-    beginTransaction = JavaMethod(returns=f"{package}.FragmentTransaction")
-
-
 class FragmentTransaction(JavaBridgeObject):
     __nativeclass__ = f"{package}.FragmentTransaction"
-    commit = JavaMethod(returns="int")
-    add = JavaMethod("int", f"{package}.Fragment")
-    replace = JavaMethod("int", f"{package}.Fragment")
+    commit = JavaMethod(returns=int)
+    add = JavaMethod(int, f"{package}.Fragment")
+    replace = JavaMethod(int, f"{package}.Fragment")
+
+
+class FragmentManager(JavaBridgeObject):
+    __nativeclass__ = f"{package}.FragmentManager"
+    beginTransaction = JavaMethod(returns=FragmentTransaction)
 
 
 class BridgedFragment(JavaBridgeObject):
     package = "com.codelv.enamlnative.adapters"
     __nativeclass__ = f"{package}.BridgedFragmentStatePagerAdapter$BridgedFragment"
-    setTitle = JavaMethod("java.lang.String")
+    setTitle = JavaMethod(str)
     setFragmentListener = JavaMethod(
         f"{package}.BridgedFragmentStatePagerAdapter$FragmentListener"
     )
-    onCreateView = JavaCallback(returns="android.view.View")
+    onCreateView = JavaCallback(returns=View)
     onDestroyView = JavaCallback()
 
 

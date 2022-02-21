@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -17,15 +17,15 @@ from .bridge import JavaCallback, JavaMethod
 
 class RatingBar(ProgressBar):
     __nativeclass__ = "android.widget.RatingBar"
-    setIsIndicator = JavaMethod("boolean")
-    setMax = JavaMethod("int")
-    setNumStars = JavaMethod("int")
+    setIsIndicator = JavaMethod(bool)
+    setMax = JavaMethod(int)
+    setNumStars = JavaMethod(int)
     setOnRatingBarChangeListener = JavaMethod(
         "android.widget.RatingBar$OnRatingBarChangeListener"
     )
-    setRating = JavaMethod("float")
-    setStepSize = JavaMethod("float")
-    onRatingChanged = JavaCallback("android.widget.RatingBar", "float", "boolean")
+    setRating = JavaMethod(float)
+    setStepSize = JavaMethod(float)
+    onRatingChanged = JavaCallback("android.widget.RatingBar", float, bool)
 
 
 class AndroidRatingBar(AndroidProgressBar, ProxyRatingBar):

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -12,23 +12,24 @@ Created on May 20, 2017
 from atom.api import Typed, set_default
 from enamlnative.widgets.flexbox import ProxyFlexbox
 from .android_view_group import AndroidViewGroup, MarginLayoutParams, ViewGroup
+from .android_image_view import Drawable
 from .bridge import JavaMethod
 
 
 class Flexbox(ViewGroup):
     __nativeclass__ = "com.google.android.flexbox.FlexboxLayout"
-    setFlexDirection = JavaMethod("int")
-    setFlexWrap = JavaMethod("int")
-    setJustifyContent = JavaMethod("int")
-    setAlignItems = JavaMethod("int")
-    setAlignContent = JavaMethod("int")
+    setFlexDirection = JavaMethod(int)
+    setFlexWrap = JavaMethod(int)
+    setJustifyContent = JavaMethod(int)
+    setAlignItems = JavaMethod(int)
+    setAlignContent = JavaMethod(int)
     setFlexLines = JavaMethod("java.util.List")
-    setDividerDrawable = JavaMethod("android.graphics.drawable.Drawable")
-    setDividerDrawableHorizontal = JavaMethod("android.graphics.drawable.Drawable")
-    setDividerDrawableVertical = JavaMethod("android.graphics.drawable.Drawable")
-    setShowDivider = JavaMethod("int")
-    setShowDividerVertical = JavaMethod("int")
-    setShowDividerHorizontal = JavaMethod("int")
+    setDividerDrawable = JavaMethod(Drawable)
+    setDividerDrawableHorizontal = JavaMethod(Drawable)
+    setDividerDrawableVertical = JavaMethod(Drawable)
+    setShowDivider = JavaMethod(int)
+    setShowDividerVertical = JavaMethod(int)
+    setShowDividerHorizontal = JavaMethod(int)
 
     FLEX_DIRECTION = {"row": 0, "row_reversed": 1, "column": 2, "column_reversed": 3}
 
@@ -85,18 +86,18 @@ class FlexboxLayoutParams(MarginLayoutParams):
 
     __nativeclass__ = "com.google.android.flexbox.FlexboxLayout$LayoutParams"
 
-    setWidth = JavaMethod("int")
-    setHeight = JavaMethod("int")
-    setOrder = JavaMethod("int")
-    setFlexGrow = JavaMethod("float")
-    setFlexShrink = JavaMethod("float")
-    setAlignSelf = JavaMethod("int")
-    setMinWidth = JavaMethod("int")
-    setMinHeight = JavaMethod("int")
-    setMaxWidth = JavaMethod("int")
-    setMaxHeight = JavaMethod("int")
-    setWrapBefore = JavaMethod("boolean")
-    setFlexBasisPercent = JavaMethod("float")
+    setWidth = JavaMethod(int)
+    setHeight = JavaMethod(int)
+    setOrder = JavaMethod(int)
+    setFlexGrow = JavaMethod(float)
+    setFlexShrink = JavaMethod(float)
+    setAlignSelf = JavaMethod(int)
+    setMinWidth = JavaMethod(int)
+    setMinHeight = JavaMethod(int)
+    setMaxWidth = JavaMethod(int)
+    setMaxHeight = JavaMethod(int)
+    setWrapBefore = JavaMethod(bool)
+    setFlexBasisPercent = JavaMethod(float)
 
 
 class AndroidFlexbox(AndroidViewGroup, ProxyFlexbox):

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -18,6 +18,7 @@ from enamlnative.widgets.view_pager import (
     ProxyViewPager,
 )
 from enamlnative.core.bridge import encode
+from .android_content import Context
 from .android_fragment import AndroidFragment
 from .android_view import LayoutParams
 from .android_view_group import AndroidViewGroup, ViewGroup
@@ -28,17 +29,17 @@ package = "androidx.viewpager.widget"
 
 class ViewPager(ViewGroup):
     __nativeclass__ = "com.codelv.enamlnative.adapters.BridgedViewPager"
-    __signature__ = ["android.content.Context"]
+    __signature__ = [Context]
     addOnPageChangeListener = JavaMethod(f"{package}.ViewPager$OnPageChangeListener")
-    setCurrentItem = JavaMethod("int")
-    setOffscreenPageLimit = JavaMethod("int")
-    setPageMargin = JavaMethod("int")
+    setCurrentItem = JavaMethod(int)
+    setOffscreenPageLimit = JavaMethod(int)
+    setPageMargin = JavaMethod(int)
     setAdapter = JavaMethod(f"{package}.PagerAdapter")
-    onPageScrollStateChanged = JavaCallback("int")
-    onPageScrolled = JavaCallback("int", "float", "int")
-    onPageSelected = JavaCallback("int")
-    setPagingEnabled = JavaMethod("boolean")
-    setPageTransformer = JavaMethod("boolean", f"{package}.ViewPager$PageTransformer")
+    onPageScrollStateChanged = JavaCallback(int)
+    onPageScrolled = JavaCallback(int, float, int)
+    onPageSelected = JavaCallback(int)
+    setPagingEnabled = JavaMethod(bool)
+    setPageTransformer = JavaMethod(bool, f"{package}.ViewPager$PageTransformer")
 
 
 #: Create builtin ones
@@ -89,18 +90,18 @@ class PageTransformer(JavaBridgeObject):
 
 class ViewPagerLayoutParams(LayoutParams):
     __nativeclass__ = f"{package}.ViewPager$LayoutParams"
-    gravity = JavaField("int")
-    isDecor = JavaField("boolean")
+    gravity = JavaField(int)
+    isDecor = JavaField(bool)
 
 
 class PagerTitleStrip(ViewGroup):
     __nativeclass__ = f"{package}.PagerTitleStrip"
     __signature__ = ["android.content.Context"]
-    setNonPrimaryAlpha = JavaMethod("float")
-    setCurrentItem = JavaMethod("int")
+    setNonPrimaryAlpha = JavaMethod(float)
+    setCurrentItem = JavaMethod(int)
     setTextColor = JavaMethod("android.graphics.Color")
-    setTextSize = JavaMethod("int", "float")
-    setTextSpacing = JavaMethod("int")
+    setTextSize = JavaMethod(int, float)
+    setTextSpacing = JavaMethod(int)
     requestLayout = JavaMethod()
     COMPLEX_UNIT_SP = 2
 
@@ -108,7 +109,7 @@ class PagerTitleStrip(ViewGroup):
 class PagerTabStrip(PagerTitleStrip):
     __nativeclass__ = f"{package}.PagerTabStrip"
     setTabIndicatorColor = JavaMethod("android.graphics.Color")
-    setDrawFullUnderline = JavaMethod("boolean")
+    setDrawFullUnderline = JavaMethod(bool)
 
 
 class BridgedFragmentStatePagerAdapter(JavaBridgeObject):

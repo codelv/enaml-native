@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -19,12 +19,12 @@ class RadioGroup(LinearLayout):
     __nativeclass__ = "android.widget.RadioGroup"
     __signature__ = ["android.content.Context"]
 
-    check = JavaMethod("int")
+    check = JavaMethod(int)
     clearCheck = JavaMethod()
     setOnCheckedChangeListener = JavaMethod(
         "android.widget.RadioGroup$OnCheckedChangeListener"
     )
-    onCheckedChanged = JavaCallback("android.widget.RadioGroup", "int")
+    onCheckedChanged = JavaCallback("android.widget.RadioGroup", int)
 
 
 class AndroidRadioGroup(AndroidLinearLayout, ProxyRadioGroup):

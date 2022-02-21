@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -30,16 +30,16 @@ class Activity(Context):
     ORIENTATIONS = ("square", "portrait", "landscape")
 
     #: Tracing methods
-    startTrace = JavaMethod("java.lang.String")
-    stopTrace = JavaMethod("java.lang.String")
+    startTrace = JavaMethod(str)
+    stopTrace = JavaMethod(str)
     resetBridgeStats = JavaMethod()
     resetBridgeCache = JavaMethod()
 
-    setView = JavaMethod("android.view.View")
-    showLoading = JavaMethod("java.lang.String")
+    setView = JavaMethod(View)
+    showLoading = JavaMethod(str)
     setActionBar = JavaMethod("android.widget.Toolbar")
     setSupportActionBar = JavaMethod("androidx.appcompat.widget.Toolbar")
-    setContentView = JavaMethod("android.view.View")
+    setContentView = JavaMethod(View)
     getWindow = JavaMethod(returns="android.view.Window")
 
     getSupportFragmentManager = JavaMethod(
@@ -48,9 +48,9 @@ class Activity(Context):
     getBuildInfo = JavaMethod(returns="java.lang.HashMap")
 
     #: Permissions
-    checkSelfPermission = JavaMethod("java.lang.String", returns="int")
-    requestPermissions = JavaMethod("[Ljava.lang.String;", "int")
-    onRequestPermissionsResult = JavaCallback("int", "[Ljava.lang.String;", "[Lint;")
+    checkSelfPermission = JavaMethod(str, returns=int)
+    requestPermissions = JavaMethod("[Ljava.lang.String;", int)
+    onRequestPermissionsResult = JavaCallback(int, "[Ljava.lang.String;", "[Lint;")
 
     #: Method added so we can listen externally
     setPermissionResultListener = JavaMethod(
@@ -67,9 +67,7 @@ class Activity(Context):
     removeActivityResultListener = JavaMethod(
         "com.codelv.enamlnative.EnamlActivity$ActivityResultListener"
     )
-    onActivityResult = JavaCallback(
-        "int", "int", "android.content.Intent", returns="boolean"
-    )
+    onActivityResult = JavaCallback(int, int, "android.content.Intent", returns=bool)
 
     #: Activity lifecycle listener
     addActivityLifecycleListener = JavaMethod(
@@ -79,7 +77,7 @@ class Activity(Context):
         "com.codelv.enamlnative.EnamlActivity$ActivityLifecycleListener"
     )
     #: Called with the lifecycle state like 'pause', 'resume', etc...
-    onActivityLifecycleChanged = JavaCallback("java.lang.String")
+    onActivityLifecycleChanged = JavaCallback(str)
 
     #: Back pressed listener
     addBackPressedListener = JavaMethod(
@@ -90,7 +88,7 @@ class Activity(Context):
     )
 
     #: Called with the lifecycle state like 'pause', 'resume', etc...
-    onBackPressed = JavaCallback(returns="boolean")
+    onBackPressed = JavaCallback(returns=bool)
 
     #: Back pressed listener
     addConfigurationChangedListener = JavaMethod(

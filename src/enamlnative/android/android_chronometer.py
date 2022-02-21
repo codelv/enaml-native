@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -22,8 +22,8 @@ class Chronometer(TextView):
     __nativeclass__ = "android.widget.Chronometer"
 
     setBase = JavaMethod("long")
-    setCountDown = JavaMethod("boolean")
-    setFormat = JavaMethod("java.lang.String")
+    setCountDown = JavaMethod(bool)
+    setFormat = JavaMethod(str)
     setOnChronometerTickListener = JavaMethod(
         "android.widget.Chronometer$OnChronometerTickListener"
     )

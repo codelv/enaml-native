@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -18,7 +18,7 @@ from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 class SurfaceView(View):
     __nativeclass__ = "android.view.SurfaceView"
     __signature__ = ["android.content.Context"]  # type: ignore
-    setSecure = JavaMethod("boolean")
+    setSecure = JavaMethod(bool)
     getHolder = JavaMethod(returns="android.view.SurfaceHolder")
 
 
@@ -26,12 +26,12 @@ class SurfaceHolder(JavaBridgeObject):
     __nativeclass__ = "android.view.SurfaceHolder"
     addCallback = JavaMethod("android.view.SurfaceHolder$Callback")
     removeCallback = JavaMethod("android.view.SurfaceHolder$Callback")
-    setKeepScreenOn = JavaMethod("boolean")
-    setFormat = JavaMethod("int")
-    setFixedSize = JavaMethod("int", "int")
+    setKeepScreenOn = JavaMethod(bool)
+    setFormat = JavaMethod(int)
+    setFixedSize = JavaMethod(int, int)
 
     #: SurfaceHolder.Callback
-    surfaceChanged = JavaCallback("android.view.SurfaceHolder", "int", "int", "int")
+    surfaceChanged = JavaCallback("android.view.SurfaceHolder", int, int, int)
     surfaceCreated = JavaCallback("android.view.SurfaceHolder")
     surfaceDestroyed = JavaCallback("android.view.SurfaceHolder")
     surfaceRedrawNeeded = JavaCallback("android.view.SurfaceHolder")

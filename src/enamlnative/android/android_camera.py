@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -126,15 +126,15 @@ class CameraManager(SystemService):
     __nativeclass__ = "android.hardware.camera2.CameraManager"
 
     getCameraCharacteristics = JavaMethod(
-        "java.lang.String", returns="android.hardware.camera2.CameraCharacteristics"
+        str, returns="android.hardware.camera2.CameraCharacteristics"
     )
     getCameraIdList = JavaMethod(returns="[java.lang.String;")
     openCamera = JavaMethod(
-        "java.lang.String",
+        str,
         "android.hardware.camera2.CameraDevice$StateCallback",
         "android.os.Handler",
     )
-    setTorchMode = JavaMethod("java.lang.String", "boolean")
+    setTorchMode = JavaMethod(str, bool)
 
     CAMERA_PERMISSION = "android.permission.CAMERA"
 
@@ -183,11 +183,11 @@ class CameraPackage(JavaBridgeObject):
         returns="com.codelv.enamlnative.packages.CameraPackage"
     )
     startCapturePreview = JavaMethod(
-        "android.view.TextureView",
+        TextureView,
         "com.codelv.enamlnative.packages.CameraPackage$CameraListener",
     )
     stopCapturePreview = JavaMethod()
-    takePicture = JavaMethod("java.lang.String")
+    takePicture = JavaMethod(str)
 
 
 class AndroidCameraView(AndroidTextureView, ProxyCameraView):

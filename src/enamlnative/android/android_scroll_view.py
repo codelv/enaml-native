@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -17,15 +17,15 @@ from .bridge import JavaMethod
 
 class ScrollView(FrameLayout):
     __nativeclass__ = "android.widget.ScrollView"
-    smoothScrollBy = JavaMethod("int", "int")
-    smoothScrollTo = JavaMethod("int", "int")
-    fullScroll = JavaMethod("int")
+    smoothScrollBy = JavaMethod(int, int)
+    smoothScrollTo = JavaMethod(int, int)
+    fullScroll = JavaMethod(int)
 
     FOCUS_UP = 0x00000021
     FOCUS_DOWN = 0x00000082
 
-    setVerticalScrollBarEnabled = JavaMethod("boolean")
-    setHorizontalScrollBarEnabled = JavaMethod("boolean")
+    setVerticalScrollBarEnabled = JavaMethod(bool)
+    setHorizontalScrollBarEnabled = JavaMethod(bool)
 
 
 class HorizontalScrollView(ScrollView):

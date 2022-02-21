@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -19,12 +19,12 @@ class CardView(FrameLayout):
     package = "androidx.cardview.widget"
     __nativeclass__ = f"{package}.CardView"
     setCardBackgroundColor = JavaMethod("android.graphics.Color")
-    setCardElevation = JavaMethod("float")
-    setContentPadding = JavaMethod("int", "int", "int", "int")
-    setMaxCardElevation = JavaMethod("float")
-    setPreventCornerOverlap = JavaMethod("boolean")
-    setRadius = JavaMethod("float")
-    setUseCompatPadding = JavaMethod("boolean")
+    setCardElevation = JavaMethod(float)
+    setContentPadding = JavaMethod(int, int, int, int)
+    setMaxCardElevation = JavaMethod(float)
+    setPreventCornerOverlap = JavaMethod(bool)
+    setRadius = JavaMethod(float)
+    setUseCompatPadding = JavaMethod(bool)
 
 
 class AndroidCardView(AndroidFrameLayout, ProxyCardView):

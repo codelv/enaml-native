@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -19,10 +19,10 @@ from .bridge import JavaMethod
 class AutoCompleteTextView(EditText):
     __nativeclass__ = "android.widget.AutoCompleteTextView"
     setAdapter = JavaMethod("android.widget.ListAdapter")
-    setDropDownHeight = JavaMethod("int")
-    setDropDownWidth = JavaMethod("int")
-    setListSelection = JavaMethod("int")
-    setThreshold = JavaMethod("int")
+    setDropDownHeight = JavaMethod(int)
+    setDropDownWidth = JavaMethod(int)
+    setListSelection = JavaMethod(int)
+    setThreshold = JavaMethod(int)
 
 
 class AndroidAutoCompleteTextView(AndroidEditText, ProxyAutoCompleteTextView):

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -37,7 +37,7 @@ class LocationManager(SystemService):
     }
 
     requestLocationUpdates = JavaMethod(
-        "java.lang.String", "long", "float", "android.location.LocationListener"
+        str, "long", float, "android.location.LocationListener"
     )
 
     removeUpdates = JavaMethod("android.location.LocationListener")
@@ -49,9 +49,9 @@ class LocationManager(SystemService):
     # LocationListener API
     # -------------------------------------------------------------------------
     onLocationChanged = JavaCallback("android.location.Location")
-    onProviderDisabled = JavaCallback("java.lang.String")
-    onProviderEnabled = JavaCallback("java.lang.String")
-    onStatusChanged = JavaCallback("java.lang.String", "int", "android.os.Bundle")
+    onProviderDisabled = JavaCallback(str)
+    onProviderEnabled = JavaCallback(str)
+    onStatusChanged = JavaCallback(str, int, "android.os.Bundle")
 
     #: Active listeners
     listeners = List(LocationListener)

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -12,19 +12,20 @@ Created on July 7, 2017
 from atom.api import Typed
 from enamlnative.widgets.web_view import ProxyWebView
 from .android_view_group import AndroidViewGroup, ViewGroup
+from .android_image_view import Bitmap
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 
 class WebView(ViewGroup):
     __nativeclass__ = "android.webkit.WebView"
-    loadUrl = JavaMethod("java.lang.String")
-    loadData = JavaMethod("java.lang.String", "java.lang.String", "java.lang.String")
+    loadUrl = JavaMethod(str)
+    loadData = JavaMethod(str, str, str)
     loadDataWithBaseURL = JavaMethod(
-        "java.lang.String",
-        "java.lang.String",
-        "java.lang.String",
-        "java.lang.String",
-        "java.lang.String",
+        str,
+        str,
+        str,
+        str,
+        str,
     )
     setWebViewClient = JavaMethod("android.webkit.WebViewClient")
     reload = JavaMethod()
@@ -37,22 +38,17 @@ class WebView(ViewGroup):
 class BridgedWebViewClient(JavaBridgeObject):
     __nativeclass__ = "com.codelv.enamlnative.adapters.BridgedWebViewClient"
     setWebView = JavaMethod(
-        "android.webkit.WebView",
+        WebView,
         "com.codelv.enamlnative.adapters.BridgedWebViewClient$WebViewListener",
     )
-    setJavaScriptEnabled = JavaMethod("boolean")
-    onLoadResource = JavaCallback("android.webkit.WebView", "java.lang.String")
-    onPageStarted = JavaCallback(
-        "android.webkit.WebView", "java.lang.String", "android.graphics.Bitmap"
-    )
-    onPageFinished = JavaCallback("android.webkit.WebView", "java.lang.String")
-    onScaleChanged = JavaCallback("android.webkit.WebView", "float", "float")
-    onReceivedError = JavaCallback(
-        "android.webkit.WebView", "int", "java.lang.String", "java.lang.String"
-    )
-
-    onProgressChanged = JavaCallback("android.webkit.WebView", "int")
-    onReceivedTitle = JavaCallback("android.webkit.WebView", "java.lang.String")
+    setJavaScriptEnabled = JavaMethod(bool)
+    onLoadResource = JavaCallback(WebView, str)
+    onPageStarted = JavaCallback(WebView, str, Bitmap)
+    onPageFinished = JavaCallback(WebView, str)
+    onScaleChanged = JavaCallback(WebView, float, float)
+    onReceivedError = JavaCallback(WebView, int, str, str)
+    onProgressChanged = JavaCallback(WebView, int)
+    onReceivedTitle = JavaCallback(WebView, str)
 
 
 class AndroidWebView(AndroidViewGroup, ProxyWebView):

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -21,15 +21,13 @@ class CalendarView(FrameLayout):
     setDate = JavaMethod("long")
     setMinDate = JavaMethod("long")
     setMaxDate = JavaMethod("long")
-    setFirstDayOfWeek = JavaMethod("int")
+    setFirstDayOfWeek = JavaMethod(int)
     setOnDateChangeListener = JavaMethod(
         "android.widget.CalendarView$OnDateChangeListener"
     )
 
     #: This is not actually a CalendarView method, but still works
-    onSelectedDayChange = JavaCallback(
-        "android.widget.CalendarView", "int", "int", "int"
-    )
+    onSelectedDayChange = JavaCallback("android.widget.CalendarView", int, int, int)
 
 
 UTC_START = datetime(1970, 1, 1)

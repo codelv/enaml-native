@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -24,12 +24,12 @@ class Snackbar(JavaBridgeObject):
     make = JavaStaticMethod(
         "android.view.View",
         "java.lang.CharSequence",
-        "int",
+        int,
         returns=f"{package}.Snackbar",
     )
     show = JavaMethod()
     dismiss = JavaMethod()
-    setDuration = JavaMethod("int")
+    setDuration = JavaMethod(int)
     setText = JavaMethod("java.lang.CharSequence")
     setAction = JavaMethod(
         "java.lang.CharSequence", "android.view.View$OnClickListener"
@@ -47,7 +47,7 @@ class Snackbar(JavaBridgeObject):
 
     #: Snackbar.Callback API
     onClick = JavaCallback("android.view.View")
-    onDismissed = JavaCallback(f"{package}.Snackbar", "int")
+    onDismissed = JavaCallback(f"{package}.Snackbar", int)
     onShown = JavaCallback(f"{package}.Snackbar")
 
 

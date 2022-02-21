@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -22,8 +22,8 @@ class UIProgressView(UIView):
     """
 
     #: Properties
-    progress = ObjcProperty("float")
-    setProgress = ObjcMethod("float", dict(animated="bool"))
+    progress = ObjcProperty(float)
+    setProgress = ObjcMethod(float, dict(animated="bool"))
 
 
 class UiKitProgressView(UiKitView, ProxyProgressBar):

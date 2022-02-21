@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -34,11 +34,8 @@ class JavaMethod(BridgeMethod):
         name = self.name.rstrip("_")
         vargs = signature and signature[-1].endswith("...")
         if not vargs and (len(args) != len(signature)):
-            raise ValueError(
-                "Invalid number of arguments: Given {}, expected {}".format(
-                    args, signature
-                )
-            )
+            msg = f"Invalid number of arguments: Given {args}, expected {signature}"
+            raise ValueError(msg)
         if vargs:
             varg = signature[-1].replace("...", "")
             return (
@@ -60,11 +57,8 @@ class JavaStaticMethod(BridgeStaticMethod):
         name = self.name.rstrip("_")
         vargs = signature and signature[-1].endswith("...")
         if not vargs and (len(args) != len(signature)):
-            raise ValueError(
-                "Invalid number of arguments: Given {}, expected {}".format(
-                    args, signature
-                )
-            )
+            msg = f"Invalid number of arguments: Given {args}, expected {signature}"
+            raise ValueError(msg)
         if vargs:
             varg = signature[-1].replace("...", "")
             return (
@@ -116,9 +110,9 @@ class JavaBridgeObject(BridgeObject):
     __nativeclass__ = "java.lang.Object"
 
     #: A callback with an implementation built in
-    hashCode = JavaCallback(returns="int")
-    toString = JavaCallback(returns="java.lang.String")
-    equals = JavaCallback(returns="boolean")
+    hashCode = JavaCallback(returns=int)
+    toString = JavaCallback(returns=str)
+    equals = JavaCallback(returns=bool)
 
     def _impl_hashCode(self):
         #: Add a default callback for hashCode

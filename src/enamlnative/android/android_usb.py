@@ -17,12 +17,10 @@ from .bridge import JavaBridgeObject, JavaMethod
 class UsbDevice(JavaBridgeObject):
     __nativeclass__ = "android.hardware.usb.UsbDevice"
     info = Dict()
-    getDeviceName = JavaMethod(returns="java.lang.String")
-    getDeviceId = JavaMethod(returns="int")
-    getInterface = JavaMethod("int", returns="android.hardware.usb.UsbInterface")
-    getConfiguration = JavaMethod(
-        "int", returns="android.hardware.usb.UsbConfiguration"
-    )
+    getDeviceName = JavaMethod(returns=str)
+    getDeviceId = JavaMethod(returns=int)
+    getInterface = JavaMethod(int, returns="android.hardware.usb.UsbInterface")
+    getConfiguration = JavaMethod(int, returns="android.hardware.usb.UsbConfiguration")
 
 
 class UsbDeviceConnection(JavaBridgeObject):
@@ -45,13 +43,13 @@ class UsbManager(SystemService):
         "android.hardware.usb.UsbDevice",
         returns="android.hardware.usb.UsbDeviceConnection",
     )
-    hasPermission = JavaMethod("android.hardware.usb.UsbDevice", returns="boolean")
+    hasPermission = JavaMethod("android.hardware.usb.UsbDevice", returns=bool)
     requestPermission = JavaMethod(
         "android.hardware.usb.UsbDevice", "android.app.PendingIntent"
     )
 
     #: These names are changed to support both signatures
-    hasPermission_ = JavaMethod("android.hardware.usb.UsbAccessory", returns="boolean")
+    hasPermission_ = JavaMethod("android.hardware.usb.UsbAccessory", returns=bool)
     requestPermission_ = JavaMethod(
         "android.hardware.usb.UsbAccessory", "android.app.PendingIntent"
     )

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -67,7 +67,7 @@ class ENBridge(ObjcBridgeObject):
     addTarget = ObjcMethod(
         "UIControl",
         dict(forControlEvents="enum"),  # ""UIControlEvents"),
-        dict(andCallback="int"),
+        dict(andCallback=int),
         dict(usingMethod="NSString"),
         dict(withValues="NSArray"),
     )

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -17,25 +17,25 @@ from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
 
 class TextView(View):
     __nativeclass__ = "android.widget.TextView"
-    setAllCaps = JavaMethod("boolean")
-    setAutoLinkMask = JavaMethod("int")
+    setAllCaps = JavaMethod(bool)
+    setAutoLinkMask = JavaMethod(int)
     setText = JavaMethod("java.lang.CharSequence")
     setTextKeepState = JavaMethod("java.lang.CharSequence")
     setTextColor = JavaMethod("android.graphics.Color")
-    setTextIsSelectable = JavaMethod("boolean")
+    setTextIsSelectable = JavaMethod(bool)
     setHighlightColor = JavaMethod("android.graphics.Color")
     setLinkTextColor = JavaMethod("android.graphics.Color")
-    setGravity = JavaMethod("int")
-    setTextSize = JavaMethod("float")
-    setTypeface = JavaMethod("android.graphics.Typeface", "int")
-    setLines = JavaMethod("int")
-    setLineSpacing = JavaMethod("float", "float")
-    setLetterSpacing = JavaMethod("float")
-    setMaxLines = JavaMethod("int")
+    setGravity = JavaMethod(int)
+    setTextSize = JavaMethod(float)
+    setTypeface = JavaMethod("android.graphics.Typeface", int)
+    setLines = JavaMethod(int)
+    setLineSpacing = JavaMethod(float, float)
+    setLetterSpacing = JavaMethod(float)
+    setMaxLines = JavaMethod(int)
     setOnEditorActionListener = JavaMethod(
         "android.widget.TextView$OnEditorActionListener"
     )
-    setInputType = JavaMethod("int")
+    setInputType = JavaMethod(int)
     addTextChangedListener = JavaMethod("android.text.TextWatcher")
     removeTextChangedListener = JavaMethod("android.text.TextWatcher")
 
@@ -43,12 +43,12 @@ class TextView(View):
 
     #: TextWatcher API
     afterTextChanged = JavaCallback("android.text.Editable")
-    beforeTextChanged = JavaCallback("java.lang.CharSequence", "int", "int", "int")
-    onTextChanged = JavaCallback("java.lang.CharSequence", "int", "int", "int")
+    beforeTextChanged = JavaCallback("java.lang.CharSequence", int, int, int)
+    onTextChanged = JavaCallback("java.lang.CharSequence", int, int, int)
 
     #: EditorAction API
     onEditorAction = JavaCallback(
-        "android.view.TextView", "int", "android.view.KeyEvent", returns="boolean"
+        "android.view.TextView", int, "android.view.KeyEvent", returns=bool
     )
 
     FONT_STYLES = {"bold": 1, "bold_italic": 3, "normal": 0, "italic": 2}
@@ -111,7 +111,7 @@ class Spanned(JavaBridgeObject):
 class Html(JavaBridgeObject):
     __nativeclass__ = "android.text.Html"
 
-    fromHtml = JavaStaticMethod("java.lang.String", returns="android.text.Spanned")
+    fromHtml = JavaStaticMethod(str, returns=Spanned)
 
 
 class AndroidTextView(AndroidView, ProxyTextView):

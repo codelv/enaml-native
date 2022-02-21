@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -17,8 +17,8 @@ from .bridge import JavaMethod
 
 class Switch(CompoundButton):
     __nativeclass__ = "android.widget.Switch"
-    setShowText = JavaMethod("boolean")
-    setSplitTrack = JavaMethod("boolean")
+    setShowText = JavaMethod(bool)
+    setSplitTrack = JavaMethod(bool)
     setTextOff = JavaMethod("java.lang.CharSequence")
     setTextOn = JavaMethod("java.lang.CharSequence")
 

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -12,32 +12,31 @@ Created on May 9, 2018
 from atom.api import Bool, Int, Typed, set_default
 from enamlnative.widgets.view import ProxyView
 from enamlnative.core.bridge import generate_id
+from .android_content import Context
 from .android_view import AndroidView, View
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 
 
 class SurfaceTexture(JavaBridgeObject):
     __nativeclass__ = "android.graphics.SurfaceTexture"
-    setDefaultBufferSize = JavaMethod("int", "int")
+    setDefaultBufferSize = JavaMethod(int, int)
     available = Bool()
     onSurfaceTextureAvailable = JavaCallback(
-        "android.graphics.SurfaceTexture", "int", "int"
+        "android.graphics.SurfaceTexture", int, int
     )
     onSurfaceTextureDestroyed = JavaCallback(
-        "android.graphics.SurfaceTexture", returns="boolean"
+        "android.graphics.SurfaceTexture", returns=bool
     )
-    onSurfaceTextureChanged = JavaCallback(
-        "android.graphics.SurfaceTexture", "int", "int"
-    )
+    onSurfaceTextureChanged = JavaCallback("android.graphics.SurfaceTexture", int, int)
     onSurfaceTextureUpdated = JavaCallback("android.graphics.SurfaceTexture")
 
 
 class TextureView(View):
     __nativeclass__ = "android.view.TextureView"
-    __signature__ = ["android.content.Context"]  # type: ignore
-    getSurfaceTexture = JavaMethod(returns="android.graphics.SurfaceTexture")
+    __signature__ = [Context]
+    getSurfaceTexture = JavaMethod(returns=SurfaceTexture)
     setTransform = JavaMethod("android.graphics.Matrix")
-    setDefaultBufferSize = JavaMethod("int", "int")
+    setDefaultBufferSize = JavaMethod(int, int)
     setSurfaceTextureListener = JavaMethod(
         "android.view.TextureView$SurfaceTextureListener"
     )

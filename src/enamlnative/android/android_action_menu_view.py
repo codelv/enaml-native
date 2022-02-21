@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -13,20 +13,8 @@ from atom.api import Typed
 from enaml.application import deferred_call
 from enamlnative.widgets.action_menu_view import ProxyActionMenuView
 from .android_linear_layout import AndroidLinearLayout, LinearLayout
+from .android_image_view import Drawable
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
-
-
-class ActionMenuView(LinearLayout):
-    package = "androidx.appcompat.widget"
-    __nativeclass__ = f"{package}.ActionMenuView"
-    getMenu = JavaMethod()
-    showOverflowMenu = JavaMethod()
-    hideOverflowMenu = JavaMethod()
-    setOverflowIcon = JavaMethod("android.graphics.drawable")
-    setOnMenuItemClickListener = JavaMethod(
-        f"{package}.ActionMenuView$OnMenuItemClickListener"
-    )
-    onMenuItemClick = JavaCallback("android.view.MenuItem", returns="boolean")
 
 
 class Menu(JavaBridgeObject):
@@ -39,6 +27,19 @@ class Menu(JavaBridgeObject):
 
 class MenuItem(JavaBridgeObject):
     __nativeclass__ = "android.view.MenuItem"
+
+
+class ActionMenuView(LinearLayout):
+    package = "androidx.appcompat.widget"
+    __nativeclass__ = f"{package}.ActionMenuView"
+    getMenu = JavaMethod()
+    showOverflowMenu = JavaMethod()
+    hideOverflowMenu = JavaMethod()
+    setOverflowIcon = JavaMethod(Drawable)
+    setOnMenuItemClickListener = JavaMethod(
+        f"{package}.ActionMenuView$OnMenuItemClickListener"
+    )
+    onMenuItemClick = JavaCallback(MenuItem, returns=bool)
 
 
 class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
@@ -80,8 +81,10 @@ class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
     # -------------------------------------------------------------------------
     # ProxyActionMenuView API
     # -------------------------------------------------------------------------
-    def set_opened(self, opened):
+    def set_opened(self, opened: bool):
+        w = self.widget
+        assert w is not None
         if opened:
-            self.widget.showOverflowMenu()
+            w.showOverflowMenu()
         else:
-            self.widget.hideOverflowMenu()
+            w.hideOverflowMenu()

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -20,13 +20,11 @@ UTC_START = datetime(1970, 1, 1)
 
 class DatePicker(FrameLayout):
     __nativeclass__ = "android.widget.DatePicker"
-    init = JavaMethod(
-        "int", "int", "int", "android.widget.DatePicker$OnDateChangedListener"
-    )
-    onDateChanged = JavaCallback("android.widget.DatePicker", "int", "int", "int")
-    updateDate = JavaMethod("int", "int", "int")
-    setFirstDayOfWeek = JavaMethod("int")
-    setEnabled = JavaMethod("boolean")
+    init = JavaMethod(int, int, int, "android.widget.DatePicker$OnDateChangedListener")
+    onDateChanged = JavaCallback("android.widget.DatePicker", int, int, int)
+    updateDate = JavaMethod(int, int, int)
+    setFirstDayOfWeek = JavaMethod(int)
+    setEnabled = JavaMethod(bool)
     setMaxDate = JavaMethod("long")
     setMinDate = JavaMethod("long")
 

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -21,20 +21,20 @@ class BridgedAsyncHttpCallback(JavaBridgeObject):
     setAsyncHttpResponseListener = JavaMethod(
         "com.codelv.enamlnative.adapters.BridgedAsyncHttpCallback"
         "$AsyncHttpResponseListener",
-        "boolean",
+        bool,
     )
 
     # -------------------------------------------------------------------------
     # AsyncHttpResponseHandler API
     # -------------------------------------------------------------------------
     onStart = JavaCallback()
-    onProgress = JavaCallback("int", "int")
+    onProgress = JavaCallback(int, int)
     onProgressData = JavaCallback("[B")
     onFinish = JavaCallback()
-    onRetry = JavaCallback("int")
+    onRetry = JavaCallback(int)
     onCancel = JavaCallback()
-    onResponse = JavaCallback("int", "java.lang.String", "[B")
-    onFailure = JavaCallback("int", "java.lang.String", "[B", "java.lang.Throwable")
+    onResponse = JavaCallback(int, str, "[B")
+    onFailure = JavaCallback(int, str, "[B", "java.lang.Throwable")
 
 
 class Call(JavaBridgeObject):
@@ -89,14 +89,14 @@ class OkHttpClient(JavaBridgeObject):
 
 class MediaType(JavaBridgeObject):
     __nativeclass__ = "okhttp3.MediaType"
-    parse = JavaStaticMethod("java.lang.String", returns="okhttp3.MediaType")
+    parse = JavaStaticMethod(str, returns="okhttp3.MediaType")
 
 
 class RequestBody(JavaBridgeObject):
     __nativeclass__ = "okhttp3.RequestBody"
     create = JavaStaticMethod(
         "okhttp3.MediaType",
-        "java.lang.String",
+        str,
         # TODO: Should support '[B',
         returns="okhttp3.RequestBody",
     )
@@ -107,9 +107,9 @@ class Request(JavaBridgeObject):
 
     class Builder(JavaBridgeObject):
         __nativeclass__ = "okhttp3.Request$Builder"
-        url = JavaMethod("java.lang.String")
-        addHeader = JavaMethod("java.lang.String", "java.lang.String")
-        method = JavaMethod("java.lang.String", "okhttp3.RequestBody")
+        url = JavaMethod(str)
+        addHeader = JavaMethod(str, str)
+        method = JavaMethod(str, "okhttp3.RequestBody")
         get = JavaMethod()
         put = JavaMethod()
         delete = JavaMethod()

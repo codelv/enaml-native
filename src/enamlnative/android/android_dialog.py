@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -13,17 +13,19 @@ from atom.api import Typed
 from enamlnative.android.android_toolkit_object import AndroidToolkitObject
 from enamlnative.android.bridge import JavaBridgeObject, JavaCallback, JavaMethod
 from enamlnative.widgets.dialog import ProxyDialog
+from .android_content import Context
+from .androdi_view import View
 
 
 class Dialog(JavaBridgeObject):
     #: Show the view for the specified duration.
     __nativeclass__ = "android.app.Dialog"
-    __signature__ = ["android.content.Context", "android.R"]
+    __signature__ = [Context, "android.R"]
     show = JavaMethod()
     dismiss = JavaMethod()
-    setCancelable = JavaMethod("boolean")
-    setCanceledOnTouchOutside = JavaMethod("boolean")
-    setContentView = JavaMethod("android.view.View")
+    setCancelable = JavaMethod(bool)
+    setCanceledOnTouchOutside = JavaMethod(bool)
+    setContentView = JavaMethod(View)
     setTitle = JavaMethod("java.lang.CharSequence")
 
     setOnDismissListener = JavaMethod(
@@ -35,7 +37,7 @@ class Dialog(JavaBridgeObject):
     onCancel = JavaCallback("android.app.Dialog")
 
     setOnKeyListener = JavaMethod("android.content.DialogInterface$OnKeyListener")
-    onKey = JavaCallback("android.app.Dialog", "int", "android.view.KeyEvent")
+    onKey = JavaCallback("android.app.Dialog", int, "android.view.KeyEvent")
 
 
 class AndroidDialog(AndroidToolkitObject, ProxyDialog):

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -18,12 +18,13 @@ from enamlnative.widgets.iconify import (
 from .android_button import AndroidButton, Button
 from .android_text_view import AndroidTextView, TextView
 from .android_toggle_button import AndroidToggleButton, ToggleButton
+from .android_content import Context
 from .bridge import JavaBridgeObject
 
 
 class IconDrawable(JavaBridgeObject):
     __nativeclass__ = "com.joanzapata.iconify.IconDrawable"
-    __signature__ = ["android.content.Context", "java.lang.String"]
+    __signature__ = [Context, str]
 
 
 class Icon(TextView):

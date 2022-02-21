@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -75,26 +75,26 @@ class Sensor(JavaBridgeObject):
     SENSOR_DELAY_GAME = 1
     SENSOR_DELAY_FASTEST = 0
 
-    getFifoMaxEventCount = JavaMethod(returns="int")
-    getFifoReservedEventCount = JavaMethod(returns="int")
-    getMaximumRange = JavaMethod(returns="float")
-    getMaxDelay = JavaMethod(returns="int")
-    getMinDelay = JavaMethod(returns="int")
-    getName = JavaMethod(returns="java.lang.String")
-    getPower = JavaMethod(returns="float")
-    getReportingMode = JavaMethod(returns="int")
-    getResolution = JavaMethod(returns="float")
-    getVendor = JavaMethod(returns="java.lang.String")
-    getVersion = JavaMethod(returns="int")
-    getType = JavaMethod(returns="int")
-    getStringType = JavaMethod(returns="java.lang.String")
-    isWakeUpSensor = JavaMethod(returns="boolean")
+    getFifoMaxEventCount = JavaMethod(returns=int)
+    getFifoReservedEventCount = JavaMethod(returns=int)
+    getMaximumRange = JavaMethod(returns=float)
+    getMaxDelay = JavaMethod(returns=int)
+    getMinDelay = JavaMethod(returns=int)
+    getName = JavaMethod(returns=str)
+    getPower = JavaMethod(returns=float)
+    getReportingMode = JavaMethod(returns=int)
+    getResolution = JavaMethod(returns=float)
+    getVendor = JavaMethod(returns=str)
+    getVersion = JavaMethod(returns=int)
+    getType = JavaMethod(returns=int)
+    getStringType = JavaMethod(returns=str)
+    isWakeUpSensor = JavaMethod(returns=bool)
 
     # -------------------------------------------------------------------------
     # SensorEventListener API
     # -------------------------------------------------------------------------
     onSensorChanged = JavaCallback("android.hardware.SensorEvent")
-    onAccuracyChanged = JavaCallback("android.hardware.Sensor", "int")
+    onAccuracyChanged = JavaCallback("android.hardware.Sensor", int)
 
     #: Sensor state
     started = Bool()
@@ -167,12 +167,12 @@ class SensorManager(SystemService):
     registerListener = JavaMethod(
         "android.hardware.SensorEventListener",
         "android.hardware.Sensor",
-        "int",
-        returns="boolean",
+        int,
+        returns=bool,
     )
     unregisterListener = JavaMethod(
         "android.hardware.SensorEventListener", "android.hardware.Sensor"
     )
 
-    getDefaultSensor = JavaMethod("int", returns="android.hardware.Sensor")
-    getSensorList = JavaMethod("int", returns="java.util.List")
+    getDefaultSensor = JavaMethod(int, returns="android.hardware.Sensor")
+    getSensorList = JavaMethod(int, returns="java.util.List")

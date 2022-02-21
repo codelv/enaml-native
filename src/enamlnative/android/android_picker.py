@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -19,19 +19,19 @@ class Picker(LinearLayout):
     __nativeclass__ = "android.widget.NumberPicker"
     #: TODO: How to do a list??
     # setDisplayedValues = JavaMethod('java.lang.String[]')
-    setMaxValue = JavaMethod("int")
-    setMinValue = JavaMethod("int")
-    setValue = JavaMethod("int")
+    setMaxValue = JavaMethod(int)
+    setMinValue = JavaMethod(int)
+    setValue = JavaMethod(int)
     setTextColor = JavaMethod("android.graphics.Color")
-    setTextSize = JavaMethod("float")
-    setSelectionDividerHeight = JavaMethod("int")
+    setTextSize = JavaMethod(float)
+    setSelectionDividerHeight = JavaMethod(int)
     setOnLongPressUpdateInterval = JavaMethod("long")
     setOnValueChangedListener = JavaMethod(
         "android.widget.NumberPicker$OnValueChangeListener"
     )
-    onValueChange = JavaCallback("android.widget.NumberPicker", "int", "int")
+    onValueChange = JavaCallback("android.widget.NumberPicker", int, int)
     setDisplayedValues = JavaMethod("[Ljava.lang.String;")
-    setWrapSelectorWheel = JavaMethod("boolean")
+    setWrapSelectorWheel = JavaMethod(bool)
 
 
 class AndroidPicker(AndroidLinearLayout, ProxyPicker):

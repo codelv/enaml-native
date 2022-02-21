@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -20,10 +20,10 @@ class UISlider(UIControl):
     """ """
 
     #: Properties
-    minimumValue = ObjcProperty("float")
-    maximumValue = ObjcProperty("float")
+    minimumValue = ObjcProperty(float)
+    maximumValue = ObjcProperty(float)
     continuous = ObjcProperty("bool")
-    value = ObjcProperty("float")
+    value = ObjcProperty(float)
     onTintColor = ObjcProperty("UIColor")
     tintColor = ObjcProperty("UIColor")
     thumbTintColor = ObjcProperty("UIColor")
@@ -32,10 +32,10 @@ class UISlider(UIControl):
 
     #: Methods
     #: Works but then doesn't let you change it
-    setValue = ObjcMethod("float", dict(animated="bool"))
+    setValue = ObjcMethod(float, dict(animated="bool"))
 
     #: Callbacks
-    onValueChanged = ObjcCallback("float")
+    onValueChanged = ObjcCallback(float)
 
 
 class UiKitSlider(UiKitControl, ProxySeekBar):

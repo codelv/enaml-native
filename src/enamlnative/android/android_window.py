@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -24,8 +24,8 @@ class Window(JavaBridgeObject):
     # view/WindowManager.LayoutParams.html#FLAG_KEEP_SCREEN_ON
     FLAG_KEEP_SCREEN_ON = 128
 
-    addFlags = JavaMethod("int")
-    clearFlags = JavaMethod("int")
+    addFlags = JavaMethod(int)
+    clearFlags = JavaMethod(int)
     setStatusBarColor = JavaMethod("android.graphics.Color")
 
     def __del__(self):

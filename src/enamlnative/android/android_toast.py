@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -12,6 +12,7 @@ Created on Sept 18, 2017
 from asyncio import Future
 from atom.api import Bool, Typed
 from enamlnative.widgets.toast import ProxyToast
+from .android_content import Context
 from .android_toolkit_object import AndroidToolkitObject
 from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
 
@@ -19,17 +20,17 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
 class Toast(JavaBridgeObject):
     #: Show the view for the specified duration.
     __nativeclass__ = "android.widget.Toast"
-    __signature__ = ["android.content.Context"]
+    __signature__ = [Context]
     makeText = JavaStaticMethod(
-        "android.content.Context",
+        Context,
         "java.lang.CharSequence",
-        "int",
+        int,
         returns="android.widget.Toast",
     )
     show = JavaMethod()
     cancel = JavaMethod()
-    setDuration = JavaMethod("int")
-    setGravity = JavaMethod("int", "int", "int")
+    setDuration = JavaMethod(int)
+    setGravity = JavaMethod(int, int, int)
     setText = JavaMethod("java.lang.CharSequence")
     setView = JavaMethod("android.view.View")
 

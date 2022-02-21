@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -147,7 +147,7 @@ class ObjcBridgeObject(BridgeObject):
             self.__app__.send_event(
                 Command.CREATE,  #: method
                 self.__id__,  #: id to assign in bridge cache
-                self.__bridge_id__,
+                id(self),
                 self.__nativeclass__,
                 *self._pack_args(**kwargs)
             )

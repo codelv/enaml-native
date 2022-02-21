@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -12,6 +12,7 @@ Created on May 20, 2017
 from atom.api import Dict, Instance, Property, Typed, observe
 from enamlnative.widgets.list_view import ProxyListItem, ProxyListView
 from enamlnative.core.bridge import encode
+from .android_content import Context
 from .android_toolkit_object import AndroidToolkitObject
 from .android_view_group import AndroidViewGroup, ViewGroup
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
@@ -22,20 +23,20 @@ package = "androidx.recyclerview.widget"
 class RecylerView(ViewGroup):
     __nativeclass__ = f"{package}.RecyclerView"
     invalidate = JavaMethod()
-    setHasFixedSize = JavaMethod("boolean")
-    scrollTo = JavaMethod("int", "int")
-    scrollToPosition = JavaMethod("int")
-    setItemViewCacheSize = JavaMethod("int")
+    setHasFixedSize = JavaMethod(bool)
+    scrollTo = JavaMethod(int, int)
+    scrollToPosition = JavaMethod(int)
+    setItemViewCacheSize = JavaMethod(int)
     setAdapter = JavaMethod(f"{package}.RecyclerView$Adapter")
-    setHasFixedSize = JavaMethod("boolean")
+    setHasFixedSize = JavaMethod(bool)
     setLayoutManager = JavaMethod(f"{package}.RecyclerView$LayoutManager")
 
     setRecyclerListener = JavaMethod(f"{package}.RecyclerView$RecyclerListener")
 
     class LayoutManager(JavaBridgeObject):
         __nativeclass__ = f"{package}.RecyclerView$LayoutManager"
-        scrollToPosition = JavaMethod("int")
-        setItemPrefetchEnabled = JavaMethod("boolean")
+        scrollToPosition = JavaMethod(int)
+        setItemPrefetchEnabled = JavaMethod(bool)
 
         HORIZONTAL = 0
         VERTICAL = 1
@@ -43,28 +44,28 @@ class RecylerView(ViewGroup):
 
 class StaggeredLayoutManager(RecylerView.LayoutManager):
     __nativeclass__ = f"{package}.StaggeredLayoutManager"
-    __signature__ = ["int", "int"]
-    setOrientation = JavaMethod("int")
-    setSpanCount = JavaMethod("int")
+    __signature__ = [int, int]
+    setOrientation = JavaMethod(int)
+    setSpanCount = JavaMethod(int)
 
 
 class LinearLayoutManager(RecylerView.LayoutManager):
     __nativeclass__ = f"{package}.LinearLayoutManager"
-    __signature__ = ["android.content.Context", "int", "boolean"]
+    __signature__ = [Context, int, bool]
 
-    scrollToPositionWithOffset = JavaMethod("int", "int")
-    setInitialPrefetchItemCount = JavaMethod("int")
-    setOrientation = JavaMethod("int")
-    setRecycleChildrenOnDetach = JavaMethod("boolean")
-    setReverseLayout = JavaMethod("boolean")
-    setSmoothScrollbarEnabled = JavaMethod("boolean")
-    setStackFromEnd = JavaMethod("boolean")
+    scrollToPositionWithOffset = JavaMethod(int, int)
+    setInitialPrefetchItemCount = JavaMethod(int)
+    setOrientation = JavaMethod(int)
+    setRecycleChildrenOnDetach = JavaMethod(bool)
+    setReverseLayout = JavaMethod(bool)
+    setSmoothScrollbarEnabled = JavaMethod(bool)
+    setStackFromEnd = JavaMethod(bool)
 
 
 class GridLayoutManager(LinearLayoutManager):
     __nativeclass__ = f"{package}.GridLayoutManager"
-    __signature__ = ["android.content.Context", "int", "int", "boolean"]
-    setSpanCount = JavaMethod("int")
+    __signature__ = [Context, int, int, bool]
+    setSpanCount = JavaMethod(int)
 
 
 # class BridgedListAdapter(JavaBridgeObject):
@@ -94,22 +95,22 @@ class BridgedRecyclerAdapter(JavaBridgeObject):
         "com.codelv.enamlnative.adapters.BridgedRecyclerAdapter"
         "$BridgedListAdapterListener"
     )
-    setItemCount = JavaMethod("int")
+    setItemCount = JavaMethod(int)
     setRecycleViews = JavaMethod("[Landroid.view.View;")
     clearRecycleViews = JavaMethod()
 
     #: BridgedListAdapterListener API
-    onRecycleView = JavaCallback("int", "int")
-    onVisibleCountChanged = JavaCallback("int", "int")
-    onScrollStateChanged = JavaCallback("android.widget.AbsListView", "int")
+    onRecycleView = JavaCallback(int, int)
+    onVisibleCountChanged = JavaCallback(int, int)
+    onScrollStateChanged = JavaCallback("android.widget.AbsListView", int)
 
     notifyDataSetChanged = JavaMethod()
-    notifyItemChanged = JavaMethod("int")
-    notifyItemInserted = JavaMethod("int")
-    notifyItemRemoved = JavaMethod("int")
-    notifyItemRangeChanged = JavaMethod("int", "int")
-    notifyItemRangeInserted = JavaMethod("int", "int")
-    notifyItemRangeRemoved = JavaMethod("int", "int")
+    notifyItemChanged = JavaMethod(int)
+    notifyItemInserted = JavaMethod(int)
+    notifyItemRemoved = JavaMethod(int)
+    notifyItemRangeChanged = JavaMethod(int, int)
+    notifyItemRangeInserted = JavaMethod(int, int)
+    notifyItemRangeRemoved = JavaMethod(int, int)
 
 
 class AndroidListView(AndroidViewGroup, ProxyListView):

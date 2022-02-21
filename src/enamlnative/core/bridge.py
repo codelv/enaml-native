@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -13,15 +13,13 @@ import functools
 import msgpack
 from asyncio import Future
 from contextlib import contextmanager
-from typing import ClassVar, Optional, Union
+from typing import Any, ClassVar, Optional, Union, Type
 from weakref import WeakValueDictionary
 from atom.api import Atom, Dict, ForwardInstance, Instance, Int, Property, Str
 
 CACHE: WeakValueDictionary[int, "BridgeObject"] = WeakValueDictionary()
-CLASS_CACHE: dict[type, int] = {}
-__global_id__ = 0
-__proxy_id__ = 0
-__property_id__ = 0
+__global_id__: int = 0
+__method_id__: int = 0
 
 
 class Command:
@@ -41,18 +39,29 @@ class ExtType:
     PROXY = 2
 
 
-def generate_id():
+def generate_id() -> int:
     """Generate an id for an object"""
     global __global_id__
     __global_id__ += 1
     return __global_id__
 
 
-def generate_property_id():
-    """Generate an id for an object"""
-    global __property_id__
-    __property_id__ += 1
-    return __property_id__
+def method_id():
+    global __method_id__
+    __method_id__ += 1
+    return __method_id__
+
+
+def convert_arg(arg: Any) -> Optional[str]:
+    """Convert an argument to a string"""
+    if isinstance(arg, str):
+        return arg
+    if hasattr(arg, "__nativeclass__"):
+        return arg.__nativeclass__
+    if arg is None:
+        return None
+    assert hasattr(arg, "__name__"), "Signature argument must be a type or str"
+    return arg.__name__
 
 
 def tag_object_with_id(obj):
@@ -151,13 +160,16 @@ class BridgeObject(Atom):
 
     """
 
-    __slots__ = ("__weakref__",)
+    __slots__ = ("__weakref__", "__method_id__")
 
     #: Native Class name
     __nativeclass__: ClassVar[str] = ""
 
     #: Constructor signature
-    __signature__: ClassVar[list[Union[dict, str]]] = []
+    __signature__: ClassVar[list[Union[dict, str, "BridgeObject", type]]] = []
+
+    #: Constructor cache id
+    __method_id__: ClassVar[int]
 
     #: Suppressed methods / fields
     __suppressed__ = Dict()
@@ -168,9 +180,6 @@ class BridgeObject(Atom):
     #: Bridge object ID
     __id__ = Int(0, factory=generate_id)
 
-    #: ID of this class
-    __bridge_id__ = Int()
-
     #: Prefix to add to all names used during method and property calls
     #: used for nested objects
     __prefix__ = Str()
@@ -178,16 +187,14 @@ class BridgeObject(Atom):
     #: Bridge
     __app__ = ForwardInstance(get_app_class)
 
+    @classmethod
+    def __init_subclass__(cls, *args, **kwargs):
+        #: Convert signature to string
+        cls.__signature__ = [convert_arg(arg) for arg in cls.__signature__]
+        cls.__method_id__ = method_id()
+
     def _default___app__(self):
         return get_app_class().instance()
-
-    def _default___bridge_id__(self):
-        cls = self.__class__
-        try:
-            return CLASS_CACHE[cls]
-        except KeyError:
-            type_id = CLASS_CACHE[cls] = generate_property_id()
-            return type_id
 
     def getId(self):
         return self.__id__
@@ -233,7 +240,7 @@ class BridgeObject(Atom):
             self.__app__.send_event(
                 Command.CREATE,  #: method
                 self.__id__,  #: id to assign in bridge cache
-                self.__bridge_id__,
+                self.__method_id__,
                 self.__nativeclass__,
                 [
                     msgpack_encoder(sig, arg)
@@ -304,13 +311,17 @@ class BridgeMethod(Property):
 
     """
 
-    __slots__ = ("__signature__", "__returns__", "__cache__", "__bridge_id__")
+    __slots__ = ("__signature__", "__returns__", "__cache__", "__method_id__")
+    __returns__: Optional[str]
+    __signature__: tuple[str, ...]
+    __cache__: dict[int, Future]
+    __method_id__: int
 
     def __init__(self, *args, **kwargs):
-        self.__returns__: Optional[str] = kwargs.get("returns", None)
-        self.__signature__: tuple[str, ...] = args
-        self.__cache__: dict[int, Future] = {}  # Result cache otherwise gc cleans up
-        self.__bridge_id__: int = generate_property_id()
+        self.__returns__ = convert_arg(kwargs.get("returns", None))
+        self.__signature__ = tuple(convert_arg(arg) for arg in args)
+        self.__cache__ = {}  # Result cache otherwise gc cleans up
+        self.__method_id__ = method_id()
         super().__init__(self.__fget__)
 
     @contextmanager
@@ -356,7 +367,7 @@ class BridgeMethod(Property):
             Command.METHOD,  #: method
             obj.__id__,
             result_id,
-            self.__bridge_id__,
+            self.__method_id__,
             f"{obj.__prefix__}{method_name}",  #: method name
             method_args,  #: args
             **kwargs,  #: kwargs to send_event
@@ -391,19 +402,29 @@ class BridgeStaticMethod(Property):
         "__returns__",
         "__cache__",
         "__owner__",
-        "__bridge_id__",
+        "__method_id__",
     )
+    #: Return type
+    __returns__: Optional[str]
+
+    #: Function signature
+    __signature__: tuple[str, ...]
+
+    #: Cache for results
+    __cache__: dict[int, Future]
+    __owner__: Optional[Type[BridgeObject]]
+    __method_id__: int
 
     def __init__(self, *args, **kwargs):
-        self.__returns__ = kwargs.get("returns", None)
-        self.__signature__ = args
+        self.__returns__ = convert_arg(kwargs.get("returns", None))
+        self.__signature__ = tuple(convert_arg(arg) for arg in args)
         self.__owner__ = None
         self.__cache__ = {}  # Result cache otherwise gc cleans up
-        self.__bridge_id__ = generate_property_id()
+        self.__method_id__ = method_id()
         super().__init__()
 
     def __get__(self, instance, owner):
-        #: Save the object this class references
+        #: Save the object this class referencesf
         if self.__owner__ is None:
             self.__owner__ = owner
         return super().__get__(instance, owner)
@@ -436,7 +457,7 @@ class BridgeStaticMethod(Property):
             Command.STATIC_METHOD,  #: method
             self.__owner__.__nativeclass__,
             result_id,
-            self.__bridge_id__,
+            self.__method_id__,  # Function cache
             method_name,  #: method name
             method_args,  #: args
             **kwargs,  #: kwargs to send_event
@@ -468,12 +489,14 @@ class BridgeField(Property):
 
     """
 
-    __slots__ = ("__signature__", "__bridge_id__", "__bridge_cached_")
+    __slots__ = ("__signature__", "__method_id__")
+    #: Field type
+    __signature__: str
+    __method_id__: int
 
     def __init__(self, arg):
-        self.__signature__ = arg
-        self.__bridge_id__ = generate_property_id()
-        self.__bridge_cached_ = False
+        self.__signature__ = convert_arg(arg)
+        self.__method_id__ = method_id()
         super().__init__(self.__fget__, self.__fset__)
 
     @contextmanager
@@ -489,11 +512,10 @@ class BridgeField(Property):
         obj.__app__.send_event(
             Command.FIELD,  #: method
             obj.__id__,
-            self.__bridge_id__,
+            self.__method_id__,
             f"{obj.__prefix__}{self.name}",  #: method name
             [msgpack_encoder(self.__signature__, arg)],  #: args
         )
-        self.__bridge_cached_ = True
 
     def __fget__(self, obj):
         """Return an object that can be used to retrieve the value."""
@@ -564,8 +586,3 @@ class BridgeCallback(BridgeMethod):
     def disconnect(self, obj, callback=None):
         """Remove the callback to be fired when the event occurs."""
         del obj.__callbacks__[self.name]
-
-
-def tag_property(cls):
-    cls.__bridge_id__ = generate_property_id()
-    return cls

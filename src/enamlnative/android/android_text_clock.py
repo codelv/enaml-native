@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -19,7 +19,7 @@ class TextClock(TextView):
     __nativeclass__ = "android.widget.TextClock"
     setFormat24Hour = JavaMethod("java.lang.CharSequence")
     setFormat24Hour = JavaMethod("java.lang.CharSequence")
-    setTimeZone = JavaMethod("java.lang.String")
+    setTimeZone = JavaMethod(str)
 
 
 class AndroidTextClock(AndroidTextView, ProxyTextClock):

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -17,9 +17,9 @@ from .bridge import JavaMethod
 
 class EditText(TextView):
     __nativeclass__ = "android.widget.EditText"
-    setSelection = JavaMethod("int", "int")
+    setSelection = JavaMethod(int, int)
     selectAll = JavaMethod()
-    extendSelection = JavaMethod("int")
+    extendSelection = JavaMethod(int)
     setHint = JavaMethod("java.lang.CharSequence")
 
 

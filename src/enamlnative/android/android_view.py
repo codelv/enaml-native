@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -12,6 +12,8 @@ Created on May 20, 2017
 from atom.api import Dict, Float, Instance, Subclass, Typed
 from enamlnative.widgets.view import ProxyView, coerce_size
 from .android_toolkit_object import AndroidToolkitObject
+from .android_content import Context
+from .android_utils import AttributeSet
 from .bridge import JavaBridgeObject, JavaCallback, JavaField, JavaMethod
 
 LAYOUT_KEYS = (
@@ -41,19 +43,15 @@ LAYOUT_KEYS = (
 
 class View(JavaBridgeObject):
     __nativeclass__ = "android.view.View"
-    __signature__ = [
-        "android.content.Context",
-        "android.util.AttributeSet",
-        "android.R",
-    ]
+    __signature__ = [Context, AttributeSet, "android.R"]
 
     VISIBILITY_VISIBLE = 0
     VISIBILITY_INVISIBLE = 4
     VISIBILITY_GONE = 8
 
     onClick = JavaCallback("android.view.View")
-    onLongClick = JavaCallback("android.view.View", returns="boolean")
-    onKey = JavaCallback("android.view.View", "int", "android.view.KeyEvent")
+    onLongClick = JavaCallback("android.view.View", returns=bool)
+    onKey = JavaCallback("android.view.View", int, "android.view.KeyEvent")
     onTouch = JavaCallback("android.view.View", "android.view.MotionEvent")
     setOnClickListener = JavaMethod("android.view.View$OnClickListener")
     setOnLongClickListener = JavaMethod("android.view.View$OnLongClickListener")
@@ -63,31 +61,31 @@ class View(JavaBridgeObject):
     setBackground = JavaMethod("android.graphics.drawable.Drawable")
     setBackgroundResource = JavaMethod("android.R")
     setBackgroundColor = JavaMethod("android.graphics.Color")
-    setClickable = JavaMethod("boolean")
-    setLongClickable = JavaMethod("boolean")
-    setAlpha = JavaMethod("float")
-    setTop = JavaMethod("int")
-    setBottom = JavaMethod("int")
-    setLeft = JavaMethod("int")
-    setRight = JavaMethod("int")
-    setLayoutDirection = JavaMethod("int")
+    setClickable = JavaMethod(bool)
+    setLongClickable = JavaMethod(bool)
+    setAlpha = JavaMethod(float)
+    setTop = JavaMethod(int)
+    setBottom = JavaMethod(int)
+    setLeft = JavaMethod(int)
+    setRight = JavaMethod(int)
+    setLayoutDirection = JavaMethod(int)
 
     setLayoutParams = JavaMethod("android.view.ViewGroup$LayoutParams")
-    setPadding = JavaMethod("int", "int", "int", "int")
+    setPadding = JavaMethod(int, int, int, int)
 
     getWindowToken = JavaMethod(returns="android.os.IBinder")
 
-    setX = JavaMethod("float")
-    setY = JavaMethod("float")
-    setZ = JavaMethod("float")
-    setMaximumHeight = JavaMethod("int")
-    setMaximumWidth = JavaMethod("int")
-    setMinimumHeight = JavaMethod("int")
-    setMinimumWidth = JavaMethod("int")
-    setEnabled = JavaMethod("boolean")
+    setX = JavaMethod(float)
+    setY = JavaMethod(float)
+    setZ = JavaMethod(float)
+    setMaximumHeight = JavaMethod(int)
+    setMaximumWidth = JavaMethod(int)
+    setMinimumHeight = JavaMethod(int)
+    setMinimumWidth = JavaMethod(int)
+    setEnabled = JavaMethod(bool)
     setTag = JavaMethod("java.lang.Object")
     setToolTipText = JavaMethod("java.lang.CharSequence")
-    setVisibility = JavaMethod("int")
+    setVisibility = JavaMethod(int)
 
     LAYOUT_DIRECTIONS = {
         "ltr": 0,
@@ -115,8 +113,8 @@ class View(JavaBridgeObject):
 
 class LayoutParams(JavaBridgeObject):
     __nativeclass__ = "android.view.ViewGroup$LayoutParams"
-    width = JavaField("int")
-    height = JavaField("int")
+    width = JavaField(int)
+    height = JavaField(int)
     LAYOUTS = {"fill_parent": -1, "match_parent": -1, "wrap_content": -2}
 
 

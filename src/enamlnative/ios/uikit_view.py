@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -57,7 +57,7 @@ class UIView(UIResponder):
     #: Properties
     backgroundColor = ObjcProperty("UIColor")
     hidden = ObjcProperty("bool")
-    alpha = ObjcProperty("float")
+    alpha = ObjcProperty(float)
     opaque = ObjcProperty("bool")
     tintColor = ObjcProperty("UIColor")
     tintAdjustmentMode = ObjcProperty("UIViewTintAdjustmentMode")

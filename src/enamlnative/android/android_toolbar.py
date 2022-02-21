@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -23,21 +23,21 @@ class Toolbar(ViewGroup):
     setTitle = JavaMethod("java.lang.CharSequence")
     setSubtitle = JavaMethod("java.lang.CharSequence")
     setSubtitleTextColor = JavaMethod("android.graphics.Color")
-    setTitleMargin = JavaMethod("int", "int", "int", "int")
+    setTitleMargin = JavaMethod(int, int, int, int)
     setTitleTextColor = JavaMethod("android.graphics.Color")
     setNavigationOnClickListener = JavaMethod("android.view.View$OnClickListener")
     setOnMenuItemClickListener = JavaMethod(
         "android.widget.Toolbar$OnMenuItemClickListener"
     )
-    setContentInsetsAbsolute = JavaMethod("int", "int")
-    setContentInsetsRelative = JavaMethod("int", "int")
+    setContentInsetsAbsolute = JavaMethod(int, int)
+    setContentInsetsRelative = JavaMethod(int, int)
     onNavigationClick = JavaCallback("android.view.View")
     onMenuItemClick = JavaCallback("android.view.MenuItem")
 
 
 class ToolbarLayoutParams(MarginLayoutParams):
     __nativeclass__ = f"{package}.Toolbar$LayoutParams"
-    gravity = JavaField("int")
+    gravity = JavaField(int)
 
 
 class AndroidToolbar(AndroidViewGroup, ProxyToolbar):

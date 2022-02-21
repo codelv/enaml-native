@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -26,13 +26,13 @@ class TabLayout(FrameLayout):
     newTab = JavaMethod(returns=f"{package}.TabLayout$Tab")
 
     setSelectedTabIndicatorColor = JavaMethod("android.graphics.Color")
-    setSelectedTabIndicatorHeight = JavaMethod("int")
-    setTabGravity = JavaMethod("int")
-    setTabMode = JavaMethod("int")
+    setSelectedTabIndicatorHeight = JavaMethod(int)
+    setTabGravity = JavaMethod(int)
+    setTabMode = JavaMethod(int)
     setTabTextColors = JavaMethod("android.graphics.Color", "android.graphics.Color")
 
-    setCurrentTab = JavaMethod("int")
-    setCurrentTabByTag = JavaMethod("java.lang.String")
+    setCurrentTab = JavaMethod(int)
+    setCurrentTabByTag = JavaMethod(str)
     addOnTabSelectedListener = JavaMethod(f"{package}.TabLayout$OnTabSelectedListener")
 
     onTabReselected = JavaCallback(f"{package}.TabLayout$Tab")

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -19,8 +19,8 @@ from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 class MediaPlayer(JavaBridgeObject):
     __nativeclass__ = "android.media.MediaPlayer"
     onCompletion = JavaCallback("android.media.MediaPlayer")
-    onError = JavaCallback("android.media.MediaPlayer", "int", "int", returns="boolean")
-    onInfo = JavaCallback("android.media.MediaPlayer", "int", "int", returns="boolean")
+    onError = JavaCallback("android.media.MediaPlayer", int, int, returns=bool)
+    onInfo = JavaCallback("android.media.MediaPlayer", int, int, returns=bool)
     onPrepared = JavaCallback("android.media.MediaPlayer")
 
     MEDIA_ERROR_UNKNOWN = 1
@@ -75,14 +75,14 @@ class MediaPlayer(JavaBridgeObject):
 
 class VideoView(SurfaceView):
     __nativeclass__ = "android.widget.VideoView"
-    setVideoPath = JavaMethod("java.lang.String")
+    setVideoPath = JavaMethod(str)
     setVideoURI = JavaMethod("android.net.Uri")
     start = JavaMethod()
     pause = JavaMethod()
     resume = JavaMethod()
     suspend = JavaMethod()
     stopPlayback = JavaMethod()
-    seekTo = JavaMethod("int")
+    seekTo = JavaMethod(int)
     setOnCompletionListener = JavaMethod(
         "android.media.MediaPlayer$OnCompletionListener"
     )

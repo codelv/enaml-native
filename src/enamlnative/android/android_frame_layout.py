@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -17,15 +17,15 @@ from .bridge import JavaField, JavaMethod
 
 class FrameLayout(ViewGroup):
     __nativeclass__ = "android.widget.FrameLayout"
-    setForegroundGravity = JavaMethod("int")
-    setMeasureAllChildren = JavaMethod("boolean")
+    setForegroundGravity = JavaMethod(int)
+    setMeasureAllChildren = JavaMethod(bool)
 
 
 class FrameLayoutParams(MarginLayoutParams):
     """Update the child widget with the given params"""
 
     __nativeclass__ = "android.widget.FrameLayout$LayoutParams"
-    gravity = JavaField("int")
+    gravity = JavaField(int)
 
 
 class AndroidFrameLayout(AndroidViewGroup, ProxyFrameLayout):

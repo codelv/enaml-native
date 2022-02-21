@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -22,11 +22,11 @@ class ProgressBar(View):
         "android.util.AttributeSet",
         "android.R",
     ]
-    setIndeterminate = JavaMethod("boolean")
-    setMax = JavaMethod("int")
-    setMin = JavaMethod("int")
-    setProgress = JavaMethod("int")  # , 'boolean')
-    setSecondaryProgress = JavaMethod("int")
+    setIndeterminate = JavaMethod(bool)
+    setMax = JavaMethod(int)
+    setMin = JavaMethod(int)
+    setProgress = JavaMethod(int)  # , 'boolean')
+    setSecondaryProgress = JavaMethod(int)
 
     STYLE_HORIZONTAL = "@attr/progressBarStyleHorizontal"
     STYLE_INVERSE = "@attr/progressBarStyleInverse"

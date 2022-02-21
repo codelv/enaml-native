@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -22,13 +22,13 @@ class SeekBar(ProgressBar):
         "android.util.AttributeSet",
         "android.R",
     ]
-    setSplitTrack = JavaMethod("boolean")
+    setSplitTrack = JavaMethod(bool)
     setOnSeekBarChangeListener = JavaMethod(
         "android.widget.SeekBar$OnSeekBarChangeListener"
     )
-    setKeyProgressIncrement = JavaMethod("int")
+    setKeyProgressIncrement = JavaMethod(int)
 
-    onProgressChanged = JavaCallback("android.widget.SeekBar", "int", "boolean")
+    onProgressChanged = JavaCallback("android.widget.SeekBar", int, bool)
     onStartTrackingTouch = JavaCallback("android.widget.SeekBar")
     onStopTrackingTouch = JavaCallback("android.widget.SeekBar")
 

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -17,11 +17,11 @@ from .bridge import JavaCallback, JavaMethod
 
 class CompoundButton(Button):
     __nativeclass__ = "android.widget.CompoundButton"
-    setChecked = JavaMethod("boolean")
+    setChecked = JavaMethod(bool)
     setOnCheckedChangeListener = JavaMethod(
         "android.widget.CompoundButton$OnCheckedChangeListener"
     )
-    onCheckedChanged = JavaCallback("android.widget.CompoundButton", "boolean")
+    onCheckedChanged = JavaCallback("android.widget.CompoundButton", bool)
 
 
 class AndroidCompoundButton(AndroidButton, ProxyCompoundButton):

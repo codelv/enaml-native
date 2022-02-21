@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -12,6 +12,7 @@ Created on May 20, 2017
 from atom.api import List, Typed, set_default
 from enamlnative.widgets.drawer_layout import ProxyDrawerLayout
 from .android_view_group import AndroidViewGroup, MarginLayoutParams, ViewGroup
+from .android_view import View
 from .bridge import JavaCallback, JavaField, JavaMethod
 
 package = "androidx.drawerlayout.widget"
@@ -19,17 +20,17 @@ package = "androidx.drawerlayout.widget"
 
 class DrawerLayout(ViewGroup):
     __nativeclass__ = f"{package}.DrawerLayout"
-    openDrawer = JavaMethod("android.view.View")
-    closeDrawer = JavaMethod("android.view.View")
+    openDrawer = JavaMethod(View)
+    closeDrawer = JavaMethod(View)
     addDrawerListener = JavaMethod(f"{package}.DrawerLayout$DrawerListener")
-    onDrawerClosed = JavaCallback("android.view.View")
-    onDrawerOpened = JavaCallback("android.view.View")
-    onDrawerSlide = JavaCallback("android.view.View", "float")
-    onDrawerStateChanged = JavaCallback("int")
+    onDrawerClosed = JavaCallback(View)
+    onDrawerOpened = JavaCallback(View)
+    onDrawerSlide = JavaCallback(View, float)
+    onDrawerStateChanged = JavaCallback(int)
 
-    setDrawerElevation = JavaMethod("float")
-    setDrawerTitle = JavaMethod("int", "java.lang.CharSequence")
-    setDrawerLockMode = JavaMethod("int")
+    setDrawerElevation = JavaMethod(float)
+    setDrawerTitle = JavaMethod(int, "java.lang.CharSequence")
+    setDrawerLockMode = JavaMethod(int)
     setScrimColor = JavaMethod("android.graphics.Color")
     setStatusBarBackgroundColor = JavaMethod("android.graphics.Color")
 
@@ -45,7 +46,7 @@ class DrawerLayoutParams(MarginLayoutParams):
     """Update the child widget with the given params"""
 
     __nativeclass__ = f"{package}.DrawerLayout$LayoutParams"
-    gravity = JavaField("int")
+    gravity = JavaField(int)
 
 
 class AndroidDrawerLayout(AndroidViewGroup, ProxyDrawerLayout):

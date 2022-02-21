@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -19,9 +19,9 @@ class SwipeRefreshLayout(ViewGroup):
     package = "androidx.swiperefreshlayout.widget"
     __nativeclass__ = f"{package}.SwipeRefreshLayout"
     __signature__ = ["android.content.Context"]
-    setDistanceToTriggerSync = JavaMethod("int")
-    setRefreshing = JavaMethod("boolean")
-    setEnabled = JavaMethod("boolean")
+    setDistanceToTriggerSync = JavaMethod(int)
+    setRefreshing = JavaMethod(bool)
+    setEnabled = JavaMethod(bool)
     setProgressBackgroundColorSchemeColor = JavaMethod("android.graphics.Color")
     setColorSchemeColors = JavaMethod("[Landroid.graphics.Color;")
     setOnRefreshListener = JavaMethod(f"{package}.SwipeRefreshLayout$OnRefreshListener")

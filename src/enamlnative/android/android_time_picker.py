@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -17,12 +17,12 @@ from .bridge import JavaCallback, JavaMethod
 
 class TimePicker(FrameLayout):
     __nativeclass__ = "android.widget.TimePicker"
-    onTimeChanged = JavaCallback("android.widget.TimePicker", "int", "int")
-    setHour = JavaMethod("int")
-    setMinute = JavaMethod("int")
+    onTimeChanged = JavaCallback("android.widget.TimePicker", int, int)
+    setHour = JavaMethod(int)
+    setMinute = JavaMethod(int)
     setCurrentHour = JavaMethod("java.lang.Integer")
     setCurrentMinute = JavaMethod("java.lang.Integer")
-    setEnabled = JavaMethod("boolean")
+    setEnabled = JavaMethod(bool)
     setIs24HourView = JavaMethod("java.lang.Boolean")
     setOnTimeChangedListener = JavaMethod(
         "android.widget.TimePicker$OnTimeChangedListener"

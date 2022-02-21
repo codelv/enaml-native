@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -12,24 +12,8 @@ Created on July 6, 2017
 from atom.api import Typed
 from enamlnative.widgets.image_view import ProxyImageView
 from .android_view import AndroidView, View
+from .android_content import Context
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
-
-
-class ImageView(View):
-    __nativeclass__ = "android.widget.ImageView"
-    setImageAlpha = JavaMethod("int")
-    setColorFilter = JavaMethod("int")
-    setCropToPadding = JavaMethod("boolean")
-    setImageBitmap = JavaMethod("android.graphics.Bitmap")
-    setImageIcon = JavaMethod("android.graphics.drawable.Icon")
-    setImageLevel = JavaMethod("int")
-    seImageMatrix = JavaMethod("android.graphics.Matrix")
-    setImageResource = JavaMethod("android.R")
-    setImageDrawable = JavaMethod("android.graphics.drawable.Drawable")
-    setImageURI = JavaMethod("android.net.Uri")
-    setMaxHeight = JavaMethod("int")
-    setMaxWidth = JavaMethod("int")
-    setScaleType = JavaMethod("android.view.ImageView.ScaleType")
 
 
 class Drawable(JavaBridgeObject):
@@ -43,34 +27,43 @@ class Bitmap(JavaBridgeObject):
 
 class Icon(JavaBridgeObject):
     __nativeclass__ = "android.graphics.drawable.Icon"
-    createWithFilePath = JavaMethod(
-        "java.lang.String", returns="android.graphics.drawable.Icon"
-    )
-    createWithContentUri = JavaMethod(
-        "java.lang.String", returns="android.graphics.drawable.Icon"
-    )
+    createWithFilePath = JavaMethod(str, returns="android.graphics.drawable.Icon")
+    createWithContentUri = JavaMethod(str, returns="android.graphics.drawable.Icon")
+
+
+class ImageView(View):
+    __nativeclass__ = "android.widget.ImageView"
+    setImageAlpha = JavaMethod(int)
+    setColorFilter = JavaMethod(int)
+    setCropToPadding = JavaMethod(bool)
+    setImageBitmap = JavaMethod(Bitmap)
+    setImageIcon = JavaMethod(Icon)
+    setImageLevel = JavaMethod(int)
+    seImageMatrix = JavaMethod("android.graphics.Matrix")
+    setImageResource = JavaMethod("android.R")
+    setImageDrawable = JavaMethod(Drawable)
+    setImageURI = JavaMethod("android.net.Uri")
+    setMaxHeight = JavaMethod(int)
+    setMaxWidth = JavaMethod(int)
+    setScaleType = JavaMethod("android.view.ImageView.ScaleType")
+
+
+class RequestBuilder(JavaBridgeObject):
+    __nativeclass__ = "com.bumptech.glide.RequestBuilder"
+    asBitmap = JavaMethod(returns=Bitmap)
+    into = JavaMethod(ImageView)
+
+
+class RequestManager(JavaBridgeObject):
+    __nativeclass__ = "com.bumptech.glide.RequestManager"
+    load = JavaMethod(str, returns=RequestBuilder)
 
 
 class Glide(JavaBridgeObject):
     __nativeclass__ = "com.bumptech.glide.Glide"
 
-    with_ = JavaStaticMethod(
-        "android.view.View", returns="com.bumptech.glide.RequestManager"
-    )
-    with__ = JavaStaticMethod(
-        "android.content.Context", returns="com.bumptech.glide.RequestManager"
-    )
-
-
-class RequestManager(JavaBridgeObject):
-    __nativeclass__ = "com.bumptech.glide.RequestManager"
-    load = JavaMethod("java.lang.String", returns="com.bumptech.glide.RequestBuilder")
-
-
-class RequestBuilder(JavaBridgeObject):
-    __nativeclass__ = "com.bumptech.glide.RequestBuilder"
-    asBitmap = JavaMethod(returns="android.graphics.Bitmap")
-    into = JavaMethod("android.widget.ImageView")
+    with_ = JavaStaticMethod(View, returns=RequestManager)
+    with__ = JavaStaticMethod(Context, returns=RequestManager)
 
 
 class AndroidImageView(AndroidView, ProxyImageView):

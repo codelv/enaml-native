@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -12,23 +12,24 @@ Created on May 20, 2017
 from atom.api import Typed, set_default
 from enamlnative.widgets.spinner import ProxySpinner
 from .android_adapter import AdapterView, AndroidAdapterView, ArrayAdapter
+from .android_content import Context
 from .bridge import JavaMethod
 
 
 class AbsSpinner(AdapterView):
     __nativeclass__ = "android.widget.AbsSpinner"
-    pointToPosition = JavaMethod("int", "int")
+    pointToPosition = JavaMethod(int, int)
     setAdapter = JavaMethod("android.widget.SpinnerAdapter")
 
 
 class Spinner(AbsSpinner):
     __nativeclass__ = "android.widget.Spinner"
-    __signature__ = ["android.content.Context", "int"]
-    setDropDownHorizontalOffset = JavaMethod("int")
-    setDropDownVerticalOffset = JavaMethod("int")
-    setDropDownWidth = JavaMethod("int")
-    setEnabled = JavaMethod("boolean")
-    setGravity = JavaMethod("int")
+    __signature__ = [Context, int]
+    setDropDownHorizontalOffset = JavaMethod(int)
+    setDropDownVerticalOffset = JavaMethod(int)
+    setDropDownWidth = JavaMethod(int)
+    setEnabled = JavaMethod(bool)
+    setGravity = JavaMethod(int)
     setPrompt = JavaMethod("java.lang.CharSequence")
 
 

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -15,18 +15,16 @@ from enamlnative.widgets.button import (
     ProxyFloatingActionButton,
     ProxyImageButton,
 )
+from .android_content import Context
 from .android_image_view import AndroidImageView, ImageView
 from .android_text_view import AndroidTextView, TextView
+from .android_utils import AttributeSet
 from .bridge import JavaMethod
 
 
 class Button(TextView):
     __nativeclass__ = "android.widget.Button"
-    __signature__ = [
-        "android.content.Context",
-        "android.util.AttributeSet",
-        "android.R",
-    ]
+    __signature__ = [Context, AttributeSet, "android.R"]
     STYLE_NORMAL = 0x01010048
     STYLE_FLAT = 0x0101032B
     STYLES = {
@@ -51,9 +49,9 @@ class FloatingActionButton(ImageButton):
 
     SIZES = {"normal": SIZE_NORMAL, "mini": SIZE_MINI, "auto": SIZE_AUTO}
 
-    setSize = JavaMethod("int")
+    setSize = JavaMethod(int)
     setRippleColor = JavaMethod("android.graphics.Color")
-    setCompatElevation = JavaMethod("float")
+    setCompatElevation = JavaMethod(float)
     show = JavaMethod()
     hide = JavaMethod()
 

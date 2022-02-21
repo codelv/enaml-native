@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -18,13 +18,13 @@ from .bridge import JavaBridgeObject, JavaField, JavaMethod
 
 class WifiConfiguration(JavaBridgeObject):
     __nativeclass__ = "android.net.wifi.WifiConfiguration"
-    BSSID = JavaField("java.lang.String")
-    FQDN = JavaField("java.lang.String")
-    SSID = JavaField("java.lang.String")
-    hiddenSSID = JavaField("boolean")
-    networkId = JavaField("int")
-    preSharedKey = JavaField("java.lang.String")
-    status = JavaField("int")
+    BSSID = JavaField(str)
+    FQDN = JavaField(str)
+    SSID = JavaField(str)
+    hiddenSSID = JavaField(bool)
+    networkId = JavaField(int)
+    preSharedKey = JavaField(str)
+    status = JavaField(int)
 
     STATUS_CURRENT = 0x0
     STATUS_DISABLED = 0x1
@@ -74,15 +74,15 @@ class WifiManager(SystemService):
     SCAN_RESULTS_AVAILABLE_ACTION = "android.net.wifi.SCAN_RESULTS"
 
     getScanResults = JavaMethod(returns="java.util.List")
-    setWifiEnabled = JavaMethod("boolean", returns="boolean")
-    isWifiEnabled = JavaMethod(returns="boolean")
-    startScan = JavaMethod(returns="boolean")
-    reassociate = JavaMethod(returns="boolean")
-    reconnect = JavaMethod(returns="boolean")
-    removeNetwork = JavaMethod("int", returns="boolean")
-    addNetwork = JavaMethod("android.net.wifi.WifiConfiguration", returns="int")
-    enableNetwork = JavaMethod("int", "boolean", returns="boolean")
-    disconnect_ = JavaMethod(returns="boolean")
+    setWifiEnabled = JavaMethod(bool, returns=bool)
+    isWifiEnabled = JavaMethod(returns=bool)
+    startScan = JavaMethod(returns=bool)
+    reassociate = JavaMethod(returns=bool)
+    reconnect = JavaMethod(returns=bool)
+    removeNetwork = JavaMethod(int, returns=bool)
+    addNetwork = JavaMethod("android.net.wifi.WifiConfiguration", returns=int)
+    enableNetwork = JavaMethod(int, bool, returns=bool)
+    disconnect_ = JavaMethod(returns=bool)
     getConnectionInfo = JavaMethod(returns="android.net.wifi.WifiInfo")
     getDhcpInfo = JavaMethod(returns="android.net.DhcpInfo")
 

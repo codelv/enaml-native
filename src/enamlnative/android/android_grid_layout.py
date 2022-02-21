@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -17,13 +17,13 @@ from .bridge import JavaMethod
 
 class GridLayout(ViewGroup):
     __nativeclass__ = "android.widget.GridLayout"
-    setOrientation = JavaMethod("int")
-    setAlignmentMode = JavaMethod("int")
-    setColumnCount = JavaMethod("int")
-    setColumnOrderPreserved = JavaMethod("boolean")
-    setRowCount = JavaMethod("int")
-    setRowOrderPreserved = JavaMethod("boolean")
-    setUseDefaultMargins = JavaMethod("boolean")
+    setOrientation = JavaMethod(int)
+    setAlignmentMode = JavaMethod(int)
+    setColumnCount = JavaMethod(int)
+    setColumnOrderPreserved = JavaMethod(bool)
+    setRowCount = JavaMethod(int)
+    setRowOrderPreserved = JavaMethod(bool)
+    setUseDefaultMargins = JavaMethod(bool)
 
 
 class GridLayoutParams(ViewGroup):

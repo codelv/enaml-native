@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -17,8 +17,8 @@ from .bridge import JavaMethod
 
 class RelativeLayout(ViewGroup):
     __nativeclass__ = "android.widget.RelativeLayout"
-    setHorizontalGravity = JavaMethod("int")
-    setVerticalGravity = JavaMethod("int")
+    setHorizontalGravity = JavaMethod(int)
+    setVerticalGravity = JavaMethod(int)
 
 
 class AndroidRelativeLayout(AndroidViewGroup, ProxyRelativeLayout):

@@ -9,6 +9,7 @@ Created on Apr 4, 2018
 
 @author: jrm
 """
+from typing import ClassVar, Optional
 from atom.api import Bool, Instance, List, Typed
 from enaml.application import deferred_call
 from enamlnative.widgets.notification import ProxyNotification
@@ -28,155 +29,10 @@ from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
 package = "androidx.core.app"
 
 
-# Android really messed this one up
-class NotificationManager(JavaBridgeObject):
-    """Android NotificationManager. Use the `show_notification` and
-    `create_channel` class methods.
-
-    """
-
-    #: Holds the singleton instance
-    _instance = None
-    __nativeclass__ = f"{package}.NotificationManagerCompat"
-
-    ACTION_BIND_SIDE_CHANNEL = "android.support.BIND_NOTIFICATION_SIDE_CHANNEL"
-    EXTRA_USE_SIDE_CHANNEL = "android.support.useSideChannel"
-
-    IMPORTANCE_NONE = -1000
-    IMPORTANCE_MIN = 1
-    IMPORTANCE_LOW = 2
-    IMPORTANCE_DEFAULT = 3
-    IMPORTANCE_HIGH = 4
-    IMPORTANCE_MAX = 5
-
-    cancel = JavaMethod("java.lang.String", "int")
-    cancel_ = JavaMethod("int")
-    cancelAll = JavaMethod()
-
-    notify = JavaMethod("int", "android.app.Notification")  # type: ignore
-    notify_ = JavaMethod("java.lang.String", "int", "android.app.Notification")
-
-    from_ = JavaStaticMethod(
-        "android.content.Context", returns=f"{package}.NotificationManagerCompat"
-    )
-
-    _receivers = List(BroadcastReceiver)
-
-    @classmethod
-    def instance(cls):
-        """Get an instance of this service if it was already requested.
-
-        You should request it first using `NotificationManager.get()`
-
-        __Example__
-
-            :::python
-
-            await NotificationManager.get()
-
-
-        """
-        return cls._instance
-
-    @classmethod
-    async def get(cls):
-        """Acquires the NotificationManager service async."""
-        app = AndroidApplication.instance()
-        if cls._instance:
-            return cls._instance
-        obj_id = await cls.from_(app)
-        return cls(__id__=obj_id)
-
-    def __init__(self, *args, **kwargs):
-        """Force only one instance to exist"""
-        cls = self.__class__
-        if cls._instance is not None:
-            name = cls.__name__
-            raise RuntimeError(
-                f"Only one instance of {name} can exist! "
-                f"Use {name}.instance() instead!"
-            )
-        super().__init__(*args, **kwargs)
-        cls._instance = self
-
-    @classmethod
-    async def create_channel(
-        cls, channel_id, name, importance=IMPORTANCE_DEFAULT, description=""
-    ):
-        """Before you can deliver the notification on Android 8.0 and higher,
-        you must register your app's notification channel with the system by
-        passing an instance of NotificationChannel
-        to createNotificationChannel().
-
-        Parameters
-        ----------
-        channel_id: String-
-            Channel ID
-        name: String
-            Channel name
-        importance: Int
-            One of the IMPORTANCE levels
-        description: String
-            Channel description
-
-        Returns
-        -------
-        channel: NotificationChannel or None
-            The channel that was created.
-
-        """
-        app = AndroidApplication.instance()
-        if app.api_level >= 26:
-            channel = NotificationChannel(channel_id, name, importance)
-            channel.setDescription(description)
-            mgr = await NotificationChannelManager.get()
-            mgr.createNotificationChannel(channel)
-            return channel
-
-    @classmethod
-    def show_notification(cls, channel_id, *args, **kwargs):
-        """Create and show a Notification. See `Notification.Builder.update`
-        for a list of accepted parameters.
-
-        """
-        app = AndroidApplication.instance()
-        builder = Notification.Builder(app, channel_id)
-        builder.update(*args, **kwargs)
-        return builder.show()
-
-    @classmethod
-    async def cancel_notification(cls, notification_or_id, tag=None):
-        """Cancel the notification.
-
-        Parameters
-        ----------
-        notification_or_id: Notification.Builder or int
-            The notification or id of a notification to clear
-        tag: String
-            The tag of the notification to clear
-
-        """
-        mgr = await cls.get()
-        if isinstance(notification_or_id, JavaBridgeObject):
-            nid = notification_or_id.__id__
-        else:
-            nid = notification_or_id
-        if tag is None:
-            mgr.cancel_(nid)
-        else:
-            mgr.cancel(tag, nid)
-
-
 class Notification(JavaBridgeObject):
     """A wrapper for an Android's notification apis"""
 
     __nativeclass__ = f"{package}.NotificationCompat"
-
-    PRIORITIES = {
-        "low": NotificationManager.IMPORTANCE_LOW,
-        "normal": NotificationManager.IMPORTANCE_DEFAULT,
-        "high": NotificationManager.IMPORTANCE_HIGH,
-    }
 
     class Builder(JavaBridgeObject):
         """Builds a notification.
@@ -189,66 +45,63 @@ class Notification(JavaBridgeObject):
         """
 
         __nativeclass__ = f"{package}.NotificationCompat$Builder"
-        __signature__ = ["android.content.Context", "java.lang.String"]
+        __signature__ = [Context, str]
         addAction = JavaMethod(f"{package}.NotificationCompat$Action")
-        addAction_ = JavaMethod(
-            "android.R", "java.lang.CharSequence", "android.app.PendingIntent"
-        )
+        addAction_ = JavaMethod("android.R", "java.lang.CharSequence", PendingIntent)
         addInvisibleAction = JavaMethod(f"{package}.NotificationCompat$Action")
         addInvisibleAction_ = JavaMethod(
-            "android.R", "java.lang.CharSequence", "android.app.PendingIntent"
+            "android.R", "java.lang.CharSequence", PendingIntent
         )
-        addPerson = JavaMethod("java.lang.String")
-
+        addPerson = JavaMethod(str)
         build = JavaMethod(returns="android.app.Notification")
 
-        setAutoCancel = JavaMethod("boolean")
+        setAutoCancel = JavaMethod(bool)
         setBadgeIconType = JavaMethod("android.R")
-        setCategory = JavaMethod("java.lang.String")
-        setChannelId = JavaMethod("java.lang.String")
+        setCategory = JavaMethod(str)
+        setChannelId = JavaMethod(str)
         setColor = JavaMethod("android.graphics.Color")
-        setColorized = JavaMethod("boolean")
+        setColorized = JavaMethod(bool)
         setContent = JavaMethod("android.widget.RemoteViews")
         setContentInfo = JavaMethod("java.lang.CharSequence")
-        setContentIntent = JavaMethod("android.app.PendingIntent")
+        setContentIntent = JavaMethod(PendingIntent)
         setContentText = JavaMethod("java.lang.CharSequence")
         setContentTitle = JavaMethod("java.lang.CharSequence")
         setCustomBigContentView = JavaMethod("android.widget.RemoteViews")
         setCustomContentView = JavaMethod("android.widget.RemoteViews")
         setCustomHeadsUpContentView = JavaMethod("android.widget.RemoteViews")
-        setDefaults = JavaMethod("int")
-        setDeleteIntent = JavaMethod("android.app.PendingIntent")
+        setDefaults = JavaMethod(int)
+        setDeleteIntent = JavaMethod(PendingIntent)
         setExtras = JavaMethod("android.os.Bundle")
-        setFullScreenIntent = JavaMethod("android.app.PendingIntent", "boolean")
+        setFullScreenIntent = JavaMethod(PendingIntent, bool)
 
-        setGroup = JavaMethod("java.lang.String")
-        setGroupAlertBehavior = JavaMethod("int")
-        setGroupSummary = JavaMethod("boolean")
-        setLargeIcon = JavaMethod("android.graphics.Bitmap")
-        setLights = JavaMethod("android.graphics.Color", "int", "int")
-        setLocalOnly = JavaMethod("boolean")
-        setNumber = JavaMethod("int")
-        setOngoing = JavaMethod("boolean")
-        setOnlyAlertOnce = JavaMethod("boolean")
-        setPriority = JavaMethod("int")
-        setProgress = JavaMethod("int", "int", "boolean")
+        setGroup = JavaMethod(str)
+        setGroupAlertBehavior = JavaMethod(int)
+        setGroupSummary = JavaMethod(bool)
+        setLargeIcon = JavaMethod(Bitmap)
+        setLights = JavaMethod("android.graphics.Color", int, int)
+        setLocalOnly = JavaMethod(bool)
+        setNumber = JavaMethod(int)
+        setOngoing = JavaMethod(bool)
+        setOnlyAlertOnce = JavaMethod(bool)
+        setPriority = JavaMethod(int)
+        setProgress = JavaMethod(int, int, bool)
         setPublicVersion = JavaMethod("android.app.Notification")
         setRemoteInputHistory = JavaMethod("Landroid.app.Notification;[")
-        setShortcutId = JavaMethod("java.lang.String")
-        setShowWhen = JavaMethod("boolean")
+        setShortcutId = JavaMethod(str)
+        setShowWhen = JavaMethod(bool)
         setSmallIcon = JavaMethod("android.R")
-        setSmallIcon_ = JavaMethod("android.R", "int")
-        setSortKey = JavaMethod("java.lang.String")
-        setSound = JavaMethod("android.net.Uri")
-        setSound_ = JavaMethod("android.net.Uri", "int")
+        setSmallIcon_ = JavaMethod("android.R", int)
+        setSortKey = JavaMethod(str)
+        setSound = JavaMethod(Uri)
+        setSound_ = JavaMethod(Uri, int)
         setStyle = JavaMethod(f"{package}.NotificationCompat$Style")
         setSubText = JavaMethod("java.lang.CharSequence")
         setTicker = JavaMethod("java.lang.CharSequence", "android.widget.RemoteViews")
         setTicker_ = JavaMethod("java.lang.CharSequence")
         setTimeoutAfter = JavaMethod("long")
-        setUsesChronometer = JavaMethod("boolean")
+        setUsesChronometer = JavaMethod(bool)
         setVibrate = JavaMethod("J[")
-        setVisibility = JavaMethod("int")
+        setVisibility = JavaMethod(int)
         setWhen = JavaMethod("long")
 
         #: Glide Manager for loading bitmaps
@@ -261,21 +114,23 @@ class Notification(JavaBridgeObject):
             app = AndroidApplication.instance()
             return RequestManager(__id__=Glide.with__(app))
 
-        def load_bitmap(self, src):
-            r = RequestBuilder(__id__=self.manager.load(src)).asBitmap()
+        def load_bitmap(self, src: str) -> Bitmap:
+            mgr = self.manager
+            assert mgr is not None
+            r = RequestBuilder(__id__=mgr.load(src)).asBitmap()
             return Bitmap(__id__=r.__id__)
 
         def update(
             self,
-            title="",
-            text="",
-            info="",
-            sub_text="",
-            ticker="",
-            importance=NotificationManager.IMPORTANCE_DEFAULT,
-            group="",
-            group_summary=None,
-            group_alert_behavior=None,
+            title: str = "",
+            text: str = "",
+            info: str = "",
+            sub_text: str = "",
+            ticker: str = "",
+            importance: int = 3,  # IMPORTANCE_DEFAULT
+            group: str = "",
+            group_summary: Optional[bool] = None,
+            group_alert_behavior: Optional[int] = None,
             small_icon="@mipmap/ic_launcher",
             large_icon="",
             number=None,
@@ -503,28 +358,179 @@ class Notification(JavaBridgeObject):
             mgr.notify(self.__id__, notification)
 
 
+# Android really messed this one up
+class NotificationManager(JavaBridgeObject):
+    """Android NotificationManager. Use the `show_notification` and
+    `create_channel` class methods.
+
+    """
+
+    IMPORTANCE_NONE = -1000
+    IMPORTANCE_MIN = 1
+    IMPORTANCE_LOW = 2
+    IMPORTANCE_DEFAULT = 3
+    IMPORTANCE_HIGH = 4
+    IMPORTANCE_MAX = 5
+
+    PRIORITIES = {
+        "low": IMPORTANCE_LOW,
+        "normal": IMPORTANCE_DEFAULT,
+        "high": IMPORTANCE_HIGH,
+    }
+
+    #: Holds the singleton instance
+    _instance: ClassVar[Optional["NotificationManager"]] = None
+    __nativeclass__ = f"{package}.NotificationManagerCompat"
+
+    ACTION_BIND_SIDE_CHANNEL = "android.support.BIND_NOTIFICATION_SIDE_CHANNEL"
+    EXTRA_USE_SIDE_CHANNEL = "android.support.useSideChannel"
+
+    cancel = JavaMethod(str, int)
+    cancel_ = JavaMethod(int)
+    cancelAll = JavaMethod()
+
+    notify = JavaMethod(int, Notification)  # type: ignore
+    notify_ = JavaMethod(str, int, Notification)
+
+    from_ = JavaStaticMethod(Context, returns=f"{package}.NotificationManagerCompat")
+
+    _receivers = List(BroadcastReceiver)
+
+    @classmethod
+    def instance(cls) -> Optional["NotificationManager"]:
+        """Get an instance of this service if it was already requested.
+
+        You should request it first using `NotificationManager.get()`
+
+        __Example__
+
+            :::python
+
+            await NotificationManager.get()
+
+
+        """
+        return cls._instance
+
+    @classmethod
+    async def get(cls) -> "NotificationManager":
+        """Acquires the NotificationManager service async."""
+        app = AndroidApplication.instance()
+        if cls._instance:
+            return cls._instance
+        obj_id = await cls.from_(app)
+        return cls(__id__=obj_id)
+
+    def __init__(self, *args, **kwargs):
+        """Force only one instance to exist"""
+        cls = self.__class__
+        if cls._instance is not None:
+            name = cls.__name__
+            raise RuntimeError(
+                f"Only one instance of {name} can exist! "
+                f"Use {name}.instance() instead!"
+            )
+        super().__init__(*args, **kwargs)
+        cls._instance = self
+
+    @classmethod
+    async def create_channel(
+        cls,
+        channel_id: str,
+        name: str,
+        importance: int = IMPORTANCE_DEFAULT,
+        description: str = "",
+    ) -> Optional["NotificationChannel"]:
+        """Before you can deliver the notification on Android 8.0 and higher,
+        you must register your app's notification channel with the system by
+        passing an instance of NotificationChannel
+        to createNotificationChannel().
+
+        Parameters
+        ----------
+        channel_id: String-
+            Channel ID
+        name: String
+            Channel name
+        importance: Int
+            One of the IMPORTANCE levels
+        description: String
+            Channel description
+
+        Returns
+        -------
+        channel: NotificationChannel or None
+            The channel that was created.
+
+        """
+        app = AndroidApplication.instance()
+        assert app is not None
+        activity = app.activity
+        assert activity is not None
+        if activity.api_level < 26:
+            return None
+        channel = NotificationChannel(channel_id, name, importance)
+        channel.setDescription(description)
+        mgr = await NotificationChannelManager.get()
+        mgr.createNotificationChannel(channel)
+        return channel
+
+    @classmethod
+    def show_notification(cls, channel_id: int, *args, **kwargs):
+        """Create and show a Notification. See `Notification.Builder.update`
+        for a list of accepted parameters.
+
+        """
+        app = AndroidApplication.instance()
+        builder = Notification.Builder(app, channel_id)
+        builder.update(*args, **kwargs)
+        return builder.show()
+
+    @classmethod
+    async def cancel_notification(cls, notification_or_id, tag=None):
+        """Cancel the notification.
+
+        Parameters
+        ----------
+        notification_or_id: Notification.Builder or int
+            The notification or id of a notification to clear
+        tag: String
+            The tag of the notification to clear
+
+        """
+        mgr = await cls.get()
+        if isinstance(notification_or_id, JavaBridgeObject):
+            nid = notification_or_id.__id__
+        else:
+            nid = notification_or_id
+        if tag is None:
+            mgr.cancel_(nid)
+        else:
+            mgr.cancel(tag, nid)
+
+
 class NotificationChannel(JavaBridgeObject):
     """Required for android 26 and up."""
 
     __nativeclass__ = "android.app.NotificationChannel"
-    __signature__ = ["java.lang.String", "java.lang.CharSequence", "int"]
-    setGroup = JavaMethod("java.lang.String")
+    __signature__ = [str, "java.lang.CharSequence", int]
+    setGroup = JavaMethod(str)
     setLightColor = JavaMethod("android.graphics.Color")
-    setBypassDnd = JavaMethod("boolean")
-    setDescription = JavaMethod("java.lang.String")
-    setImportance = JavaMethod("int")
+    setBypassDnd = JavaMethod(bool)
+    setDescription = JavaMethod(str)
+    setImportance = JavaMethod(int)
     setName = JavaMethod("java.lang.CharSequence")
-    showBadge = JavaMethod("boolean")
+    showBadge = JavaMethod(bool)
 
     setVibrationPattern = JavaMethod("J[")
 
 
 class NotificationChannelManager(SystemService):
     SERVICE_TYPE = Context.NOTIFICATION_SERVICE
-    __nativeclass__ = "android.app.NotificationManager"
+    __nativeclass__ = "android.app.NotificationChannelManager"
 
     # This is not in the docs
-    createNotificationChannel = JavaMethod("android.app.NotificationChannel")
+    createNotificationChannel = JavaMethod(NotificationChannel)
 
 
 class AndroidNotification(AndroidToolkitObject, ProxyNotification):

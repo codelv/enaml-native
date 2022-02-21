@@ -14,25 +14,28 @@ from typing import ClassVar
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
 
 
+class IntentFilter(JavaBridgeObject):
+    __nativeclass__ = "android.content.IntentFilter"
+    __signature__ = [str]
+
+
 class Context(JavaBridgeObject):
     __nativeclass__ = "android.content.Context"
 
     #: Broadcast receiver
-    registerReceiver = JavaMethod(
-        "android.content.BroadcastReceiver", "android.content.IntentFilter"
-    )
+    registerReceiver = JavaMethod("android.content.BroadcastReceiver", IntentFilter)
     sendBroadcast = JavaMethod("")
     unregisterReceiver = JavaMethod("android.content.BroadcastReceiver")
 
     startService = JavaMethod("android.content.Intent")
     stopService = JavaMethod("android.content.Intent")
     unbindService = JavaMethod(
-        "android.content.Intent", "android.content.ServiceConnection", "int"
+        "android.content.Intent", "android.content.ServiceConnection", int
     )
     unbindService = JavaMethod("android.content.ServiceConnection")
 
     #: Get system services
-    getSystemService = JavaMethod("java.lang.String", returns="java.lang.Object")
+    getSystemService = JavaMethod(str, returns="java.lang.Object")
 
     ACCESSIBILITY_SERVICE = "accessibility"
     ACCOUNT_SERVICE = "account"
@@ -157,39 +160,34 @@ class Context(JavaBridgeObject):
 
 class Intent(JavaBridgeObject):
     __nativeclass__ = "android.content.Intent"
-    setAction = JavaMethod("java.lang.String")
-    setClass = JavaMethod("android.content.Context", "java.lang.Class")
-    putExtra = JavaMethod("java.lang.String", "java.lang.String")
+    setAction = JavaMethod(str)
+    setClass = JavaMethod(Context, "java.lang.Class")
+    putExtra = JavaMethod(str, str)
 
 
 class PendingIntent(JavaBridgeObject):
     __nativeclass__ = "android.app.PendingIntent"
     getActivity = JavaStaticMethod(
-        "android.content.Context",
-        "int",
-        "android.content.Intent",
-        "int",
-        returns="androind.app.PendingIntent",
+        Context,
+        int,
+        Intent,
+        int,
+        returns="android.app.PendingIntent",
     )
     getService = JavaStaticMethod(
-        "android.content.Context",
-        "int",
-        "android.content.Intent",
-        "int",
-        returns="androind.app.PendingIntent",
+        Context,
+        int,
+        Intent,
+        int,
+        returns="android.app.PendingIntent",
     )
     getBroadcast = JavaStaticMethod(
-        "android.content.Context",
-        "int",
-        "android.content.Intent",
-        "int",
+        Context,
+        int,
+        Intent,
+        int,
         returns="androind.app.PendingIntent",
     )
-
-
-class IntentFilter(JavaBridgeObject):
-    __nativeclass__ = "android.content.IntentFilter"
-    __signature__ = ["java.lang.String"]
 
 
 class BroadcastReceiver(JavaBridgeObject):
@@ -202,10 +200,10 @@ class BroadcastReceiver(JavaBridgeObject):
     )
 
     #: Delegate receiver callback
-    onReceive = JavaCallback("android.content.Context", "android.content.Intent")
+    onReceive = JavaCallback(Context, Intent)
 
     @classmethod
-    def for_action(cls, action, callback, single_shot=True):
+    def for_action(cls, action: str, callback, single_shot: bool = True):
         """Create a BroadcastReceiver that is invoked when the given
         action is received.
 
@@ -226,7 +224,10 @@ class BroadcastReceiver(JavaBridgeObject):
 
         """
         receiver = cls()
-        activity = receiver.__app__.activity.widget
+        android_app = receiver.__app__
+        assert android_app is not None
+        activity = android_app.activity
+        assert activity is not None
         receiver.setReceiver(receiver.getId())
 
         def on_receive(ctx, intent):
@@ -238,7 +239,7 @@ class BroadcastReceiver(JavaBridgeObject):
 
     def __del__(self):
         """Unregister automatically"""
-        activity = self.__app__.activity.widget
+        activity = self.__app__.activity
         activity.unregisterReceiver(self)
         super().__del__()
 

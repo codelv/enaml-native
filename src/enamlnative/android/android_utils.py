@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -14,11 +14,15 @@ from .app import AndroidApplication
 from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
 
 
+class AttributeSet(JavaBridgeObject):
+    __nativeclass__ = "android.util.AttributeSet"
+
+
 class ArrayList(JavaBridgeObject):
     __nativeclass__ = "java.util.ArrayList"
-    add = JavaMethod("int", "java.lang.Object")
+    add = JavaMethod(int, "java.lang.Object")
     addAll = JavaMethod("java.util.Collection")
-    remove = JavaMethod("int")
+    remove = JavaMethod(int)
     removeAll = JavaMethod("java.util.Collection")
     clear = JavaMethod()
 
@@ -42,8 +46,8 @@ class InputMethodManager(SystemService):
     SERVICE_TYPE = Context.INPUT_METHOD_SERVICE
     __nativeclass__ = "android.view.inputmethod.InputMethodManager"
 
-    toggleSoftInput = JavaMethod("int", "int", returns="boolean")
-    hideSoftInputFromWindow = JavaMethod("android.os.IBinder", "int", returns="boolean")
+    toggleSoftInput = JavaMethod(int, int, returns=bool)
+    hideSoftInputFromWindow = JavaMethod("android.os.IBinder", int, returns=bool)
 
     HIDE_IMPLICIT_ONLY = 1
     SHOW_FORCED = 2
@@ -86,7 +90,7 @@ class InputMethodManager(SystemService):
 
 class Uri(JavaBridgeObject):
     __nativeclass__ = "android.net.Uri"
-    parse = JavaStaticMethod("java.lang.String", returns="android.net.Uri")
+    parse = JavaStaticMethod(str, returns="android.net.Uri")
 
 
 class Handler(JavaBridgeObject):
@@ -96,11 +100,11 @@ class Handler(JavaBridgeObject):
 
 class HandlerThread(JavaBridgeObject):
     __nativeclass__ = "android.os.HandlerThread"
-    __signature__ = ["java.lang.String"]
+    __signature__ = [str]
     getLooper = JavaMethod(returns="android.os.Looper")
-    getThreadId = JavaMethod("int")
-    quit = JavaMethod(returns="boolean")
-    quitSafely = JavaMethod(returns="boolean")
+    getThreadId = JavaMethod(int)
+    quit = JavaMethod(returns=bool)
+    quitSafely = JavaMethod(returns=bool)
     run = JavaMethod()
     join = JavaMethod()
     interrupt = JavaMethod()

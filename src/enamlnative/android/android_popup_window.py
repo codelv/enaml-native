@@ -13,45 +13,41 @@ from atom.api import Bool, Typed
 from enamlnative.android.android_toolkit_object import AndroidToolkitObject
 from enamlnative.android.bridge import JavaBridgeObject, JavaCallback, JavaMethod
 from enamlnative.widgets.popup_window import ProxyPopupWindow
-from .android_utils import ColorDrawable
+from .android_content import Context
+from .android_image_view import Drawable
+from .android_view import View
+from .android_utils import ColorDrawable, AttributeSet
 
 
 class PopupWindow(JavaBridgeObject):
     #: Show the view for the specified duration.
     __nativeclass__ = "android.widget.PopupWindow"
-    __signature__ = [
-        "android.content.Context",
-        "android.util.AttributeSet",
-        "int",
-        "android.R",
-    ]
+    __signature__ = [Context, AttributeSet, int, "android.R"]
     dismiss = JavaMethod()
-    setContentView = JavaMethod("android.view.View")
-    setAnimationStyle = JavaMethod("int")
-    setHeight = JavaMethod("int")
-    setWidth = JavaMethod("int")
+    setContentView = JavaMethod(View)
+    setAnimationStyle = JavaMethod(int)
+    setHeight = JavaMethod(int)
+    setWidth = JavaMethod(int)
 
-    showAsDropDown = JavaMethod("android.view.View", "int", "int", "int")
-    showAtLocation = JavaMethod("android.view.View", "int", "int", "int")
+    showAsDropDown = JavaMethod(View, int, int, int)
+    showAtLocation = JavaMethod(View, int, int, int)
 
-    setFocusable = JavaMethod("boolean")
-    setTouchable = JavaMethod("boolean")
-    setOutsideTouchable = JavaMethod("boolean")
+    setFocusable = JavaMethod(bool)
+    setTouchable = JavaMethod(bool)
+    setOutsideTouchable = JavaMethod(bool)
 
     setAnimationStyle = JavaMethod("android.R")
 
     setOnDismissListener = JavaMethod("android.widget.PopupWindow$OnDismissListener")
     onDismiss = JavaCallback()
 
-    setTouchInterceptor = JavaMethod(
-        "android.view.View$OnTouchListener", returns="boolean"
-    )
-    onTouch = JavaCallback("android.view.View", "android.view.MotionEvent")
+    setTouchInterceptor = JavaMethod("android.view.View$OnTouchListener", returns=bool)
+    onTouch = JavaCallback(View, "android.view.MotionEvent")
 
-    update = JavaMethod("android.view.View", "int", "int", "int", "int")
-    update_ = JavaMethod("int", "int", "int", "int")
+    update = JavaMethod(View, int, int, int, int)
+    update_ = JavaMethod(int, int, int, int)
 
-    setBackgroundDrawable = JavaMethod("android.graphics.drawable.Drawable")
+    setBackgroundDrawable = JavaMethod(Drawable)
 
 
 class AndroidPopupWindow(AndroidToolkitObject, ProxyPopupWindow):

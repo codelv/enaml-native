@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -17,14 +17,14 @@ from .bridge import JavaField, JavaMethod
 
 class LinearLayout(ViewGroup):
     __nativeclass__ = "android.widget.LinearLayout"
-    setOrientation = JavaMethod("int")
-    setGravity = JavaMethod("int")
+    setOrientation = JavaMethod(int)
+    setGravity = JavaMethod(int)
 
 
 class LinearLayoutParams(MarginLayoutParams):
     __nativeclass__ = "android.widget.LinearLayout$LayoutParams"
-    gravity = JavaField("int")
-    weight = JavaField("int")
+    gravity = JavaField(int)
+    weight = JavaField(int)
 
 
 class AndroidLinearLayout(AndroidViewGroup, ProxyLinearLayout):

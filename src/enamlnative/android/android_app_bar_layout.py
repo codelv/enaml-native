@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -11,6 +11,7 @@ Created on Mar 13, 2018
 """
 from atom.api import Typed
 from enamlnative.widgets.app_bar_layout import ProxyAppBarLayout
+from .android_content import Context
 from .android_linear_layout import AndroidLinearLayout, LinearLayout
 from .bridge import JavaCallback, JavaMethod
 
@@ -19,7 +20,7 @@ class AppBarLayout(LinearLayout):
     package = "com.google.android.material.appbar"
 
     __nativeclass__ = f"{package}.AppBarLayout"
-    __signature__ = ["android.content.Context"]
+    __signature__ = [Context]
 
     addOnOffsetChangedListener = JavaMethod(
         f"{package}.AppBarLayout$OnOffsetChangedListener"
@@ -28,9 +29,9 @@ class AppBarLayout(LinearLayout):
         f"{package}.AppBarLayout$OnOffsetChangedListener"
     )
 
-    setExpanded = JavaMethod("boolean")
+    setExpanded = JavaMethod(bool)
 
-    onOffsetChanged = JavaCallback(f"{package}.AppBarLayout", "int")
+    onOffsetChanged = JavaCallback(f"{package}.AppBarLayout", int)
 
 
 class AndroidAppBarLayout(AndroidLinearLayout, ProxyAppBarLayout):

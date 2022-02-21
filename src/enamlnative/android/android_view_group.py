@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -17,21 +17,19 @@ from .bridge import JavaBridgeObject, JavaMethod
 
 class ViewGroup(View):
     __nativeclass__ = "android.view.ViewGroup"
-    addView_ = JavaMethod(
-        "android.view.View", "int", "android.view.ViewGroup$LayoutParams"
-    )
-    addView = JavaMethod("android.view.View", "int")
+    addView_ = JavaMethod(View, int, "android.view.ViewGroup$LayoutParams")
+    addView = JavaMethod(View, int)
 
-    removeView = JavaMethod("android.view.View")
+    removeView = JavaMethod(View)
 
     setLayoutTransition = JavaMethod("android.animation.LayoutTransition")
 
 
 class MarginLayoutParams(LayoutParams):
     __nativeclass__ = "android.view.ViewGroup$MarginLayoutParams"
-    __signature__ = ["int", "int"]
-    setMargins = JavaMethod("int", "int", "int", "int")
-    setLayoutDirection = JavaMethod("int")
+    __signature__ = [int, int]
+    setMargins = JavaMethod(int, int, int, int)
+    setLayoutDirection = JavaMethod(int)
 
 
 class LayoutTransition(JavaBridgeObject):
