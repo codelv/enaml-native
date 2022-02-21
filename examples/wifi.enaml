@@ -1,6 +1,7 @@
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 from enamlnative.android.api import WifiManager
+from enaml.application import deferred_call
 
 
 enamldef ContentView(Flexbox): view:
@@ -10,20 +11,36 @@ enamldef ContentView(Flexbox): view:
     attr wifi_enabled = False
     attr wifi_info = None
     attr dhcp_info = None
-    activated ::
-        WifiManager.is_wifi_enabled().then(
-            lambda r,view=view:setattr(view,'wifi_enabled',r))
+    activated :: deferred_call(start)
 
-    func start_scan():
-        view.scanning = True
-        WifiManager.get_networks().then(on_scan_complete)
+    async func start():
+        try:
+            self.wifi_enabled = await WifiManager.is_wifi_enabled()
+        except RuntimeError as e:
+            app.show_toast(f'{e}')
 
-    func on_scan_complete(results):
-        view.scanning = False
-        view.networks = results
+    async func start_scan():
+        self.scanning = True
+        try:
+            self.networks = await WifiManager.get_networks()
+        except RuntimeError as e:
+            app.show_toast(f'{e}')
+        finally:
+            self.scanning = False
 
-    func on_connect(result):
-        dialog.show = False
+    async func get_connection_info():
+        self.wifi_info = await WifiManager.get_connection_info()
+
+    async func get_dhcp_info():
+        self.dhcp_info = await WifiManager.get_dhcp_info()
+
+    async func toggle_wifi():
+        self.wifi_enabled = await WifiManager.set_wifi_enabled(not wifi_enabled)
+
+
+    async func connect_wifi():
+        await WifiManager.connect(ssid=dialog.ssid, key=pwd.text)
+        dialog.show = True
 
     Toolbar:
         height = 100
@@ -33,26 +50,22 @@ enamldef ContentView(Flexbox): view:
             Button:
                 flat = True
                 text = "Scan"
-                clicked  :: start_scan()
+                clicked  :: deferred_call(start_scan)
             Button:
                 flat = True
                 text = "Conn"
-                clicked  ::
-                    WifiManager.get_connection_info().then(
-                        lambda r,view=view: setattr(view,'wifi_info',r))
+                clicked  :: deferred_call(get_connection_info)
+
             Button:
                 flat = True
                 text = "DHCP"
-                clicked  ::
-                    WifiManager.get_dhcp_info().then(
-                        lambda r,view=view: setattr(view,'dhcp_info',r))
+                clicked  :: deferred_call(get_dhcp_info)
+
             Button:
                 flat = True
                 text << "Disable" if wifi_enabled else "Enable"
-                clicked  ::
-                    WifiManager.set_wifi_enabled(not wifi_enabled).then(
-                        lambda r,view=view:setattr(view,'wifi_enabled',
-                        (not view.wifi_enabled) if r==True else view.wifi_enabled))
+                clicked  :: deferred_call(toggle_wifi)
+
     Flexbox:
         flex_direction = 'column'
         ScrollView:
@@ -105,8 +118,7 @@ enamldef ContentView(Flexbox): view:
                     Button:
                         flat = True
                         text = "Connect"
-                        clicked ::
-                            WifiManager.connect(ssid=ssid,
-                                                key=pwd.text).then(on_connect)
+                        clicked :: deferred_call(connect_wifi)
+
 
 

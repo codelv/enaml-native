@@ -1,9 +1,10 @@
 from enamlnative.widgets.api import *
 
+
 enamldef ContentView(Flexbox):
     flex_direction = "column"
-    background_color="#eee"
-    padding=(10,10,10,0)
+    background_color = "#eee"
+    padding = (10, 10, 10, 0)
     CardView:
         #: Padding inside card
         #: Border radius
@@ -15,7 +16,7 @@ enamldef ContentView(Flexbox):
         #: Content is usually a layout container (ie flexbox)
         Flexbox:
             TextView:
-                padding=(10,10,10,10)
+                padding = (10, 10, 10, 10)
                 text_size = 32
                 text = "This is a card view!"
 

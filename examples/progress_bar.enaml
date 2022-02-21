@@ -2,7 +2,7 @@ from enamlnative.widgets.api import *
 
 enamldef ContentView(Flexbox):
     flex_direction = "column"
-
+    align_items = "stretch"
     ProgressBar: pb:
         padding = (10, 10, 10, 10)
         progress = 50

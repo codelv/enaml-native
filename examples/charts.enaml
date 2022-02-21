@@ -7,7 +7,7 @@ AndroidApplication.instance().debug = False
 
 enamldef ChartPage(Flexbox): view:
     flex_direction = "column"
-    padding = (10,10,10,10)
+    padding = (10, 10, 10, 10)
     attr title = ""
     Toolbar:
         title = view.title

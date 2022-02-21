@@ -5,19 +5,21 @@ from enamlnative.core.api import Looper
 enamldef ContentView(Flexbox):
     attr app = AndroidApplication.instance()
     flex_direction = "column"
+    align_items = "stretch"
     Button:
         text = "Open bottom sheet"
         clicked :: sheet.show = True
     TextView:
-        text << "Show: {}".format(sheet.show)
+        text << f"Show: {sheet.show}"
     BottomSheetDialog: sheet:
         Flexbox:
             flex_direction = "column"
+            align_items = "stretch"
             Looper:
                 iterable = range(3)
                 Button:
                     flat = True
-                    text = "Action {}".format(loop_item)
+                    text = f"Action {loop.item}"
                     clicked ::
                         app.show_toast(self.text, False)
                         sheet.show = False

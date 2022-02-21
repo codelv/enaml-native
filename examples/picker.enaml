@@ -2,17 +2,25 @@ from enamlnative.widgets.api import *
 
 enamldef ContentView(Flexbox):
     flex_direction = "column"
+    align_items = "stretch"
+    TextView:
+        text = "Number Pickers"
 
     #: Numeric by default (on android)
     Picker: pk1:
-      min_value = 0
-      max_value = 100
-      value = 20
+        min_value = 0
+        max_value = 100
+        value = 20
+        text_size = 24
+        divider_height = 2
     TextView:
-      text << "Selected: {}".format(pk1.value)
+        text << f"Selected: {pk1.value}"
 
     #: Use items for strings
     Picker: pk2:
-      items = [u"blue", u'red', u'green', u'orange', u'yellow', u'white', u'black']
+        text_color << items[value]
+        min_height = 100
+        min_width = 100
+        items = ["blue", 'cyan', 'red', 'magenta', 'green', 'yellow', 'black']
     TextView:
-      text << "Selected: {}".format(pk2.items[pk2.value])
+        text << f"Selected: {pk2.items[pk2.value]}"

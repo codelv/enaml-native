@@ -13,11 +13,13 @@ enamldef ContentView(Flexbox): view:
 
     func on_back_pressed(change):
         lbl.text = str(change)
+        print("BACK WAS PRESSED")
         #: Don't actually go back
         change['value']['handled'] = view.handled
 
     activated::
-        app.observe('back_pressed',on_back_pressed)
+        app.observe('back_pressed', on_back_pressed)
+
 
     TextView: lbl:
         text = "Press the back button"

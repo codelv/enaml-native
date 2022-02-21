@@ -1,6 +1,7 @@
 from enamlnative.core.api import Looper, Conditional
 from enamlnative.widgets.api import (
-    Flexbox, Toolbar, Button, Dialog, TextView, View, ViewPager, PagerFragment, WebView, ScrollView
+    Flexbox, Toolbar, Button, Dialog, TextView, View, ViewPager,
+    PagerFragment, WebView, ScrollView
 )
 from enamlnative.android.app import AndroidApplication
 

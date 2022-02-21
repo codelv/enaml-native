@@ -73,13 +73,16 @@ enamldef ContentView(CoordinatorLayout):
         Flexbox:
             justify_content = 'center'
             align_items = 'center'
-            VideoView: video:
-                src << app_state.current_video
-                src :: app.show_toast(self.src)
-                activated :: app.show_toast(self.src)
-                control = 'stop'
-                error :: app.show_toast("Error: {}".format(change['value']['message']))
-                info :: app.show_toast("Info: {}".format(change['value']['message']))
+            View: video:
+                attr control
+                attr state
+            #VideoView: video:
+                #src << app_state.current_video
+                #src :: app.show_toast(self.src)
+                #activated :: app.show_toast(self.src)
+                #control = 'stop'
+                #error :: app.show_toast("Error: {}".format(change['value']['message']))
+                #info :: app.show_toast("Info: {}".format(change['value']['message']))
         Flexbox:
             justify_content = 'center'
             align_items = 'center'
@@ -95,15 +98,15 @@ enamldef ContentView(CoordinatorLayout):
                     video.control = 'play' if video.control in ('stop', 'pause') else 'pause'
                     self.visible = False
 
-        Flexbox:
-            justify_content = 'space_between'
-            align_items = 'center'
-            transition = 'default'
-            MediaButton:
-                visible := btn.visible
-                text << "{md-skip-previous}"
-                clicked :: app_state.previous_video()
-            MediaButton:
-                visible := btn.visible
-                text << "{md-skip-next}"
-                clicked :: app_state.next_video()
+        #Flexbox:
+            #justify_content = 'space_between'
+            #align_items = 'center'
+            #transition = 'default'
+            #MediaButton:
+                #visible := btn.visible
+                #text << "{md-skip-previous}"
+                #clicked :: app_state.previous_video()
+            #MediaButton:
+                #visible := btn.visible
+                #text << "{md-skip-next}"
+                #clicked :: app_state.next_video()

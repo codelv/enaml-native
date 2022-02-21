@@ -8,9 +8,9 @@ enamldef ContentView(ScrollView):
         CalendarView: cv:
             pass
         TextView:
-            text << "Date: {}".format(cv.date)
+            text << f"Date: {cv.date}"
         CalendarView:
-            min_date = datetime(1982,3,1)
+            min_date = datetime(1982, 3, 1)
             max_date = datetime.now()
             date = datetime.now()
 

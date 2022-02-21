@@ -1,14 +1,16 @@
 from enamlnative.widgets.api import *
 
+
 enamldef ContentView(Flexbox):
     flex_direction = "column"
+    align_items = "stretch"
 
     TextView:
         text = "Pet type"
 
     AutoCompleteTextView: tv:
         #: Autocomplete items
-        choices = ['Cat','Dog', 'Duck','Bird','Elephant', "Fish"]
+        choices = ['Cat', 'Dog', 'Duck','Bird','Elephant', "Fish"]
 
         #: Min letters before autocomplete
         threshold = 1
@@ -17,4 +19,4 @@ enamldef ContentView(Flexbox):
         placeholder = "Type an animal name"
 
     TextView:
-        text << "Selection: {}".format(tv.text)
+        text << f"Selection: {tv.text}"

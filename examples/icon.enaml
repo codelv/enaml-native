@@ -45,17 +45,17 @@ enamldef ContentView(ScrollView): finder:
                 Text:
                   text = "Icon packs"
                 Spinner: icon_pack:
-                  items = ICON_PACKS.keys()
+                  items = list(ICON_PACKS.keys())
 
                 Text:
                   text = "Icon"
                 AutoCompleteTextView: search:
                     choices << list(finder.icons)
-                    text << finder.icons[0]
+                    text << choices[0]
 
                 Flexbox: display:
                     padding = (0, 20, 0, 20)
-                    attr text << u"{%s}"%(search.text) if search.text in finder.icons else ""
+                    attr text << "{%s}" % search.text if search.text in finder.icons else ""
                     Looper:
                         iterable = [72, 64, 48, 32, 24, 18]
                         Icon:
@@ -83,4 +83,4 @@ enamldef ContentView(ScrollView): finder:
                   text = "Icons"
                 Icon:
                   text_size = 32
-                  text << u" ".join([u"{%s}"%n for n in finder.icons])
+                  text << " ".join(["{%s}" % n for n in finder.icons])

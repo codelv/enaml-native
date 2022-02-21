@@ -1,9 +1,12 @@
 from enamlnative.widgets.api import *
 
+
 enamldef ContentView(Flexbox):
     flex_direction = "column"
+    align_items = "stretch"
+    margin = (10, 10, 10, 10)
     SeekBar: seekbar:
-      progress = 12
-      max = 20
+        progress = 12
+        max = 20
     TextView:
-      text << "Value {}".format(seekbar.progress)
+        text << f"Value {seekbar.progress}"

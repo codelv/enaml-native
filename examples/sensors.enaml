@@ -13,23 +13,36 @@ Created on May 20, 2017
 from enamlnative.widgets.api import *
 from enaml.core.api import Conditional, Looper
 from enamlnative.android.api import SensorManager, Sensor
+from enaml.application import deferred_call
 
 
 enamldef ContentView(ScrollView): view:
-    attr manager
-    attr sensor
+    attr manager: SensorManager
+    attr sensor: Sensor
     attr event
     attr sensor_type = 'TYPE_ACCELEROMETER'
     attr sensor_delay = 'SENSOR_DELAY_NORMAL'
+
+    deactivated ::
+        if sensor is not None:
+            sensor.stop()
+
     func on_sensor_changed(data):
         view.event = data
+
+    async func load_manager():
+        self.manager = await SensorManager.get()
+
+    async func load_sensor():
+        sensor_type = getattr(Sensor, view.sensor_type)
+        self.sensor = await Sensor.get(sensor_type)
+
     Flexbox:
         flex_direction = 'column'
         Button:
             text = "Get manager"
-            clicked::
-                SensorManager.get().then(
-                    lambda m, view=view:setattr(view, 'manager', m))
+            clicked :: deferred_call(load_manager)
+
         TextView:
             text = "Sensor Type"
         Spinner:
@@ -46,9 +59,8 @@ enamldef ContentView(ScrollView): view:
 
         Button:
             text = "Get sensor"
-            clicked::
-                Sensor.get(getattr(Sensor, view.sensor_type)).then(
-                    lambda s, view=view:setattr(view, 'sensor', s))
+            clicked :: deferred_call(load_sensor)
+
         Button:
             text = "Start"
             clicked::
@@ -62,10 +74,11 @@ enamldef ContentView(ScrollView): view:
             clicked::
                 # Hard way
                 #manager.unregisterListener(sensor.getId(), sensor)
-                sensor.stop()
+                if sensor is not None:
+                    sensor.stop()
         TextView:
-            text << "Manager: {}".format(manager)
+            text << f"Manager: {manager}"
         TextView:
-            text << "Sensor: {}".format(sensor)
+            text << f"Sensor: {sensor}"
         TextView:
-            text << "Event: {}".format(event)
+            text << f"Event: {event}"

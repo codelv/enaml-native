@@ -1,0 +1,37 @@
+from enamlnative.core.api import *
+from enamlnative.widgets.api import *
+from enamlnative.android.app import AndroidApplication
+
+
+enamldef ContentView(Flexbox):
+    attr app = AndroidApplication.instance()
+    flex_direction = "column"
+    align_items = "stretch"
+    Button:
+        text = "default"
+        text_color = "#f00"
+        font_family = "sans-serif-light"
+        align_self = 'flex_end'
+        text_size = 32
+        clicked :: app.show_toast(f"Clicked {text}")
+    Button:
+        text = "flat"
+        flat = True
+        text_color = "#c1a"
+        align_self = 'flex_start'
+        clicked :: app.show_toast(f"Clicked {text}")
+    ToggleButton:
+        text = "Initial"
+        text_on = "On"
+        text_off = "Off"
+        min_width = 400
+        max_width = 500
+        align_self = 'center'
+        clicked :: app.show_toast(f"State {text}")
+    #FloatingActionButton:
+    #    gravity = "bottom|right"
+    #    margin = (0, 0, 10, 10)
+    #    src = "{md-play-arrow}"
+    #    clicked :: app.show_toast("Play clicked!")
+
+

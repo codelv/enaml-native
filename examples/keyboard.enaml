@@ -1,13 +1,15 @@
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 from enamlnative.android.api import InputMethodManager
+from enaml.application import deferred_call
 
 
 enamldef ContentView(Flexbox):
     flex_direction = "column"
+    align_items = "stretch"
     Button:
         text = "Click to toggle the keyboard"
-        clicked :: InputMethodManager.toggle_keyboard()
+        clicked :: deferred_call(InputMethodManager.toggle_keyboard)
     Button:
         text = "Click to hide the keyboard"
-        clicked :: InputMethodManager.hide_keyboard()
+        clicked :: deferred_call(InputMethodManager.hide_keyboard)
