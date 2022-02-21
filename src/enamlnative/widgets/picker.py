@@ -9,7 +9,7 @@ Created on July 6, 2017
 
 @author: jrm
 """
-from atom.api import Bool, ForwardTyped, Int, List, Typed, observe
+from atom.api import Bool, ForwardTyped, Int, List, Float, Str, Typed, observe
 from enaml.core.declarative import d_
 from .linear_layout import LinearLayout, ProxyLinearLayout
 
@@ -20,22 +20,31 @@ class ProxyPicker(ProxyLinearLayout):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Picker)
 
-    def set_max_value(self, value):
+    def set_max_value(self, value: int):
         raise NotImplementedError
 
-    def set_min_value(self, value):
+    def set_min_value(self, value: int):
         raise NotImplementedError
 
-    def set_value(self, value):
+    def set_value(self, value: int):
         raise NotImplementedError
 
-    def set_long_press_update_interval(self, interval):
+    def set_long_press_update_interval(self, interval: int):
         raise NotImplementedError
 
-    def set_wraps(self, wraps):
+    def set_wraps(self, wraps: bool):
         raise NotImplementedError
 
-    def set_items(self, items):
+    def set_items(self, items: list[str]):
+        raise NotImplementedError
+
+    def set_text_color(self, color: str):
+        raise NotImplementedError
+
+    def set_text_size(self, size: float):
+        raise NotImplementedError
+
+    def set_divider_height(self, height: int):
         raise NotImplementedError
 
 
@@ -55,6 +64,15 @@ class Picker(LinearLayout):
 
     #: Items to display
     items = d_(List(str))
+
+    #: Text color
+    text_color = d_(Str())
+
+    #: Text size
+    text_size = d_(Float(strict=False))
+
+    #: Divider height
+    divider_height = d_(Int(1))
 
     #: Sets the speed at which the numbers be incremented and decremented
     #: when the up and down buttons are long pressed respectively.
@@ -77,6 +95,9 @@ class Picker(LinearLayout):
         "items",
         "long_press_update_interval",
         "wraps",
+        "text_color",
+        "text_size",
+        "divider_height",
     )
     def _update_proxy(self, change):
 

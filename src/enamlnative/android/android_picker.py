@@ -9,7 +9,7 @@ Created on July 6, 2017
 
 @author: jrm
 """
-from atom.api import Typed
+from atom.api import Typed, set_default
 from enamlnative.widgets.picker import ProxyPicker
 from .android_linear_layout import AndroidLinearLayout, LinearLayout
 from .bridge import JavaCallback, JavaMethod
@@ -22,6 +22,9 @@ class Picker(LinearLayout):
     setMaxValue = JavaMethod("int")
     setMinValue = JavaMethod("int")
     setValue = JavaMethod("int")
+    setTextColor = JavaMethod("android.graphics.Color")
+    setTextSize = JavaMethod("float")
+    setSelectionDividerHeight = JavaMethod("int")
     setOnLongPressUpdateInterval = JavaMethod("long")
     setOnValueChangedListener = JavaMethod(
         "android.widget.NumberPicker$OnValueChangeListener"
@@ -36,6 +39,8 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
 
     #: A reference to the widget created by the proxy.
     widget = Typed(Picker)
+
+    default_layout = set_default({"width": "wrap_content", "height": "wrap_content"})  # type: ignore
 
     # -------------------------------------------------------------------------
     # Initialization API
@@ -55,6 +60,13 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
         super().init_widget()
         d = self.declaration
         w = self.widget
+        if d.text_color:
+            self.set_text_color(d.text_color)
+        if d.text_size:
+            self.set_text_size(d.text_size)
+        if d.divider_height:
+            self.set_divider_height(d.divider_height)
+
         if d.items:
             self.set_items(d.items)
         else:
@@ -107,3 +119,18 @@ class AndroidPicker(AndroidLinearLayout, ProxyPicker):
         w.setMinValue(0)
         w.setDisplayedValues(items)
         w.setMaxValue(len(items) - 1)  # max-min + 1 wtf
+
+    def set_text_color(self, color: str):
+        w = self.widget
+        assert w is not None
+        w.setTextColor(color)
+
+    def set_text_size(self, size: float):
+        w = self.widget
+        assert w is not None
+        w.setTextSize(size)
+
+    def set_divider_height(self, height: int):
+        w = self.widget
+        assert w is not None
+        w.setSelectionDividerHeight(height)

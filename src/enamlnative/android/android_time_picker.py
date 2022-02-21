@@ -60,27 +60,42 @@ class AndroidTimePicker(AndroidFrameLayout, ProxyTimePicker):
     # -------------------------------------------------------------------------
     # OnTimeChangedListener API
     # -------------------------------------------------------------------------
-    def on_time_changed(self, view, hour, minute):
+    def on_time_changed(self, view, hour: int, minute: int):
         d = self.declaration
-        with self.widget.setHour.suppressed():
+        assert d is not None
+        w = self.widget
+        assert w is not None
+        with w.setHour.suppressed():
             d.hour = hour
-        with self.widget.setMinute.suppressed():
+        with w.setMinute.suppressed():
             d.minute = minute
 
     # -------------------------------------------------------------------------
     # ProxyFrameLayout API
     # -------------------------------------------------------------------------
-    def set_hour(self, hour):
-        if self.get_context().api_level < 23:
-            self.widget.setCurrentHour(hour)
-        else:
-            self.widget.setHour(hour)
 
-    def set_minute(self, minute):
-        if self.get_context().api_level < 23:
-            self.widget.setCurrentMinute(minute)
-        else:
-            self.widget.setMinute(minute)
+    def _get_api_level(self) -> int:
+        app = self.get_context()
+        assert app.activity is not None
+        return app.activity.api_level
 
-    def set_hour_mode(self, mode):
-        self.widget.setIs24HourView(mode == "24")
+    def set_hour(self, hour: int):
+        w = self.widget
+        assert w is not None
+        if self._get_api_level() < 23:
+            w.setCurrentHour(hour)
+        else:
+            w.setHour(hour)
+
+    def set_minute(self, minute: int):
+        w = self.widget
+        assert w is not None
+        if self._get_api_level() < 23:
+            w.setCurrentMinute(minute)
+        else:
+            w.setMinute(minute)
+
+    def set_hour_mode(self, mode: str):
+        w = self.widget
+        assert w is not None
+        w.setIs24HourView(mode == "24")
