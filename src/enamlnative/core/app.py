@@ -248,7 +248,7 @@ class BridgedApplication(Application):
         #: So we don't get out of order
         self._bridge_send(now=True)
 
-    def _bridge_send(self, now=False):
+    def _bridge_send(self, now: bool = False):
         """Send the events over the bridge to be processed by the native
         handler.
 
@@ -262,8 +262,8 @@ class BridgedApplication(Application):
         if len(self._bridge_queue):
             if self.debug:
                 print("======== Py --> Native ======")
-                for event in self._bridge_queue:
-                    print(event)
+                for i, event in enumerate(self._bridge_queue):
+                    print(f"{i}: {event}")
                 print("===========================")
             self.dispatch_events(bridge.dumps(self._bridge_queue))
             self._bridge_queue = []

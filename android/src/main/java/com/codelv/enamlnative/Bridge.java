@@ -31,6 +31,7 @@ import org.msgpack.value.IntegerValue;
 import org.msgpack.value.Value;
 
 import java.io.IOException;
+import java.lang.String;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -488,9 +489,11 @@ public class Bridge implements PythonInterpreter.EventListener {
         if (cls==null) {
             if (name.equals("NoneType")) {
                 cls = Void.TYPE;
+            } else if (name.equals("str")) {
+                cls = String.class;
             } else if (name.equals("int")) {
                 cls = int.class;
-            } else if (name.equals("boolean") || name.equals("bool")) {
+            } else if (name.equals("bool") || name.equals("boolean")) {
                 cls = boolean.class;
             } else if (name.equals("float")) {
                 cls = float.class;
@@ -1428,10 +1431,11 @@ public class Bridge implements PythonInterpreter.EventListener {
     public void processEvents(byte[] data) {
         mBridgeHandler.post(()->{
             long start = System.currentTimeMillis();
+            int i = 0;
             MessageUnpacker unpacker = newDefaultUnpacker(data);
             try {
                 int eventCount = unpacker.unpackArrayHeader();
-                for (int i=0; i<eventCount; i++) {
+                for (i=0; i<eventCount; i++) {
                     int eventTuple = unpacker.unpackArrayHeader(); // Unpack event tuple
                     String eventType = unpacker.unpackString(); // first value
                     int paramCount = unpacker.unpackArrayHeader();
@@ -1526,6 +1530,9 @@ public class Bridge implements PythonInterpreter.EventListener {
                 mActivity.runOnUiThread(()->{
                     mActivity.showErrorMessage(e);
                 });
+            } catch (Exception e) {
+                Log.e(TAG, "error processing event #" + i);
+                throw e;
             }
 
             // Process requested tasks
