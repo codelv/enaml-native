@@ -53,12 +53,20 @@ dependencies {
     testImplementation 'junit:junit:5.8'
 
     // Support
-    api 'com.android.support:appcompat-v7:28.0.0'
-    api 'com.android.support:cardview-v7:28.0.0'
-    api 'com.android.support:design:28.0.0'
-    api 'com.android.support:recyclerview-v7:28.0.0'
-    api 'com.android.support:support-fragment:28.0.0'
-    api 'com.android.support:support-v4:28.0.0'
+    api 'androidx.appcompat:appcompat:1.4.1'
+    api 'androidx.activity:activity:1.4.0'
+    api "androidx.cardview:cardview:1.0.0"
+    api "androidx.drawerlayout:drawerlayout:1.1.1"
+    api "androidx.fragment:fragment:1.4.1"
+    api "androidx.recyclerview:recyclerview:1.2.1"
+    // For control over item selection of both touch and mouse driven selection
+    api "androidx.recyclerview:recyclerview-selection:1.1.0"
+    api "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    api 'com.google.android.material:material:1.5.0'
+    api 'androidx.viewpager:viewpager:1.0.0'
+    api 'androidx.browser:browser:1.4.0'
+    api "androidx.navigation:navigation-fragment:2.4.1"
+    api "androidx.navigation:navigation-ui:2.4.1"
 
     // Requirements
     api 'org.msgpack:msgpack-core:0.9.+'
