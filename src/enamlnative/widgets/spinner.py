@@ -21,16 +21,16 @@ class ProxySpinner(ProxyViewGroup):
     #: A reference to the Label declaration.
     declaration = ForwardTyped(lambda: Spinner)
 
-    def set_mode(self, mode):
+    def set_mode(self, mode: str):
         pass
 
-    def set_prompt(self, prompt):
+    def set_prompt(self, prompt: str):
         raise NotImplementedError
 
-    def set_selected(self, selected):
+    def set_selected(self, selected: int):
         raise NotImplementedError
 
-    def set_items(self, items):
+    def set_items(self, items: list):
         raise NotImplementedError
 
     def set_item_gravity(self, gravity):

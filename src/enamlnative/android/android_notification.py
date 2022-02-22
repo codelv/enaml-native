@@ -389,8 +389,8 @@ class NotificationManager(JavaBridgeObject):
     cancel_ = JavaMethod(int)
     cancelAll = JavaMethod()
 
-    notify = JavaMethod(int, Notification)  # type: ignore
-    notify_ = JavaMethod(str, int, Notification)
+    notify = JavaMethod(int, "android.app.Notification")  # type: ignore
+    notify_ = JavaMethod(str, int, "android.app.Notification")
 
     from_ = JavaStaticMethod(Context, returns=f"{package}.NotificationManagerCompat")
 

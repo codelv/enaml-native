@@ -194,7 +194,8 @@ class BridgedApplication(Application):
     # -------------------------------------------------------------------------
     def init_error_handler(self):
         """When an error occurs, set the error view in the App"""
-        self.loop.handle_callback_exception = self.handle_error
+        # HACK: Reassign the discard method to show errors
+        self.loop._discard_future_result = self._on_future_result
 
     def create_future(self):
         """Create a future object using the EventLoop implementation"""
@@ -247,6 +248,13 @@ class BridgedApplication(Application):
         """Force an update now."""
         #: So we don't get out of order
         self._bridge_send(now=True)
+
+    def _on_future_result(self, future: Future) -> None:
+        """Avoid unhandled-exception warnings from spawned coroutines."""
+        try:
+            future.result()
+        except Exception:
+            self.handle_error(future)
 
     def _bridge_send(self, now: bool = False):
         """Send the events over the bridge to be processed by the native

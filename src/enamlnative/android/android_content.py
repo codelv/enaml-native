@@ -224,22 +224,26 @@ class BroadcastReceiver(JavaBridgeObject):
 
         """
         receiver = cls()
-        android_app = receiver.__app__
-        assert android_app is not None
-        activity = android_app.activity
-        assert activity is not None
         receiver.setReceiver(receiver.getId())
 
         def on_receive(ctx, intent):
             callback(intent)
 
         receiver.onReceive.connect(on_receive)
+        app = receiver.__app__
+        assert app is not None
+        d = app.activity
+        assert d is not None
+        proxy = d.proxy
+        assert proxy is not None
+        activity = proxy.widget
+        assert activity is not None
         activity.registerReceiver(receiver, IntentFilter(action))
         return receiver
 
     def __del__(self):
         """Unregister automatically"""
-        activity = self.__app__.activity
+        activity = self.__app__.activity.proxy.widget
         activity.unregisterReceiver(self)
         super().__del__()
 
