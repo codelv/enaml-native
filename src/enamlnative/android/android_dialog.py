@@ -14,7 +14,7 @@ from enamlnative.android.android_toolkit_object import AndroidToolkitObject
 from enamlnative.android.bridge import JavaBridgeObject, JavaCallback, JavaMethod
 from enamlnative.widgets.dialog import ProxyDialog
 from .android_content import Context
-from .androdi_view import View
+from .android_view import View
 
 
 class Dialog(JavaBridgeObject):
