@@ -160,7 +160,7 @@ class BridgeObject(Atom):
 
     """
 
-    __slots__ = ("__weakref__", "__method_id__")
+    __slots__ = ("__weakref__", "__constructor_ids__")
 
     #: Native Class name
     __nativeclass__: ClassVar[str] = ""
@@ -169,7 +169,7 @@ class BridgeObject(Atom):
     __signature__: ClassVar[list[Union[dict, str, "BridgeObject", type]]] = []
 
     #: Constructor cache id
-    __method_id__: ClassVar[int]
+    __constructor_ids__: ClassVar[list[int]]
 
     #: Suppressed methods / fields
     __suppressed__ = Dict()
@@ -191,7 +191,10 @@ class BridgeObject(Atom):
     def __init_subclass__(cls, *args, **kwargs):
         #: Convert signature to string
         cls.__signature__ = [convert_arg(arg) for arg in cls.__signature__]
-        cls.__method_id__ = method_id()
+        # Create a method id for each signature length as some may be
+        # optional. TODO: Rethink this...
+        n = max(1, len(cls.__signature__))
+        cls.__constructor_ids__ = [method_id() for i in range(n)]
 
     def _default___app__(self):
         return get_app_class().instance()
@@ -237,10 +240,14 @@ class BridgeObject(Atom):
             CACHE[self.__id__] = self
 
         if __id__ is None:
+            if args:
+                constructor_id = self.__constructor_ids__[len(args) - 1]
+            else:
+                constructor_id = self.__constructor_ids__[0]
             self.__app__.send_event(
                 Command.CREATE,  #: method
                 self.__id__,  #: id to assign in bridge cache
-                self.__method_id__,
+                constructor_id,
                 self.__nativeclass__,
                 [
                     msgpack_encoder(sig, arg)

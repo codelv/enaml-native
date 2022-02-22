@@ -596,6 +596,8 @@ public class Bridge implements PythonInterpreter.EventListener {
             if (newSpec) {
                 spec = new Class[args.length];
                 mClassSpecCache.put(cacheId,spec);
+            } else {
+                assert spec.length >= args.length; // If this fails the cache is wrong
             }
 
             // Decode each value
