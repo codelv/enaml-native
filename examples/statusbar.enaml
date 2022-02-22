@@ -1,13 +1,12 @@
 from enamlnative.widgets.api import *
-from enamlnative.android.app import AndroidApplication
 
-app = AndroidApplication.instance()
-app.statusbar_color = "blue"
 
 enamldef ContentView(Flexbox):
     flex_direction = "column"
     TextView:
         text << "Statusbar color"
     Spinner: sp:
-        items = ["blue",'red','green','orange','yellow','white','black']
-        selected :: app.statusbar_color = items[selected]
+        items = ["blue",'red','green','cyan','magenta','white','black']
+        selected ::
+            # NOTE: window must be an alias to the MainActivity's active window
+            window.statusbar_color = items[selected]

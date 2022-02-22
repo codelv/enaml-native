@@ -4,7 +4,13 @@ enamldef ContentView(Flexbox):
     flex_direction = "column"
     align_items = "stretch"
     Spinner: sp:
-        items = ["blue",'red','green','orange','yellow','white','black']
-        selected = 3
+        items = ["blue", 'red', 'green']
+        selected = 0
     TextView:
-      text << f"Selected: {sp.items[sp.selected]}"
+        text << f"Selected: {sp.items[sp.selected]}"
+
+    Spinner: popup:
+        mode = "dialog"
+        items = ["blue", 'red', 'green']
+    TextView:
+        text << f"Selected: {popup.items[sp.selected]}"

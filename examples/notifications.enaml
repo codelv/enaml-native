@@ -35,18 +35,18 @@ enamldef ContentView(Flexbox): view:
     Notification: pn:
         channel_id = CHANNEL_ID
         title = "Picture download"
-        text << "Download in progress {}%".format(self.progress)
+        text << f"Download in progress {self.progress}%"
         color = "#bac"
         show_progress = True
         progress = 0 # Initial progress must be zero then incremented
-        settings = {"ongoing":True}
+        settings = {"ongoing": True}
 
     async func show_action_notification():
         # Must save a ref when using it this way or the buttons won't work
-        self.ref = await NotificationManager.show_notification(
+        btn.ref = await NotificationManager.show_notification(
             CHANNEL_ID,
             title="Good morning!",
-            text="Wake up you lazy bum!",
+            text="Hope you have a great day!",
             actions=[
                 ("@drawable/ic_snooze", "SNOOZE", btn.on_snooze),
             ]

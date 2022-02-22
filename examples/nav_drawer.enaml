@@ -73,6 +73,7 @@ enamldef Drawer(ScrollView): drawer:
         parent.opened = []
     Flexbox:
         flex_direction = "column"
+        align_items = "stretch"
         FrameLayout:
             ImageView:
                 src = "https://antonioleiva.com/wp-content/uploads/2014/10/WallpaperAndroid50.jpg"
