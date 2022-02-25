@@ -13,6 +13,7 @@ import imp
 import os
 import sys
 from glob import glob
+from typing import Optional
 
 
 class ExtensionImporter:
@@ -39,7 +40,7 @@ class ExtensionImporter:
 
         # print("Libraries found: {}".format(self.extension_modules))
 
-    def load_module(self, mod):
+    def load_module(self, mod: str):
         """Load the extension using the load_dynamic method."""
         try:
             return sys.modules[mod]
@@ -51,7 +52,7 @@ class ExtensionImporter:
         sys.modules[mod] = m
         return m
 
-    def find_module(self, mod, path=None):
+    def find_module(self, mod: str, path: Optional[str] = None):
         """Use this as the loader if the desired module is an extension
         within the given library folder.
         """

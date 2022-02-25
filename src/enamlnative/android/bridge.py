@@ -9,6 +9,7 @@ Created on June 21, 2017
 
 @author: jrm
 """
+from typing import Optional
 from atom.api import Atom
 from enamlnative.core.bridge import (
     BridgeCallback,
@@ -22,6 +23,32 @@ from enamlnative.core.bridge import (
 )
 
 
+def encode_args(method: BridgeMethod, args: tuple, encoder=msgpack_encoder):
+    """ Common function for packing method arguments.
+
+    """
+    signature = method.__signature__
+    name = method.name.rstrip("_")
+    if not signature:
+        return (name, [])  # No arguments
+    if signature[-1].endswith("..."):
+        nargs = len(args)
+        nparams = len(signature)
+        if nargs > nparams:
+            msg = f"Invalid number of arguments: Got {args}, expected {signature}"
+            raise ValueError(msg)
+        varg = signature[-1][0:-3]
+        end = nparams - 1
+        return (
+            name,
+            [
+                encoder(signature[i] if i < end else varg, args[i])
+                for i in range(nargs)
+            ],
+        )
+    return (name, [encoder(sig, arg) for sig, arg in zip(signature, args)])
+
+
 class JavaMethod(BridgeMethod):
     """Description of a method of a View (or subclass) in Java. When called,
     this serializes call, packs the arguments, and delegates handling to a
@@ -29,49 +56,14 @@ class JavaMethod(BridgeMethod):
 
     """
 
-    def pack_args(self, obj, *args, **kwargs):
-        signature = self.__signature__
-        name = self.name.rstrip("_")
-        vargs = signature and signature[-1].endswith("...")
-        if not vargs and (len(args) != len(signature)):
-            msg = f"Invalid number of arguments: Given {args}, expected {signature}"
-            raise ValueError(msg)
-        if vargs:
-            varg = signature[-1].replace("...", "")
-            return (
-                name,
-                [
-                    msgpack_encoder(
-                        signature[i] if i + 1 < len(signature) else varg, args[i]
-                    )
-                    for i in range(len(args))
-                ],
-            )
-
-        return (name, [msgpack_encoder(sig, arg) for sig, arg in zip(signature, args)])
+    def pack_args(self, obj: BridgeObject, *args, **kwargs):
+        # The obj param is handled by the superclass
+        return encode_args(self, args)
 
 
 class JavaStaticMethod(BridgeStaticMethod):
     def pack_args(self, *args, **kwargs):
-        signature = self.__signature__
-        name = self.name.rstrip("_")
-        vargs = signature and signature[-1].endswith("...")
-        if not vargs and (len(args) != len(signature)):
-            msg = f"Invalid number of arguments: Given {args}, expected {signature}"
-            raise ValueError(msg)
-        if vargs:
-            varg = signature[-1].replace("...", "")
-            return (
-                name,
-                [
-                    msgpack_encoder(
-                        signature[i] if i + 1 < len(signature) else varg, args[i]
-                    )
-                    for i in range(len(args))
-                ],
-            )
-
-        return (name, [msgpack_encoder(sig, arg) for sig, arg in zip(signature, args)])
+        return encode_args(self, args)
 
 
 class JavaField(BridgeField):
@@ -88,8 +80,8 @@ class JavaCallback(BridgeCallback, JavaMethod):
 
     """
 
-    def pack_args(self, obj, *args, **kwargs):
-        return JavaMethod.pack_args(self, obj, *args, **kwargs)
+    def pack_args(self, obj: BridgeObject, *args, **kwargs):
+        return encode_args(self, args)
 
 
 class JavaBridgeObject(BridgeObject):
@@ -145,17 +137,16 @@ class JavaProxy(JavaBridgeObject):
 
     """
 
-    def __init__(self, ref=None, **kwargs):
+    def __init__(self, ref: Optional[BridgeObject] = None, **kwargs):
         """Sends the event to create this View in Java"""
+        # Skip the subclass
         super(Atom, self).__init__(**kwargs)
 
-        #:
-        ref = ref or self
-
-        #: Send the event over the bridge to construct the view
+        # Send the event over the bridge to construct the view
         __id__ = kwargs.get("__id__", None)
         CACHE[self.__id__] = self
         if __id__ is None:
+            ref = ref or self
             self.__app__.send_event(
                 Command.PROXY,  #: method
                 self.__id__,  #: id to assign in bridge cache
