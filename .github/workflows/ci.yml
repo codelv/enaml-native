@@ -13,28 +13,43 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Set up JDK
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
-      - name: Start emulator
-        run: |
-          android list target
-          echo no | android create avd --force -n test -t android-32 --abi armeabi-v7a
-          emulator -avd test -no-audio -no-window &
-          android-wait-for-emulator
-      - name: Install cli
-        run: pip install --user git+https://github.com/codelv/enaml-native-cli.git
       - name: Install test dependencies
-        run: pip install -U atom enaml torando msgpack-python codecov pytest pytest-cov pytest-asyncio
+        run: pip install -U wheel tornado msgpack-python codecov pytest pytest-cov pytest-asyncio
+      - name: Install latest dependencies
+        run: |
+            pip install --user git+https://github.com/nucleic/atom.git
+            pip install --user git+https://github.com/frmdstryr/enaml.git@d-change-types
+      - name: Install cli
+        run: |
+            pip install --user git+https://github.com/codelv/enaml-native-cli.git
+            enaml-native -h
       - name: Install enaml-native
         run: pip install -e ./
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+      - name: Install android system image and emulator
+        run: |
+          sdkmanager --list
+          sdkmanager --install "system-images;android-30;google_apis;x86_64"
+          sdkmanager --install "emulator"
+      - name: Create avd
+        run: |
+          echo no | avdmanager create avd --force --name test -k "system-images;android-30;google_apis;x86_64"
+          avdmanager list avd
+      - name: Start emulator
+        run: |
+          export PATH="$PATH:$ANDROID_HOME/emulator"
+          emulator -avd test -no-audio -no-window -no-accel &
+          timeout 300 adb wait-for-device
+          adb devices
       - name: Run tests
         run: pytest -v tests --cov enamlnative --cov-report xml --asyncio-mode auto
       - name: Coverage

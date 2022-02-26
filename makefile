@@ -10,7 +10,7 @@ lintcheck:
 	flake8 --ignore=E501 src
 	flake8 --ignore=E501 tests
 reformat:
-	black src/enamlnative
+	black src
 	black tests
 test:
 	pytest -v tests --cov src --cov-report xml --asyncio-mode auto
