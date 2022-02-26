@@ -1,0 +1,65 @@
+name: CI
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.10']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup python ${{ matrix.python-version}}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+      - name: Start emulator
+        run: |
+          android list target
+          echo no | android create avd --force -n test -t android-32 --abi armeabi-v7a
+          emulator -avd test -no-audio -no-window &
+          android-wait-for-emulator
+      - name: Install cli
+        run: pip install --user git+https://github.com/codelv/enaml-native-cli.git
+      - name: Install test dependencies
+        run: pip install -U atom enaml torando msgpack-python codecov pytest pytest-cov pytest-asyncio
+      - name: Install enaml-native
+        run: pip install -e ./
+      - name: Run tests
+        run: pytest -v tests --cov enamlnative --cov-report xml --asyncio-mode auto
+      - name: Coverage
+        run: codecov
+  check-code:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup python ${{ matrix.python-version}}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: pip install -U mypy black isort flake8
+      - name: Run checks
+        run: |
+            isort src --check --diff
+            isort tests --check --diff
+            black src/enamlnative --check --diff
+            black tests --check --diff
+            flake8 --ignore=E501 src
+            flake8 --ignore=E501 tests
+            mypy src --ignore-missing-imports
+
+
