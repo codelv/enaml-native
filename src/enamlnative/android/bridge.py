@@ -24,9 +24,7 @@ from enamlnative.core.bridge import (
 
 
 def encode_args(method: BridgeMethod, args: tuple, encoder=msgpack_encoder):
-    """ Common function for packing method arguments.
-
-    """
+    """Common function for packing method arguments."""
     signature = method.__signature__
     name = method.name.rstrip("_")
     if not signature:
@@ -41,10 +39,7 @@ def encode_args(method: BridgeMethod, args: tuple, encoder=msgpack_encoder):
         end = nparams - 1
         return (
             name,
-            [
-                encoder(signature[i] if i < end else varg, args[i])
-                for i in range(nargs)
-            ],
+            [encoder(signature[i] if i < end else varg, args[i]) for i in range(nargs)],
         )
     return (name, [encoder(sig, arg) for sig, arg in zip(signature, args)])
 
@@ -147,7 +142,9 @@ class JavaProxy(JavaBridgeObject):
         CACHE[self.__id__] = self
         if __id__ is None:
             ref = ref or self
-            self.__app__.send_event(
+            app = self.__app__
+            assert app is not None
+            app.send_event(
                 Command.PROXY,  #: method
                 self.__id__,  #: id to assign in bridge cache
                 self.__nativeclass__,
