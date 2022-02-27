@@ -127,9 +127,11 @@ class ObjcBridgeObject(BridgeObject):
 
     """
 
-    def _default___nativeclass__(self):
+    @classmethod
+    def __init_subclass__(cls, *args, **kwargs):
         """Use the class name by default as everything should be unique."""
-        return self.__class__.__name__
+        super().__init_subclass__(*args, **kwargs)
+        cls.__nativeclass__ = cls.__name__
 
     def __init__(self, *args, **kwargs):
         """Sends the event to create this View in Java"""

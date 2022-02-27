@@ -35,7 +35,7 @@ class ProxyNotification(ProxyToolkitObject):
     def set_text(self, text):
         raise NotImplementedError
 
-    def set_sub_text(self, sub_text):
+    def set_sub_text(self, text):
         raise NotImplementedError
 
     def set_info(self, info):
@@ -45,6 +45,9 @@ class ProxyNotification(ProxyToolkitObject):
         raise NotImplementedError
 
     def set_show_progress(self, show):
+        raise NotImplementedError
+
+    def set_show_when(self, show):
         raise NotImplementedError
 
     def set_progress(self, progress):
@@ -73,6 +76,7 @@ class Notification(ToolkitObject):
     #: Set the text (second row) of the notification, in a standard
     #: notification.
     text = d_(Str())
+    sub_text = d_(Str())
 
     #: Set the large text at the right-hand side of the notification.
     info = d_(Str())
@@ -98,6 +102,9 @@ class Notification(ToolkitObject):
     #: Show a progress bar
     show_progress = d_(Bool())
 
+    #: Show a timestamp
+    show_when = d_(Bool())
+
     #: Notification style using the @style format
     #: (ex. @style/Theme_Light_NoTitleBar_Fullscreen
     style = d_(Str())
@@ -118,11 +125,12 @@ class Notification(ToolkitObject):
         "channel_id",
         "title",
         "text",
-        "info",
         "sub_text",
+        "info",
         "color",
         "progress",
         "show_progress",
+        "show_when",
         "progress_indeterminate",
         "priority",
         "show",

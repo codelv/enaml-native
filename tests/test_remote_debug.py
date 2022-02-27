@@ -11,6 +11,7 @@ Created on Oct 4, 2017
 """
 import sys
 import sh
+import pytest
 from importlib import reload
 
 
@@ -62,6 +63,7 @@ def load_view(app):
     app.show_view()
 
 
+@pytest.mark.skip(reason="Disabled")
 def test_remote_debug():
     # sh.pip('install tornado --user'.split())
     enaml_native = sh.Command("enaml-native")

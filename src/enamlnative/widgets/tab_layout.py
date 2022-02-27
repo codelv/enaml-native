@@ -81,7 +81,6 @@ class TabLayout(FrameLayout):
     # Observers
     # -------------------------------------------------------------------------
     @observe(
-        "tabs",
         "tab_mode",
         "tab_gravity",
         "current_tab",

@@ -9,100 +9,88 @@ Created on Oct 4, 2017
 
 @author: jrm
 """
-import os
-import sys
 import enaml
 import pytest
-from app import MockApplication
+import nativehooks
+from glob import glob
+from pydoc import locate, ErrorDuringImport
+from enaml.application import Application
+from enamlnative.android.app import AndroidApplication
+
+try:
+    import iconify
+except ImportError:
+    iconify = None
+
+try:
+    import googlemaps
+except ImportError:
+    googlemaps = None
+
+try:
+    import charts.android
+except ImportError:
+    charts = None
+
 from utils import load
 
-if "src" not in sys.path:
-    sys.path.append("src")
+with enaml.imports():
+    from activity import ExampleActivity
 
 
-@pytest.mark.parametrize(
-    "platforms, path",
-    [
-        (["android", "ios"], "activity_indicator.enaml"),
-        (["android"], "app_login.enaml"),
-        (["android"], "auto_complete_text_view.enaml"),
-        (["android"], "bottom_sheet.enaml"),
-        (["android"], "block.enaml"),
-        (["android"], "button.enaml"),
-        (["android"], "calendar_view.enaml"),
-        (["android"], "card_view.enaml"),
-        (["android"], "chronometer.enaml"),
-        (["android"], "clocks.enaml"),
-        # (["android"], 'charts.enaml'), # now requires enaml-native-charts
-        (["android"], "checkbox.enaml"),
-        (["android"], "chronometer.enaml"),
-        (["android"], "date_picker.enaml"),
-        (["android"], "dialog.enaml"),
-        (["android"], "drawer_layout.enaml"),
-        (["android", "ios"], "edit_text.enaml"),
-        (["android"], "email_app.enaml"),
-        (["android"], "flexbox.enaml"),
-        (["android"], "icon.enaml"),
-        (["android"], "keyboard.enaml"),
-        (["android"], "list_view.enaml"),
-        (["android"], "nav_drawer.enaml"),
-        (["android"], "notifications.enaml"),
-        # (["android"], 'mapview.enaml'),# now requires enaml-native-maps
-        (["android"], "pager_tab_strip.enaml"),
-        (["android"], "picker.enaml"),
-        (["android"], "popup_window.enaml"),
-        (["android", "ios"], "progress_bar.enaml"),
-        (["android"], "radio_buttons.enaml"),
-        (["android"], "rating_bar.enaml"),
-        (["android"], "seekbar.enaml"),
-        (["android"], "sensors.enaml"),
-        (["android"], "snackbar.enaml"),
-        (["android"], "spinner.enaml"),
-        (["android"], "statusbar.enaml"),
-        (["android", "ios"], "switch.enaml"),
-        (["android"], "swipe_refresh_layout.enaml"),
-        (["android"], "tabs.enaml"),
-        (["android"], "text_view.enaml"),
-        (["android"], "time_picker.enaml"),
-        (["android"], "toast.enaml"),
-        (["android"], "toolbar.enaml"),
-        (["android"], "view_pager.enaml"),
-        (["android"], "video_view.enaml"),
-        (["android"], "webview.enaml"),
-        (["android"], "wifi.enaml"),
-        # (["ios"], '../ios/demo/Python/view.enaml'),
-    ],
-)
-def test_examples(platforms, path):
-    #: Load
-    dir_path = os.path.abspath(os.path.split(os.path.dirname(__file__))[0])
-    enaml_file = os.path.join(dir_path, "examples", os.path.normpath(path))
-
-    #: Run for each platform
-    for platform in platforms:
-        app = MockApplication.instance(platform)
-
-        with enaml.imports():
-            with open(enaml_file, "rb") as f:
-                ContentView = load(f.read())
-
-        app.view = ContentView()
-        app.run()
+@pytest.fixture
+def native_app():
+    yield
+    nativehooks.messages = []
+    Application._instance = None  # Clear after every run
 
 
-def test_demo_app():
+@pytest.mark.parametrize("path", glob("examples/*.enaml"))
+def test_examples(native_app, path):
+    example = path[:-6].replace("/", ".")  # Remove example/ and .enaml
+
+    if 'thermostat' in example:
+        return pytest.skip("thermostat example needs updated")
+
+    app = AndroidApplication(debug=True)
     with enaml.imports():
-        with open("examples/demo/view.enaml", "rb") as f:
-            ContentView = load(f.read())
-        app = MockApplication.instance("android")
-        app.view = ContentView()
-        app.run()
+        try:
+            ContentView = locate(f"{example}.ContentView")
+        except ErrorDuringImport as e:
+            msg = f"{e}"
+            if iconify is None and "iconify" in msg:
+                return pytest.skip("enaml-native-icons is not installed")
+            if googlemaps is None and "googlemaps" in msg:
+                return pytest.skip("enaml-native-maps is not installed")
+            if charts is None and "charts" in msg:
+                return pytest.skip("enaml-native-charts is not installed")
+            raise
+
+    app.activity = ExampleActivity(example=ContentView())
+
+    f = nativehooks.shown = app.create_future()
+    f.add_done_callback(lambda f: app.stop())
+    # Add fail timeout
+    app.timed_call(5 * 1000, lambda: f.set_result(False))
+    app.start()
+    assert f.result()
 
 
-def test_playground_app():
-    with enaml.imports():
-        with open("examples/playground/view.enaml", "rb") as f:
-            ContentView = load(f.read())
-        app = MockApplication.instance("android")
-        app.view = ContentView()
-        app.run()
+@pytest.mark.skip(reason="Disabled")
+def test_demo_app(enamlnative_app):
+    app = AndroidApplication(debug=True)
+    with open("examples/demo/view.enaml") as f:
+        ContentView = load(f.read())
+    app.activity = ExampleActivity(example=ContentView())
+    app.run()
+
+
+@pytest.mark.skip(reason="Disabled")
+def test_playground_app(enamlnative_app):
+    app = AndroidApplication(debug=True)
+
+    with open("examples/playground/view.enaml") as f:
+        ContentView = load(f.read())
+
+    app.activity = ExampleActivity(example=ContentView())
+    app.run()

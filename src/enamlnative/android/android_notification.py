@@ -661,6 +661,9 @@ class AndroidNotification(AndroidToolkitObject, ProxyNotification):
     def set_show_progress(self, show):
         self.set_progress(self.declaration.progress)
 
+    def set_show_when(self, show):
+        self.builder.setShowWhen(show)
+
     def set_progress(self, progress):
         d = self.declaration
         if d.show_progress:

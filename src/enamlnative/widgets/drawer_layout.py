@@ -89,7 +89,7 @@ class DrawerLayout(ViewGroup):
         "title",
         "title_gravity",
         "drawer_elevation",
-        "drawer_lock_mode",
+        "lock_mode",
         "scrim_color",
         "status_bar_background_color",
     )

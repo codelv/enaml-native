@@ -4,7 +4,7 @@ import math
 from atom.api import *
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
-from enamlnative.core.http import AsyncHttpClient
+from enamlnative.android.http import AsyncHttpClient
 from enamlnative.core.app import BridgedApplication
 from pprint import pprint
 from datetime import datetime
@@ -327,7 +327,6 @@ enamldef Drawer(Flexbox):
     #     clicked :: pager.current_index = 1
 
 enamldef Border(Flexbox):
-    layout_height = "1"
     background_color = "#ccc"
 
 
@@ -335,17 +334,18 @@ enamldef Card(Flexbox):
     attr state = AppState.instance()
     attr title = ""
     alias content
-    margins = (5,5,5,5)
-    layout = dict(min_width=480, flex_grow=1)
-    layout_height = "wrap_content"
-    layout_width = "wrap_content"
+    margin = (5, 5, 5, 5)
+    min_width = 480
+    flex_grow = 1
+    #layout_height = "wrap_content"
+    #layout_width = "wrap_content"
     background_color << state.theme.bg
     Flexbox:
         flex_direction = "column"
         Flexbox:
             justify_content = "center"
             align_items = "center"
-            layout_height = "wrap_content"
+            #layout_height = "wrap_content"
             padding = (10,10,10,10)
             Text:
                 text << title
@@ -373,11 +373,11 @@ enamldef Dashboard(PagerFragment): view:
                     block << parent.content
                     Flexbox:
                         attr state << view.state
-                        layout_height = "wrap_content"
+                        #layout_height = "wrap_content"
                         flex_direction = "column"
                         justify_content = "center"
                         align_items = "center"
-                        layout = dict(min_height=480)
+                        min_height=480
                         Text:
                             text = "temperature"
                             text_color << state.theme.text_light
@@ -394,7 +394,7 @@ enamldef Dashboard(PagerFragment): view:
                     #Border:
                     #    pass
                     Flexbox:
-                        layout_height = "50"
+                        height = 50
                         justify_content = "center"
                         align_items = "center"
                         Conditional:
@@ -413,20 +413,20 @@ enamldef Dashboard(PagerFragment): view:
                             text_size = 24
             Card:
                 title = "System"
-                layout_height = "wrap_content"
+                #layout_height = "wrap_content"
                 #layout = dict(max_width=300)
                 Block:
                     block << parent.content
                     Flexbox:
-                        layout_height = "wrap_content"
+                        #layout_height = "wrap_content"
                         justify_content = "center"
                         Text:
                             text = "set point"
                             text_color << state.theme.text_light
                     Flexbox:
-                        layout_height = "wrap_content"
+                        #  layout_height= "wrap_content"
                         justify_content = "space_around"
-                        layout = dict(min_height=480)
+                        min_height=480
                         Flexbox:
                             justify_content = 'center'
                             align_items = 'center'
@@ -457,7 +457,7 @@ enamldef Dashboard(PagerFragment): view:
                     #Border:
                     #    pass
                     Flexbox:
-                        layout_height = "wrap_content"
+                        #  layout_height= "wrap_content"
                         justify_content = "space_around"
                         align_items = "center"
                         Text:
@@ -472,8 +472,8 @@ enamldef Dashboard(PagerFragment): view:
 enamldef Weather(PagerFragment): view:
     attr state = AppState.instance()
     ScrollView:
-        layout_height = "match_parent"
-        layout_width = "match_parent"
+        #  layout_height= "match_parent"
+        # layout_width = "match_parent"
         background_color << view.state.theme.bg
         Flexbox:
             flex_direction = "column"
@@ -501,15 +501,15 @@ enamldef Weather(PagerFragment): view:
             #             Text:
             #                 text = "refresh"
 
-            layout_height = "match_parent"
-            layout_width = "match_parent"
+            #  layout_height= "match_parent"
+            # layout_width = "match_parent"
             Conditional:
                 condition << view.state.weather.loading_current
                 Flexbox:
                     flex_direction="column"
                     justify_content = "center"
                     align_items = "center"
-                    layout = dict(min_height=480)
+                    min_height = 480
                     ActivityIndicator:
                         style = "small"
                     Text:
@@ -526,13 +526,13 @@ enamldef Weather(PagerFragment): view:
                         Block:
                             block << parent.content
                             Flexbox:
-                                layout_height = "wrap_content"
+                                #  layout_height= "wrap_content"
                                 flex_direction = "column"
                                 justify_content = "center"
                                 align_items = "center"
-                                layout = dict(min_height=480)
+                                min_height = 480
                                 Flexbox:
-                                    layout_height = "wrap_content"
+                                    #  layout_height= "wrap_content"
                                     justify_content = "center"
                                     align_items = "center"
                                     Icon:
@@ -548,12 +548,12 @@ enamldef Weather(PagerFragment): view:
                                     font_family = "sans-serif-condensed-light"
                                     text_size = 124
                             Flexbox:
-                                layout_height = "wrap_content"
+                                #  layout_height= "wrap_content"
                                 justify_content = "space_between"
                                 align_items = "center"
                                 Flexbox:
                                     flex_direction = "column"
-                                    layout_height = "wrap_content"
+                                    #  layout_height= "wrap_content"
                                     align_items="flex_start"
                                     Text:
                                         text = "wind"
@@ -569,7 +569,7 @@ enamldef Weather(PagerFragment): view:
                                             text_size = 24
                                 Flexbox:
                                     flex_direction = "column"
-                                    layout_height = "wrap_content"
+                                    #  layout_height= "wrap_content"
                                     align_items = "center"
                                     Text:
                                         text = "precipitation"
@@ -587,7 +587,7 @@ enamldef Weather(PagerFragment): view:
                                             text_size = 24
                                 Flexbox:
                                     flex_direction = "column"
-                                    layout_height = "wrap_content"
+                                    #  layout_height= "wrap_content"
                                     align_items = "flex_end"
                                     Text:
                                         text = "humidity"
@@ -610,7 +610,7 @@ enamldef Weather(PagerFragment): view:
                     flex_direction = "column"
                     justify_content = "center"
                     align_items = "center"
-                    layout = dict(min_height=240)
+                    min_height=240
                     ActivityIndicator:
                         style = "small"
                     Text:
@@ -623,13 +623,13 @@ enamldef Weather(PagerFragment): view:
 
                 Flexbox:
                     flex_direction = "column"
-                    layout_height = "wrap_content"
+                    #  layout_height= "wrap_content"
                     #: Group each day
                     attr daily_forecast << view.state.weather.daily_forecast
                     Looper:
                         iterable << daily_forecast
                         Flexbox:
-                            layout_height = "wrap_content"
+                            #  layout_height= "wrap_content"
                             padding = (10,10,10,10)
                             attr item_time << datetime.fromtimestamp(loop_item[0]['dt'])
                             Flexbox:
@@ -650,8 +650,8 @@ enamldef Weather(PagerFragment): view:
                                     text_color << view.state.theme.text_light
                         ScrollView:
                             orientation = "horizontal"
-                            layout_height = "wrap_content"
-                            layout_width = "match_parent"
+                            # layout_height= "wrap_content"
+                            # # layout_width = "match_parent"
                             Flexbox:
                                 justify_content = "space_between"
                                 #: 3-hr forcast for next 24 hours
@@ -665,7 +665,7 @@ enamldef Weather(PagerFragment): view:
                                         justify_content = "space_between"
                                         align_items = "center"
                                         padding = (10,10,10,10)
-                                        layout_width = "wrap_content"
+                                        # layout_width = "wrap_content"
                                         attr item_time <<  datetime.fromtimestamp(loop_item['dt'])
                                         Text:
                                             text << "now" if (loop_index==0 and parent_index==0) else item_time.strftime('%-I %p' if view.state.time_mode=='12' else '%-H')
@@ -752,7 +752,7 @@ enamldef Fireplace(PagerFragment): view:
 
 enamldef TitleRow(Flexbox):
     attr state = AppState.instance()
-    layout_height = "wrap_content"
+    #  layout_height= "wrap_content"
     justify_content = "space_between"
     align_items = "center"
     padding = (10,20,10,20)
@@ -764,7 +764,7 @@ enamldef TitleRow(Flexbox):
 
 enamldef SettingsRow(Flexbox):
     attr state = AppState.instance()
-    layout_height = "wrap_content"
+    #  layout_height= "wrap_content"
     justify_content = "space_between"
     align_items = "center"
     padding = (10,20,10,20)
@@ -773,18 +773,19 @@ enamldef SettingsRow(Flexbox):
     alias content
     alias caption
     Flexbox:
-        layout_width = "wrap_content"
+        # layout_width = "wrap_content"
         Icon: icon:
             text = "{md-help}"
             text_size = 32
             text_color << state.theme.icon
             #background_color = "#fab"
-            layout = dict(min_width=56,max_width=64)
+            min_width = 56
+            max_width = 64
         Flexbox:
             flex_direction = "column"
-            layout_width="wrap_content"
+            # layout_width="wrap_content"
             #layout_height="wrap_content"
-            layout = dict(max_width=700)
+            max_width = 700
             #background_color = "#baf"
             padding = (10,0,0,0)
             Text: title:
@@ -818,7 +819,7 @@ enamldef ToggleSetting(SettingsRow):
 
 enamldef TextSetting(Flexbox):
     attr state = AppState.instance()
-    layout_height = "wrap_content"
+    #  layout_height= "wrap_content"
     #justify_content = "space_between"
     align_items = "center"
     padding = (10,20,10,20)
@@ -829,7 +830,7 @@ enamldef TextSetting(Flexbox):
         text = "{md-help}"
         text_size = 32
         text_color = "#356782"
-        layout_width = "56"
+        # layout_width = "56"
         #background_color = "#fab"
     Flexbox:
         flex_direction = "column"
@@ -851,7 +852,7 @@ enamldef Settings(PagerFragment): view:
             flex_direction = "column"
             Flexbox:
                 flex_direction = "column"
-                margins = (0, 20, 0, 0)
+                margin = (0, 20, 0, 0)
                 #background_color << state.theme.card
                 TitleRow:
                     title = "Settings"
@@ -914,7 +915,7 @@ enamldef ContentView(Flexbox): view:
     Drawer:
         pager << view_pager
         background_color << state.theme.drawer
-        layout_width = "wrap_content"
+        # layout_width = "wrap_content"
     ViewPager: view_pager:
         current_index := state.current_screen
         current_index ::

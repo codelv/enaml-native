@@ -1,0 +1,16 @@
+from enaml.core.api import Include
+from enamlnative.widgets.api import Activity, Window, View
+
+
+enamldef MainWindow(Window):
+    attr view: View
+    Include:
+        objects << [view]
+
+
+enamldef ExampleActivity(Activity):
+    attr example: View
+    on_back_pressed => ():
+        return False
+    MainWindow:
+        view = example

@@ -60,6 +60,10 @@ def convert_arg(arg: Any) -> Optional[str]:
         return arg.__nativeclass__
     if arg is None:
         return None
+    if isinstance(arg, dict):
+        args = tuple(arg.values())
+        assert len(args) == 1
+        return convert_arg(args[0])
     assert hasattr(arg, "__name__"), "Signature argument must be a type or str"
     return arg.__name__
 

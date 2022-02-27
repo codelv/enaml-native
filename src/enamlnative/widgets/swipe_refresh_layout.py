@@ -29,9 +29,6 @@ class ProxySwipeRefreshLayout(ProxyViewGroup):
     def set_trigger_distance(self, distance):
         raise NotImplementedError
 
-    def set_refreshed(self, refresh):
-        raise NotImplementedError
-
 
 class SwipeRefreshLayout(ViewGroup):
     """SwipeRefreshLayout is a view group that displays
@@ -65,7 +62,6 @@ class SwipeRefreshLayout(ViewGroup):
         "indicator_color",
         "indicator_background_color",
         "trigger_distance",
-        "refeshed",
     )
     def _update_proxy(self, change):
 
