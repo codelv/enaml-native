@@ -22,7 +22,7 @@ allprojects {
 
 android {
     compileSdkVersion 32
-    buildToolsVersion '33.0.0'
+    buildToolsVersion '32.0.0'
     defaultConfig {
         targetSdkVersion 32
         versionCode 15
