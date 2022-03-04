@@ -49,7 +49,7 @@ def native_app():
 def test_examples(native_app, path):
     example = path[:-6].replace("/", ".")  # Remove example/ and .enaml
 
-    if 'thermostat' in example:
+    if "thermostat" in example:
         return pytest.skip("thermostat example needs updated")
 
     app = AndroidApplication(debug=True)
