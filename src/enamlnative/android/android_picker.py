@@ -30,7 +30,7 @@ class Picker(LinearLayout):
         "android.widget.NumberPicker$OnValueChangeListener"
     )
     onValueChange = JavaCallback("android.widget.NumberPicker", int, int)
-    setDisplayedValues = JavaMethod("[Ljava.lang.String;")
+    setDisplayedValues = JavaMethod(list[str])
     setWrapSelectorWheel = JavaMethod(bool)
 
 

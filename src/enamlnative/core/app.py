@@ -13,6 +13,7 @@ import json
 import traceback
 from asyncio import Future
 from time import time
+from inspect import iscoroutinefunction
 from atom.api import Atom, Bool, Dict, Float, Instance, Int, List, Str, Value
 from enaml.application import Application
 from tornado.ioloop import IOLoop
@@ -280,7 +281,7 @@ class BridgedApplication(Application):
         """Send events to the bridge using the system specific implementation."""
         raise NotImplementedError
 
-    def process_events(self, data):
+    async def process_events(self, data: str):
         """The native implementation must use this call to"""
         events = bridge.loads(data)
         if self.debug:
@@ -288,29 +289,33 @@ class BridgedApplication(Application):
             for event in events:
                 print(event)
             print("===========================")
-        for event in events:
-            if event[0] == "event":
-                self.handle_event(event)
+        for t, event in events:
+            if t == "event":
+                await self.handle_event(*event)
 
-    def handle_event(self, event):
+    async def handle_event(self, result_id: int, ptr: int, method: str, args: list):
         """When we get an 'event' type from the bridge
         handle it by invoking the handler and if needed
         sending back the result.
 
         """
-        result_id, ptr, method, args = event[1]
         obj = None
         result = None
         try:
             obj, handler = bridge.get_handler(ptr, method)
-            result = handler(*(v for t, v in args))
+            if iscoroutinefunction(handler):
+                result = await handler(*(v for t, v in args))
+            else:
+                result = handler(*(v for t, v in args))
         except bridge.BridgeReferenceError as e:
             #: Log the event, don't blow up here
+            event = (result_id, ptr, method, args)
             print(f"Error processing event: {event} - {e}")
             # self.show_error(msg)
         except Exception:
             #: Log the event, blow up in user's face
             err = traceback.format_exc()
+            event = (result_id, ptr, method, args)
             msg = f"Error processing event: {event} - {err}"
             print(msg)
             self.show_error(msg)
@@ -318,14 +323,15 @@ class BridgedApplication(Application):
         finally:
             if result_id:
                 if hasattr(obj, "__nativeclass__"):
-                    sig = getattr(type(obj), method).__returns__
+                    sig = getattr(obj.__class__, method).__returns__
                 else:
-                    sig = type(result).__name__
+                    sig = result.__class__.__name__
 
                 self.send_event(
                     bridge.Command.RESULT,  #: method
                     result_id,
                     bridge.msgpack_encoder(sig, result),  #: args
+                    now=True,
                 )
 
     def handle_error(self, callback):

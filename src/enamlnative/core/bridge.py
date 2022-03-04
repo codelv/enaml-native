@@ -15,6 +15,7 @@ from asyncio import Future
 from contextlib import contextmanager
 from typing import Any, ClassVar, Optional, Union, Type
 from weakref import WeakValueDictionary
+from types import GenericAlias
 from atom.api import Atom, Dict, ForwardInstance, Instance, Int, Property, Str
 
 CACHE: WeakValueDictionary[int, "BridgeObject"] = WeakValueDictionary()
@@ -60,6 +61,8 @@ def convert_arg(arg: Any) -> Optional[str]:
         return arg.__nativeclass__
     if arg is None:
         return None
+    if isinstance(arg, GenericAlias):
+        return str(arg)  # eg list[int]
     if isinstance(arg, dict):
         args = tuple(arg.values())
         assert len(args) == 1

@@ -96,7 +96,7 @@ class ViewPagerLayoutParams(LayoutParams):
 
 class PagerTitleStrip(ViewGroup):
     __nativeclass__ = f"{package}.PagerTitleStrip"
-    __signature__ = ["android.content.Context"]
+    __signature__ = [Context]
     setNonPrimaryAlpha = JavaMethod(float)
     setCurrentItem = JavaMethod(int)
     setTextColor = JavaMethod("android.graphics.Color")
@@ -118,7 +118,7 @@ class BridgedFragmentStatePagerAdapter(JavaBridgeObject):
     addFragments = JavaMethod("[Landroidx.fragment.app.Fragment;")
     removeFragment = JavaMethod("androidx.fragment.app.Fragment")
     removeFragments = JavaMethod("[Landroidx.fragment.app.Fragment;")
-    setTitles = JavaMethod("[Ljava.lang.String;")
+    setTitles = JavaMethod(list[str])
     clearTitles = JavaMethod()
     notifyDataSetChanged = JavaMethod()
 

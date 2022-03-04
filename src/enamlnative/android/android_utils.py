@@ -14,13 +14,19 @@ from .app import AndroidApplication
 from .bridge import JavaBridgeObject, JavaMethod, JavaStaticMethod
 
 
+class HashMap(JavaBridgeObject):
+    __nativeclass__ = "java.util.HashMap"
+    get = JavaMethod(object, returns=object)
+    set = JavaMethod(object, object)
+
+
 class AttributeSet(JavaBridgeObject):
     __nativeclass__ = "android.util.AttributeSet"
 
 
 class ArrayList(JavaBridgeObject):
     __nativeclass__ = "java.util.ArrayList"
-    add = JavaMethod(int, "java.lang.Object")
+    add = JavaMethod(int, object)
     addAll = JavaMethod("java.util.Collection")
     remove = JavaMethod(int)
     removeAll = JavaMethod("java.util.Collection")

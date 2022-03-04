@@ -35,7 +35,7 @@ class Context(JavaBridgeObject):
     unbindService = JavaMethod("android.content.ServiceConnection")
 
     #: Get system services
-    getSystemService = JavaMethod(str, returns="java.lang.Object")
+    getSystemService = JavaMethod(str, returns=object)
 
     ACCESSIBILITY_SERVICE = "accessibility"
     ACCOUNT_SERVICE = "account"
@@ -161,8 +161,11 @@ class Context(JavaBridgeObject):
 class Intent(JavaBridgeObject):
     __nativeclass__ = "android.content.Intent"
     setAction = JavaMethod(str)
+    getAction = JavaMethod(returns=str)
     setClass = JavaMethod(Context, "java.lang.Class")
     putExtra = JavaMethod(str, str)
+    getParcelableExtra = JavaMethod(str, returns=object)
+    getBooleanExtra = JavaMethod(str, bool, returns=bool)
 
 
 class PendingIntent(JavaBridgeObject):
@@ -226,10 +229,6 @@ class BroadcastReceiver(JavaBridgeObject):
         receiver = cls()
         receiver.setReceiver(receiver.getId())
 
-        def on_receive(ctx, intent):
-            callback(intent)
-
-        receiver.onReceive.connect(on_receive)
         app = receiver.__app__
         assert app is not None
         d = app.activity
@@ -238,6 +237,14 @@ class BroadcastReceiver(JavaBridgeObject):
         assert proxy is not None
         activity = proxy.widget
         assert activity is not None
+
+        def on_receive(ctx, intent):
+            if single_shot:
+                activity.unregisterReceiver(receiver)
+            callback(intent)
+
+        receiver.onReceive.connect(on_receive)
+
         activity.registerReceiver(receiver, IntentFilter(action))
         return receiver
 

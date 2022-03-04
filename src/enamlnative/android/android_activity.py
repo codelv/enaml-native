@@ -12,8 +12,9 @@ Created on July 24, 2017
 
 from atom.api import Int, Typed, Instance
 from enamlnative.widgets.activity import ProxyActivity
-from .android_content import Context
+from .android_content import Context, Intent
 from .android_view import View
+from .android_utils import HashMap
 from .bridge import JavaCallback, JavaMethod
 
 
@@ -45,12 +46,12 @@ class Activity(Context):
     getSupportFragmentManager = JavaMethod(
         returns="androidx.fragment.app.FragmentManager"
     )
-    getBuildInfo = JavaMethod(returns="java.lang.HashMap")
+    getBuildInfo = JavaMethod(returns=HashMap)
 
     #: Permissions
     checkSelfPermission = JavaMethod(str, returns=int)
-    requestPermissions = JavaMethod("[Ljava.lang.String;", int)
-    onRequestPermissionsResult = JavaCallback(int, "[Ljava.lang.String;", "[Lint;")
+    requestPermissions = JavaMethod(list[str], int)
+    onRequestPermissionsResult = JavaCallback(int, list[str], list[int])
 
     #: Method added so we can listen externally
     setPermissionResultListener = JavaMethod(
@@ -67,7 +68,7 @@ class Activity(Context):
     removeActivityResultListener = JavaMethod(
         "com.codelv.enamlnative.EnamlActivity$ActivityResultListener"
     )
-    onActivityResult = JavaCallback(int, int, "android.content.Intent", returns=bool)
+    onActivityResult = JavaCallback(int, int, Intent, returns=bool)
 
     #: Activity lifecycle listener
     addActivityLifecycleListener = JavaMethod(
@@ -99,7 +100,7 @@ class Activity(Context):
     )
 
     #: Called with the lifecycle state like 'pause', 'resume', etc...
-    onConfigurationChanged = JavaCallback("java.lang.HashMap")
+    onConfigurationChanged = JavaCallback(HashMap)
 
 
 class AndroidActivity(ProxyActivity):

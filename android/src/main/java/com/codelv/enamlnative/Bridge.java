@@ -497,10 +497,26 @@ public class Bridge implements PythonInterpreter.EventListener {
                 cls = boolean.class;
             } else if (name.equals("float")) {
                 cls = float.class;
+            } else if (name.equals("list[int]")) {
+                cls = int[].class;
+            } else if (name.equals("list[str]")) {
+                cls = String[].class;
+            } else if (name.equals("list[bool]")) {
+                cls = boolean[].class;
+            } else if (name.equals("list[float]")) {
+                cls = float[].class;
+            } else if (name.equals("list[object]")) {
+                cls = Object[].class;
             } else if (name.equals("long")) {
                 cls = long.class;
             } else if (name.equals("double")) {
                 cls = double.class;
+            } else if (name.equals("object")) {
+                cls = Object.class;
+            } else if (name.equals("dict")) {
+                cls = HashMap.class;
+            } else if (name.equals("cls")) {
+                cls = Class.class;
             } else {
                 cls = Class.forName(name);
             }

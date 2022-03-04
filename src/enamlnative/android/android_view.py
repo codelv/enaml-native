@@ -83,7 +83,7 @@ class View(JavaBridgeObject):
     setMinimumHeight = JavaMethod(int)
     setMinimumWidth = JavaMethod(int)
     setEnabled = JavaMethod(bool)
-    setTag = JavaMethod("java.lang.Object")
+    setTag = JavaMethod(object)
     setToolTipText = JavaMethod("java.lang.CharSequence")
     setVisibility = JavaMethod(int)
 

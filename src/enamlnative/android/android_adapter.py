@@ -19,9 +19,9 @@ from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
 class ArrayAdapter(JavaBridgeObject):
     __nativeclass__ = "android.widget.ArrayAdapter"
     __signature__ = [Context, "android.R"]
-    add = JavaMethod("java.lang.Object")
-    addAll = JavaMethod("[Ljava.lang.Object;")
-    remove = JavaMethod("java.lang.Object")
+    add = JavaMethod(object)
+    addAll = JavaMethod(list[object])
+    remove = JavaMethod(object)
     clear = JavaMethod()
 
 

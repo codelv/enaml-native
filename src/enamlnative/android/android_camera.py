@@ -128,7 +128,7 @@ class CameraManager(SystemService):
     getCameraCharacteristics = JavaMethod(
         str, returns="android.hardware.camera2.CameraCharacteristics"
     )
-    getCameraIdList = JavaMethod(returns="[java.lang.String;")
+    getCameraIdList = JavaMethod(returns=list[str])
     openCamera = JavaMethod(
         str,
         "android.hardware.camera2.CameraDevice$StateCallback",
