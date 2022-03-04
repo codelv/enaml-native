@@ -10,8 +10,8 @@ Created on May 20, 2017
 @author: jrm
 """
 from atom.api import Typed
-from enaml.application import Application
 from enaml.widgets.toolkit_object import ProxyToolkitObject
+from .app import AndroidApplication
 from .bridge import JavaBridgeObject
 
 
@@ -54,9 +54,24 @@ class AndroidToolkitObject(ProxyToolkitObject):
         """
         pass
 
-    def get_context(self):
+    def get_context(self) -> AndroidApplication:
         """Get the context of the View."""
-        return Application.instance()
+        app = AndroidApplication.instance()
+        assert app is not None
+        return app
+
+    def get_activity(self):
+        app = self.get_context()
+        activity = app.activity
+        assert activity is not None
+        proxy = activity.proxy
+        assert proxy is not None
+        return proxy
+
+    def get_display_density(self) -> float:
+        activity = self.get_activity()
+        d = activity.declaration
+        return 1 if d is None else d.dp
 
     # -------------------------------------------------------------------------
     # ProxyToolkitObject API

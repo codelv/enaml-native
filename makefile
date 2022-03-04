@@ -5,7 +5,7 @@ isort:
 	isort src
 	isort tests
 typecheck:
-	mypy src --ignore-missing-imports
+	mypy src/enamlnative --ignore-missing-imports
 lintcheck:
 	flake8 --ignore=E501 src
 	flake8 --ignore=E501 tests

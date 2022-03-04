@@ -172,35 +172,40 @@ class AndroidPopupWindow(AndroidToolkitObject, ProxyPopupWindow):
     def set_position(self, position):
         self.update()
 
-    def set_show(self, show):
+    def set_show(self, show: bool):
         d = self.declaration
+        assert d is not None
+        w = self.window
+        assert w is not None
+        dp = self.get_display_density()
         if show and self.showing:
-            dp = self.get_context().dp
             x, y = int(d.x * dp), int(d.y * dp)
             view = self.parent_widget()
             if d.position == "relative":
-                self.window.update(view, x, y, d.width, d.height)
+                w.update(view, x, y, d.width, d.height)
             else:
-                self.window.update_(x, y, d.width, d.height)
+                w.update_(x, y, d.width, d.height)
         elif show:
-            dp = self.get_context().dp
             x, y = int(d.x * dp), int(d.y * dp)
             self.showing = True
             view = self.parent_widget()
             if d.position == "relative":
-                self.window.showAsDropDown(view, x, y, d.gravity)
+                w.showAsDropDown(view, x, y, d.gravity)
             else:
-                self.window.showAtLocation(view, d.gravity, x, y)
+                w.showAtLocation(view, d.gravity, x, y)
         else:
             self.showing = False
-            self.window.dismiss()
+            w.dismiss()
 
-    def set_animation(self, style):
-        self.window.setAnimationStyle(style)
+    def set_animation(self, style: str):
+        w = self.window
+        assert w is not None
+        w.setAnimationStyle(style)
 
-    def set_style(self, style):
+    def set_style(self, style: str):
         d = self.declaration
-        if d.show:
+        assert d is not None
+        if d.show and self.window is not None:
             self.window.dismiss()
 
         #: Recreate window with new style

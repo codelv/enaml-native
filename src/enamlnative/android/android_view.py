@@ -137,7 +137,7 @@ class AndroidView(AndroidToolkitObject, ProxyView):
     default_layout = Dict(default={"width": "wrap_content", "height": "wrap_content"})
 
     def _default_dp(self):
-        return self.get_context().activity.dp
+        return self.get_display_density()
 
     # -------------------------------------------------------------------------
     # Initialization API
