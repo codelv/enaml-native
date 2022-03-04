@@ -413,45 +413,69 @@ public class Bridge implements PythonInterpreter.EventListener {
 
         });
 
+        addPacker(ScanResult.class, (packer, id, object)-> {
+            ScanResult result = (ScanResult) object;
+            int count = 7;
+            if (Build.VERSION.SDK_INT>=23 ) {
+                count = 9;
+            }
+            packer.packMapHeader(count);
+            packer.packString("mac");
+            packer.packString(result.BSSID);
+            packer.packString("ssid");
+            packer.packString(result.SSID);
+            packer.packString("capabilities");
+            packer.packString(result.capabilities);
+            packer.packString("channel_width");
+            packer.packInt(result.channelWidth);
+            packer.packString("frequency");
+            packer.packInt(result.frequency);
+            packer.packString("rssi");
+            packer.packInt(result.level);
+            packer.packString("timestamp");
+            packer.packLong(result.timestamp);
+
+            if (Build.VERSION.SDK_INT >= 23) {
+                packer.packString("venue_name");
+                packer.packString(result.venueName.toString());
+                packer.packString("operator_name");
+                packer.packString(result.operatorFriendlyName.toString());
+            }
+        });
+
+
         // Convert
         mGenericPackers.add(new BridgeGenericPacker((id, object)-> {
             if (object instanceof List) {
-                List objects = (List) object;
-
-                // TODO: Should reuse existing packers for lists
-                return objects.isEmpty() || objects.get(0).getClass()==ScanResult.class;
+                return true;
             }
             return false;
         }, (packer, id, object)->{
-            List<ScanResult> results = (List<ScanResult>) object;
+            List results = (List) object;
             packer.packArrayHeader(results.size());
-            for (ScanResult result:results) {
-                int count = 7;
-                if (Build.VERSION.SDK_INT>=23 ) {
-                    count = 9;
+            for (Object obj : results) {
+                Class argClass = obj.getClass();
+                // Check based on type
+                Packer typePacker = mTypePackers.get(argClass);
+                if (typePacker != null) {
+                    typePacker.pack(packer, id, obj);
+                    continue;
                 }
-                packer.packMapHeader(count);
-                packer.packString("mac");
-                packer.packString(result.BSSID);
-                packer.packString("ssid");
-                packer.packString(result.SSID);
-                packer.packString("capabilities");
-                packer.packString(result.capabilities);
-                packer.packString("channel_width");
-                packer.packInt(result.channelWidth);
-                packer.packString("frequency");
-                packer.packInt(result.frequency);
-                packer.packString("rssi");
-                packer.packInt(result.level);
-                packer.packString("timestamp");
-                packer.packLong(result.timestamp);
 
-                if (Build.VERSION.SDK_INT >= 23) {
-                    packer.packString("venue_name");
-                    packer.packString(result.venueName.toString());
-                    packer.packString("operator_name");
-                    packer.packString(result.operatorFriendlyName.toString());
+                // Check generics
+                boolean packed = false;
+                for (BridgeGenericPacker genericPacker : mGenericPackers) {
+                    if (genericPacker.canPack(id, obj)) {
+                        genericPacker.pack(packer, id, obj);
+                        packed = true;
+                        break;
+                    }
                 }
+                // Fallback
+                if (!packed) {
+                    packer.packString(obj.toString());
+                }
+
             }
         }));
 

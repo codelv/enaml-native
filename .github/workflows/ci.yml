@@ -73,8 +73,8 @@ jobs:
             isort tests --check --diff
             black src/enamlnative --check --diff
             black tests --check --diff
-            flake8 --ignore=E501 src
-            flake8 --ignore=E501 tests
+            flake8 --ignore=E501,W503 src
+            flake8 --ignore=E501,W503 tests
             mypy src --ignore-missing-imports
 
 

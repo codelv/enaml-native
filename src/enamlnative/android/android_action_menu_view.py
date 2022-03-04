@@ -32,7 +32,7 @@ class MenuItem(JavaBridgeObject):
 class ActionMenuView(LinearLayout):
     package = "androidx.appcompat.widget"
     __nativeclass__ = f"{package}.ActionMenuView"
-    getMenu = JavaMethod()
+    getMenu = JavaMethod(returns=Menu)
     showOverflowMenu = JavaMethod()
     hideOverflowMenu = JavaMethod()
     setOverflowIcon = JavaMethod(Drawable)
@@ -69,8 +69,7 @@ class AndroidActionMenuView(AndroidLinearLayout, ProxyActionMenuView):
         w.onMenuItemClick.connect(self.on_menu_item_click)
 
     async def init_menu(self):
-        menu_id = await self.widget.getMenu()
-        self.menu = Menu(__id__=menu_id)
+        self.menu = await self.widget.getMenu()
 
     # -------------------------------------------------------------------------
     # OnMenuItemClickListener API

@@ -19,6 +19,7 @@ from .android_content import (
     IntentFilter,
     Intent,
 )
+from .android_utils import HashMap
 from .bridge import JavaBridgeObject, JavaMethod
 
 
@@ -59,7 +60,7 @@ class UsbManager(SystemService):
     SERVICE_TYPE = Context.USB_SERVICE
 
     getAccessoryList = JavaMethod(returns="android.hardware.usb.UsbAccessory[")
-    getDeviceList = JavaMethod(returns=dict)
+    getDeviceList = JavaMethod(returns=HashMap)
     openAccessory = JavaMethod(UsbAccessory, returns="android.os.ParcelFileDescriptor")
     openDevice = JavaMethod(UsbDevice, returns=UsbDeviceConnection)
     hasPermission = JavaMethod(UsbDevice, returns=bool)

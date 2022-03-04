@@ -7,8 +7,8 @@ isort:
 typecheck:
 	mypy src/enamlnative --ignore-missing-imports
 lintcheck:
-	flake8 --ignore=E501 src
-	flake8 --ignore=E501 tests
+	flake8 --ignore=E501,W503 src
+	flake8 --ignore=E501,W503 tests
 reformat:
 	black src
 	black tests

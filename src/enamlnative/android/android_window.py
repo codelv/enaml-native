@@ -37,8 +37,7 @@ class AndroidWindow(AndroidToolkitObject, ProxyWindow):
     widget = Typed(Window)
 
     def create_widget(self):
-        window_id = self.parent().window_id
-        self.widget = Window(__id__=window_id)
+        self.widget = self.parent().window
 
     def init_widget(self):
         """ """

@@ -1,0 +1,27 @@
+context: {}
+package:
+
+  name: enaml-native
+  version: 5.0.0
+
+requirements:
+  build:
+    - python
+    - cython
+    - android-ndk
+  run:
+    - android-enaml
+    - android-msgpack
+    - sel(osx): ios-enaml
+    - sel(osx): ios-msgpack
+
+build:
+  number: 1
+  noarch: generic
+  include_recipe: false
+  binary_relocation: false
+
+about:
+  home: http://github.com/codelv/enaml-native
+  license: MIT
+

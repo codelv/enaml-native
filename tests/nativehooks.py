@@ -2,7 +2,6 @@
 
 """
 
-import asyncio
 import msgpack
 from enaml.application import Application
 
@@ -18,7 +17,7 @@ MOCK_BUILD_INFO = {
 messages = []
 
 #: Event set when the view has been called
-shown = asyncio.Future()
+shown = None
 
 
 def publish(data: str):

@@ -14,6 +14,7 @@ from atom.api import Int, Typed, Instance
 from enamlnative.widgets.activity import ProxyActivity
 from .android_content import Context, Intent
 from .android_view import View
+from .android_window import Window
 from .android_utils import HashMap
 from .bridge import JavaCallback, JavaMethod
 
@@ -41,7 +42,7 @@ class Activity(Context):
     setActionBar = JavaMethod("android.widget.Toolbar")
     setSupportActionBar = JavaMethod("androidx.appcompat.widget.Toolbar")
     setContentView = JavaMethod(View)
-    getWindow = JavaMethod(returns="android.view.Window")
+    getWindow = JavaMethod(returns=Window)
 
     getSupportFragmentManager = JavaMethod(
         returns="androidx.fragment.app.FragmentManager"
@@ -109,7 +110,7 @@ class AndroidActivity(ProxyActivity):
     widget = Typed(Activity)
 
     #: Default window id
-    window_id = Int()
+    window = Typed(Window)
 
     #: View currently displayed
     view = Instance(View)
@@ -146,7 +147,7 @@ class AndroidActivity(ProxyActivity):
         d.height = info["DISPLAY_HEIGHT"]
         d.orientation = Activity.ORIENTATIONS[info["DISPLAY_ORIENTATION"]]
         d.api_level = info["SDK_INT"]
-        self.window_id = await activity.getWindow()
+        self.window = await activity.getWindow()
 
     def activate_bottom_up(self):
         """Show the first child view of the window"""
@@ -154,7 +155,7 @@ class AndroidActivity(ProxyActivity):
 
     def child_added(self, child):
         super().child_added(child)
-        if self.window_id:
+        if self.window is not None:
             self.reload_view()
 
     def reload_view(self):

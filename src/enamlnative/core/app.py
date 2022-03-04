@@ -13,11 +13,20 @@ import json
 import traceback
 from asyncio import Future
 from time import time
+from typing import Optional, Union
 from inspect import iscoroutinefunction
-from atom.api import Atom, Bool, Dict, Float, Instance, Int, List, Str, Value
+from atom.api import Atom, Bool, Dict, Float, Event, Instance, Int, List, Str, Value
 from enaml.application import Application
 from tornado.ioloop import IOLoop
-from enamlnative.core import bridge
+from enamlnative.core.bridge import (
+    BridgeFuture,
+    Command,
+    loads,
+    dumps,
+    encode,
+    get_handler,
+    BridgeReferenceError,
+)
 from enamlnative.widgets.activity import Activity
 
 
@@ -77,6 +86,9 @@ class BridgedApplication(Application):
 
     #: Entry points to load plugins
     plugins = Dict()
+
+    #: Event triggered when an error occurs
+    error_occurred = Event(Exception)
 
     # -------------------------------------------------------------------------
     # Defaults
@@ -198,18 +210,18 @@ class BridgedApplication(Application):
         # HACK: Reassign the discard method to show errors
         self.loop._discard_future_result = self._on_future_result
 
-    def create_future(self):
+    def create_future(self, return_type: Optional[type] = None) -> BridgeFuture:
         """Create a future object using the EventLoop implementation"""
-        return bridge.tag_object_with_id(Future())
+        return BridgeFuture(return_type)
 
     # -------------------------------------------------------------------------
     # Bridge API Implementation
     # -------------------------------------------------------------------------
-    def show_error(self, msg):
+    def show_error(self, msg: Union[bytes, str]):
         """Show the error view with the given message on the UI."""
-        self.send_event(bridge.Command.ERROR, msg)
+        self.send_event(Command.ERROR, msg)
 
-    def send_event(self, name, *args, **kwargs):
+    def send_event(self, name: str, *args, **kwargs):
         """Send an event to the native handler. This call is queued and
         batched.
 
@@ -254,8 +266,8 @@ class BridgedApplication(Application):
         """Avoid unhandled-exception warnings from spawned coroutines."""
         try:
             future.result()
-        except Exception:
-            self.handle_error(future)
+        except Exception as e:
+            self.handle_error(future, e)
 
     def _bridge_send(self, now: bool = False):
         """Send the events over the bridge to be processed by the native
@@ -274,7 +286,7 @@ class BridgedApplication(Application):
                 for i, event in enumerate(self._bridge_queue):
                     print(f"{i}: {event}")
                 print("===========================")
-            self.dispatch_events(bridge.dumps(self._bridge_queue))
+            self.dispatch_events(dumps(self._bridge_queue))
             self._bridge_queue = []
 
     def dispatch_events(self, data):
@@ -283,7 +295,7 @@ class BridgedApplication(Application):
 
     async def process_events(self, data: str):
         """The native implementation must use this call to"""
-        events = bridge.loads(data)
+        events = loads(data)
         if self.debug:
             print("======== Py <-- Native ======")
             for event in events:
@@ -302,18 +314,20 @@ class BridgedApplication(Application):
         obj = None
         result = None
         try:
-            obj, handler = bridge.get_handler(ptr, method)
+            obj, handler = get_handler(ptr, method)
             if iscoroutinefunction(handler):
                 result = await handler(*(v for t, v in args))
             else:
                 result = handler(*(v for t, v in args))
-        except bridge.BridgeReferenceError as e:
+        except BridgeReferenceError as e:
             #: Log the event, don't blow up here
             event = (result_id, ptr, method, args)
             print(f"Error processing event: {event} - {e}")
+            self.error_occurred(e)  # type: ignore
             # self.show_error(msg)
-        except Exception:
+        except Exception as e:
             #: Log the event, blow up in user's face
+            self.error_occurred(e)  # type: ignore
             err = traceback.format_exc()
             event = (result_id, ptr, method, args)
             msg = f"Error processing event: {event} - {err}"
@@ -323,22 +337,23 @@ class BridgedApplication(Application):
         finally:
             if result_id:
                 if hasattr(obj, "__nativeclass__"):
-                    sig = getattr(obj.__class__, method).__returns__
+                    sig, ret_type = getattr(obj.__class__, method).__returns__
                 else:
                     sig = result.__class__.__name__
 
                 self.send_event(
-                    bridge.Command.RESULT,  #: method
+                    Command.RESULT,  #: method
                     result_id,
-                    bridge.msgpack_encoder(sig, result),  #: args
+                    (sig, encode(result)),  #: args
                     now=True,
                 )
 
-    def handle_error(self, callback):
+    def handle_error(self, callback, exc: Exception):
         """Called when an error occurs in an event loop callback.
         By default, sets the error view.
 
         """
+        self.error_occurred(exc)  # type: ignore
         msg = f"Exception in callback {callback}: {traceback.format_exc()}"
         self.show_error(msg.encode("utf-8"))
 

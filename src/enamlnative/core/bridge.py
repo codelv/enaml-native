@@ -18,9 +18,13 @@ from weakref import WeakValueDictionary
 from types import GenericAlias
 from atom.api import Atom, Dict, ForwardInstance, Instance, Int, Property, Str
 
-CACHE: WeakValueDictionary[int, "BridgeObject"] = WeakValueDictionary()
+CACHE: WeakValueDictionary[int, Union[Future, "BridgeObject"]] = WeakValueDictionary()
 __global_id__: int = 0
 __method_id__: int = 0
+
+
+#: Mapping of nativeclass str to subclasses
+REGISTRY: dict[str, "BridgeObject"] = {}
 
 
 class Command:
@@ -134,7 +138,7 @@ class BridgeReferenceError(ReferenceError):
     pass
 
 
-def get_handler(ptr: int, method: str):
+def get_handler(ptr: int, method: str) -> tuple:
     """Dereference the pointer and return the handler method."""
     obj = CACHE.get(ptr, None)
     if obj is None:
@@ -202,6 +206,7 @@ class BridgeObject(Atom):
         # optional. TODO: Rethink this...
         n = max(1, len(cls.__signature__))
         cls.__constructor_ids__ = [method_id() for i in range(n)]
+        REGISTRY[cls.__nativeclass__] = cls
 
     def _default___app__(self):
         return get_app_class().instance()
@@ -326,13 +331,17 @@ class BridgeMethod(Property):
     """
 
     __slots__ = ("__signature__", "__returns__", "__cache__", "__method_id__")
-    __returns__: Optional[str]
+    __returns__: Optional[tuple[str, type]]
     __signature__: tuple[str, ...]
     __cache__: dict[int, Future]
     __method_id__: int
 
     def __init__(self, *args, **kwargs):
-        self.__returns__ = convert_arg(kwargs.get("returns", None))
+        return_type = kwargs.get("returns", None)
+        if return_type is None:
+            self.__returns__ = None
+        else:
+            self.__returns__ = (convert_arg(return_type), return_type)
         self.__signature__ = tuple(convert_arg(arg) for arg in args)
         self.__cache__ = {}  # Result cache otherwise gc cleans up
         self.__method_id__ = method_id()
@@ -361,18 +370,18 @@ class BridgeMethod(Property):
         #: Create a future to retrieve the result if needed
         app = obj.__app__
         if self.__returns__:
-            result = app.create_future()
+            result = app.create_future(self.__returns__[1])
             #: Store in local cache or global cache (weakref) removes it
             #: resulting in a Reference error when the result is returned
             result_id = result.__id__
             self.__cache__[result_id] = result
 
-            def resolve(r):
+            def cleanup(r):
                 #: Remove from local cache to free future
                 del self.__cache__[result_id]
 
             #: Delete from the local cache once resolved.
-            result.add_done_callback(resolve)
+            result.add_done_callback(cleanup)
         else:
             result = None
             result_id = 0
@@ -419,7 +428,7 @@ class BridgeStaticMethod(Property):
         "__method_id__",
     )
     #: Return type
-    __returns__: Optional[str]
+    __returns__: Optional[tuple[str, type]]
 
     #: Function signature
     __signature__: tuple[str, ...]
@@ -430,7 +439,11 @@ class BridgeStaticMethod(Property):
     __method_id__: int
 
     def __init__(self, *args, **kwargs):
-        self.__returns__ = convert_arg(kwargs.get("returns", None))
+        return_type = kwargs.get("returns", None)
+        if return_type is None:
+            self.__returns__ = None
+        else:
+            self.__returns__ = (convert_arg(return_type), return_type)
         self.__signature__ = tuple(convert_arg(arg) for arg in args)
         self.__owner__ = None
         self.__cache__ = {}  # Result cache otherwise gc cleans up
@@ -451,18 +464,18 @@ class BridgeStaticMethod(Property):
 
         #: Create a future to retrieve the result if needed
         if self.__returns__:
-            result = app.create_future()
+            result = app.create_future(self.__returns__[1])
             result_id = result.__id__
             #: Store in local cache or global cache (weakref) removes it
             #: resulting in a Reference error when the result is returned
             self.__cache__[result_id] = result
 
-            def resolve(r):
+            def cleanup(r):
                 #: Remove from local cache to free future
                 del self.__cache__[result_id]
 
             #: Delete from the local cache once resolved.
-            result.add_done_callback(resolve)
+            result.add_done_callback(cleanup)
         else:
             result = None
             result_id = 0
@@ -600,3 +613,26 @@ class BridgeCallback(BridgeMethod):
     def disconnect(self, obj, callback=None):
         """Remove the callback to be fired when the event occurs."""
         del obj.__callbacks__[self.name]
+
+
+class BridgeFuture(Future):
+    """A future which automatically resolves to the return type"""
+
+    __id__: int
+    __returns__: Optional[type]
+
+    def __init__(self, return_type: Optional[type] = None):
+        result_id = self.__id__ = generate_id()
+        CACHE[result_id] = self
+        self.__returns__ = return_type
+        super().__init__()
+
+    def set_result(self, result):
+        return_type = self.__returns__
+        if (
+            isinstance(result, int)
+            and isinstance(return_type, type)
+            and issubclass(return_type, BridgeObject)
+        ):
+            result = return_type(__id__=result)
+        super().set_result(result)

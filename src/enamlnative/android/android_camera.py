@@ -225,13 +225,13 @@ class AndroidCameraView(AndroidTextureView, ProxyCameraView):
         allowed = self.allowed = await CameraManager.request_permission()
         if not allowed:
             return
-        camera_id = await CameraPackage.getInstance()
-        if camera_id is None:
+        camera_package = await CameraPackage.getInstance()
+        if camera_package is None:
             raise RuntimeError(
                 "You must add the CameraPackage to your apps MainActiviy"
             )
-        api = self.api = CameraPackage(__id__=camera_id)
-        api.startCapturePreview(self.widget, camera_id)
+        api = self.api = camera_package
+        api.startCapturePreview(self.widget, camera_package)
 
     def stop_camera_preview(self):
         if self.api:

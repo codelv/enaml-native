@@ -46,7 +46,7 @@ def native_app():
 
 
 @pytest.mark.parametrize("path", glob("examples/*.enaml"))
-def test_examples(native_app, path):
+async def test_examples(native_app, path):
     example = path[:-6].replace("/", ".")  # Remove example/ and .enaml
 
     if "thermostat" in example:
@@ -67,13 +67,18 @@ def test_examples(native_app, path):
             raise
 
     app.activity = ExampleActivity(example=ContentView())
-
     f = nativehooks.shown = app.create_future()
-    f.add_done_callback(lambda f: app.stop())
+
+    def on_error(event):
+        f.set_exception(event["value"])
+
+    app.observe("error_occurred", on_error)
+
+    # f.add_done_callback(lambda f: app.stop())
     # Add fail timeout
     app.timed_call(5 * 1000, lambda: f.set_result(False))
-    app.start()
-    assert f.result()
+    app.deferred_call(app.activity.start)
+    assert await f
 
 
 @pytest.mark.skip(reason="Disabled")

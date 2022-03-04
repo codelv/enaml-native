@@ -9,6 +9,7 @@ Created on Jan 28, 2018
 
 @author: jrm
 """
+from typing import Optional
 from atom.api import ForwardInstance, Int, Bool
 from .android_content import Context, SystemService
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod
@@ -100,7 +101,7 @@ class Sensor(JavaBridgeObject):
     started = Bool()
 
     @classmethod
-    async def get(cls, sensor_type):
+    async def get(cls, sensor_type: int) -> Optional["Sensor"]:
         """Shortcut that acquires the default Sensor of a given type.
 
         Parameters
@@ -116,10 +117,12 @@ class Sensor(JavaBridgeObject):
 
         """
         mgr = await SensorManager.get()
-        sensor_id = await mgr.getDefaultSensor(sensor_type)
-        if not sensor_id:
-            return
-        return Sensor(__id__=sensor_id, manager=mgr, type=sensor_type)
+        sensor = await mgr.getDefaultSensor(sensor_type)
+        if sensor is None:
+            return None
+        sensor.manager = mgr
+        sensor.type = sensor_type
+        return sensor
 
     def start(self, callback, rate=SENSOR_DELAY_NORMAL):
         """Start listening to sensor events. Sensor event data depends
@@ -166,13 +169,11 @@ class SensorManager(SystemService):
 
     registerListener = JavaMethod(
         "android.hardware.SensorEventListener",
-        "android.hardware.Sensor",
+        Sensor,
         int,
         returns=bool,
     )
-    unregisterListener = JavaMethod(
-        "android.hardware.SensorEventListener", "android.hardware.Sensor"
-    )
+    unregisterListener = JavaMethod("android.hardware.SensorEventListener", Sensor)
 
-    getDefaultSensor = JavaMethod(int, returns="android.hardware.Sensor")
+    getDefaultSensor = JavaMethod(int, returns=Sensor)
     getSensorList = JavaMethod(int, returns="java.util.List")
