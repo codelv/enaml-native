@@ -325,7 +325,7 @@ class TornadoDevClient(DevClient):
             app = session.app
 
             try:
-                print("Dev client connecting {}...".format(session.url))
+                # print("Dev client connecting {}...".format(session.url))
                 conn = yield websocket_connect(session.url)
                 session.connected = True
                 self.connection = conn
@@ -345,7 +345,8 @@ class TornadoDevClient(DevClient):
                         conn.write_message(json.dumps(r))
                 session.connected = False
             except Exception as e:
-                print("Dev client connection dropped: {}".format(e))
+                if "refused" not in f"{e}":
+                    print(f"Dev client connection dropped: {e}")
             finally:
                 if mode == "remote":
                     session.app.stop()
