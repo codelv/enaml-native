@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.hardware.SensorEvent;
+import android.hardware.usb.UsbAccessory;
+import android.hardware.usb.UsbDevice;
 import android.location.Location;
 import android.net.DhcpInfo;
 import android.net.wifi.ScanResult;
@@ -252,6 +254,22 @@ public class Bridge implements PythonInterpreter.EventListener {
             packer.packString(MotionEvent.actionToString(event.getAction()));
         });
 
+        addPacker(UsbDevice.class, (packer, id, object)-> {
+            int code = ((UsbDevice) object).hashCode();
+            if (mObjectCache.get(code) == null) {
+                mObjectCache.put(code, object);
+            }
+            packer.packInt(code);
+        });
+
+        addPacker(UsbAccessory.class, (packer, id, object)-> {
+            int code = ((UsbAccessory) object).hashCode();
+            if (mObjectCache.get(code) == null) {
+                mObjectCache.put(code, object);
+            }
+            packer.packInt(code);
+        });
+
         addGenericPacker(Map.class, (packer, id, object)->{
             Map map = (Map) object;
             packer.packMapHeader(map.keySet().size());
@@ -487,14 +505,15 @@ public class Bridge implements PythonInterpreter.EventListener {
 
         // Add special packer for objects...
         mGenericPackers.add(
-                new BridgeGenericPacker((id, object)-> id!=IGNORE_RESULT,
-                        (packer, id, object)->{
-                            // The callback is returning a newly created object
-                            if (mObjectCache.get(id)==null) {
-                                mObjectCache.put(id, object);
-                            }
-                            packer.packInt(id);
-                        }));
+            new BridgeGenericPacker((id, object)-> id!=IGNORE_RESULT,
+            (packer, id, object)->{
+                // The callback is returning a newly created object
+                if (mObjectCache.get(id)==null) {
+                    mObjectCache.put(id, object);
+                }
+                packer.packInt(id);
+            })
+        );
     }
 
     void registerBuiltinUnpackers() {
