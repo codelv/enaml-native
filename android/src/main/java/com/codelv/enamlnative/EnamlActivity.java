@@ -60,18 +60,12 @@ public class EnamlActivity extends AppCompatActivity {
         EnamlApplication app = (EnamlApplication) getApplication();
         mEnamlPackages.addAll(app.getPackages());
 
+        prepareLoadingScreen();
+
         // Create
         for (EnamlPackage pkg: getPackages()) {
             Log.d(TAG, "Creating "+pkg);
             pkg.onCreate(this);
-        }
-
-
-        prepareLoadingScreen();
-
-        // Now initialize everything
-        for (EnamlPackage pkg: getPackages()) {
-            pkg.onStart();
         }
 
         // Now notify any listeners
@@ -253,6 +247,20 @@ public class EnamlActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        // Now initialize everything
+        for (EnamlPackage pkg: getPackages()) {
+            pkg.onStart();
+        }
+
+        // Now notify any listeners
+        for (ActivityLifecycleListener listener:mActivityLifecycleListeners) {
+            listener.onActivityLifecycleChanged("started");
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         // Initialize the packages
@@ -271,7 +279,7 @@ public class EnamlActivity extends AppCompatActivity {
         super.onPause();
         // Initialize the packages
         for (EnamlPackage pkg: getPackages()) {
-            pkg.onStop();
+            pkg.onPause();
         }
 
         // Now notify any listeners

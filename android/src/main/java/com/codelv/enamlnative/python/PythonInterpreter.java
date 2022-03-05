@@ -45,6 +45,13 @@ public class PythonInterpreter {
     public native int sendEvents(byte[] data);
 
     /**
+     * Check if the interpreter is already initialized.
+     *
+     * @return error code
+     */
+    public native boolean isInitialized();
+
+    /**
      * Stops the Python interpreter.
      *
      * @return error code

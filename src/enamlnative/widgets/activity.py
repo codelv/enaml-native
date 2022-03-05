@@ -38,7 +38,7 @@ class Activity(ToolkitObject):
     stopped = d_(Event(), writable=False)
 
     #: Activity lifecycle state must be set by the implementation
-    state = Enum("created", "paused", "resumed", "stopped", "destroyed")
+    state = Enum("created", "started", "paused", "resumed", "stopped", "destroyed")
 
     #: Pixel density of the device
     #: Loaded immediately as this is used often.

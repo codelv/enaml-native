@@ -34,13 +34,23 @@ public class PythonPackage implements EnamlPackage {
 
     public void onCreate(EnamlActivity activity) {
         mActivity = activity;
+        if (BuildConfig.DEV_REMOTE_DEBUG) {
+            mPythonInterpreter = RemotePythonInterpreter.instance();
+        } else {
+            mPythonInterpreter = PythonInterpreter.instance();
+        }
+
+        if (mPythonInterpreter.isInitialized()) {
+            // Do nothing
+        } else {
+            mPython = new PythonTask();
+            new Thread(mPython).start();
+        }
     }
 
     @Override
     public void onStart() {
-        // Extract and start python in the background
-        new Thread(new PythonTask()).start();
-        //mPython.execute("python");
+
     }
 
     @Override
@@ -61,6 +71,9 @@ public class PythonPackage implements EnamlPackage {
     @Override
     public void onDestroy() {
         mDestroyRequested = true;
+        if (mPythonInterpreter != null) {
+            mPythonInterpreter.stop();
+        }
     }
 
     /**
@@ -112,13 +125,6 @@ public class PythonPackage implements EnamlPackage {
 
             // Initialize python
             // Note: This must be NOT done in the UI thread!
-            if (BuildConfig.DEV_REMOTE_DEBUG) {
-                mPythonInterpreter = RemotePythonInterpreter.instance();
-
-            } else {
-                mPythonInterpreter = PythonInterpreter.instance();
-            }
-
             int result = mPythonInterpreter.start(assetsPath, cachePath, nativePath);
             Log.i(TAG, "Python main() finished with code: "+result);
             mPythonInterpreter.stop();

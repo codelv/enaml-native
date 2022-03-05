@@ -324,6 +324,11 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
     return result;
 }
 
+JNIEXPORT jboolean JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_isInitialized
+  (JNIEnv *env, jclass jc) {
+    return Py_IsInitialized() != 0;
+}
+
 
 JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_stop
   (JNIEnv *env, jclass jc) {

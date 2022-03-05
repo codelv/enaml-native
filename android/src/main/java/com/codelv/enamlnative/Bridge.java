@@ -79,7 +79,7 @@ public class Bridge implements PythonInterpreter.EventListener {
 
     final EnamlActivity mActivity;
 
-    final Bridge mBridge;
+    static Bridge mBridge;
 
     // Context
     final Context mContext;
@@ -127,7 +127,17 @@ public class Bridge implements PythonInterpreter.EventListener {
 
     final PythonInterpreter mPythonInterpreter;
 
-    public Bridge(EnamlActivity activity) {
+    /**
+     * Singleton
+     */
+    public static Bridge instance(EnamlActivity activity) {
+        if (mBridge==null) {
+            mBridge = new Bridge(activity);
+        }
+        return mBridge;
+    }
+
+    protected Bridge(EnamlActivity activity) {
         mBridge = this;
         mContext = activity;
         mActivity = activity;

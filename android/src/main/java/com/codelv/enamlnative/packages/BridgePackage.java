@@ -15,7 +15,7 @@ public class BridgePackage implements EnamlPackage {
     @Override
     public void onCreate(EnamlActivity activity) {
         mActivity = activity;
-        mBridge = new Bridge(activity);
+        mBridge = Bridge.instance(activity);
 
         // Set the bridge
         activity.setBridge(mBridge);
