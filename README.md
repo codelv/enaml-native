@@ -1,5 +1,6 @@
 # enaml-native
-[![Build Status](https://travis-ci.org/codelv/enaml-native.svg?branch=master)](https://travis-ci.org/codelv/enaml-native) [![codecov](https://codecov.io/gh/codelv/enaml-native/branch/master/graph/badge.svg)](https://codecov.io/gh/codelv/enaml-native) [![Help chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/enaml-native/Lobby) [![Documentation Status](https://readthedocs.org/projects/enaml-native/badge/?version=latest)](http://enaml-native.readthedocs.io/en/latest/?badge=latest) [![Downloads](https://pepy.tech/badge/enaml-native/month)](https://pepy.tech/project/enaml-native/month)
+
+[![status](https://github.com/codelv/enaml-native/actions/workflows/ci.yml/badge.svg)](https://github.com/codelv/enaml-native/actions) [![codecov](https://codecov.io/gh/codelv/enaml-native/branch/master/graph/badge.svg)](https://codecov.io/gh/codelv/enaml-native) [![Help chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/enaml-native/Lobby) [![Documentation Status](https://readthedocs.org/projects/enaml-native/badge/?version=latest)](http://enaml-native.readthedocs.io/en/latest/?badge=latest) [![Downloads](https://pepy.tech/badge/enaml-native/month)](https://pepy.tech/project/enaml-native/month)
 
 Build native mobile apps in python using enaml and native widgets!
 
@@ -11,7 +12,7 @@ This is still a very young project but the results and feedback have been positi
 
 ### Docs and Examples ###
 
-See the [project site](https://www.codelv.com/projects/enaml-native/) or the [api docs](http://enaml-native.readthedocs.io/)
+See the [project site](https://codelv.com/projects/enaml-native/) or the [api docs](http://enaml-native.readthedocs.io/)
 
 There's also some short tutorials and examples on [youtube](https://www.youtube.com/playlist?list=PLXUaMWWFaOjT2WdIrJdTYjEMJmrjuvVz0).
 
@@ -54,7 +55,7 @@ Created a package? Send a PR and add it here!
 
 ### Apps ###
 
-Apps using enaml-native can be found [here](https://www.codelv.com/projects/enaml-native/apps/).
+Apps using enaml-native can be found [here](https://codelv.com/projects/enaml-native/apps/).
 
 A short video showing of some of the apps I made are here
 
@@ -95,6 +96,6 @@ for docstrings and the [pep-8](https://www.python.org/dev/peps/pep-0008/) code s
 
 ### Donate
 
-This is a project I develop in my free time.  If you use enaml-native or simply like the project and want to help continue the development of it please consider [donating](https://www.codelv.com/projects/enaml-native/support/).
+This is a project I develop in my free time.  If you use enaml-native or simply like the project and want to help continue the development of it please consider [donating](https://codelv.com/projects/enaml-native/support/).
 
 
