@@ -24,9 +24,16 @@ class Window(JavaBridgeObject):
     # view/WindowManager.LayoutParams.html#FLAG_KEEP_SCREEN_ON
     FLAG_KEEP_SCREEN_ON = 128
 
+    RESIZE_MODES = {
+        "auto": 0,  # Pick pan or zoom based on presense of scroll view
+        "resize": 16,
+        "pan": 32,
+    }
+
     addFlags = JavaMethod(int)
     clearFlags = JavaMethod(int)
     setStatusBarColor = JavaMethod("android.graphics.Color")
+    setSoftInputMode = JavaMethod(int)
 
     def __del__(self):
         """Do not destroy the main window"""
@@ -46,6 +53,7 @@ class AndroidWindow(AndroidToolkitObject, ProxyWindow):
             self.set_keep_screen_on(d.keep_screen_on)
         if d.statusbar_color:
             self.set_statusbar_color(d.statusbar_color)
+        self.set_keyboard_resize_mode(d.keyboard_resize_mode)
 
     def set_keep_screen_on(self, keep_on: bool):
         """Set or clear the window flag to keep the screen on"""
@@ -61,3 +69,8 @@ class AndroidWindow(AndroidToolkitObject, ProxyWindow):
         widget = self.widget
         if widget is not None:
             widget.setStatusBarColor(color)
+
+    def set_keyboard_resize_mode(self, mode: str):
+        widget = self.widget
+        if widget is not None:
+            widget.setSoftInputMode(Window.RESIZE_MODES[mode])
