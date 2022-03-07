@@ -14,7 +14,4 @@ Android Implementation
 ----------------------------
 
 .. autoclass:: enamlnative.android.android_flexbox.AndroidFlexbox
-iOS Implementation
-----------------------------
-
-.. autoclass:: enamlnative.ios.uikit_flexbox.UiKitFlexbox
+No iOS implementation found.

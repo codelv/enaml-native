@@ -12,6 +12,7 @@ APIs
    SensorManager <android_sensormanager>
    UsbDevice <android_usbdevice>
    UsbManager <android_usbmanager>
+   Vibrator <android_vibrator>
    WifiManager <android_wifimanager>
 
 

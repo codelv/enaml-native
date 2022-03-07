@@ -14,7 +14,4 @@ Android Implementation
 ----------------------------
 
 .. autoclass:: enamlnative.android.android_activity_indicator.AndroidActivityIndicator
-iOS Implementation
-----------------------------
-
-.. autoclass:: enamlnative.ios.uikit_activity_indicator.UiKitActivityIndicator
+No iOS implementation found.

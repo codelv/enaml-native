@@ -5,12 +5,14 @@ Widgets
 .. toctree::
    :maxdepth: 2
 
+   Activity <activity>
    ActivityIndicator <activityindicator>
    AppBarLayout <appbarlayout>
    AutoCompleteTextView <autocompletetextview>
    BottomSheetDialog <bottomsheetdialog>
    Button <button>
    CalendarView <calendarview>
+   CameraView <cameraview>
    CardView <cardview>
    CheckBox <checkbox>
    Chronometer <chronometer>
@@ -48,19 +50,23 @@ Widgets
    SeekBar <seekbar>
    Snackbar <snackbar>
    Spinner <spinner>
+   SurfaceView <surfaceview>
    SwipeRefreshLayout <swiperefreshlayout>
    Switch <switch>
    TabFragment <tabfragment>
    TabLayout <tablayout>
    TextClock <textclock>
    TextView <textview>
+   TextureView <textureview>
    TimePicker <timepicker>
    Toast <toast>
    ToggleButton <togglebutton>
    Toolbar <toolbar>
+   VideoView <videoview>
    View <view>
    ViewGroup <viewgroup>
    ViewPager <viewpager>
    WebView <webview>
+   Window <window>
 
 

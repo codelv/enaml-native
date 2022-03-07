@@ -14,7 +14,4 @@ Android Implementation
 ----------------------------
 
 .. autoclass:: enamlnative.android.android_checkbox.AndroidCheckBox
-iOS Implementation
-----------------------------
-
-.. autoclass:: enamlnative.ios.uikit_switch.UiKitSwitch
+No iOS implementation found.

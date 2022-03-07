@@ -1,5 +1,5 @@
 
-ScrollView
+Activity
 ========================================
 
 No example available.
@@ -7,10 +7,10 @@ No example available.
 Declaration
 ----------------------------
 
-.. autoclass:: enamlnative.widgets.scroll_view.ScrollView
+.. autoclass:: enamlnative.widgets.activity.Activity
 
 Android Implementation
 ----------------------------
 
-.. autoclass:: enamlnative.android.android_scroll_view.AndroidScrollView
+.. autoclass:: enamlnative.android.android_activity.AndroidActivity
 No iOS implementation found.

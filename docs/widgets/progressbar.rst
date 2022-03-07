@@ -14,7 +14,4 @@ Android Implementation
 ----------------------------
 
 .. autoclass:: enamlnative.android.android_progress_bar.AndroidProgressBar
-iOS Implementation
-----------------------------
-
-.. autoclass:: enamlnative.ios.uikit_progress_view.UiKitProgressView
+No iOS implementation found.

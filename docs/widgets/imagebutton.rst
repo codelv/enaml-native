@@ -2,7 +2,7 @@
 ImageButton
 ========================================
 
-.. literalinclude:: ../../examples/button.enaml
+.. literalinclude:: ../../examples/buttons.enaml
             :language: python
 
 Declaration

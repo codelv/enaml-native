@@ -14,7 +14,4 @@ Android Implementation
 ----------------------------
 
 .. autoclass:: enamlnative.android.android_seek_bar.AndroidSeekBar
-iOS Implementation
-----------------------------
-
-.. autoclass:: enamlnative.ios.uikit_slider.UiKitSlider
+No iOS implementation found.

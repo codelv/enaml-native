@@ -14,7 +14,4 @@ Android Implementation
 ----------------------------
 
 .. autoclass:: enamlnative.android.android_edit_text.AndroidEditText
-iOS Implementation
-----------------------------
-
-.. autoclass:: enamlnative.ios.uikit_edit_text.UiKitEditText
+No iOS implementation found.

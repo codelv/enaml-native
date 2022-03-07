@@ -1,5 +1,5 @@
 
-ScrollView
+SurfaceView
 ========================================
 
 No example available.
@@ -7,10 +7,10 @@ No example available.
 Declaration
 ----------------------------
 
-.. autoclass:: enamlnative.widgets.scroll_view.ScrollView
+.. autoclass:: enamlnative.widgets.surface_view.SurfaceView
 
 Android Implementation
 ----------------------------
 
-.. autoclass:: enamlnative.android.android_scroll_view.AndroidScrollView
+.. autoclass:: enamlnative.android.android_surface_view.AndroidSurfaceView
 No iOS implementation found.

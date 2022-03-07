@@ -13,7 +13,4 @@ Android Implementation
 ----------------------------
 
 .. autoclass:: enamlnative.android.android_linear_layout.AndroidLinearLayout
-iOS Implementation
-----------------------------
-
-.. autoclass:: enamlnative.ios.uikit_linear_layout.UiKitLinearLayout
+No iOS implementation found.

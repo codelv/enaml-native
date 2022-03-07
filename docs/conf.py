@@ -47,7 +47,8 @@ extensions = [
     'sphinx.ext.graphviz',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.autosummary',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinx_markdown_builder',
 ]
 
 
@@ -149,7 +150,7 @@ napoleon_include_special_with_doc = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'
+#html_theme = 'sphinx_rtd_theme'
 #html_theme = 'sphinx_materialdesign_theme'
 
 # html_theme_options = {
@@ -382,4 +383,5 @@ texinfo_documents = [
 
 
 def setup(app):
-    app.add_javascript("js/custom.js")
+    #app.add_javascript("js/custom.js")
+    pass
