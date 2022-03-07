@@ -160,7 +160,14 @@ class Flexbox(ViewGroup):
     #: Control how multiple lines of content are aligned within a
     #: container which uses FlexWrap
     align_content = d_(
-        Enum("flex_start", "flex_end", "center", "space_between", "space_around")
+        Enum(
+            "flex_start",
+            "flex_end",
+            "center",
+            "space_between",
+            "space_around",
+            "stretch",
+        )
     )
 
     #: Should the layout be a column or a row.
