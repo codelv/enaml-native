@@ -11,7 +11,7 @@ Created on Feb 11, 2018
 """
 import os
 from asyncio import Future
-from atom.api import Dict, Int, List, Typed, Event, Value
+from atom.api import Dict, List, Typed, Event, Value
 from .android_content import (
     BroadcastReceiver,
     Context,
@@ -24,27 +24,26 @@ from .bridge import JavaBridgeObject, JavaMethod
 
 
 def find_library(lib: str) -> str:
-    """ Locate a library with of the given name """
-    lib_dir = os.environ['PY_LIB_DIR']
-    path = f'{lib_dir}/{lib}.so'
+    """Locate a library with of the given name"""
+    lib_dir = os.environ["PY_LIB_DIR"]
+    path = f"{lib_dir}/{lib}.so"
     if os.path.exists(path):
         return path
-    return ''
+    return ""
 
 
 def libusb_init(self, lib):
-    """ Patch pyusb's libusb1 backend to work on android """
-    from usb.backend import IBackend, libusb1
+    """Patch pyusb's libusb1 backend to work on android"""
     from ctypes import POINTER, c_void_p, c_int, byref
+    from usb.backend import IBackend, libusb1
+
     IBackend.__init__(self)
     self.lib = lib
     self.ctx = c_void_p()
     NO_DEVICE_DISCOVERY = 2
     try:
         _check = libusb1._check
-        lib.libusb_wrap_sys_device.argtypes = [
-            c_void_p, c_void_p, POINTER(c_void_p)
-        ]
+        lib.libusb_wrap_sys_device.argtypes = [c_void_p, c_void_p, POINTER(c_void_p)]
         lib.libusb_wrap_sys_device.restype = c_int
         lib.libusb_get_device.argtypes = [c_void_p]
         lib.libusb_get_device.restype = c_void_p
@@ -58,15 +57,14 @@ def libusb_init(self, lib):
 
 
 def load_libusb():
-    """ Apply a patch to pyusb and load the libusb1 backend
-
-    """
+    """Apply a patch to pyusb and load the libusb1 backend"""
     # Patch ctypes find_library to look in the correct location
     # import ctypes.util
     # ctypes.util.find_library = find_library
 
     # Patch the LibUSB init to disable device discovery
     from usb.backend import libusb1
+
     libusb1._LibUSB.__init__ = libusb_init
     return libusb1.get_backend(find_library)
 
@@ -137,9 +135,7 @@ class UsbDeviceConnection(JavaBridgeObject):
     handle = Value()
 
     async def acquire(self):
-        """ Acquire a pyusb device for this connection.
-
-        """
+        """Acquire a pyusb device for this connection."""
         from ctypes import c_void_p, byref
         from usb.core import Device
         from usb.backend import libusb1
@@ -148,9 +144,9 @@ class UsbDeviceConnection(JavaBridgeObject):
 
         backend = load_libusb()
         self.handle = c_void_p()
-        libusb1._check(backend.lib.libusb_wrap_sys_device(
-            backend.ctx, fd, byref(self.handle)
-        ))
+        libusb1._check(
+            backend.lib.libusb_wrap_sys_device(backend.ctx, fd, byref(self.handle))
+        )
         self.devid = backend.lib.libusb_get_device(self.handle)
         return Device(self, backend)
 
