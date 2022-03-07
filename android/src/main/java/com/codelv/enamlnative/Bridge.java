@@ -265,11 +265,32 @@ public class Bridge implements PythonInterpreter.EventListener {
         });
 
         addPacker(UsbDevice.class, (packer, id, object)-> {
-            int code = ((UsbDevice) object).hashCode();
+            UsbDevice device = (UsbDevice) object;
+            int code = device.hashCode();
             if (mObjectCache.get(code) == null) {
                 mObjectCache.put(code, object);
             }
+            packer.packMapHeader(6);
+            packer.packString("id");
             packer.packInt(code);
+            packer.packString("device_id");
+            packer.packInt(device.getDeviceId());
+            packer.packString("product_id");
+            packer.packInt(device.getProductId());
+            packer.packString("vendor_id");
+            packer.packInt(device.getVendorId());
+            packer.packString("name");
+            if (device.getProductName() != null) {
+                packer.packString(device.getProductName());
+            } else {
+                packer.packNil();
+            }
+            packer.packString("manufacturer");
+            if (device.getManufacturerName() != null) {
+                packer.packString(device.getManufacturerName());
+            } else {
+                packer.packNil();
+            }
         });
 
         addPacker(UsbAccessory.class, (packer, id, object)-> {
@@ -329,13 +350,17 @@ public class Bridge implements PythonInterpreter.EventListener {
         // Unpack Intent objects
         addPacker(Intent.class, (packer, id, object)->{
             Intent intent = (Intent) object;
+            int code = intent.hashCode();
+            if (mObjectCache.get(code)==null) {
+                mObjectCache.put(code, object);
+            }
             packer.packMapHeader(3);
             packer.packString("id");
-            packer.packInt(id);
+            packer.packInt(code);
             packer.packString("action");
             packer.packString(intent.getAction());
-            packer.packString("uri");
-            packer.packString(intent.toUri(0));
+            packer.packString("context");
+            packer.packString(intent.toString());
         });
 
         // Unpack Location objects
