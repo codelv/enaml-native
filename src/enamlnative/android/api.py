@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017-2018, Jairus Martin.
+Copyright (c) 2017-2022, Jairus Martin.
 
 Distributed under the terms of the MIT License.
 
@@ -16,3 +16,4 @@ from .android_sensors import Sensor, SensorManager
 from .android_usb import UsbDevice, UsbManager
 from .android_utils import InputMethodManager
 from .android_wifi import WifiManager
+from .android_vibrator import Vibrator

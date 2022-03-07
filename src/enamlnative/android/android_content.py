@@ -10,7 +10,8 @@ Created on July 24, 2017
 @author: jrm
 """
 
-from typing import ClassVar
+from typing import ClassVar, Union
+from atom.api import Str
 from .bridge import JavaBridgeObject, JavaCallback, JavaMethod, JavaStaticMethod
 
 
@@ -160,6 +161,8 @@ class Context(JavaBridgeObject):
 
 class Intent(JavaBridgeObject):
     __nativeclass__ = "android.content.Intent"
+    action = Str()
+    context = Str()
     setAction = JavaMethod(str)
     getAction = JavaMethod(returns=str)
     setClass = JavaMethod(Context, "java.lang.Class")
@@ -192,6 +195,9 @@ class PendingIntent(JavaBridgeObject):
         returns="androind.app.PendingIntent",
     )
 
+    cancel = JavaMethod()
+    describeContents = JavaMethod(returns=int)
+
 
 class BroadcastReceiver(JavaBridgeObject):
     """A BroadcastReceiver that delegates to a listener"""
@@ -206,14 +212,16 @@ class BroadcastReceiver(JavaBridgeObject):
     onReceive = JavaCallback(Context, Intent)
 
     @classmethod
-    def for_action(cls, action: str, callback, single_shot: bool = True):
+    def for_action(
+        cls, actions: Union[str, list[str]], callback, single_shot: bool = True
+    ):
         """Create a BroadcastReceiver that is invoked when the given
         action is received.
 
         Parameters
         ----------
-        action: String
-            Action to receive
+        action: Union[str, list[str]]
+            Action or list of actions to receive
         callback: Callable
             Callback to invoke when the action is received
         single_shot: Bool
@@ -238,14 +246,23 @@ class BroadcastReceiver(JavaBridgeObject):
         activity = proxy.widget
         assert activity is not None
 
-        def on_receive(ctx, intent):
+        def on_receive(ctx, data: dict):
+            # The bridge sends the intent as a dict with keys id, action, and url
             if single_shot:
                 activity.unregisterReceiver(receiver)
-            callback(intent)
+            intent = Intent(
+                __id__=data["id"],
+                action=data["action"],
+                context=data["context"],
+            )
+            assert app is not None
+            app.deferred_call(callback, ctx, intent)
 
         receiver.onReceive.connect(on_receive)
-
-        activity.registerReceiver(receiver, IntentFilter(action))
+        if isinstance(actions, str):
+            actions = [actions]
+        for action in actions:
+            activity.registerReceiver(receiver, IntentFilter(action))
         return receiver
 
     def __del__(self):
