@@ -114,6 +114,11 @@ class UsbDevice(JavaBridgeObject):
     getInterface = JavaMethod(int, returns=UsbInterface)
     getConfiguration = JavaMethod(int, returns=UsbConfiguration)
 
+    def __del__(self):
+        if UsbManager._instance and self.__id__ in UsbManager._instance.devices:
+            return  # Do not destroy
+        super().__del__()
+
 
 class UsbDeviceConnection(JavaBridgeObject):
     __nativeclass__ = "android.hardware.usb.UsbDeviceConnection"
@@ -148,7 +153,9 @@ class UsbDeviceConnection(JavaBridgeObject):
             backend.lib.libusb_wrap_sys_device(backend.ctx, fd, byref(self.handle))
         )
         self.devid = backend.lib.libusb_get_device(self.handle)
-        return Device(self, backend)
+        dev = Device(self, backend)
+        dev._ctx.handle = self  # Already opened
+        return dev
 
 
 class UsbAccessory(JavaBridgeObject):
@@ -186,8 +193,10 @@ class UsbManager(SystemService):
 
     receiver = Typed(BroadcastReceiver)
     permission_intent = Typed(PendingIntent)
-    allowed_devices = Dict(int, UsbDevice)
     pending_requests = List(Future)
+
+    #: Hold references to devices
+    devices = Dict(int, UsbDevice)
 
     #: You can listen for this
     device_attached = Event(UsbDevice)
@@ -243,9 +252,13 @@ class UsbManager(SystemService):
         )
         try:
             if allowed and info:
-                device = UsbDevice(__id__=info["id"], info=info)
+                dev_id = info["id"]
+                dev = self.devices.get(dev_id, None)
+                if dev is None:
+                    dev = UsbDevice(__id__=dev_id, info=info)
+                    self.devices[dev_id] = dev
                 for f in self.pending_requests:
-                    f.set_result(device)
+                    f.set_result(dev)
             else:
                 err = PermissionError("Access to USB device denied")
                 for f in self.pending_requests:
@@ -256,13 +269,20 @@ class UsbManager(SystemService):
     async def on_device_attached(self, ctx, intent: Intent):
         info = await intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
         if info:
-            dev = UsbDevice(__id__=info["id"], info=info)
+            dev_id = info["id"]
+            dev = self.devices.get(dev_id, None)
+            if dev is None:
+                dev = UsbDevice(__id__=dev_id, info=info)
+                self.devices[dev_id] = dev
             self.device_attached(dev)  # type: ignore
 
     async def on_device_detached(self, ctx, intent: Intent):
         info = await intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
         if info:
-            dev = UsbDevice(__id__=info["id"], info=info)
+            dev_id = info["id"]
+            dev = self.devices.pop(dev_id, None)
+            if dev is None:
+                dev = UsbDevice(__id__=dev_id, info=info)
             self.device_detached(dev)  # type: ignore
 
     def clean_pending(self):
@@ -285,3 +305,21 @@ class UsbManager(SystemService):
         self.pending_requests.append(f)
         self.requestPermission(device, permission_intent)
         return await f
+
+    async def get_devices(self) -> list[UsbDevice]:
+        """ Load devices and update the internal list. Since the bridge
+        caches a reference here it important to not delete it until it
+        detaches.
+
+        """
+        devices = {}
+        result = await self.getDeviceList()
+        for info in result.values():
+            dev_id = info['id']
+            dev = self.devices.get(dev_id, None)
+            if dev is None:
+                dev = UsbDevice(__id__=dev_id, info=info)
+            devices[dev_id] = dev
+
+        self.devices = devices
+        return list(self.devices.values())
