@@ -295,8 +295,6 @@ class UsbManager(SystemService):
                     pass
 
     async def request_permission(self, device: UsbDevice) -> bool:
-        if device.__id__ in self.allowed_devices:
-            return True
         permission_intent = self.permission_intent
         assert permission_intent is not None
         app = self.__app__
@@ -307,7 +305,7 @@ class UsbManager(SystemService):
         return await f
 
     async def get_devices(self) -> list[UsbDevice]:
-        """ Load devices and update the internal list. Since the bridge
+        """Load devices and update the internal list. Since the bridge
         caches a reference here it important to not delete it until it
         detaches.
 
@@ -315,7 +313,7 @@ class UsbManager(SystemService):
         devices = {}
         result = await self.getDeviceList()
         for info in result.values():
-            dev_id = info['id']
+            dev_id = info["id"]
             dev = self.devices.get(dev_id, None)
             if dev is None:
                 dev = UsbDevice(__id__=dev_id, info=info)
