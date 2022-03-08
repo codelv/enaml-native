@@ -135,6 +135,17 @@ def loads(data):
 
 
 class BridgeReferenceError(ReferenceError):
+    """This exception occurs when an event comes in from the bridge and
+    python does not have any reference in the cache.
+
+    """
+
+    pass
+
+
+class BridgeException(Exception):
+    """This exception occurs when a remote method call fails."""
+
     pass
 
 

@@ -87,6 +87,10 @@ public class RemotePythonInterpreter extends PythonInterpreter {
         return 0;
     }
 
+     public boolean isInitialized() {
+        return false;
+     }
+
     /**
      * Stops the Python interpreter.
      *

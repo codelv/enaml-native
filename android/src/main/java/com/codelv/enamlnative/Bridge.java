@@ -595,6 +595,8 @@ public class Bridge implements PythonInterpreter.EventListener {
                 cls = HashMap.class;
             } else if (name.equals("cls")) {
                 cls = Class.class;
+            } else if (name.equals("color")) {
+                cls = Color.class;
             } else {
                 cls = Class.forName(name);
             }
@@ -1013,12 +1015,8 @@ public class Bridge implements PythonInterpreter.EventListener {
                 try {
                     lambda = objClass.getMethod(method, uv.getSpec());
                     mMethodCache.put(cacheId, lambda);
-                } catch (NoSuchMethodException e) {
-                    Log.e(TAG,"Error getting method of class="+className+" method="+method, e);
-                    mActivity.showErrorMessage(e);
-                    return;
                 } catch (Exception e) {
-                    Log.e(TAG,"Error getting method of class="+className+" method="+method, e);
+                    sendErrorResult(resultId, "Error getting method of class="+className+" method="+method, e);
                     mActivity.showErrorMessage(e);
                     return;
                 }
@@ -1027,14 +1025,15 @@ public class Bridge implements PythonInterpreter.EventListener {
 
             // Get the lambda
             Object result = lambda.invoke(objClass, uv.getArgs());
-            onResult(resultId, result);
+            sendResult(resultId, result);
         } catch (IllegalAccessException e) {
-            Log.e(TAG,"Error invoking class method="+method+" of class="+className, e);
+            sendErrorResult(resultId, "Error invoking class method="+method+" of class="+className, e);
             mActivity.showErrorMessage(e);
         } catch (InvocationTargetException e) {
-            Log.e(TAG,"Error invoking class method="+method+" of class="+className, e);
+            sendErrorResult(resultId, "Error invoking class method="+method+" of class="+className, e);
             mActivity.showErrorMessage(e);
         } catch (ClassNotFoundException e) {
+            sendErrorResult(resultId, "Class not found:" + className, e);
             mActivity.showErrorMessage(e);
         }
     }
@@ -1053,8 +1052,9 @@ public class Bridge implements PythonInterpreter.EventListener {
         //Log.d(TAG,"Update object  obid="+objId+" method="+method);
         Object obj = mObjectCache.get(objId);
         if (obj==null) {
-            mActivity.showErrorMessage(
-                    "Error: Null object reference when updating id="+objId+" method="+method);
+            String msg = "Error: Null object reference when updating id="+objId+" method="+method;
+            sendErrorResult(resultId, msg, null);
+            mActivity.showErrorMessage(msg);
             return;
         }
 
@@ -1080,12 +1080,8 @@ public class Bridge implements PythonInterpreter.EventListener {
                     lambda = objClass.getMethod(method, uv.getSpec());
                     lambda.setAccessible(true);
                     reflectionCache.put(cacheId, lambda);
-                } catch (NoSuchMethodException e) {
-                    Log.e(TAG,"Error getting method id="+objId+" method="+method+" on object="+obj, e);
-                    mActivity.showErrorMessage(e);
-                    return;
                 } catch (Exception e) {
-                    Log.e(TAG,"Error getting method id="+objId+" method="+method+" on object="+obj, e);
+                    sendErrorResult(resultId, "Error getting method id="+objId+" method="+method+" on object="+obj, e);
                     mActivity.showErrorMessage(e);
                     return;
                 }
@@ -1094,12 +1090,12 @@ public class Bridge implements PythonInterpreter.EventListener {
 
             // Get the lambda
             Object result = lambda.invoke(obj, uv.getArgs());
-            onResult(resultId, result);
+            sendResult(resultId, result);
         } catch (IllegalAccessException e) {
-            Log.e(TAG,"Error invoking obj="+ obj +" id="+objId+" method="+method, e);
+            sendErrorResult(resultId, "Error invoking obj="+ obj +" id="+objId+" method="+method, e);
             mActivity.showErrorMessage(e);
         } catch (InvocationTargetException e) {
-            Log.e(TAG, "Error invoking obj=" + obj + " id=" + objId + " method=" + method, e);
+            sendErrorResult(resultId, "Error invoking obj="+ obj +" id="+objId+" method="+method, e);
             mActivity.showErrorMessage(e);
         }
     }
@@ -1114,6 +1110,7 @@ public class Bridge implements PythonInterpreter.EventListener {
     public void updateObjectField(int objId, int cacheId, String field, UnpackedValues uv) {
         Object obj = mObjectCache.get(objId);
         if (obj==null) {
+            // TODO: Return error
             mActivity.showErrorMessage(
                     "Error: Null object reference when updating id="+objId+" field="+field);
             return;
@@ -1146,6 +1143,7 @@ public class Bridge implements PythonInterpreter.EventListener {
             // Get the lambda
             lambda.set(obj, uv.getArgs()[0]);
         } catch (IllegalAccessException e) {
+            // TODO: Return error
             mActivity.showErrorMessage(e);
         }
     }
@@ -1261,7 +1259,7 @@ public class Bridge implements PythonInterpreter.EventListener {
      * @param pythonObjectId
      * @param result
      */
-    public void onResult(int pythonObjectId, Object result) {
+    public void sendResult(int pythonObjectId, Object result) {
         if (pythonObjectId==IGNORE_RESULT) {
             return;
         }
@@ -1277,6 +1275,22 @@ public class Bridge implements PythonInterpreter.EventListener {
         }
         onEvent(IGNORE_RESULT, pythonObjectId, "set_result", new Object[]{result});
         //});
+    }
+
+    /**
+     * Set an exception on a future in python. This only is sent if python expects ar result back
+     * otherwise it is ignored.
+     *
+     * @param pythonObjectId
+     * @param msg
+     * @param e
+     */
+    public void sendErrorResult(int pythonObjectId, String msg, Exception e) {
+        if (pythonObjectId==IGNORE_RESULT) {
+            return;
+        }
+        Log.e(TAG, msg, e);
+        onEvent(IGNORE_RESULT, pythonObjectId, "set_exception", new Object[]{msg});
     }
 
     /**

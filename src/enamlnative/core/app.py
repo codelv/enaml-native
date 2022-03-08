@@ -26,6 +26,7 @@ from enamlnative.core.bridge import (
     encode,
     get_handler,
     BridgeReferenceError,
+    BridgeException,
 )
 from enamlnative.widgets.activity import Activity
 
@@ -315,7 +316,10 @@ class BridgedApplication(Application):
         result = None
         try:
             obj, handler = get_handler(ptr, method)
-            if iscoroutinefunction(handler):
+            if method == "set_exception":
+                # Remote call failed
+                obj.set_exception(BridgeException(args))
+            elif iscoroutinefunction(handler):
                 result = await handler(*(v for t, v in args))
             else:
                 result = handler(*(v for t, v in args))
