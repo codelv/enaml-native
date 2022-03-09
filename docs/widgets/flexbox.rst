@@ -5,6 +5,9 @@ Flexbox
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/flexbox.enaml
     :language: enaml
 

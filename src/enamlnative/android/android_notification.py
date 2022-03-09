@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on Apr 4, 2018
 
-@author: jrm
+
 """
 from typing import ClassVar, Optional
 from atom.api import Bool, Instance, List, Typed

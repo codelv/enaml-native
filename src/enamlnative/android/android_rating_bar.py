@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on June 7, 2017
 
-@author: jrm
+
 """
 from atom.api import Typed, set_default
 from enamlnative.widgets.rating_bar import ProxyRatingBar

@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on May 20, 2017
 
-@author: jrm
+ 
 """
 from datetime import datetime
 from atom.api import Bool, Enum, ForwardTyped, Int, Str, Typed, observe

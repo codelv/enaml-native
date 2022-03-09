@@ -5,6 +5,9 @@ Snackbar
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/snackbar.enaml
     :language: enaml
 

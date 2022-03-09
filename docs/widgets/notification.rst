@@ -5,6 +5,9 @@ Notification
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/notifications.enaml
     :language: enaml
 

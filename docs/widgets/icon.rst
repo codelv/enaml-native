@@ -5,6 +5,9 @@ Icon
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/icon.enaml
     :language: enaml
 

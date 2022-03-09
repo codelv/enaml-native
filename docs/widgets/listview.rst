@@ -5,6 +5,9 @@ ListView
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/list_view.enaml
     :language: enaml
 

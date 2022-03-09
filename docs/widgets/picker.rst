@@ -5,6 +5,9 @@ Picker
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/picker.enaml
     :language: enaml
 

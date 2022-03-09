@@ -5,6 +5,9 @@ TextView
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/text_view.enaml
     :language: enaml
 

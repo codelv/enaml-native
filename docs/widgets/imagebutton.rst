@@ -5,6 +5,9 @@ ImageButton
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/button.enaml
     :language: enaml
 

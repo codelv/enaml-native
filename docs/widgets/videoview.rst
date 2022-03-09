@@ -5,6 +5,9 @@ VideoView
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/video_view.enaml
     :language: enaml
 

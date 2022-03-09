@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on May 10, 2018
 
-@author: jrm
+ 
 """
 from atom.api import ForwardTyped, Typed
 from .view import ProxyView, View

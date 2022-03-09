@@ -5,6 +5,9 @@ PopupWindow
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/popup_window.enaml
     :language: enaml
 

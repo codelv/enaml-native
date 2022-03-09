@@ -5,6 +5,9 @@ SeekBar
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/seekbar.enaml
     :language: enaml
 

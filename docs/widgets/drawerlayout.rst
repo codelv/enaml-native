@@ -5,6 +5,9 @@ DrawerLayout
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/drawer_layout.enaml
     :language: enaml
 

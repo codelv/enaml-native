@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on July 6, 2017
 
-@author: jrm
+
 """
 from atom.api import Typed, set_default
 from enamlnative.widgets.picker import ProxyPicker

@@ -5,6 +5,9 @@ CalendarView
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/calendar_view.enaml
     :language: enaml
 

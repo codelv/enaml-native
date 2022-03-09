@@ -5,6 +5,9 @@ AutoCompleteTextView
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/auto_complete_text_view.enaml
     :language: enaml
 

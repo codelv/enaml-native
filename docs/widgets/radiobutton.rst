@@ -5,6 +5,9 @@ RadioButton
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/radio_buttons.enaml
     :language: enaml
 

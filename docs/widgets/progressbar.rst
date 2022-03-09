@@ -5,6 +5,9 @@ ProgressBar
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/progress_bar.enaml
     :language: enaml
 

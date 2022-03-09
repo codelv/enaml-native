@@ -5,6 +5,9 @@ DatePicker
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/date_picker.enaml
     :language: enaml
 

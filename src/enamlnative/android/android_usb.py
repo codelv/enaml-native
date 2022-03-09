@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on Feb 11, 2018
 
-@author: jrm
+
 """
 import os
 from asyncio import Future

@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on Aug 22, 2017
 
-@author: jrm
+
 """
 from atom.api import ForwardTyped, set_default
 from enamlnative.widgets.activity_indicator import (

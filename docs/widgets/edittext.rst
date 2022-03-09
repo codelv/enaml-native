@@ -5,6 +5,9 @@ EditText
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/edit_text.enaml
     :language: enaml
 

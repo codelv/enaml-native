@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on Sept 5, 2017
 
-@author: jrm
+
 """
 from atom.api import List
 from .android_content import Context, SystemService

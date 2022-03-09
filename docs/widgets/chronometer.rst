@@ -5,6 +5,9 @@ Chronometer
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/chronometer.enaml
     :language: enaml
 

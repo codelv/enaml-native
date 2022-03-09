@@ -5,6 +5,9 @@ CheckBox
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/checkbox.enaml
     :language: enaml
 

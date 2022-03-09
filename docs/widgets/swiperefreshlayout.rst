@@ -5,6 +5,9 @@ SwipeRefreshLayout
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/swipe_refresh_layout.enaml
     :language: enaml
 

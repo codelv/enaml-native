@@ -5,6 +5,9 @@ RatingBar
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/rating_bar.enaml
     :language: enaml
 

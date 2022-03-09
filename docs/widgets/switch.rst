@@ -5,6 +5,9 @@ Switch
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/switch.enaml
     :language: enaml
 

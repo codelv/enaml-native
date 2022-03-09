@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on Mar 13, 2018
 
-@author: jrm
+
 """
 from atom.api import Typed
 from enamlnative.widgets.app_bar_layout import ProxyAppBarLayout

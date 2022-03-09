@@ -5,6 +5,9 @@ PagerTabStrip
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/view_pager.enaml
     :language: enaml
 

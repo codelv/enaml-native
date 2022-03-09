@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on May 9, 2018
 
-@author: jrm
+
 """
 from atom.api import Typed
 from enamlnative.widgets.video_view import ProxyVideoView

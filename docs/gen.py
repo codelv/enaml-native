@@ -27,13 +27,16 @@ iOS Implementation
 """
 
 EXAMPLE_TEMPLATE = """
+Example
+----------------------------
+
 .. literalinclude:: ../{path}
     :language: enaml
 """
 
 IMAGE_TEMPLATE = """
 Screenshot
--------------------------------------------------------------------------------
+----------------------------
 
 .. image:: {path}
 """

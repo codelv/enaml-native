@@ -5,6 +5,9 @@ Toast
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/toast.enaml
     :language: enaml
 

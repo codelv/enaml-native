@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on May 9, 2018
 
-@author: jrm
+
 """
 from atom.api import Bool, Int, Typed, set_default
 from enamlnative.widgets.view import ProxyView

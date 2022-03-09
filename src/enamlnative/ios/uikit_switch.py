@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on Aug 25, 2017
 
-@author: jrm
+ 
 """
 
 from atom.api import Typed

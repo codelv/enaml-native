@@ -5,6 +5,9 @@ Spinner
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/spinner.enaml
     :language: enaml
 

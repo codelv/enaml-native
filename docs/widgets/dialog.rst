@@ -5,6 +5,9 @@ Dialog
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/dialog.enaml
     :language: enaml
 

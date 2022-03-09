@@ -10,7 +10,7 @@ Created on May 20, 2017
 
 Forked from https://github.com/joaoventura/pybridge
 @author joaoventura
-@author: jrm
+ 
 """
 import os
 import sys

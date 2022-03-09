@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on Apr 15, 2017
 
-@author: jrm
+
 """
 from atom.api import Enum, ForwardInstance
 from enaml.core.declarative import Declarative, d_

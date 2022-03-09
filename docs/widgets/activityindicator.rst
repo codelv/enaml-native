@@ -5,6 +5,9 @@ ActivityIndicator
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/activity_indicator.enaml
     :language: enaml
 

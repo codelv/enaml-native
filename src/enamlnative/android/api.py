@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on July 24, 2017
 
-@author: jrm
+ 
 """
 # flake8: noqa F401
 from .android_location import LocationManager

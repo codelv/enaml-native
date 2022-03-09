@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on Mar 17, 2018
 
-@author: jrm
+
 """
 from atom.api import Bool, Typed
 from enamlnative.android.android_toolkit_object import AndroidToolkitObject

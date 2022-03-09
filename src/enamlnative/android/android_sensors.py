@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on Jan 28, 2018
 
-@author: jrm
+
 """
 from typing import Optional
 from atom.api import ForwardInstance, Int, Bool

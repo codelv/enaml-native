@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on May 20, 2017
 
-@author: jrm
+
 """
 from typing import ClassVar
 from atom.api import Int, List, Typed, set_default

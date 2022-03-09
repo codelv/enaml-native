@@ -5,6 +5,9 @@ CardView
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/card_view.enaml
     :language: enaml
 

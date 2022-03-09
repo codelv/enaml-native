@@ -5,6 +5,9 @@ TimePicker
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/time_picker.enaml
     :language: enaml
 

@@ -5,6 +5,9 @@ Toolbar
 
 
 
+Example
+----------------------------
+
 .. literalinclude:: ../../examples/toolbar.enaml
     :language: enaml
 

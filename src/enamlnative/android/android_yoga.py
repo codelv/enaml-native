@@ -7,7 +7,7 @@ The full license is in the file LICENSE, distributed with this software.
 
 Created on Nov 29, 2017
 
-@author: jrm
+ 
 """
 from .android_view_group import LayoutParams, ViewGroup
 from .bridge import JavaBridgeObject, JavaMethod
