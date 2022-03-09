@@ -4,8 +4,7 @@ from enamlnative.widgets.api import *
 enamldef ContentView(Flexbox):
     flex_direction = "column"
     background_color = "#eee"
-    padding = (10, 10, 10, 0)
-    CardView:
+    CardView: card:
         #: Padding inside card
         #: Border radius
         radius = 3
@@ -13,11 +12,24 @@ enamldef ContentView(Flexbox):
         #: Elevation or "shadow"
         elevation = 10
 
+        content_padding = (50, 50, 50, 50)
+
         #: Content is usually a layout container (ie flexbox)
         Flexbox:
+            flex_direction = "column"
+            align_items = "stretch"
+            padding = (50, 50, 50, 50)
             TextView:
-                padding = (10, 10, 10, 10)
-                text_size = 32
-                text = "This is a card view!"
+                text = "Radius"
+            SeekBar:
+                progress << int(card.radius)
+                progress :: card.radius = int(change['value'])
+                max = 500
+            TextView:
+                text = "Elevation"
+            SeekBar:
+                progress << int(card.elevation)
+                progress :: card.elevation = int(change['value'])
+                max = 50
 
 

@@ -1,0 +1,18 @@
+from enamlnative.widgets.api import *
+from enamlnative.android.api import Vibrator
+
+enamldef ContentView(Flexbox):
+    flex_direction = "column"
+    attr vibrator: Vibrator
+    activated :: app.deferred_call(load)
+
+    async func load():
+        # NOTE: You must add the VIBRATE permssion for this to work
+        self.vibrator = await Vibrator.get()
+
+    Button:
+        text = "Vibrate short"
+        clicked :: vibrator.vibrate(100)
+    Button:
+        text = "Vibrate long"
+        clicked :: vibrator.vibrate(500)

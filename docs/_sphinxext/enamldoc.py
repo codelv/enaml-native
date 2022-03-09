@@ -1,20 +1,18 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright (c) 2013, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
 # The full license is in the file COPYING.txt, distributed with this software.
-#------------------------------------------------------------------------------
-import  re
+# ------------------------------------------------------------------------------
+import re
+from atom.api import Member  # noqa: F401
 
-from atom.api import Member
 
-
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # AST Nodes
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 class Docstring(object):
-
     def __init__(self, body):
         self.body = body
 
@@ -26,7 +24,6 @@ class Docstring(object):
 
 
 class NormalLine(object):
-
     def __init__(self, text):
         self.text = text
 
@@ -35,7 +32,6 @@ class NormalLine(object):
 
 
 class Parameters(object):
-
     def __init__(self, body):
         self.body = body
 
@@ -47,7 +43,6 @@ class Parameters(object):
 
 
 class ParameterSpec(object):
-
     def __init__(self, pname, ptype, description):
         self.pname = pname
         self.ptype = ptype
@@ -55,14 +50,13 @@ class ParameterSpec(object):
 
     def render(self):
         lines = []
-        lines.append(':param %s: %s' % (self.pname, self.description))
+        lines.append(":param %s: %s" % (self.pname, self.description))
         if self.ptype:
-            lines.append(':type %s: %s' % (self.pname, self.ptype))
+            lines.append(":type %s: %s" % (self.pname, self.ptype))
         return lines
 
 
 class Returns(object):
-
     def __init__(self, body):
         self.body = body
 
@@ -74,42 +68,41 @@ class Returns(object):
 
 
 class ReturnSpec(object):
-
     def __init__(self, rtype, description):
         self.rtype = rtype
         self.description = description
 
     def render(self):
         lines = []
-        lines.append(':rtype: %s' % self.rtype)
-        lines.append(':returns: %s' % self.description)
+        lines.append(":rtype: %s" % self.rtype)
+        lines.append(":returns: %s" % self.description)
         return lines
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Lexer
-#------------------------------------------------------------------------------
-dashed_line = 'dashed_line'
-empty_line = 'empty_line'
-indented_line = 'indented_line'
-normal_line = 'normal_line'
-parameters_header = 'parameters_header'
-parameter_spec = 'parameter_spec'
-returns_header = 'returns_header'
-star_args = 'star_args'
-star_star_kwargs = 'star_star_kwargs'
+# ------------------------------------------------------------------------------
+dashed_line = "dashed_line"
+empty_line = "empty_line"
+indented_line = "indented_line"
+normal_line = "normal_line"
+parameters_header = "parameters_header"
+parameter_spec = "parameter_spec"
+returns_header = "returns_header"
+star_args = "star_args"
+star_star_kwargs = "star_star_kwargs"
 
 
 line_regexes = (
-    (parameters_header, re.compile(r'^Parameters$')),
-    (returns_header, re.compile(r'^Returns$')),
-    (star_args, re.compile(r'^\*([a-zA-Z_][a-zA-Z0-9_]*)$')),
-    (star_star_kwargs, re.compile(r'^\*\*([a-zA-Z_][a-zA-Z0-9_]*)$')),
-    (parameter_spec, re.compile(r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*(.*)$')),
-    (dashed_line, re.compile(r'^-+$')),
-    (indented_line, re.compile(r'^(\s+)[^\s].*$')),
-    (normal_line, re.compile(r'^[^\s].*$')),
-    (empty_line, re.compile(r'^\s*$')),
+    (parameters_header, re.compile(r"^Parameters$")),
+    (returns_header, re.compile(r"^Returns$")),
+    (star_args, re.compile(r"^\*([a-zA-Z_][a-zA-Z0-9_]*)$")),
+    (star_star_kwargs, re.compile(r"^\*\*([a-zA-Z_][a-zA-Z0-9_]*)$")),
+    (parameter_spec, re.compile(r"^([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*(.*)$")),
+    (dashed_line, re.compile(r"^-+$")),
+    (indented_line, re.compile(r"^(\s+)[^\s].*$")),
+    (normal_line, re.compile(r"^[^\s].*$")),
+    (empty_line, re.compile(r"^\s*$")),
 )
 
 
@@ -121,12 +114,12 @@ def lex_line(line):
     raise ValueError('line "%s" failed to lex' % line)
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Parser
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def peek(stack):
     if len(stack) == 0:
-        return ''
+        return ""
     return stack[-1][0]
 
 
@@ -140,7 +133,7 @@ def extract_description(stack):
     while peek(stack) == indented_line:
         token, line, match = stack.pop()
         parts.append(line.strip())
-    return ' '.join(parts)
+    return " ".join(parts)
 
 
 def p_normal(line, match, stack):
@@ -169,7 +162,7 @@ def p_parameters(line, match, stack):
             consume_blank_lines(stack)
             descr = extract_description(stack)
             pname = match.group(1)
-            spec = ParameterSpec(pname, '', descr)
+            spec = ParameterSpec(pname, "", descr)
             body.append(spec)
             consume_blank_lines(stack)
         else:
@@ -217,9 +210,9 @@ def parse(classified):
     return Docstring(body)
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Docstring Processors
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def process_function(app, name, obj, options, lines):
     classified = map(lex_line, lines)
     return parse(classified).render()
@@ -238,9 +231,9 @@ def process_attribute(app, name, obj, options, lines):
 
 
 HANDLERS = {
-    'function': process_function,
-    'method': process_function,
-    'attribute': process_attribute,
+    "function": process_function,
+    "method": process_function,
+    "attribute": process_attribute,
 }
 
 
@@ -252,4 +245,4 @@ def process_docstring(app, what, name, obj, options, lines):
 
 
 def setup(app):
-    app.connect('autodoc-process-docstring', process_docstring)
+    app.connect("autodoc-process-docstring", process_docstring)

@@ -2,16 +2,24 @@
 Toolbar
 ========================================
 
+
+
+
 .. literalinclude:: ../../examples/toolbar.enaml
-            :language: python
+    :language: enaml
+
 
 Declaration
 ----------------------------
 
 .. autoclass:: enamlnative.widgets.toolbar.Toolbar
 
+
 Android Implementation
 ----------------------------
 
 .. autoclass:: enamlnative.android.android_toolbar.AndroidToolbar
+
+
+
 No iOS implementation found.

@@ -1,148 +1,190 @@
 import re
 import sys
 import enaml
-import inspect
-from textwrap import dedent
-from os.path import exists, join, abspath
+from os.path import exists, join
 
 
 def convert(name):
     # Straight from So
-    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+
+
+ANDROID_WIDGET_TEMPLATE = """
+Android Implementation
+----------------------------
+
+.. autoclass:: {mod.__module__}.{mod.__name__}
+
+"""
+
+IOS_WIDGET_TEMPLATE = """
+iOS Implementation
+----------------------------
+
+.. autoclass:: {mod.__module__}.{mod.__name__}
+
+"""
+
+EXAMPLE_TEMPLATE = """
+.. literalinclude:: ../{path}
+    :language: enaml
+"""
+
+IMAGE_TEMPLATE = """
+Screenshot
+-------------------------------------------------------------------------------
+
+.. image:: {path}
+"""
+
+DECLARATION_TEMPLATE = """
+{cls}
+========================================
+
+{image}
+
+{example}
+
+Declaration
+----------------------------
+
+.. autoclass:: {mod}.{cls}
+
+{android}
+
+{ios}
+"""
+
+WIDGET_INDEX_TEMPLATE = """
+Widgets
+========================================
+
+.. toctree::
+    :maxdepth: 2
+
+    {toc}
+
+"""
+
+API_TEMPLATE = """
+{platform} {api.__name__}
+========================================
+
+{example}
+
+.. autoclass:: {api.__module__}.{api.__name__}
+
+"""
+
+API_INDEX_TEMPLATE = """
+APIs
+========================================
+
+.. toctree::
+    :maxdepth: 2
+
+    {toc}
+
+"""
+
+
+def find_example(*example_names: str) -> str:
+    for filename in example_names:
+        path = join("../examples", filename)
+        if exists(path):
+            return EXAMPLE_TEMPLATE.format(path=path)
+    return ""
+
+
+def find_image(cls: str) -> str:
+
+    return ""
 
 
 def make_widgets():
     """ """
     from enamlnative.widgets import api
+    from enamlnative.android.factories import ANDROID_FACTORIES
+
+    # from enamlnative.ios.factories import IOS_FACTORIES
+    IOS_FACTORIES = {}
+
     widgets = [getattr(api, n) for n in dir(api) if not n.startswith("_")]
+    toc = []
     for Widget in widgets:
         example = "No example available."
-        try:
-            mod = Widget.__module__.split(".")[-1]
-            for filename in ['{mod}.enaml',
-                             '{mod}s.enaml',
-                             '{name}.enaml',
-                             '{uname}.enaml',
-                             '{uname}s.enaml',
-                             '{name}s.enaml']:
-                path = join('../examples', filename.format(
-                    mod=mod, name=Widget.__name__.lower(),
-                    uname=convert(Widget.__name__)))
-                if exists(path):
-                    example = dedent("""
-                    
-                    .. literalinclude:: ../{path}
-                        :language: python
-                    """.strip()).format(path=path)
-                else:
-                    print("{} not found".format(abspath(path)))
-        except:
-            pass
+        pkg = Widget.__module__.split(".")[-1]
+        cls = Widget.__name__
+        fname = cls.lower()
+        uname = convert(cls)
+        toc.append(f"{cls} <{fname}>")
+        example = find_example(
+            f"{pkg}.enaml",
+            f"{pkg}s.enaml",
+            f"{fname}.enaml",
+            f"{fname}s.enaml",
+            f"{uname}.enaml",
+            f"{uname}s.enaml",
+        )
 
+        image = find_image(cls)
 
-        try:
-            from enamlnative.android.factories import ANDROID_FACTORIES
-
-            android = dedent("""
-            Android Implementation
-            ----------------------------
-
-            .. autoclass:: {mod.__module__}.{mod.__name__}
-            
-            """.strip()).format(mod=ANDROID_FACTORIES[Widget.__name__]())
-        except:
+        if cls in ANDROID_FACTORIES:
+            mod = ANDROID_FACTORIES[cls]()
+            android = ANDROID_WIDGET_TEMPLATE.format(mod=mod)
+        else:
             android = "No Android implementation found"
 
-        try:
-            from enamlnative.ios.factories import IOS_FACTORIES
-
-            ios = dedent("""
-            iOS Implementation
-            ----------------------------
-
-            .. autoclass:: {mod.__module__}.{mod.__name__}
-            
-            """.strip()).format(mod=IOS_FACTORIES[Widget.__name__]())
-        except:
+        if cls in IOS_FACTORIES:
+            mod = IOS_FACTORIES[cls]()
+            ios = IOS_WIDGET_TEMPLATE.format(mod=mod)
+        else:
             ios = "No iOS implementation found."
 
-        with open('widgets/{}.rst'.format(Widget.__name__.lower()), 'w') as f:
-            f.write(dedent("""
-            {w.__name__}
-            ========================================
-            
-            {ex}
-            
-            Declaration
-            ----------------------------
-                    
-            .. autoclass:: {w.__module__}.{w.__name__}
-            
-            {android}
-            {ios}
-            """.format(w=Widget, android=android, ios=ios, ex=example)))
+        with open(f"widgets/{fname}.rst", "w") as f:
+            mod = Widget.__module__
+            tmpl = DECLARATION_TEMPLATE.format(
+                mod=mod,
+                cls=cls,
+                example=example,
+                android=android,
+                ios=ios,
+                image=image,
+            )
+            f.write(tmpl)
 
-    with open('widgets/index.rst', 'w') as f:
-        f.write(dedent("""
-        Widgets
-        ========================================
-        
-        .. toctree::
-           :maxdepth: 2
-
-           {toc}
-
-
-        """).format(toc='\n   '.join([
-            '{N} <{n}>'.format(N=w.__name__, n=w.__name__.lower())
-            for w in widgets
-        ])))
+    with open("widgets/index.rst", "w") as f:
+        f.write(WIDGET_INDEX_TEMPLATE.format(toc="\n    ".join(toc)))
 
 
 def make_apis():
     from enamlnative.android import api as android_apis
-    #from enamlnative.ios import api as ios_apis
+
+    # from enamlnative.ios import api as ios_apis
 
     apis = [
-        getattr(android_apis, n) for n in dir(android_apis)
-        if not n.startswith("_")
+        getattr(android_apis, n) for n in dir(android_apis) if not n.startswith("_")
     ]
     # + [
     #     getattr(ios_apis, n) for n in dir(ios_apis)
     #     if not n.startswith("_")
     # ]
 
+    toc = []
     for api in apis:
-        platform = api.__module__.split('.')[1]
-        with open('apis/{}_{}.rst'.format(
-                platform, api.__name__.lower()), 'w') as f:
-            f.write(dedent("""
-            {platform} {cls.__name__}
-            ========================================
-            
-            .. autoclass:: {cls.__module__}.{cls.__name__}
-            
-            """.format(cls=api, platform=platform)))
+        platform = api.__module__.split(".")[1]
+        name = api.__name__
+        fname = name.lower()
+        example = find_example(
+            f"{fname}.enaml",
+        )
+        toc.append(f"{name} <{platform}_{fname}>")
+        with open(f"apis/{platform}_{fname}.rst", "w") as f:
+            f.write(API_TEMPLATE.format(platform=platform, api=api, example=example))
 
-    with open('apis/index.rst', 'w') as f:
-        f.write(dedent("""
-        APIs
-        ========================================
-        
-        .. toctree::
-           :maxdepth: 2
-
-           {toc}
-
-
-        """).format(toc='\n   '.join([
-            '{N} <{p}_{n}>'.format(N=api.__name__,
-                                        p=api.__module__.split('.')[1],
-                                        n=api.__name__.lower())
-            for api in apis
-        ])))
-
+    with open("apis/index.rst", "w") as f:
+        f.write(API_INDEX_TEMPLATE.format(toc="\n    ".join(toc)))
 
 
 def main():
@@ -150,8 +192,8 @@ def main():
     make_apis()
 
 
-if __name__ == '__main__':
-    sys.path.append('../src')
-    sys.path.append('../tests')
+if __name__ == "__main__":
+    sys.path.append("../src")
+    sys.path.append("../tests")
     with enaml.imports():
         main()

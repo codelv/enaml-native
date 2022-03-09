@@ -1,5 +1,4 @@
 import random
-import charts.android
 from enamlnative.core.api import *
 from enamlnative.widgets.api import *
 from enamlnative.android.app import AndroidApplication
@@ -12,7 +11,7 @@ enamldef ChartPage(Flexbox): view:
     attr title = ""
     Toolbar:
         title = view.title
-        height = "80"
+        layout_height = "80"
 
 enamldef ContentView(Flexbox):
     flex_direction = "column"

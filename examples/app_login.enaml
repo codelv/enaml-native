@@ -22,9 +22,9 @@ class Model(Atom):
     theme_color = Str("#cab")
 
     #: Define our "user database"
-    users = List(User,default=[
-        User(username="Bob",password="secret"),
-        User(username="Jane",password="sweet"),
+    users = List(User, default=[
+        User(username="Bob", password="secret"),
+        User(username="Jane", password="sweet"),
     ])
 
     #: Current user
@@ -34,7 +34,7 @@ class Model(Atom):
         """ Return a user if the user and pwd match """
         #: Simulate a login that takes time
         result = app.create_future()
-        def simulate_login(result, user,password):
+        def simulate_login(result, user, password):
             for u in self.users:
                 if u.username==user and u.password==password:
                     self.current_user = u
@@ -47,7 +47,7 @@ class Model(Atom):
 
         #: Simulate the call taking some time
         #: In a real model we would check using some web service
-        app.timed_call(1000,simulate_login,result,user,password)
+        app.timed_call(1000, simulate_login, result, user, password)
 
         return result
 
@@ -58,6 +58,20 @@ enamldef SignInScreen(PagerFragment): view:
     attr working = False
     attr pager << view.parent
     attr error = ""
+    alias username
+    alias password
+
+    async func handle_login():
+        #: Why is scope screwed up?
+        self.working = True
+        r = await model.login(username.text, password.text)
+        self.working = False
+        if r is None:
+            self.error = "Invalid username or password"
+        else:
+            self.error = ""
+            pager.current_index +=1
+
     Flexbox:
         flex_direction = "column"
         background_color = "#eee"
@@ -108,23 +122,7 @@ enamldef SignInScreen(PagerFragment): view:
                     flat = True
                     text << "Sign In"
                     #text_color << view.model.theme_color
-                    attr root << view
-                    async func handle_login():
-                        #: Why is scope screwed up?
-                        view = self.root
-                        r = await view.model.login(username.text, password.text)
-
-                        view.working = False
-                        if r is None:
-                            view.error = "Invalid username or password"
-                        else:
-                            view.error = ""
-                            view.pager.current_index +=1
-
-                    clicked ::
-                        view.working = True
-                        self.root = view
-                        app.deferred_call(handle_login)
+                    clicked :: app.deferred_call(view.handle_login)
 
             Conditional:
                 #: Dispal
