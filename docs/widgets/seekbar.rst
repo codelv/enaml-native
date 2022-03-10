@@ -3,6 +3,11 @@ SeekBar
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_seekbar.gif
+
 
 
 Example

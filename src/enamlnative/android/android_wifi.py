@@ -258,9 +258,9 @@ class WifiManager(SystemService):
 
          Returns
          --------
-             result: future
-                 A future that resolves with a dict of the connection info
-                 or None if an error occurred (ie permission denied).s
+        result: future
+            A future that resolves with a dict of the connection info
+            or None if an error occurred (ie permission denied).
 
         """
         allowed = await WifiManager.request_permission(

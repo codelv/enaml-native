@@ -3,6 +3,11 @@ RadioButton
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_radio_button.gif
+
 
 
 Example

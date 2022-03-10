@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 """
 Copyright (c) 2017-2022, Jairus Martin.
 
@@ -9,9 +9,6 @@ The full license is in the file LICENSE, distributed with this software.
 Copied from https://github.com/ipython/ipython/blob/master/IPython/extensions/autoreload.py
 
 Created Sept 7, 2017
-
-@author jrm
-
 """
 import os
 import sys

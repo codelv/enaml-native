@@ -3,6 +3,11 @@ PagerTabStrip
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_pager_tab_strip.gif
+
 
 
 Example

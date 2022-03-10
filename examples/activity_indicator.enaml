@@ -2,14 +2,13 @@ from enamlnative.widgets.api import *
 
 
 enamldef ContentView(Flexbox):
-    #: Normal size
-    ActivityIndicator:
-        pass
-
-    #: Small
+    align_items = "center"
+    justify_content = "space_around"
     ActivityIndicator:
         size = "small"
 
-    #: Large
+    ActivityIndicator:
+        pass
+
     ActivityIndicator:
         size = "large"

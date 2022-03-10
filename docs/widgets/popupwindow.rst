@@ -3,6 +3,11 @@ PopupWindow
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_popup_window.gif
+
 
 
 Example

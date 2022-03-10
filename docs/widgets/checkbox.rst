@@ -3,6 +3,11 @@ CheckBox
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_checkbox.gif
+
 
 
 Example

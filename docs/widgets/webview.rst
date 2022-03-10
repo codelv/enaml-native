@@ -3,6 +3,11 @@ WebView
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_webview.gif
+
 
 
 Example

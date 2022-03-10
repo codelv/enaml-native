@@ -38,7 +38,7 @@ IMAGE_TEMPLATE = """
 Screenshot
 ----------------------------
 
-.. image:: {path}
+.. image:: ../{path}
 """
 
 DECLARATION_TEMPLATE = """
@@ -100,8 +100,11 @@ def find_example(*example_names: str) -> str:
     return ""
 
 
-def find_image(cls: str) -> str:
-
+def find_image(*image_names: str) -> str:
+    for name in image_names:
+        path = f"images/{name}"
+        if exists(path):
+            return IMAGE_TEMPLATE.format(path=path)
     return ""
 
 
@@ -131,7 +134,11 @@ def make_widgets():
             f"{uname}s.enaml",
         )
 
-        image = find_image(cls)
+        image = find_image(
+            f'android_{fname}.gif',
+            f'android_{uname}.gif',
+            f'android_{uname}.gif',
+        )
 
         if cls in ANDROID_FACTORIES:
             mod = ANDROID_FACTORIES[cls]()
@@ -184,7 +191,7 @@ def make_apis():
         )
         toc.append(f"{name} <{platform}_{fname}>")
         with open(f"apis/{platform}_{fname}.rst", "w") as f:
-            f.write(API_TEMPLATE.format(platform=platform, api=api, example=example))
+            f.write(API_TEMPLATE.format(platform=platform.title(), api=api, example=example))
 
     with open("apis/index.rst", "w") as f:
         f.write(API_INDEX_TEMPLATE.format(toc="\n    ".join(toc)))

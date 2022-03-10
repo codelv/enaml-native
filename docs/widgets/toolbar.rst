@@ -3,6 +3,11 @@ Toolbar
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_toolbar.gif
+
 
 
 Example

@@ -3,6 +3,11 @@ Toast
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_toast.gif
+
 
 
 Example

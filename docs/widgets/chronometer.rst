@@ -3,6 +3,11 @@ Chronometer
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_chronometer.gif
+
 
 
 Example

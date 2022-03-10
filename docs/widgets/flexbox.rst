@@ -3,6 +3,11 @@ Flexbox
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_flexbox.gif
+
 
 
 Example

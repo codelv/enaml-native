@@ -1,5 +1,5 @@
 
-android SensorManager
+Android SensorManager
 ========================================
 
 

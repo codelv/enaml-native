@@ -3,6 +3,11 @@ Icon
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_icon.gif
+
 
 
 Example

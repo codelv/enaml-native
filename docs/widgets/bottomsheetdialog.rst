@@ -3,7 +3,18 @@ BottomSheetDialog
 ========================================
 
 
+Screenshot
+----------------------------
 
+.. image:: ../images/android_bottom_sheet_dialog.gif
+
+
+
+Example
+----------------------------
+
+.. literalinclude:: ../../examples/bottom_sheet_dialog.enaml
+    :language: enaml
 
 
 Declaration

@@ -106,3 +106,4 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
     def set_size(self, size):
         """Size cannot be changed dynamically."""
         pass
+

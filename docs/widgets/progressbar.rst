@@ -3,6 +3,11 @@ ProgressBar
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_progress_bar.gif
+
 
 
 Example

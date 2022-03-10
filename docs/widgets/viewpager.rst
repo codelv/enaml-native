@@ -3,6 +3,11 @@ ViewPager
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_view_pager.gif
+
 
 
 Example

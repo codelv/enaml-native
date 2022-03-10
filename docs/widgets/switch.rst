@@ -3,6 +3,11 @@ Switch
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_switch.gif
+
 
 
 Example

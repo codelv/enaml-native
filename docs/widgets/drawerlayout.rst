@@ -3,6 +3,11 @@ DrawerLayout
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_drawer_layout.gif
+
 
 
 Example

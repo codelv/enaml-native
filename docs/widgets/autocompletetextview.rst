@@ -3,6 +3,11 @@ AutoCompleteTextView
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_auto_complete_text_view.gif
+
 
 
 Example

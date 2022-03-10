@@ -3,6 +3,11 @@ Spinner
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_spinner.gif
+
 
 
 Example

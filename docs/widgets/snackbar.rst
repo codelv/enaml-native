@@ -3,6 +3,11 @@ Snackbar
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_snackbar.gif
+
 
 
 Example

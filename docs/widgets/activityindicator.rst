@@ -3,6 +3,11 @@ ActivityIndicator
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_activity_indicator.gif
+
 
 
 Example

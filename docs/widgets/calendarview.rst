@@ -3,6 +3,11 @@ CalendarView
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_calendar_view.gif
+
 
 
 Example

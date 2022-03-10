@@ -3,6 +3,11 @@ ListView
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_list_view.gif
+
 
 
 Example

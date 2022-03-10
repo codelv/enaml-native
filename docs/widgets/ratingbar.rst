@@ -3,6 +3,11 @@ RatingBar
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_rating_bar.gif
+
 
 
 Example

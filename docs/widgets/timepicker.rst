@@ -3,6 +3,11 @@ TimePicker
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_time_picker.gif
+
 
 
 Example

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 #
 # enaml-native documentation build configuration file, created by
 # sphinx-quickstart on Sat Feb 24 14:59:48 2018.
@@ -112,7 +112,7 @@ exclude_patterns = ["_build", "_templates", "_sphinxext"]
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "friendly"
+pygments_style = "pastie"
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []

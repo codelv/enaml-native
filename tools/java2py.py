@@ -9,7 +9,7 @@ Created on May 15, 2018
 
 Converts Java classes to Python classes.
 
-@author: jrm
+ 
 """
 import os
 from jinja2 import Template

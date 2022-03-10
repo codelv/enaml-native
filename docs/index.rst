@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to enaml-native's documentation!
+Welcome to enaml-native's API reference!
 ========================================
 
 Contents:
@@ -23,5 +23,4 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
 

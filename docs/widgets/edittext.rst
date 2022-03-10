@@ -3,6 +3,11 @@ EditText
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_edit_text.gif
+
 
 
 Example

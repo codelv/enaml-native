@@ -3,6 +3,11 @@ Dialog
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_dialog.gif
+
 
 
 Example

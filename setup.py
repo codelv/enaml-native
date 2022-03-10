@@ -5,9 +5,6 @@ Distributed under the terms of the MIT License.
 
 The full license is in the file LICENSE, distributed with this software.
 
-Created on July 10, 2017
-
-@author
 """
 import re
 import os

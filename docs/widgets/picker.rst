@@ -3,6 +3,11 @@ Picker
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_picker.gif
+
 
 
 Example
