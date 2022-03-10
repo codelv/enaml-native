@@ -399,8 +399,13 @@ class BridgedApplication(Application):
         """
         try:
             from .dev import DevServerSession
-
-            session = DevServerSession.initialize(host=self.dev)
+            dev = self.dev
+            if ":" in dev:
+                host, port = dev.split(":")
+                params = {"host": host, "port": int(port)}
+            else:
+                params = {"host": dev}
+            session = DevServerSession.initialize(**params)
             session.start()
 
             #: Save a reference
