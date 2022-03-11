@@ -413,7 +413,7 @@ class DevServer(Atom):
             tmp = os.environ.get("TMP")
             root = sys.path[1 if tmp and tmp in sys.path else 0]
         items = []
-        for filename in os.listdir(root):
+        for filename in sorted(os.listdir(root)):
             # for subdirname in dirnames:
             #     path = os.path.join(dirname, subdirname)
             #     items.append(FOLDER_TMPL.format(
