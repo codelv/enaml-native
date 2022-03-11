@@ -266,7 +266,7 @@ JNIEXPORT jint JNICALL Java_com_codelv_enamlnative_python_PythonInterpreter_star
     // Build paths for the Python interpreter
     char paths[512];
     // Remove extra paths, the smaller the search path the faster the import
-    snprintf(paths, sizeof(paths),"%s:%s/site-packages", assetspath, assetspath);
+    snprintf(paths, sizeof(paths),"%s:%s/python:%s/python/site-packages", assetspath, assetspath, assetspath);
 
     // Set JNI path
     setenv("ASSETS", assetspath, 1);
