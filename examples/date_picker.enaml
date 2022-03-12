@@ -1,12 +1,18 @@
-from enamlnative.widgets.api import *
+from enamlnative.widgets.api import Flexbox, DatePicker, TextView
 
 
 enamldef ContentView(Flexbox):
     flex_direction = "column"
     align_items = "center"
+    justify_content = "center"
+    background_color = "#eee"
+
     DatePicker: dp:
-        width = "match_parent"
+        background_color = "white"
+        margin = (0, 0, 0, 10)
+        width = "wrap_content"
         height = "wrap_content"
 
     TextView:
-        text << f"Date: {dp.date}"
+        text << f"Date selected: {dp.date}"
+

@@ -3,6 +3,11 @@ DatePicker
 ========================================
 
 
+Screenshot
+----------------------------
+
+.. image:: ../images/android_date_picker.gif
+
 
 
 Example

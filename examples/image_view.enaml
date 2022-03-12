@@ -1,0 +1,25 @@
+from enamlnative.core.api import Looper
+from enamlnative.widgets.api import *
+
+
+enamldef ContentView(ScrollView):
+    Flexbox:
+        flex_direction = "column"
+        align_items="stretch"
+        justify_content = "flex_start"
+        Looper:
+            iterable = (
+                "https://pixy.org/src/21/219269.jpg",
+                "https://pixy.org/src2/600/6007103.jpg",
+                "https://pixy.org/src2/609/6093695.jpg",
+                "https://pixy.org/src/45/452744.jpg",
+                "https://pixy.org/src/15/157866.jpg",
+                "https://pixy.org/src/20/200823.jpg"
+            )
+
+            ImageView:
+                background_color = "black"
+                height = "wrap_content"
+                src = loop.item
+                clickable = True
+                clicked :: app.show_toast(loop.item)

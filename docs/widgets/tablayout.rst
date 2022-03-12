@@ -3,7 +3,18 @@ TabLayout
 ========================================
 
 
+Screenshot
+----------------------------
 
+.. image:: ../images/android_tab_layout.gif
+
+
+
+Example
+----------------------------
+
+.. literalinclude:: ../../examples/tab_layout.enaml
+    :language: enaml
 
 
 Declaration

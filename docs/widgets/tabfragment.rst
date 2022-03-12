@@ -5,6 +5,12 @@ TabFragment
 
 
 
+Example
+----------------------------
+
+.. literalinclude:: ../../examples/tab_layout.enaml
+    :language: enaml
+
 
 Declaration
 ----------------------------

@@ -1,6 +1,6 @@
 # enaml-native
 
-[![status](https://github.com/codelv/enaml-native/actions/workflows/ci.yml/badge.svg)](https://github.com/codelv/enaml-native/actions) [![codecov](https://codecov.io/gh/codelv/enaml-native/branch/master/graph/badge.svg)](https://codecov.io/gh/codelv/enaml-native) [![Help chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/enaml-native/Lobby) [![Documentation Status](https://readthedocs.org/projects/enaml-native/badge/?version=latest)](http://enaml-native.readthedocs.io/en/latest/?badge=latest) [![Downloads](https://pepy.tech/badge/enaml-native/month)](https://pepy.tech/project/enaml-native/month)
+[![status](https://github.com/codelv/enaml-native/actions/workflows/ci.yml/badge.svg)](https://github.com/codelv/enaml-native/actions) [![codecov](https://codecov.io/gh/codelv/enaml-native/branch/master/graph/badge.svg)](https://codecov.io/gh/codelv/enaml-native) [![Help chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/enaml-native/Lobby) [![Downloads](https://pepy.tech/badge/enaml-native/month)](https://pepy.tech/project/enaml-native/)
 
 Build native mobile apps in python using enaml and native widgets!
 
@@ -12,7 +12,7 @@ This is still a very young project but the results and feedback have been positi
 
 ### Docs and Examples ###
 
-See the [project site](https://codelv.com/projects/enaml-native/) or the [api docs](http://enaml-native.readthedocs.io/)
+See the [project site](https://codelv.com/projects/enaml-native/) and [docs](https://codelv.com/projects/enaml-native/docs/getting-started/)
 
 There's also some short tutorials and examples on [youtube](https://www.youtube.com/playlist?list=PLXUaMWWFaOjT2WdIrJdTYjEMJmrjuvVz0).
 

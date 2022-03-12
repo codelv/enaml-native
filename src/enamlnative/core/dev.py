@@ -410,8 +410,7 @@ class DevServer(Atom):
     def render_files(self, root=None):
         """Render the file path as accordions"""
         if root is None:
-            tmp = os.environ.get("TMP")
-            root = sys.path[1 if tmp and tmp in sys.path else 0]
+            root = sys.path[0]
         items = []
         for filename in sorted(os.listdir(root)):
             # for subdirname in dirnames:

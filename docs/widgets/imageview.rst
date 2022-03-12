@@ -3,7 +3,18 @@ ImageView
 ========================================
 
 
+Screenshot
+----------------------------
 
+.. image:: ../images/android_image_view.gif
+
+
+
+Example
+----------------------------
+
+.. literalinclude:: ../../examples/image_view.enaml
+    :language: enaml
 
 
 Declaration
