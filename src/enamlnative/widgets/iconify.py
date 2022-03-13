@@ -6,8 +6,6 @@ Distributed under the terms of the MIT License.
 The full license is in the file LICENSE, distributed with this software.
 
 Created on July 8, 2017
-
- 
 """
 from atom.api import ForwardTyped, Typed
 from .button import Button, ProxyButton

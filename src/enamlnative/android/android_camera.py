@@ -5,9 +5,7 @@ Distributed under the terms of the MIT License.
 
 The full license is in the file LICENSE, distributed with this software.
 
-Created on May 9, 2018
-
-
+Created on May 9, 201
 """
 from atom.api import Bool, Typed
 from enamlnative.widgets.camera_view import ProxyCameraView

@@ -6,8 +6,6 @@ Distributed under the terms of the MIT License.
 The full license is in the file LICENSE, distributed with this software.
 
 Created on May 20, 2017
-
-
 """
 from atom.api import Dict, Float, Instance, Subclass, Typed
 from enamlnative.widgets.view import ProxyView, coerce_size

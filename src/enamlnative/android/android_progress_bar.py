@@ -6,8 +6,6 @@ Distributed under the terms of the MIT License.
 The full license is in the file LICENSE, distributed with this software.
 
 Created on May 26, 2017
-
-
 """
 from atom.api import Bool, Typed
 from enamlnative.widgets.progress_bar import ProxyProgressBar
@@ -106,4 +104,3 @@ class AndroidProgressBar(AndroidView, ProxyProgressBar):
     def set_size(self, size):
         """Size cannot be changed dynamically."""
         pass
-

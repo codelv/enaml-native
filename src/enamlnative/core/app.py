@@ -395,6 +395,7 @@ class BridgedApplication(Application):
         """
         try:
             from .dev import DevServerSession
+
             dev = self.dev
             if ":" in dev:
                 host, port = dev.split(":")

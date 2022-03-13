@@ -6,8 +6,6 @@ Distributed under the terms of the MIT License.
 The full license is in the file LICENSE, distributed with this software.
 
 Created on Nov 29, 2017
-
- 
 """
 from .android_view_group import LayoutParams, ViewGroup
 from .bridge import JavaBridgeObject, JavaMethod

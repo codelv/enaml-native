@@ -6,8 +6,6 @@ Distributed under the terms of the MIT License.
 The full license is in the file LICENSE, distributed with this software.
 
 Created on May 9, 2018
-
-
 """
 from atom.api import Typed
 from enamlnative.widgets.video_view import ProxyVideoView

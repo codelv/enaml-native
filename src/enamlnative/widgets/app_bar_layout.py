@@ -6,8 +6,6 @@ Distributed under the terms of the MIT License.
 The full license is in the file LICENSE, distributed with this software.
 
 Created on Mar 13, 2018
-
- 
 """
 from atom.api import Bool, ForwardTyped, Int, Typed, observe
 from enaml.core.declarative import d_

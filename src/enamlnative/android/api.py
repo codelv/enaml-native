@@ -6,8 +6,6 @@ Distributed under the terms of the MIT License.
 The full license is in the file LICENSE, distributed with this software.
 
 Created on July 24, 2017
-
- 
 """
 # flake8: noqa F401
 from .android_location import LocationManager

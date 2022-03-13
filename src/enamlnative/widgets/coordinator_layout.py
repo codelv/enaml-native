@@ -6,8 +6,6 @@ Distributed under the terms of the MIT License.
 The full license is in the file LICENSE, distributed with this software.
 
 Created on Sept 18, 2017
-
- 
 """
 from atom.api import ForwardTyped, Typed
 from .frame_layout import FrameLayout, ProxyFrameLayout

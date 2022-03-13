@@ -4,7 +4,6 @@ Copyright (c) 2022, Jairus Martin.
 Distributed under the terms of the MIT License.
 
 The full license is in the file LICENSE, distributed with this software.
-
 """
 from atom.api import Dict, Enum, Event, Float, ForwardTyped, Instance, Int, Typed
 from enaml.application import Application

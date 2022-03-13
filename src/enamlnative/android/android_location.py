@@ -6,8 +6,6 @@ Distributed under the terms of the MIT License.
 The full license is in the file LICENSE, distributed with this software.
 
 Created on Sept 5, 2017
-
-
 """
 from atom.api import List
 from .android_content import Context, SystemService
