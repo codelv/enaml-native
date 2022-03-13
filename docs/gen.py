@@ -135,9 +135,9 @@ def make_widgets():
         )
 
         image = find_image(
-            f'android_{fname}.gif',
-            f'android_{uname}.gif',
-            f'android_{uname}.gif',
+            f"android_{fname}.gif",
+            f"android_{uname}.gif",
+            f"android_{uname}.gif",
         )
 
         if cls in ANDROID_FACTORIES:
@@ -191,7 +191,9 @@ def make_apis():
         )
         toc.append(f"{name} <{platform}_{fname}>")
         with open(f"apis/{platform}_{fname}.rst", "w") as f:
-            f.write(API_TEMPLATE.format(platform=platform.title(), api=api, example=example))
+            f.write(
+                API_TEMPLATE.format(platform=platform.title(), api=api, example=example)
+            )
 
     with open("apis/index.rst", "w") as f:
         f.write(API_INDEX_TEMPLATE.format(toc="\n    ".join(toc)))
