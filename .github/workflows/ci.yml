@@ -71,10 +71,13 @@ jobs:
         run: |
             isort src --check --diff
             isort tests --check --diff
-            black src/enamlnative --check --diff
+            isort docs --check --diff
+            black src --check --diff
             black tests --check --diff
+            black docs --check --diff
             flake8 --ignore=E501,W503 src
             flake8 --ignore=E501,W503 tests
-            mypy src --ignore-missing-imports
+            flake8 --ignore=E501,W503 docs
+            mypy src/enamlnative --ignore-missing-imports
 
 
