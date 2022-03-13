@@ -6,8 +6,6 @@ Distributed under the terms of the MIT License.
 The full license is in the file LICENSE, distributed with this software.
 
 Created on Oct 4, 2017
-
-
 """
 import enaml
 import pytest
