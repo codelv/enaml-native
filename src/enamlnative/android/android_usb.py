@@ -309,7 +309,7 @@ class UsbManager(SystemService):
 
         """
         devices = {}
-        result = await self.getDeviceList()
+        result = await self.getDeviceList()  # type: ignore
         for info in result.values():
             dev_id = info["id"]
             dev = self.devices.get(dev_id, None)
