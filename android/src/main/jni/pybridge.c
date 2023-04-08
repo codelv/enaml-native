@@ -190,8 +190,8 @@ PyMODINIT_FUNC PyInit_NativeHooks() {
     mExtensions = PyDict_New();
     if (mExtensions!=NULL) {
         char* lib_dir = getenv("PY_LIB_DIR");
-        int nlib = strlen(lib_dir);
-        int n;
+        unsigned int nlib = strlen(lib_dir);
+        unsigned int n;
         DIR *dir;
         char mod[256];// lib. .so+'\0'
         char path[256];
@@ -201,13 +201,18 @@ PyMODINIT_FUNC PyInit_NativeHooks() {
             while ((ent = readdir(dir)) != NULL) {
                 // If startswith lib. strip mod
                 if (ent->d_type == DT_REG && strncmp("lib.", ent->d_name, 4) == 0) {
+                    LOG(ent->d_name);
                     n = strlen(ent->d_name);
-                    strncpy(mod, ent->d_name+4, n-7);
-                    mod[n-7] = '\0';
+                    unsigned int mod_end = n - 7;
+                    unsigned int path_end = nlib+n+1;
+                    if (mod_end > 255 || path_end > 255)
+                        continue; // out of bounds
+                    strncpy(mod, ent->d_name+4, mod_end);
+                    mod[mod_end] = '\0';
                     strcpy(path, lib_dir);
                     strcat(path, "/");
                     strcat(path, ent->d_name);
-                    path[nlib+n+1] = '\0';
+                    path[path_end] = '\0';
                     PyDict_SetItem(mExtensions, Py_BuildValue("s", mod), Py_BuildValue("s", path));
                 }
             }
@@ -216,6 +221,8 @@ PyMODINIT_FUNC PyInit_NativeHooks() {
           /* could not open directory */
           LOG("Python extension dir is invalid");
         }
+    } else {
+        LOG("Extension modules null");
     }
 
     // Add to meta path
